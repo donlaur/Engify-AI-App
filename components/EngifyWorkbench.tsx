@@ -5,7 +5,7 @@ type ActiveTab = 'incident-co-commander' | 'incident-strategist' | 'tech-debt-st
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [activeTab, setActiveTab] = useState<ActiveTab>('incident-co-commander');
+    const [activeTab, setActiveTab] = useState<ActiveTab>('post-mortem-facilitator');
 
     useEffect(() => {
         if (initialPrompt) {
@@ -14,7 +14,6 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
     }, [initialPrompt]);
     
     // Stubs for components that are not fully implemented yet
-    const PostmortemFacilitator: React.FC = () => <div className="p-4 text-center">Post-Mortem Facilitator Coming Soon</div>;
     const UserStoryGenerator: React.FC = () => <div className="p-4 text-center">User Story Generator Coming Soon</div>;
     const OkrArchitect: React.FC = () => <div className="p-4 text-center">Goal & OKR Architect Coming Soon</div>;
     const CoreValuesArchitect: React.FC = () => <div className="p-4 text-center">Core Values Architect Coming Soon</div>;
@@ -30,10 +29,10 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Post-Mortem Facilitator" isActive={activeTab === 'post-mortem-facilitator'} onClick={() => setActiveTab('post-mortem-facilitator')} />
                     <TabButton name="Incident Co-Commander" isActive={activeTab === 'incident-co-commander'} onClick={() => setActiveTab('incident-co-commander')} />
                     <TabButton name="Incident Strategist" isActive={activeTab === 'incident-strategist'} onClick={() => setActiveTab('incident-strategist')} />
                     <TabButton name="Technical Debt Strategist" isActive={activeTab === 'tech-debt-strategist'} onClick={() => setActiveTab('tech-debt-strategist')} />
-                    <TabButton name="Post-Mortem Facilitator" isActive={activeTab === 'post-mortem-facilitator'} onClick={() => setActiveTab('post-mortem-facilitator')} />
                     <TabButton name="User Story Generator" isActive={activeTab === 'user-story-generator'} onClick={() => setActiveTab('user-story-generator')} />
                     <TabButton name="Knowledge Navigator" isActive={activeTab === 'knowledge-navigator'} onClick={() => setActiveTab('knowledge-navigator')} />
                     <TabButton name="Goal & OKR Architect" isActive={activeTab === 'okr-architect'} onClick={() => setActiveTab('okr-architect')} />
@@ -44,10 +43,10 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'post-mortem-facilitator' && <PostmortemFacilitator />}
                 {activeTab === 'incident-co-commander' && <IncidentCoCommander />}
                 {activeTab === 'incident-strategist' && <IncidentResponseStrategist />}
                 {activeTab === 'tech-debt-strategist' && <TechnicalDebtStrategist />}
-                {activeTab === 'post-mortem-facilitator' && <PostmortemFacilitator />}
                 {activeTab === 'user-story-generator' && <UserStoryGenerator />}
                 {activeTab === 'knowledge-navigator' && <KnowledgeNavigator />}
                 {activeTab === 'okr-architect' && <OkrArchitect />}
@@ -71,6 +70,105 @@ const TabButton: React.FC<{name: string, isActive: boolean, onClick: () => void}
         {name}
     </button>
 );
+
+const PostmortemFacilitator: React.FC = () => {
+    const [incidentSummary, setIncidentSummary] = useState('On Tuesday afternoon, the primary user authentication service experienced a 45-minute outage, resulting in a 100% login failure rate for all customers.');
+    const [timeline, setTimeline] = useState(`14:02 UTC - Deployment of new rate-limiting logic begins.
+14:05 UTC - First PagerDuty alerts fire for elevated 5xx errors.
+14:08 UTC - On-call engineer acknowledges the alert and begins investigation.
+14:15 UTC - Incident is escalated to the core services team.
+14:25 UTC - Root cause is suspected to be the new deployment. Rollback is initiated.
+14:35 UTC - Rollback is complete. System begins to recover.
+14:50 UTC - All services are confirmed to be stable. Incident is resolved.`);
+    const [customerImpact, setCustomerImpact] = useState('All users were unable to log in, access their accounts, or use any features requiring authentication. This led to a surge in customer support tickets and significant frustration expressed on social media.');
+    const [result, setResult] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setResult('');
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found. Please set it in the Settings page.");
+            
+            const response = await fetch('/api/generate-postmortem', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ 
+                    incident_summary: incidentSummary,
+                    timeline: timeline,
+                    customer_impact: customerImpact 
+                })
+            });
+
+            if (!response.ok) {
+                 const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate post-mortem from the server.');
+            }
+            const data = await response.json();
+            setResult(data.result);
+        } catch (err: any) {
+            console.error(err);
+            setResult(`Error: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+                <div>
+                    <label htmlFor="incident-summary" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Incident Summary</label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Provide a brief, high-level summary of what happened.</p>
+                    <textarea 
+                        id="incident-summary" 
+                        rows={3} 
+                        value={incidentSummary} 
+                        onChange={e => setIncidentSummary(e.target.value)} 
+                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="timeline" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Timeline of Events</label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Paste a timestamped list of key events that occurred during the incident.</p>
+                    <textarea 
+                        id="timeline" 
+                        rows={8} 
+                        value={timeline} 
+                        onChange={e => setTimeline(e.target.value)} 
+                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 font-mono text-sm"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="customer-impact" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Customer Impact</label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Describe how this incident affected your users.</p>
+                    <textarea 
+                        id="customer-impact" 
+                        rows={4} 
+                        value={customerImpact} 
+                        onChange={e => setCustomerImpact(e.target.value)} 
+                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"
+                    />
+                </div>
+                <button type="submit" disabled={isLoading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 disabled:bg-indigo-400">
+                    {isLoading ? 'Facilitating...' : 'Generate Post-Mortem Draft'}
+                </button>
+            </form>
+             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col min-h-0">
+                <h2 className="text-xl font-semibold mb-3">Generated Post-Mortem Document</h2>
+                <div className="flex-1 mt-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto relative border border-slate-200 dark:border-slate-700">
+                    {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}
+                    {result ? <pre className="text-sm whitespace-pre-wrap font-sans">{result}</pre> : <p className="text-sm text-slate-500">The blameless post-mortem draft, including root cause analysis and action items, will be generated here.</p>}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 interface IncidentLogEntry {
     author: 'user' | 'ai';
