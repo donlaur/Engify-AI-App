@@ -20,7 +20,11 @@ type AnalysisResult = {
 
 type ActionType = 'generate_playbook' | 'create_plan' | 'draft_share';
 
-const LearningHub: React.FC = () => {
+interface LearningHubProps {
+  onSendToWorkbench: (prompt: string) => void;
+}
+
+const LearningHub: React.FC<LearningHubProps> = ({ onSendToWorkbench }) => {
   const [articles, setArticles] = useState<LearningArticle[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -87,7 +91,7 @@ const LearningHub: React.FC = () => {
   };
 
   if (selectedArticle) {
-    return <ArticleDetail article={selectedArticle} onBack={() => setSelectedArticle(null)} />;
+    return <ArticleDetail article={selectedArticle} onBack={() => setSelectedArticle(null)} onSendToWorkbench={onSendToWorkbench} />;
   }
 
   return (
@@ -116,12 +120,13 @@ const LearningHub: React.FC = () => {
 };
 
 
-const ArticleDetail: React.FC<{ article: LearningArticle, onBack: () => void }> = ({ article, onBack }) => {
+const ArticleDetail: React.FC<{ article: LearningArticle, onBack: () => void, onSendToWorkbench: (prompt: string) => void }> = ({ article, onBack, onSendToWorkbench }) => {
     const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
     const [actionResult, setActionResult] = useState<string>('');
     const [isLoading, setIsLoading] = useState(true);
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [error, setError] = useState('');
+    const [activeAction, setActiveAction] = useState<ActionType | null>(null);
 
     useEffect(() => {
         const analyzeArticle = async () => {
@@ -149,6 +154,7 @@ const ArticleDetail: React.FC<{ article: LearningArticle, onBack: () => void }> 
     const handleAction = async (action: ActionType) => {
         setIsActionLoading(true);
         setActionResult('');
+        setActiveAction(action);
         try {
             const response = await fetch('/api/process-article', {
                 method: 'POST',
@@ -206,6 +212,14 @@ const ArticleDetail: React.FC<{ article: LearningArticle, onBack: () => void }> 
                          {isActionLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Generating...</p></div>}
                          {actionResult ? <pre className="text-sm whitespace-pre-wrap font-sans">{actionResult}</pre> : <p className="text-sm text-slate-500">AI output will appear here.</p>}
                     </div>
+                    {actionResult && activeAction === 'generate_playbook' && (
+                        <button
+                            onClick={() => onSendToWorkbench(actionResult)}
+                            className="mt-4 w-full px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors"
+                        >
+                            Send to Workbench
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
