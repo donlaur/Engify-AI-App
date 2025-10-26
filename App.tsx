@@ -9,15 +9,21 @@ type Tool = 'learning-hub' | 'playbooks' | 'workbench' | 'settings';
 
 const App: React.FC = () => {
   const [activeTool, setActiveTool] = useState<Tool>('learning-hub');
+  const [promptForLab, setPromptForLab] = useState<string>('');
+
+  const handleSendToWorkbench = (prompt: string) => {
+    setPromptForLab(prompt);
+    setActiveTool('workbench');
+  };
 
   const renderTool = () => {
     switch (activeTool) {
       case 'learning-hub':
-        return <LearningHub />;
+        return <LearningHub onSendToWorkbench={handleSendToWorkbench} />;
       case 'playbooks':
         return <PlaybookLibrary />;
       case 'workbench':
-        return <EngifyWorkbench />;
+        return <EngifyWorkbench initialPrompt={promptForLab} />;
       case 'settings':
         return <Settings />;
       default:
@@ -42,13 +48,16 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTool, setActiveTool }) => (
   <aside className="w-64 bg-white dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700/50 flex flex-col">
-    <div className="flex items-center space-x-3 h-16 px-6 border-b border-slate-200 dark:border-slate-700/50 flex-shrink-0">
-       <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-       </svg>
-      <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-        Engify.ai
-      </h1>
+    <div className="flex flex-col h-20 px-6 border-b border-slate-200 dark:border-slate-700/50 justify-center">
+        <div className="flex items-center space-x-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                Engify.ai
+            </h1>
+        </div>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">From AI Fear to AI Fluency.</p>
     </div>
     <nav className="flex-1 p-4 space-y-2">
       <NavItem icon={<LearningIcon />} label="Learning Hub" isActive={activeTool === 'learning-hub'} onClick={() => setActiveTool('learning-hub')} />
