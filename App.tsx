@@ -1,0 +1,99 @@
+import React, { useState } from 'react';
+import { PlaybookIcon, WorkbenchIcon, SettingsIcon, LearningIcon } from './components/icons/SidebarIcons';
+import PlaybookLibrary from './components/PlaybookLibrary';
+import EngifyWorkbench from './components/EngifyWorkbench';
+import Settings from './components/Settings';
+import LearningHub from './components/LearningHub';
+
+type Tool = 'learning-hub' | 'playbooks' | 'workbench' | 'settings';
+
+const App: React.FC = () => {
+  const [activeTool, setActiveTool] = useState<Tool>('learning-hub');
+
+  const renderTool = () => {
+    switch (activeTool) {
+      case 'learning-hub':
+        return <LearningHub />;
+      case 'playbooks':
+        return <PlaybookLibrary />;
+      case 'workbench':
+        return <EngifyWorkbench />;
+      case 'settings':
+        return <Settings />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex h-screen font-sans bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+      <Sidebar activeTool={activeTool} setActiveTool={setActiveTool} />
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        {renderTool()}
+      </main>
+    </div>
+  );
+};
+
+interface SidebarProps {
+  activeTool: Tool;
+  setActiveTool: (tool: Tool) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ activeTool, setActiveTool }) => (
+  <aside className="w-64 bg-white dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700/50 flex flex-col">
+    <div className="flex items-center space-x-3 h-16 px-6 border-b border-slate-200 dark:border-slate-700/50 flex-shrink-0">
+       <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+       </svg>
+      <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+        Engify.ai
+      </h1>
+    </div>
+    <nav className="flex-1 p-4 space-y-2">
+      <NavItem icon={<LearningIcon />} label="Learning Hub" isActive={activeTool === 'learning-hub'} onClick={() => setActiveTool('learning-hub')} />
+      <NavItem icon={<PlaybookIcon />} label="Playbooks" isActive={activeTool === 'playbooks'} onClick={() => setActiveTool('playbooks')} />
+      <NavItem icon={<WorkbenchIcon />} label="Workbench" isActive={activeTool === 'workbench'} onClick={() => setActiveTool('workbench')} />
+      <NavItem icon={<SettingsIcon />} label="Settings" isActive={activeTool === 'settings'} onClick={() => setActiveTool('settings')} isDisabled={false} />
+    </nav>
+     <div className="p-4 border-t border-slate-200 dark:border-slate-700/50">
+        <button className="w-full flex items-center space-x-3 p-3 rounded-lg text-sm font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+            <div className="w-8 h-8 rounded-full bg-indigo-200 dark:bg-indigo-900 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300">
+                G
+            </div>
+            <div className="text-left">
+                <div className="font-semibold">Guest User</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">Sign In</div>
+            </div>
+        </button>
+    </div>
+  </aside>
+);
+
+interface NavItemProps {
+  icon: React.ReactNode;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+  isDisabled?: boolean;
+}
+
+const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick, isDisabled }) => (
+  <button
+    onClick={onClick}
+    disabled={isDisabled}
+    className={`w-full flex items-center space-x-3 p-3 rounded-lg text-sm font-medium transition-colors
+      ${isActive
+        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-white'
+        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+      }
+      ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
+    `}
+  >
+    {icon}
+    <span>{label}</span>
+     {isDisabled && <span className="text-xs text-slate-400 dark:text-slate-500 ml-auto">Soon</span>}
+  </button>
+);
+
+export default App;

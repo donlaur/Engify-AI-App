@@ -1,0 +1,29 @@
+
+{
+  "rewrites": [
+    {
+      "source": "/api/rag",
+      "destination": "/api/rag.py"
+    },
+    {
+      "source": "/api/generate-okrs",
+      "destination": "/api/generate-okrs.py"
+    },
+     {
+      "source": "/api/generate-kickoff",
+      "destination": "/api/generate-kickoff.py"
+    },
+    {
+      "source": "/api/execute-prompt",
+      "destination": "/api/execute-prompt.py"
+    },
+    {
+        "source": "/api/process-article",
+        "destination": "/api/process-article.py"
+    },
+    {
+        "source": "/api/user-story",
+        "destination": "/api/user-story.py"
+    }
+  ]
+}
