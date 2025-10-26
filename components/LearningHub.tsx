@@ -1,5 +1,17 @@
-import React, { useState } from 'react';
-import { learningContent, LearningArticle } from '../data/learning_content';
+
+import React, { useState, useEffect } from 'react';
+
+// This defines the shape of our article data.
+export interface LearningArticle {
+    id: string;
+    title: string;
+    author: string;
+    source: string;
+    url: string;
+    publicationDate: string;
+    tags: string[];
+    fullText: string;
+}
 
 type AnalysisResult = {
   summary: string;
@@ -9,9 +21,30 @@ type AnalysisResult = {
 type ActionType = 'generate_playbook' | 'create_plan' | 'draft_share';
 
 const LearningHub: React.FC = () => {
-  const [articles, setArticles] = useState<LearningArticle[]>(learningContent);
+  const [articles, setArticles] = useState<LearningArticle[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<LearningArticle | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+        try {
+            const response = await fetch('/data/articles.json');
+            if (!response.ok) {
+                throw new Error('Failed to fetch articles.');
+            }
+            const data: LearningArticle[] = await response.json();
+            setArticles(data);
+        } catch (err: any) {
+            setError(err.message || 'An unexpected error occurred.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchArticles();
+  }, []);
+
 
   const handleSelectArticle = (article: LearningArticle) => {
     setSelectedArticle(article);
@@ -20,11 +53,37 @@ const LearningHub: React.FC = () => {
   const handleAddArticle = (newArticle: Omit<LearningArticle, 'id' | 'tags'>) => {
     const articleToAdd: LearningArticle = {
         ...newArticle,
-        id: (articles.length + 1).toString(),
-        tags: ['User Submitted'], // Simple tagging for now
+        id: `user-${Date.now()}`, // Simple unique ID for session
+        tags: ['User Submitted'],
     };
+    // In a real app, this would be an API call to a database.
+    // For now, we prepend to the local state for this session.
     setArticles([articleToAdd, ...articles]);
     setIsModalOpen(false);
+  };
+
+  const renderContent = () => {
+    if (isLoading) {
+        return <p>Loading articles...</p>;
+    }
+    if (error) {
+        return <p className="text-red-500">Error: {error}</p>;
+    }
+    return (
+        <div className="space-y-4">
+            {articles.map(article => (
+                <div key={article.id} onClick={() => handleSelectArticle(article)} className="bg-white dark:bg-slate-800/50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg text-indigo-600 dark:text-indigo-400">{article.title}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{article.author} / {article.source}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                        {article.tags.map(tag => (
+                            <span key={tag} className="px-2 py-1 text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full">{tag}</span>
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
   };
 
   if (selectedArticle) {
@@ -48,18 +107,8 @@ const LearningHub: React.FC = () => {
         </button>
       </header>
       
-      <div className="mt-6 flex-1 overflow-y-auto pr-2 space-y-4">
-        {articles.map(article => (
-            <div key={article.id} onClick={() => handleSelectArticle(article)} className="bg-white dark:bg-slate-800/50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-slate-200 dark:border-slate-700">
-                <h2 className="font-semibold text-lg text-indigo-600 dark:text-indigo-400">{article.title}</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{article.author} / {article.source}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                    {article.tags.map(tag => (
-                        <span key={tag} className="px-2 py-1 text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full">{tag}</span>
-                    ))}
-                </div>
-            </div>
-        ))}
+      <div className="mt-6 flex-1 overflow-y-auto pr-2">
+        {renderContent()}
       </div>
       {isModalOpen && <AddArticleModal onClose={() => setIsModalOpen(false)} onAdd={handleAddArticle} />}
     </div>
@@ -74,7 +123,7 @@ const ArticleDetail: React.FC<{ article: LearningArticle, onBack: () => void }> 
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [error, setError] = useState('');
 
-    React.useEffect(() => {
+    useEffect(() => {
         const analyzeArticle = async () => {
             setIsLoading(true);
             setError('');
@@ -184,6 +233,10 @@ const AddArticleModal: React.FC<AddArticleModalProps> = ({ onClose, onAdd }) => 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!title || !author || !source || !url || !fullText) {
+            alert('Please fill out all fields.');
+            return;
+        }
         onAdd({ title, author, source, url, publicationDate: new Date().toISOString().split('T')[0], fullText });
     };
 
