@@ -101,6 +101,45 @@ export const learningPathways: LearningPathway[] = [
                 targetId: 'https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/',
             }
         ]
+    },
+    {
+        id: 'prompt-engineering-basics',
+        title: 'Prompt Engineering Basics',
+        description: 'Learn the fundamental techniques of writing effective prompts to get better results from any AI model.',
+        steps: [
+            {
+                id: 1,
+                title: "Understand the Model Landscape",
+                description: "Start by reading Ethan Mollick's guide to understand when to use free vs. advanced models. This context is crucial before writing any prompt.",
+                actionText: "Read Article",
+                type: 'article',
+                targetId: '11', // "An Opinionated Guide to Using AI Right Now"
+            },
+            {
+                id: 2,
+                title: "Learn a Structured Framework",
+                description: "A great prompt has a clear structure. Use the C.R.A.F.T.E.D. framework to learn how to provide clear context, roles, and actions to the AI.",
+                actionText: "Use Playbook",
+                type: 'playbook',
+                targetId: 'crafted-prompt-design',
+            },
+            {
+                id: 3,
+                title: "Master Key Prompting Strategies",
+                description: "Explore powerful techniques like the two-step 'Plan + Execute' method and giving the AI a persona to dramatically improve output quality.",
+                actionText: "Read Article",
+                type: 'article',
+                targetId: '12', // "2025 Guide to Prompt Engineering..."
+            },
+            {
+                id: 4,
+                title: "Apply Your Skills in the Lab",
+                description: "Go to the Prompt Lab in the Workbench. Try using the C.R.A.F.T.E.D. framework and the two-step method to write a prompt for a task you do every day.",
+                actionText: "Go to Workbench",
+                type: 'workbench',
+                targetId: 'prompt-lab',
+            },
+        ]
     }
 ];
 // We will add more pathways here in the future.
