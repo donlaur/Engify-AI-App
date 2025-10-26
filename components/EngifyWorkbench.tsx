@@ -79,8 +79,6 @@ interface IncidentLogEntry {
 }
 
 const IncidentCoCommander: React.FC = () => {
-    // This component appears to be correctly implemented already
-    // ... (content from file)
     const [log, setLog] = useState<IncidentLogEntry[]>([
         { author: 'ai', text: "I'm your Incident Co-Commander. Describe the initial alert or symptom to begin the response process.", timestamp: new Date().toLocaleTimeString() }
     ]);
@@ -150,17 +148,17 @@ const IncidentCoCommander: React.FC = () => {
             <div className="flex-1 p-4 overflow-y-auto space-y-4">
                 {log.map((entry, index) => (
                     <div key={index} className={`flex items-start gap-3 ${entry.author === 'user' ? 'justify-end' : ''}`}>
-                        {entry.author === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300 text-sm">AI</div>}
-                        <div className={`p-3 rounded-lg max-w-xl ${entry.author === 'ai' ? 'bg-slate-100 dark:bg-slate-700/50' : 'bg-indigo-500 text-white'}`}>
+                        {entry.author === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300 text-sm flex-shrink-0">AI</div>}
+                        <div className={`p-3 rounded-lg max-w-full sm:max-w-xl ${entry.author === 'ai' ? 'bg-slate-100 dark:bg-slate-700/50' : 'bg-indigo-500 text-white'}`}>
                             <p className="text-sm">{entry.text}</p>
                             <p className="text-xs opacity-70 mt-1 text-right">{entry.timestamp}</p>
                         </div>
-                         {entry.author === 'user' && <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 text-sm">You</div>}
+                         {entry.author === 'user' && <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 text-sm flex-shrink-0">You</div>}
                     </div>
                 ))}
                  {isLoading && (
                     <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300 text-sm">AI</div>
+                        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300 text-sm flex-shrink-0">AI</div>
                         <div className="p-3 rounded-lg bg-slate-100 dark:bg-slate-700/50">
                             <div className="flex items-center space-x-1">
                                 <span className="h-2 w-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
@@ -188,8 +186,6 @@ const IncidentCoCommander: React.FC = () => {
 };
 
 const IncidentResponseStrategist: React.FC = () => {
-    // This component appears to be correctly implemented already
-    // ... (content from file)
     const [serviceDescription, setServiceDescription] = useState('A user authentication service that handles login, sign-up, and password reset. It is a critical service for our main web application.');
     const [result, setResult] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -224,7 +220,7 @@ const IncidentResponseStrategist: React.FC = () => {
     };
 
     return (
-        <div className="lg:grid lg:grid-cols-2 lg:gap-8 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
             <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
                 <div>
                     <label htmlFor="service-description" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Service Description</label>
@@ -241,7 +237,7 @@ const IncidentResponseStrategist: React.FC = () => {
                     {isLoading ? 'Generating Plan...' : 'Generate Incident Response Plan'}
                 </button>
             </form>
-             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col min-h-0">
                 <h2 className="text-xl font-semibold mb-3">Generated Incident Response Strategy</h2>
                 <div className="flex-1 mt-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto relative border border-slate-200 dark:border-slate-700">
                     {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}
@@ -253,8 +249,6 @@ const IncidentResponseStrategist: React.FC = () => {
 };
 
 const TechnicalDebtStrategist: React.FC = () => {
-    // This component appears to be correctly implemented already
-    // ... (content from file)
     const [step, setStep] = useState(1);
     const [symptoms, setSymptoms] = useState('Our CI/CD pipeline for the main monolith is taking over 45 minutes to run, which slows down developer velocity. New features in the billing module are taking twice as long as estimated because the code is tightly coupled and lacks tests. We had two minor production incidents last quarter related to this module.');
     const [businessContext, setBusinessContext] = useState('The billing module is business-critical. It handles all revenue and subscription logic. Any downtime directly impacts revenue. Slowing down feature development in this area means we are falling behind competitors.');
@@ -326,7 +320,7 @@ const TechnicalDebtStrategist: React.FC = () => {
                     <h2 className="font-semibold text-lg mb-1">Step 2: Your Generated Strategy Documents</h2>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Use the Prompt Sequence in your company's secure AI, and the Stakeholder Briefing to get buy-in.</p>
                     
-                    <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
                             <h3 className="font-semibold mb-2">AI Prompt Sequence (for your internal AI)</h3>
                             <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
@@ -347,8 +341,6 @@ const TechnicalDebtStrategist: React.FC = () => {
 };
 
 const KnowledgeNavigator: React.FC = () => {
-    // This component appears to be correctly implemented already
-    // ... (content from file)
     const [sourceText, setSourceText] = useState('');
     const [question, setQuestion] = useState('');
     const [result, setResult] = useState('');
@@ -387,7 +379,7 @@ const KnowledgeNavigator: React.FC = () => {
     };
     
     return (
-        <div className="lg:grid lg:grid-cols-2 lg:gap-8 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
             <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
                 <div>
                     <label htmlFor="source-text" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Source Knowledge</label>
@@ -416,7 +408,7 @@ const KnowledgeNavigator: React.FC = () => {
                     {isLoading ? 'Searching...' : 'Ask Question'}
                 </button>
             </form>
-             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col min-h-0">
                 <h2 className="text-xl font-semibold mb-3">AI-Generated Answer</h2>
                 <div className="flex-1 mt-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto relative border border-slate-200 dark:border-slate-700">
                     {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}
@@ -467,7 +459,7 @@ const ProjectKickoff: React.FC = () => {
     };
 
     return (
-        <div className="lg:grid lg:grid-cols-2 lg:gap-8 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
             <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
                 <div>
                     <label htmlFor="project-goal" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Project Goal</label>
@@ -497,7 +489,7 @@ const ProjectKickoff: React.FC = () => {
                     {isLoading ? 'Generating Document...' : 'Draft Kickoff Document'}
                 </button>
             </form>
-             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col min-h-0">
                 <h2 className="text-xl font-semibold mb-3">Generated Project Kickoff Draft</h2>
                 <div className="flex-1 mt-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto relative border border-slate-200 dark:border-slate-700">
                     {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}
@@ -552,7 +544,7 @@ const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
     };
 
     return (
-        <div className="lg:grid lg:grid-cols-2 lg:gap-8 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
             <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
                 <div>
                     <label htmlFor="model-select" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Model</label>
@@ -581,7 +573,7 @@ const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
                     {isLoading ? 'Executing...' : 'Run Prompt'}
                 </button>
             </form>
-            <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+            <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col min-h-0">
                 <h2 className="text-xl font-semibold mb-3">Model Output</h2>
                 <div className="flex-1 mt-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto relative border border-slate-200 dark:border-slate-700">
                     {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}

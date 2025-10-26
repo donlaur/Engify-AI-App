@@ -1,3 +1,5 @@
+
+
 export interface PlaybookRecipe {
   id: string;
   title: string;
@@ -39,6 +41,23 @@ Analyze the ticket description below and provide the following:
 
 --- PROBLEM STATEMENT ---
 [Describe the technical problem you need to solve, e.g., "We need to implement a real-time notification system for our users."]"`,
+      },
+      {
+        id: 'crafted-prompt-design',
+        title: 'Design a C.R.A.F.T.E.D. Prompt',
+        description: 'Guides you through the C.R.A.F.T.E.D. framework to create a high-quality, comprehensive prompt for any task.',
+        prompt: `Act as a prompt engineering expert. I need to create a detailed prompt for a specific task. Guide me through the C.R.A.F.T.E.D. framework by asking me questions for each section. After I provide my answers, synthesize them into a final, well-structured prompt.
+
+**C.R.A.F.T.E.D. Framework:**
+*   **C (Context):** What is the background information the AI needs?
+*   **R (Role):** What persona should the AI adopt?
+*   **A (Action):** What is the specific task the AI should perform?
+*   **F (Format):** How should the output be structured (e.g., JSON, Markdown, list)?
+*   **T (Tone):** What style of communication should the AI use (e.g., professional, empathetic, critical)?
+*   **E (Examples):** What are some examples of the desired output?
+*   **D (Definition of Done):** What criteria must the response meet to be considered complete?
+
+Start by asking me for the **Context**.`,
       },
     ],
   },
@@ -118,6 +137,117 @@ Analyze the ticket description below and provide the following:
 
 --- TECHNICAL UPDATE ---
 [Paste the technical update here, e.g., "We have successfully migrated the user authentication service from a monolithic architecture to a microservice. This involved refactoring the database schema and deploying a new service on Kubernetes."]"`,
+      },
+      {
+        id: 'strategic-project-analysis',
+        title: 'Strategic Project Analysis',
+        description: 'Uses deep context from Jira, team structure, and business constraints to generate strategic recommendations for project planning.',
+        prompt: `<role>
+You are a senior project manager and resource planning specialist at a software company with access to current project data, team information, and resource allocation details. Your expertise includes analyzing project status, resource optimization, risk assessment, and timeline management. You should demonstrate deep knowledge of agile methodologies, team dynamics, and strategic business planning.
+</role>
+
+<context>
+You are working at a company that is managing multiple concurrent projects and is operating under specific constraints (e.g., hiring freezes, budget allocations, critical business deadlines).
+
+**Instructions:** Replace the bracketed content below with your actual data.
+
+## Current Team Structure
+\`\`\`json
+[Paste your team structure JSON here. Example:
+{
+  "teams": {
+    "frontend": { "lead": "Sarah Chen", "members": [...] },
+    "backend": { "lead": "David Park", "members": [...] }
+  }
+}
+]
+\`\`\`
+
+## Current Sprint Backlog (JIRA Data)
+\`\`\`json
+[Paste your current sprint backlog JSON here. Example:
+{
+  "sprint": { "name": "Q3 Feature Sprint", "status": "active" },
+  "tickets": [
+    { "key": "PROJ-1234", "summary": "Implement user auth", "priority": "High", "status": "In Progress", "storyPoints": 13 },
+    { "key": "PROJ-1235", "summary": "Redesign dashboard", "priority": "Medium", "status": "To Do", "storyPoints": 8 }
+  ]
+}
+]
+\`\`\`
+
+## Resource Allocation Matrix
+\`\`\`json
+[Paste your resource allocation matrix here.]
+\`\`\`
+
+## Historical Performance Metrics
+\`\`\`json
+[Paste your historical velocity and performance metrics here.]
+\`\`\`
+
+## Constraints and Business Context
+[List your key constraints, e.g., budget, deadlines, compliance requirements.]
+
+## Recent Stakeholder Feedback
+[List recent feedback from key stakeholders, e.g., "The mobile app project seems to be falling behind." - Robert Johnson, Engineering Director]
+
+</context>
+
+<action>
+Given the current project status, team availability, resource constraints, and business priorities, analyze the provided data and provide strategic recommendations including:
+
+1. **Immediate Action Items**: Identify the top 3 actions that need to be taken this week to address the most critical issues.
+2. **Resource Reallocation Recommendations**: Propose how to redistribute team members across projects to optimize delivery timelines while maintaining quality.
+3. **Risk Mitigation Strategy**: Develop specific steps to address high-risk projects and blocked tickets.
+4. **Timeline Adjustments**: Recommend realistic timeline adjustments for each project based on current velocity trends and constraints.
+5. **Communication Plan**: Define key messages for stakeholders and present trade-offs involved in your recommendations.
+</action>
+
+<format>
+Structure your response with clear headings for each of the 5 required sections. Use bullet points for action items and recommendations. Present resource allocation recommendations in a clear, tabular format when possible. Provide reasoning for each major recommendation. Keep the response comprehensive but concise, focusing on actionable insights rather than restating the provided data.
+</format>
+
+<tone>
+Communicate with the authority and expertise of a senior project manager. Use professional, analytical language appropriate for executive-level stakeholders. Be direct about challenges and realistic about constraints while maintaining a solutions-focused approach. Balance optimism with a pragmatic assessment of risks and trade-offs.
+</tone>`
+      },
+      {
+        id: 'identify-bottlenecks',
+        title: 'Identify Productivity Bottlenecks',
+        description: 'Analyzes a description of a team\'s workflow to identify potential bottlenecks and suggests AI-powered improvements.',
+        prompt: `Act as a senior engineering manager and process improvement expert. I'm going to describe my team's current software development lifecycle. Your task is to analyze this process, identify the top 3 potential bottlenecks that are likely slowing the team down, and for each bottleneck, suggest a practical way that AI could be used to alleviate it.
+
+--- TEAM WORKFLOW DESCRIPTION ---
+[Describe your team's process here. e.g., "We follow 2-week sprints. Planning is often slow because we struggle to break down large epics. Code reviews sometimes take several days because senior engineers are busy. Documentation is often an afterthought and written at the end of the sprint, which delays handoffs."]`,
+      },
+      {
+        id: 'draft-job-description',
+        title: 'Draft an Effective Job Description',
+        description: 'Guides a hiring manager to create a compelling and inclusive job description for an open engineering role.',
+        prompt: `Act as an expert technical recruiter and hiring manager. I need to draft a job description for a new role on my team. Guide me through the process by asking for the following information one by one:
+1.  **Job Title:** (e.g., Senior Frontend Engineer)
+2.  **Team Mission:** (What is the purpose of this team?)
+3.  **Key Responsibilities:** (What will this person do day-to-day?)
+4.  **Core Technologies:** (What is the tech stack?)
+5.  **Qualifications:** (What are the must-have skills and experience?)
+6.  **Company Culture Highlights:** (What makes this a great place to work?)
+
+Once I've provided all the information, synthesize it into a clear, compelling, and inclusive job description that will attract top talent.`,
+      },
+      {
+        id: 'team-retro-topics',
+        title: 'Generate Team Health Retrospective Topics',
+        description: 'Generates a set of thoughtful, open-ended questions to facilitate a productive team health retrospective.',
+        prompt: `Act as an experienced Agile coach and team facilitator. My engineering team is holding its monthly team health retrospective. Our goal is to move beyond just talking about the last sprint and have a deeper conversation about our teamwork, communication, and overall well-being.
+
+Please generate a list of 5-7 thoughtful, open-ended questions designed to spark conversation in the following areas:
+- Communication & Collaboration
+- Work-Life Balance & Morale
+- Processes & Tools
+- Learning & Growth
+
+The questions should be constructive and assume a high-trust environment.`,
       },
     ],
   },

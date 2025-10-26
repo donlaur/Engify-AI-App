@@ -89,5 +89,55 @@
         "publicationDate": "2025-08-27",
         "tags": ["AI Strategy", "Leadership", "Product Management", "Engineering"],
         "fullText": "This article asserts that in the age of AI, engineering leaders must own the AI product strategy, not just execute on a roadmap handed to them. Because AI systems are probabilistic and complex, traditional product specs are insufficient. Engineers are uniquely positioned to understand the crucial trade-offs between cost, latency, model choice, RAG vs. fine-tuning, and data feedback loops. These are no longer implementation details; they are core strategic decisions that define the product's defensibility and performance. The article argues that 'Engineering Strategy IS AI Product Strategy.' It introduces a framework for thinking about this new reality, which includes three non-negotiable dimensions: 1. **Probabilistic Outputs:** Designing for variability and trust. 2. **Compounding Loops:** Building feedback mechanisms so the product gets smarter with use. 3. **Economic Alignment:** Managing inference costs and model mixing to ensure profitability at scale. The key takeaway for CTOs and engineering leaders is to take a seat at the strategy table and develop the skills to answer not just the 'how,' but the 'what, when, and why' of building AI products."
+    },
+    {
+        "id": "10",
+        "title": "How to Use AI to Help With Planning Engineering Projects",
+        "author": "Gregor Ojstersek and Steven Levey",
+        "source": "Engineering Leadership",
+        "url": "https://engineeringleadership.substack.com/",
+        "publicationDate": "2025-10-26",
+        "tags": ["AI Strategy", "Prompt Engineering", "Project Planning", "Leadership"],
+        "fullText": "This article provides a deep dive into 'Context Engineering' as a method for planning complex engineering projects with AI. It argues that providing rich, structured context is the key to getting high-quality, strategic outputs from LLMs. The authors provide a detailed, step-by-step guide for creating a master prompt that includes multiple data sources: current business context (constraints, deadlines), team structure (skills, availability), sprint backlog data from Jira, resource allocation matrices, historical performance metrics, and recent stakeholder feedback. The article presents a complete example prompt following the C.R.A.F.T.E.D. framework, designed for an Engineering Manager to get AI-driven recommendations on action items, resource allocation, and risk mitigation. The core philosophy is to treat 'prompts as code'—they should be version-controlled, shareable, testable, and dynamically populated with data from source systems. This approach moves beyond simple prompting to a more reliable, engineering-driven discipline."
+    },
+    {
+        "id": "11",
+        "title": "How to Use AI to Help With Software Engineering Tasks",
+        "author": "Gregor Ojstersek and Steven Levey",
+        "source": "Engineering Leadership",
+        "url": "https://newsletter.eng-leadership.com/p/how-to-use-ai-to-help-with-software",
+        "publicationDate": "2025-10-12",
+        "tags": ["Prompt Engineering", "Developer Productivity", "CRAFTED Framework"],
+        "fullText": "This article introduces the C.R.A.F.T.E.D. prompt framework, a structured approach to help software engineers save time on common tasks. The framework is an acronym that guides users to provide comprehensive context to the AI: Context, Role, Action, Format, Tone, Examples, and Definition of Done. By following this structure, engineers can get more reliable and accurate responses from LLMs for tasks like writing code, generating documentation, or refactoring. The authors argue that 'Context Engineering' is a crucial skill. The article provides a detailed example of a complete prompt for a project planning scenario, demonstrating how to fill each section of the C.R.A.F.T.E.D. framework with rich, specific information. The key takeaway is that treating prompts with the same discipline as code—by engineering the context—leads to dramatically better results and moves AI from a novelty to a reliable engineering tool."
+    },
+    {
+        "id": "12",
+        "title": "How to Use AI to Increase Software Development Productivity",
+        "author": "Gregor Ojstersek",
+        "source": "Engineering Leadership",
+        "url": "https://newsletter.eng-leadership.com/p/how-to-use-ai-to-increase-software",
+        "publicationDate": "2025-03-09",
+        "tags": ["Developer Productivity", "AI Tools", "Metrics", "Leadership"],
+        "fullText": "This article explores practical ways engineering leaders can use AI to boost their team's productivity. It moves beyond the hype and focuses on tangible applications. The author suggests that the biggest gains come from using AI to automate or accelerate non-coding tasks that consume a significant portion of a developer's day, such as writing documentation, summarizing meetings, and planning projects. The article provides specific examples, like using an AI to analyze a project backlog and suggest prioritization based on business goals and dependencies. It also emphasizes the importance of measuring the impact of AI tools, not just assuming they are effective. The core message is that AI's true value isn't just in writing code faster, but in freeing up engineers' cognitive load so they can focus on higher-level problem-solving and innovation. For leaders, the goal is to strategically introduce AI to remove friction and amplify their team's creative potential."
+    },
+    {
+        "id": "13",
+        "title": "How to Use AI to Be a Great Engineering Leader",
+        "author": "Gregor Ojstersek",
+        "source": "Engineering Leadership",
+        "url": "https://newsletter.eng-leadership.com/p/how-to-use-ai-to-be-a-great-engineering",
+        "publicationDate": "2025-05-11",
+        "tags": ["Leadership", "Management", "AI Tools", "Strategy"],
+        "fullText": "This article outlines how engineering leaders can leverage AI to become more effective in their roles. It argues that AI is a 'force multiplier' for leadership, capable of handling administrative tasks and providing data-driven insights. The author provides several concrete use cases for managers: preparing for 1-on-1 meetings by having an AI summarize a direct report's recent work and suggest talking points; drafting job descriptions and interview questions to streamline hiring; and creating performance review summaries based on peer feedback and project outcomes. The article also touches on more strategic uses, such as using an AI to analyze team communication patterns in public Slack channels to gauge morale or identify knowledge silos. The central theme is that by delegating repetitive and data-synthesis tasks to AI, engineering leaders can free up their time to focus on the uniquely human aspects of their job: mentoring, coaching, setting vision, and building culture."
+    },
+    {
+        "id": "14",
+        "title": "How to Use AI to Improve Teamwork in Engineering Teams",
+        "author": "Gregor Ojstersek and Henry Poydar",
+        "source": "Engineering Leadership",
+        "url": "https://newsletter.eng-leadership.com/p/how-to-use-ai-to-improve-teamwork",
+        "publicationDate": "2025-09-07",
+        "tags": ["Teamwork", "Collaboration", "Communication", "AI Tools"],
+        "fullText": "This article explores how AI can be used to enhance, rather than replace, teamwork in engineering organizations. The authors suggest that AI can act as a neutral facilitator and communication aid, helping to bridge gaps and improve collaboration. They propose several practical applications. First, using AI to generate structured agendas for meetings and summarize the key decisions and action items afterward, ensuring everyone is aligned. Second, using AI as a 'translator' to help engineers communicate complex technical topics to non-technical stakeholders in a clear and concise way. Third, using an AI to facilitate blameless post-mortems by creating an objective timeline of events and guiding the team through a structured root cause analysis. The underlying principle is that AI can handle the logistical and administrative aspects of collaboration, allowing team members to focus on the creative and strategic parts of working together, leading to better outcomes and stronger team cohesion."
     }
 ]

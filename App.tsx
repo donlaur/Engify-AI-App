@@ -7,23 +7,31 @@ import LearningHub from './components/LearningHub';
 import OnboardingJourney from './components/OnboardingJourney';
 import LearningPathways from './components/LearningPathways';
 
-type Tool = 'onboarding' | 'pathways' | 'learning-hub' | 'playbooks' | 'workbench' | 'settings';
+export type Tool = 'onboarding' | 'pathways' | 'learning-hub' | 'playbooks' | 'workbench' | 'settings';
 
 const App: React.FC = () => {
   const [activeTool, setActiveTool] = useState<Tool>('onboarding');
   const [promptForLab, setPromptForLab] = useState<string>('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleSendToWorkbench = (prompt: string) => {
     setPromptForLab(prompt);
     setActiveTool('workbench');
+    setIsSidebarOpen(false); // Close sidebar on navigation
   };
+  
+  const handleSetActiveTool = (tool: Tool) => {
+    setActiveTool(tool);
+    setIsSidebarOpen(false); // Close sidebar on navigation
+  };
+
 
   const renderTool = () => {
     switch (activeTool) {
       case 'onboarding':
         return <OnboardingJourney />;
       case 'pathways':
-        return <LearningPathways setActiveTool={setActiveTool} />;
+        return <LearningPathways setActiveTool={handleSetActiveTool} />;
       case 'learning-hub':
         return <LearningHub onSendToWorkbench={handleSendToWorkbench} />;
       case 'playbooks':
@@ -39,9 +47,20 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen font-sans bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
-      <Sidebar activeTool={activeTool} setActiveTool={setActiveTool} />
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-        {renderTool()}
+      {/* Mobile Sidebar Overlay */}
+      <div 
+        className={`fixed inset-0 bg-black/30 z-30 transition-opacity lg:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setIsSidebarOpen(false)}
+      ></div>
+      <div className={`fixed lg:relative inset-y-0 left-0 w-64 z-40 transition-transform transform lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+         <Sidebar activeTool={activeTool} setActiveTool={handleSetActiveTool} />
+      </div>
+      
+      <main className="flex-1 flex flex-col overflow-y-auto">
+        <MobileHeader onMenuClick={() => setIsSidebarOpen(true)} />
+        <div className="flex-1 p-4 sm:p-6 lg:p-8">
+            {renderTool()}
+        </div>
       </main>
     </div>
   );
@@ -53,7 +72,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTool, setActiveTool }) => (
-  <aside className="w-64 bg-white dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700/50 flex flex-col">
+  <aside className="w-64 h-full bg-white dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700/50 flex flex-col">
     <div className="flex flex-col h-20 px-6 border-b border-slate-200 dark:border-slate-700/50 justify-center">
         <div className="flex items-center space-x-3">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -65,7 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTool, setActiveTool }) => (
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">From AI Fear to AI Fluency.</p>
     </div>
-    <nav className="flex-1 p-4 space-y-2">
+    <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
       <NavItem icon={<OnboardingIcon />} label="Onboarding" isActive={activeTool === 'onboarding'} onClick={() => setActiveTool('onboarding')} />
       <NavItem icon={<PathwaysIcon />} label="Pathways" isActive={activeTool === 'pathways'} onClick={() => setActiveTool('pathways')} />
       <NavItem icon={<LearningIcon />} label="Learning Hub" isActive={activeTool === 'learning-hub'} onClick={() => setActiveTool('learning-hub')} />
@@ -87,6 +106,25 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTool, setActiveTool }) => (
     </div>
   </aside>
 );
+
+const MobileHeader: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => (
+    <header className="lg:hidden flex items-center justify-between h-16 px-4 border-b border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 sticky top-0 z-10">
+        <button onClick={onMenuClick} className="p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <div className="flex items-center space-x-2">
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+            <h1 className="text-lg font-bold text-slate-900 dark:text-white">
+                Engify.ai
+            </h1>
+        </div>
+    </header>
+);
+
 
 interface NavItemProps {
   icon: React.ReactNode;
