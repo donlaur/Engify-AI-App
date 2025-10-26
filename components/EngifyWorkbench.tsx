@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { KICKOFF_PLAN_PROMPT_TEMPLATE } from '../services/agentService';
-
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'post-mortem-facilitator' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab';
+type ActiveTab = 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'post-mortem-facilitator' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
@@ -15,6 +13,12 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
         }
     }, [initialPrompt]);
     
+    // Stubs for components that are not fully implemented yet
+    const PostmortemFacilitator: React.FC = () => <div className="p-4 text-center">Post-Mortem Facilitator Coming Soon</div>;
+    const UserStoryGenerator: React.FC = () => <div className="p-4 text-center">User Story Generator Coming Soon</div>;
+    const OkrArchitect: React.FC = () => <div className="p-4 text-center">Goal & OKR Architect Coming Soon</div>;
+    const CoreValuesArchitect: React.FC = () => <div className="p-4 text-center">Core Values Architect Coming Soon</div>;
+
     return (
         <div className="flex flex-col h-full">
             <header className="pb-4 border-b border-slate-200 dark:border-slate-700">
@@ -33,6 +37,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
                     <TabButton name="User Story Generator" isActive={activeTab === 'user-story-generator'} onClick={() => setActiveTab('user-story-generator')} />
                     <TabButton name="Knowledge Navigator" isActive={activeTab === 'knowledge-navigator'} onClick={() => setActiveTab('knowledge-navigator')} />
                     <TabButton name="Goal & OKR Architect" isActive={activeTab === 'okr-architect'} onClick={() => setActiveTab('okr-architect')} />
+                    <TabButton name="Core Values Architect" isActive={activeTab === 'core-values-architect'} onClick={() => setActiveTab('core-values-architect')} />
                     <TabButton name="Project Kickoff" isActive={activeTab === 'project-kickoff'} onClick={() => setActiveTab('project-kickoff')} />
                     <TabButton name="Prompt Lab" isActive={activeTab === 'prompt-lab'} onClick={() => setActiveTab('prompt-lab')} />
                 </nav>
@@ -46,6 +51,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
                 {activeTab === 'user-story-generator' && <UserStoryGenerator />}
                 {activeTab === 'knowledge-navigator' && <KnowledgeNavigator />}
                 {activeTab === 'okr-architect' && <OkrArchitect />}
+                {activeTab === 'core-values-architect' && <CoreValuesArchitect />}
                 {activeTab === 'project-kickoff' && <ProjectKickoff />}
                 {activeTab === 'prompt-lab' && <PromptLab initialPrompt={initialPrompt} />}
             </div>
@@ -73,6 +79,8 @@ interface IncidentLogEntry {
 }
 
 const IncidentCoCommander: React.FC = () => {
+    // This component appears to be correctly implemented already
+    // ... (content from file)
     const [log, setLog] = useState<IncidentLogEntry[]>([
         { author: 'ai', text: "I'm your Incident Co-Commander. Describe the initial alert or symptom to begin the response process.", timestamp: new Date().toLocaleTimeString() }
     ]);
@@ -109,7 +117,8 @@ const IncidentCoCommander: React.FC = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to get a response from the AI co-commander.');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to get a response from the AI co-commander.');
             }
             const data = await response.json();
             
@@ -178,8 +187,9 @@ const IncidentCoCommander: React.FC = () => {
     );
 };
 
-
 const IncidentResponseStrategist: React.FC = () => {
+    // This component appears to be correctly implemented already
+    // ... (content from file)
     const [serviceDescription, setServiceDescription] = useState('A user authentication service that handles login, sign-up, and password reset. It is a critical service for our main web application.');
     const [result, setResult] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -200,7 +210,8 @@ const IncidentResponseStrategist: React.FC = () => {
                 body: JSON.stringify({ service_description: serviceDescription })
             });
             if (!response.ok) {
-                throw new Error('Failed to generate incident plan from the server.');
+                 const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate incident plan from the server.');
             }
             const data = await response.json();
             setResult(data.result);
@@ -241,8 +252,9 @@ const IncidentResponseStrategist: React.FC = () => {
     );
 };
 
-
 const TechnicalDebtStrategist: React.FC = () => {
+    // This component appears to be correctly implemented already
+    // ... (content from file)
     const [step, setStep] = useState(1);
     const [symptoms, setSymptoms] = useState('Our CI/CD pipeline for the main monolith is taking over 45 minutes to run, which slows down developer velocity. New features in the billing module are taking twice as long as estimated because the code is tightly coupled and lacks tests. We had two minor production incidents last quarter related to this module.');
     const [businessContext, setBusinessContext] = useState('The billing module is business-critical. It handles all revenue and subscription logic. Any downtime directly impacts revenue. Slowing down feature development in this area means we are falling behind competitors.');
@@ -263,7 +275,10 @@ const TechnicalDebtStrategist: React.FC = () => {
                 },
                 body: JSON.stringify({ symptoms, business_context: businessContext })
             });
-            if (!response.ok) throw new Error("Failed to get a response from the server.");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to get a response from the server.");
+            }
             const data = await response.json();
             setPromptSequence(data.prompt_sequence);
             setStakeholderBriefing(data.stakeholder_briefing);
@@ -331,38 +346,86 @@ const TechnicalDebtStrategist: React.FC = () => {
     );
 };
 
-// FIX: Define placeholder components for missing tabs to resolve compilation errors.
-const PostmortemFacilitator: React.FC = () => (
-    <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-        <h2 className="font-semibold text-lg">Post-Mortem Facilitator</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">This tool will help guide your team through a blameless post-mortem process to learn from incidents.</p>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-semibold">Coming Soon</p>
-    </div>
-);
+const KnowledgeNavigator: React.FC = () => {
+    // This component appears to be correctly implemented already
+    // ... (content from file)
+    const [sourceText, setSourceText] = useState('');
+    const [question, setQuestion] = useState('');
+    const [result, setResult] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-const UserStoryGenerator: React.FC = () => (
-    <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-        <h2 className="font-semibold text-lg">User Story Generator</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Generate well-formed user stories, acceptance criteria, and Gherkin scenarios from a high-level feature description.</p>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-semibold">Coming Soon</p>
-    </div>
-);
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setResult('');
 
-const KnowledgeNavigator: React.FC = () => (
-     <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-        <h2 className="font-semibold text-lg">Knowledge Navigator</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Use Retrieval-Augmented Generation (RAG) to ask questions about your internal documentation or codebase.</p>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-semibold">Coming Soon</p>
-    </div>
-);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
 
-const OkrArchitect: React.FC = () => (
-     <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-        <h2 className="font-semibold text-lg">Goal & OKR Architect</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Turn a high-level strategic goal into a set of clear, measurable Objectives and Key Results (OKRs) for your team.</p>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-semibold">Coming Soon</p>
-    </div>
-);
+            const response = await fetch('/api/rag', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ source_text: sourceText, question })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to get response from RAG service.");
+            }
+            const data = await response.json();
+            setResult(data.answer);
+
+        } catch (err: any) {
+            console.error(err);
+            setResult(`Error: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    return (
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 h-full">
+            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+                <div>
+                    <label htmlFor="source-text" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Source Knowledge</label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Paste any text you want to ask questions about (e.g., meeting notes, design doc, article).</p>
+                    <textarea 
+                        id="source-text" 
+                        rows={10} 
+                        value={sourceText} 
+                        onChange={e => setSourceText(e.target.value)} 
+                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"
+                        placeholder="Paste your text here..."
+                    />
+                </div>
+                 <div>
+                    <label htmlFor="question" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Your Question</label>
+                    <input 
+                        id="question" 
+                        type="text"
+                        value={question} 
+                        onChange={e => setQuestion(e.target.value)} 
+                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"
+                        placeholder="e.g., What were the key action items?"
+                    />
+                </div>
+                <button type="submit" disabled={isLoading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 disabled:bg-indigo-400">
+                    {isLoading ? 'Searching...' : 'Ask Question'}
+                </button>
+            </form>
+             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+                <h2 className="text-xl font-semibold mb-3">AI-Generated Answer</h2>
+                <div className="flex-1 mt-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto relative border border-slate-200 dark:border-slate-700">
+                    {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}
+                    {result ? <pre className="text-sm whitespace-pre-wrap font-sans">{result}</pre> : <p className="text-sm text-slate-500">The answer based on your provided text will appear here.</p>}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const ProjectKickoff: React.FC = () => {
     const [projectGoal, setProjectGoal] = useState('');
@@ -375,43 +438,32 @@ const ProjectKickoff: React.FC = () => {
         setIsLoading(true);
         setResult('');
 
-        // Mocking an AI call
-        await new Promise(res => setTimeout(res, 1500));
-        
-        const filledPrompt = KICKOFF_PLAN_PROMPT_TEMPLATE
-            .replace('{{projectGoal}}', projectGoal || 'a new feature')
-            .replace('{{stakeholders}}', stakeholders || 'the project team');
-        
-        // A mock response.
-        const mockResponse = `
-### 1. Project Overview
-*   **Background:** Based on the goal to "${projectGoal}", this project is likely a high-priority initiative to improve user experience and drive engagement.
-*   **Problem Statement:** The current process is manual and inefficient, leading to user friction. This project aims to automate and streamline this process.
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
 
-### 2. Goals and Scope
-*   **In-Scope Goals:** 
-    *   Deliver a new automated system for the described goal.
-    *   Integrate with existing user profiles.
-*   **Out-of-Scope (Non-Goals):**
-    *   This will not include a mobile-specific interface initially.
-    *   Internationalization is not part of V1.
+            const response = await fetch('/api/generate-kickoff', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ projectGoal, stakeholders })
+            });
 
-### 3. Key Stakeholders
-*   **${stakeholders.split(',')[0].trim() || 'Stakeholder'}**: Likely the Project Lead or Product Manager.
-*   **Other Stakeholders**: Engineering, Design, QA.
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to generate kickoff document.");
+            }
 
-### 4. Initial Risk Assessment
-*   **Technical Risk:** The new system may have unforeseen integration challenges. Mitigation: Spike/PoC.
-*   **Timeline Risk:** The scope might be too large for one quarter. Mitigation: Phase the rollout.
-*   **Adoption Risk:** Users might not adopt the new system. Mitigation: Involve UX early and conduct user testing.
-
-### 5. Open Questions
-*   What are the specific performance KPIs for the new system?
-*   Are there any data privacy concerns to address with the legal team?
-`;
-
-        setResult(mockResponse);
-        setIsLoading(false);
+            const data = await response.json();
+            setResult(data.result);
+        } catch (err: any) {
+            console.error(err);
+            setResult(`Error: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -473,10 +525,30 @@ const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
         setIsLoading(true);
         setResult('');
 
-        // Mocking AI call
-        await new Promise(res => setTimeout(res, 1000));
-        setResult(`This is a mocked AI response for the model ${model} based on your prompt:\n\n---\n\n${prompt}`);
-        setIsLoading(false);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+
+            const response = await fetch('/api/execute-prompt', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ prompt, model })
+            });
+            if (!response.ok) {
+                 const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to execute prompt.");
+            }
+            const data = await response.json();
+            setResult(data.result);
+        } catch (err: any) {
+             console.error(err);
+             setResult(`Error: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -520,5 +592,4 @@ const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
     );
 };
 
-// FIX: Add default export to make the component available for import.
 export default EngifyWorkbench;
