@@ -105,6 +105,33 @@ Start by asking me for the **Context**.`,
 [Provide a 2-3 sentence description of the project, its goal, and key stakeholders.]`
       },
       {
+        id: 'address-tech-debt',
+        title: 'Address Technical Debt',
+        description: 'Guides a user through identifying technical debt from Jira tickets, prioritizing it based on business impact and risk, and generating a persuasive business case for its remediation to stakeholders.',
+        prompt: `Act as a seasoned Principal Engineer and business strategist. Your task is to help me create a compelling business case to address a significant area of technical debt.
+
+I will provide you with the symptoms we are observing and the business context. You will then generate a structured proposal document that I can share with product managers and other stakeholders.
+
+The proposal must include:
+1.  **Problem Statement:** A clear summary of the symptoms and their immediate impact on the team (e.g., slower velocity, lower morale, increased bug count).
+2.  **Hypothesized Root Cause:** Based on the symptoms, infer the likely underlying technical debt (e.g., "tight coupling in the billing module," "outdated frontend framework," "lack of test coverage in the authentication service").
+3.  **Business Impact & Risk Analysis:** This is the most critical section. Translate the technical problem into tangible business risks (e.g., "Increased risk of revenue-impacting outages," "Slower time-to-market for new features," "Decreased developer morale and potential attrition"). Quantify where possible.
+4.  **Proposed Solution:** A high-level proposal for how to address the debt (e.g., "A dedicated 2-sprint refactoring project," "Allocate 20% of capacity for the next quarter to this effort").
+5.  **Expected ROI:** Articulate the return on investment, focusing on benefits like increased development velocity, improved system reliability, and reduced operational costs.
+
+---
+
+**1. SYMPTOMS OBSERVED:**
+(e.g., "Tickets for new features in our Billing module consistently take 50% longer than estimated. We've had two minor production incidents related to this module in the last quarter. Developers complain that the code is hard to understand and brittle.")
+[PASTE YOUR OBSERVED SYMPTOMS HERE]
+
+---
+
+**2. BUSINESS CONTEXT:**
+(e.g., "The Billing module is business-critical and handles all revenue. Our top company priority this year is to launch new international payment options, which this module will need to support.")
+[PASTE THE RELEVANT BUSINESS CONTEXT HERE]`,
+      },
+      {
         id: '1-on-1-prep',
         title: 'Prepare for a 1:1 Meeting',
         description: 'Creates a structured agenda with talking points for an upcoming 1:1 meeting with a direct report.',

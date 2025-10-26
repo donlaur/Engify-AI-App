@@ -18,9 +18,9 @@ export const onboardingJourney: OnboardingStep[] = [
     },
     {
         id: 2,
-        title: "Day 2: Your First AI Playbook",
-        description: "The Playbook Library is full of ready-to-use AI recipes. Let's start with a simple but powerful one: summarizing a technical update for a non-technical audience.",
-        actionText: "Find the Playbook",
+        title: "Day 2: Your First AI Prompt Playbook",
+        description: "The Prompt Playbook Library is full of ready-to-use AI recipes. Let's start with a simple but powerful one: summarizing a technical update for a non-technical audience.",
+        actionText: "Find the Prompt Playbook",
         target: "playbooks",
         isCompleted: false,
     },
@@ -43,7 +43,7 @@ export const onboardingJourney: OnboardingStep[] = [
     {
         id: 5,
         title: "Day 5: Become an AI Leader",
-        description: "You've learned the basics. Now, explore the rest of the Playbooks and Workbench tools to see how you can use Engify.ai to lead your team.",
+        description: "You've learned the basics. Now, explore the rest of the Prompt Playbooks and Workbench tools to see how you can use Engify.ai to lead your team.",
         actionText: "Explore on Your Own",
         target: "playbooks",
         isCompleted: false,

@@ -1,4 +1,3 @@
-
 export interface PathwayStep {
     id: number;
     title: string;
@@ -32,8 +31,8 @@ export const learningPathways: LearningPathway[] = [
             {
                 id: 2,
                 title: "Define Your AI Policy",
-                description: "Before you can adopt AI, you need a clear and safe policy. Use this playbook to draft a comprehensive AI usage policy for your team.",
-                actionText: "Use Playbook",
+                description: "Before you can adopt AI, you need a clear and safe policy. Use this prompt playbook to draft a comprehensive AI usage policy for your team.",
+                actionText: "Use Prompt Playbook",
                 type: 'playbook',
                 targetId: 'ai-usage-policy', // Assumes a new playbook id
             },
@@ -119,7 +118,7 @@ export const learningPathways: LearningPathway[] = [
                 id: 2,
                 title: "Learn a Structured Framework",
                 description: "A great prompt has a clear structure. Use the C.R.A.F.T.E.D. framework to learn how to provide clear context, roles, and actions to the AI.",
-                actionText: "Use Playbook",
+                actionText: "Use Prompt Playbook",
                 type: 'playbook',
                 targetId: 'crafted-prompt-design',
             },

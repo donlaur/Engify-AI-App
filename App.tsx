@@ -88,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTool, setActiveTool }) => (
       <NavItem icon={<OnboardingIcon />} label="Onboarding" isActive={activeTool === 'onboarding'} onClick={() => setActiveTool('onboarding')} />
       <NavItem icon={<PathwaysIcon />} label="Pathways" isActive={activeTool === 'pathways'} onClick={() => setActiveTool('pathways')} />
       <NavItem icon={<LearningIcon />} label="Learning Hub" isActive={activeTool === 'learning-hub'} onClick={() => setActiveTool('learning-hub')} />
-      <NavItem icon={<PlaybookIcon />} label="Playbooks" isActive={activeTool === 'playbooks'} onClick={() => setActiveTool('playbooks')} />
+      <NavItem icon={<PlaybookIcon />} label="Prompt Playbooks" isActive={activeTool === 'playbooks'} onClick={() => setActiveTool('playbooks')} />
       <NavItem icon={<WorkbenchIcon />} label="Workbench" isActive={activeTool === 'workbench'} onClick={() => setActiveTool('workbench')} />
       <div className="flex-grow"></div>
       <NavItem icon={<SettingsIcon />} label="Settings" isActive={activeTool === 'settings'} onClick={() => setActiveTool('settings')} isDisabled={false} />
