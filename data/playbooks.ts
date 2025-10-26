@@ -59,6 +59,35 @@ Analyze the ticket description below and provide the following:
 
 Start by asking me for the **Context**.`,
       },
+      {
+        id: 'compare-languages-libs',
+        title: 'Compare Languages or Libraries',
+        description: 'Compares programming languages or libraries for a specific use case, providing pros, cons, and a recommendation.',
+        prompt: `I'm evaluating a few libraries or languages to choose the best fit for a new project.
+
+**My Use Case:** [Describe your project goal, e.g., "Building a high-throughput data processing pipeline that ingests real-time events from a Kafka stream and writes to BigQuery."]
+
+**Technologies to Compare:** [List the technologies, e.g., "Go, Rust, and Python with the Faust library."]
+
+Please help me by providing the following:
+1.  **Pros and Cons:** For each technology, compare its pros and cons specifically for my use case. Consider trade-offs in performance, ecosystem maturity, developer learning curve, and maintainability.
+2.  **Additional Libraries:** Identify any other key libraries or frameworks commonly used for this type of work with each option.
+3.  **Top Recommendation:** Based on your analysis, recommend a top choice for me and briefly explain why it's the best fit.`
+      },
+      {
+        id: 'system-design-best-practices',
+        title: 'System Design Best Practices',
+        description: 'Looks up best practices and anti-patterns for a new system based on its context.',
+        prompt: `Act as a principal engineer specializing in system architecture. I'm designing a new system and want to ensure it's built using best practices in security, performance, scalability, availability, and maintainability.
+
+Please analyze my system context below and provide:
+1.  **Relevant Design Principles:** A list of 3-5 key architectural principles I should follow (e.g., "Stateless services," "Asynchronous communication," "Defense in depth").
+2.  **Common Pitfalls & Anti-Patterns:** Highlight common mistakes or anti-patterns to avoid for this type of system.
+3.  **Key Questions to Consider:** A list of probing questions I should be asking myself about the design.
+
+--- SYSTEM CONTEXT ---
+[Describe your system, e.g., "A backend service that handles user authentication and profile management for a global SaaS platform, expected to serve millions of users."]`
+      },
     ],
   },
   {
