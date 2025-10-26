@@ -24,6 +24,10 @@
     {
         "source": "/api/user-story",
         "destination": "/api/user-story.py"
+    },
+    {
+        "source": "/api/analyze-tech-debt",
+        "destination": "/api/analyze-tech-debt.py"
     }
   ]
 }
