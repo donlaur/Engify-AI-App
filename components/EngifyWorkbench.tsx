@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { KICKOFF_PLAN_PROMPT_TEMPLATE } from '../services/agentService';
 
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'user-story-generator' |'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab';
+type ActiveTab = 'post-mortem-facilitator' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab';
 
 
-const EngifyWorkbench: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<ActiveTab>('user-story-generator');
+const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
+    const [activeTab, setActiveTab] = useState<ActiveTab>('post-mortem-facilitator');
+
+    useEffect(() => {
+        if (initialPrompt) {
+            setActiveTab('prompt-lab');
+        }
+    }, [initialPrompt]);
     
     return (
         <div className="flex flex-col h-full">
@@ -20,6 +26,7 @@ const EngifyWorkbench: React.FC = () => {
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Post-Mortem Facilitator" isActive={activeTab === 'post-mortem-facilitator'} onClick={() => setActiveTab('post-mortem-facilitator')} />
                     <TabButton name="User Story Generator" isActive={activeTab === 'user-story-generator'} onClick={() => setActiveTab('user-story-generator')} />
                     <TabButton name="Knowledge Navigator" isActive={activeTab === 'knowledge-navigator'} onClick={() => setActiveTab('knowledge-navigator')} />
                     <TabButton name="Goal & OKR Architect" isActive={activeTab === 'okr-architect'} onClick={() => setActiveTab('okr-architect')} />
@@ -29,11 +36,12 @@ const EngifyWorkbench: React.FC = () => {
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'post-mortem-facilitator' && <PostmortemFacilitator />}
                 {activeTab === 'user-story-generator' && <UserStoryGenerator />}
                 {activeTab === 'knowledge-navigator' && <KnowledgeNavigator />}
                 {activeTab === 'okr-architect' && <OkrArchitect />}
                 {activeTab === 'project-kickoff' && <ProjectKickoff />}
-                {activeTab === 'prompt-lab' && <PromptLab />}
+                {activeTab === 'prompt-lab' && <PromptLab initialPrompt={initialPrompt} />}
             </div>
         </div>
     );
@@ -51,6 +59,66 @@ const TabButton: React.FC<{name: string, isActive: boolean, onClick: () => void}
         {name}
     </button>
 );
+
+const PostmortemFacilitator: React.FC = () => {
+    const [summary, setSummary] = useState('The user authentication service experienced a 45-minute outage, resulting in a 100% login failure rate for all users.');
+    const [timeline, setTimeline] = useState('14:00 - Deployment of new version of auth-service begins.\n14:05 - First PagerDuty alerts fire for high login failure rates.\n14:10 - On-call engineer begins investigation.\n14:25 - Incident is escalated to the core services team.\n14:35 - Root cause identified as a misconfigured environment variable in the new deployment.\n14:40 - Rollback to the previous version is initiated.\n14:45 - Services restored, login success rate returns to normal.');
+    const [impact, setImpact] = useState('All users were unable to log in for 45 minutes. ~5,000 failed login attempts were recorded. Customer support received over 200 tickets related to the outage.');
+    const [result, setResult] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setResult('');
+        try {
+            const response = await fetch('/api/generate-postmortem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ summary, timeline, impact })
+            });
+            if (!response.ok) {
+                throw new Error('Failed to generate post-mortem from the server.');
+            }
+            const data = await response.json();
+            setResult(data.result);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 h-full">
+            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+                <div>
+                    <label htmlFor="summary" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Incident Summary</label>
+                    <textarea id="summary" rows={3} value={summary} onChange={e => setSummary(e.target.value)} className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"/>
+                </div>
+                <div>
+                    <label htmlFor="timeline" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Key Timeline Events</label>
+                    <textarea id="timeline" rows={7} value={timeline} onChange={e => setTimeline(e.target.value)} className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"/>
+                </div>
+                <div>
+                    <label htmlFor="impact" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Customer Impact</label>
+                    <textarea id="impact" rows={4} value={impact} onChange={e => setImpact(e.target.value)} className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"/>
+                </div>
+                 <button type="submit" disabled={isLoading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 disabled:bg-indigo-400">
+                    {isLoading ? 'Facilitating...' : 'Generate Post-Mortem'}
+                </button>
+            </form>
+             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+                <h2 className="text-xl font-semibold mb-3">Generated Post-Mortem (RCA)</h2>
+                <div className="flex-1 mt-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto relative border border-slate-200 dark:border-slate-700">
+                    {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}
+                    {result ? <pre className="text-sm whitespace-pre-wrap font-sans">{result}</pre> : <p className="text-sm text-slate-500">The post-mortem document will be generated here.</p>}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const UserStoryGenerator: React.FC = () => {
     const [step, setStep] = useState(1);
@@ -306,11 +374,16 @@ const ProjectKickoff: React.FC = () => {
     );
 };
 
-const PromptLab: React.FC = () => {
-    const [prompt, setPrompt] = useState(KICKOFF_PLAN_PROMPT_TEMPLATE.replace('{{projectGoal}}', 'My project goal').replace('{{stakeholders}}', 'Me'));
+const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
+    const [prompt, setPrompt] = useState('');
     const [model, setModel] = useState<Model>('gemini-2.5-flash');
     const [result, setResult] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        setPrompt(initialPrompt || KICKOFF_PLAN_PROMPT_TEMPLATE.replace('{{projectGoal}}', 'My project goal').replace('{{stakeholders}}', 'Me'));
+    }, [initialPrompt]);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
