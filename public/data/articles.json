@@ -102,42 +102,22 @@
     },
     {
         "id": "11",
-        "title": "How to Use AI to Help With Software Engineering Tasks",
-        "author": "Gregor Ojstersek and Steven Levey",
-        "source": "Engineering Leadership",
-        "url": "https://newsletter.eng-leadership.com/p/how-to-use-ai-to-help-with-software",
-        "publicationDate": "2025-10-12",
-        "tags": ["Prompt Engineering", "Developer Productivity", "CRAFTED Framework"],
-        "fullText": "This article introduces the C.R.A.F.T.E.D. prompt framework, a structured approach to help software engineers save time on common tasks. The framework is an acronym that guides users to provide comprehensive context to the AI: Context, Role, Action, Format, Tone, Examples, and Definition of Done. By following this structure, engineers can get more reliable and accurate responses from LLMs for tasks like writing code, generating documentation, or refactoring. The authors argue that 'Context Engineering' is a crucial skill. The article provides a detailed example of a complete prompt for a project planning scenario, demonstrating how to fill each section of the C.R.A.F.T.E.D. framework with rich, specific information. The key takeaway is that treating prompts with the same discipline as code—by engineering the context—leads to dramatically better results and moves AI from a novelty to a reliable engineering tool."
+        "title": "An Opinionated Guide to Using AI Right Now",
+        "author": "Ethan Mollick",
+        "source": "One Useful Thing",
+        "url": "https://www.oneusefulthing.ai/p/an-opinionated-guide-to-using-ai",
+        "publicationDate": "2025-10-19",
+        "tags": ["AI Models", "Best Practices", "Prompting"],
+        "fullText": "This guide provides a practical framework for choosing and using AI models in late 2025. It emphasizes that for many tasks, free models are sufficient, but for complex, high-stakes work (like coding, data analysis, or deep research), advanced models are always better. The author breaks down the current AI landscape, recommending a primary choice between Claude, Gemini, and ChatGPT for advanced systems. The article explains the difference between model types: 'Chat models' for quick conversation, 'Agent models' for multi-step tasks, and 'Wizard models' for deep academic work. It offers a crucial insight: 'Picking the model' is a multi-layered decision, from the provider (e.g., Google) to the specific version (e.g., Gemini 2.5 Pro) and the mode (e.g., Deep Research). Key takeaways include: don't worry too much about prompting 'well' as models get smarter; give the AI context to work with; and experiment to build intuition. The future of AI is less about better models and more about people figuring out what to do with them."
     },
     {
         "id": "12",
-        "title": "How to Use AI to Increase Software Development Productivity",
-        "author": "Gregor Ojstersek",
-        "source": "Engineering Leadership",
-        "url": "https://newsletter.eng-leadership.com/p/how-to-use-ai-to-increase-software",
-        "publicationDate": "2025-03-09",
-        "tags": ["Developer Productivity", "AI Tools", "Metrics", "Leadership"],
-        "fullText": "This article explores practical ways engineering leaders can use AI to boost their team's productivity. It moves beyond the hype and focuses on tangible applications. The author suggests that the biggest gains come from using AI to automate or accelerate non-coding tasks that consume a significant portion of a developer's day, such as writing documentation, summarizing meetings, and planning projects. The article provides specific examples, like using an AI to analyze a project backlog and suggest prioritization based on business goals and dependencies. It also emphasizes the importance of measuring the impact of AI tools, not just assuming they are effective. The core message is that AI's true value isn't just in writing code faster, but in freeing up engineers' cognitive load so they can focus on higher-level problem-solving and innovation. For leaders, the goal is to strategically introduce AI to remove friction and amplify their team's creative potential."
-    },
-    {
-        "id": "13",
-        "title": "How to Use AI to Be a Great Engineering Leader",
-        "author": "Gregor Ojstersek",
-        "source": "Engineering Leadership",
-        "url": "https://newsletter.eng-leadership.com/p/how-to-use-ai-to-be-a-great-engineering",
-        "publicationDate": "2025-05-11",
-        "tags": ["Leadership", "Management", "AI Tools", "Strategy"],
-        "fullText": "This article outlines how engineering leaders can leverage AI to become more effective in their roles. It argues that AI is a 'force multiplier' for leadership, capable of handling administrative tasks and providing data-driven insights. The author provides several concrete use cases for managers: preparing for 1-on-1 meetings by having an AI summarize a direct report's recent work and suggest talking points; drafting job descriptions and interview questions to streamline hiring; and creating performance review summaries based on peer feedback and project outcomes. The article also touches on more strategic uses, such as using an AI to analyze team communication patterns in public Slack channels to gauge morale or identify knowledge silos. The central theme is that by delegating repetitive and data-synthesis tasks to AI, engineering leaders can free up their time to focus on the uniquely human aspects of their job: mentoring, coaching, setting vision, and building culture."
-    },
-    {
-        "id": "14",
-        "title": "How to Use AI to Improve Teamwork in Engineering Teams",
-        "author": "Gregor Ojstersek and Henry Poydar",
-        "source": "Engineering Leadership",
-        "url": "https://newsletter.eng-leadership.com/p/how-to-use-ai-to-improve-teamwork",
-        "publicationDate": "2025-09-07",
-        "tags": ["Teamwork", "Collaboration", "Communication", "AI Tools"],
-        "fullText": "This article explores how AI can be used to enhance, rather than replace, teamwork in engineering organizations. The authors suggest that AI can act as a neutral facilitator and communication aid, helping to bridge gaps and improve collaboration. They propose several practical applications. First, using AI to generate structured agendas for meetings and summarize the key decisions and action items afterward, ensuring everyone is aligned. Second, using AI as a 'translator' to help engineers communicate complex technical topics to non-technical stakeholders in a clear and concise way. Third, using an AI to facilitate blameless post-mortems by creating an objective timeline of events and guiding the team through a structured root cause analysis. The underlying principle is that AI can handle the logistical and administrative aspects of collaboration, allowing team members to focus on the creative and strategic parts of working together, leading to better outcomes and stronger team cohesion."
+        "title": "2025 Guide to Prompt Engineering for Software Engineers",
+        "author": "Jordan Cutler",
+        "source": "High Growth Engineer",
+        "url": "https://highgrowthengineer.com/",
+        "publicationDate": "2025-05-18",
+        "tags": ["Prompt Engineering", "Developer Productivity", "AI Agents"],
+        "fullText": "This article presents a practical guide to prompt engineering specifically for developers using AI in their code editors ('Agent Mode'). It focuses on the 'Collaborator' approach—giving brief, conversational prompts. The guide's most powerful technique is the 'two-step method: Plan + Execute.' Instead of asking the AI to do a task directly, first ask it to create a comprehensive plan ('DO NOT WRITE ANY CODE YET. JUST WRITE A PLAN.'). Once the plan is approved, then ask the AI to execute it step-by-step. This simple change dramatically improves output quality. Other key tips include: giving the AI a specific role to embody (e.g., 'Think like a principal engineer'), asking it to ask you clarifying questions one at a time, having it generate a formal spec for complex features, and providing clear examples of the desired output. The core message is that small tweaks to how you prompt can 5-10x the quality of the AI's output, and treating prompting as a methodical process is key to maximizing productivity."
     }
 ]
