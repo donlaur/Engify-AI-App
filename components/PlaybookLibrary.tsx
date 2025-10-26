@@ -13,9 +13,9 @@ const PlaybookLibrary: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       <header className="pb-4 border-b border-slate-200 dark:border-slate-700">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Playbook Library</h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Prompt Playbook Library</h1>
         <p className="mt-1 text-slate-500 dark:text-slate-400">
-          A curated collection of strategic playbooks to integrate AI into your daily tasks.
+          A curated collection of expert prompts to integrate AI into your daily tasks.
         </p>
       </header>
       
