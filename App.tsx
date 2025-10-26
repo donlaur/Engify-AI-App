@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { PlaybookIcon, WorkbenchIcon, SettingsIcon, LearningIcon } from './components/icons/SidebarIcons';
+import { PlaybookIcon, WorkbenchIcon, SettingsIcon, LearningIcon, OnboardingIcon, PathwaysIcon } from './components/icons/SidebarIcons';
 import PlaybookLibrary from './components/PlaybookLibrary';
 import EngifyWorkbench from './components/EngifyWorkbench';
 import Settings from './components/Settings';
 import LearningHub from './components/LearningHub';
+import OnboardingJourney from './components/OnboardingJourney';
+import LearningPathways from './components/LearningPathways';
 
-type Tool = 'learning-hub' | 'playbooks' | 'workbench' | 'settings';
+type Tool = 'onboarding' | 'pathways' | 'learning-hub' | 'playbooks' | 'workbench' | 'settings';
 
 const App: React.FC = () => {
-  const [activeTool, setActiveTool] = useState<Tool>('learning-hub');
+  const [activeTool, setActiveTool] = useState<Tool>('onboarding');
   const [promptForLab, setPromptForLab] = useState<string>('');
 
   const handleSendToWorkbench = (prompt: string) => {
@@ -18,6 +20,10 @@ const App: React.FC = () => {
 
   const renderTool = () => {
     switch (activeTool) {
+      case 'onboarding':
+        return <OnboardingJourney />;
+      case 'pathways':
+        return <LearningPathways setActiveTool={setActiveTool} />;
       case 'learning-hub':
         return <LearningHub onSendToWorkbench={handleSendToWorkbench} />;
       case 'playbooks':
@@ -27,7 +33,7 @@ const App: React.FC = () => {
       case 'settings':
         return <Settings />;
       default:
-        return null;
+        return <OnboardingJourney />;
     }
   };
 
@@ -60,9 +66,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTool, setActiveTool }) => (
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">From AI Fear to AI Fluency.</p>
     </div>
     <nav className="flex-1 p-4 space-y-2">
+      <NavItem icon={<OnboardingIcon />} label="Onboarding" isActive={activeTool === 'onboarding'} onClick={() => setActiveTool('onboarding')} />
+      <NavItem icon={<PathwaysIcon />} label="Pathways" isActive={activeTool === 'pathways'} onClick={() => setActiveTool('pathways')} />
       <NavItem icon={<LearningIcon />} label="Learning Hub" isActive={activeTool === 'learning-hub'} onClick={() => setActiveTool('learning-hub')} />
       <NavItem icon={<PlaybookIcon />} label="Playbooks" isActive={activeTool === 'playbooks'} onClick={() => setActiveTool('playbooks')} />
       <NavItem icon={<WorkbenchIcon />} label="Workbench" isActive={activeTool === 'workbench'} onClick={() => setActiveTool('workbench')} />
+      <div className="flex-grow"></div>
       <NavItem icon={<SettingsIcon />} label="Settings" isActive={activeTool === 'settings'} onClick={() => setActiveTool('settings')} isDisabled={false} />
     </nav>
      <div className="p-4 border-t border-slate-200 dark:border-slate-700/50">
