@@ -3,11 +3,11 @@ import { KICKOFF_PLAN_PROMPT_TEMPLATE } from '../services/agentService';
 
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'tech-debt-strategist' | 'post-mortem-facilitator' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab';
+type ActiveTab = 'incident-strategist' | 'tech-debt-strategist' | 'post-mortem-facilitator' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [activeTab, setActiveTab] = useState<ActiveTab>('tech-debt-strategist');
+    const [activeTab, setActiveTab] = useState<ActiveTab>('incident-strategist');
 
     useEffect(() => {
         if (initialPrompt) {
@@ -26,6 +26,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Incident Strategist" isActive={activeTab === 'incident-strategist'} onClick={() => setActiveTab('incident-strategist')} />
                     <TabButton name="Technical Debt Strategist" isActive={activeTab === 'tech-debt-strategist'} onClick={() => setActiveTab('tech-debt-strategist')} />
                     <TabButton name="Post-Mortem Facilitator" isActive={activeTab === 'post-mortem-facilitator'} onClick={() => setActiveTab('post-mortem-facilitator')} />
                     <TabButton name="User Story Generator" isActive={activeTab === 'user-story-generator'} onClick={() => setActiveTab('user-story-generator')} />
@@ -37,6 +38,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'incident-strategist' && <IncidentResponseStrategist />}
                 {activeTab === 'tech-debt-strategist' && <TechnicalDebtStrategist />}
                 {activeTab === 'post-mortem-facilitator' && <PostmortemFacilitator />}
                 {activeTab === 'user-story-generator' && <UserStoryGenerator />}
@@ -62,87 +64,136 @@ const TabButton: React.FC<{name: string, isActive: boolean, onClick: () => void}
     </button>
 );
 
-const TechnicalDebtStrategist: React.FC = () => {
-    const [step, setStep] = useState(1);
-    const [codePasted, setCodePasted] = useState('Paste a block of code, a file, or describe a module here...');
-    const [debtAnalysis, setDebtAnalysis] = useState('');
-    const [businessContext, setBusinessContext] = useState('This is our core checkout service. It is business-critical and handles all revenue transactions.');
-    const [strategicPlan, setStrategicPlan] = useState('');
+const IncidentResponseStrategist: React.FC = () => {
+    const [serviceDescription, setServiceDescription] = useState('A user authentication service that handles login, sign-up, and password reset. It is a critical service for our main web application.');
+    const [result, setResult] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleAnalyze = async () => {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         setIsLoading(true);
-        const response = await fetch('/api/analyze-tech-debt', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'analyze', code: codePasted })
-        });
-        const data = await response.json();
-        setDebtAnalysis(data.result);
-        setStep(2);
-        setIsLoading(false);
+        setResult('');
+        try {
+            const response = await fetch('/api/generate-incident-plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ service_description: serviceDescription })
+            });
+            if (!response.ok) {
+                throw new Error('Failed to generate incident plan from the server.');
+            }
+            const data = await response.json();
+            setResult(data.result);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
     };
-    
-    const handleStrategize = async () => {
+
+    return (
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 h-full">
+            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+                <div>
+                    <label htmlFor="service-description" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Service Description</label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Describe the service you want to create a response plan for. Include its function and criticality.</p>
+                    <textarea 
+                        id="service-description" 
+                        rows={5} 
+                        value={serviceDescription} 
+                        onChange={e => setServiceDescription(e.target.value)} 
+                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"
+                    />
+                </div>
+                <button type="submit" disabled={isLoading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 disabled:bg-indigo-400">
+                    {isLoading ? 'Generating Plan...' : 'Generate Incident Response Plan'}
+                </button>
+            </form>
+             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col">
+                <h2 className="text-xl font-semibold mb-3">Generated Incident Response Strategy</h2>
+                <div className="flex-1 mt-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto relative border border-slate-200 dark:border-slate-700">
+                    {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}
+                    {result ? <pre className="text-sm whitespace-pre-wrap font-sans">{result}</pre> : <p className="text-sm text-slate-500">The response plan, including suggested monitors and alerts, will be generated here.</p>}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+const TechnicalDebtStrategist: React.FC = () => {
+    const [step, setStep] = useState(1);
+    const [symptoms, setSymptoms] = useState('Our CI/CD pipeline for the main monolith is taking over 45 minutes to run, which slows down developer velocity. New features in the billing module are taking twice as long as estimated because the code is tightly coupled and lacks tests. We had two minor production incidents last quarter related to this module.');
+    const [businessContext, setBusinessContext] = useState('The billing module is business-critical. It handles all revenue and subscription logic. Any downtime directly impacts revenue. Slowing down feature development in this area means we are falling behind competitors.');
+    const [promptSequence, setPromptSequence] = useState('');
+    const [stakeholderBriefing, setStakeholderBriefing] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async () => {
         setIsLoading(true);
         const response = await fetch('/api/analyze-tech-debt', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'strategize', analysis: debtAnalysis, context: businessContext })
+            body: JSON.stringify({ symptoms, business_context: businessContext })
         });
         const data = await response.json();
-        setStrategicPlan(data.result);
-        setStep(3);
+        setPromptSequence(data.prompt_sequence);
+        setStakeholderBriefing(data.stakeholder_briefing);
+        setStep(2);
         setIsLoading(false);
     };
     
     return (
         <div className="space-y-6">
             <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                <h2 className="font-semibold text-lg mb-1">Step 1: Analyze Codebase for Technical Debt</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Provide a code sample or describe a system module for the AI to analyze.</p>
+                <h2 className="font-semibold text-lg mb-1">Step 1: Describe the Symptoms & Business Context</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Instead of code, provide the observable problems (from Jira, team feedback) and explain why it matters to the business.</p>
+                
+                <label htmlFor="symptoms" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Symptoms of Technical Debt</label>
                 <textarea 
-                    value={codePasted}
-                    onChange={(e) => setCodePasted(e.target.value)}
-                    rows={10}
-                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none transition font-mono text-sm"
+                    id="symptoms"
+                    value={symptoms}
+                    onChange={(e) => setSymptoms(e.target.value)}
+                    rows={6}
+                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none transition font-sans text-sm"
                     disabled={step > 1}
                 />
-                 <button onClick={handleAnalyze} disabled={isLoading || step > 1} className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:bg-indigo-400">
-                    {isLoading ? 'Analyzing...' : 'Analyze Debt'}
+                
+                <label htmlFor="businessContext" className="mt-4 block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Business Context</label>
+                <textarea 
+                    id="businessContext"
+                    value={businessContext}
+                    onChange={(e) => setBusinessContext(e.target.value)}
+                    rows={4}
+                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none transition font-sans text-sm"
+                    disabled={step > 1}
+                />
+
+                 <button onClick={handleSubmit} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:bg-indigo-400">
+                    {isLoading ? 'Analyzing...' : 'Generate Remediation Plan'}
                 </button>
             </div>
             
-             {step >= 2 && (
+            {step >= 2 && (
                 <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <h2 className="font-semibold text-lg mb-1">Step 2: Provide Business Context</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">The AI has analyzed the code. Now, explain the business impact of this module to prioritize the findings.</p>
-                    <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg mb-4 max-h-48 overflow-y-auto">
-                        <h3 className="font-semibold mb-2">AI Analysis:</h3>
-                        <pre className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans">{debtAnalysis}</pre>
+                    <h2 className="font-semibold text-lg mb-1">Step 2: Your Generated Strategy Documents</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Use the Prompt Sequence in your company's secure AI, and the Stakeholder Briefing to get buy-in.</p>
+                    
+                    <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+                        <div>
+                            <h3 className="font-semibold mb-2">AI Prompt Sequence (for your internal AI)</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <pre className="text-sm whitespace-pre-wrap font-mono">{promptSequence}</pre>
+                            </div>
+                        </div>
+                        <div>
+                             <h3 className="font-semibold mb-2">Stakeholder Briefing Memo</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <pre className="text-sm whitespace-pre-wrap font-sans">{stakeholderBriefing}</pre>
+                            </div>
+                        </div>
                     </div>
-                    <textarea 
-                        value={businessContext}
-                        onChange={(e) => setBusinessContext(e.target.value)}
-                        rows={3}
-                        placeholder="e.g., 'This is a legacy admin panel with low traffic' or 'This is our primary user authentication service.'"
-                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                        disabled={step > 2}
-                    />
-                    <button onClick={handleStrategize} disabled={isLoading || step > 2} className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:bg-indigo-400">
-                        {isLoading ? 'Generating Plan...' : 'Generate Strategic Plan'}
-                    </button>
-                </div>
-            )}
-            
-            {step >= 3 && (
-                 <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <h2 className="font-semibold text-lg mb-1">Step 3: Review Strategic Remediation Plan</h2>
-                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">This plan frames the technical debt in terms of business risk and impact, ready for discussion with stakeholders.</p>
-                    <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
-                        <pre className="text-sm whitespace-pre-wrap font-sans">{strategicPlan}</pre>
-                    </div>
-                    <button onClick={() => { setStep(1); setDebtAnalysis(''); setStrategicPlan(''); }} className="mt-4 text-sm font-semibold text-indigo-600 hover:underline">Start Over</button>
+                    <button onClick={() => { setStep(1); setPromptSequence(''); setStakeholderBriefing(''); }} className="mt-4 text-sm font-semibold text-indigo-600 hover:underline">Start Over</button>
                 </div>
             )}
         </div>
@@ -373,11 +424,15 @@ const OkrArchitect: React.FC = () => {
     const [timeframe, setTimeframe] = useState('Q3');
     const [result, setResult] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [review, setReview] = useState('');
+    const [isReviewLoading, setIsReviewLoading] = useState(false);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setResult('');
+        setReview('');
         const response = await fetch('/api/generate-okrs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -387,6 +442,20 @@ const OkrArchitect: React.FC = () => {
         setResult(data.result);
         setIsLoading(false);
     };
+
+    const handleReview = async () => {
+        setIsReviewLoading(true);
+        setReview('');
+        const response = await fetch('/api/review-okrs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ okrs: result })
+        });
+        const data = await response.json();
+        setReview(data.result);
+        setIsReviewLoading(false);
+    };
+
 
     return (
          <div className="lg:grid lg:grid-cols-2 lg:gap-8 h-full">
@@ -413,6 +482,19 @@ const OkrArchitect: React.FC = () => {
                     {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}
                     {result ? <pre className="text-sm whitespace-pre-wrap font-sans">{result}</pre> : <p className="text-sm text-slate-500">The OKRs will appear here.</p>}
                 </div>
+                 {result && !review && (
+                    <button onClick={handleReview} disabled={isReviewLoading} className="mt-4 px-4 py-2 bg-amber-500 text-white rounded-lg font-semibold text-sm hover:bg-amber-600 disabled:bg-amber-400">
+                         {isReviewLoading ? 'Reviewing...' : 'Run Critical Review'}
+                    </button>
+                )}
+                {review && (
+                    <div className="mt-4">
+                        <h3 className="text-lg font-semibold mb-2">Critical Review:</h3>
+                         <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+                            <pre className="text-sm whitespace-pre-wrap font-sans text-amber-900 dark:text-amber-100">{review}</pre>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
