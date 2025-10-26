@@ -121,4 +121,43 @@ Analyze the ticket description below and provide the following:
       },
     ],
   },
+  {
+    id: 'governance',
+    title: 'AI Trust & Governance',
+    recipes: [
+      {
+        id: 'prompt-risk-assessment',
+        title: 'Prompt Risk Assessment',
+        description: 'Guides you through a checklist to identify potential security, privacy, and bias risks in your prompt.',
+        prompt: `Act as an AI security and ethics specialist. I am about to use the following prompt with a large language model. Please help me assess the potential risks. For each category below, ask me a clarifying question to help me think through the implications.
+
+**1. Data Privacy (PII):** Does my prompt contain any personally identifiable information (names, emails, addresses, etc.) or confidential company data?
+**2. Bias & Fairness:** Could the prompt lead to a response that is biased against any group? Is the language inclusive?
+**3. Security (Prompt Injection):** Is any part of this prompt constructed from untrusted user input, which could lead to prompt injection attacks?
+**4. Factual Reliability:** Is this prompt asking for factual information that should be independently verified? What is my plan to verify the output?
+**5. Over-reliance:** Am I using this AI for a critical decision where human oversight is essential?
+
+--- MY PROMPT ---
+[Paste the prompt you want to assess here]`
+      },
+      {
+        id: 'output-quality-checklist',
+        title: 'AI Output Quality Checklist',
+        description: 'Uses a structured checklist to evaluate the quality and reliability of an AI-generated response.',
+        prompt: `Act as a meticulous quality assurance analyst for AI systems. I have received the following output from an LLM. Please help me evaluate its quality by walking me through the 8-Point Evaluation Check. For each point, ask me a question to guide my assessment.
+
+**1. Redundancy:** Does the output contain repetitive phrases or looped sentences?
+**2. Compression:** Could the same information be conveyed more concisely without losing meaning?
+**3. Factual Drift:** How does this output compare to the original source data? Are there any subtle inaccuracies?
+**4. Ordering Logic:** If this is a ranked list, is the ordering logical and consistent, or does it seem random?
+**5. Tone Alignment:** Is the tone of this output appropriate for its intended audience (e.g., professional, casual, empathetic)?
+**6. Structural Consistency:** Is the formatting (e.g., Markdown, JSON) correct and consistent?
+**7. Cost-to-Value:** Was the quality of this answer worth the tokens/cost to generate it?
+**8. Latency vs. Utility:** Did this response arrive quickly enough to be useful in my workflow?
+
+--- AI-GENERATED OUTPUT ---
+[Paste the AI output you want to evaluate here]`
+      },
+    ],
+  },
 ];
