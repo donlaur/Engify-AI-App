@@ -3,11 +3,11 @@ import { KICKOFF_PLAN_PROMPT_TEMPLATE } from '../services/agentService';
 
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'incident-strategist' | 'tech-debt-strategist' | 'post-mortem-facilitator' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab';
+type ActiveTab = 'incident-copilot' | 'incident-strategist' | 'tech-debt-strategist' | 'post-mortem-facilitator' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [activeTab, setActiveTab] = useState<ActiveTab>('incident-strategist');
+    const [activeTab, setActiveTab] = useState<ActiveTab>('incident-copilot');
 
     useEffect(() => {
         if (initialPrompt) {
@@ -26,6 +26,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Incident Co-pilot" isActive={activeTab === 'incident-copilot'} onClick={() => setActiveTab('incident-copilot')} />
                     <TabButton name="Incident Strategist" isActive={activeTab === 'incident-strategist'} onClick={() => setActiveTab('incident-strategist')} />
                     <TabButton name="Technical Debt Strategist" isActive={activeTab === 'tech-debt-strategist'} onClick={() => setActiveTab('tech-debt-strategist')} />
                     <TabButton name="Post-Mortem Facilitator" isActive={activeTab === 'post-mortem-facilitator'} onClick={() => setActiveTab('post-mortem-facilitator')} />
@@ -38,6 +39,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'incident-copilot' && <IncidentCopilot />}
                 {activeTab === 'incident-strategist' && <IncidentResponseStrategist />}
                 {activeTab === 'tech-debt-strategist' && <TechnicalDebtStrategist />}
                 {activeTab === 'post-mortem-facilitator' && <PostmortemFacilitator />}
@@ -63,6 +65,119 @@ const TabButton: React.FC<{name: string, isActive: boolean, onClick: () => void}
         {name}
     </button>
 );
+
+interface IncidentLogEntry {
+    author: 'user' | 'ai';
+    text: string;
+    timestamp: string;
+}
+
+const IncidentCopilot: React.FC = () => {
+    const [log, setLog] = useState<IncidentLogEntry[]>([
+        { author: 'ai', text: "I'm your Incident Co-pilot. Describe the initial alert or symptom to get started.", timestamp: new Date().toLocaleTimeString() }
+    ]);
+    const [userInput, setUserInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!userInput.trim()) return;
+
+        const userEntry: IncidentLogEntry = {
+            author: 'user',
+            text: userInput,
+            timestamp: new Date().toLocaleTimeString()
+        };
+        const updatedLog = [...log, userEntry];
+        setLog(updatedLog);
+        setUserInput('');
+        setIsLoading(true);
+
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) {
+                throw new Error("API key not found. Please set it in the Settings page.");
+            }
+
+            const response = await fetch('/api/incident-copilot', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ incident_log: updatedLog })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get a response from the AI co-pilot.');
+            }
+            const data = await response.json();
+            
+            const aiEntry: IncidentLogEntry = {
+                author: 'ai',
+                text: data.result,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            setLog(prevLog => [...prevLog, aiEntry]);
+
+        } catch (err: any) {
+            console.error(err);
+            const errorEntry: IncidentLogEntry = {
+                author: 'ai',
+                text: `Error: ${err.message}`,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            setLog(prevLog => [...prevLog, errorEntry]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    return (
+        <div className="flex flex-col h-full bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                <h2 className="font-semibold text-lg">Live Incident Log</h2>
+            </div>
+            <div className="flex-1 p-4 overflow-y-auto space-y-4">
+                {log.map((entry, index) => (
+                    <div key={index} className={`flex items-start gap-3 ${entry.author === 'user' ? 'justify-end' : ''}`}>
+                        {entry.author === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300 text-sm">AI</div>}
+                        <div className={`p-3 rounded-lg max-w-xl ${entry.author === 'ai' ? 'bg-slate-100 dark:bg-slate-700/50' : 'bg-indigo-500 text-white'}`}>
+                            <p className="text-sm">{entry.text}</p>
+                            <p className="text-xs opacity-70 mt-1 text-right">{entry.timestamp}</p>
+                        </div>
+                         {entry.author === 'user' && <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 text-sm">You</div>}
+                    </div>
+                ))}
+                 {isLoading && (
+                    <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300 text-sm">AI</div>
+                        <div className="p-3 rounded-lg bg-slate-100 dark:bg-slate-700/50">
+                            <div className="flex items-center space-x-1">
+                                <span className="h-2 w-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                <span className="h-2 w-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                <span className="h-2 w-2 bg-indigo-500 rounded-full animate-bounce"></span>
+                            </div>
+                        </div>
+                    </div>
+                 )}
+            </div>
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        value={userInput}
+                        onChange={(e) => setUserInput(e.target.value)}
+                        placeholder="Log an event or ask for a suggestion..."
+                        className="w-full p-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                        disabled={isLoading}
+                    />
+                </form>
+            </div>
+        </div>
+    );
+};
+
 
 const IncidentResponseStrategist: React.FC = () => {
     const [serviceDescription, setServiceDescription] = useState('A user authentication service that handles login, sign-up, and password reset. It is a critical service for our main web application.');
