@@ -153,11 +153,30 @@ const validationRules = [
       if (filePath.includes('.test.ts') || filePath.includes('.spec.ts')) {
         return false;
       }
+      
+      // Allow if preceded by eslint-disable comment on previous line OR same line
+      const lines = content.split('\n');
+      const matchIndex = content.substring(0, match.index).split('\n').length - 1;
+      const currentLine = lines[matchIndex] || '';
+      const previousLine = lines[matchIndex - 1] || '';
+      
+      // Check previous line for eslint-disable-next-line
+      if (previousLine.includes('eslint-disable-next-line') && 
+          previousLine.includes('no-explicit-any')) {
+        return false;
+      }
+      
+      // Check same line for eslint-disable-line
+      if (currentLine.includes('eslint-disable-line') && 
+          currentLine.includes('no-explicit-any')) {
+        return false;
+      }
+      
       return true;
     },
     severity: 'HIGH',
     message: 'Using "any" type - breaks type safety',
-    suggestion: 'Use proper types or unknown with type guards',
+    suggestion: 'Use proper types or unknown with type guards, or add eslint-disable comment if intentional',
   },
   
   {

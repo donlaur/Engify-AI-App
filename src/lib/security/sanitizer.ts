@@ -107,7 +107,8 @@ export function sanitizeObject<T extends Record<string, unknown>>(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sanitized[key as keyof T] = sanitizeObject(value as Record<string, unknown>, level) as any;
     } else {
-      sanitized[key as keyof T] = value;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      sanitized[key as keyof T] = value as any;
     }
   }
 
@@ -193,6 +194,7 @@ export function sanitizeUrl(url: string): string {
 export function createSanitizationMiddleware(
   level: 'strict' | 'basic' | 'rich' = 'strict'
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (input: any) => {
     if (typeof input === 'string') {
       return sanitizeHtml(input, level);

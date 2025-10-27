@@ -56,6 +56,9 @@ const t = initTRPC.context<Context>().create({
 export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 
+// Export t for middleware creation
+export { t };
+
 /**
  * Protected procedure - requires authentication
  *
