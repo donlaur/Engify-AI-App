@@ -119,46 +119,22 @@ Please analyze my system context below and provide:
     title: 'Engineering Leaders & PMs',
     recipes: [
       {
-        id: 'project-kickoff',
-        title: 'Draft Project Kickoff Doc',
-        description: 'Generates a structured project kickoff document (RFC/design doc) from a brief description.',
-        prompt: `Act as an experienced Principal Engineer and Project Manager. I am kicking off a new project. Based on the initial details below, generate a draft for a project kickoff document. The document should include the following sections:
-1. **Background:** Why are we doing this?
-2. **Problem Statement:** What specific problem are we solving?
-3. **Goals & Non-Goals:** What is in scope and what is explicitly out of scope?
-4. **Proposed Solution:** A high-level overview of the technical approach.
-5. **Initial Risk Assessment:** What are the potential risks (technical, product, timeline)?
-6. **Key Stakeholders:** Who needs to be involved or informed?
+        id: 'build-tech-debt-case',
+        title: 'Build a Business Case for Tech Debt',
+        description: 'An interactive coach to help you translate technical debt into a compelling business case by focusing on risk, opportunity cost, and team morale.',
+        prompt: `Act as a pragmatic VP of Engineering who is an expert at securing budget and roadmap capacity from business stakeholders. I am a senior engineer or manager who needs to convince my Product Manager and Director to prioritize fixing a piece of technical debt.
 
---- INITIAL DETAILS ---
-[Provide a 2-3 sentence description of the project, its goal, and key stakeholders.]`
-      },
-      {
-        id: 'address-tech-debt',
-        title: 'Address Technical Debt',
-        description: 'Guides a user through identifying technical debt from Jira tickets, prioritizing it based on business impact and risk, and generating a persuasive business case for its remediation to stakeholders.',
-        prompt: `Act as a seasoned Principal Engineer and business strategist. Your task is to help me create a compelling business case to address a significant area of technical debt.
+I will describe the technical debt symptoms. You will help me build a business case by asking me questions that reframe the problem in terms of business impact. Your questions should focus on these four areas:
 
-I will provide you with the symptoms we are observing and the business context. You will then generate a structured proposal document that I can share with product managers and other stakeholders.
+1.  **Opportunity Cost:** 'How much faster could we ship new features in this area if this debt were resolved? What valuable product initiatives are currently blocked or slowed down by this problem?'
+2.  **Risk Mitigation:** 'What is the risk of *not* fixing this? Could it lead to a production outage, security vulnerability, or data loss? Quantify that risk if possible (e.g., potential downtime, compliance fines).'
+3.  **Quality & Customer Impact:** 'How does this debt negatively affect our users right now? Does it cause bugs, slow performance, or a poor user experience?'
+4.  **Team Morale & Productivity:** 'How does working with this system affect developer morale and productivity? Does it make onboarding new engineers harder?'
 
-The proposal must include:
-1.  **Problem Statement:** A clear summary of the symptoms and their immediate impact on the team (e.g., slower velocity, lower morale, increased bug count).
-2.  **Hypothesized Root Cause:** Based on the symptoms, infer the likely underlying technical debt (e.g., "tight coupling in the billing module," "outdated frontend framework," "lack of test coverage in the authentication service").
-3.  **Business Impact & Risk Analysis:** This is the most critical section. Translate the technical problem into tangible business risks (e.g., "Increased risk of revenue-impacting outages," "Slower time-to-market for new features," "Decreased developer morale and potential attrition"). Quantify where possible.
-4.  **Proposed Solution:** A high-level proposal for how to address the debt (e.g., "A dedicated 2-sprint refactoring project," "Allocate 20% of capacity for the next quarter to this effort").
-5.  **Expected ROI:** Articulate the return on investment, focusing on benefits like increased development velocity, improved system reliability, and reduced operational costs.
+After I answer your questions, synthesize my answers into a concise, 1-page memo titled 'Business Case for Addressing [Name of Debt Area]' that I can share with leadership. The memo should be written for a non-technical audience.
 
----
-
-**1. SYMPTOMS OBSERVED:**
-(e.g., "Tickets for new features in our Billing module consistently take 50% longer than estimated. We've had two minor production incidents related to this module in the last quarter. Developers complain that the code is hard to understand and brittle.")
-[PASTE YOUR OBSERVED SYMPTOMS HERE]
-
----
-
-**2. BUSINESS CONTEXT:**
-(e.g., "The Billing module is business-critical and handles all revenue. Our top company priority this year is to launch new international payment options, which this module will need to support.")
-[PASTE THE RELEVANT BUSINESS CONTEXT HERE]`,
+--- TECHNICAL DEBT DESCRIPTION ---
+[Describe the symptoms of the technical debt here. Focus on the observable problems, not just the code.]`
       },
       {
         id: '1-on-1-prep',
