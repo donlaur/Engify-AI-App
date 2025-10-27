@@ -113,8 +113,9 @@ export const Icons = {
   // Navigation & UI
   menu: Menu,
   close: X,
-  chevronRight: ChevronRight,
-  chevronLeft: ChevronLeft,
+  arrowRight: ChevronRight,
+  check: Check,
+  left: ChevronLeft,
   chevronDown: ChevronDown,
   chevronUp: ChevronUp,
   arrowRight: ArrowRight,

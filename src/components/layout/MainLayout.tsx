@@ -16,28 +16,15 @@ import { Toaster } from '@/components/ui/toaster';
 
 interface MainLayoutProps {
   children: ReactNode;
-  showSidebar?: boolean;
-  user?: {
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  } | null;
 }
 
-export function MainLayout({
-  children,
-  showSidebar = false,
-  user,
-}: MainLayoutProps) {
+export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="relative flex min-h-screen flex-col">
-      <Header user={user} />
-      <div className="flex flex-1">
-        {showSidebar && <Sidebar className="hidden lg:block" />}
-        <main className="flex-1">{children}</main>
-      </div>
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1">{children}</main>
       <Footer />
-      <Toaster />
+      <ChatWidget />
     </div>
   );
 }
