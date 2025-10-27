@@ -124,6 +124,7 @@ export const Icons = {
 
   // Status & Feedback
   warning: AlertTriangle,
+  alertTriangle: AlertTriangle,
   error: AlertCircle,
   success: CheckCircle,
   info: Info,

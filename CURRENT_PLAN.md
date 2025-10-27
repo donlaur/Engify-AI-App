@@ -199,7 +199,7 @@
 - [x] Seed data (15 prompts) ✅
 - [x] Comprehensive templates ✅
 - [x] Prompt detail page ✅
-- [ ] Copy prompt button (in PromptCard)
+- [x] Copy prompt button (in PromptCard) ✅
 - [ ] View count tracking
 - [ ] Seed 35+ more prompts
 
