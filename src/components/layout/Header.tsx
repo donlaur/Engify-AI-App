@@ -67,12 +67,13 @@ export function Header({ user }: HeaderProps) {
           >
             Learn
           </Link>
-          <Link
+          {/* Pricing temporarily hidden */}
+          {/* <Link
             href="/pricing"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             Pricing
-          </Link>
+          </Link> */}
           {navigationLinks.map((link) => (
             <Link
               key={link.href}
