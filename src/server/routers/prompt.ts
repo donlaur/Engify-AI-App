@@ -1,6 +1,6 @@
 /**
  * Prompt Router
- * 
+ *
  * tRPC router for prompt-related operations
  */
 
@@ -22,8 +22,9 @@ export const promptRouter = createTRPCRouter({
         cursor: z.string().optional(), // For pagination
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input: _input }) => {
       // TODO: Implement with MongoDB service
+      // Will use _input for filtering when implemented
       return {
         prompts: [],
         nextCursor: null,
@@ -35,17 +36,18 @@ export const promptRouter = createTRPCRouter({
    */
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ input: _input }) => {
       // TODO: Implement with MongoDB service
+      // Will use _input.id when implemented
       return null;
     }),
 
   /**
    * Get user's favorite prompts
    */
-  getFavorites: protectedProcedure.query(async ({ ctx }) => {
+  getFavorites: protectedProcedure.query(async ({ ctx: _ctx }) => {
     // TODO: Implement with MongoDB service
-    // ctx.session.user.id is available
+    // Will use _ctx.session.user.id when implemented
     return [];
   }),
 
@@ -54,8 +56,9 @@ export const promptRouter = createTRPCRouter({
    */
   addFavorite: protectedProcedure
     .input(z.object({ promptId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx: _ctx, input: _input }) => {
       // TODO: Implement with MongoDB service
+      // Will use _ctx.session.user.id and _input.promptId when implemented
       return { success: true };
     }),
 
@@ -64,8 +67,9 @@ export const promptRouter = createTRPCRouter({
    */
   removeFavorite: protectedProcedure
     .input(z.object({ promptId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx: _ctx, input: _input }) => {
       // TODO: Implement with MongoDB service
+      // Will use _ctx.session.user.id and _input.promptId when implemented
       return { success: true };
     }),
 
@@ -80,8 +84,9 @@ export const promptRouter = createTRPCRouter({
         comment: z.string().max(500).optional(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx: _ctx, input: _input }) => {
       // TODO: Implement with MongoDB service
+      // Will use _ctx.session.user.id and _input.promptId when implemented
       return { success: true };
     }),
 });
