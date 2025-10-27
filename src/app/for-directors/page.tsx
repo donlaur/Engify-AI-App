@@ -79,10 +79,10 @@ export default function ForDirectorsPage() {
                       ))}
                     </ul>
                   </div>
-                  {priority.relatedPrompts && (
+                  {priority.relatedPrompts && priority.relatedPrompts.length > 0 && (
                     <Button variant="outline" className="w-full" asChild>
-                      <Link href="/library">
-                        View Related Prompts
+                      <Link href={`/library/${priority.relatedPrompts[0]}`}>
+                        View Prompt
                         <Icons.arrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
