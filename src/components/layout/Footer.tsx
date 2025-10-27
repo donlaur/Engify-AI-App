@@ -21,14 +21,13 @@ const footerLinks = {
   ],
   company: [
     { href: '/built-in-public', label: 'About' },
-    { href: '/blog', label: 'Blog' },
     { href: '/built-in-public', label: 'Careers' },
     { href: 'mailto:hello@engify.ai', label: 'Contact' },
   ],
   resources: [
     { href: '/learn', label: 'Documentation' },
     { href: '/learn', label: 'Guides' },
-    { href: '/blog', label: 'Case Studies' },
+    { href: '/patterns', label: 'Patterns' },
     { href: '/built-in-public', label: 'API' },
   ],
   legal: [
@@ -135,12 +134,6 @@ export function Footer() {
             {currentYear} Engify.ai. All rights reserved.
           </p>
           <div className="flex space-x-6">
-            <Link
-              href="/blog"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Blog
-            </Link>
             <a
               href="mailto:hello@engify.ai"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
