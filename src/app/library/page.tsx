@@ -13,7 +13,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Input } from '@/components/ui/input';
 import { PromptCard } from '@/components/features/PromptCard';
 import { EmptyState } from '@/components/features/EmptyState';
-import { LoadingSpinner } from '@/components/features/LoadingSpinner';
+import { LibraryPageSkeleton } from '@/components/features/LibraryPageSkeleton';
 import { Badge } from '@/components/ui/badge';
 import type { Prompt, PromptCategory, UserRole } from '@/lib/schemas/prompt';
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
@@ -120,7 +120,7 @@ export default function LibraryPage() {
 
         {/* Results */}
         {isLoading ? (
-          <LoadingSpinner text="Loading prompts..." />
+          <LibraryPageSkeleton />
         ) : filteredPrompts.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredPrompts.map((prompt) => (
