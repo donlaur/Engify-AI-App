@@ -93,7 +93,8 @@
 ### Prerequisites
 
 - [x] Install dependencies (pnpm install) ✅
-- [ ] Fix TypeScript errors (27 errors in 10 files)
+- [x] Fix NextAuth v5 imports ✅
+- [ ] Fix remaining TypeScript errors (~15 errors in 8 files)
 - [ ] Verify TypeScript compilation passes
 - [ ] Test dev server (pnpm dev)
 
@@ -231,13 +232,10 @@
 ✅ Python AI services (embeddings, RAG, multi-provider)
 ✅ Testing framework (automated grading A-F)
 ✅ Prompt patterns (15 patterns documented with misuse prevention)
-✅ Mobile-first layout (PWA)
-✅ Type-safe APIs (tRPC)
-✅ Authentication backend (NextAuth.js v5, signup API)
 
 ### What's Next (Priority Order)
 
-1. **Install Dependencies** (pnpm install - CRITICAL)
+1. **Fix TypeScript Errors** (27 errors blocking compilation)
 2. **UI Components** (need to see something)
 3. **Authentication UI** (login/signup pages)
 4. **Prompt Library** (core feature)

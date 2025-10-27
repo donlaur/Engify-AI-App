@@ -1,15 +1,17 @@
 /**
  * NextAuth.js v5 Configuration
- * 
+ *
  * Handles authentication with email/password and OAuth providers
  */
 
-import NextAuth from 'next-auth';
+import NextAuth, { type NextAuthConfig } from 'next-auth';
 import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import { compare } from 'bcryptjs';
 import { z } from 'zod';
+import type { JWT } from 'next-auth/jwt';
+import type { Session, User } from 'next-auth';
 import clientPromise from '@/lib/db/client';
 import { userService } from '@/lib/services/UserService';
 
@@ -18,9 +20,9 @@ const loginSchema = z.object({
   password: z.string().min(8),
 });
 
-export const authOptions = {
+export const authOptions: NextAuthConfig = {
   adapter: MongoDBAdapter(clientPromise),
-  
+
   providers: [
     // Email/Password authentication
     CredentialsProvider({
@@ -33,19 +35,19 @@ export const authOptions = {
         try {
           // Validate input
           const { email, password } = loginSchema.parse(credentials);
-          
+
           // Find user
           const user = await userService.findByEmail(email);
           if (!user || !user.password) {
             return null;
           }
-          
+
           // Verify password
           const isValid = await compare(password, user.password);
           if (!isValid) {
             return null;
           }
-          
+
           // Return user object
           return {
             id: user._id.toString(),
@@ -60,27 +62,27 @@ export const authOptions = {
         }
       },
     }),
-    
+
     // Google OAuth (optional - can enable later)
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     }),
   ],
-  
+
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  
+
   pages: {
     signIn: '/login',
     signOut: '/logout',
     error: '/login',
   },
-  
+
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user: User }) {
       // Add user info to token on login
       if (user) {
         token.id = user.id;
@@ -89,21 +91,20 @@ export const authOptions = {
       }
       return token;
     },
-    
-    async session({ session, token }) {
+
+    async session({ session, token }: { session: Session; token: JWT }) {
       // Add user info to session
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
-        session.user.organizationId = token.organizationId as string | null;
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.organizationId = token.organizationId;
       }
       return session;
     },
   },
-  
+
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST };
+export const { handlers, auth, signIn, signOut } = NextAuth(authOptions);
+export const { GET, POST } = handlers;
