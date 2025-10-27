@@ -379,11 +379,11 @@
 
 ### Tier 1: Must-Have (Launch Blockers)
 
-#### 1. ROI Calculator
-- [ ] Calculator component
-- [ ] Time savings by role
-- [ ] Cost savings calculation
-- [ ] "Save X hours/week = $Y/year"
+#### 1. ROI Calculator ✅ COMPLETE
+- [x] Calculator component
+- [x] Time savings by role
+- [x] Cost savings calculation
+- [x] "Save X hours/week = $Y/year"
 
 #### 2. Interactive Demo on Homepage
 - [ ] Bad prompt → Good prompt comparison
