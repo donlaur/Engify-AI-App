@@ -150,26 +150,31 @@
 - [x] Form ✅
 - [x] Toast ✅
 - [x] Label ✅
-- [ ] Drawer (mobile)
+- [x] Sheet (mobile drawer) ✅
+- [x] Dropdown Menu ✅
+- [x] Avatar ✅
+- [x] Badge ✅
+- [x] Separator ✅
 - [ ] Dialog
 - [ ] Tabs
 - [ ] Select
 
 ### Layout Components
 
-- [ ] Header with mobile nav
-- [ ] Sidebar (desktop)
-- [ ] Bottom nav (mobile)
-- [ ] Footer
+- [x] Header with mobile nav ✅
+- [x] Sidebar (desktop) ✅
+- [x] Footer ✅
+- [ ] Main layout wrapper
+- [ ] Dashboard layout
 
 ### Feature Components
 
-- [ ] PromptCard
+- [x] PromptCard ✅
+- [x] LoadingSpinner ✅
+- [x] EmptyState ✅
 - [ ] PromptList
 - [ ] PromptSearch
 - [ ] PromptFilters
-- [ ] LoadingSpinner
-- [ ] EmptyState
 - [ ] ErrorBoundary
 
 ---
@@ -288,9 +293,9 @@
 
 ## 📊 Current Progress
 
-**Commits**: 92/150 (61%)
-**Phase**: 4/9 (UI Components - shadcn/ui Installed, Core Components Ready)
-**MVP Ready**: ~61%
+**Commits**: 93/150 (62%)
+**Phase**: 4/9 (UI Components - Layout & Feature Components Built)
+**MVP Ready**: ~62%
 
 ### What Works Now
 
