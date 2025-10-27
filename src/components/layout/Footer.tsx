@@ -20,21 +20,21 @@ const footerLinks = {
     { href: '/pricing', label: 'Pricing' },
   ],
   company: [
-    { href: '/built-in-public', label: 'About' },
-    { href: '/built-in-public', label: 'Careers' },
+    { href: '/built-in-public#about', label: 'About' },
+    { href: '/built-in-public#careers', label: 'Careers' },
     { href: 'mailto:hello@engify.ai', label: 'Contact' },
   ],
   resources: [
-    { href: '/learn', label: 'Documentation' },
-    { href: '/learn', label: 'Guides' },
+    { href: '/learn#docs', label: 'Documentation' },
+    { href: '/learn#guides', label: 'Guides' },
     { href: '/patterns', label: 'Patterns' },
-    { href: '/built-in-public', label: 'API' },
+    { href: '/built-in-public#api', label: 'API' },
   ],
   legal: [
     { href: '/privacy', label: 'Privacy' },
     { href: '/terms', label: 'Terms' },
-    { href: '/built-in-public', label: 'Security' },
-    { href: '/privacy', label: 'Cookies' },
+    { href: '/built-in-public#security', label: 'Security' },
+    { href: '/privacy#cookies', label: 'Cookies' },
   ],
 };
 
