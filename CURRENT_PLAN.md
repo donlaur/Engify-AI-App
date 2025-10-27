@@ -200,7 +200,7 @@
 - [x] Comprehensive templates ✅
 - [x] Prompt detail page ✅
 - [x] Copy prompt button (in PromptCard) ✅
-- [ ] View count tracking
+- [x] View count tracking ✅
 - [ ] Seed 35+ more prompts
 
 ### User Features

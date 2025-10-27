@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -19,10 +19,32 @@ interface PromptDetailPageProps {
 export default function PromptDetailPage({ params }: PromptDetailPageProps) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [viewCount, setViewCount] = useState(0);
 
   // Get all prompts and find the one with matching ID
   const prompts = getSeedPromptsWithTimestamps();
   const prompt = prompts.find((p) => p.id === params.id);
+
+  // Track view count
+  useEffect(() => {
+    if (prompt) {
+      // Initialize view count from prompt data
+      setViewCount(prompt.views || 0);
+
+      // Increment view count (in real app, this would be an API call)
+      const viewKey = `prompt_view_${params.id}`;
+      const hasViewed = sessionStorage.getItem(viewKey);
+
+      if (!hasViewed) {
+        // Only count once per session
+        setViewCount((prev) => prev + 1);
+        sessionStorage.setItem(viewKey, 'true');
+
+        // TODO: In production, send to API to persist
+        // await fetch(`/api/prompts/${params.id}/view`, { method: 'POST' });
+      }
+    }
+  }, [prompt, params.id]);
 
   // Handle copy to clipboard
   const handleCopy = async () => {
@@ -182,7 +204,7 @@ export default function PromptDetailPage({ params }: PromptDetailPageProps) {
                     <span className="text-sm">Views</span>
                   </div>
                   <span className="font-semibold">
-                    {prompt.views?.toLocaleString() || 0}
+                    {viewCount.toLocaleString()}
                   </span>
                 </div>
 
