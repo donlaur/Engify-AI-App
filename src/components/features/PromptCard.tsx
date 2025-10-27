@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useFavorites } from '@/hooks/use-favorites';
+import { MakeItMineButton } from './MakeItMineButton';
 
 interface PromptCardProps {
   id: string;
@@ -130,11 +131,18 @@ export function PromptCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
         <div className="flex flex-wrap gap-2">
           <Badge variant="secondary">{category}</Badge>
           {role && <Badge variant="outline">{role}</Badge>}
         </div>
+        <MakeItMineButton
+          promptId={id}
+          promptTitle={title}
+          variant="outline"
+          size="sm"
+          className="w-full"
+        />
       </CardContent>
       <CardFooter className="flex justify-between text-sm text-muted-foreground">
         <div className="flex items-center space-x-4">

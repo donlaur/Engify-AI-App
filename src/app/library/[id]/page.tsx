@@ -10,6 +10,7 @@ import { Icons } from '@/lib/icons';
 import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
 import { RatingStars } from '@/components/features/RatingStars';
+import { MakeItMineButton } from '@/components/features/MakeItMineButton';
 import { useToast } from '@/hooks/use-toast';
 
 interface PromptDetailPageProps {
@@ -47,7 +48,7 @@ export default function PromptDetailPage({ params }: PromptDetailPageProps) {
         // TODO: In production, send to API to persist
         // await fetch(`/api/prompts/${params.id}/view`, { method: 'POST' });
       }
-      
+
       // Load user rating from localStorage
       const ratingKey = `prompt_rating_${params.id}`;
       const savedRating = localStorage.getItem(ratingKey);
@@ -56,7 +57,7 @@ export default function PromptDetailPage({ params }: PromptDetailPageProps) {
       }
     }
   }, [prompt, params.id]);
-  
+
   // Handle rating
   const handleRate = (rating: number) => {
     setUserRating(rating);
@@ -199,15 +200,23 @@ export default function PromptDetailPage({ params }: PromptDetailPageProps) {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <Button className="flex-1">
-                    <Icons.zap className="mr-2 h-4 w-4" />
-                    Try in Workbench
-                  </Button>
-                  <Button variant="outline">
-                    <Icons.heart className="mr-2 h-4 w-4" />
-                    Save to Favorites
-                  </Button>
+                <div className="space-y-3">
+                  <MakeItMineButton
+                    promptId={prompt.id}
+                    promptTitle={prompt.title}
+                    size="lg"
+                    className="w-full"
+                  />
+                  <div className="flex gap-3">
+                    <Button variant="outline" className="flex-1">
+                      <Icons.zap className="mr-2 h-4 w-4" />
+                      Try in Workbench
+                    </Button>
+                    <Button variant="outline" className="flex-1">
+                      <Icons.share className="mr-2 h-4 w-4" />
+                      Share
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -238,15 +247,19 @@ export default function PromptDetailPage({ params }: PromptDetailPageProps) {
                       <span className="text-sm">Avg Rating</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold">{prompt.rating || 0}</span>
-                      <span className="text-muted-foreground text-sm">/ 5</span>
+                      <span className="font-semibold">
+                        {prompt.rating || 0}
+                      </span>
+                      <span className="text-sm text-muted-foreground">/ 5</span>
                     </div>
                   </div>
-                  
+
                   <div className="border-t pt-3">
-                    <p className="text-sm text-muted-foreground mb-2">Your Rating:</p>
-                    <RatingStars 
-                      rating={userRating} 
+                    <p className="mb-2 text-sm text-muted-foreground">
+                      Your Rating:
+                    </p>
+                    <RatingStars
+                      rating={userRating}
                       onRate={handleRate}
                       size="lg"
                     />
