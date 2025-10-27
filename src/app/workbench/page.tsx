@@ -28,12 +28,13 @@ export default function WorkbenchPage() {
   const [provider, setProvider] = useState('openai');
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
 
-  // Real AI execution
+  // Real AI execution with history tracking
   const handleExecute = async () => {
     if (!prompt.trim()) return;
 
     setIsLoading(true);
     setResponse('');
+    const startTime = Date.now();
 
     try {
       const res = await fetch('/api/ai/execute', {
@@ -47,11 +48,38 @@ export default function WorkbenchPage() {
       });
 
       const data = await res.json();
-
+      const executionTime = Date.now() - startTime;
+      
       if (!res.ok) {
         setResponse(`Error: ${data.error || 'Failed to execute prompt'}`);
       } else {
         setResponse(data.response);
+        
+        // Save to history
+        await fetch('/api/prompts/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            promptId: 'workbench',
+            promptTitle: 'Custom Workbench Prompt',
+            promptText: prompt,
+            response: data.response,
+            model: data.model,
+            tokensUsed: data.usage?.totalTokens,
+            executionTime,
+          }),
+        });
+
+        // Track analytics
+        await fetch('/api/analytics/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            promptId: 'workbench',
+            event: 'execute',
+            metadata: { model: data.model, tokensUsed: data.usage?.totalTokens },
+          }),
+        });
       }
     } catch (error) {
       setResponse('Error: Failed to connect to AI service');
