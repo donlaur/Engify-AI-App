@@ -58,25 +58,25 @@ export function Header({ user }: HeaderProps) {
         <nav className="hidden md:flex md:items-center md:space-x-6">
           <Link
             href="/library"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
             Prompt Playbooks
           </Link>
           <Link
             href="/patterns"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
             Patterns
           </Link>
           <Link
             href="/learn"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
             Pathways
           </Link>
           <Link
             href="/demo"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
             Workbench
           </Link>
