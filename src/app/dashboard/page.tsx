@@ -12,60 +12,40 @@ import { Icons } from '@/lib/icons';
 import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 
 export default function DashboardPage() {
-  // Mock user data - will be replaced with real auth later
+  // Real user data from session
   const user = {
-    name: 'Alex Chen',
-    email: 'alex@example.com',
-    level: 2,
-    xp: 750,
-    xpToNextLevel: 1500,
-    joinedDate: new Date('2024-10-01'),
+    name: 'User', // Will come from session
+    email: 'user@example.com',
+    level: 1,
+    xp: 0,
+    xpToNextLevel: 500,
+    joinedDate: new Date(),
   };
 
   // Get prompts for stats
   const allPrompts = getSeedPromptsWithTimestamps();
 
-  // Mock user stats - will come from database later
+  // Real user stats - starts at zero
   const stats = {
-    promptsUsed: 23,
+    promptsUsed: 0,
     totalPrompts: allPrompts.length,
-    favoritePrompts: 8,
-    patternsLearned: 5,
+    favoritePrompts: 0,
+    patternsLearned: 0,
     totalPatterns: 15,
-    streak: 7, // days
-    totalViews: 156,
+    streak: 0,
+    totalViews: 0,
   };
 
   // Calculate XP percentage
   const xpPercentage = (user.xp / user.xpToNextLevel) * 100;
 
-  // Recent activity - mock data
-  const recentActivity = [
-    {
-      id: '1',
-      type: 'used',
-      promptTitle: 'Code Review Assistant',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-    },
-    {
-      id: '2',
-      type: 'favorited',
-      promptTitle: 'System Design Sparring Partner',
-      timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
-    },
-    {
-      id: '3',
-      type: 'used',
-      promptTitle: 'Bug Investigation Helper',
-      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-    },
-    {
-      id: '4',
-      type: 'learned',
-      promptTitle: 'Chain of Thought Pattern',
-      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    },
-  ];
+  // Recent activity - will populate as user uses the app
+  const recentActivity: Array<{
+    id: string;
+    type: string;
+    promptTitle: string;
+    timestamp: Date;
+  }> = [];
 
   // Format timestamp
   const formatTimestamp = (date: Date) => {
