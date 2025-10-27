@@ -250,6 +250,13 @@ export default function Home() {
                 <p className="text-lg text-gray-600">
                   Built using AI-augmented development. See the code, follow the commits, learn how modern teams ship fast.
                 </p>
+                <div className="rounded-lg bg-blue-50 p-4 text-sm">
+                  <p className="font-semibold text-blue-900 mb-1">The Philosophy:</p>
+                  <p className="text-blue-800">
+                    Start with TypeScript files, not databases. UI can be rebuilt in minutes. 
+                    Ship fast, validate, then optimize. This is modern rapid prototyping.
+                  </p>
+                </div>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
                     <Icons.check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
@@ -283,6 +290,12 @@ export default function Home() {
                   <Button size="lg" variant="outline" asChild>
                     <Link href="/signup">Try Free</Link>
                   </Button>
+                </div>
+                <div className="pt-4 border-t text-sm text-gray-500">
+                  <p>
+                    Part of the <span className="font-semibold">HireLadder.ai</span> ecosystem - 
+                    AI-powered career tools for engineers (resume builder coming soon)
+                  </p>
                 </div>
               </div>
             </div>
