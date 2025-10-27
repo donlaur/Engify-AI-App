@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'post-mortem-facilitator' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
+type ActiveTab = 'legacy-code-archaeologist' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [activeTab, setActiveTab] = useState<ActiveTab>('post-mortem-facilitator');
+    const [activeTab, setActiveTab] = useState<ActiveTab>('legacy-code-archaeologist');
 
     useEffect(() => {
         if (initialPrompt) {
@@ -14,9 +14,10 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
     }, [initialPrompt]);
     
     // Stubs for components that are not fully implemented yet
-    const UserStoryGenerator: React.FC = () => <div className="p-4 text-center">User Story Generator Coming Soon</div>;
-    const OkrArchitect: React.FC = () => <div className="p-4 text-center">Goal & OKR Architect Coming Soon</div>;
-    const CoreValuesArchitect: React.FC = () => <div className="p-4 text-center">Core Values Architect Coming Soon</div>;
+    const UserStoryGenerator: React.FC = () => <FeatureStub title="User Story Generator" description="A multi-step workflow to transform a vague feature idea into a set of well-defined user stories and acceptance criteria." />;
+    const OkrArchitect: React.FC = () => <FeatureStub title="Goal & OKR Architect" description="A guided, AI-powered experience that acts as an executive coach, helping you transform vague objectives into sharp, measurable Key Results." />;
+    const CoreValuesArchitect: React.FC = () => <FeatureStub title="Core Values Architect" description="Guides a leader through the process of defining and articulating the values that will become the foundation of their team's culture."/>;
+    const IncidentResponseStrategist: React.FC = () => <FeatureStub title="Incident Response Strategist" description="Helps you prepare for incidents by generating plans, roles, and proactive monitoring strategies to prevent outages in the first place."/>;
 
     return (
         <div className="flex flex-col h-full">
@@ -29,6 +30,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Legacy Code Archaeologist" isActive={activeTab === 'legacy-code-archaeologist'} onClick={() => setActiveTab('legacy-code-archaeologist')} />
                     <TabButton name="Post-Mortem Facilitator" isActive={activeTab === 'post-mortem-facilitator'} onClick={() => setActiveTab('post-mortem-facilitator')} />
                     <TabButton name="Incident Co-Commander" isActive={activeTab === 'incident-co-commander'} onClick={() => setActiveTab('incident-co-commander')} />
                     <TabButton name="Incident Strategist" isActive={activeTab === 'incident-strategist'} onClick={() => setActiveTab('incident-strategist')} />
@@ -43,6 +45,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'legacy-code-archaeologist' && <LegacyCodeArchaeologist />}
                 {activeTab === 'post-mortem-facilitator' && <PostmortemFacilitator />}
                 {activeTab === 'incident-co-commander' && <IncidentCoCommander />}
                 {activeTab === 'incident-strategist' && <IncidentResponseStrategist />}
@@ -71,7 +74,147 @@ const TabButton: React.FC<{name: string, isActive: boolean, onClick: () => void}
     </button>
 );
 
+const FeatureStub: React.FC<{title: string, description: string}> = ({ title, description }) => (
+    <div className="p-6 text-center bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 h-full flex flex-col justify-center items-center">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h2>
+        <p className="mt-2 text-slate-500 dark:text-slate-400 max-w-2xl">{description}</p>
+        <span className="mt-4 px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 rounded-full">Coming Soon</span>
+    </div>
+);
+
+const LegacyCodeArchaeologist: React.FC = () => {
+    const [step, setStep] = useState(1);
+    const [context, setContext] = useState("Our legacy billing system is a Java monolith. Symptoms include slow build times (30+ mins), frequent bugs in the payment module, and it is very difficult to onboard new developers. It processes all B2B payments and is a single point of failure.");
+    const [findings, setFindings] = useState("");
+    const [discoveryPlan, setDiscoveryPlan] = useState("");
+    const [strategyDoc, setStrategyDoc] = useState("");
+    const [riskMemo, setRiskMemo] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleStartDiscovery = async () => {
+        setIsLoading(true);
+        setDiscoveryPlan('');
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+            
+            const response = await fetch('/api/legacy-code-archaeologist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'generate_discovery_plan', context: context })
+            });
+
+            if (!response.ok) {
+                 const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate discovery plan.');
+            }
+            const data = await response.json();
+            setDiscoveryPlan(data.discovery_plan);
+            setStep(2);
+        } catch (err: any) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGenerateArtifacts = async () => {
+        setIsLoading(true);
+        setStrategyDoc('');
+        setRiskMemo('');
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+            
+            const response = await fetch('/api/legacy-code-archaeologist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'generate_artifacts', context: context, findings: findings })
+            });
+
+            if (!response.ok) {
+                 const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate artifacts.');
+            }
+            const data = await response.json();
+            setStrategyDoc(data.modernization_strategy);
+            setRiskMemo(data.risk_assessment_memo);
+            setStep(3);
+        } catch (err: any) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                <h2 className="font-semibold text-lg mb-1">Step 1: Provide Context</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Describe the legacy system's purpose, known issues, and business context. No code needed.</p>
+                <textarea 
+                    value={context}
+                    onChange={(e) => setContext(e.target.value)}
+                    rows={6}
+                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 font-sans text-sm"
+                    disabled={step > 1}
+                />
+                 <button onClick={handleStartDiscovery} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:bg-indigo-400">
+                    {isLoading ? 'Analyzing...' : 'Generate Discovery Plan'}
+                </button>
+            </div>
+            
+            {step >= 2 && (
+                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-1">Step 2: Execute Discovery & Synthesize Findings</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Execute the prompt sequence below in your own secure AI environment. Then, paste your synthesized findings here.</p>
+                     
+                    <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-60 overflow-y-auto mb-4">
+                        <h3 className="font-semibold mb-2 text-sm">AI Prompt Sequence</h3>
+                        <pre className="text-sm whitespace-pre-wrap font-mono">{discoveryPlan}</pre>
+                    </div>
+
+                    <label htmlFor="findings" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Your Synthesized Findings</label>
+                    <textarea 
+                        id="findings"
+                        value={findings}
+                        onChange={(e) => setFindings(e.target.value)}
+                        rows={4}
+                        placeholder="e.g., The system is a large monolith with tightly coupled UI and business logic. It relies on a deprecated version of Struts with known security vulnerabilities."
+                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 font-sans text-sm"
+                        disabled={step > 2}
+                    />
+                    <button onClick={handleGenerateArtifacts} disabled={isLoading || step > 2} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:bg-indigo-400">
+                        {isLoading ? 'Generating Artifacts...' : 'Generate Strategic Artifacts'}
+                    </button>
+                </div>
+            )}
+
+            {step >= 3 && (
+                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-1">Step 3: Your Generated Strategy Documents</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <h3 className="font-semibold mb-2">Modernization Strategy Document</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <pre className="text-sm whitespace-pre-wrap font-sans">{strategyDoc}</pre>
+                            </div>
+                        </div>
+                        <div>
+                             <h3 className="font-semibold mb-2">Risk Assessment Memo for Leadership</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <pre className="text-sm whitespace-pre-wrap font-sans">{riskMemo}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const PostmortemFacilitator: React.FC = () => {
+    // ... (rest of the component remains unchanged)
     const [incidentSummary, setIncidentSummary] = useState('On Tuesday afternoon, the primary user authentication service experienced a 45-minute outage, resulting in a 100% login failure rate for all customers.');
     const [timeline, setTimeline] = useState(`14:02 UTC - Deployment of new rate-limiting logic begins.
 14:05 UTC - First PagerDuty alerts fire for elevated 5xx errors.
@@ -177,6 +320,7 @@ interface IncidentLogEntry {
 }
 
 const IncidentCoCommander: React.FC = () => {
+    // ... (rest of the component remains unchanged)
     const [log, setLog] = useState<IncidentLogEntry[]>([
         { author: 'ai', text: "I'm your Incident Co-Commander. Describe the initial alert or symptom to begin the response process.", timestamp: new Date().toLocaleTimeString() }
     ]);
@@ -283,70 +427,8 @@ const IncidentCoCommander: React.FC = () => {
     );
 };
 
-const IncidentResponseStrategist: React.FC = () => {
-    const [serviceDescription, setServiceDescription] = useState('A user authentication service that handles login, sign-up, and password reset. It is a critical service for our main web application.');
-    const [result, setResult] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setResult('');
-        try {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) throw new Error("API key not found.");
-            const response = await fetch('/api/generate-incident-plan', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({ service_description: serviceDescription })
-            });
-            if (!response.ok) {
-                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to generate incident plan from the server.');
-            }
-            const data = await response.json();
-            setResult(data.result);
-        } catch (err: any) {
-            console.error(err);
-            setResult(`Error: ${err.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
-            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-                <div>
-                    <label htmlFor="service-description" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Service Description</label>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Describe the service you want to create a response plan for. Include its function and criticality.</p>
-                    <textarea 
-                        id="service-description" 
-                        rows={5} 
-                        value={serviceDescription} 
-                        onChange={e => setServiceDescription(e.target.value)} 
-                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"
-                    />
-                </div>
-                <button type="submit" disabled={isLoading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 disabled:bg-indigo-400">
-                    {isLoading ? 'Generating Plan...' : 'Generate Incident Response Plan'}
-                </button>
-            </form>
-             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col min-h-0">
-                <h2 className="text-xl font-semibold mb-3">Generated Incident Response Strategy</h2>
-                <div className="flex-1 mt-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto relative border border-slate-200 dark:border-slate-700">
-                    {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}
-                    {result ? <pre className="text-sm whitespace-pre-wrap font-sans">{result}</pre> : <p className="text-sm text-slate-500">The response plan, including suggested monitors and alerts, will be generated here.</p>}
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const TechnicalDebtStrategist: React.FC = () => {
+    // ... (rest of the component remains unchanged)
     const [step, setStep] = useState(1);
     const [symptoms, setSymptoms] = useState('Our CI/CD pipeline for the main monolith is taking over 45 minutes to run, which slows down developer velocity. New features in the billing module are taking twice as long as estimated because the code is tightly coupled and lacks tests. We had two minor production incidents last quarter related to this module.');
     const [businessContext, setBusinessContext] = useState('The billing module is business-critical. It handles all revenue and subscription logic. Any downtime directly impacts revenue. Slowing down feature development in this area means we are falling behind competitors.');
@@ -439,6 +521,7 @@ const TechnicalDebtStrategist: React.FC = () => {
 };
 
 const KnowledgeNavigator: React.FC = () => {
+    // ... (rest of the component remains unchanged)
     const [sourceText, setSourceText] = useState('');
     const [question, setQuestion] = useState('');
     const [result, setResult] = useState('');
@@ -518,6 +601,7 @@ const KnowledgeNavigator: React.FC = () => {
 };
 
 const ProjectKickoff: React.FC = () => {
+    // ... (rest of the component remains unchanged)
     const [projectGoal, setProjectGoal] = useState('');
     const [stakeholders, setStakeholders] = useState('');
     const [result, setResult] = useState('');
@@ -599,6 +683,7 @@ const ProjectKickoff: React.FC = () => {
 };
 
 const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
+    // ... (rest of the component remains unchanged)
     const [model, setModel] = useState<Model>('gemini-2.5-flash');
     const [prompt, setPrompt] = useState(initialPrompt || '');
     const [result, setResult] = useState('');
