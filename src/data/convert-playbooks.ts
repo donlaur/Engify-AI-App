@@ -28,19 +28,24 @@ const categoryMap: Record<string, string> = {
   'devops-sre': 'general',
 };
 
-// Map playbook categories to roles
-const roleMap: Record<string, string> = {
-  'eng-junior': 'engineer',
-  'eng-mid': 'engineer',
-  'eng-senior': 'engineer',
-  'pm-associate': 'product-manager',
-  'pm-senior': 'product-manager',
-  'product-owners': 'product-manager',
-  'scrum-masters': 'product-manager',
-  'ux-designers': 'designer',
-  'qa-engineers': 'qa',
-  architects: 'engineering-manager',
-  'devops-sre': 'engineer',
+// Map playbook category IDs to roles and experience levels
+const categoryToRoleAndLevel: Record<string, { role: string; level: string }> = {
+  'eng-junior': { role: 'engineer', level: 'junior' },
+  'eng-mid': { role: 'engineer', level: 'mid-level' },
+  'eng-senior': { role: 'engineer', level: 'senior' },
+  'pm-associate': { role: 'product-manager', level: 'junior' },
+  'pm-mid': { role: 'product-manager', level: 'mid-level' },
+  'pm-senior': { role: 'product-manager', level: 'senior' },
+  'product-owners': { role: 'product-owner', level: 'mid-level' },
+  'scrum-masters': { role: 'scrum-master', level: 'mid-level' },
+  'designer-junior': { role: 'designer', level: 'junior' },
+  'designer-mid': { role: 'designer', level: 'mid-level' },
+  'designer-senior': { role: 'designer', level: 'senior' },
+  'leader-team': { role: 'engineering-manager', level: 'lead' },
+  'leader-director': { role: 'c-level', level: 'director' },
+  'qa-engineers': { role: 'qa', level: 'mid-level' },
+  'architects': { role: 'architect', level: 'senior' },
+  'devops-sre': { role: 'devops-sre', level: 'mid-level' },
 };
 
 export function convertPlaybooksToPrompts(): Omit<
@@ -51,13 +56,15 @@ export function convertPlaybooksToPrompts(): Omit<
 
   playbookCategories.forEach((category) => {
     category.recipes.forEach((recipe, index) => {
+      const roleAndLevel = categoryToRoleAndLevel[category.id];
       const prompt: Omit<Prompt, 'createdAt' | 'updatedAt'> = {
         id: recipe.id,
         title: recipe.title,
         description: recipe.description,
         content: recipe.prompt,
         category: (categoryMap[category.id] || 'general') as PromptCategory,
-        role: (roleMap[category.id] || 'engineer') as UserRole,
+        role: (roleAndLevel?.role || 'engineer') as any,
+        experienceLevel: (roleAndLevel?.level || 'mid-level') as any,
         pattern: detectPattern(recipe.prompt) as PromptPattern,
         tags: generateTags(recipe.title, recipe.description, category.title),
         views: Math.floor(Math.random() * 500) + 100, // Random views for now
