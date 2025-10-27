@@ -28,21 +28,20 @@ export default function PromptDetailPage() {
 
   // Track view count
   useEffect(() => {
-    if (prompt) {
+    if (prompt && id) {
       // Initialize view count from prompt data
       setViewCount(prompt.views || 0);
 
       // Increment view count (in real app, this would be an API call)
-      const viewKey = `prompt_view_${params.id}`;
+      const viewKey = `prompt_view_${id}`;
       const hasViewed = sessionStorage.getItem(viewKey);
-
       if (!hasViewed) {
         // Only count once per session
         setViewCount((prev) => prev + 1);
         sessionStorage.setItem(viewKey, 'true');
 
         // TODO: In production, send to API to persist
-        // await fetch(`/api/prompts/${params.id}/view`, { method: 'POST' });
+        // await fetch(`/api/prompts/${id}/view`, { method: 'POST' });
       }
 
       // Load user rating from localStorage
