@@ -63,9 +63,11 @@ export default function Home() {
             Master AI Prompt Engineering
           </Badge>
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-            Transform Your Team into{' '}
-            <span className="text-primary">AI Power Users</span>
+            <span className="text-primary">Engify</span> Your Engineering Team
           </h1>
+          <p className="text-lg text-muted-foreground italic mb-2">
+            Engineer + Amplify = Engify
+          </p>
           <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
             Master AI prompt engineering with {totalPrompts} expert-curated
             prompts, 15 battle-tested patterns, and gamified learning. Join

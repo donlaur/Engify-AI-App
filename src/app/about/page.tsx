@@ -13,14 +13,26 @@ export default function AboutPage() {
             <Icons.sparkles className="mr-2 h-3 w-3" />
             About Engify.ai
           </Badge>
-          <h1 className="mb-4 text-4xl font-bold">
+          <h1 className="text-4xl font-bold mb-4">
             Empowering Teams to Master AI
           </h1>
-          <p className="text-xl text-muted-foreground">
-            We believe every developer should have the skills to leverage AI
-            effectively. Engify.ai makes prompt engineering accessible through
-            expert-curated content and hands-on learning.
+          <p className="text-xl text-muted-foreground mb-4">
+            We believe every developer should have the skills to leverage AI effectively. 
+            Engify.ai makes prompt engineering accessible through expert-curated content 
+            and hands-on learning.
           </p>
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="pt-6">
+              <p className="text-lg font-semibold mb-2">
+                <span className="text-primary">Engify</span> = Engineer + Amplify
+              </p>
+              <p className="text-muted-foreground">
+                We help engineers amplify their capabilities with AI. When you engify your workflow, 
+                you&apos;re not just using AI—you&apos;re mastering it, multiplying your impact, and 
+                transforming how you build.
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Mission */}
