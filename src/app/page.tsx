@@ -68,10 +68,9 @@ export default function Home() {
           <p className="text-lg text-muted-foreground italic mb-2">
             Engineer + Amplify = Engify
           </p>
-          <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-            Master AI prompt engineering with {totalPrompts} expert-curated
-            prompts, 15 battle-tested patterns, and gamified learning. Join
-            thousands of developers leveling up their AI skills.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Transform engineers into AI power users. Master prompt engineering with {totalPrompts} expert-curated prompts, 
+            15 battle-tested patterns, and gamified learning. Amplify your team&apos;s capabilities—engify your workflow.
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Button size="lg" asChild>
