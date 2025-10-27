@@ -640,6 +640,102 @@
 
 ---
 
+## 🎯 Phase 10.5: Career Ladder Integration - 🔥 STRATEGIC (318/400)
+
+**Goal**: Connect Engify.ai to career development WITHOUT feature bloat
+**Strategy**: Use career context as a LENS, not a separate feature
+**Value**: Answers "Will this help my career?" and "Will my boss pay?"
+
+### Enhanced User Profile (2 commits)
+
+#### 1. Career Context Fields
+- [ ] Add `level` field (junior/mid/senior/staff/principal)
+- [ ] Add `companySize` field (startup/mid/enterprise)
+- [ ] Add `careerGoal` field (promotion/skill-building/job-search)
+- [ ] Migration script for existing users
+- [ ] Update user schema
+
+#### 2. Profile UI Enhancement
+- [ ] Career context selector in onboarding
+- [ ] Profile page career section
+- [ ] "Update career goals" feature
+
+### Skill Mapping System (3 commits)
+
+#### 3. Prompt-to-Skill Mapping
+- [ ] Create PROMPT_SKILL_MAP constant
+- [ ] Map prompts to career skills (communication, leadership, etc.)
+- [ ] Map patterns to L4→L5 requirements
+- [ ] Document skill categories
+
+#### 4. Auto Skill Tracking
+- [ ] Track skill usage on prompt execution
+- [ ] Increment skill counters
+- [ ] Calculate skill improvement percentages
+- [ ] Store in user_skills collection
+
+#### 5. Skill Progress Display
+- [ ] Show skill improvements in dashboard
+- [ ] "Communication: +15%" badges
+- [ ] Skill breakdown chart
+- [ ] "Skills developed this week" section
+
+### Manager Dashboard (4 commits)
+
+#### 6. Team Overview
+- [ ] Manager role detection
+- [ ] Team member list
+- [ ] Team activity summary
+- [ ] Aggregate stats (prompts used, time saved)
+
+#### 7. Skill Development Tracking
+- [ ] Team skill matrix
+- [ ] "3 members improving L4→L5 skills"
+- [ ] Individual progress view
+- [ ] Export team skill report
+
+#### 8. ROI for Managers
+- [ ] Team time saved calculation
+- [ ] "34 hours saved this week"
+- [ ] Cost savings report
+- [ ] Training budget justification
+
+#### 9. Manager Dashboard UI
+- [ ] /dashboard/team route
+- [ ] Team overview cards
+- [ ] Skill development charts
+- [ ] Export PDF report
+
+### Career-Aware Features (3 commits)
+
+#### 10. Smart Recommendations
+- [ ] Recommend patterns based on level
+- [ ] "L4→L5: Focus on these 3 patterns"
+- [ ] Career goal-based suggestions
+- [ ] "Others at your level use these"
+
+#### 11. Career Context in Certificates
+- [ ] Add skill area to certificates
+- [ ] "Skill area: Technical Communication (L4→L5)"
+- [ ] "Impact: Improved code review quality by 40%"
+- [ ] "Share with manager" CTA
+
+#### 12. Enhanced Progress Dashboard
+- [ ] Career impact section
+- [ ] "Demonstrating L5 communication skills"
+- [ ] "Building promotion portfolio"
+- [ ] "Estimated promotion value: +$25K"
+
+### Integration Points (1 commit)
+
+#### 13. Tie It All Together
+- [ ] Update ROI calculator with career impact
+- [ ] Add career context to email reports
+- [ ] Show career progress in notifications
+- [ ] "You're developing L5 skills" messages
+
+---
+
 ## 🚢 Phase 11: Deployment (PAUSED - Local MVP First)
 
 - [ ] ~~AWS setup (Amplify or Lambda)~~
