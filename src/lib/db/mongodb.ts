@@ -10,14 +10,18 @@ import { MongoClient, Db } from 'mongodb';
 const uri = process.env.MONGODB_URI;
 
 if (!uri) {
-  throw new Error(
-    'MONGODB_URI is required. Please add it to your .env.local file.\n' +
-      'Get a free MongoDB Atlas cluster at: https://cloud.mongodb.com'
-  );
+  throw new Error('Please add your MongoDB URI to .env.local');
 }
 
 const options = {
   maxPoolSize: 10,
+  minPoolSize: 5,
+  serverSelectionTimeoutMS: 10000,
+  socketTimeoutMS: 45000,
+  connectTimeoutMS: 10000,
+  retryWrites: true,
+  retryReads: true,
+  w: 'majority',
   minPoolSize: 2,
   maxIdleTimeMS: 30000,
 };
