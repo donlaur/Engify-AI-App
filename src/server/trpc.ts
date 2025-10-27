@@ -1,6 +1,6 @@
 /**
  * tRPC Server Configuration
- * 
+ *
  * This is the core tRPC setup that provides:
  * - Type-safe API routes
  * - Automatic type inference
@@ -10,10 +10,9 @@
 
 import { initTRPC, TRPCError } from '@trpc/server';
 import { type CreateNextContextOptions } from '@trpc/server/adapters/next';
-import { getServerSession } from 'next-auth';
+import { auth } from '@/app/api/auth/[...nextauth]/route';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 /**
  * Create context for tRPC requests
@@ -23,7 +22,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
  * - Any other per-request data
  */
 export async function createTRPCContext(opts: CreateNextContextOptions) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   return {
     session,
@@ -59,7 +58,7 @@ export const publicProcedure = t.procedure;
 
 /**
  * Protected procedure - requires authentication
- * 
+ *
  * Usage:
  * ```ts
  * export const myRouter = createTRPCRouter({
