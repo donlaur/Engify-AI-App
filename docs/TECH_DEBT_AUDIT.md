@@ -29,7 +29,12 @@
 - ✅ `src/lib/services/UserService.ts` (4 any types)
 - ✅ `src/lib/middleware/withAuth.ts` (Updated to App Router pattern)
 
-**Remaining TypeScript Errors**: ~4 (non-critical, adapter version mismatches)
+**Remaining TypeScript Warnings**: 1 (non-blocking)
+
+- NextAuth v5 beta + MongoDB adapter version mismatch
+- Peer dependency issue, does not affect runtime
+- Will be resolved when NextAuth v5 reaches stable release
+- **Status**: Acceptable for MVP development
 
 **Files Affected**:
 
