@@ -282,9 +282,9 @@ export default function Home() {
                 </div>
                 <div className="flex gap-3 pt-4">
                   <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600" asChild>
-                    <Link href="https://github.com/donlaur/Engify-AI-App" target="_blank">
-                      <Icons.github className="mr-2 h-4 w-4" />
-                      View Source
+                    <Link href="/built-in-public">
+                      <Icons.code className="mr-2 h-4 w-4" />
+                      See How It&apos;s Built
                     </Link>
                   </Button>
                   <Button size="lg" variant="outline" asChild>
