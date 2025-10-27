@@ -736,6 +736,145 @@
 
 ---
 
+## 🎯 Phase 10.6: Career Ladder Builder & Assessment - 🔥 STRATEGIC (324/400)
+
+**Goal**: Build AI-powered career ladder tools that solve REAL manager/employee pain
+**Value**: Answers "When will I be promoted?" and "What do I need to do?"
+**Revenue**: B2B tool that companies will PAY for (retention, development, transparency)
+
+### For Managers: Career Ladder Builder (5 commits)
+
+#### 1. Career Ladder Generator
+- [ ] Upload company docs (levels, expectations, competencies)
+- [ ] AI extracts career ladder structure
+- [ ] Generate L1→L6+ framework
+- [ ] Customize per role (Engineer, PM, Designer, etc.)
+- [ ] Export as PDF/Markdown
+
+#### 2. Ladder Template Library
+- [ ] Google L3→L10 template
+- [ ] Meta E3→E9 template
+- [ ] Amazon L4→L10 template
+- [ ] Netflix template
+- [ ] Startup template (L1→L5)
+- [ ] Allow custom templates
+
+#### 3. Competency Framework Builder
+- [ ] Define competencies per level
+- [ ] Technical skills matrix
+- [ ] Leadership expectations
+- [ ] Communication requirements
+- [ ] Impact scope per level
+
+#### 4. Team Ladder Management
+- [ ] Assign ladder to team members
+- [ ] Track team against ladder
+- [ ] Identify promotion candidates
+- [ ] Gap analysis per person
+
+#### 5. Ladder Analytics Dashboard
+- [ ] Team distribution (how many at each level)
+- [ ] Promotion readiness
+- [ ] Skill gaps across team
+- [ ] Retention risk indicators
+
+### For Employees: Self-Assessment & Career Path (8 commits)
+
+#### 6. Career Self-Assessment Tool
+- [ ] Upload your company's career ladder
+- [ ] AI-powered self-assessment questionnaire
+- [ ] Score yourself against level criteria
+- [ ] Get objective rating per competency
+- [ ] "You're 75% ready for L5" analysis
+
+#### 7. 9-Box Model Integration
+- [ ] Performance axis (Low → High)
+- [ ] Potential axis (Low → High)
+- [ ] AI places you in 9-box grid
+- [ ] Recommendations per box
+- [ ] "High Potential, Needs Development" → action plan
+
+#### 8. Performance Review Analyzer
+- [ ] Upload your performance review
+- [ ] AI extracts strengths/weaknesses
+- [ ] Maps to career ladder criteria
+- [ ] Identifies gaps for next level
+- [ ] Generates improvement plan
+
+#### 9. OKR & SMART Goal Generator
+- [ ] Based on self-assessment gaps
+- [ ] Generate 3-5 OKRs per quarter
+- [ ] SMART goals for each competency gap
+- [ ] "To reach L5, achieve these 8 goals"
+- [ ] Track progress on goals
+
+#### 10. Career Development Plan
+- [ ] 6-month development plan
+- [ ] Learning resources per gap
+- [ ] Projects to demonstrate skills
+- [ ] Milestones and checkpoints
+- [ ] "By Q2, complete X to show Y skill"
+
+#### 11. Promotion Readiness Tracker
+- [ ] Track progress on development plan
+- [ ] "You're 85% ready for promotion"
+- [ ] Checklist of requirements
+- [ ] Evidence collection (projects, feedback)
+- [ ] "Share with manager" export
+
+#### 12. Gap Analysis & Recommendations
+- [ ] "You vs. Next Level" comparison
+- [ ] Top 3 gaps to close
+- [ ] Recommended prompts to build skills
+- [ ] Suggested projects/experiences
+- [ ] Timeline to promotion
+
+#### 13. Career Conversation Prep
+- [ ] Generate talking points for 1:1
+- [ ] "How to ask for promotion" script
+- [ ] "Why others promoted ahead of me" analysis
+- [ ] Salary negotiation data
+- [ ] Career progression timeline
+
+### AI Workbench Integration (3 commits)
+
+#### 14. Career Ladder Prompts
+- [ ] "Build career ladder from company docs"
+- [ ] "Assess me against L5 criteria"
+- [ ] "Generate OKRs for promotion"
+- [ ] "Analyze my performance review"
+- [ ] "Create 6-month development plan"
+
+#### 15. Smart Prompt Recommendations
+- [ ] Based on career gaps
+- [ ] "You need System Design skills → Use these prompts"
+- [ ] "Improve Communication → Try these patterns"
+- [ ] Track skill development through prompts
+
+#### 16. Career Progress in Dashboard
+- [ ] Show career ladder position
+- [ ] Display promotion readiness %
+- [ ] Highlight skills developed
+- [ ] Next milestone countdown
+
+### Manager Tools (2 commits)
+
+#### 17. Team Career Planning
+- [ ] See all team members' career goals
+- [ ] Promotion pipeline visibility
+- [ ] Skill gap heatmap
+- [ ] Development plan tracking
+- [ ] "3 people ready for L5 in Q2"
+
+#### 18. Career Conversation Templates
+- [ ] 1:1 discussion guides
+- [ ] Promotion decision framework
+- [ ] Feedback templates
+- [ ] Development plan reviews
+- [ ] "How to deliver promotion news"
+
+---
+
 ## 🚢 Phase 11: Deployment (PAUSED - Local MVP First)
 
 - [ ] ~~AWS setup (Amplify or Lambda)~~
