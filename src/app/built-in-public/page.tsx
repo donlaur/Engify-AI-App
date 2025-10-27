@@ -453,8 +453,8 @@ export default function BuiltInPublicPage() {
           <div className="grid gap-6 md:grid-cols-3">
             <Card>
               <CardContent className="pt-6 text-center">
-                <div className="text-4xl font-bold text-purple-600">391</div>
-                <div className="text-sm text-gray-600">Total Commits</div>
+                <div className="text-6xl font-bold text-purple-600">461</div>
+                <div className="text-sm text-gray-600">Commits Today</div>
                 <div className="text-xs text-gray-500 mt-1">350+ today alone</div>
               </CardContent>
             </Card>
