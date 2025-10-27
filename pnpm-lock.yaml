@@ -54,8 +54,8 @@ dependencies:
     specifier: ^10.45.0
     version: 10.45.2
   bcryptjs:
-    specifier: ^2.4.3
-    version: 2.4.3
+    specifier: ^3.0.2
+    version: 3.0.2
   class-variance-authority:
     specifier: ^0.7.0
     version: 0.7.1
@@ -113,8 +113,8 @@ devDependencies:
     specifier: ^14.6.1
     version: 14.6.1(@testing-library/dom@10.4.1)
   '@types/bcryptjs':
-    specifier: ^2.4.6
-    version: 2.4.6
+    specifier: ^3.0.0
+    version: 3.0.0
   '@types/dompurify':
     specifier: ^3.2.0
     version: 3.2.0
@@ -2362,8 +2362,11 @@ packages:
       '@babel/types': 7.28.5
     dev: true
 
-  /@types/bcryptjs@2.4.6:
-    resolution: {integrity: sha512-9xlo6R2qDs5uixm0bcIqCeMCE6HiQsIyel9KQySStiyqNl2tnj2mP3DX1Nf56MD6KMenNNlBBsy3LJ7gUEQPXQ==}
+  /@types/bcryptjs@3.0.0:
+    resolution: {integrity: sha512-WRZOuCuaz8UcZZE4R5HXTco2goQSI2XxjGY3hbM/xDvwmqFWd4ivooImsMx65OKM6CtNKbnZ5YL+YwAwK7c1dg==}
+    deprecated: This is a stub types definition. bcryptjs provides its own type definitions, so you do not need this installed.
+    dependencies:
+      bcryptjs: 3.0.2
     dev: true
 
   /@types/chai@5.2.3:
@@ -3204,9 +3207,9 @@ packages:
     engines: {node: '>=10.0.0'}
     dev: true
 
-  /bcryptjs@2.4.3:
-    resolution: {integrity: sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ==}
-    dev: false
+  /bcryptjs@3.0.2:
+    resolution: {integrity: sha512-k38b3XOZKv60C4E2hVsXTolJWfkGRMbILBIe2IBITXciy5bOsTKot5kDrf3ZfufQtQOUN5mXceUEpU1rTl9Uog==}
+    hasBin: true
 
   /bidi-js@1.0.3:
     resolution: {integrity: sha512-RKshQI1R3YQ+n9YJz2QQ147P66ELpa1FQEg20Dk8oW9t2KgLbpDLLp9aGZ7y8WHSshDknG0bknqGw5/tyCs5tw==}
