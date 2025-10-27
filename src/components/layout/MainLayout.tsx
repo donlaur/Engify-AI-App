@@ -12,6 +12,7 @@ import { ReactNode } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
+import { ChatWidget } from '@/components/chat/ChatWidget';
 import { Toaster } from '@/components/ui/toaster';
 
 interface MainLayoutProps {
