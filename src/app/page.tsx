@@ -215,15 +215,13 @@ export default function Home() {
                   </CardHeader>
                 </Card>
               );
-            })}
-          </div>
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-purple-900 via-pink-900 to-blue-900 py-24">
         <div className="absolute inset-0 animate-glow bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-blue-500/10" />
-
+        
         <div className="container relative">
           <Card className="mx-auto max-w-3xl border-white/20 bg-white/10 backdrop-blur-sm">
             <CardContent className="space-y-6 py-12 text-center">
@@ -232,11 +230,11 @@ export default function Home() {
                 Ready to Transform Your Team?
               </h2>
               <p className="mx-auto max-w-2xl text-xl text-gray-200">
-                Join 1,200+ engineers mastering AI with {totalPrompts} expert
-                prompts. Start free today—no credit card required.
+                Master AI with {totalPrompts} expert prompts. 
+                Start free today—no credit card required.
               </p>
-              <Button
-                size="lg"
+              <Button 
+                size="lg" 
                 className="bg-white text-purple-900 hover:bg-gray-100"
                 asChild
               >
