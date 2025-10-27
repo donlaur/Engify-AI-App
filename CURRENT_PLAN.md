@@ -201,7 +201,7 @@
 - [x] Prompt detail page ✅
 - [x] Copy prompt button (in PromptCard) ✅
 - [x] View count tracking ✅
-- [ ] Seed 35+ more prompts
+- [x] Seed 35+ more prompts ✅ (52 role-based playbooks restored!)
 
 ### User Features
 
