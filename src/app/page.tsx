@@ -56,8 +56,8 @@ export default function Home() {
   const stats = [
     { label: 'Prompt Templates', value: totalPrompts.toString() },
     { label: 'Proven Patterns', value: '15' },
-    { label: 'Active Users', value: '1,200+' },
-    { label: 'Time Saved', value: '40%' },
+    { label: 'AI Providers', value: '3' },
+    { label: 'Free Forever', value: '$0' },
   ];
 
   return (
