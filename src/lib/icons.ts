@@ -106,7 +106,6 @@ import {
   RefreshCw,
   Database,
   type LucideIcon,
-,
   Lightbulb,
   Compass,
   Mail,
@@ -227,13 +226,7 @@ export const Icons = {
   tree: TreePine,
   refresh: RefreshCw,
   database: Database,
-} as const;
-
-// Export type for icon names
-export type IconName = keyof typeof Icons;
-
-// Export LucideIcon type for component props
-export type { LucideIcon 
+  
   // Auto-added icons
   lightbulb: Lightbulb,
   compass: Compass,
@@ -256,7 +249,13 @@ export type { LucideIcon
   hash: Hash,
   play: Play,
   wifi: Wifi,
-};
+} as const;
+
+// Export type for icon names
+export type IconName = keyof typeof Icons;
+
+// Export LucideIcon type for component props
+export type { LucideIcon };
 
 /**
  * Icon Usage Tracking
