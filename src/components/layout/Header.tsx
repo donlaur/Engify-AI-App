@@ -56,6 +56,18 @@ export function Header({ user }: HeaderProps) {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex md:items-center md:space-x-6">
           <Link
+            href="/patterns"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Patterns
+          </Link>
+          <Link
+            href="/learn"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Learn
+          </Link>
+          <Link
             href="/pricing"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
