@@ -5,7 +5,12 @@
  * so they can be displayed in the library
  */
 
-import type { Prompt } from '@/lib/schemas/prompt';
+import type {
+  Prompt,
+  PromptCategory,
+  UserRole,
+  PromptPattern,
+} from '@/lib/schemas/prompt';
 import { playbookCategories } from './playbooks';
 
 // Map playbook categories to our prompt categories
@@ -51,9 +56,9 @@ export function convertPlaybooksToPrompts(): Omit<
         title: recipe.title,
         description: recipe.description,
         content: recipe.prompt,
-        category: categoryMap[category.id] || 'general',
-        role: roleMap[category.id] || 'engineer',
-        pattern: detectPattern(recipe.prompt),
+        category: (categoryMap[category.id] || 'general') as PromptCategory,
+        role: (roleMap[category.id] || 'engineer') as UserRole,
+        pattern: detectPattern(recipe.prompt) as PromptPattern,
         tags: generateTags(recipe.title, recipe.description, category.title),
         views: Math.floor(Math.random() * 500) + 100, // Random views for now
         rating: Number((Math.random() * 1.5 + 3.5).toFixed(1)), // 3.5-5.0 rating
