@@ -137,6 +137,10 @@
 - [x] Sanitization middleware for tRPC ✅
 - [x] 32 passing security tests ✅
 - [x] Security standards documentation ✅
+- [x] Audit logging system (SOC2 compliant) ✅
+- [x] Audit log schema with 20+ event types ✅
+- [x] Audit middleware for automatic logging ✅
+- [x] 1-year retention policy ✅
 
 ### shadcn/ui Primitives
 
