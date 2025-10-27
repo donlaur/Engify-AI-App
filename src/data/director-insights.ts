@@ -1,8 +1,8 @@
 /**
  * Director of Engineering Insights
- * Real-world priorities from engineering leaders
+ * Common priorities from engineering leaders
  * 
- * Based on actual interviews with Directors of Engineering
+ * Based on patterns observed across engineering leadership conversations
  */
 
 export interface DirectorPriority {

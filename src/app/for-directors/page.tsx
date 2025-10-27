@@ -51,7 +51,7 @@ export default function ForDirectorsPage() {
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-4xl font-bold">What Directors Are Asking</h2>
             <p className="text-xl text-gray-600">
-              Real priorities from engineering leaders at aviation, fintech, and enterprise companies
+              Common priorities from engineering leaders across industries
             </p>
           </div>
 
