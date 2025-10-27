@@ -1,16 +1,15 @@
 
 
 import React, { useState, useEffect } from 'react';
-// FIX: Add imports for Gemini SDK and prompt template.
 import { GoogleGenAI } from '@google/genai';
 import { KICKOFF_PLAN_PROMPT_TEMPLATE } from '../services/agentService';
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'roadmap-alignment' | 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
+type ActiveTab = 'roadmap-defense-architect' | 'roadmap-alignment' | 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [activeTab, setActiveTab] = useState<ActiveTab>('roadmap-alignment');
+    const [activeTab, setActiveTab] = useState<ActiveTab>('roadmap-defense-architect');
 
     useEffect(() => {
         if (initialPrompt) {
@@ -37,6 +36,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Roadmap Defense Architect" isActive={activeTab === 'roadmap-defense-architect'} onClick={() => setActiveTab('roadmap-defense-architect')} />
                     <TabButton name="Roadmap Alignment" isActive={activeTab === 'roadmap-alignment'} onClick={() => setActiveTab('roadmap-alignment')} />
                     <TabButton name="Qualitative Insights" isActive={activeTab === 'qualitative-insights'} onClick={() => setActiveTab('qualitative-insights')} />
                     <TabButton name="Feature Prioritization" isActive={activeTab === 'feature-prioritization'} onClick={() => setActiveTab('feature-prioritization')} />
@@ -58,6 +58,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'roadmap-defense-architect' && <RoadmapDefenseArchitect />}
                 {activeTab === 'roadmap-alignment' && <RoadmapAlignmentConsultant />}
                 {activeTab === 'qualitative-insights' && <QualitativeInsightsSynthesizer />}
                 {activeTab === 'feature-prioritization' && <FeaturePrioritizationFacilitator />}
@@ -100,6 +101,129 @@ const FeatureStub: React.FC<{title: string, description: string}> = ({ title, de
         <span className="mt-4 px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 rounded-full">Coming Soon</span>
     </div>
 );
+
+const RoadmapDefenseArchitect: React.FC = () => {
+    const [step, setStep] = useState(1);
+    const [initiatives, setInitiatives] = useState("1. Build a new mobile app -> Increase user retention by 15%\n2. Redesign the onboarding flow -> Improve new user activation rate\n3. Integrate with Salesforce -> Increase enterprise sales");
+    const [stakeholders, setStakeholders] = useState("CEO: Overall business growth\nHead of Sales: Closing enterprise deals this quarter\nCTO: Technical stability and scalability");
+    const [riceScores, setRiceScores] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [defenseKit, setDefenseKit] = useState<any>(null);
+
+    const handleStartPrioritization = async () => {
+        setIsLoading(true);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+
+            const response = await fetch('/api/roadmap-defense-architect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'guide_prioritization', initiatives })
+            });
+            if (!response.ok) throw new Error('Failed to start prioritization.');
+            const data = await response.json();
+            setRiceScores(data.initiatives_with_questions);
+            setStep(2);
+        } catch (err) { console.error(err); } finally { setIsLoading(false); }
+    };
+
+    const handleScoreChange = (index: number, key: string, value: string) => {
+        const newScores = [...riceScores];
+        newScores[index][key] = value;
+        setRiceScores(newScores);
+    };
+
+    const handleGenerateKit = async () => {
+        setIsLoading(true);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+
+            const response = await fetch('/api/roadmap-defense-architect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'generate_kit', initiatives: riceScores, stakeholders })
+            });
+            if (!response.ok) throw new Error('Failed to generate defense kit.');
+            const data = await response.json();
+            setDefenseKit(data);
+            setStep(3);
+        } catch (err) { console.error(err); } finally { setIsLoading(false); }
+    };
+    
+    return (
+        <div className="space-y-6">
+            <div className={`p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 ${step > 1 ? 'opacity-60' : ''}`}>
+                <h2 className="font-semibold text-lg mb-1">Step 1: Define Initiatives & Stakeholders</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">List your potential roadmap initiatives and their linked company objectives. Then, map your key stakeholders.</p>
+                <label className="block text-sm font-medium mb-1">Roadmap Initiatives & Goals</label>
+                <textarea value={initiatives} onChange={e => setInitiatives(e.target.value)} rows={4} className="w-full p-2 mb-4 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 1} />
+                <label className="block text-sm font-medium mb-1">Key Stakeholders & Concerns</label>
+                <textarea value={stakeholders} onChange={e => setStakeholders(e.target.value)} rows={4} className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 1} />
+                 <button onClick={handleStartPrioritization} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                    {isLoading ? 'Thinking...' : 'Start Prioritization'}
+                </button>
+            </div>
+
+            {step >= 2 && (
+                 <div className={`p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 ${step > 2 ? 'opacity-60' : ''}`}>
+                    <h2 className="font-semibold text-lg mb-4">Step 2: AI-Guided RICE Scoring</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">The AI has generated questions to help you score each initiative. Provide your estimates.</p>
+                    <div className="space-y-4">
+                        {riceScores.map((item, index) => (
+                            <div key={index} className="p-3 bg-slate-100 dark:bg-slate-700/50 rounded-md">
+                                <p className="font-semibold">{item.initiative}</p>
+                                <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500">{item.questions.reach}</label>
+                                        <input type="text" onChange={(e) => handleScoreChange(index, 'reach', e.target.value)} className="w-full p-1 mt-1 rounded-md bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600" disabled={step > 2} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500">{item.questions.impact}</label>
+                                        <input type="text" onChange={(e) => handleScoreChange(index, 'impact', e.target.value)} className="w-full p-1 mt-1 rounded-md bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600" disabled={step > 2} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500">{item.questions.confidence}</label>
+                                        <input type="text" onChange={(e) => handleScoreChange(index, 'confidence', e.target.value)} className="w-full p-1 mt-1 rounded-md bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600" disabled={step > 2} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-slate-500">{item.questions.effort}</label>
+                                        <input type="text" onChange={(e) => handleScoreChange(index, 'effort', e.target.value)} className="w-full p-1 mt-1 rounded-md bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600" disabled={step > 2} />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                     <button onClick={handleGenerateKit} disabled={isLoading || step > 2} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                        {isLoading ? 'Generating...' : 'Generate Roadmap Defense Kit'}
+                    </button>
+                </div>
+            )}
+
+            {step >= 3 && defenseKit && (
+                 <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-4">Step 3: Your Roadmap Defense Kit</h2>
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="font-semibold mb-2">1. Prioritized Roadmap Visualization</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg"><pre className="text-sm whitespace-pre-wrap font-sans">{defenseKit.roadmap_visualization}</pre></div>
+                        </div>
+                         <div>
+                            <h3 className="font-semibold mb-2">2. Prioritization Rationale Document</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-80 overflow-y-auto"><pre className="text-sm whitespace-pre-wrap font-sans">{defenseKit.rationale_document}</pre></div>
+                        </div>
+                         <div>
+                            <h3 className="font-semibold mb-2">3. Customizable Stakeholder Presentation</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-80 overflow-y-auto"><pre className="text-sm whitespace-pre-wrap font-sans">{defenseKit.stakeholder_presentation}</pre></div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 const RoadmapAlignmentConsultant: React.FC = () => {
     const [step, setStep] = useState(1);
@@ -934,7 +1058,6 @@ const KnowledgeNavigator: React.FC = () => {
         setResult('');
 
         try {
-            // FIX: Use @google/genai SDK and a RAG-like prompt.
             const prompt = `Based on the following text, please answer the question.\n\nText:\n"""\n${sourceText}\n"""\n\nQuestion: ${question}`;
 
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
@@ -1006,7 +1129,6 @@ const ProjectKickoff: React.FC = () => {
         setResult('');
 
         try {
-            // FIX: Use @google/genai SDK and prompt template.
             const promptContent = KICKOFF_PLAN_PROMPT_TEMPLATE
                 .replace('{{projectGoal}}', projectGoal)
                 .replace('{{stakeholders}}', stakeholders);
@@ -1086,8 +1208,6 @@ const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
         setResult('');
 
         try {
-            // FIX: Use @google/genai SDK instead of fetch to a local API.
-            // API key is sourced from process.env.API_KEY as per guidelines.
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
             const response = await ai.models.generateContent({
                 model: model,
