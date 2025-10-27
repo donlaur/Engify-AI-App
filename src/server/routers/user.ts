@@ -1,6 +1,6 @@
 /**
  * User Router
- * 
+ *
  * tRPC router for user-related operations
  */
 
@@ -31,16 +31,18 @@ export const userRouter = createTRPCRouter({
         image: z.string().url().optional(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx: _ctx, input: _input }) => {
       // TODO: Implement with MongoDB service
+      // Will use _ctx.session.user.id and _input when implemented
       return { success: true };
     }),
 
   /**
    * Get user's learning progress
    */
-  getProgress: protectedProcedure.query(async ({ ctx }) => {
+  getProgress: protectedProcedure.query(async ({ ctx: _ctx }) => {
     // TODO: Implement with MongoDB service
+    // Will use _ctx.session.user.id when implemented
     return [];
   }),
 });
