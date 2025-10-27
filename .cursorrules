@@ -1,0 +1,159 @@
+# Cursor AI Rules for Engify.ai
+
+## Project Context
+- Next.js 15.5.4 (App Router, stable not canary)
+- TypeScript strict mode
+- MongoDB + NextAuth for auth
+- Tailwind CSS + shadcn/ui
+- OpenAI + Google AI integration
+
+## Code Quality Standards
+
+### TypeScript
+- ALWAYS use strict mode
+- NO `any` types - use `unknown` and type guards
+- Prefer interfaces over types for objects
+- Use Zod for runtime validation
+- Export types from schema files (single source of truth)
+
+### React/Next.js
+- Use 'use client' only when necessary (forms, hooks, interactivity)
+- Server components by default
+- Async server components for data fetching
+- No useEffect for data fetching - use server components
+- Prefer Server Actions over API routes for mutations
+
+### File Organization
+- One component per file
+- Co-locate types with components
+- Shared types in `/lib/schemas`
+- Utils in `/lib/utils`
+- NO duplicate code - DRY principle
+
+### Naming Conventions
+- Components: PascalCase (e.g., `PromptCard.tsx`)
+- Files: kebab-case for utils (e.g., `format-date.ts`)
+- Functions: camelCase (e.g., `getUserProfile`)
+- Constants: SCREAMING_SNAKE_CASE (e.g., `MAX_RETRIES`)
+- Database collections: snake_case (e.g., `prompt_history`)
+
+### Imports
+- Group imports: React → Next → External → Internal → Types
+- Use absolute imports with `@/` prefix
+- NO relative imports beyond one level
+
+### Error Handling
+- ALWAYS handle errors explicitly
+- Use try/catch for async operations
+- Return error objects, don't throw in API routes
+- Log errors with context (user ID, action, timestamp)
+
+### Security
+- NEVER commit secrets or API keys
+- Use environment variables for all config
+- Validate ALL user input with Zod
+- Sanitize data before database operations
+- Use parameterized queries (MongoDB prevents injection)
+
+### Performance
+- Use React.memo() for expensive components
+- Implement pagination for large lists
+- Lazy load heavy components
+- Optimize images with Next.js Image component
+- Use dynamic imports for code splitting
+
+### Styling
+- Tailwind utility classes only
+- Use shadcn/ui components as base
+- NO custom CSS files
+- Responsive by default (mobile-first)
+- Dark mode support via Tailwind classes
+
+### Database
+- MongoDB with Mongoose schemas
+- Use transactions for multi-document operations
+- Index frequently queried fields
+- Validate data with Zod before DB operations
+- Use aggregation pipeline for complex queries
+
+### API Routes
+- Use NextResponse for all responses
+- Return consistent error format: `{ error: string }`
+- Include status codes (200, 400, 401, 500)
+- Validate request body with Zod
+- Check authentication with `auth()` from NextAuth
+
+### Testing (when implemented)
+- Write tests for critical paths
+- Test error cases, not just happy path
+- Mock external APIs (OpenAI, Google AI)
+- Use React Testing Library for components
+- Integration tests for API routes
+
+## AI-Specific Guidelines
+
+### When Generating Code
+1. Read existing code patterns first
+2. Match the existing style exactly
+3. Use existing utilities and helpers
+4. Don't reinvent the wheel
+5. Ask if unsure about architecture decisions
+
+### When Refactoring
+1. Make small, focused changes
+2. Don't break existing functionality
+3. Update tests if they exist
+4. Keep commits atomic and descriptive
+5. Explain trade-offs in comments
+
+### When Adding Features
+1. Check if similar feature exists
+2. Reuse existing components
+3. Follow established patterns
+4. Consider mobile responsiveness
+5. Add proper TypeScript types
+
+## Commit Message Format
+```
+type(scope): description
+
+- feat: new feature
+- fix: bug fix
+- refactor: code refactoring
+- docs: documentation
+- style: formatting
+- test: adding tests
+- chore: maintenance
+```
+
+## What NOT to Do
+- ❌ NO `any` types
+- ❌ NO `console.log` in production code
+- ❌ NO inline styles
+- ❌ NO duplicate code
+- ❌ NO unhandled promises
+- ❌ NO hardcoded values (use constants)
+- ❌ NO mixing server/client components incorrectly
+- ❌ NO committing commented-out code
+- ❌ NO TODO comments without tickets
+
+## Progressive Enhancement Philosophy
+1. Start with TypeScript files (fast iteration)
+2. Move to database when patterns emerge
+3. Add tests when APIs stabilize
+4. Optimize when performance issues appear
+5. Ship fast, iterate faster
+
+## Questions to Ask Before Coding
+1. Does this already exist in the codebase?
+2. Can I reuse an existing component/utility?
+3. Is this the simplest solution?
+4. Will this scale?
+5. Is this secure?
+
+## Remember
+- Velocity AND quality, not one or the other
+- Ship fast, but ship production-ready code
+- No ego - delete and start over if needed
+- Code is read more than written
+- Future you will thank present you for good docs
