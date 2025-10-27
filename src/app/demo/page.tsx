@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
@@ -62,6 +62,15 @@ export default function DemoPage() {
   const [prompt, setPrompt] = useState('');
   const [pattern, setPattern] = useState('persona');
   const [selectedDemo, setSelectedDemo] = useState<number | null>(null);
+
+  // Check for pre-filled prompt from URL
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlPrompt = params.get('prompt');
+    if (urlPrompt) {
+      setPrompt(decodeURIComponent(urlPrompt));
+    }
+  }, []);
 
   const handleDemoSelect = (index: number) => {
     setSelectedDemo(index);

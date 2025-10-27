@@ -52,9 +52,12 @@ export default function LibraryPage() {
   ];
   const roles: Array<UserRole | 'all'> = [
     'all',
-    'engineer',
+    'c-level',
     'engineering-manager',
+    'engineer',
     'product-manager',
+    'designer',
+    'qa',
   ];
 
   return (
