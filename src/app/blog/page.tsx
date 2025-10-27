@@ -40,30 +40,55 @@ export default function BlogPage() {
             Blog
           </Badge>
           <h1 className="text-4xl font-bold mb-4">Latest Insights</h1>
-          <p className="text-xl text-muted-foreground mb-12">
-            Practical guides, patterns, and strategies for mastering AI.
-          </p>
-
-          <div className="space-y-6">
-            {posts.map((post) => (
-              <Card key={post.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline">{post.category}</Badge>
-                    <span className="text-sm text-muted-foreground">{post.date}</span>
-                    <span className="text-sm text-muted-foreground">• {post.readTime} read</span>
-                  </div>
-                  <CardTitle className="text-2xl">{post.title}</CardTitle>
-                  <CardDescription className="text-base">{post.excerpt}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">Coming soon...</p>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Posts */}
+      <section className="container py-20">
+        <div className="mx-auto max-w-4xl space-y-8">
+          {posts.map((post) => (
+            <Card key={post.id} className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-purple-200">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="mb-2 flex items-center gap-2">
+                      <Badge variant="secondary">{post.category}</Badge>
+                      <span className="text-sm text-gray-500">{post.readTime} read</span>
+                    </div>
+                    <CardTitle className="text-2xl group-hover:text-purple-600 transition-colors">
+                      {post.title}
+                    </CardTitle>
+                    <CardDescription className="mt-2 text-base">
+                      {post.excerpt}
+                    </CardDescription>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-4 text-sm text-gray-500">
+                  <span>{post.author}</span>
+                  <span>•</span>
+                  <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {post.tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                <Button variant="outline" asChild>
+                  <Link href={`/blog/${post.slug}`}>
+                    Read More
+                    <Icons.arrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
     </MainLayout>
   );
 }
