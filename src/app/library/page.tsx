@@ -134,7 +134,7 @@ export default function LibraryPage() {
           </div>
         ) : (
           <EmptyState
-            icon={Icons.inbox}
+            icon={Icons.brain}
             title="No prompts found"
             description="Try adjusting your search or filters"
             action={{

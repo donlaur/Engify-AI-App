@@ -626,7 +626,8 @@ export const directorPrompts: Prompt[] = [
   {
     id: 'dir-001',
     title: 'AI Workflow Integration Planner',
-    description: 'Create a phased plan to introduce AI tools into your engineering workflow with proper guardrails and quality gates.',
+    description:
+      'Create a phased plan to introduce AI tools into your engineering workflow with proper guardrails and quality gates.',
     content: `You are an engineering director consultant specializing in AI adoption. Help me create a practical plan to introduce AI into our engineering workflow.
 
 **Our Context:**
@@ -671,7 +672,8 @@ Make this actionable and specific to our context.`,
   {
     id: 'dir-002',
     title: 'RAG System Architecture Designer',
-    description: 'Design a production-ready RAG system with document chunking, embeddings, vector search, and tool integration.',
+    description:
+      'Design a production-ready RAG system with document chunking, embeddings, vector search, and tool integration.',
     content: `You are a senior AI architect with expertise in RAG (Retrieval-Augmented Generation) systems. Help me design a production-ready RAG system.
 
 **Our Use Case:**
@@ -728,7 +730,8 @@ Make this actionable and specific to our context.`,
   {
     id: 'dir-003',
     title: 'Team AI Coaching Framework',
-    description: 'Create a coaching plan to help your team transition from traditional development to AI-augmented workflows.',
+    description:
+      'Create a coaching plan to help your team transition from traditional development to AI-augmented workflows.',
     content: `You are an engineering leadership coach specializing in AI transformation. Help me create a coaching framework for my team's AI transition.
 
 **Team Context:**
@@ -787,7 +790,8 @@ Make this actionable and specific to our context.`,
   {
     id: 'dir-004',
     title: 'Legacy System Modernization with AI',
-    description: 'Create a strategy to modernize legacy systems (10+ years old) using AI for analysis, refactoring, and testing.',
+    description:
+      'Create a strategy to modernize legacy systems (10+ years old) using AI for analysis, refactoring, and testing.',
     content: `You are a software modernization expert. Help me create a strategy to modernize our legacy system using AI.
 
 **System Context:**
@@ -848,7 +852,8 @@ Make this actionable and specific to our context.`,
   {
     id: 'dir-005',
     title: 'Product-Engineering AI Collaboration Framework',
-    description: 'Design a framework for product and engineering to identify and prioritize AI opportunities together.',
+    description:
+      'Design a framework for product and engineering to identify and prioritize AI opportunities together.',
     content: `You are a product-engineering collaboration expert. Help me create a framework for product and engineering to work together on AI opportunities.
 
 **Our Context:**
@@ -903,5 +908,256 @@ Make this actionable and specific to our context.`,
     ratingCount: 0,
     isPublic: true,
     isFeatured: true,
+  },
+
+  // PRODUCT MANAGER PROMPTS
+  {
+    id: 'pm-001',
+    title: 'User Story Generator',
+    description: 'Generate comprehensive user stories with acceptance criteria',
+    content: `You are a product management expert. Create detailed user stories for:
+
+**Feature:** {feature_description}
+
+**Include:**
+1. User story format (As a... I want... So that...)
+2. Acceptance criteria (Given/When/Then)
+3. Edge cases and error scenarios
+4. Success metrics
+5. Dependencies and assumptions
+
+Make stories specific, testable, and valuable.`,
+    category: 'documentation',
+    role: 'product-manager',
+    pattern: 'template',
+    tags: ['user-stories', 'agile', 'requirements'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
+  },
+  {
+    id: 'pm-002',
+    title: 'Feature Prioritization Matrix',
+    description: 'Prioritize features using impact vs effort analysis',
+    content: `You are a product strategist. Help me prioritize these features:
+
+**Features to evaluate:** {list_features}
+
+**Create a prioritization matrix:**
+1. Impact score (1-10): User value, business value, strategic alignment
+2. Effort score (1-10): Engineering complexity, design work, dependencies
+3. Risk assessment: Technical risk, market risk, execution risk
+4. Recommended priority: Must-have, Should-have, Nice-to-have
+5. Sequencing rationale: Why this order?
+
+Provide clear recommendations with data-driven reasoning.`,
+    category: 'leadership',
+    role: 'product-manager',
+    pattern: 'chain-of-thought',
+    tags: ['prioritization', 'strategy', 'roadmap'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'pm-003',
+    title: 'Competitive Analysis',
+    description:
+      'Analyze competitors and identify differentiation opportunities',
+    content: `You are a market analyst. Conduct a competitive analysis for:
+
+**Our product:** {product_description}
+**Competitors:** {list_competitors}
+
+**Analyze:**
+1. Feature comparison matrix
+2. Pricing and positioning
+3. Strengths and weaknesses
+4. Market gaps and opportunities
+5. Differentiation strategy recommendations
+
+Focus on actionable insights for product strategy.`,
+    category: 'leadership',
+    role: 'product-manager',
+    pattern: 'few-shot',
+    tags: ['competitive-analysis', 'strategy', 'market-research'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
+  },
+
+  // DESIGNER PROMPTS
+  {
+    id: 'des-001',
+    title: 'UX Audit',
+    description:
+      'Conduct comprehensive UX audit with actionable recommendations',
+    content: `You are a UX expert. Audit this interface and provide recommendations:
+
+**Interface:** {describe_interface}
+
+**Evaluate:**
+1. Usability: Navigation, clarity, consistency
+2. Accessibility: WCAG compliance, screen readers, keyboard navigation
+3. Visual hierarchy: Information architecture, typography, spacing
+4. User flow: Task completion, friction points, error prevention
+5. Mobile responsiveness: Touch targets, layouts, performance
+
+Provide specific, prioritized recommendations.`,
+    category: 'documentation',
+    role: 'designer',
+    pattern: 'persona',
+    tags: ['ux', 'audit', 'accessibility'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'des-002',
+    title: 'Design System Component',
+    description: 'Create design system component with variants and guidelines',
+    content: `You are a design systems expert. Create a component specification:
+
+**Component:** {component_name}
+**Purpose:** {component_purpose}
+
+**Define:**
+1. Variants: Sizes, states, types
+2. Props/attributes: Required and optional
+3. Accessibility: ARIA labels, keyboard support
+4. Usage guidelines: When to use, when not to use
+5. Code examples: HTML/React implementation
+6. Design tokens: Colors, spacing, typography
+
+Follow atomic design principles.`,
+    category: 'code-generation',
+    role: 'designer',
+    pattern: 'template',
+    tags: ['design-system', 'components', 'ui'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
+  },
+  {
+    id: 'des-003',
+    title: 'User Research Plan',
+    description: 'Design user research study with methodology and questions',
+    content: `You are a UX researcher. Create a research plan for:
+
+**Research goal:** {research_objective}
+**Target users:** {user_segments}
+
+**Plan:**
+1. Research methodology: Interviews, surveys, usability testing
+2. Participant criteria and recruitment
+3. Discussion guide/test scenarios
+4. Key questions to answer
+5. Success metrics
+6. Timeline and resources needed
+
+Make it actionable and focused on insights.`,
+    category: 'documentation',
+    role: 'designer',
+    pattern: 'template',
+    tags: ['user-research', 'ux', 'methodology'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
+  },
+
+  // C-LEVEL / DIRECTOR PROMPTS
+  {
+    id: 'exec-001',
+    title: 'Engineering Metrics Dashboard',
+    description: 'Define key engineering metrics for executive reporting',
+    content: `You are an engineering executive. Define metrics for our engineering dashboard:
+
+**Organization:** {team_size} engineers, {product_description}
+
+**Create metrics framework:**
+1. Velocity metrics: Deployment frequency, lead time, cycle time
+2. Quality metrics: Bug rates, incident frequency, test coverage
+3. Team health: Retention, satisfaction, growth
+4. Business impact: Feature adoption, performance, cost
+5. Leading vs lagging indicators
+
+Provide specific formulas and targets for each metric.`,
+    category: 'leadership',
+    role: 'director',
+    pattern: 'template',
+    tags: ['metrics', 'kpis', 'reporting'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'exec-002',
+    title: 'Technical Strategy Presentation',
+    description: 'Create executive presentation for technical strategy',
+    content: `You are a CTO. Create a board-level presentation for:
+
+**Strategy:** {technical_initiative}
+
+**Presentation structure:**
+1. Executive summary: Problem, solution, impact (1 slide)
+2. Current state analysis: Challenges, costs, risks
+3. Proposed solution: Architecture, timeline, resources
+4. Business case: ROI, competitive advantage, risk mitigation
+5. Implementation plan: Phases, milestones, dependencies
+6. Ask: Budget, headcount, executive support
+
+Make it concise, data-driven, and business-focused.`,
+    category: 'leadership',
+    role: 'director',
+    pattern: 'template',
+    tags: ['strategy', 'presentation', 'executive'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'exec-003',
+    title: 'Team Scaling Plan',
+    description: 'Plan engineering team growth and organization',
+    content: `You are a VP of Engineering. Create a team scaling plan:
+
+**Current state:** {current_team_size} engineers
+**Growth target:** {target_team_size} in {timeframe}
+**Product needs:** {product_roadmap}
+
+**Plan:**
+1. Hiring strategy: Roles, seniority mix, timeline
+2. Team structure: Squads, platforms, reporting lines
+3. Onboarding process: Ramp-up time, training, mentorship
+4. Culture preservation: Values, practices, rituals
+5. Budget and resources: Compensation, tools, space
+6. Success metrics: Productivity, retention, quality
+
+Balance speed with quality and culture.`,
+    category: 'leadership',
+    role: 'director',
+    pattern: 'chain-of-thought',
+    tags: ['hiring', 'scaling', 'organization'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
   },
 ];
