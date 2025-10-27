@@ -11,6 +11,7 @@ import GoogleProvider from 'next-auth/providers/google';
 // import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import type { Session, User } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
 import { userService } from '@/lib/services/UserService';
 
 const loginSchema = z.object({
