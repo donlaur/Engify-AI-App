@@ -28,6 +28,10 @@
     {
         "source": "/api/analyze-tech-debt",
         "destination": "/api/analyze-tech-debt.py"
+    },
+    {
+        "source": "/api/generate-postmortem",
+        "destination": "/api/generate-postmortem.py"
     }
   ]
 }
