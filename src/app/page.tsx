@@ -156,6 +156,64 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="container py-16">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Is Engify.ai really free?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Yes! All {totalPrompts} prompts, 15 patterns, and learning pathways are 100% free forever. 
+                  We believe in making AI education accessible to everyone.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Do I need AI experience to use this?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Not at all! Our content is designed for all skill levels, from beginners to experts. 
+                  Start with our learning pathways and progress at your own pace.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Which AI providers do you support?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Our prompts work with ChatGPT, Claude, Gemini, and other major AI providers. 
+                  The patterns are universal and can be adapted to any AI model.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Can I use these prompts for my team?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Absolutely! Share prompts with your team, adapt them to your needs, and use them 
+                  in your work. That&apos;s exactly what they're designed for.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="container py-24">
         <Card className="mx-auto max-w-3xl border-primary/20 bg-primary/5">
