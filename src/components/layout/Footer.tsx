@@ -9,7 +9,7 @@
  */
 
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import { Icons } from '@/lib/icons';
 import { Separator } from '@/components/ui/separator';
 
 const footerLinks = {
@@ -49,7 +49,7 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="mb-4 flex items-center space-x-2">
-              <Sparkles className="h-6 w-6 text-primary" />
+              <Icons.sparkles className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold">Engify.ai</span>
             </Link>
             <p className="text-sm text-muted-foreground">

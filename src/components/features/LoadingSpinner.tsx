@@ -8,7 +8,7 @@
  */
 
 import { cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Icons } from '@/lib/icons';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -34,7 +34,9 @@ export function LoadingSpinner({
         className
       )}
     >
-      <Loader2 className={cn('animate-spin text-primary', sizeClasses[size])} />
+      <Icons.spinner
+        className={cn('animate-spin text-primary', sizeClasses[size])}
+      />
       {text && (
         <p className="text-sm text-muted-foreground" role="status">
           {text}

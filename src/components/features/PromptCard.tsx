@@ -1,6 +1,6 @@
 /**
  * PromptCard Component
- * 
+ *
  * Display prompt information with:
  * - Title and description
  * - Category badge
@@ -12,8 +12,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, Check, Eye, Star } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icons } from '@/lib/icons';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -31,7 +38,7 @@ interface PromptCardProps {
 }
 
 export function PromptCard({
-  id,
+  id: _id,
   title,
   description,
   content,
@@ -69,10 +76,13 @@ export function PromptCard({
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleView}>
+    <Card
+      className="cursor-pointer transition-shadow hover:shadow-lg"
+      onClick={handleView}
+    >
       <CardHeader>
         <div className="flex items-start justify-between">
-          <div className="space-y-1 flex-1">
+          <div className="flex-1 space-y-1">
             <CardTitle className="text-lg">{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
           </div>
@@ -86,9 +96,9 @@ export function PromptCard({
             className="shrink-0"
           >
             {copied ? (
-              <Check className="h-4 w-4 text-green-600" />
+              <Icons.check className="h-4 w-4 text-green-600" />
             ) : (
-              <Copy className="h-4 w-4" />
+              <Icons.copy className="h-4 w-4" />
             )}
           </Button>
         </div>
@@ -102,12 +112,12 @@ export function PromptCard({
       <CardFooter className="flex justify-between text-sm text-muted-foreground">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-1">
-            <Eye className="h-4 w-4" />
+            <Icons.view className="h-4 w-4" />
             <span>{views.toLocaleString()}</span>
           </div>
           {rating > 0 && (
             <div className="flex items-center space-x-1">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <Icons.star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
               <span>{rating.toFixed(1)}</span>
             </div>
           )}

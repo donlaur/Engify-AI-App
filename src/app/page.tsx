@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Sparkles, Target, Trophy, Zap } from 'lucide-react';
+import { Icons } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -12,24 +12,24 @@ import { MainLayout } from '@/components/layout/MainLayout';
 
 const features = [
   {
-    icon: Sparkles,
+    icon: Icons.sparkles,
     title: 'AI-Powered Learning',
     description:
       'Master prompt engineering with intelligent guidance and real-time feedback.',
   },
   {
-    icon: Target,
+    icon: Icons.target,
     title: '15 Proven Patterns',
     description:
       'Learn battle-tested patterns used by top AI practitioners worldwide.',
   },
   {
-    icon: Trophy,
+    icon: Icons.trophy,
     title: 'Gamified Progress',
     description: 'Unlock achievements, level up, and compete with your team.',
   },
   {
-    icon: Zap,
+    icon: Icons.zap,
     title: 'Instant Results',
     description:
       'See your prompts in action with multi-provider AI integration.',
@@ -43,7 +43,7 @@ export default function Home() {
       <section className="container py-24 md:py-32">
         <div className="mx-auto max-w-3xl space-y-8 text-center">
           <div className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm">
-            <Sparkles className="mr-2 h-4 w-4" />
+            <Icons.sparkles className="mr-2 h-4 w-4" />
             Master AI Prompt Engineering
           </div>
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
@@ -58,7 +58,7 @@ export default function Home() {
             <Button size="lg" asChild>
               <Link href="/api/auth/signin">
                 Get Started Free
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <Icons.arrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
@@ -112,7 +112,7 @@ export default function Home() {
             <Button size="lg" variant="secondary" asChild>
               <Link href="/api/auth/signin">
                 Start Learning Now
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <Icons.arrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </CardContent>
