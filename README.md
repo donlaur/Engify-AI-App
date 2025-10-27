@@ -14,6 +14,19 @@ An AI-powered platform that helps engineering teams transition from AI fear to A
 
 ---
 
+## 🚦 Quality & Security
+
+**Every commit is automatically checked:**
+- ✅ Linting (ESLint)
+- ✅ Type checking (TypeScript strict)
+- ✅ Build verification
+- ✅ Security audit (npm audit)
+- ✅ Dependency review (Dependabot)
+
+[View Quality Gates →](.github/QUALITY_GATES.md)
+
+---
+
 ## 🚀 Features
 
 ### Core Features
