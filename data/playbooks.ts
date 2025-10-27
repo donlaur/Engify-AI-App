@@ -1,5 +1,3 @@
-
-
 export interface PlaybookRecipe {
   id: string;
   title: string;
@@ -14,506 +12,326 @@ export interface PlaybookCategory {
 }
 
 export const playbookCategories: PlaybookCategory[] = [
+  // == Junior Engineers ==
   {
-    id: 'planning',
-    title: 'Developer: Planning & Design',
+    id: 'eng-junior',
+    title: 'Engineer: Junior',
     recipes: [
       {
-        id: 'ticket-breakdown',
-        title: 'Jira Ticket Breakdown',
-        description: 'Breaks down a feature request or bug report into actionable steps, questions, and potential edge cases.',
-        prompt: `Act as a senior software engineer. I'm about to start work on the following ticket. Your task is to help me plan my approach.
-
-Analyze the ticket description below and provide the following:
-1.  **Clarifying Questions:** A list of questions I should ask the Product Manager or designer to resolve ambiguities.
-2.  **Implementation Steps:** A high-level, step-by-step plan to implement the feature.
-3.  **Potential Edge Cases:** A list of edge cases I need to consider and test for.
-4.  **Key Files to Investigate:** Suggest files or modules in a typical web application codebase that I might need to modify.
-
---- TICKET DESCRIPTION ---
-[Paste your Jira ticket description here]`,
+        "id": "eng-jun-code-navigator",
+        "title": "Codebase Navigator",
+        "description": "Helps you quickly understand the purpose, structure, and key interactions of an unfamiliar code file or module. A safe space to ask basic questions.",
+        "prompt": "Act as an expert Staff Engineer who is a patient mentor. I am a new developer on the team, and I'm trying to understand a part of our codebase. I'm going to paste a code file/module below.\n\nYour task is to be my guide. Analyze the code and provide the following in simple, clear terms:\n1. **Primary Responsibility:** In one sentence, what is the main purpose of this code?\n2. **Key Components:** List the most important functions/classes and briefly explain what each one does.\n3. **Inputs & Outputs:** What are the main data inputs this code expects, and what are the primary outputs or side effects it produces?\n4. **Potential 'Gotchas':** Based on your experience, are there any non-obvious behaviors, potential performance issues, or tricky parts I should be aware of?\n5. **Follow-up Questions:** Now, ask me 2-3 simple questions to check my understanding and prompt my curiosity.\n\nRemember, assume I have zero context. Explain it to me like I'm a smart intern.\n\n--- CODE ---\n[Paste your code snippet here]"
       },
       {
-        id: 'solution-brainstorm',
-        title: 'Brainstorm Technical Solutions',
-        description: 'Generates multiple technical approaches for a given problem, listing the pros and cons of each.',
-        prompt: `Act as a staff engineer. I need to solve the following problem. Please brainstorm 3 different technical solutions. For each solution, provide a brief description, a list of pros, and a list of cons.
-
---- PROBLEM STATEMENT ---
-[Describe the technical problem you need to solve, e.g., "We need to implement a real-time notification system for our users."]"`,
+        "id": "eng-jun-debug-assistant",
+        "title": "Debugging Assistant",
+        "description": "Guides you through a structured, systematic process to diagnose and fix a bug, preventing you from getting stuck in trial-and-error loops.",
+        "prompt": "Act as a methodical Senior QA Engineer specializing in root cause analysis. I'm a developer who is stuck on a bug, and I need your help to think through it systematically.\n\nFirst, I will describe the bug. Then, you will guide me through a step-by-step debugging process. Do not solve it for me directly. Instead, ask me a series of questions to help me solve it myself.\n\nHere is the process you will follow:\n1. **Symptom Clarification:** After I describe the bug, your first response will be to ask clarifying questions to ensure you (and I) understand the *exact* unexpected behavior vs. the expected behavior.\n2. **Hypothesis Generation:** Ask me to list 3-5 potential hypotheses for the cause of the bug, from most likely to least likely.\n3. **Testing the Hypothesis:** For my #1 hypothesis, ask me: 'What is the simplest experiment or check you could run to prove or disprove this hypothesis?'\n4. **Iterative Loop:** I will tell you the result of the experiment. Based on that, you will either help me refine my next experiment or guide me to test my #2 hypothesis. We will continue this loop until we find the root cause.\n5. **Learning:** Once we've found the bug, ask me: 'What can we learn from this? How could a similar bug be prevented in the future (e.g., with better testing, code comments, or a different implementation)?'\n\nLet's begin.\n\n--- BUG DESCRIPTION ---\n[Paste your bug description here]"
       },
       {
-        id: 'crafted-prompt-design',
-        title: 'Design a C.R.A.F.T.E.D. Prompt',
-        description: 'Guides you through the C.R.A.F.T.E.D. framework to create a high-quality, comprehensive prompt for any task.',
-        prompt: `Act as a prompt engineering expert. I need to create a detailed prompt for a specific task. Guide me through the C.R.A.F.T.E.D. framework by asking me questions for each section. After I provide my answers, synthesize them into a final, well-structured prompt.
-
-**C.R.A.F.T.E.D. Framework:**
-*   **C (Context):** What is the background information the AI needs?
-*   **R (Role):** What persona should the AI adopt?
-*   **A (Action):** What is the specific task the AI should perform?
-*   **F (Format):** How should the output be structured (e.g., JSON, Markdown, list)?
-*   **T (Tone):** What style of communication should the AI use (e.g., professional, empathetic, critical)?
-*   **E (Examples):** What are some examples of the desired output?
-*   **D (Definition of Done):** What criteria must the response meet to be considered complete?
-
-Start by asking me for the **Context**.`,
-      },
-      {
-        id: 'compare-languages-libs',
-        title: 'Compare Languages or Libraries',
-        description: 'Compares programming languages or libraries for a specific use case, providing pros, cons, and a recommendation.',
-        prompt: `I'm evaluating a few libraries or languages to choose the best fit for a new project.
-
-**My Use Case:** [Describe your project goal, e.g., "Building a high-throughput data processing pipeline that ingests real-time events from a Kafka stream and writes to BigQuery."]
-
-**Technologies to Compare:** [List the technologies, e.g., "Go, Rust, and Python with the Faust library."]
-
-Please help me by providing the following:
-1.  **Pros and Cons:** For each technology, compare its pros and cons specifically for my use case. Consider trade-offs in performance, ecosystem maturity, developer learning curve, and maintainability.
-2.  **Additional Libraries:** Identify any other key libraries or frameworks commonly used for this type of work with each option.
-3.  **Top Recommendation:** Based on your analysis, recommend a top choice for me and briefly explain why it's the best fit.`
-      },
-      {
-        id: 'system-design-best-practices',
-        title: 'System Design Best Practices',
-        description: 'Looks up best practices and anti-patterns for a new system based on its context.',
-        prompt: `Act as a principal engineer specializing in system architecture. I'm designing a new system and want to ensure it's built using best practices in security, performance, scalability, availability, and maintainability.
-
-Please analyze my system context below and provide:
-1.  **Relevant Design Principles:** A list of 3-5 key architectural principles I should follow (e.g., "Stateless services," "Asynchronous communication," "Defense in depth").
-2.  **Common Pitfalls & Anti-Patterns:** Highlight common mistakes or anti-patterns to avoid for this type of system.
-3.  **Key Questions to Consider:** A list of probing questions I should be asking myself about the design.
-
---- SYSTEM CONTEXT ---
-[Describe your system, e.g., "A backend service that handles user authentication and profile management for a global SaaS platform, expected to serve millions of users."]`
-      },
-      {
-        id: 'dev-system-design-sparring-partner',
-        title: 'System Design Sparring Partner (Principal Persona)',
-        description: 'Acts as a Principal Engineer to pressure-test your system design, asking tough questions and identifying potential weaknesses.',
-        prompt: `Act as a Principal Engineer who is my sparring partner for a new system design. My goal is to identify weaknesses in my design early.
-
-I will provide a high-level overview of the system I'm trying to build. You will then challenge my design by playing the role of a skeptical but constructive critic. Ask me tough, probing questions based on these non-functional requirements:
-
--   **Scalability:** "How will this handle 10x the traffic? What breaks first?"
--   **Availability & Resiliency:** "What happens if this key component fails? What's the single point of failure?"
--   **Security:** "What's the most likely attack vector? How are we handling authentication and data encryption?"
--   **Cost:** "What's the most expensive part of this architecture? How can we optimize for cost?"
--   **Maintainability & Operability:** "How will we monitor this? How easy will it be to debug a problem in production?"
-
-After our dialogue, provide a summary of the key weaknesses we identified.
-
---- SYSTEM DESIGN PROPOSAL ---
-[Provide a high-level overview of your proposed system architecture]`
+        "id": "eng-jun-concept-translator",
+        "title": "Technical Concept Translator",
+        "description": "Translates technical jargon and complex engineering concepts into clear, concise language for non-technical audiences like PMs, designers, or marketing.",
+        "prompt": "Act as an expert Communications Coach for engineers. Your specialty is helping technical people explain complex ideas in simple, compelling ways.\n\nI need to explain a technical topic to a specific audience, and I want you to help me craft the perfect explanation.\n\nFirst, I will provide the technical topic and the target audience. Then, you will provide three different versions of the explanation, each with a different focus:\n1. **The Analogy:** Explain the concept using a simple, real-world analogy that the audience will immediately understand.\n2. **The 'Why It Matters':** Explain the concept by focusing on the direct benefit or impact it has on the audience or the end-user. Avoid technical details and focus on the outcome.\n3. **The Q&A:** Provide a list of 3 likely questions the audience might ask, along with simple, direct answers for each.\n\nLet's start.\n\n**Technical Topic:**\n[Your Topic Here]\n\n**Target Audience:**\n[Your Audience Here]"
       }
-    ],
+    ]
   },
+  // == Mid-Level Engineers ==
   {
-    id: 'coding',
-    title: 'Developer: Coding & Refactoring',
+    id: 'eng-mid',
+    title: 'Engineer: Mid-Level',
     recipes: [
       {
-        id: 'test-generator',
-        title: 'Generate Unit Tests',
-        description: 'Creates a suite of unit tests for a given function or code snippet, covering happy paths and edge cases.',
-        prompt: `Act as a software engineer with a focus on Test-Driven Development (TDD). Write a suite of unit tests for the following code snippet using the [Jest/Pytest/Go testing/etc.] framework. Cover happy paths, edge cases, and error conditions.
-
---- CODE SNIPPET ---
-[Paste your function or code snippet here]`,
+        "id": "eng-mid-pr-reviewer",
+        "title": "Pull Request Review Co-Pilot",
+        "description": "Helps you provide thorough, constructive, and empathetic feedback on a teammate's pull request, improving both code quality and team dynamics.",
+        "prompt": "Act as a Staff Engineer known for giving excellent, insightful, and kind code reviews. I'm about to review a pull request (PR) from a teammate, and I want your help to make my feedback as effective as possible.\n\nI will provide the PR description and a code diff. You will analyze them and help me structure my review by suggesting feedback in three categories:\n1. **Praise (Start with the Positive):** Identify at least one thing the author did well (e.g., clean code, good test coverage, a clever solution) and suggest a positive, specific comment.\n2. **Questions (Seek to Understand):** Identify areas that are unclear or where the author's intent isn't obvious. Formulate these as open-ended questions, not accusations (e.g., 'Can you walk me through the reasoning for this approach?' instead of 'Why did you do it this way?').\n3. **Suggestions (Offer Improvements):** Identify potential bugs, edge cases, or opportunities for simplification/refactoring. Frame these as collaborative suggestions, often using the 'I' or 'We' pronoun (e.g., 'I wonder if we could simplify this logic by...' or 'What do you think about adding a test case for when the input is null?').\n\nYour goal is to help me improve the code while strengthening my relationship with my teammate.\n\n--- PR DESCRIPTION ---\n[Paste PR Description]\n\n--- CODE DIFF ---\n[Paste the code diff here]"
       },
       {
-        id: 'code-explainer',
-        title: 'Explain Complex Code',
-        description: 'Explains a piece of complex or legacy code in plain English, line by line.',
-        prompt: `Act as a senior software engineer mentoring a junior developer. Explain the following code snippet to me. Go through it line by line and explain what it does, why it might be written this way, and any potential pitfalls or improvements.
-
---- CODE SNIPPET ---
-[Paste the complex code snippet here]`,
+        "id": "eng-mid-feature-planner",
+        "title": "Feature Pre-Mortem & Plan",
+        "description": "Guides you in thinking like a senior engineer to proactively identify risks, dependencies, and questions for a new feature *before* you start coding.",
+        "prompt": "Act as a pragmatic Principal Engineer. I've just been assigned a new feature. Before I dive into the code, I want you to help me run a 'pre-mortem' to anticipate problems and plan my work.\n\nI will provide the feature description or user story. You will then ask me a series of probing questions to build a robust plan. Your questions should cover these areas:\n1. **Goal & Scope Clarification:** 'What is the single most important user problem this feature solves? What is explicitly *out of scope* for this first version?'\n2. **Technical Risks & Unknowns:** 'What is the riskiest part of this implementation? What part of the codebase are you least familiar with? Are there any new technologies or APIs involved?'\n3. **Dependencies:** 'Which other teams, services, or people do you depend on to complete this work? Have you spoken to them yet?'\n4. **Data & Analytics:** 'How will we know if this feature is successful? What key metrics should we be tracking from day one?'\n5. **Testing Strategy:** 'Beyond unit tests, what is the most important end-to-end scenario we need to test to ensure this works for the user?'\n6. **Rollout Plan:** 'Should this be released behind a feature flag? What's our rollback plan if something goes wrong in production?'\n\nAfter I answer your questions, summarize my answers into a concise 'Feature Plan' document that I can share with my PM and team lead.\n\n--- FEATURE DESCRIPTION ---\n[Paste the user story or feature description here]"
       },
       {
-        id: 'dev-ai-code-reviewer',
-        title: 'AI Code Reviewer (Senior Persona)',
-        description: 'Acts as a senior engineer providing a thorough, constructive, and empathetic code review on your code changes.',
-        prompt: `Act as a senior software engineer known for giving clear, constructive, and kind code reviews. I'm about to submit a pull request and want your feedback first. Analyze the following code diff and provide a review.
-
-Your review should be structured in three parts:
-1.  **Praise:** Identify at least one positive aspect of the change (e.g., good test coverage, clean logic, clear naming).
-2.  **Suggestions:** Identify areas for improvement. Frame these as collaborative suggestions, not commands (e.g., "I wonder if we could simplify this by...", "Have you considered the edge case where...?").
-3.  **Questions:** Ask 1-2 open-ended questions to understand the author's reasoning (e.g., "What was the motivation for this approach?").
-
---- CODE DIFF ---
-[Paste your 'git diff' output here]`
+        "id": "eng-mid-mentorship-prep",
+        "title": "Junior Dev Mentorship Prep",
+        "description": "Helps you prepare for a 1:1 mentorship session with a junior engineer, ensuring the conversation is productive, supportive, and focused on their growth.",
+        "prompt": "Act as an experienced Engineering Manager who excels at career coaching. I am a mid-level engineer, and I'm about to have a mentorship 1:1 with a junior developer on my team. I want to make this session as helpful as possible for them.\n\nHelp me prepare an agenda. I will provide some context about the junior developer. Based on that, you will suggest:\n1. **An Icebreaker Question:** A question to start the meeting on a positive and open note.\n2. **Three Key Talking Points:** Propose three specific topics for discussion. These should be a mix of tactical (e.g., a recent project) and strategic (e.g., career goals). For each talking point, suggest an open-ended question to kick it off.\n3. **A 'Teaching Moment' Idea:** Based on their recent work, suggest one technical concept or team process that I could offer to explain or pair-program on with them.\n4. **A Goal-Setting Prompt:** A question to help them define a small, actionable goal to work on before our next session.\n5. **A Closing Remark:** A way to end the meeting that reinforces my support and their value to the team.\n\n--- MENTEE CONTEXT ---\n**Name:** [e.g., Alex]\n**Recent Work:** [e.g., 'Just finished their first major bug fix ticket.', 'Is struggling with the new frontend framework.']\n**Observed Strengths/Weaknesses:** [e.g., 'Great attitude and eager to learn, but seems hesitant to ask for help.']\n**My Goal for this Session:** [e.g., 'I want to build their confidence and help them feel more comfortable in the codebase.']"
       }
-    ],
+    ]
   },
+  // == Senior Engineers ==
   {
-    id: 'designers',
-    title: 'Designers',
+    id: 'eng-senior',
+    title: 'Engineer: Senior',
+    recipes: [
+      {
+        "id": "eng-sen-arch-decision-doc",
+        "title": "Architecture Decision Record (ADR) Drafter",
+        "description": "Guides you through structuring and writing a clear, concise Architecture Decision Record (ADR) to document significant technical decisions for posterity.",
+        "prompt": "Act as a Principal Engineer who champions clear, asynchronous communication. I need to write an Architecture Decision Record (ADR) for a recent technical decision my team made. Your task is to help me draft it.\n\nI will describe the decision in my own words. You will then format my description into a standard ADR template. You must ask me clarifying questions if any section is unclear.\n\nThe ADR template you will use is:\n1. **Title:** A short, descriptive title for the decision.\n2. **Status:** (Proposed, Accepted, Deprecated, Superseded)\n3. **Context:** What is the problem or issue that this decision addresses? What is the background?\n4. **Decision:** What is the change that we are proposing or have decided on?\n5. **Consequences:** What are the results of this decision? What are the positive outcomes? What are the trade-offs or risks? What new problems might this decision introduce?\n6. **Options Considered:** What other options were considered, and why were they rejected?\n\nLet's begin.\n\n--- MY DESCRIPTION OF THE DECISION ---\n[Your description here]"
+      },
+      {
+        "id": "eng-sen-tech-debt-case",
+        "title": "Tech Debt Business Case Builder",
+        "description": "Helps you articulate the business impact of technical debt and build a compelling case for prioritizing its resolution with product and leadership.",
+        "prompt": "Act as a pragmatic VP of Engineering who is an expert at securing budget and roadmap capacity from business stakeholders. I am a senior engineer who needs to convince my Product Manager and Director to prioritize fixing a piece of technical debt.\n\nI will describe the technical debt. You will help me build a business case by asking me questions that reframe the problem in terms of business impact. Your questions should focus on these four areas:\n1. **Opportunity Cost:** 'How much faster could we ship new features in this area if this debt were resolved? What valuable product initiatives are currently blocked or slowed down by this problem?'\n2. **Risk Mitigation:** 'What is the risk of *not* fixing this? Could it lead to a production outage, security vulnerability, or data loss? Quantify that risk if possible (e.g., potential downtime, compliance fines).'\n3. **Quality & Customer Impact:** 'How does this debt negatively affect our users right now? Does it cause bugs, slow performance, or a poor user experience?'\n4. **Team Morale & Productivity:** 'How does working with this system affect developer morale and productivity? Does it make onboarding new engineers harder?'\n\nAfter I answer your questions, synthesize my answers into a concise, 1-page memo titled 'Business Case for Addressing' that I can share with leadership. The memo should be written for a non-technical audience.\n\n--- TECHNICAL DEBT DESCRIPTION ---\n[Your description here]"
+      },
+      {
+        "id": "eng-sen-system-design-sparring",
+        "title": "System Design Sparring Partner",
+        "description": "Acts as an intelligent sounding board to help you brainstorm, pressure-test, and refine a complex system design before committing to an architecture.",
+        "prompt": "Act as a Distinguished Engineer. I am designing a new system, and I want you to be my sparring partner. My goal is to identify weaknesses in my design early.\n\nFirst, I will provide a high-level overview of the system I'm trying to build and my proposed architecture.\n\nThen, you will challenge my design by playing the role of a skeptical but constructive critic. You will ask me tough questions based on the following non-functional requirements. For each category, ask me one or two probing questions:\n- **Scalability:** 'How will this design handle 10x the current traffic? What is the first component that will break under load?'\n- **Availability & Resiliency:** 'What happens if this key component (e.g., the database, a specific microservice) fails? How does the system recover? What is the single point of failure?'\n- **Security:** 'What is the most likely attack vector for this system? How are we handling authentication, authorization, and data encryption?'\n- **Cost:** 'What is the most expensive part of this architecture? How can we optimize for cost without sacrificing performance?'\n- **Maintainability & Operability:** 'How easy will it be to debug a problem in production with this design? How will we monitor the health of this system?'\n\nAfter our dialogue, provide a summary of the key weaknesses we identified and suggest areas for further investigation.\n\n--- SYSTEM DESIGN PROPOSAL ---\n[Your proposal here]"
+      }
+    ]
+  },
+  // == Associate Product Managers ==
+  {
+    id: 'pm-associate',
+    title: 'Product Manager: Associate',
+    recipes: [
+      {
+        "id": "pm-assoc-user-story-crafter",
+        "title": "User Story & Acceptance Criteria Crafter",
+        "description": "Helps you write clear, concise, and unambiguous user stories and then generates comprehensive acceptance criteria to ensure shared understanding with engineering.",
+        "prompt": "Act as a Principal Product Manager who is an expert in Agile methodologies. I need to write a user story for our development team. Your task is to help me refine my initial idea into a high-quality, actionable ticket.\n\nFirst, I will describe the feature or user need in plain language.\n\nThen, you will help me structure it by providing:\n1. **A Refined User Story:** Format my description into the standard 'As a [user type], I want to [action], so that [benefit]' template. You may need to ask me a clarifying question to get this right.\n2. **Acceptance Criteria (AC):** Generate a comprehensive list of AC using the 'Given-When-Then' format. This list should cover the happy path, edge cases, and potential error states.\n3. **Clarifying Questions for Engineering:** Propose 2-3 questions that I should proactively ask the engineering team to uncover technical constraints or ambiguities before they start work.\n\nLet's begin.\n\n--- FEATURE DESCRIPTION ---\n[Your feature description here]"
+      },
+      {
+        "id": "pm-assoc-feedback-synthesizer",
+        "title": "User Feedback Synthesizer",
+        "description": "Analyzes a collection of raw user feedback (from surveys, support tickets, etc.) and distills it into key themes, actionable insights, and illustrative quotes.",
+        "prompt": "Act as an experienced User Researcher. I have a batch of raw user feedback, and I need your help to make sense of it. My goal is to identify the most important patterns and insights.\n\nI will paste a collection of user comments, support tickets, or survey responses below.\n\nYour task is to analyze this text and provide a structured summary with the following sections:\n1. **Top 3-5 Themes:** Identify the most frequently mentioned topics or sentiments in the feedback. For each theme, provide a clear title (e.g., 'Performance Issues on Mobile', 'Confusion about Pricing Page', 'Request for Feature X').\n2. **Actionable Insights per Theme:** For each theme, write a one-sentence insight that the product team can act on. (e.g., 'Users are dropping off because the mobile checkout flow is too slow.')\n3. **Supporting Quotes:** For each theme, pull out 1-2 direct quotes from the feedback that best exemplify the user's sentiment. This helps bring the data to life.\n4. **Sentiment Analysis:** Provide a brief, overall summary of the sentiment (e.g., 'Overall sentiment is mixed, with strong positive feedback on the new dashboard but significant frustration around login issues.').\n\n--- RAW USER FEEDBACK ---\n[Paste your collection of user feedback here]"
+      },
+      {
+        "id": "pm-assoc-stakeholder-update",
+        "title": "Stakeholder Update Composer",
+        "description": "Helps you draft clear, concise, and audience-appropriate status updates for different stakeholders (e.g., leadership, sales, marketing).",
+        "prompt": "Act as a Director of Product Operations, skilled in cross-functional communication. I need to send a status update about a project, but I need to tailor it for a specific audience.\n\nI will provide the key points of the update and tell you who the audience is. You will then draft the update in a format and tone that is most effective for that audience.\n\nYour draft should:\n- Be concise and respectful of their time.\n- Start with the most important information first (the 'so what?').\n- Use language they will understand (avoiding internal jargon).\n- Clearly state what, if anything, you need from them.\n\nLet's get started.\n\n**Key Update Points:**\n[Your key points]\n\n**Target Audience:**\n[Your audience]"
+      }
+    ]
+  },
+  // == Mid-Level Product Managers ==
+  {
+    id: 'pm-mid',
+    title: 'Product Manager: Mid-Level',
+    recipes: [
+      {
+        "id": "pm-mid-prioritization-framework",
+        "title": "Prioritization Framework Advisor",
+        "description": "Helps you apply a structured prioritization framework (like RICE or MoSCoW) to a list of features, creating a data-informed and defensible roadmap.",
+        "prompt": "Act as a seasoned Group Product Manager who excels at roadmap strategy. I have a list of potential features and initiatives, and I need help prioritizing them in a structured, objective way.\n\nFirst, choose a prioritization framework you want to use. Then, I will provide my list of initiatives.\n\nYour task is to guide me through applying the framework. You will ask me for the necessary inputs for each initiative and then generate a scored and ranked list.\n\n**Available Frameworks:**\n1. **RICE (Reach, Impact, Confidence, Effort):** Good for data-driven teams.\n2. **MoSCoW (Must-have, Should-have, Could-have, Won't-have):** Good for release planning with fixed deadlines.\n3. **Kano Model (Basic, Performance, Excitement):** Good for understanding customer satisfaction.\n\nLet's begin.\n\n**Framework I want to use:**\n[Framework name]\n\n**List of Initiatives:**\n[Your list of initiatives]"
+      },
+      {
+        "id": "pm-mid-dependency-mapper",
+        "title": "Cross-Team Dependency Mapper",
+        "description": "Guides you through a systematic process to identify, map, and plan for cross-team dependencies on a major project, preventing downstream delays.",
+        "prompt": "Act as an expert Technical Program Manager (TPM). I am kicking off a large, cross-functional project, and my biggest fear is being derailed by unforeseen dependencies. Help me proactively identify and map them out.\n\nI will describe the project. You will then ask me a series of probing questions designed to uncover dependencies across different domains.\n\nYour questions should cover:\n1. **Upstream Dependencies (Inputs):** 'What teams or systems need to provide you with something (e.g., an API, data, design assets, legal approval) before your team can start or complete its work?'\n2. **Downstream Dependencies (Outputs):** 'What other teams are waiting for your team to deliver something? How will they consume your work (e.g., via an SDK, a new UI component, a documentation update)?'\n3. **Shared Resource Dependencies:** 'Are there any shared resources or platforms (e.g., a central QA environment, a shared microservice, a single subject matter expert) that could become a bottleneck?'\n4. **Timeline & Sequencing:** 'What is the critical path? If Team A is delayed, how does that impact Team B and Team C? Have you agreed on SLAs or delivery dates with these other teams?'\n\nAfter I answer your questions, synthesize the information into a 'Dependency Map' table with columns for: 'Dependency Type', 'Providing Team', 'Consuming Team', 'What is Being Delivered', and 'Potential Risk'.\n\n--- PROJECT DESCRIPTION ---\n[Your project description here]"
+      },
+      {
+        "id": "pm-mid-meeting-facilitator",
+        "title": "Pre-Meeting Agenda & Goal Setter",
+        "description": "Helps you structure an effective meeting by defining a clear purpose, setting a concrete agenda, and identifying the right attendees to ensure a productive outcome.",
+        "prompt": "Act as a Chief of Staff, obsessed with operational efficiency and effective meetings. I need to schedule a meeting, and I want to ensure it's not a waste of time. Help me prepare.\n\nI will tell you the topic of the meeting. You will then help me create a pre-meeting document by asking me three critical questions:\n1. **Purpose:** 'In one sentence, what is the primary purpose of this meeting? Is it to decide, to inform, or to brainstorm?'\n2. **Desired Outcome:** 'What specific, tangible outcome must be achieved by the end of this meeting for it to be considered a success? (e.g., 'A decision on which payment provider to use', 'A prioritized list of Q4 goals').'\n3. **Attendees:** 'Who are the essential people needed to achieve this outcome? For each person, what is their role in the meeting (e.g., decider, subject matter expert, stakeholder)?'\n\nOnce I've answered, you will generate a concise meeting invitation/agenda that includes:\n- **Meeting Title**\n- **Purpose & Desired Outcome**\n- **Agenda Items** (with estimated timings)\n- **Attendees** (with their roles)\n- **Pre-Reading/Preparation Required**\n\n--- MEETING TOPIC ---\n[Your meeting topic here]"
+      }
+    ]
+  },
+    // == Senior Product Managers ==
+  {
+    id: 'pm-senior',
+    title: 'Product Manager: Senior/Lead',
     recipes: [
         {
-            id: 'design-user-personas',
-            title: 'Generate User Personas',
-            description: 'Creates rich, detailed user personas based on a product brief and target audience.',
-            prompt: `Act as a senior UX researcher. I need to create a set of user personas for a new product. Based on the product brief below, generate 2-3 distinct user personas.
-
-For each persona, include:
-- A name and a photo suggestion.
-- A short bio.
-- Key goals and motivations.
-- Primary pain points and frustrations.
-- A quote that summarizes their perspective.
-
---- PRODUCT BRIEF ---
-[Provide a description of the product and its target audience. e.g., "A mobile app for busy parents to coordinate family schedules and tasks."]`
+            "id": "pm-sen-market-analysis",
+            "title": "Competitive & Market Analysis",
+            "description": "Provides a structured framework for conducting a thorough analysis of a competitor or a market segment, helping you identify strategic opportunities and threats.",
+            "prompt": "Act as a top-tier Market Intelligence Analyst. I need to conduct a comprehensive analysis of a key competitor to inform our product strategy. Your task is to guide me through this process.\n\nI will name the competitor. You will then provide me with a structured template to fill out, asking me questions to populate each section. The template should include:\n1. **Product Offering:** 'What are their core products and features? What is their primary value proposition?'\n2. **Target Audience:** 'Who is their ideal customer profile? How does it overlap with or differ from ours?'\n3. **Go-to-Market Strategy:** 'How do they acquire customers? What are their pricing and packaging models? What are their key marketing channels?'\n4. **Strengths:** 'What are the 2-3 things they do exceptionally well? Where is their product or strategy superior to ours?'\n5. **Weaknesses:** 'Where are their biggest product gaps, strategic weaknesses, or most common customer complaints? Where are they vulnerable?'\n6. **Strategic Implications:** 'Based on this analysis, what is the single biggest threat they pose to us? What is the single biggest opportunity their position in the market creates for us?'\n\nAfter I answer your questions, synthesize the information into a concise 'Competitor Brief' document.\n\n--- COMPETITOR TO ANALYZE ---\n[Enter the name of the competitor company or product here]"
         },
         {
-            id: 'design-ux-microcopy',
-            title: 'Brainstorm UI/UX Microcopy',
-            description: 'Generates clear, concise, and on-brand microcopy for UI elements like buttons, tooltips, and empty states.',
-            prompt: `Act as a UX writer. I need some microcopy for a specific UI component. My product's brand voice is [e.g., friendly, professional, witty].
-
-Please brainstorm 3-5 options for the following UI element:
-
-**UI Element:** [e.g., "An empty state for a user's 'Favorites' list."]
-**Context:** [e.g., "This is what the user sees when they haven't favorited any items yet."]
-**Goal:** [e.g., "To encourage the user to start favoriting items."]`
+            "id": "pm-sen-vision-memo",
+            "title": "Product Vision Memo Drafter",
+            "description": "Helps you articulate a compelling, long-term product vision by guiding you through the creation of a 'Working Backwards' Press Release or a strategic memo.",
+            "prompt": "Act as a seasoned product executive, trained in the Amazon 'Working Backwards' methodology. I need to write a compelling internal document to align the company around a new product vision. Help me draft a future press release for this product.\n\nI will provide a brief description of the product or strategic initiative. You will then ask me a series of questions to flesh out the press release. The final output should be a 1-page document that is clear, exciting, and customer-obsessed.\n\nYour questions will help me define:\n1. **Headline:** A compelling headline for the launch, dated one year in the future.\n2. **Sub-Headline:** A one-sentence summary of the product and its primary benefit.\n3. **Problem:** A clear and empathetic description of the customer problem this product solves.\n4. **Solution:** How the new product elegantly solves this problem.\n5. **Quote from a Leader:** A quote from me (the product leader) explaining the vision behind the product.\n6. **Customer Quote:** An ideal (but realistic) quote from a happy customer explaining how the product has changed their life or work.\n7. **Call to Action:** How customers can get started.\n\n--- PRODUCT/INITIATIVE DESCRIPTION ---\n[Your description here]"
+        },
+        {
+            "id": "pm-sen-product-strategy-critique",
+            "title": "Product Strategy Red Team",
+            "description": "Acts as a critical 'Red Team' to pressure-test your product strategy, identify hidden assumptions, and uncover potential weaknesses before you commit.",
+            "prompt": "Act as a skeptical but brilliant strategy consultant. I am a product leader, and I've developed a new product strategy. Before I present it to the executive team, I want you to 'red team' it. Your goal is to find the flaws in my thinking.\n\nI will outline my proposed strategy. You will then challenge it with a series of difficult but fair questions. Do not accept my assumptions at face value. Your questions should probe for weaknesses in the following areas:\n1. **Problem/Market Fit:** 'What is the strongest evidence you have that this is a real, urgent, and valuable problem for a large enough market? What if you're wrong?'\n2. **Competitive Landscape:** 'How will our top competitors likely react to this move? What is their unfair advantage against us in this area?'\n3. **Execution Risk:** 'What is the single biggest internal obstacle to executing this strategy? Do we have the right talent, resources, and organizational alignment to pull this off?'\n4. **Business Model:** 'What are the weakest assumptions in our financial model for this strategy? How could this strategy fail even if the product is a success?'\n5. **Unintended Consequences:** 'What is a potential negative second-order effect of this strategy that we haven't considered? Could this move cannibalize one of our existing successful products?'\n\n--- MY PRODUCT STRATEGY ---\n[Outline your proposed product strategy here]"
+        }
+    ]
+  },
+  // == Product Owners ==
+  {
+    id: 'product-owners',
+    title: 'Product Owners',
+    recipes: [
+        {
+            "id": "po-story-refiner",
+            "title": "User Story Refinement & Splitting Co-Pilot",
+            "description": "Helps you break down large, ambiguous features into small, well-defined, and sprint-ready user stories with clear acceptance criteria.",
+            "prompt": "Act as an expert Agile Coach specializing in backlog refinement. I am a Product Owner, and I need to break down a large feature into smaller user stories for the development team.\n\nI will provide the high-level feature idea. You will then guide me through a refinement process:\n1. **Clarify the 'Why':** Ask me, 'What is the core user problem we are solving with this feature? What is the desired outcome for the user?'\n2. **Identify User Roles:** Ask, 'Who are the different types of users that will interact with this feature?'\n3. **Brainstorm 'Micro-Stories':** Based on my answers, generate a list of potential user stories using the format 'As a [user role], I want to [action] so that [benefit].' Focus on breaking the feature into the smallest possible slices of value.\n4. **Draft Acceptance Criteria:** For the highest-priority story you generated, draft a set of acceptance criteria in the 'Given-When-Then' format to ensure it's ready for development.\n\n--- HIGH-LEVEL FEATURE ---\n[Your feature idea here]"
+        },
+        {
+            "id": "po-backlog-prioritizer",
+            "title": "Backlog Prioritization Assistant",
+            "description": "Guides you in applying an objective framework to prioritize your product backlog, helping you make defensible decisions based on value and effort.",
+            "prompt": "Act as a pragmatic Product Owner with deep experience in backlog management. I have a list of backlog items, and I need help prioritizing them objectively.\n\nI will provide a list of items. You will then help me apply a 'Value vs. Effort' prioritization matrix.\n\nFor each item on my list, you will ask me to score it on two dimensions:\n1. **Value Score (1-10):** 'On a scale of 1 to 10, how much value does this item deliver to the user or the business?'\n2. **Effort Score (1-10):** 'On a scale of 1 to 10, how much effort does the development team believe this will take to implement?'\n\nAfter I provide the scores for all items, you will categorize them into four quadrants and provide a prioritized list:\n1. **Quick Wins (High Value, Low Effort):** Do these first.\n2. **Major Projects (High Value, High Effort):** Plan these carefully.\n3. **Fill-ins (Low Value, Low Effort):** Do these if you have time.\n4. **Reconsider (Low Value, High Effort):** Question why these are on the backlog.\n\n--- BACKLOG ITEMS ---\n[Your backlog items here]"
+        },
+        {
+            "id": "po-stakeholder-comms",
+            "title": "Stakeholder 'Say No' Script Builder",
+            "description": "Helps you craft a diplomatic, clear, and respectful response to a stakeholder request that you need to decline or postpone.",
+            "prompt": "Act as a communications expert and veteran Product Owner. I've received a feature request from a stakeholder that doesn't align with our current priorities, and I need to say 'no' without damaging the relationship.\n\nI will describe the request and the reason for declining it. You will then help me draft a response using the 'A-R-C' method:\n1. **Acknowledge & Appreciate:** Start by acknowledging the request and showing appreciation for the stakeholder's input. (e.g., 'Thanks so much for sharing this idea. I really appreciate you thinking about how we can improve X.')\n2. **Reframe & Explain:** Gently reframe the 'no' by explaining the current priorities and the 'why' behind them. Connect the current work back to the larger goals we've all agreed on. (e.g., 'Right now, our main focus for this quarter is on improving user retention, which is why we're prioritizing features A and B.')\n3. **Collaborate & Re-engage:** Close by offering a path forward. Suggest adding their idea to the backlog for future consideration or finding an alternative, lower-effort way to solve their underlying problem. (e.g., 'This is a valuable idea that I've added to our backlog for consideration in our next planning cycle. Could we connect next week to discuss if there's a smaller way to address the problem you're seeing?')\n\n--- STAKEHOLDER REQUEST & REASON FOR DECLINING ---\n[Your description here]"
+        }
+    ]
+  },
+  // == Scrum Masters ==
+  {
+    id: 'scrum-masters',
+    title: 'Scrum Masters',
+    recipes: [
+        {
+            "id": "scrum-retro-facilitator",
+            "title": "Retrospective Facilitator",
+            "description": "Generates creative and effective formats for your team's sprint retrospective, helping to spark new conversations and drive actionable improvements.",
+            "prompt": "Act as an experienced Agile Coach and Scrum Master. I need to facilitate a sprint retrospective for my team, and I want to use a format other than the standard 'What went well, what didn't.'\n\nBased on the context I provide about the last sprint, suggest a suitable retrospective format and provide a set of facilitator questions for me to use.\n\n**Available Formats:**\n- **Mad, Sad, Glad:** Focuses on the emotional journey of the sprint.\n- **Starfish (Keep, More of, Less of, Start, Stop):** A comprehensive format for identifying actions.\n- **Sailboat/Speedboat:** Uses the metaphor of a boat to identify things that helped, things that hindered, and potential risks.\n- **4 Ls (Liked, Learned, Lacked, Longed For):** A simple and effective format for reflection.\n\nYour response should include:\n1. **Recommended Format:** The name of the format you recommend.\n2. **Why You Recommend It:** A brief explanation of why this format is a good fit for my team's situation.\n3. **Facilitator's Script:** A set of 3-5 open-ended questions to guide the team through the retrospective using your chosen format.\n\n--- SPRINT CONTEXT ---\n[Your sprint context here]"
+        },
+        {
+            "id": "scrum-impediment-triage",
+            "title": "Impediment Triage Bot",
+            "description": "Helps you systematically analyze a team impediment, identify the root cause, and determine the next actionable step to resolve it.",
+            "prompt": "Act as a veteran Scrum Master who is an expert at removing blockers. A team member has raised an impediment, and I need your help to think through how to solve it.\n\nI will describe the impediment. You will then guide me through a problem-solving framework by asking me a series of questions:\n1. **Clarify the Impact:** 'What is the immediate impact of this impediment on the sprint goal? Who on the team is blocked right now?'\n2. **Identify the Scope:** 'Is this impediment within the team's control to solve, or does it involve external people, teams, or processes?'\n3. **Brainstorm Root Causes:** 'Let's brainstorm 3 potential root causes for this issue. What is the most likely one?'\n4. **Determine the Next Action:** 'Based on the most likely root cause, what is the single smallest, most immediate action you can take to start resolving this? Who do you need to talk to first?'\n\nYour goal is not to solve the problem for me, but to help me structure my thinking so I can solve it effectively.\n\n--- IMPEDIMENT DESCRIPTION ---\n[Your impediment description here]"
+        },
+        {
+            "id": "scrum-agile-coach",
+            "title": "Agile Principles Coach",
+            "description": "Helps you address common team anti-patterns by providing coaching questions and talking points rooted in Agile principles.",
+            "prompt": "Act as a wise and empathetic Agile Coach. I've observed a recurring challenge or 'anti-pattern' in my team, and I need help preparing to address it in a constructive, coaching-oriented way.\n\nI will describe the anti-pattern. You will then provide me with a coaching toolkit:\n1. **The Underlying Agile Principle:** Identify the core Agile principle or value that is being compromised (e.g., 'Sustainable Pace,' 'Simplicity,' 'Self-Organizing Teams').\n2. **Powerful Questions:** Provide 3-4 open-ended, non-judgmental questions I can ask the team to help them recognize the problem and its impact themselves. (e.g., 'I've noticed we often have work spilling over into the next sprint. What does that feel like for you? What impact does that have on our ability to forecast?').\n3. **A Conversation Starter:** Suggest a way to introduce the topic to the team, perhaps during a retrospective. (e.g., 'For this retrospective, I'd like to explore the theme of predictability. Let's talk about the story of our sprint burndown chart.').\n\n--- TEAM ANTI-PATTERN ---\n[Your team anti-pattern here]"
+        }
+    ]
+  },
+    // == Designers ==
+  {
+    id: 'designers-junior',
+    title: 'Designer: Junior',
+    recipes: [
+        {
+            "id": "design-jun-heuristic-eval",
+            "title": "Heuristic Evaluation Guide",
+            "description": "Guides you through conducting a structured heuristic evaluation of an interface, helping you identify and articulate common usability problems.",
+            "prompt": "Act as a Senior UX Researcher mentoring a junior designer. I want you to help me conduct a heuristic evaluation based on Jakob Nielsen's 10 Usability Heuristics.\n\nI will provide a screenshot or a description of a user interface. You will then walk me through the evaluation by asking me to assess the interface against three specific heuristics:\n1. **Visibility of System Status:** 'Where does this interface inform the user about what is going on? Is there any feedback that is missing?'\n2. **User Control and Freedom:** 'How easily can a user undo an action or exit from an unwanted state? Is there a clear 'emergency exit'?'\n3. **Consistency and Standards:** 'Does this interface use consistent patterns and terminology? Does it follow platform conventions (e.g., standard iOS or Android patterns)?'\n\nFor each heuristic, prompt me to identify potential issues and rate the severity (from 1-5). Your goal is to teach me how to apply these principles systematically.\n\n--- INTERFACE TO EVALUATE ---\n[Your interface description here]"
+        },
+        {
+            "id": "design-jun-research-script",
+            "title": "User Research Script Generator",
+            "description": "Helps you create a structured, unbiased script for conducting user interviews or usability tests, ensuring you gather high-quality insights.",
+            "prompt": "Act as an expert User Researcher. I am preparing for a user research session, and I need your help to create an effective interview script.\n\nI will tell you the goal of my research and who I'm talking to. You will then generate a script for me that includes:\n1. **Introduction & Warm-up:** A friendly opening to make the participant comfortable and explain the purpose of the session without biasing them.\n2. **Key Questions (Open-ended):** A list of 5-7 open-ended questions designed to elicit stories and detailed responses, not just 'yes' or 'no' answers. The questions should focus on past behavior, not future speculation. (e.g., 'Tell me about the last time you...' instead of 'Would you use a feature that...').\n3. **Usability Task (if applicable):** If I mention a task, formulate a clear, scenario-based prompt for the user to perform.\n4. **Wrap-up & Thank You:** A closing section to thank the participant and ask if they have any final questions.\n\n--- RESEARCH GOAL & PARTICIPANT ---\n**Goal:** [e.g., 'Understand how people decide what movie to watch on streaming services.']\n**Participant:** [e.g., 'A busy professional who subscribes to Netflix and Hulu.']"
+        },
+        {
+            "id": "design-jun-moodboard-ai",
+            "title": "AI-Powered Mood Board Creator",
+            "description": "Uses generative AI to quickly create a visual mood board, including color palettes, typography, and interface examples, for a new product idea.",
+            "prompt": "Act as a creative Art Director using generative AI. I have a concept for a new app, and I need to quickly create a mood board to establish a visual direction.\n\nI will describe the app, its target audience, and the desired brand attributes (e.g., 'calm,' 'energetic,' 'professional').\n\nYou will then generate a mood board by providing:\n1. **A Primary Color Palette:** A set of 5-6 hex codes with a brief explanation of the mood they evoke.\n2. **Typography Suggestions:** Recommendations for a headline font and a body font that match the brand attributes.\n3. **Interface Style Description:** A short paragraph describing the recommended UI style (e.g., 'Minimalist with soft shadows,' 'Brutalist with bold typography,' 'Glassmorphism with translucent elements').\n4. **Generative Image Prompts:** Three distinct prompts that I could use in an AI image generator (like Midjourney or DALL-E) to create inspirational imagery for the mood board.\n\n--- APP CONCEPT ---\n**App Idea:** [e.g., 'A meditation and mindfulness app.']\n**Target Audience:**\n**Brand Attributes:** [e.g., 'Calm, serene, trustworthy, minimal.']"
         }
     ]
   },
   {
-    id: 'product_owners',
-    title: 'Product Owners',
+    id: 'designers-mid',
+    title: 'Designer: Mid-Level',
     recipes: [
-      {
-        id: 'po-story-refiner',
-        title: 'User Story Refinement & Splitting Co-Pilot',
-        description: 'Helps you break down large, ambiguous features into small, well-defined, and sprint-ready user stories with clear acceptance criteria.',
-        prompt: `Act as an expert Agile Coach specializing in backlog refinement. I am a Product Owner, and I need to break down a large feature into smaller user stories for the development team.
-
-I will provide the high-level feature idea. You will then guide me through a refinement process:
-1.  **Clarify the 'Why':** Ask me, 'What is the core user problem we are solving with this feature? What is the desired outcome for the user?'
-2.  **Identify User Roles:** Ask, 'Who are the different types of users that will interact with this feature?'
-3.  **Brainstorm 'Micro-Stories':** Based on my answers, generate a list of potential user stories using the format 'As a [user role], I want to [action] so that [benefit].' Focus on breaking the feature into the smallest possible slices of value.
-4.  **Draft Acceptance Criteria:** For the highest-priority story you generated, draft a set of acceptance criteria in the 'Given-When-Then' format to ensure it's ready for development.
-
---- HIGH-LEVEL FEATURE ---
-[Paste your high-level feature idea here]`
-      },
-      {
-        id: 'po-backlog-prioritizer',
-        title: 'Backlog Prioritization Assistant',
-        description: 'Guides you in applying an objective framework to prioritize your product backlog, helping you make defensible decisions based on value and effort.',
-        prompt: `Act as a pragmatic Product Owner with deep experience in backlog management. I have a list of backlog items, and I need help prioritizing them objectively.
-
-I will provide a list of items. You will then help me apply a 'Value vs. Effort' prioritization matrix.
-
-For each item on my list, you will ask me to score it on two dimensions:
-1.  **Value Score (1-10):** 'On a scale of 1 to 10, how much value does this item deliver to the user or the business?'
-2.  **Effort Score (1-10):** 'On a scale of 1 to 10, how much effort does the development team believe this will take to implement?'
-
-After I provide the scores for all items, you will categorize them into four quadrants and provide a prioritized list:
-1.  **Quick Wins (High Value, Low Effort):** Do these first.
-2.  **Major Projects (High Value, High Effort):** Plan these carefully.
-3.  **Fill-ins (Low Value, Low Effort):** Do these if you have time.
-4.  **Reconsider (Low Value, High Effort):** Question why these are on the backlog.
-
---- BACKLOG ITEMS ---
-[Paste your list of backlog items here]`
-      },
-      {
-        id: 'po-stakeholder-comms',
-        title: 'Stakeholder "Say No" Script Builder',
-        description: 'Helps you craft a diplomatic, clear, and respectful response to a stakeholder request that you need to decline or postpone.',
-        prompt: `Act as a communications expert and veteran Product Owner. I've received a feature request from a stakeholder that doesn't align with our current priorities, and I need to say 'no' without damaging the relationship.
-
-I will describe the request and the reason for declining it. You will then help me draft a response using the 'A-R-C' method:
-1.  **Acknowledge & Appreciate:** Start by acknowledging the request and showing appreciation for the stakeholder's input. (e.g., 'Thanks so much for sharing this idea. I really appreciate you thinking about how we can improve X.')
-2.  **Reframe & Explain:** Gently reframe the 'no' by explaining the current priorities and the 'why' behind them. Connect the current work back to the larger goals we've all agreed on. (e.g., 'Right now, our main focus for this quarter is on improving user retention, which is why we're prioritizing features A and B.')
-3.  **Collaborate & Re-engage:** Close by offering a path forward. Suggest adding their idea to the backlog for future consideration or finding an alternative, lower-effort way to solve their underlying problem. (e.g., 'This is a valuable idea that I've added to our backlog for consideration in our next planning cycle. Could we connect next week to discuss if there's a smaller way to address the problem you're seeing?')
-
---- STAKEHOLDER REQUEST & REASON FOR DECLINING ---
-[Paste the stakeholder request and your reason for declining here]`
-      },
+        {
+            "id": "design-mid-articulation-aide",
+            "title": "Design Articulation & Storytelling Aide",
+            "description": "Helps you build a compelling narrative to present your design work, connecting your decisions to user needs, business goals, and research data.",
+            "prompt": "Act as a Lead Product Designer who is an expert at presenting work to stakeholders. I'm preparing to present a new design, and I need help articulating my rationale.\n\nI will provide a screenshot of my design and some brief context. You will then help me build a presentation narrative using the 'Problem-Solution-Impact' framework:\n1. **The User Problem:** Ask me questions to help me clearly articulate the specific user problem or pain point this design solves. (e.g., 'What was the user struggling with before this design? What goal were they trying to achieve?')\n2. **The Design Solution:** Help me describe *why* my specific design choices are an effective solution. Prompt me to connect UI elements to user benefits. (e.g., 'How does this new layout reduce cognitive load? Why did you choose this particular interaction pattern?')\n3. **The Business Impact:** Guide me to connect the solution to a business goal. (e.g., 'How will solving this user problem contribute to our team's OKRs? Will it improve conversion, engagement, or satisfaction?')\n\nYour goal is to turn my design into a persuasive story.\n\n--- DESIGN CONTEXT ---\n[Your design context here]"
+        },
+        {
+            "id": "design-mid-ab-test-hypothesis",
+            "title": "A/B Test Hypothesis Builder",
+            "description": "Guides you in writing a clear, measurable, and actionable hypothesis for an A/B test, ensuring your design experiments yield valuable insights.",
+            "prompt": "Act as a data-driven UX Researcher. I want to run an A/B test on a design change, and I need help formulating a strong hypothesis.\n\nI will describe the change I want to test. You will then guide me to create a hypothesis using the following template:\n'We believe that [making this change] for [this user segment] will result in [this outcome]. We will know this is true when we see [this measurable metric] change.'\n\nYou will ask me questions to fill in each part of the template:\n1. **The Change:** 'What is the specific change you are making in the variant version?'\n2. **The User Segment:** 'Are we targeting all users, or a specific segment (e.g., new users, mobile users)?'\n3. **The Expected Outcome:** 'What user behavior do you expect to change? What will they do more or less of?'\n4. **The Measurable Metric:** 'What specific metric (e.g., click-through rate, conversion rate, time on task) will tell us if our hypothesis is correct?'\n\n--- PROPOSED DESIGN CHANGE ---\n[Your proposed change here]"
+        },
+        {
+            "id": "design-mid-variant-ideator-ai",
+            "title": "AI Component Variant Ideator",
+            "description": "Uses AI to brainstorm and describe different structural and stylistic variations for a common UI component, helping you break out of familiar patterns.",
+            "prompt": "Act as an innovative UI Designer leveraging AI for creative exploration. I'm working on a UI component and want to explore different design approaches beyond my initial idea.\n\nI will tell you the component I'm designing. You will then generate three distinct variations for that component, each with a description covering:\n- **Layout & Structure:** How the elements are arranged.\n- **Visual Style:** The aesthetic feel (e.g., minimalist, playful, data-dense).\n- **Key Interaction:** A unique interactive element or behavior.\n\nYour goal is to provide concrete, diverse ideas that I can then go and visualize.\n\n--- UI COMPONENT ---\n[e.g., 'A product card for an e-commerce site,' 'A dashboard widget for displaying key metrics,' 'A user profile screen.']"
+        }
     ]
   },
   {
-    id: 'scrum_masters',
-    title: 'Scrum Masters',
+    id: 'designers-senior',
+    title: 'Designer: Senior/Lead',
     recipes: [
-      {
-        id: 'scrum-retro-facilitator',
-        title: 'Retrospective Facilitator',
-        description: 'Generates creative and effective formats for your team\'s sprint retrospective, helping to spark new conversations and drive actionable improvements.',
-        prompt: `Act as an experienced Agile Coach and Scrum Master. I need to facilitate a sprint retrospective for my team, and I want to use a format other than the standard 'What went well, what didn't.'
-
-Based on the context I provide about the last sprint, suggest a suitable retrospective format and provide a set of facilitator questions for me to use.
-
-**Available Formats:**
--   **Mad, Sad, Glad:** Focuses on the emotional journey of the sprint.
--   **Starfish (Keep, More of, Less of, Start, Stop):** A comprehensive format for identifying actions.
--   **Sailboat/Speedboat:** Uses the metaphor of a boat to identify things that helped, things that hindered, and potential risks.
--   **4 Ls (Liked, Learned, Lacked, Longed For):** A simple and effective format for reflection.
-
-Your response should include:
-1.  **Recommended Format:** The name of the format you recommend.
-2.  **Why You Recommend It:** A brief explanation of why this format is a good fit for my team's situation.
-3.  **Facilitator's Script:** A set of 3-5 open-ended questions to guide the team through the retrospective using your chosen format.
-
---- SPRINT CONTEXT ---
-[Provide some context about the last sprint, e.g., "The team seemed a bit burned out," "We successfully shipped a major feature but had some last-minute bugs," "There was some confusion about priorities."]`
-      },
-      {
-        id: 'scrum-impediment-triage',
-        title: 'Impediment Triage Bot',
-        description: 'Helps you systematically analyze a team impediment, identify the root cause, and determine the next actionable step to resolve it.',
-        prompt: `Act as a veteran Scrum Master who is an expert at removing blockers. A team member has raised an impediment, and I need your help to think through how to solve it.
-
-I will describe the impediment. You will then guide me through a problem-solving framework by asking me a series of questions:
-1.  **Clarify the Impact:** 'What is the immediate impact of this impediment on the sprint goal? Who on the team is blocked right now?'
-2.  **Identify the Scope:** 'Is this impediment within the team's control to solve, or does it involve external people, teams, or processes?'
-3.  **Brainstorm Root Causes:** 'Let's brainstorm 3 potential root causes for this issue. What is the most likely one?'
-4.  **Determine the Next Action:** 'Based on the most likely root cause, what is the single smallest, most immediate action you can take to start resolving this? Who do you need to talk to first?'
-
-Your goal is not to solve the problem for me, but to help me structure my thinking so I can solve it effectively.
-
---- IMPEDIMENT DESCRIPTION ---
-[Describe the impediment here, e.g., "The staging environment is down," "We are waiting on the design team for final mockups."]`
-      },
-      {
-        id: 'scrum-agile-coach',
-        title: 'Agile Principles Coach',
-        description: 'Helps you address common team anti-patterns by providing coaching questions and talking points rooted in Agile principles.',
-        prompt: `Act as a wise and empathetic Agile Coach. I've observed a recurring challenge or 'anti-pattern' in my team, and I need help preparing to address it in a constructive, coaching-oriented way.
-
-I will describe the anti-pattern. You will then provide me with a coaching toolkit:
-1.  **The Underlying Agile Principle:** Identify the core Agile principle or value that is being compromised (e.g., 'Sustainable Pace,' 'Simplicity,' 'Self-Organizing Teams').
-2.  **Powerful Questions:** Provide 3-4 open-ended, non-judgmental questions I can ask the team to help them recognize the problem and its impact themselves. (e.g., 'I've noticed we often have work spilling over into the next sprint. What does that feel like for you? What impact does that have on our ability to forecast?').
-3.  **A Conversation Starter:** Suggest a way to introduce the topic to the team, perhaps during a retrospective. (e.g., 'For this retrospective, I'd like to explore the theme of predictability. Let's talk about the story of our sprint burndown chart.').
-
---- TEAM ANTI-PATTERN ---
-[Describe the anti-pattern here, e.g., "The team consistently takes on more work than they can complete in a sprint," "Daily stand-ups are turning into long status report meetings."]`
-      },
+        {
+            "id": "design-lead-strategy-doc",
+            "title": "Design Strategy Document Drafter",
+            "description": "Helps you structure and write a high-level design strategy document, articulating the vision, principles, and priorities for your product area.",
+            "prompt": "Act as a Head of Design. I need to create a design strategy document to align my team and stakeholders on a long-term vision.\n\nI will provide the product area and our key business goals. You will then generate an outline for my strategy document and help me flesh out each section by asking probing questions.\n\nThe document outline should include:\n1. **Product Vision:** A brief, aspirational statement about the future state of the user experience.\n2. **Design Principles:** A set of 3-5 memorable principles that will guide our design decisions (e.g., 'Effortless over comprehensive,' 'Clarity over cleverness').\n3. **Strategic Pillars:** 2-3 key themes or focus areas for our design work over the next year (e.g., 'Improve Onboarding,' 'Streamline Core Workflow').\n4. **Success Metrics:** How we will measure the impact of our design efforts (e.g., 'Increase in user satisfaction score,' 'Reduction in time-on-task').\n\nFor each section, you will ask me a question to help me generate the content.\n\n--- PRODUCT AREA & GOALS ---\n[Your product area and goals here]"
+        },
+        {
+            "id": "design-lead-workshop-planner",
+            "title": "Cross-Functional Alignment Workshop Planner",
+            "description": "Helps you plan and structure a collaborative workshop (like a design sprint or kickoff) to ensure alignment between product, engineering, and design.",
+            "prompt": "Act as an expert workshop facilitator. I need to plan a workshop to kick off a new project and get my cross-functional partners in engineering and product aligned.\n\nI will tell you the goal of the workshop and who will be attending. You will then generate a detailed agenda for a 3-hour workshop, including:\n- **Workshop Title & Goal**\n- **Attendees & Roles**\n- **Agenda with Timings:** A step-by-step schedule of activities.\n- **Activity Descriptions:** For each key activity (e.g., 'How Might We' brainstorming, 'User Journey Mapping'), provide a brief description and the desired outcome.\n- **Materials Needed:** A list of required materials (e.g., 'Miro board, sticky notes, markers').\n\n--- WORKSHOP CONTEXT ---\n**Goal:**\n**Attendees:**"
+        },
+        {
+            "id": "design-lead-persona-stress-test-ai",
+            "title": "AI Persona Stress-Tester",
+            "description": "Uses an AI to role-play a specific user persona, providing feedback on a proposed user flow to uncover potential friction or confusion.",
+            "prompt": "Act as an advanced AI research assistant. I want you to simulate a user test for me. I will provide you with a detailed user persona and a proposed user flow. \n\nYour task is to adopt the persona and 'walk through' the user flow step-by-step. For each step, you will provide feedback from the persona's point of view, focusing on:\n- **Clarity & Understanding:** 'What am I seeing here? Do I understand what I'm supposed to do next?'\n- **Motivation & Goals:** 'Does this step help me achieve my goal? Is this what I expected to happen?'\n- **Potential Friction:** 'What might confuse or frustrate me at this step? What questions do I have?'\n\nThis simulation will help me identify potential usability issues before I build a prototype.\n\n--- USER PERSONA ---\n[Paste a detailed user persona, including goals, motivations, and pain points.]\n\n--- USER FLOW ---\n[Describe the user flow step-by-step]"
+        }
+    ]
+  },
+    // == Leaders ==
+  {
+    id: 'leaders-team',
+    title: 'Leader: Team Lead/Manager',
+    recipes: [
+        {
+            "id": "lead-mgr-growth-convo-prep",
+            "title": "Career Growth Conversation Planner",
+            "description": "Helps you structure a meaningful career development 1:1 with a direct report, moving beyond status updates to focus on their long-term goals and aspirations.",
+            "prompt": "Act as an experienced VP of Engineering who is a certified career coach. I am an Engineering Manager preparing for a career growth conversation with one of my direct reports. I want this to be a highly effective and motivating session.\n\nI will provide context about my team member. You will then generate a structured agenda and a set of powerful, open-ended questions for me to use.\n\nThe agenda should have three parts:\n1. **Looking Back (Reflection):** Questions to help them reflect on their accomplishments and learnings over the last 6-12 months.\n2. **Looking Forward (Aspiration):** Questions to help them articulate their long-term career goals, interests, and what kind of work energizes them.\n3. **Closing the Gap (Action Plan):** Questions to brainstorm concrete actions, projects, or skills they can develop in the next quarter to move toward their goals.\n\nFor each part, provide 2-3 thoughtful questions.\n\n--- DIRECT REPORT CONTEXT ---\n**Name:**\n**Role & Level:**\n**Strengths:** [e.g., 'Excellent at debugging complex issues, very reliable.']\n**Areas for Growth:** [e.g., 'Could be more proactive in design discussions, wants to develop leadership skills.']\n**Recent Accomplishments:** [e.g., 'Led the successful launch of the new reporting feature.']"
+        },
+        {
+            "id": "lead-mgr-delegation-planner",
+            "title": "Effective Delegation Planner",
+            "description": "Guides you to delegate tasks in a way that develops your team members' skills and empowers them, rather than simply offloading your own work.",
+            "prompt": "Act as a senior engineering director, mentoring a new manager on the art of effective delegation. I have a task I need to delegate to someone on my team, and I want to do it thoughtfully.\n\nI will describe the task and the potential team member I'm considering. You will then walk me through a 5-step delegation checklist by asking me a series of questions:\n1. **Define the 'What' and 'Why':** 'What is the specific, desired outcome of this task? Why is this task important for the team or the business?'\n2. **Select the Right Person:** 'Why is this person the right choice for this task? What specific skill or experience do you hope they will gain from it?'\n3. **Set Clear Expectations:** 'How will you define and communicate 'success' for this task? What is the deadline? What level of autonomy will they have (e.g., 'Follow these steps exactly' vs. 'Achieve this outcome, the approach is up to you')?'\n4. **Provide Resources & Support:** 'What information, tools, or introductions do they need to be successful? How and when will you check in on their progress?'\n5. **Plan for Feedback:** 'How will you provide constructive feedback on their work once it's complete, regardless of the outcome?'\n\n--- DELEGATION CONTEXT ---\n**Task to Delegate:** [e.g., 'Investigate and choose a new logging library for our services.']\n**Team Member:**"
+        },
+        {
+            "id": "lead-mgr-unblocker-bot",
+            "title": "Daily Stand-up 'Unblocker' Bot",
+            "description": "Analyzes a transcript of your team's daily stand-up notes to proactively identify potential blockers, risks, and dependencies that require your attention.",
+            "prompt": "Act as a highly observant and proactive Agile Coach. I'm an Engineering Manager, and I want to get more signal out of my team's daily stand-up. I will paste the notes or a transcript from today's meeting below.\n\nYour task is to analyze the text and highlight potential issues for me to follow up on. Provide your output in three sections:\n1. **Potential Blockers:** Identify any statements where a team member mentions they are 'stuck,' 'waiting on,' 'blocked by,' or having trouble with something. List the person and the issue.\n2. **Cross-Team Dependencies:** Pinpoint any mentions of other teams, services, or individuals outside our immediate team. These are potential communication or coordination points.\n3. **Emerging Risks:** Detect subtle hints of risk, such as mentions of 'unexpected complexity,' 'taking longer than I thought,' or uncertainty about requirements. These are issues that might become blockers tomorrow.\n\nFor each item you identify, suggest a simple follow-up question I could ask the relevant team member.\n\n--- STAND-UP NOTES/TRANSCRIPT ---\n[Your stand-up notes here]"
+        }
     ]
   },
   {
-    id: 'leadership',
-    title: 'Engineering Leaders & PMs',
+    id: 'leaders-director',
+    title: 'Leader: Director/VP',
     recipes: [
-      {
-        id: 'build-tech-debt-case',
-        title: 'Build a Business Case for Tech Debt',
-        description: 'An interactive coach to help you translate technical debt into a compelling business case by focusing on risk, opportunity cost, and team morale.',
-        prompt: `Act as a pragmatic VP of Engineering who is an expert at securing budget and roadmap capacity from business stakeholders. I am a senior engineer or manager who needs to convince my Product Manager and Director to prioritize fixing a piece of technical debt.
-
-I will describe the technical debt symptoms. You will help me build a business case by asking me questions that reframe the problem in terms of business impact. Your questions should focus on these four areas:
-
-1.  **Opportunity Cost:** 'How much faster could we ship new features in this area if this debt were resolved? What valuable product initiatives are currently blocked or slowed down by this problem?'
-2.  **Risk Mitigation:** 'What is the risk of *not* fixing this? Could it lead to a production outage, security vulnerability, or data loss? Quantify that risk if possible (e.g., potential downtime, compliance fines).'
-3.  **Quality & Customer Impact:** 'How does this debt negatively affect our users right now? Does it cause bugs, slow performance, or a poor user experience?'
-4.  **Team Morale & Productivity:** 'How does working with this system affect developer morale and productivity? Does it make onboarding new engineers harder?'
-
-After I answer your questions, synthesize my answers into a concise, 1-page memo titled 'Business Case for Addressing [Name of Debt Area]' that I can share with leadership. The memo should be written for a non-technical audience.
-
---- TECHNICAL DEBT DESCRIPTION ---
-[Describe the symptoms of the technical debt here. Focus on the observable problems, not just the code.]`
-      },
-      {
-        id: '1-on-1-prep',
-        title: 'Prepare for a 1:1 Meeting',
-        description: 'Creates a structured agenda with talking points for an upcoming 1:1 meeting with a direct report.',
-        prompt: `Act as a thoughtful Engineering Manager. I have an upcoming 1:1 meeting with one of my direct reports. Help me prepare an agenda. Based on the context below, suggest 3-4 key talking points and open-ended questions to facilitate a productive conversation about their career growth, current projects, and well-being.
-
---- CONTEXT ---
-- **Report's Name:** [Name]
-- **Their recent accomplishments:** [e.g., "Successfully launched the new billing feature"]
-- **Their recent challenges:** [e.g., "Struggling with a legacy part of the codebase"]
-- **Their stated career goals:** [e.g., "Wants to move into a tech lead role"]`
-      },
-       {
-        id: 'pr-description-comm',
-        title: 'Write a PR Description',
-        description: 'Generates a clear and concise Pull Request description based on a summary of changes.',
-        prompt: `Act as a senior software engineer who writes excellent, clear Pull Request descriptions. Based on the summary of my changes below, write a comprehensive PR description. The description should include:
-1.  **What does this PR do?** (A high-level summary)
-2.  **Why is this change needed?** (The problem it solves, link to Jira ticket)
-3.  **How was this implemented?** (Brief technical overview)
-4.  **How can this be tested?** (Step-by-step instructions for the reviewer)
-
---- SUMMARY OF CHANGES ---
-[Briefly describe your changes, e.g., "Added a new button to the user profile page that allows them to export their data as a CSV. This involved creating a new API endpoint and a front-end component."]"`,
-      },
-      {
-        id: 'technical-summary-comm',
-        title: 'Summarize for Non-Technical Audience',
-        description: 'Translates a technical update into a simple summary for stakeholders like Product Managers or executives.',
-        prompt: `Act as an engineering manager communicating with non-technical stakeholders. Translate the following technical update into a clear, concise summary that focuses on user impact and business value. Avoid jargon.
-
---- TECHNICAL UPDATE ---
-[Paste the technical update here, e.g., "We have successfully migrated the user authentication service from a monolithic architecture to a microservice. This involved refactoring the database schema and deploying a new service on Kubernetes."]"`,
-      },
-      {
-        id: 'strategic-project-analysis',
-        title: 'Strategic Project Analysis',
-        description: 'Uses deep context from Jira, team structure, and business constraints to generate strategic recommendations for project planning.',
-        prompt: `<role>
-You are a senior project manager and resource planning specialist at a software company with access to current project data, team information, and resource allocation details. Your expertise includes analyzing project status, resource optimization, risk assessment, and timeline management. You should demonstrate deep knowledge of agile methodologies, team dynamics, and strategic business planning.
-</role>
-
-<context>
-You are working at a company that is managing multiple concurrent projects and is operating under specific constraints (e.g., hiring freezes, budget allocations, critical business deadlines).
-
-**Instructions:** Replace the bracketed content below with your actual data.
-
-## Current Team Structure
-\`\`\`json
-[Paste your team structure JSON here. Example:
-{
-  "teams": {
-    "frontend": { "lead": "Sarah Chen", "members": [...] },
-    "backend": { "lead": "David Park", "members": [...] }
+        {
+            "id": "lead-dir-eng-business-align",
+            "title": "Engineering Initiative to Business Value Translator",
+            "description": "Helps you translate a major technical initiative into a compelling narrative focused on business outcomes (e.g., revenue, cost, risk) for an executive audience.",
+            "prompt": "Act as a strategic CFO who is a former engineer. I am an engineering leader who needs to pitch a significant technical initiative to our CEO and the rest of the executive team. I need your help to frame it in the language of business value, not technical details.\n\nI will describe the engineering initiative. You will then help me build the business case by asking me questions that connect the technical work to one of the four key business drivers: \n1. **Increasing Revenue:** 'How will this initiative directly or indirectly lead to more revenue? (e.g., enabling a new product line, increasing conversion rates, improving customer retention).'\n2. **Decreasing Costs:** 'How will this initiative reduce operational costs? (e.g., lowering infrastructure spend, reducing manual support tickets, improving developer efficiency).'\n3. **Mitigating Risk:** 'What specific business risk does this initiative mitigate? (e.g., avoiding security breaches and fines, preventing costly outages, ensuring regulatory compliance).'\n4. **Improving Optionality:** 'How does this initiative give the business more strategic options in the future? (e.g., enabling faster entry into new markets, making it easier to experiment with new features).'\n\nAfter our dialogue, synthesize my answers into a 1-page executive summary titled 'The Business Case for [Initiative Name]'.\n\n--- ENGINEERING INITIATIVE ---\n[Your initiative description here]"
+        },
+        {
+            "id": "lead-dir-bottleneck-analysis",
+            "title": "Org-Wide Bottleneck Analysis",
+            "description": "Guides you to analyze common engineering metrics (like cycle time, deployment frequency) to diagnose systemic process bottlenecks across your organization.",
+            "prompt": "Act as a data scientist specializing in engineering operations (like the DORA metrics). I am an engineering leader, and I have a feeling my organization's processes are inefficient, but I don't know where the bottleneck is. I will provide you with some high-level observations or metrics.\n\nYour task is to act as a diagnostic expert. Based on the symptoms I describe, you will:\n1. **Formulate a Primary Hypothesis:** State the most likely systemic bottleneck (e.g., 'The data suggests a bottleneck in the code review process.').\n2. **Suggest Key Metrics to Investigate:** List 2-3 specific, measurable metrics that would help prove or disprove your hypothesis (e.g., 'Pull Request Time-to-Merge', 'Number of comments per PR').\n3. **Propose Potential Root Causes:** List several common root causes for this type of bottleneck (e.g., 'Lack of clear ownership for services,' 'Insufficient number of senior reviewers,' 'No automated testing to build confidence.').\n4. **Recommend a Next Step:** Suggest a concrete, low-effort next step I could take to validate the root cause (e.g., 'Interview three senior engineers about their experience with the code review process.').\n\n--- SYMPTOMS / OBSERVATIONS ---\n[Your observations here]"
+        },
+        {
+            "id": "lead-dir-rd-capitalization-narrative",
+            "title": "R&D Capitalization Narrative Builder",
+            "description": "Helps you construct a data-driven narrative to justify engineering headcount, budget, or R&D spending to your CFO and executive team.",
+            "prompt": "Act as a seasoned VP of Finance who partners closely with Engineering. I am an engineering leader preparing for our annual budget planning, and I need to justify my request for additional headcount and resources. Help me build a narrative that the CFO will understand and approve.\n\nI will state my 'ask' (e.g., 'I need to hire 5 more senior engineers'). You will then guide me to build the justification by asking me a series of questions structured around a financial narrative:\n1. **The Investment:** 'What is the total cost of your request (fully loaded)?'\n2. **The Strategic Alignment:** 'Which specific company-level strategic goal for the upcoming year does this investment support?'\n3. **The Expected Return (ROI):** 'What is the measurable business outcome this investment will produce? Frame it in terms of revenue generated, costs saved, or risk averted. Be specific and quantify where possible (e.g., 'This team will build Feature X, which is projected to increase customer retention by 2%, saving $500k annually').'\n4. **The Cost of Inaction:** 'What is the business consequence if we *don't* make this investment? What opportunity will we miss? What risk will we be exposed to?'\n\nAfter I provide the answers, synthesize them into a concise, one-page memo titled 'Investment Proposal:' that I can use as the basis for my budget presentation.\n\n--- MY BUDGET 'ASK' ---\n[Your budget ask here]"
+        }
+    ]
   }
-}
-]
-\`\`\`
-
-## Current Sprint Backlog (JIRA Data)
-\`\`\`json
-[Paste your current sprint backlog JSON here. Example:
-{
-  "sprint": { "name": "Q3 Feature Sprint", "status": "active" },
-  "tickets": [
-    { "key": "PROJ-1234", "summary": "Implement user auth", "priority": "High", "status": "In Progress", "storyPoints": 13 },
-    { "key": "PROJ-1235", "summary": "Redesign dashboard", "priority": "Medium", "status": "To Do", "storyPoints": 8 }
-  ]
-}
-]
-\`\`\`
-
-## Resource Allocation Matrix
-\`\`\`json
-[Paste your resource allocation matrix here.]
-\`\`\`
-
-## Historical Performance Metrics
-\`\`\`json
-[Paste your historical velocity and performance metrics here.]
-\`\`\`
-
-## Constraints and Business Context
-[List your key constraints, e.g., budget, deadlines, compliance requirements.]
-
-## Recent Stakeholder Feedback
-[List recent feedback from key stakeholders, e.g., "The mobile app project seems to be falling behind." - Robert Johnson, Engineering Director]
-
-</context>
-
-<action>
-Given the current project status, team availability, resource constraints, and business priorities, analyze the provided data and provide strategic recommendations including:
-
-1. **Immediate Action Items**: Identify the top 3 actions that need to be taken this week to address the most critical issues.
-2. **Resource Reallocation Recommendations**: Propose how to redistribute team members across projects to optimize delivery timelines while maintaining quality.
-3. **Risk Mitigation Strategy**: Develop specific steps to address high-risk projects and blocked tickets.
-4. **Timeline Adjustments**: Recommend realistic timeline adjustments for each project based on current velocity trends and constraints.
-5. **Communication Plan**: Define key messages for stakeholders and present trade-offs involved in your recommendations.
-</action>
-
-<format>
-Structure your response with clear headings for each of the 5 required sections. Use bullet points for action items and recommendations. Present resource allocation recommendations in a clear, tabular format when possible. Provide reasoning for each major recommendation. Keep the response comprehensive but concise, focusing on actionable insights rather than restating the provided data.
-</format>
-
-<tone>
-Communicate with the authority and expertise of a senior project manager. Use professional, analytical language appropriate for executive-level stakeholders. Be direct about challenges and realistic about constraints while maintaining a solutions-focused approach. Balance optimism with a pragmatic assessment of risks and trade-offs.
-</tone>`
-      },
-      {
-        id: 'identify-bottlenecks',
-        title: 'Identify Productivity Bottlenecks',
-        description: 'Analyzes a description of a team\'s workflow to identify potential bottlenecks and suggests AI-powered improvements.',
-        prompt: `Act as a senior engineering manager and process improvement expert. I'm going to describe my team's current software development lifecycle. Your task is to analyze this process, identify the top 3 potential bottlenecks that are likely slowing the team down, and for each bottleneck, suggest a practical way that AI could be used to alleviate it.
-
---- TEAM WORKFLOW DESCRIPTION ---
-[Describe your team's process here. e.g., "We follow 2-week sprints. Planning is often slow because we struggle to break down large epics. Code reviews sometimes take several days because senior engineers are busy. Documentation is often an afterthought and written at the end of the sprint, which delays handoffs."]`,
-      },
-      {
-        id: 'draft-job-description',
-        title: 'Draft an Effective Job Description',
-        description: 'Guides a hiring manager to create a compelling and inclusive job description for an open engineering role.',
-        prompt: `Act as an expert technical recruiter and hiring manager. I need to draft a job description for a new role on my team. Guide me through the process by asking for the following information one by one:
-1.  **Job Title:** (e.g., Senior Frontend Engineer)
-2.  **Team Mission:** (What is the purpose of this team?)
-3.  **Key Responsibilities:** (What will this person do day-to-day?)
-4.  **Core Technologies:** (What is the tech stack?)
-5.  **Qualifications:** (What are the must-have skills and experience?)
-6.  **Company Culture Highlights:** (What makes this a great place to work?)
-
-Once I've provided all the information, synthesize it into a clear, compelling, and inclusive job description that will attract top talent.`,
-      },
-      {
-        id: 'team-retro-topics',
-        title: 'Generate Team Health Retrospective Topics',
-        description: 'Generates a set of thoughtful, open-ended questions to facilitate a productive team health retrospective.',
-        prompt: `Act as an experienced Agile coach and team facilitator. My engineering team is holding its monthly team health retrospective. Our goal is to move beyond just talking about the last sprint and have a deeper conversation about our teamwork, communication, and overall well-being.
-
-Please generate a list of 5-7 thoughtful, open-ended questions designed to spark conversation in the following areas:
-- Communication & Collaboration
-- Work-Life Balance & Morale
-- Processes & Tools
-- Learning & Growth
-
-The questions should be constructive and assume a high-trust environment.`,
-      },
-    ],
-  },
-  {
-    id: 'governance',
-    title: 'AI Trust & Governance',
-    recipes: [
-      {
-        id: 'prompt-risk-assessment',
-        title: 'Prompt Risk Assessment',
-        description: 'Guides you through a checklist to identify potential security, privacy, and bias risks in your prompt.',
-        prompt: `Act as an AI security and ethics specialist. I am about to use the following prompt with a large language model. Please help me assess the potential risks. For each category below, ask me a clarifying question to help me think through the implications.
-
-**1. Data Privacy (PII):** Does my prompt contain any personally identifiable information (names, emails, addresses, etc.) or confidential company data?
-**2. Bias & Fairness:** Could the prompt lead to a response that is biased against any group? Is the language inclusive?
-**3. Security (Prompt Injection):** Is any part of this prompt constructed from untrusted user input, which could lead to prompt injection attacks?
-**4. Factual Reliability:** Is this prompt asking for factual information that should be independently verified? What is my plan to verify the output?
-**5. Over-reliance:** Am I using this AI for a critical decision where human oversight is essential?
-
---- MY PROMPT ---
-[Paste the prompt you want to assess here]`
-      },
-      {
-        id: 'output-quality-checklist',
-        title: 'AI Output Quality Checklist',
-        description: 'Uses a structured checklist to evaluate the quality and reliability of an AI-generated response.',
-        prompt: `Act as a meticulous quality assurance analyst for AI systems. I have received the following output from an LLM. Please help me evaluate its quality by walking me through the 8-Point Evaluation Check. For each point, ask me a question to guide my assessment.
-
-**1. Redundancy:** Does the output contain repetitive phrases or looped sentences?
-**2. Compression:** Could the same information be conveyed more concisely without losing meaning?
-**3. Factual Drift:** How does this output compare to the original source data? Are there any subtle inaccuracies?
-**4. Ordering Logic:** If this is a ranked list, is the ordering logical and consistent, or does it seem random?
-**5. Tone Alignment:** Is the tone of this output appropriate for its intended audience (e.g., professional, casual, empathetic)?
-**6. Structural Consistency:** Is the formatting (e.g., Markdown, JSON) correct and consistent?
-**7. Cost-to-Value:** Was the quality of this answer worth the tokens/cost to generate it?
-**8. Latency vs. Utility:** Did this response arrive quickly enough to be useful in my workflow?
-
---- AI-GENERATED OUTPUT ---
-[Paste the AI output you want to evaluate here]`
-      },
-      {
-        id: 'embody-a-persona',
-        title: 'Embody a Persona',
-        description: 'Instructs the AI to adopt a specific persona to improve the quality and context of its responses.',
-        prompt: `For our entire conversation, I want you to embody a specific persona. This will help you provide more relevant and insightful responses.
-
-**Persona:** [e.g., "A skeptical but fair Principal Engineer," "A customer-obsessed Product Manager," "An empathetic career coach"]
-
-**Your Goal:** [e.g., "To help me pressure-test my technical design," "To ensure my feature ideas are focused on user value," "To guide me through a difficult career decision"]
-
-Please confirm you understand this persona and goal before we begin.`
-      },
-    ],
-  },
 ];
