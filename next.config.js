@@ -2,6 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   
+  // Fix for Next.js 15 deploymentId error
+  experimental: {
+    deploymentId: process.env.VERCEL_DEPLOYMENT_ID || 'local',
+  },
+  
   // Environment variables available to the browser
   env: {
     NEXT_PUBLIC_APP_NAME: 'Engify.ai',
