@@ -1,16 +1,13 @@
-
-
-
 import React from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { KICKOFF_PLAN_PROMPT_TEMPLATE } from '../services/agentService';
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'lean-research-planner' | 'roadmap-defense-architect' | 'roadmap-alignment' | 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
+type ActiveTab = 'tech-investment-advisor' | 'lean-research-planner' | 'roadmap-defense-architect' | 'roadmap-alignment' | 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [activeTab, setActiveTab] = React.useState<ActiveTab>('lean-research-planner');
+    const [activeTab, setActiveTab] = React.useState<ActiveTab>('tech-investment-advisor');
 
     React.useEffect(() => {
         if (initialPrompt) {
@@ -37,6 +34,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Tech Investment Advisor" isActive={activeTab === 'tech-investment-advisor'} onClick={() => setActiveTab('tech-investment-advisor')} />
                     <TabButton name="Lean Research Planner" isActive={activeTab === 'lean-research-planner'} onClick={() => setActiveTab('lean-research-planner')} />
                     <TabButton name="Roadmap Defense Architect" isActive={activeTab === 'roadmap-defense-architect'} onClick={() => setActiveTab('roadmap-defense-architect')} />
                     <TabButton name="Roadmap Alignment" isActive={activeTab === 'roadmap-alignment'} onClick={() => setActiveTab('roadmap-alignment')} />
@@ -60,6 +58,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'tech-investment-advisor' && <TechnologyInvestmentAdvisor />}
                 {activeTab === 'lean-research-planner' && <LeanResearchPlanner />}
                 {activeTab === 'roadmap-defense-architect' && <RoadmapDefenseArchitect />}
                 {activeTab === 'roadmap-alignment' && <RoadmapAlignmentConsultant />}
@@ -102,6 +101,100 @@ const FeatureStub: React.FC<{title: string, description: string}> = ({ title, de
         <h2 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h2>
         <p className="mt-2 text-slate-500 dark:text-slate-400 max-w-2xl">{description}</p>
         <span className="mt-4 px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 rounded-full">Coming Soon</span>
+    </div>
+);
+
+const TechnologyInvestmentAdvisor: React.FC = () => {
+    const [step, setStep] = React.useState(1);
+    const [initiative, setInitiative] = React.useState("Migrate our primary application database from self-hosted MySQL to Amazon Aurora.");
+    const [drivers, setDrivers] = React.useState("Our current database is a scaling bottleneck and requires significant operational overhead.");
+    const [questions, setQuestions] = React.useState<any>(null);
+    const [answers, setAnswers] = React.useState<any>({});
+    const [proposal, setProposal] = React.useState<any>(null);
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    const handleStart = async () => {
+        setIsLoading(true);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+            const response = await fetch('/api/technology-investment-advisor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'guide_business_case', initiative, drivers })
+            });
+            if (!response.ok) throw new Error('Failed to get questions.');
+            const data = await response.json();
+            setQuestions(data.questions);
+            setStep(2);
+        } catch (err) { console.error(err); } finally { setIsLoading(false); }
+    };
+
+    const handleAnswerChange = (key: string, value: string) => {
+        setAnswers((prev: any) => ({ ...prev, [key]: value }));
+    };
+
+    const handleGenerate = async () => {
+        setIsLoading(true);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+            const response = await fetch('/api/technology-investment-advisor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'generate_package', initiative, drivers, answers })
+            });
+            if (!response.ok) throw new Error('Failed to generate proposal.');
+            const data = await response.json();
+            setProposal(data);
+            setStep(3);
+        } catch (err) { console.error(err); } finally { setIsLoading(false); }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className={`p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 ${step > 1 ? 'opacity-60' : ''}`}>
+                <h2 className="font-semibold text-lg mb-1">Step 1: Describe the Technology Investment</h2>
+                <label className="text-sm font-medium mt-4 block">Initiative Overview</label>
+                <textarea value={initiative} onChange={e => setInitiative(e.target.value)} rows={3} className="w-full p-2 mt-1 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 1} />
+                <label className="text-sm font-medium mt-4 block">Primary Technical Drivers</label>
+                <textarea value={drivers} onChange={e => setDrivers(e.target.value)} rows={3} className="w-full p-2 mt-1 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 1} />
+                <button onClick={handleStart} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                    {isLoading ? 'Thinking...' : 'Start Business Case'}
+                </button>
+            </div>
+            {step >= 2 && questions && (
+                <div className={`p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 ${step > 2 ? 'opacity-60' : ''}`}>
+                    <h2 className="font-semibold text-lg mb-4">Step 2: AI-Guided Business Case Construction</h2>
+                    <div className="space-y-4">
+                        <AnswerInput label={questions.cost_analysis} onChange={v => handleAnswerChange('cost_analysis', v)} disabled={step > 2} />
+                        <AnswerInput label={questions.benefit_quantification} onChange={v => handleAnswerChange('benefit_quantification', v)} disabled={step > 2} />
+                        <AnswerInput label={questions.risk_assessment} onChange={v => handleAnswerChange('risk_assessment', v)} disabled={step > 2} />
+                        <AnswerInput label={questions.strategic_alignment} onChange={v => handleAnswerChange('strategic_alignment', v)} disabled={step > 2} />
+                    </div>
+                    <button onClick={handleGenerate} disabled={isLoading || step > 2} className="mt-6 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                        {isLoading ? 'Generating...' : 'Generate Investment Proposal'}
+                    </button>
+                </div>
+            )}
+            {step >= 3 && proposal && (
+                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-4">Step 3: Your Boardroom-Ready Investment Proposal</h2>
+                     <div className="space-y-6">
+                        <Artifact a_title="1. Executive Summary (for CEO/CFO)" a_content={proposal.executive_summary} />
+                        <Artifact a_title="2. Detailed Financial Model (Spreadsheet Format)" a_content={proposal.financial_model} />
+                        <Artifact a_title="3. Technical & Risk Briefing (for CTO/VP Eng)" a_content={proposal.technical_briefing} />
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const AnswerInput: React.FC<{label: string, onChange: (value: string) => void, disabled: boolean}> = ({ label, onChange, disabled }) => (
+    <div>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">{label}</label>
+        <textarea onChange={e => onChange(e.target.value)} rows={3} className="w-full p-2 mt-1 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={disabled} />
     </div>
 );
 
