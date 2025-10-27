@@ -1,6 +1,9 @@
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+
+// Validate environment variables at startup (Red Hat Review - Critical Fix #1)
+import '@/lib/env';
 
 const inter = Inter({ subsets: ['latin'] });
 
