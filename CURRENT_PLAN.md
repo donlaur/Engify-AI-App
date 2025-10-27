@@ -188,7 +188,7 @@
 
 ---
 
-## 🚀 Phase 5: Core Features (30 commits)
+## 🚀 Phase 5: Core Features & Content (30 commits)
 
 ### Prompt Library (MVP Core)
 
@@ -306,8 +306,10 @@
 ## 📊 Current Progress
 
 **Commits**: 104/150 (69%)
-**Phase**: 5/9 (Core Features - Next.js 16 & React 19 Upgraded)
+**Phase**: 5/10 (Core Features - Next.js 16 & React 19 Upgraded)
 **MVP Ready**: ~69%
+
+**Note**: Phase 6 added for Jellyfish-inspired UI/UX redesign (20 commits)
 
 ### What Works Now
 
