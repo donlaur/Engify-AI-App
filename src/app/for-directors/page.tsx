@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { directorPriorities, directorChallenges } from '@/data/director-insights';
+import { RoleSelector } from '@/components/roles/RoleSelector';
 import Link from 'next/link';
 
 export default function ForDirectorsPage() {
@@ -13,6 +14,7 @@ export default function ForDirectorsPage() {
 
   return (
     <MainLayout>
+      <RoleSelector />
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="absolute inset-0 animate-glow bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-blue-500/10" />
