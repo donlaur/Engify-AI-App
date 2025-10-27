@@ -1,17 +1,18 @@
 
 
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { KICKOFF_PLAN_PROMPT_TEMPLATE } from '../services/agentService';
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'roadmap-defense-architect' | 'roadmap-alignment' | 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
+type ActiveTab = 'lean-research-planner' | 'roadmap-defense-architect' | 'roadmap-alignment' | 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [activeTab, setActiveTab] = useState<ActiveTab>('roadmap-defense-architect');
+    const [activeTab, setActiveTab] = React.useState<ActiveTab>('lean-research-planner');
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (initialPrompt) {
             setActiveTab('prompt-lab');
         }
@@ -36,6 +37,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Lean Research Planner" isActive={activeTab === 'lean-research-planner'} onClick={() => setActiveTab('lean-research-planner')} />
                     <TabButton name="Roadmap Defense Architect" isActive={activeTab === 'roadmap-defense-architect'} onClick={() => setActiveTab('roadmap-defense-architect')} />
                     <TabButton name="Roadmap Alignment" isActive={activeTab === 'roadmap-alignment'} onClick={() => setActiveTab('roadmap-alignment')} />
                     <TabButton name="Qualitative Insights" isActive={activeTab === 'qualitative-insights'} onClick={() => setActiveTab('qualitative-insights')} />
@@ -58,6 +60,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'lean-research-planner' && <LeanResearchPlanner />}
                 {activeTab === 'roadmap-defense-architect' && <RoadmapDefenseArchitect />}
                 {activeTab === 'roadmap-alignment' && <RoadmapAlignmentConsultant />}
                 {activeTab === 'qualitative-insights' && <QualitativeInsightsSynthesizer />}
@@ -102,13 +105,112 @@ const FeatureStub: React.FC<{title: string, description: string}> = ({ title, de
     </div>
 );
 
+const LeanResearchPlanner: React.FC = () => {
+    const [step, setStep] = React.useState(1);
+    const [researchGoal, setResearchGoal] = React.useState("Understand why users are abandoning the checkout process.");
+    const [constraints, setConstraints] = React.useState("We have a 5-day timeline, our budget is $500 for incentives, and we need to talk to users who have made a purchase in the last 3 months.");
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [researchKit, setResearchKit] = React.useState<any>(null);
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        setResearchKit(null);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found. Please set it in Settings.");
+
+            const response = await fetch('/api/lean-research-planner', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ research_goal: researchGoal, constraints })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to get a response from the server.");
+            }
+
+            const data = await response.json();
+            setResearchKit(data);
+            setStep(2);
+        } catch (err: any) {
+            console.error(err);
+            // You might want to display this error to the user
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className={`p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 ${step > 1 ? 'opacity-60' : ''}`}>
+                <h2 className="font-semibold text-lg mb-1">Step 1: Define Your Research Goal & Constraints</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Tell the AI what you want to learn and what your limitations are (time, budget, etc.).</p>
+                
+                <label htmlFor="researchGoal" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Research Goal</label>
+                <textarea 
+                    id="researchGoal"
+                    value={researchGoal}
+                    onChange={(e) => setResearchGoal(e.target.value)}
+                    rows={3}
+                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 font-sans text-sm"
+                    disabled={step > 1}
+                />
+                
+                <label htmlFor="constraints" className="mt-4 block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Constraints (Timeline, Budget, etc.)</label>
+                <textarea 
+                    id="constraints"
+                    value={constraints}
+                    onChange={(e) => setConstraints(e.target.value)}
+                    rows={4}
+                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 font-sans text-sm"
+                    disabled={step > 1}
+                />
+
+                 <button onClick={handleSubmit} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                    {isLoading ? 'Generating Plan...' : 'Generate Research Kit'}
+                </button>
+            </div>
+            
+            {step >= 2 && researchKit && (
+                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-4">Step 2: Your "Research-in-a-Box" Kit</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">The AI has generated a complete set of artifacts to kickstart your user research.</p>
+
+                    <div className="space-y-6">
+                        <Artifact a_title="1. Research Plan" a_content={researchKit.research_plan} />
+                        <Artifact a_title="2. Participant Screener" a_content={researchKit.participant_screener} />
+                        <Artifact a_title="3. Email Outreach Template" a_content={researchKit.email_outreach_template} />
+                        <Artifact a_title="4. Moderated Interview Script" a_content={researchKit.interview_script} />
+                        <Artifact a_title="5. Consent Form" a_content={researchKit.consent_form} />
+                        <Artifact a_title="6. Note-Taking & Synthesis Template" a_content={researchKit.synthesis_template} />
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const Artifact: React.FC<{a_title: string, a_content: string}> = ({ a_title, a_content }) => (
+    <div>
+        <h3 className="font-semibold mb-2 text-indigo-600 dark:text-indigo-400">{a_title}</h3>
+        <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-700">
+            <pre className="text-sm whitespace-pre-wrap font-sans">{a_content}</pre>
+        </div>
+    </div>
+);
+
+
 const RoadmapDefenseArchitect: React.FC = () => {
-    const [step, setStep] = useState(1);
-    const [initiatives, setInitiatives] = useState("1. Build a new mobile app -> Increase user retention by 15%\n2. Redesign the onboarding flow -> Improve new user activation rate\n3. Integrate with Salesforce -> Increase enterprise sales");
-    const [stakeholders, setStakeholders] = useState("CEO: Overall business growth\nHead of Sales: Closing enterprise deals this quarter\nCTO: Technical stability and scalability");
-    const [riceScores, setRiceScores] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [defenseKit, setDefenseKit] = useState<any>(null);
+    const [step, setStep] = React.useState(1);
+    const [initiatives, setInitiatives] = React.useState("1. Build a new mobile app -> Increase user retention by 15%\n2. Redesign the onboarding flow -> Improve new user activation rate\n3. Integrate with Salesforce -> Increase enterprise sales");
+    const [stakeholders, setStakeholders] = React.useState("CEO: Overall business growth\nHead of Sales: Closing enterprise deals this quarter\nCTO: Technical stability and scalability");
+    const [riceScores, setRiceScores] = React.useState<any[]>([]);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [defenseKit, setDefenseKit] = React.useState<any>(null);
 
     const handleStartPrioritization = async () => {
         setIsLoading(true);
@@ -226,13 +328,13 @@ const RoadmapDefenseArchitect: React.FC = () => {
 
 
 const RoadmapAlignmentConsultant: React.FC = () => {
-    const [step, setStep] = useState(1);
-    const [vision, setVision] = useState("To become the leading B2B platform for enterprise data analytics.");
-    const [objectives, setObjectives] = useState("Q4 OKRs:\n1. Increase new enterprise user sign-ups by 20%.\n2. Reduce customer churn from 5% to 3%.");
-    const [roadmap, setRoadmap] = useState("Current Roadmap Items:\n- Redesign user dashboard\n- Integrate with Salesforce\n- Build a new mobile app\n- Add two-factor authentication");
-    const [promptSequence, setPromptSequence] = useState('');
-    const [alignmentBriefing, setAlignmentBriefing] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [step, setStep] = React.useState(1);
+    const [vision, setVision] = React.useState("To become the leading B2B platform for enterprise data analytics.");
+    const [objectives, setObjectives] = React.useState("Q4 OKRs:\n1. Increase new enterprise user sign-ups by 20%.\n2. Reduce customer churn from 5% to 3%.");
+    const [roadmap, setRoadmap] = React.useState("Current Roadmap Items:\n- Redesign user dashboard\n- Integrate with Salesforce\n- Build a new mobile app\n- Add two-factor authentication");
+    const [promptSequence, setPromptSequence] = React.useState('');
+    const [alignmentBriefing, setAlignmentBriefing] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleSubmit = async () => {
         setIsLoading(true);
@@ -308,13 +410,13 @@ const RoadmapAlignmentConsultant: React.FC = () => {
 
 
 const QualitativeInsightsSynthesizer: React.FC = () => {
-    const [step, setStep] = useState(1);
-    const [rawData, setRawData] = useState('User A: "The new dashboard is visually pleasing but loads very slowly with my large dataset."\nUser B: "I can\'t figure out what \'segmentation\' means. The terminology is confusing."\nUser C: "Love the new look! Wish I could export the charts to PowerPoint for my weekly report."\nUser D: "The login process is still frustrating. It keeps logging me out."');
-    const [researchGoal, setResearchGoal] = useState('We are exploring why users are churning from our analytics dashboard.');
-    const [clusters, setClusters] = useState<any[]>([]);
-    const [insightsReport, setInsightsReport] = useState('');
-    const [ost, setOst] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [step, setStep] = React.useState(1);
+    const [rawData, setRawData] = React.useState('User A: "The new dashboard is visually pleasing but loads very slowly with my large dataset."\nUser B: "I can\'t figure out what \'segmentation\' means. The terminology is confusing."\nUser C: "Love the new look! Wish I could export the charts to PowerPoint for my weekly report."\nUser D: "The login process is still frustrating. It keeps logging me out."');
+    const [researchGoal, setResearchGoal] = React.useState('We are exploring why users are churning from our analytics dashboard.');
+    const [clusters, setClusters] = React.useState<any[]>([]);
+    const [insightsReport, setInsightsReport] = React.useState('');
+    const [ost, setOst] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleAnalyzeThemes = async () => {
         setIsLoading(true);
@@ -434,11 +536,11 @@ const QualitativeInsightsSynthesizer: React.FC = () => {
 // ... keep other implemented components like CiCdDiagnostician, CodebaseOnboardingCompanion, etc.
 
 const CiCdDiagnostician: React.FC = () => {
-    const [step, setStep] = useState(1);
-    const [symptoms, setSymptoms] = useState('Our main CI build times out on the E2E test suite, taking over 30 minutes. Deployments to staging frequently fail on Tuesdays after the weekly dependency update job runs.');
-    const [promptSequence, setPromptSequence] = useState('');
-    const [stakeholderReport, setStakeholderReport] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [step, setStep] = React.useState(1);
+    const [symptoms, setSymptoms] = React.useState('Our main CI build times out on the E2E test suite, taking over 30 minutes. Deployments to staging frequently fail on Tuesdays after the weekly dependency update job runs.');
+    const [promptSequence, setPromptSequence] = React.useState('');
+    const [stakeholderReport, setStakeholderReport] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleSubmit = async () => {
         setIsLoading(true);
@@ -517,11 +619,11 @@ const CiCdDiagnostician: React.FC = () => {
 };
 
 const CodebaseOnboardingCompanion: React.FC = () => {
-    const [projectScope, setProjectScope] = useState('E-commerce platform built in Rails with microservices for inventory, payments, and user accounts. The frontend is a React SPA. Key challenge is understanding the data flow between the monolith and the newer microservices.');
-    const [promptSequence, setPromptSequence] = useState('');
-    const [summaryDocument, setSummaryDocument] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [isGenerated, setIsGenerated] = useState(false);
+    const [projectScope, setProjectScope] = React.useState('E-commerce platform built in Rails with microservices for inventory, payments, and user accounts. The frontend is a React SPA. Key challenge is understanding the data flow between the monolith and the newer microservices.');
+    const [promptSequence, setPromptSequence] = React.useState('');
+    const [summaryDocument, setSummaryDocument] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [isGenerated, setIsGenerated] = React.useState(false);
 
     const handleSubmit = async () => {
         setIsLoading(true);
@@ -601,13 +703,13 @@ const CodebaseOnboardingCompanion: React.FC = () => {
 };
 
 const ArchitecturalTradeoffAnalyst: React.FC = () => {
-    const [step, setStep] = useState(1);
-    const [problem, setProblem] = useState("We need to build a real-time notification system for 1 million concurrent users.");
-    const [constraints, setConstraints] = useState("Must have less than 200ms latency, must be cost-effective, our team has deep expertise in Kafka but not in Pulsar.");
-    const [options, setOptions] = useState<any[]>([]);
-    const [evaluations, setEvaluations] = useState<any>({});
-    const [adr, setAdr] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [step, setStep] = React.useState(1);
+    const [problem, setProblem] = React.useState("We need to build a real-time notification system for 1 million concurrent users.");
+    const [constraints, setConstraints] = React.useState("Must have less than 200ms latency, must be cost-effective, our team has deep expertise in Kafka but not in Pulsar.");
+    const [options, setOptions] = React.useState<any[]>([]);
+    const [evaluations, setEvaluations] = React.useState<any>({});
+    const [adr, setAdr] = React.useState("");
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleBrainstorm = async () => {
         setIsLoading(true);
@@ -730,13 +832,13 @@ const ArchitecturalTradeoffAnalyst: React.FC = () => {
 
 
 const LegacyCodeArchaeologist: React.FC = () => {
-    const [step, setStep] = useState(1);
-    const [context, setContext] = useState("Our legacy billing system is a Java monolith. Symptoms include slow build times (30+ mins), frequent bugs in the payment module, and it is very difficult to onboard new developers. It processes all B2B payments and is a single point of failure.");
-    const [findings, setFindings] = useState("");
-    const [discoveryPlan, setDiscoveryPlan] = useState("");
-    const [strategyDoc, setStrategyDoc] = useState("");
-    const [riskMemo, setRiskMemo] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [step, setStep] = React.useState(1);
+    const [context, setContext] = React.useState("Our legacy billing system is a Java monolith. Symptoms include slow build times (30+ mins), frequent bugs in the payment module, and it is very difficult to onboard new developers. It processes all B2B payments and is a single point of failure.");
+    const [findings, setFindings] = React.useState("");
+    const [discoveryPlan, setDiscoveryPlan] = React.useState("");
+    const [strategyDoc, setStrategyDoc] = React.useState("");
+    const [riskMemo, setRiskMemo] = React.useState("");
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleStartDiscovery = async () => {
         setIsLoading(true);
@@ -861,12 +963,12 @@ const LegacyCodeArchaeologist: React.FC = () => {
 };
 
 const FeaturePrioritizationFacilitator: React.FC = () => {
-    const [step, setStep] = useState(1);
-    const [features, setFeatures] = useState('1. Build new mobile app (Effort: L)\n2. Redesign the onboarding flow (Effort: M)\n3. Integrate with Salesforce (Effort: XL)');
-    const [businessContext, setBusinessContext] = useState('Our primary OKR this quarter is to increase user retention by 15%. A secondary goal is to improve new user activation rate.');
-    const [promptSequence, setPromptSequence] = useState('');
-    const [prioritizedMemo, setPrioritizedMemo] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [step, setStep] = React.useState(1);
+    const [features, setFeatures] = React.useState('1. Build new mobile app (Effort: L)\n2. Redesign the onboarding flow (Effort: M)\n3. Integrate with Salesforce (Effort: XL)');
+    const [businessContext, setBusinessContext] = React.useState('Our primary OKR this quarter is to increase user retention by 15%. A secondary goal is to improve new user activation rate.');
+    const [promptSequence, setPromptSequence] = React.useState('');
+    const [prioritizedMemo, setPrioritizedMemo] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleSubmit = async () => {
         setIsLoading(true);
@@ -955,12 +1057,12 @@ const FeaturePrioritizationFacilitator: React.FC = () => {
 
 
 const TechnicalDebtStrategist: React.FC = () => {
-    const [step, setStep] = useState(1);
-    const [symptoms, setSymptoms] = useState('Our CI/CD pipeline for the main monolith is taking over 45 minutes to run, which slows down developer velocity. New features in the billing module are taking twice as long as estimated because the code is tightly coupled and lacks tests. We had two minor production incidents last quarter related to this module.');
-    const [businessContext, setBusinessContext] = useState('The billing module is business-critical. It handles all revenue and subscription logic. Any downtime directly impacts revenue. Slowing down feature development in this area means we are falling behind competitors.');
-    const [promptSequence, setPromptSequence] = useState('');
-    const [stakeholderBriefing, setStakeholderBriefing] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [step, setStep] = React.useState(1);
+    const [symptoms, setSymptoms] = React.useState('Our CI/CD pipeline for the main monolith is taking over 45 minutes to run, which slows down developer velocity. New features in the billing module are taking twice as long as estimated because the code is tightly coupled and lacks tests. We had two minor production incidents last quarter related to this module.');
+    const [businessContext, setBusinessContext] = React.useState('The billing module is business-critical. It handles all revenue and subscription logic. Any downtime directly impacts revenue. Slowing down feature development in this area means we are falling behind competitors.');
+    const [promptSequence, setPromptSequence] = React.useState('');
+    const [stakeholderBriefing, setStakeholderBriefing] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleSubmit = async () => {
         setIsLoading(true);
@@ -1047,10 +1149,10 @@ const TechnicalDebtStrategist: React.FC = () => {
 };
 
 const KnowledgeNavigator: React.FC = () => {
-    const [sourceText, setSourceText] = useState('');
-    const [question, setQuestion] = useState('');
-    const [result, setResult] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [sourceText, setSourceText] = React.useState('');
+    const [question, setQuestion] = React.useState('');
+    const [result, setResult] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -1058,16 +1160,25 @@ const KnowledgeNavigator: React.FC = () => {
         setResult('');
 
         try {
-            const prompt = `Based on the following text, please answer the question.\n\nText:\n"""\n${sourceText}\n"""\n\nQuestion: ${question}`;
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found. Please set it in Settings.");
 
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
-            // Using gemini-2.5-flash for a basic Q&A task as per guidelines.
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: prompt,
+             const response = await fetch('/api/rag', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ source_text: sourceText, question: question })
             });
 
-            setResult(response.text);
+             if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to get a response from the server.");
+            }
+
+            const data = await response.json();
+            setResult(data.answer);
         } catch (err: any) {
             console.error(err);
             setResult(`Error: ${err.message}`);
@@ -1118,10 +1229,10 @@ const KnowledgeNavigator: React.FC = () => {
 };
 
 const ProjectKickoff: React.FC = () => {
-    const [projectGoal, setProjectGoal] = useState('');
-    const [stakeholders, setStakeholders] = useState('');
-    const [result, setResult] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [projectGoal, setProjectGoal] = React.useState('');
+    const [stakeholders, setStakeholders] = React.useState('');
+    const [result, setResult] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -1129,17 +1240,25 @@ const ProjectKickoff: React.FC = () => {
         setResult('');
 
         try {
-            const promptContent = KICKOFF_PLAN_PROMPT_TEMPLATE
-                .replace('{{projectGoal}}', projectGoal)
-                .replace('{{stakeholders}}', stakeholders);
-            
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
-            // Using gemini-2.5-pro for a complex text task as per guidelines.
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-pro',
-                contents: promptContent,
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found. Please set it in Settings.");
+
+            const response = await fetch('/api/generate-kickoff', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ project_goal: projectGoal, stakeholders: stakeholders })
             });
-            setResult(response.text);
+
+             if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to get a response from the server.");
+            }
+
+            const data = await response.json();
+            setResult(data.kickoff_plan);
         } catch (err: any) {
             console.error(err);
             setResult(`Error: ${err.message}`);
@@ -1191,12 +1310,12 @@ const ProjectKickoff: React.FC = () => {
 };
 
 const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [model, setModel] = useState<Model>('gemini-2.5-flash');
-    const [prompt, setPrompt] = useState(initialPrompt || '');
-    const [result, setResult] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [model, setModel] = React.useState<Model>('gemini-2.5-flash');
+    const [prompt, setPrompt] = React.useState(initialPrompt || '');
+    const [result, setResult] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (initialPrompt) {
             setPrompt(initialPrompt);
         }
@@ -1208,12 +1327,25 @@ const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
         setResult('');
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
-            const response = await ai.models.generateContent({
-                model: model,
-                contents: prompt,
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found. Please set it in Settings.");
+
+            const response = await fetch('/api/execute-prompt', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ prompt: prompt, model: model })
             });
-            setResult(response.text);
+
+             if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to get a response from the server.");
+            }
+
+            const data = await response.json();
+            setResult(data.result);
         } catch (err: any) {
              console.error(err);
              setResult(`Error: ${err.message}`);
@@ -1233,8 +1365,8 @@ const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
                         onChange={e => setModel(e.target.value as Model)}
                         className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"
                     >
-                        <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-                        <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                        <option value="gemini-2.5-flash">gemini-2.5-flash (Fast & Cost-Effective)</option>
+                        <option value="gemini-2.5-pro">gemini-2.5-pro (Advanced Reasoning)</option>
                     </select>
                 </div>
                 <div>
