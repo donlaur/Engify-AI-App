@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { auth } from '@/lib/auth';
 import { githubConnectionService } from '@/lib/services/GitHubConnectionService';
 import { GitHubClient, extractCodeContext } from '@/lib/integrations/github';
 
@@ -18,7 +18,7 @@ export const maxDuration = 60; // 60 seconds for large repos
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
