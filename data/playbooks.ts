@@ -1,3 +1,4 @@
+
 export interface PlaybookRecipe {
   id: string;
   title: string;
@@ -332,6 +333,30 @@ export const playbookCategories: PlaybookCategory[] = [
             "description": "Helps you construct a data-driven narrative to justify engineering headcount, budget, or R&D spending to your CFO and executive team.",
             "prompt": "Act as a seasoned VP of Finance who partners closely with Engineering. I am an engineering leader preparing for our annual budget planning, and I need to justify my request for additional headcount and resources. Help me build a narrative that the CFO will understand and approve.\n\nI will state my 'ask' (e.g., 'I need to hire 5 more senior engineers'). You will then guide me to build the justification by asking me a series of questions structured around a financial narrative:\n1. **The Investment:** 'What is the total cost of your request (fully loaded)?'\n2. **The Strategic Alignment:** 'Which specific company-level strategic goal for the upcoming year does this investment support?'\n3. **The Expected Return (ROI):** 'What is the measurable business outcome this investment will produce? Frame it in terms of revenue generated, costs saved, or risk averted. Be specific and quantify where possible (e.g., 'This team will build Feature X, which is projected to increase customer retention by 2%, saving $500k annually').'\n4. **The Cost of Inaction:** 'What is the business consequence if we *don't* make this investment? What opportunity will we miss? What risk will we be exposed to?'\n\nAfter I provide the answers, synthesize them into a concise, one-page memo titled 'Investment Proposal:' that I can use as the basis for my budget presentation.\n\n--- MY BUDGET 'ASK' ---\n[Your budget ask here]"
         }
+    ]
+  },
+  {
+    id: 'qa-engineers',
+    title: 'QA Engineers',
+    recipes: [
+      {
+        "id": "qa-test-case-generator",
+        "title": "Comprehensive Test Case Generator",
+        "description": "Generates a full suite of test cases (functional, edge case, negative, exploratory) from a user story or feature spec.",
+        "prompt": "Act as a meticulous QA Lead with a decade of experience in both manual and automated testing. I am going to provide a user story or technical specification for a new feature. Your task is to generate a comprehensive test plan in Markdown format.\n\nThe plan should include the following sections:\n1.  **Positive Test Cases (Happy Path):** A list of test cases that verify the primary functionality works as expected.\n2.  **Negative Test Cases:** A list of test cases that verify the system gracefully handles invalid input or error states.\n3.  **Edge Case Tests:** A list of test cases that probe the boundaries and limits of the system (e.g., empty inputs, maximum values, unusual character sets).\n4.  **Exploratory Testing Charter:** A mission statement for an exploratory testing session, including what areas to focus on and what types of bugs to look for (e.g., 'Mission: Explore the user profile page to find any UI inconsistencies or confusing workflows. Look for issues related to data formatting and user permissions.').\n\nFor each test case, provide a 'Test Description' and 'Expected Result'.\n\n--- FEATURE SPECIFICATION ---\n[Paste your user story or feature spec here]"
+      },
+      {
+        "id": "qa-failure-diagnoser",
+        "title": "Test Failure Diagnoser",
+        "description": "Analyzes a failed test log or description to suggest potential root causes and debugging paths for the development team.",
+        "prompt": "Act as a Senior QA Automation Engineer with deep expertise in root cause analysis. A test has failed in our CI/CD pipeline, and I need your help to diagnose the likely cause before I hand it over to a developer. I will provide the failed test log and a description of the test.\n\nYour task is to analyze the information and provide:\n1.  **A Summary of the Failure:** In one sentence, what failed and what was the expected outcome?\n2.  **Top 3 Potential Root Causes:** List the three most likely causes for this failure, ordered from most to least probable. For each cause, provide a brief explanation. (e.g., 1. Backend API Change: The API contract may have changed, causing the frontend test to fail. 2. Environment Issue: A dependency in the test environment might be down or misconfigured. 3. Frontend Race Condition: The test might be flaky due to a timing issue in the UI code.)\n3.  **A Recommended First Action:** Suggest the single most effective first step a developer should take to confirm the root cause.\n\n--- FAILED TEST LOG & DESCRIPTION ---\n[Paste the logs and a brief description of what the test was supposed to do here]"
+      },
+      {
+        "id": "qa-testability-reviewer",
+        "title": "Testability Review Assistant",
+        "description": "Reviews a technical spec or feature plan to proactively identify potential testing challenges and suggest design improvements for better testability.",
+        "prompt": "Act as a Principal Software Development Engineer in Test (SDET) who is a champion for building testable software. I am a QA engineer reviewing a technical specification for a new feature *before* development begins. I want to identify any potential testability issues early.\n\nI will provide the technical spec below. Please review it and provide:\n1.  **Clarifying Questions for the Team:** A list of questions that will help uncover hidden assumptions or ambiguities that could make testing difficult.\n2.  **Potential Testability Blind Spots:** Identify any parts of the design that seem hard to test with automation (e.g., dependencies on third-party systems, complex UI interactions, lack of clear API contracts).\n3.  **Suggestions for Improved Testability:** Propose concrete changes to the design that would make the feature easier to test. (e.g., 'Consider adding a health check endpoint to this new service,' 'Ensure this feature is controlled by a feature flag to allow for safe testing in production,' 'Can we use dependency injection to mock this external service in our integration tests?').\n\n--- TECHNICAL SPECIFICATION ---\n[Paste the technical spec or feature plan here]"
+      }
     ]
   }
 ];
