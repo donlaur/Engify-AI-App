@@ -95,6 +95,16 @@ import {
   Calendar,
   Clock,
   Bell,
+
+  // Additional icons for patterns/learn pages
+  Brain,
+  Link,
+  HelpCircle,
+  Focus,
+  Shield,
+  TreePine,
+  RefreshCw,
+  Database,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -184,6 +194,16 @@ export const Icons = {
   calendar: Calendar,
   clock: Clock,
   bell: Bell,
+
+  // Pattern page icons
+  brain: Brain,
+  link: Link,
+  help: HelpCircle,
+  focus: Focus,
+  shield: Shield,
+  tree: TreePine,
+  refresh: RefreshCw,
+  database: Database,
 } as const;
 
 // Export type for icon names
