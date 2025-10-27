@@ -55,6 +55,12 @@ export function Header({ user }: HeaderProps) {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex md:items-center md:space-x-6">
+          <Link
+            href="/pricing"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Pricing
+          </Link>
           {navigationLinks.map((link) => (
             <Link
               key={link.href}
