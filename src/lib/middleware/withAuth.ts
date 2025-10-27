@@ -2,12 +2,12 @@
  * Authentication Middleware
  * 
  * Ensures user is authenticated before accessing route
+ * Note: For App Router, use auth() directly in Server Components/Actions
+ * This middleware is for API routes if needed
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { unauthorized } from '@/lib/api/response';
+import { auth } from '@/app/api/auth/[...nextauth]/route';
 
 export interface AuthContext {
   user: {
@@ -19,26 +19,21 @@ export interface AuthContext {
   };
 }
 
-type AuthHandler = (
-  req: NextRequest,
-  context: AuthContext
-) => Promise<NextResponse>;
-
 /**
- * Middleware to require authentication
- * 
- * @example
- * export const GET = withAuth(async (req, { user }) => {
- *   // user.id is guaranteed to exist
- *   return success({ userId: user.id });
- * });
+ * Middleware to check authentication for API routes
+ * Usage: Wrap your API route handler with this function
  */
-export function withAuth(handler: AuthHandler) {
-  return async (req: NextRequest): Promise<NextResponse> => {
-    const session = await getServerSession(authOptions);
+export async function withAuth(
+  handler: (req: NextRequest) => Promise<NextResponse>
+): Promise<(req: NextRequest) => Promise<NextResponse>> {
+  return async (req: NextRequest) => {
+    const session = await auth();
 
     if (!session || !session.user) {
-      return unauthorized('Authentication required');
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
     // Build context with user info

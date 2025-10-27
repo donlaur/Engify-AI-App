@@ -32,7 +32,7 @@ export abstract class BaseService<T extends { _id: ObjectId }> {
   async findById(id: string): Promise<T | null> {
     const collection = await this.getCollection();
     const doc = await collection.findOne({ _id: new ObjectId(id) } as Filter<T>);
-    return doc;
+    return doc as T | null;
   }
 
   /**
@@ -40,7 +40,8 @@ export abstract class BaseService<T extends { _id: ObjectId }> {
    */
   async findOne(filter: Filter<T>): Promise<T | null> {
     const collection = await this.getCollection();
-    return await collection.findOne(filter);
+    const doc = await collection.findOne(filter);
+    return doc as T | null;
   }
 
   /**
@@ -48,7 +49,8 @@ export abstract class BaseService<T extends { _id: ObjectId }> {
    */
   async find(filter: Filter<T> = {}): Promise<T[]> {
     const collection = await this.getCollection();
-    return await collection.find(filter).toArray();
+    const docs = await collection.find(filter).toArray();
+    return docs as T[];
   }
 
   /**
@@ -67,7 +69,7 @@ export abstract class BaseService<T extends { _id: ObjectId }> {
       collection.countDocuments(filter),
     ]);
 
-    return { data, total };
+    return { data: data as T[], total };
   }
 
   /**
@@ -78,7 +80,8 @@ export abstract class BaseService<T extends { _id: ObjectId }> {
     const validated = this.schema.parse(data);
 
     const collection = await this.getCollection();
-    const result = await collection.insertOne(validated as OptionalId<T>);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await collection.insertOne(validated as any); // MongoDB type mismatch with Zod
 
     return {
       ...validated,
@@ -97,11 +100,12 @@ export abstract class BaseService<T extends { _id: ObjectId }> {
 
     const result = await collection.findOneAndUpdate(
       { _id: new ObjectId(id) } as Filter<T>,
-      { $set: { ...update, updatedAt: new Date() } },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { $set: { ...update, updatedAt: new Date() } as any }, // MongoDB update type complexity
       { returnDocument: 'after' }
     );
 
-    return result;
+    return result as T | null;
   }
 
   /**
