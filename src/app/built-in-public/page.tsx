@@ -344,8 +344,8 @@ export default function BuiltInPublicPage() {
                 <div className="rounded-lg bg-white p-4 border-l-4 border-green-500">
                   <p className="font-semibold text-green-900 mb-2">✅ The Point:</p>
                   <p className="text-sm text-green-800">
-                    I can sit down and code. I&apos;m not old and stuck in my ways. This is rapid prototyping: 
-                    build fast, validate fast, pivot fast. If it works, keep it. If not, start over. No ego.
+                    This is rapid prototyping at its finest: build fast, validate fast, pivot fast. 
+                    If it works, keep it. If not, delete and start over. No ego, just results.
                   </p>
                 </div>
               </div>
