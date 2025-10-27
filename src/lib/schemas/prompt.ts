@@ -18,14 +18,33 @@ export const PromptCategorySchema = z.enum([
   'general',
 ]);
 
-export const UserRoleSchema = z.enum([
+export const userRoles = [
   'c-level',
   'engineering-manager',
   'engineer',
   'product-manager',
   'designer',
   'qa',
-]);
+  'architect',
+  'devops-sre',
+  'scrum-master',
+  'product-owner',
+] as const;
+
+export type UserRole = (typeof userRoles)[number];
+
+export const experienceLevels = [
+  'junior',
+  'mid-level',
+  'senior',
+  'lead',
+  'principal',
+  'director',
+  'vp',
+] as const;
+
+export const UserRoleSchema = z.enum(userRoles);
+export const ExperienceLevelSchema = z.enum(experienceLevels);
 
 export const PromptPatternSchema = z.enum([
   'persona',
@@ -52,6 +71,7 @@ export const PromptSchema = z.object({
   content: z.string().min(1),
   category: PromptCategorySchema,
   role: UserRoleSchema.optional(),
+  experienceLevel: ExperienceLevelSchema.optional(),
   pattern: PromptPatternSchema.optional(),
   tags: z.array(z.string()).default([]),
   views: z.number().int().min(0).default(0),
@@ -78,7 +98,7 @@ export const UpdatePromptSchema = CreatePromptSchema.partial();
 // Types
 export type Prompt = z.infer<typeof PromptSchema>;
 export type PromptCategory = z.infer<typeof PromptCategorySchema>;
-export type UserRole = z.infer<typeof UserRoleSchema>;
+export type ExperienceLevel = z.infer<typeof ExperienceLevelSchema>;
 export type PromptPattern = z.infer<typeof PromptPatternSchema>;
 export type CreatePrompt = z.infer<typeof CreatePromptSchema>;
 export type UpdatePrompt = z.infer<typeof UpdatePromptSchema>;
@@ -102,6 +122,10 @@ export const roleLabels: Record<UserRole, string> = {
   'product-manager': 'Product Manager',
   designer: 'Designer',
   qa: 'QA Engineer',
+  architect: 'Architect',
+  'devops-sre': 'DevOps/SRE',
+  'scrum-master': 'Scrum Master',
+  'product-owner': 'Product Owner',
 };
 
 export const patternLabels: Record<PromptPattern, string> = {

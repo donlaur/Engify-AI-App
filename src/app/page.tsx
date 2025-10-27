@@ -78,14 +78,14 @@ export default function Home() {
             </Badge>
 
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
-              #1 Prompt Library for{' '}
+              Amplify Engineers with{' '}
               <span className="bg-gradient-to-r from-green-300 to-cyan-300 bg-clip-text text-transparent">
-                Engineering Teams
+                AI Power
               </span>
             </h1>
 
-            <p className="mx-auto max-w-2xl text-xl text-white/90">
-              Find {siteStats.totalPrompts}+ expert prompts, {siteStats.totalPatterns} proven patterns, and AI best practices to 10x your team's productivity.
+            <p className="mx-auto max-w-2xl text-xl text-white">
+              {siteStats.totalPrompts}+ expert prompts, {siteStats.totalPatterns} battle-tested patterns, and gamified learning. Transform your team's capabilities with Engify.ai
             </p>
 
             <div className="flex flex-col justify-center gap-4 pt-8">
@@ -128,7 +128,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="container bg-white py-16">
+      <section className="container bg-white dark:bg-gray-900 py-16">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-8 md:grid-cols-4">
             {stats.map((stat, i) => (
@@ -137,10 +137,10 @@ export default function Home() {
                 className="animate-fade-in text-center"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
-                <div className="mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-5xl font-bold text-transparent">
+                <div className="mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-6xl font-bold text-transparent">
                   {stat.value}
                 </div>
-                <p className="text-sm font-medium uppercase tracking-wide text-gray-600">
+                <p className="text-base font-semibold uppercase tracking-wide text-gray-900 dark:text-gray-100">
                   {stat.label}
                 </p>
               </div>
