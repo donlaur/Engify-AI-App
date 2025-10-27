@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,13 +13,9 @@ import { RatingStars } from '@/components/features/RatingStars';
 import { MakeItMineButton } from '@/components/features/MakeItMineButton';
 import { useToast } from '@/hooks/use-toast';
 
-interface PromptDetailPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function PromptDetailPage({ params }: PromptDetailPageProps) {
+export default function PromptDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [viewCount, setViewCount] = useState(0);
@@ -28,7 +24,7 @@ export default function PromptDetailPage({ params }: PromptDetailPageProps) {
 
   // Get all prompts and find the one with matching ID
   const prompts = getSeedPromptsWithTimestamps();
-  const prompt = prompts.find((p) => p.id === params.id);
+  const prompt = prompts.find((p) => p.id === id);
 
   // Track view count
   useEffect(() => {
@@ -50,24 +46,24 @@ export default function PromptDetailPage({ params }: PromptDetailPageProps) {
       }
 
       // Load user rating from localStorage
-      const ratingKey = `prompt_rating_${params.id}`;
+      const ratingKey = `prompt_rating_${id}`;
       const savedRating = localStorage.getItem(ratingKey);
       if (savedRating) {
         setUserRating(Number(savedRating));
       }
     }
-  }, [prompt, params.id]);
+  }, [prompt, id]);
 
   // Handle rating
   const handleRate = (rating: number) => {
     setUserRating(rating);
-    localStorage.setItem(`prompt_rating_${params.id}`, String(rating));
+    localStorage.setItem(`prompt_rating_${id}`, String(rating));
     toast({
       title: 'Rating saved!',
       description: `You rated this prompt ${rating} stars`,
     });
     // TODO: In production, send to API
-    // await fetch(`/api/prompts/${params.id}/rate`, { method: 'POST', body: { rating } });
+    // await fetch(`/api/prompts/${id}/rate`, { method: 'POST', body: { rating } });
   };
 
   // Handle copy to clipboard
