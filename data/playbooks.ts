@@ -147,7 +147,156 @@ Your review should be structured in three parts:
       }
     ],
   },
-    {
+  {
+    id: 'designers',
+    title: 'Designers',
+    recipes: [
+        {
+            id: 'design-user-personas',
+            title: 'Generate User Personas',
+            description: 'Creates rich, detailed user personas based on a product brief and target audience.',
+            prompt: `Act as a senior UX researcher. I need to create a set of user personas for a new product. Based on the product brief below, generate 2-3 distinct user personas.
+
+For each persona, include:
+- A name and a photo suggestion.
+- A short bio.
+- Key goals and motivations.
+- Primary pain points and frustrations.
+- A quote that summarizes their perspective.
+
+--- PRODUCT BRIEF ---
+[Provide a description of the product and its target audience. e.g., "A mobile app for busy parents to coordinate family schedules and tasks."]`
+        },
+        {
+            id: 'design-ux-microcopy',
+            title: 'Brainstorm UI/UX Microcopy',
+            description: 'Generates clear, concise, and on-brand microcopy for UI elements like buttons, tooltips, and empty states.',
+            prompt: `Act as a UX writer. I need some microcopy for a specific UI component. My product's brand voice is [e.g., friendly, professional, witty].
+
+Please brainstorm 3-5 options for the following UI element:
+
+**UI Element:** [e.g., "An empty state for a user's 'Favorites' list."]
+**Context:** [e.g., "This is what the user sees when they haven't favorited any items yet."]
+**Goal:** [e.g., "To encourage the user to start favoriting items."]`
+        }
+    ]
+  },
+  {
+    id: 'product_owners',
+    title: 'Product Owners',
+    recipes: [
+      {
+        id: 'po-story-refiner',
+        title: 'User Story Refinement & Splitting Co-Pilot',
+        description: 'Helps you break down large, ambiguous features into small, well-defined, and sprint-ready user stories with clear acceptance criteria.',
+        prompt: `Act as an expert Agile Coach specializing in backlog refinement. I am a Product Owner, and I need to break down a large feature into smaller user stories for the development team.
+
+I will provide the high-level feature idea. You will then guide me through a refinement process:
+1.  **Clarify the 'Why':** Ask me, 'What is the core user problem we are solving with this feature? What is the desired outcome for the user?'
+2.  **Identify User Roles:** Ask, 'Who are the different types of users that will interact with this feature?'
+3.  **Brainstorm 'Micro-Stories':** Based on my answers, generate a list of potential user stories using the format 'As a [user role], I want to [action] so that [benefit].' Focus on breaking the feature into the smallest possible slices of value.
+4.  **Draft Acceptance Criteria:** For the highest-priority story you generated, draft a set of acceptance criteria in the 'Given-When-Then' format to ensure it's ready for development.
+
+--- HIGH-LEVEL FEATURE ---
+[Paste your high-level feature idea here]`
+      },
+      {
+        id: 'po-backlog-prioritizer',
+        title: 'Backlog Prioritization Assistant',
+        description: 'Guides you in applying an objective framework to prioritize your product backlog, helping you make defensible decisions based on value and effort.',
+        prompt: `Act as a pragmatic Product Owner with deep experience in backlog management. I have a list of backlog items, and I need help prioritizing them objectively.
+
+I will provide a list of items. You will then help me apply a 'Value vs. Effort' prioritization matrix.
+
+For each item on my list, you will ask me to score it on two dimensions:
+1.  **Value Score (1-10):** 'On a scale of 1 to 10, how much value does this item deliver to the user or the business?'
+2.  **Effort Score (1-10):** 'On a scale of 1 to 10, how much effort does the development team believe this will take to implement?'
+
+After I provide the scores for all items, you will categorize them into four quadrants and provide a prioritized list:
+1.  **Quick Wins (High Value, Low Effort):** Do these first.
+2.  **Major Projects (High Value, High Effort):** Plan these carefully.
+3.  **Fill-ins (Low Value, Low Effort):** Do these if you have time.
+4.  **Reconsider (Low Value, High Effort):** Question why these are on the backlog.
+
+--- BACKLOG ITEMS ---
+[Paste your list of backlog items here]`
+      },
+      {
+        id: 'po-stakeholder-comms',
+        title: 'Stakeholder "Say No" Script Builder',
+        description: 'Helps you craft a diplomatic, clear, and respectful response to a stakeholder request that you need to decline or postpone.',
+        prompt: `Act as a communications expert and veteran Product Owner. I've received a feature request from a stakeholder that doesn't align with our current priorities, and I need to say 'no' without damaging the relationship.
+
+I will describe the request and the reason for declining it. You will then help me draft a response using the 'A-R-C' method:
+1.  **Acknowledge & Appreciate:** Start by acknowledging the request and showing appreciation for the stakeholder's input. (e.g., 'Thanks so much for sharing this idea. I really appreciate you thinking about how we can improve X.')
+2.  **Reframe & Explain:** Gently reframe the 'no' by explaining the current priorities and the 'why' behind them. Connect the current work back to the larger goals we've all agreed on. (e.g., 'Right now, our main focus for this quarter is on improving user retention, which is why we're prioritizing features A and B.')
+3.  **Collaborate & Re-engage:** Close by offering a path forward. Suggest adding their idea to the backlog for future consideration or finding an alternative, lower-effort way to solve their underlying problem. (e.g., 'This is a valuable idea that I've added to our backlog for consideration in our next planning cycle. Could we connect next week to discuss if there's a smaller way to address the problem you're seeing?')
+
+--- STAKEHOLDER REQUEST & REASON FOR DECLINING ---
+[Paste the stakeholder request and your reason for declining here]`
+      },
+    ]
+  },
+  {
+    id: 'scrum_masters',
+    title: 'Scrum Masters',
+    recipes: [
+      {
+        id: 'scrum-retro-facilitator',
+        title: 'Retrospective Facilitator',
+        description: 'Generates creative and effective formats for your team\'s sprint retrospective, helping to spark new conversations and drive actionable improvements.',
+        prompt: `Act as an experienced Agile Coach and Scrum Master. I need to facilitate a sprint retrospective for my team, and I want to use a format other than the standard 'What went well, what didn't.'
+
+Based on the context I provide about the last sprint, suggest a suitable retrospective format and provide a set of facilitator questions for me to use.
+
+**Available Formats:**
+-   **Mad, Sad, Glad:** Focuses on the emotional journey of the sprint.
+-   **Starfish (Keep, More of, Less of, Start, Stop):** A comprehensive format for identifying actions.
+-   **Sailboat/Speedboat:** Uses the metaphor of a boat to identify things that helped, things that hindered, and potential risks.
+-   **4 Ls (Liked, Learned, Lacked, Longed For):** A simple and effective format for reflection.
+
+Your response should include:
+1.  **Recommended Format:** The name of the format you recommend.
+2.  **Why You Recommend It:** A brief explanation of why this format is a good fit for my team's situation.
+3.  **Facilitator's Script:** A set of 3-5 open-ended questions to guide the team through the retrospective using your chosen format.
+
+--- SPRINT CONTEXT ---
+[Provide some context about the last sprint, e.g., "The team seemed a bit burned out," "We successfully shipped a major feature but had some last-minute bugs," "There was some confusion about priorities."]`
+      },
+      {
+        id: 'scrum-impediment-triage',
+        title: 'Impediment Triage Bot',
+        description: 'Helps you systematically analyze a team impediment, identify the root cause, and determine the next actionable step to resolve it.',
+        prompt: `Act as a veteran Scrum Master who is an expert at removing blockers. A team member has raised an impediment, and I need your help to think through how to solve it.
+
+I will describe the impediment. You will then guide me through a problem-solving framework by asking me a series of questions:
+1.  **Clarify the Impact:** 'What is the immediate impact of this impediment on the sprint goal? Who on the team is blocked right now?'
+2.  **Identify the Scope:** 'Is this impediment within the team's control to solve, or does it involve external people, teams, or processes?'
+3.  **Brainstorm Root Causes:** 'Let's brainstorm 3 potential root causes for this issue. What is the most likely one?'
+4.  **Determine the Next Action:** 'Based on the most likely root cause, what is the single smallest, most immediate action you can take to start resolving this? Who do you need to talk to first?'
+
+Your goal is not to solve the problem for me, but to help me structure my thinking so I can solve it effectively.
+
+--- IMPEDIMENT DESCRIPTION ---
+[Describe the impediment here, e.g., "The staging environment is down," "We are waiting on the design team for final mockups."]`
+      },
+      {
+        id: 'scrum-agile-coach',
+        title: 'Agile Principles Coach',
+        description: 'Helps you address common team anti-patterns by providing coaching questions and talking points rooted in Agile principles.',
+        prompt: `Act as a wise and empathetic Agile Coach. I've observed a recurring challenge or 'anti-pattern' in my team, and I need help preparing to address it in a constructive, coaching-oriented way.
+
+I will describe the anti-pattern. You will then provide me with a coaching toolkit:
+1.  **The Underlying Agile Principle:** Identify the core Agile principle or value that is being compromised (e.g., 'Sustainable Pace,' 'Simplicity,' 'Self-Organizing Teams').
+2.  **Powerful Questions:** Provide 3-4 open-ended, non-judgmental questions I can ask the team to help them recognize the problem and its impact themselves. (e.g., 'I've noticed we often have work spilling over into the next sprint. What does that feel like for you? What impact does that have on our ability to forecast?').
+3.  **A Conversation Starter:** Suggest a way to introduce the topic to the team, perhaps during a retrospective. (e.g., 'For this retrospective, I'd like to explore the theme of predictability. Let's talk about the story of our sprint burndown chart.').
+
+--- TEAM ANTI-PATTERN ---
+[Describe the anti-pattern here, e.g., "The team consistently takes on more work than they can complete in a sprint," "Daily stand-ups are turning into long status report meetings."]`
+      },
+    ]
+  },
+  {
     id: 'leadership',
     title: 'Engineering Leaders & PMs',
     recipes: [
@@ -352,6 +501,18 @@ The questions should be constructive and assume a high-trust environment.`,
 
 --- AI-GENERATED OUTPUT ---
 [Paste the AI output you want to evaluate here]`
+      },
+      {
+        id: 'embody-a-persona',
+        title: 'Embody a Persona',
+        description: 'Instructs the AI to adopt a specific persona to improve the quality and context of its responses.',
+        prompt: `For our entire conversation, I want you to embody a specific persona. This will help you provide more relevant and insightful responses.
+
+**Persona:** [e.g., "A skeptical but fair Principal Engineer," "A customer-obsessed Product Manager," "An empathetic career coach"]
+
+**Your Goal:** [e.g., "To help me pressure-test my technical design," "To ensure my feature ideas are focused on user value," "To guide me through a difficult career decision"]
+
+Please confirm you understand this persona and goal before we begin.`
       },
     ],
   },
