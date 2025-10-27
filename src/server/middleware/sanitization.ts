@@ -15,7 +15,8 @@ import { t } from '../trpc';
  * Sanitization middleware
  * Sanitizes all string inputs in the request
  */
-export const sanitizationMiddleware = t.middleware(async ({ next, rawInput }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sanitizationMiddleware = t.middleware(async ({ next, rawInput }: { next: any; rawInput: unknown }) => {
   // Check for obvious XSS attempts
   if (typeof rawInput === 'string' && containsScriptTag(rawInput)) {
     throw new TRPCError({
@@ -55,7 +56,7 @@ export const sanitizationMiddleware = t.middleware(async ({ next, rawInput }) =>
   if (typeof rawInput === 'string') {
     sanitizedInput = sanitizeObject({ value: rawInput }, 'basic').value;
   } else if (rawInput && typeof rawInput === 'object') {
-    sanitizedInput = sanitizeObject(rawInput, 'basic');
+    sanitizedInput = sanitizeObject(rawInput as Record<string, unknown>, 'basic');
   }
 
   // Continue with sanitized input
