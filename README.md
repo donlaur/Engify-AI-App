@@ -80,9 +80,10 @@ See the [Documentation Index](./docs/README.md) for complete navigation.
 - **Future**: React Native or Swift/Kotlin apps
 
 ### Deployment
-- **Hosting**: Vercel or AWS
+- **Hosting**: AWS (Amplify or Lambda)
 - **Database**: MongoDB Atlas
-- **CDN**: Automatic (Vercel/CloudFront)
+- **CDN**: CloudFront
+- **Infrastructure**: SST (Serverless Stack)
 
 ---
 
