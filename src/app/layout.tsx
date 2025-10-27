@@ -24,13 +24,38 @@ export const metadata: Metadata = {
     'Gemini',
   ],
   applicationName: 'Engify.ai',
+  authors: [{ name: 'Engify.ai Team' }],
+  creator: 'Engify.ai',
+  publisher: 'Engify.ai',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://engify.ai',
+    siteName: 'Engify.ai',
+    title: 'Engify.ai - Master AI Prompt Engineering',
+    description:
+      'Transform engineers into AI power users. 67+ expert prompts, 15 battle-tested patterns, gamified learning. Free forever.',
+    images: [
+      {
+        url: 'https://engify.ai/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Engify.ai - AI Prompt Engineering Platform',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Engify.ai - Master AI Prompt Engineering',
+    description:
+      'Transform engineers into AI power users. 67+ expert prompts, 15 battle-tested patterns. Free forever.',
+    images: ['https://engify.ai/og-image.png'],
+    creator: '@engifyai',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Engify.ai',
-    authors: [{ name: 'Engify.ai Team' }],
-    creator: 'Engify.ai',
-    publisher: 'Engify.ai',
   },
   robots: {
     index: true,

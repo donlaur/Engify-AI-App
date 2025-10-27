@@ -2,11 +2,16 @@
 
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { TokenCounter } from '@/components/workbench/TokenCounter';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -115,13 +120,13 @@ export default function WorkbenchPage() {
                 {/* Prompt Input */}
                 <div className="space-y-2">
                   <Label htmlFor="prompt">Your Prompt</Label>
-                  <Textarea
+                  <textarea
                     id="prompt"
                     placeholder="Enter your prompt here..."
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     rows={12}
-                    className="font-mono text-sm"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                   <p className="text-xs text-muted-foreground">
                     {prompt.length} characters
@@ -131,19 +136,12 @@ export default function WorkbenchPage() {
                 {/* Execute Button */}
                 <div className="flex gap-2">
                   <Button
-                    onClick={() => setShowTokenCounter(!showTokenCounter)}
-                    variant="outline"
-                    size="lg"
-                  >
-                    <Icons.hash className="mr-2 h-4 w-4" />
-                    {showTokenCounter ? 'Hide' : 'Show'} Tokens
-                  </Button>
-                  <Button
                     onClick={handleExecute}
-                    disabled={!prompt.trim() || isExecuting}
+                    disabled={!prompt.trim() || isLoading}
                     size="lg"
+                    className="w-full"
                   >
-                    {isExecuting ? (
+                    {isLoading ? (
                       <>
                         <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                         Executing...
@@ -151,7 +149,7 @@ export default function WorkbenchPage() {
                     ) : (
                       <>
                         <Icons.play className="mr-2 h-4 w-4" />
-                        Execute
+                        Execute Prompt
                       </>
                     )}
                   </Button>

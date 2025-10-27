@@ -1,3 +1,5 @@
+'use client';
+
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
@@ -14,7 +16,8 @@ export default function OfflinePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              It looks like you&apos;ve lost your internet connection. Some features may be limited.
+              It looks like you&apos;ve lost your internet connection. Some
+              features may be limited.
             </p>
             <div className="space-y-2 text-left">
               <p className="text-sm font-semibold">Available offline:</p>
@@ -24,10 +27,7 @@ export default function OfflinePage() {
                 <li>• Read learning content</li>
               </ul>
             </div>
-            <Button
-              onClick={() => window.location.reload()}
-              className="w-full"
-            >
+            <Button onClick={() => window.location.reload()} className="w-full">
               <Icons.refresh className="mr-2 h-4 w-4" />
               Try Again
             </Button>
