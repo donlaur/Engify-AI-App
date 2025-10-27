@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Icons } from '@/lib/icons';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Input } from '@/components/ui/input';
@@ -19,19 +19,39 @@ import type { Prompt, PromptCategory, UserRole } from '@/lib/schemas/prompt';
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
 import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 
-// Use seed data - will be replaced with API call
-const mockPrompts: Prompt[] = getSeedPromptsWithTimestamps();
-
 export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<
     PromptCategory | 'all'
   >('all');
   const [selectedRole, setSelectedRole] = useState<UserRole | 'all'>('all');
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
+
+  // Fetch prompts from API on mount
+  useEffect(() => {
+    async function fetchPrompts() {
+      try {
+        const res = await fetch('/api/prompts');
+        if (res.ok) {
+          const data = await res.json();
+          setPrompts(data.prompts || []);
+        } else {
+          // Fallback to static data
+          setPrompts(getSeedPromptsWithTimestamps());
+        }
+      } catch (error) {
+        console.error('Error fetching prompts:', error);
+        setPrompts(getSeedPromptsWithTimestamps());
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchPrompts();
+  }, []);
 
   // Filter prompts
-  const filteredPrompts = mockPrompts.filter((prompt) => {
+  const filteredPrompts = prompts.filter((prompt) => {
     const matchesSearch =
       prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       prompt.description.toLowerCase().includes(searchQuery.toLowerCase());

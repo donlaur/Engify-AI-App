@@ -16,10 +16,30 @@ function generateSlug(title: string, id: string): string {
 }
 
 async function seedDatabase() {
+  // Try to load from .env.local
+  const fs = require('fs');
+  const path = require('path');
+  
+  try {
+    const envPath = path.join(process.cwd(), '.env.local');
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf-8');
+      const mongoMatch = envContent.match(/MONGODB_URI=(.+)/);
+      if (mongoMatch) {
+        // Remove quotes if present
+        process.env.MONGODB_URI = mongoMatch[1].trim().replace(/^["']|["']$/g, '');
+      }
+    }
+  } catch (e) {
+    // Ignore
+  }
+  
   const uri = process.env.MONGODB_URI;
   
   if (!uri) {
     console.error('❌ MONGODB_URI not found in environment variables');
+    console.log('💡 Add MONGODB_URI to your .env.local file');
+    console.log('   Example: MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/engify');
     process.exit(1);
   }
 
