@@ -30,7 +30,12 @@ interface RCAData {
   preventionSteps: string;
 }
 
-const SEVERITY_LEVELS = ['SEV-1 (Critical)', 'SEV-2 (High)', 'SEV-3 (Medium)', 'SEV-4 (Low)'];
+const SEVERITY_LEVELS = [
+  'SEV-1 (Critical)',
+  'SEV-2 (High)',
+  'SEV-3 (Medium)',
+  'SEV-4 (Low)',
+];
 
 export default function RCABuilderPage() {
   const [step, setStep] = useState(1);
@@ -102,7 +107,7 @@ ${data.preventionSteps}
         {/* Header */}
         <div className="mb-8 text-center">
           <Badge variant="secondary" className="mb-4">
-            <Icons.fileText className="mr-2 h-3 w-3" />
+            <Icons.document className="mr-2 h-3 w-3" />
             Interactive Builder
           </Badge>
           <h1 className="mb-2 text-4xl font-bold">RCA / Postmortem Builder</h1>
@@ -113,18 +118,21 @@ ${data.preventionSteps}
 
         {/* Progress */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2 flex items-center justify-between">
             <span className="text-sm font-medium">
               Step {Math.min(step, totalSteps)} of {totalSteps}
             </span>
             <span className="text-sm text-muted-foreground">
-              {Math.round((Math.min(step, totalSteps) / totalSteps) * 100)}% Complete
+              {Math.round((Math.min(step, totalSteps) / totalSteps) * 100)}%
+              Complete
             </span>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-2 overflow-hidden rounded-full bg-gray-200">
             <div
               className="h-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-300"
-              style={{ width: `${(Math.min(step, totalSteps) / totalSteps) * 100}%` }}
+              style={{
+                width: `${(Math.min(step, totalSteps) / totalSteps) * 100}%`,
+              }}
             />
           </div>
         </div>
@@ -179,7 +187,9 @@ ${data.preventionSteps}
                   id="services"
                   placeholder="e.g., API Gateway, User Authentication"
                   value={data.impactedServices}
-                  onChange={(e) => updateData('impactedServices', e.target.value)}
+                  onChange={(e) =>
+                    updateData('impactedServices', e.target.value)
+                  }
                 />
               </div>
               <div>
@@ -188,12 +198,16 @@ ${data.preventionSteps}
                   id="detection"
                   placeholder="e.g., PagerDuty alert, Customer report, Monitoring dashboard"
                   value={data.detectionMethod}
-                  onChange={(e) => updateData('detectionMethod', e.target.value)}
+                  onChange={(e) =>
+                    updateData('detectionMethod', e.target.value)
+                  }
                 />
               </div>
               <Button
                 onClick={() => setStep(2)}
-                disabled={!data.incidentTitle || !data.dateTime || !data.severity}
+                disabled={
+                  !data.incidentTitle || !data.dateTime || !data.severity
+                }
                 className="w-full"
               >
                 Next: Timeline
@@ -229,7 +243,11 @@ ${data.preventionSteps}
                 />
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(1)}
+                  className="flex-1"
+                >
                   <Icons.arrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
@@ -272,12 +290,18 @@ ${data.preventionSteps}
                   id="contributing"
                   placeholder="What other factors made this worse or allowed it to happen? (e.g., lack of monitoring, missing alerts, unclear runbooks)"
                   value={data.contributingFactors}
-                  onChange={(e) => updateData('contributingFactors', e.target.value)}
+                  onChange={(e) =>
+                    updateData('contributingFactors', e.target.value)
+                  }
                   className="min-h-[120px]"
                 />
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(2)}
+                  className="flex-1"
+                >
                   <Icons.arrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
@@ -299,9 +323,7 @@ ${data.preventionSteps}
           <Card>
             <CardHeader>
               <CardTitle>Step 4: Resolution Steps</CardTitle>
-              <CardDescription>
-                How was the incident resolved?
-              </CardDescription>
+              <CardDescription>How was the incident resolved?</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -315,7 +337,11 @@ ${data.preventionSteps}
                 />
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(3)} className="flex-1">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(3)}
+                  className="flex-1"
+                >
                   <Icons.arrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
@@ -343,7 +369,9 @@ ${data.preventionSteps}
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="prevention">Action Items & Prevention Steps *</Label>
+                <Label htmlFor="prevention">
+                  Action Items & Prevention Steps *
+                </Label>
                 <Textarea
                   id="prevention"
                   placeholder="List specific, actionable items with owners and deadlines. Example:
@@ -351,12 +379,18 @@ ${data.preventionSteps}
 - Update runbook with troubleshooting steps (Owner: Eng Lead, Due: 1 week)
 - Implement auto-scaling for connection pools (Owner: Platform, Due: 1 month)"
                   value={data.preventionSteps}
-                  onChange={(e) => updateData('preventionSteps', e.target.value)}
+                  onChange={(e) =>
+                    updateData('preventionSteps', e.target.value)
+                  }
                   className="min-h-[200px] font-mono text-sm"
                 />
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(4)} className="flex-1">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(4)}
+                  className="flex-1"
+                >
                   <Icons.arrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
@@ -384,7 +418,7 @@ ${data.preventionSteps}
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-lg bg-gray-50 p-6">
-                <pre className="whitespace-pre-wrap text-sm font-mono">
+                <pre className="whitespace-pre-wrap font-mono text-sm">
                   {generatedReport}
                 </pre>
               </div>
@@ -393,7 +427,11 @@ ${data.preventionSteps}
                   <Icons.copy className="mr-2 h-4 w-4" />
                   Copy to Clipboard
                 </Button>
-                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(1)}
+                  className="flex-1"
+                >
                   <Icons.refresh className="mr-2 h-4 w-4" />
                   Start New RCA
                 </Button>
@@ -402,13 +440,13 @@ ${data.preventionSteps}
               {/* Upgrade CTA */}
               <Card className="border-purple-200 bg-purple-50">
                 <CardContent className="py-6">
-                  <h3 className="font-semibold text-purple-900 mb-2">
-                    <Icons.sparkles className="inline mr-2 h-4 w-4" />
+                  <h3 className="mb-2 font-semibold text-purple-900">
+                    <Icons.sparkles className="mr-2 inline h-4 w-4" />
                     Want AI-Powered Insights?
                   </h3>
-                  <p className="text-sm text-purple-800 mb-4">
-                    Sign up to get AI-generated recommendations, similar incident analysis, 
-                    and automated action item tracking.
+                  <p className="mb-4 text-sm text-purple-800">
+                    Sign up to get AI-generated recommendations, similar
+                    incident analysis, and automated action item tracking.
                   </p>
                   <Button asChild>
                     <Link href="/signup">
@@ -427,7 +465,7 @@ ${data.preventionSteps}
           <Card className="mt-8 border-blue-200 bg-blue-50">
             <CardHeader>
               <CardTitle className="text-sm text-blue-900">
-                <Icons.info className="inline mr-2 h-4 w-4" />
+                <Icons.info className="mr-2 inline h-4 w-4" />
                 Tips for Great Postmortems
               </CardTitle>
             </CardHeader>
@@ -436,7 +474,10 @@ ${data.preventionSteps}
                 <li>• Be specific and factual - avoid blame</li>
                 <li>• Focus on systems and processes, not individuals</li>
                 <li>• Include timestamps for all major events</li>
-                <li>• Make action items SMART (Specific, Measurable, Achievable, Relevant, Time-bound)</li>
+                <li>
+                  • Make action items SMART (Specific, Measurable, Achievable,
+                  Relevant, Time-bound)
+                </li>
                 <li>• Share learnings with the broader team</li>
               </ul>
             </CardContent>
