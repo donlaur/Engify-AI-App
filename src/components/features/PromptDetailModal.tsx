@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -127,12 +128,13 @@ export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModal
         <div className="flex gap-3 pt-4 border-t">
           <Button className="flex-1" onClick={handleCopy}>
             <Icons.copy className="mr-2 h-4 w-4" />
-            Copy to Clipboard
+            {copied ? 'Copied!' : 'Copy to Clipboard'}
           </Button>
-          <Button variant="outline" className="flex-1">
-            <Icons.sparkles className="mr-2 h-4 w-4" />
-            Make it Mine
-            <Badge variant="secondary" className="ml-2">Pro</Badge>
+          <Button variant="outline" className="flex-1" asChild>
+            <Link href={`/demo?prompt=${encodeURIComponent(prompt.content)}`}>
+              <Icons.edit className="mr-2 h-4 w-4" />
+              Edit & Customize
+            </Link>
           </Button>
         </div>
 
