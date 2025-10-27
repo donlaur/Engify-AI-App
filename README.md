@@ -14,13 +14,19 @@ An AI-powered platform that helps engineering teams transition from AI fear to A
 
 ## 🚀 Features
 
-- **Onboarding Journey**: Guided introduction to AI tools and best practices
-- **Learning Pathways**: Curated learning experiences for different roles
-- **Learning Hub**: AI-powered article analysis and insights
-- **Prompt Playbooks**: 100+ role-specific prompt templates
-- **AI Workbench**: Interactive tools for engineering leaders (OKRs, retrospectives, tech debt analysis)
-- **Multi-Provider AI**: Support for Gemini, OpenAI, Anthropic, and AWS Bedrock
-- **BYOK Model**: Bring Your Own Keys - use your own AI API keys
+### Core Features
+- **Prompt Library**: 100+ curated, role-specific prompt templates
+- **Learning Pathways**: Guided learning experiences for different roles
+- **Interactive Workbench**: Practice prompt engineering with real-time feedback
+- **Favorites & Ratings**: Save and rate prompts for easy access
+- **Search & Filter**: Find prompts by category, role, and difficulty
+
+### Technical Features
+- **Mobile-First Design**: Optimized for mobile, tablet, and desktop
+- **PWA Support**: Install as an app on iOS and Android
+- **Type-Safe APIs**: End-to-end type safety with tRPC
+- **Modern UI**: Beautiful components with Tailwind CSS + shadcn/ui
+- **Offline Ready**: Works without internet (coming soon)
 
 ---
 
@@ -54,12 +60,29 @@ See the [Documentation Index](./docs/README.md) for complete navigation.
 
 ## 🏗️ Technology Stack
 
-- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes + Python Lambda Functions
-- **Database**: MongoDB Atlas (with Vector Search for RAG)
-- **AI Providers**: Google Gemini, OpenAI, Anthropic, AWS Bedrock
-- **Hosting**: AWS (Lambda, API Gateway, CloudFront, S3)
-- **Deployment**: SST (Serverless Stack)
+### Frontend
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript (strict mode)
+- **Styling**: Tailwind CSS + shadcn/ui
+- **State**: React Query + Zustand
+- **API**: tRPC (type-safe)
+
+### Backend
+- **API**: tRPC + Next.js API Routes
+- **Database**: MongoDB Atlas
+- **Auth**: NextAuth.js v5
+- **Validation**: Zod
+
+### Mobile
+- **PWA**: Progressive Web App support
+- **iOS**: Installable, optimized
+- **Android**: Installable, optimized
+- **Future**: React Native or Swift/Kotlin apps
+
+### Deployment
+- **Hosting**: Vercel or AWS
+- **Database**: MongoDB Atlas
+- **CDN**: Automatic (Vercel/CloudFront)
 
 ---
 
@@ -68,28 +91,30 @@ See the [Documentation Index](./docs/README.md) for complete navigation.
 ### Prerequisites
 
 - Node.js 18+
+- pnpm (recommended) or npm
 - MongoDB Atlas account (free tier)
-- AI API keys (Gemini, OpenAI, or Anthropic)
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/engify-ai.git
-cd engify-ai
+git clone https://github.com/donlaur/Engify-AI-App.git
+cd Engify-AI-App
 
 # Install dependencies
-npm install
+pnpm install
 
 # Set up environment variables
 cp .env.example .env.local
-# Edit .env.local with your MongoDB URI and API keys
+# Edit .env.local with your MongoDB URI
 
 # Run development server
-npm run dev
+pnpm dev
 ```
 
 Visit `http://localhost:3000` to see the app.
+
+**📱 Mobile**: Open on your phone and add to home screen for the full app experience!
 
 For detailed setup instructions, see the [Quick Start Guide](./docs/guides/QUICK_START.md).
 
