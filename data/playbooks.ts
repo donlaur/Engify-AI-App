@@ -88,6 +88,25 @@ Please analyze my system context below and provide:
 --- SYSTEM CONTEXT ---
 [Describe your system, e.g., "A backend service that handles user authentication and profile management for a global SaaS platform, expected to serve millions of users."]`
       },
+      {
+        id: 'dev-system-design-sparring-partner',
+        title: 'System Design Sparring Partner (Principal Persona)',
+        description: 'Acts as a Principal Engineer to pressure-test your system design, asking tough questions and identifying potential weaknesses.',
+        prompt: `Act as a Principal Engineer who is my sparring partner for a new system design. My goal is to identify weaknesses in my design early.
+
+I will provide a high-level overview of the system I'm trying to build. You will then challenge my design by playing the role of a skeptical but constructive critic. Ask me tough, probing questions based on these non-functional requirements:
+
+-   **Scalability:** "How will this handle 10x the traffic? What breaks first?"
+-   **Availability & Resiliency:** "What happens if this key component fails? What's the single point of failure?"
+-   **Security:** "What's the most likely attack vector? How are we handling authentication and data encryption?"
+-   **Cost:** "What's the most expensive part of this architecture? How can we optimize for cost?"
+-   **Maintainability & Operability:** "How will we monitor this? How easy will it be to debug a problem in production?"
+
+After our dialogue, provide a summary of the key weaknesses we identified.
+
+--- SYSTEM DESIGN PROPOSAL ---
+[Provide a high-level overview of your proposed system architecture]`
+      }
     ],
   },
   {
@@ -112,6 +131,20 @@ Please analyze my system context below and provide:
 --- CODE SNIPPET ---
 [Paste the complex code snippet here]`,
       },
+      {
+        id: 'dev-ai-code-reviewer',
+        title: 'AI Code Reviewer (Senior Persona)',
+        description: 'Acts as a senior engineer providing a thorough, constructive, and empathetic code review on your code changes.',
+        prompt: `Act as a senior software engineer known for giving clear, constructive, and kind code reviews. I'm about to submit a pull request and want your feedback first. Analyze the following code diff and provide a review.
+
+Your review should be structured in three parts:
+1.  **Praise:** Identify at least one positive aspect of the change (e.g., good test coverage, clean logic, clear naming).
+2.  **Suggestions:** Identify areas for improvement. Frame these as collaborative suggestions, not commands (e.g., "I wonder if we could simplify this by...", "Have you considered the edge case where...?").
+3.  **Questions:** Ask 1-2 open-ended questions to understand the author's reasoning (e.g., "What was the motivation for this approach?").
+
+--- CODE DIFF ---
+[Paste your 'git diff' output here]`
+      }
     ],
   },
     {
