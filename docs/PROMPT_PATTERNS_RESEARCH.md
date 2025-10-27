@@ -2,7 +2,15 @@
 
 **Purpose**: This document catalogs proven prompt engineering patterns for our AI education platform. These patterns will be integrated into our learning pathways and used to validate user prompts for appropriate use.
 
-**Last Updated**: 2025-10-27
+**Version**: 2.0 (Integrated ChatGPT + Gemini Research)  
+**Last Updated**: 2025-10-27  
+**Sources**: ChatGPT Analysis, Gemini Deep Research, Vanderbilt University, OpenAI, Anthropic, Google
+
+## 📋 Experience Level Guide
+
+**Beginner**: Foundational patterns, easy to implement, immediate value  
+**Intermediate**: Complex structures, multi-turn interactions, nuanced control  
+**Expert**: Advanced architectural approaches, orchestrate multiple prompts, production-grade systems
 
 ---
 
