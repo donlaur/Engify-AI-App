@@ -2,18 +2,12 @@
 
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
+import { TokenCounter } from '@/components/workbench/TokenCounter';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -135,24 +129,33 @@ export default function WorkbenchPage() {
                 </div>
 
                 {/* Execute Button */}
-                <Button
-                  onClick={handleExecute}
-                  disabled={!prompt.trim() || isLoading}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isLoading ? (
-                    <>
-                      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                      Executing...
-                    </>
-                  ) : (
-                    <>
-                      <Icons.zap className="mr-2 h-4 w-4" />
-                      Execute Prompt
-                    </>
-                  )}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setShowTokenCounter(!showTokenCounter)}
+                    variant="outline"
+                    size="lg"
+                  >
+                    <Icons.hash className="mr-2 h-4 w-4" />
+                    {showTokenCounter ? 'Hide' : 'Show'} Tokens
+                  </Button>
+                  <Button
+                    onClick={handleExecute}
+                    disabled={!prompt.trim() || isExecuting}
+                    size="lg"
+                  >
+                    {isExecuting ? (
+                      <>
+                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                        Executing...
+                      </>
+                    ) : (
+                      <>
+                        <Icons.play className="mr-2 h-4 w-4" />
+                        Execute
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
