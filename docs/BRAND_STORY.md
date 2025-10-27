@@ -7,15 +7,22 @@
 
 ## 🎯 **The Name**
 
-### Engify = Engineer + Amplify
+### Engify.ai = Engineer + Amplify + AI
+
+**The Complete Formula:**
+- **Eng**ineer (the who)
+- **-ify** (to make/transform)
+- **.ai** (using artificial intelligence)
 
 **What does it mean to "engify"?**
 
-When you **engify** your workflow, you're not just using AI—you're:
+When you **engify** your workflow, you're:
 - **Engineering** better prompts
-- **Amplifying** your capabilities
-- **Transforming** how you build
-- **Multiplying** your impact
+- **Amplifying** your capabilities **with AI**
+- **Transforming** how you build **using AI**
+- **Multiplying** your impact **through AI**
+
+**The .ai is crucial** - We're not just amplifying engineers, we're amplifying them **using AI**.
 
 **Usage:**
 - "Let's engify this process"
