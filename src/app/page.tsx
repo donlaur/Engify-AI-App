@@ -231,8 +231,8 @@ export default function Home() {
                     <Icons.code className="h-12 w-12 text-white" />
                   </div>
                   <div className="space-y-2">
-                    <div className="text-6xl font-bold text-white">15+</div>
-                    <div className="text-xl text-gray-200">Commits Tonight</div>
+                    <div className="text-6xl font-bold text-white">350+</div>
+                    <div className="text-xl text-gray-200">Commits Today</div>
                   </div>
                   <div className="space-y-1 text-sm text-gray-300">
                     <div>✓ Real Auth</div>
