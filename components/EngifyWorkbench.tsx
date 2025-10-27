@@ -3,11 +3,12 @@ import { GoogleGenAI } from '@google/genai';
 import { KICKOFF_PLAN_PROMPT_TEMPLATE } from '../services/agentService';
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'tech-investment-advisor' | 'lean-research-planner' | 'roadmap-defense-architect' | 'roadmap-alignment' | 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
+// FIX: Added 'accessibility-auditor' to ActiveTab type
+type ActiveTab = 'retrospective-diagnostician' | 'tech-investment-advisor' | 'lean-research-planner' | 'roadmap-defense-architect' | 'roadmap-alignment' | 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect' | 'accessibility-auditor';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [activeTab, setActiveTab] = React.useState<ActiveTab>('tech-investment-advisor');
+    const [activeTab, setActiveTab] = React.useState<ActiveTab>('retrospective-diagnostician');
 
     React.useEffect(() => {
         if (initialPrompt) {
@@ -23,6 +24,99 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
     const PostmortemFacilitator: React.FC = () => <FeatureStub title="Post-Mortem Facilitator" description="Guides a team through a blameless post-mortem process to find root causes and create actionable follow-up items." />;
     const IncidentCoCommander: React.FC = () => <FeatureStub title="Incident Co-Commander" description="Acts as an AI partner during a live incident, providing structured guidance, communication nudges, and a real-time log." />;
     
+    // FIX: Added new DigitalAccessibilityAuditor component
+    const DigitalAccessibilityAuditor: React.FC = () => {
+        const [step, setStep] = React.useState(1);
+        const [flowDescription, setFlowDescription] = React.useState("The user logs in using a form with an email field, a password field, and a 'Log In' button. If they enter the wrong password, an error message appears in red text below the password field.");
+        const [isLoading, setIsLoading] = React.useState(false);
+        const [report, setReport] = React.useState<any>(null);
+
+        const handleAudit = async () => {
+            setIsLoading(true);
+            setReport(null);
+    
+            // Mocking API call since backend is not provided
+            await new Promise(resolve => setTimeout(resolve, 1000));
+    
+            const fakeReport = {
+                issue_log: [
+                    {
+                        finding: "Potential Color Contrast Failure",
+                        why: "The red error text on a white background may be unreadable for users with color blindness. This can prevent them from understanding how to correct the error and log in.",
+                        guideline: "1.4.3 Contrast (Minimum)",
+                        remediation: "Ensure the error text has a contrast ratio of at least 4.5:1 against the background. Consider adding an icon next to the error message for users who cannot perceive color."
+                    },
+                    {
+                        finding: "Missing Form Labels",
+                        why: "Without explicit labels linked to the email and password fields, screen reader users may not know what information is required in each field.",
+                        guideline: "3.3.2 Labels or Instructions",
+                        remediation: "Add a <label> element for each <input> and use the 'for' attribute to associate it with the input's 'id'."
+                    }
+                ],
+                inclusivity_checklist: [
+                    "Is the language used in the error message simple and free of technical jargon?",
+                    "Does the login button have a clear and visible focus state for keyboard navigators?",
+                    "Have you considered the cognitive load of a user who has forgotten their password? Is the 'Forgot Password' link easy to find and use?"
+                ]
+            };
+            setReport(fakeReport);
+            setStep(2);
+            setIsLoading(false);
+        };
+        
+        return (
+            <div className="space-y-6">
+                <div className={`p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 ${step > 1 ? 'opacity-60' : ''}`}>
+                    <h2 className="font-semibold text-lg mb-1">Step 1: Describe the User Flow or Interface</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Describe a user interface or a multi-step user flow in natural language. You can also provide a link to a Figma prototype or upload a screenshot (support for links/screenshots coming soon).</p>
+                    
+                    <textarea 
+                        value={flowDescription}
+                        onChange={(e) => setFlowDescription(e.target.value)}
+                        rows={6}
+                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 font-sans text-sm"
+                        disabled={step > 1}
+                    />
+    
+                     <button onClick={handleAudit} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                        {isLoading ? 'Auditing...' : 'Generate Accessibility Report'}
+                    </button>
+                </div>
+                
+                {step >= 2 && report && (
+                    <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <h2 className="font-semibold text-lg mb-4">Step 2: Accessibility Report Card</h2>
+                        
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="font-semibold text-indigo-600 dark:text-indigo-400 mb-2">Issue Log</h3>
+                                <div className="space-y-4">
+                                    {report.issue_log.map((issue: any, index: number) => (
+                                        <div key={index} className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                                            <h4 className="font-semibold">{issue.finding}</h4>
+                                            <p className="text-sm mt-1"><span className="font-medium">Impact:</span> {issue.why}</p>
+                                            <p className="text-sm mt-1"><span className="font-medium">Guideline:</span> <span className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1 py-0.5 rounded">{issue.guideline}</span></p>
+                                            <p className="text-sm mt-2 pt-2 border-t border-slate-200 dark:border-slate-700"><span className="font-medium">Remediation:</span> {issue.remediation}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+    
+                            <div>
+                                <h3 className="font-semibold text-indigo-600 dark:text-indigo-400 mb-2">Inclusivity Checklist</h3>
+                                <ul className="list-disc list-inside space-y-2 text-sm">
+                                    {report.inclusivity_checklist.map((item: string, index: number) => (
+                                        <li key={index}>{item}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className="flex flex-col h-full">
             <header className="pb-4 border-b border-slate-200 dark:border-slate-700">
@@ -34,6 +128,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Retrospective Diagnostician" isActive={activeTab === 'retrospective-diagnostician'} onClick={() => setActiveTab('retrospective-diagnostician')} />
                     <TabButton name="Tech Investment Advisor" isActive={activeTab === 'tech-investment-advisor'} onClick={() => setActiveTab('tech-investment-advisor')} />
                     <TabButton name="Lean Research Planner" isActive={activeTab === 'lean-research-planner'} onClick={() => setActiveTab('lean-research-planner')} />
                     <TabButton name="Roadmap Defense Architect" isActive={activeTab === 'roadmap-defense-architect'} onClick={() => setActiveTab('roadmap-defense-architect')} />
@@ -52,12 +147,15 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
                     <TabButton name="Knowledge Navigator" isActive={activeTab === 'knowledge-navigator'} onClick={() => setActiveTab('knowledge-navigator')} />
                     <TabButton name="Goal & OKR Architect" isActive={activeTab === 'okr-architect'} onClick={() => setActiveTab('okr-architect')} />
                     <TabButton name="Core Values Architect" isActive={activeTab === 'core-values-architect'} onClick={() => setActiveTab('core-values-architect')} />
+                    {/* FIX: Added TabButton for the new tool */}
+                    <TabButton name="Accessibility Auditor" isActive={activeTab === 'accessibility-auditor'} onClick={() => setActiveTab('accessibility-auditor')} />
                     <TabButton name="Project Kickoff" isActive={activeTab === 'project-kickoff'} onClick={() => setActiveTab('project-kickoff')} />
                     <TabButton name="Prompt Lab" isActive={activeTab === 'prompt-lab'} onClick={() => setActiveTab('prompt-lab')} />
                 </nav>
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'retrospective-diagnostician' && <RetrospectiveDiagnostician />}
                 {activeTab === 'tech-investment-advisor' && <TechnologyInvestmentAdvisor />}
                 {activeTab === 'lean-research-planner' && <LeanResearchPlanner />}
                 {activeTab === 'roadmap-defense-architect' && <RoadmapDefenseArchitect />}
@@ -77,6 +175,8 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
                 {activeTab === 'okr-architect' && <OkrArchitect />}
                 {activeTab === 'core-values-architect' && <CoreValuesArchitect />}
                 {activeTab === 'project-kickoff' && <ProjectKickoff />}
+                {/* FIX: Added conditional render for the new tool */}
+                {activeTab === 'accessibility-auditor' && <DigitalAccessibilityAuditor />}
                 {activeTab === 'prompt-lab' && <PromptLab initialPrompt={initialPrompt} />}
             </div>
         </div>
@@ -103,6 +203,164 @@ const FeatureStub: React.FC<{title: string, description: string}> = ({ title, de
         <span className="mt-4 px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 rounded-full">Coming Soon</span>
     </div>
 );
+
+const RetrospectiveDiagnostician: React.FC = () => {
+    const [step, setStep] = React.useState(1);
+    const [context, setContext] = React.useState("Sprint Goal: Launch v1 of the new reporting dashboard. What went well: The team collaborated effectively on the frontend components. What didn't go well: We discovered a major performance issue with the backend API on the last day, which caused us to miss the deadline. Team morale is a bit low.");
+    const [feedback, setFeedback] = React.useState("- Mad: I'm mad that the API issue was found so late.\n- Sad: I'm sad we missed our launch goal.\n- Glad: I'm glad we worked well together as a frontend team.");
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [themes, setThemes] = React.useState<string[]>([]);
+    const [selectedTheme, setSelectedTheme] = React.useState<string | null>(null);
+    const [fiveWhys, setFiveWhys] = React.useState<{ question: string; answer: string }[]>([]);
+    const [rootCause, setRootCause] = React.useState<string | null>(null);
+    const [actionItems, setActionItems] = React.useState<string | null>(null);
+
+    const handleClusterThemes = async () => {
+        setIsLoading(true);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+            const response = await fetch('/api/retrospective-diagnostician', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'cluster_themes', context, feedback })
+            });
+            if (!response.ok) throw new Error('Failed to cluster themes.');
+            const data = await response.json();
+            setThemes(data.themes);
+            setStep(2);
+        } catch (err) { console.error(err); } finally { setIsLoading(false); }
+    };
+
+    const handleStart5Whys = async (theme: string) => {
+        setSelectedTheme(theme);
+        setIsLoading(true);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+            const response = await fetch('/api/retrospective-diagnostician', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'start_5_whys', theme })
+            });
+            if (!response.ok) throw new Error('Failed to start 5 whys.');
+            const data = await response.json();
+            setFiveWhys([{ question: data.question, answer: '' }]);
+            setStep(3);
+        } catch (err) { console.error(err); } finally { setIsLoading(false); }
+    };
+    
+    const handleNextWhy = async (answer: string) => {
+        const updatedWhys = [...fiveWhys];
+        updatedWhys[updatedWhys.length - 1].answer = answer;
+        setFiveWhys(updatedWhys);
+        setIsLoading(true);
+
+        try {
+             const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+             const response = await fetch('/api/retrospective-diagnostician', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'continue_5_whys', history: updatedWhys })
+            });
+            if (!response.ok) throw new Error('Failed to get next question.');
+            const data = await response.json();
+            if(data.root_cause) {
+                setRootCause(data.root_cause);
+                setStep(4);
+            } else {
+                setFiveWhys(prev => [...prev, { question: data.question, answer: '' }]);
+            }
+        } catch (err) { console.error(err); } finally { setIsLoading(false); }
+    };
+    
+    const handleGenerateActions = async () => {
+        if(!rootCause) return;
+        setIsLoading(true);
+        try {
+             const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+            const response = await fetch('/api/retrospective-diagnostician', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'generate_actions', root_cause: rootCause })
+            });
+            if (!response.ok) throw new Error('Failed to generate actions.');
+            const data = await response.json();
+            setActionItems(data.action_items);
+            setStep(5);
+        } catch (err) { console.error(err); } finally { setIsLoading(false); }
+    };
+
+
+    return (
+        <div className="space-y-6">
+            <div className={`p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 ${step > 1 ? 'opacity-60' : ''}`}>
+                <h2 className="font-semibold text-lg mb-1">Step 1: Setup & Context</h2>
+                <label className="text-sm font-medium mt-4 block">Sprint Context</label>
+                <textarea value={context} onChange={e => setContext(e.target.value)} rows={4} className="w-full p-2 mt-1 rounded-md bg-slate-100 dark:bg-slate-700/50" disabled={step > 1} />
+                <label className="text-sm font-medium mt-4 block">Anonymous Team Feedback (Mad/Sad/Glad)</label>
+                <textarea value={feedback} onChange={e => setFeedback(e.target.value)} rows={4} className="w-full p-2 mt-1 rounded-md bg-slate-100 dark:bg-slate-700/50" disabled={step > 1} />
+                <button onClick={handleClusterThemes} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                    {isLoading ? 'Clustering...' : 'Cluster Themes'}
+                </button>
+            </div>
+            {step >= 2 && themes.length > 0 && (
+                <div className={`p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 ${step > 2 ? 'opacity-60' : ''}`}>
+                    <h2 className="font-semibold text-lg mb-4">Step 2: AI-Assisted Thematic Clustering</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">The AI has clustered your team's feedback. Select a theme to diagnose further.</p>
+                    <div className="space-y-2">
+                        {themes.map((theme, index) => (
+                            <button key={index} onClick={() => handleStart5Whys(theme)} disabled={isLoading || step > 2} className="w-full text-left p-3 bg-slate-100 dark:bg-slate-700/50 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                {theme}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+            {step >= 3 && selectedTheme && (
+                 <div className={`p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 ${step > 3 ? 'opacity-60' : ''}`}>
+                    <h2 className="font-semibold text-lg mb-4">Step 3: AI-Guided Root Cause Analysis (5 Whys)</h2>
+                    <div className="space-y-4">
+                        {fiveWhys.map((item, index) => (
+                           <div key={index}>
+                             <p className="font-medium">{item.question}</p>
+                             <input type="text"
+                                defaultValue={item.answer}
+                                onBlur={(e) => { if(index === fiveWhys.length -1) { handleNextWhy(e.target.value) }}}
+                                disabled={isLoading || index < fiveWhys.length - 1}
+                                className="w-full p-2 mt-1 rounded-md bg-slate-100 dark:bg-slate-700/50"
+                             />
+                           </div>
+                        ))}
+                        {isLoading && <p>Thinking...</p>}
+                   </div>
+                </div>
+            )}
+            {step >= 4 && rootCause && (
+                <div className={`p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 ${step > 4 ? 'opacity-60' : ''}`}>
+                    <h2 className="font-semibold text-lg mb-4">Step 4: Root Cause Identified</h2>
+                    <div className="p-3 bg-green-100 dark:bg-green-900/50 rounded-md">
+                        <p className="font-semibold">{rootCause}</p>
+                    </div>
+                     <button onClick={handleGenerateActions} disabled={isLoading || step > 4} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                        {isLoading ? 'Generating...' : 'Generate SMART Action Items'}
+                    </button>
+                </div>
+            )}
+             {step >= 5 && actionItems && (
+                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-4">Step 5: Generated Action Items</h2>
+                    <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg">
+                        <pre className="text-sm whitespace-pre-wrap font-sans">{actionItems}</pre>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 const TechnologyInvestmentAdvisor: React.FC = () => {
     const [step, setStep] = React.useState(1);
