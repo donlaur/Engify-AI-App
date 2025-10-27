@@ -8,15 +8,18 @@ import '@/lib/env';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Engify.ai - AI Adoption Education Platform',
+  title: 'Engify.ai - AI Prompt Engineering Education Platform',
   description:
-    'Learn prompt engineering and AI best practices through curated templates and learning pathways',
+    'Transform your team into AI power users with 67+ expert prompts, 15 proven patterns, and gamified learning. Start free!',
   keywords: [
-    'AI',
-    'prompt engineering',
-    'learning',
-    'education',
-    'ChatGPT',
+    'AI prompt engineering',
+    'prompt templates',
+    'AI education',
+    'prompt patterns',
+    'ChatGPT prompts',
+    'AI learning platform',
+    'prompt library',
+    'engineering prompts',
     'Claude',
     'Gemini',
   ],
