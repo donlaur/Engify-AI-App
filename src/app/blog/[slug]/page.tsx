@@ -1,5 +1,3 @@
-'use client';
-
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -62,8 +60,8 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
       <section className="container py-12">
         <div className="mx-auto max-w-4xl">
           <Card>
-            <CardContent className="prose prose-lg max-w-none p-8">
-              <div dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }} />
+            <CardContent className="prose prose-lg max-w-none p-8 whitespace-pre-wrap">
+              {post.content}
             </CardContent>
           </Card>
 

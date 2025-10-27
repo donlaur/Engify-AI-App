@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -145,24 +146,25 @@ export default function LearnPage() {
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <Button
-                                variant="outline"
-                                onClick={() => {
-                                  if (step.type === 'external_link') {
-                                    window.open(step.targetId, '_blank');
-                                  } else if (step.type === 'article') {
-                                    // Navigate to library for now
-                                    window.location.href = '/library';
-                                  } else if (step.type === 'playbook') {
-                                    window.location.href = '/library';
-                                  } else if (step.type === 'workbench') {
-                                    window.location.href = '/workbench';
-                                  }
-                                }}
-                              >
-                                <Icon className="mr-2 h-4 w-4" />
-                                {step.actionText}
-                              </Button>
+                              {step.type === 'external_link' ? (
+                                <Button variant="outline" asChild>
+                                  <a href={step.targetId} target="_blank" rel="noopener noreferrer">
+                                    <Icon className="mr-2 h-4 w-4" />
+                                    {step.actionText}
+                                  </a>
+                                </Button>
+                              ) : (
+                                <Button variant="outline" asChild>
+                                  <Link href={
+                                    step.type === 'workbench' ? '/demo' :
+                                    step.type === 'article' ? `/blog/${step.targetId}` :
+                                    `/library/${step.targetId}`
+                                  }>
+                                    <Icon className="mr-2 h-4 w-4" />
+                                    {step.actionText}
+                                  </Link>
+                                </Button>
+                              )}
                             </CardContent>
                           </Card>
                         </div>
@@ -186,20 +188,17 @@ export default function LearnPage() {
               Pick a pathway above and begin your journey to AI mastery
             </p>
             <div className="flex justify-center gap-4">
-              <Button
-                size="lg"
-                onClick={() => (window.location.href = '/patterns')}
-              >
-                <Icons.sparkles className="mr-2 h-4 w-4" />
-                View All Patterns
+              <Button size="lg" asChild>
+                <Link href="/patterns">
+                  <Icons.sparkles className="mr-2 h-4 w-4" />
+                  View All Patterns
+                </Link>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => (window.location.href = '/library')}
-              >
-                <Icons.library className="mr-2 h-4 w-4" />
-                Browse Prompts
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/library">
+                  <Icons.library className="mr-2 h-4 w-4" />
+                  Browse Prompts
+                </Link>
               </Button>
             </div>
           </CardContent>

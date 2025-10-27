@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -390,12 +391,11 @@ export default function PatternsPage() {
             <p className="mb-6 text-muted-foreground">
               Browse our library of 67 expert prompts that use these patterns
             </p>
-            <Button
-              size="lg"
-              onClick={() => (window.location.href = '/library')}
-            >
-              <Icons.arrowRight className="mr-2 h-4 w-4" />
-              Browse Prompt Library
+            <Button size="lg" asChild>
+              <Link href="/library">
+                <Icons.arrowRight className="mr-2 h-4 w-4" />
+                Browse Prompt Library
+              </Link>
             </Button>
           </CardContent>
         </Card>

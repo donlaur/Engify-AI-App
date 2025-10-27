@@ -75,8 +75,11 @@ dependencies:
     specifier: ^15.5.4
     version: 15.5.4(@babel/core@7.28.5)(react-dom@18.3.1)(react@18.3.1)
   next-auth:
-    specifier: ^5.0.0-beta.20
+    specifier: ^5.0.0-beta.25
     version: 5.0.0-beta.29(next@15.5.4)(react@18.3.1)
+  next-themes:
+    specifier: ^0.2.1
+    version: 0.2.1(next@15.5.4)(react-dom@18.3.1)(react@18.3.1)
   react:
     specifier: ^18.3.1
     version: 18.3.1
@@ -5381,6 +5384,18 @@ packages:
       '@auth/core': 0.40.0
       next: 15.5.4(@babel/core@7.28.5)(react-dom@18.3.1)(react@18.3.1)
       react: 18.3.1
+    dev: false
+
+  /next-themes@0.2.1(next@15.5.4)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-B+AKNfYNIzh0vqQQKqQItTS8evEouKD7H5Hj3kmuPERwddR2TxvDSFZuTj6T7Jfn1oyeUyJMydPl1Bkxkh0W7A==}
+    peerDependencies:
+      next: '*'
+      react: '*'
+      react-dom: '*'
+    dependencies:
+      next: 15.5.4(@babel/core@7.28.5)(react-dom@18.3.1)(react@18.3.1)
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
     dev: false
 
   /next@15.5.4(@babel/core@7.28.5)(react-dom@18.3.1)(react@18.3.1):

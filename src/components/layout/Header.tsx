@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 interface HeaderProps {
   user?: {
@@ -35,7 +36,7 @@ interface HeaderProps {
 }
 
 const navigationLinks = [
-  { href: '/workbench', label: 'AI Workbench' },
+  { href: '/demo', label: 'AI Workbench' },
   { href: '/patterns', label: 'Patterns' },
   { href: '/library', label: 'Library' },
   { href: '/learn', label: 'Learn' },
@@ -84,6 +85,7 @@ export function Header({ user }: HeaderProps) {
 
         {/* Right Side Actions */}
         <div className="flex items-center space-x-4">
+          <ThemeToggle />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

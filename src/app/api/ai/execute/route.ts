@@ -6,19 +6,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
+import { checkRateLimit, getClientIp, trackTokenUsage } from '@/lib/rate-limit';
 
 const executeSchema = z.object({
   prompt: z.string().min(1).max(10000),
-  model: z.enum(['gpt-4', 'gpt-3.5-turbo']).default('gpt-3.5-turbo'),
+  model: z.enum(['gpt-4', 'gpt-3.5-turbo', 'gemini-pro']).default('gpt-3.5-turbo'),
   temperature: z.number().min(0).max(2).default(0.7),
 });
 
 export async function POST(req: NextRequest) {
   try {
-    // Check authentication
+    // Get user session (optional for demo)
     const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    
+    // Determine rate limit tier and identifier
+    const tier = session?.user ? 'authenticated' : 'anonymous';
+    const identifier = session?.user?.email || getClientIp(req);
+    
+    // Check rate limit
+    const rateLimit = await checkRateLimit(identifier, tier);
+    
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { 
+          error: rateLimit.reason,
+          resetAt: rateLimit.resetAt,
+          tier,
+        },
+        { status: 429 }
+      );
     }
 
     // Parse and validate request
@@ -66,13 +82,23 @@ export async function POST(req: NextRequest) {
     const completion = data.choices[0]?.message?.content || '';
     const usage = data.usage;
 
-    // Return response with usage stats
+    // Track token usage for rate limiting
+    if (usage?.total_tokens) {
+      await trackTokenUsage(identifier, usage.total_tokens);
+    }
+
+    // Return response with usage stats and rate limit info
     return NextResponse.json({
       response: completion,
       usage: {
         promptTokens: usage.prompt_tokens,
         completionTokens: usage.completion_tokens,
         totalTokens: usage.total_tokens,
+      },
+      rateLimit: {
+        remaining: rateLimit.remaining,
+        resetAt: rateLimit.resetAt,
+        tier,
       },
       model,
     });

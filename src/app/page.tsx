@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import { getSiteStats, getDisplayStats } from '@/lib/site-stats';
 
 const roles = [
   { name: 'Engineers', icon: Icons.code, count: '24 prompts' },
@@ -50,65 +50,71 @@ const features = [
 ];
 
 export default function Home() {
-  const prompts = getSeedPromptsWithTimestamps();
-  const totalPrompts = prompts.length; // Real count from seed + playbooks
+  const siteStats = getSiteStats();
+  const displayStats = getDisplayStats();
 
   const stats = [
-    { label: 'Prompt Templates', value: totalPrompts.toString() },
-    { label: 'Proven Patterns', value: '15' },
-    { label: 'AI Providers', value: '3' },
-    { label: 'Free Forever', value: '$0' },
+    displayStats.prompts,
+    displayStats.patterns,
+    displayStats.providers,
+    displayStats.pricing,
   ];
 
   return (
     <MainLayout>
-      {/* Hero Section - Dark with Gradient */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        {/* Animated background gradient */}
-        <div className="absolute inset-0 animate-glow bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-blue-500/10" />
+      {/* Hero Section - Vibrant Gradient like Vibe Code Careers */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-red-500 via-purple-600 via-blue-600 to-teal-500 dark:from-red-600 dark:via-purple-700 dark:via-blue-700 dark:to-teal-600">
+        {/* Animated background gradient overlay */}
+        <div className="absolute inset-0 bg-black/20" />
 
         <div className="container relative py-24 md:py-32">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
             <Badge
               variant="secondary"
-              className="mb-4 border-white/20 bg-white/10 text-white"
+              className="mb-4 border-white/30 bg-black/30 text-white backdrop-blur-sm"
             >
               <Icons.sparkles className="mr-2 h-3 w-3" />
-              Master AI Prompt Engineering
+              ⚡ AI-Powered Prompt Engineering is Taking Off 🚀
             </Badge>
 
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
-              Transform Engineers into{' '}
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                AI Power Users
+              #1 Prompt Library for{' '}
+              <span className="bg-gradient-to-r from-green-300 to-cyan-300 bg-clip-text text-transparent">
+                Engineering Teams
               </span>
             </h1>
 
-            <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              {totalPrompts}+ expert prompts, 15 battle-tested patterns, and
-              gamified learning. Amplify your team&apos;s capabilities with
-              Engify.ai
+            <p className="mx-auto max-w-2xl text-xl text-white/90">
+              Find {siteStats.totalPrompts}+ expert prompts, {siteStats.totalPatterns} proven patterns, and AI best practices to 10x your team's productivity.
             </p>
 
-            <div className="flex flex-col justify-center gap-4 pt-4 sm:flex-row">
-              <Button
-                size="lg"
-                className="border-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
-                asChild
-              >
-                <Link href="/library">
-                  Browse {totalPrompts} Prompts
-                  <Icons.arrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/20 text-white hover:bg-white/10"
-                asChild
-              >
-                <Link href="/signup">Start Free</Link>
-              </Button>
+            <div className="flex flex-col justify-center gap-4 pt-8">
+              <div className="rounded-2xl bg-gradient-to-br from-gray-900/80 to-black/80 p-8 backdrop-blur-sm border border-white/10">
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  Get the Latest <span className="text-green-400">Prompt Engineering</span> Tips
+                </h3>
+                <p className="text-white/80 mb-4">Right in Your Inbox</p>
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold hover:from-green-600 hover:to-cyan-600"
+                    asChild
+                  >
+                    <Link href="/library">
+                      Browse {siteStats.totalPrompts} Prompts
+                      <Icons.arrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/30 text-white hover:bg-white/10"
+                    asChild
+                  >
+                    <Link href="/signup">Start Free</Link>
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -333,7 +339,7 @@ export default function Home() {
                 Ready to Transform Your Team?
               </h2>
               <p className="mx-auto max-w-2xl text-xl text-gray-200">
-                Master AI with {totalPrompts} expert prompts. Start free
+                Master AI with {siteStats.totalPrompts} expert prompts. Start free
                 today—no credit card required.
               </p>
               <Button
