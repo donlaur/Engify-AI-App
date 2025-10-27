@@ -62,27 +62,24 @@ export function Header({ user }: HeaderProps) {
             Patterns
           </Link>
           <Link
+            href="/library"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Library
+          </Link>
+          <Link
             href="/learn"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             Learn
           </Link>
-          {/* Pricing temporarily hidden */}
-          {/* <Link
-            href="/pricing"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          <Link
+            href="/built-in-public"
+            className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-200"
           >
-            Pricing
-          </Link> */}
-          {navigationLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
-              {link.label}
-            </Link>
-          ))}
+            <Icons.github className="h-3 w-3" />
+            Built in Public
+          </Link>
         </nav>
 
         {/* Right Side Actions */}
@@ -132,10 +129,13 @@ export function Header({ user }: HeaderProps) {
           ) : (
             <div className="hidden md:flex md:items-center md:space-x-2">
               <Button variant="ghost" asChild>
-                <Link href="/api/auth/signin">Sign in</Link>
+                <Link href="/login">Sign in</Link>
               </Button>
-              <Button asChild>
-                <Link href="/api/auth/signin">Get Started</Link>
+              <Button
+                className="bg-purple-600 text-white hover:bg-purple-700"
+                asChild
+              >
+                <Link href="/signup">Get Started</Link>
               </Button>
             </div>
           )}
