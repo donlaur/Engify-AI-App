@@ -151,8 +151,8 @@ export default function LearnPage() {
                                   if (step.type === 'external_link') {
                                     window.open(step.targetId, '_blank');
                                   } else if (step.type === 'article') {
-                                    // TODO: Navigate to article
-                                    alert('Article feature coming soon!');
+                                    // Navigate to library for now
+                                    window.location.href = '/library';
                                   } else if (step.type === 'playbook') {
                                     window.location.href = '/library';
                                   } else if (step.type === 'workbench') {

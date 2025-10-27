@@ -150,8 +150,8 @@ export default function PricingPage() {
                     } else if (plan.name === 'Team') {
                       window.location.href = 'mailto:sales@engify.ai';
                     } else {
-                      // TODO: Stripe checkout
-                      alert('Stripe checkout coming soon!');
+                      // Redirect to signup
+                      window.location.href = '/signup';
                     }
                   }}
                 >

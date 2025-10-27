@@ -7,12 +7,12 @@
 
 import { useState, useEffect } from 'react';
 import { Icons } from '@/lib/icons';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SKILL_INFO } from '@/lib/constants/skills';
-import { formatNumber } from '@/lib/utils/string';
 
 interface TeamOverview {
   teamId: string;
@@ -256,8 +256,13 @@ export function ManagerDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Skills matrix visualization coming soon...
+                Track your team&apos;s AI skill development and identify growth opportunities.
               </p>
+              <div className="mt-4">
+                <Button variant="outline" asChild>
+                  <Link href="/learn">View Learning Paths</Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
