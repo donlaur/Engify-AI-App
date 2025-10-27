@@ -41,7 +41,7 @@
 - [x] Embeddings API (sentence-transformers)
 - [x] RAG API (vector search)
 - [x] Multi-provider AI execution
-- [ ] Deploy to AWS Lambda
+- [ ] ~~Deploy to AWS Lambda~~ (PAUSED - local first)
 
 ### Utilities
 - [x] Array helpers (safe operations)
@@ -167,17 +167,19 @@
 
 ---
 
-## 🚢 Phase 9: Deployment (9 commits)
+## 🚢 Phase 9: Deployment (PAUSED - Local MVP First)
 
-- [ ] AWS setup (Amplify or Lambda)
-- [ ] MongoDB Atlas production
-- [ ] Environment variables
-- [ ] Python Lambda deployment
-- [ ] CDN setup (CloudFront)
-- [ ] Domain configuration
-- [ ] SSL certificates
-- [ ] Monitoring (CloudWatch)
-- [ ] Error tracking (Sentry)
+- [ ] ~~AWS setup (Amplify or Lambda)~~
+- [ ] ~~MongoDB Atlas production~~
+- [ ] ~~Environment variables~~
+- [ ] ~~Python Lambda deployment~~
+- [ ] ~~CDN setup (CloudFront)~~
+- [ ] ~~Domain configuration~~
+- [ ] ~~SSL certificates~~
+- [ ] ~~Monitoring (CloudWatch)~~
+- [ ] ~~Error tracking (Sentry)~~
+
+**Focus**: Get everything working on localhost:3000 first!
 
 ---
 
@@ -204,28 +206,34 @@
 
 ---
 
-## 🎯 MVP Definition
+## 🎯 Local MVP Definition
 
-**Must Have** (Week 1-2):
-- User signup/login
-- Browse 100+ prompts
-- Search & filter
-- Copy prompts
-- Basic workbench (test prompts)
-- Mobile responsive
+**Must Work on localhost:3000**:
+- [x] MongoDB running locally
+- [ ] User signup/login (NextAuth)
+- [ ] Browse prompts page
+- [ ] Search & filter prompts
+- [ ] Copy prompt button
+- [ ] Basic workbench (test with company keys)
+- [ ] Rate limiting working
+- [ ] Mobile responsive
+- [ ] Python APIs running locally
 
-**Nice to Have** (Week 3-4):
-- Favorites
-- Ratings
-- Learning pathways
-- Usage analytics
-- OAuth providers
+**Nice to Have Locally**:
+- [ ] Favorites
+- [ ] Ratings
+- [ ] Usage stats display
 
-**Future** (Month 2+):
+**PAUSED Until Local Works**:
+- ~~AWS deployment~~
+- ~~Production database~~
+- ~~CDN setup~~
+- ~~Monitoring~~
+
+**Future** (After Local MVP):
+- Deploy to AWS
 - Team features
 - Admin dashboard
-- BYOK (bring your own keys)
-- Advanced RAG
 - Native mobile apps
 
 ---
