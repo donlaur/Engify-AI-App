@@ -40,7 +40,7 @@ export default function BuiltInPublicPage() {
                   View Source Code
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10" asChild>
+              <Button size="lg" variant="outline" className="border-white bg-white/90 text-purple-900 hover:bg-white" asChild>
                 <Link href="/signup">Try It Free</Link>
               </Button>
             </div>
@@ -200,7 +200,7 @@ export default function BuiltInPublicPage() {
                 </div>
                 <div>
                   <CardTitle>Modern UI</CardTitle>
-                  <CardDescription>Hour 3 • Jellyfish.co inspired design</CardDescription>
+                  <CardDescription>Hour 3 • Modern, professional design</CardDescription>
                 </div>
               </div>
             </CardHeader>
