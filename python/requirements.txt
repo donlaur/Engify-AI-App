@@ -1,0 +1,24 @@
+# AI/ML Libraries
+openai==1.12.0
+anthropic==0.18.1
+google-generativeai==0.4.0
+
+# Vector/Embeddings
+sentence-transformers==2.5.1
+numpy==1.26.4
+faiss-cpu==1.8.0
+
+# Data Processing
+pandas==2.2.1
+
+# MongoDB
+pymongo==4.6.2
+
+# API Framework
+fastapi==0.110.0
+uvicorn==0.27.1
+pydantic==2.6.3
+
+# Utils
+python-dotenv==1.0.1
+httpx==0.27.0
