@@ -57,16 +57,16 @@ export function Header({ user }: HeaderProps) {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex md:items-center md:space-x-6">
           <Link
-            href="/"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Home
-          </Link>
-          <Link
             href="/demo"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             Workbench
+          </Link>
+          <Link
+            href="/library"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Prompt Playbooks
           </Link>
           <Link
             href="/patterns"
@@ -75,20 +75,14 @@ export function Header({ user }: HeaderProps) {
             Patterns
           </Link>
           <Link
-            href="/library"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Library
-          </Link>
-          <Link
             href="/learn"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
-            Learn
+            Pathways
           </Link>
           <Link
             href="/built-in-public"
-            className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-200"
+            className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-200"
           >
             <Icons.github className="h-3 w-3" />
             Built in Public
