@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -258,8 +259,8 @@ export default function DashboardPage() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <button
-                  onClick={() => (window.location.href = '/library')}
+                <Link
+                  href="/library"
                   className="flex w-full items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                 >
                   <Icons.library className="h-5 w-5 text-primary" />
@@ -269,12 +270,10 @@ export default function DashboardPage() {
                       {stats.totalPrompts} prompts
                     </p>
                   </div>
-                </button>
+                </Link>
 
-                <button
-                  onClick={() =>
-                    (window.location.href = '/library?filter=favorites')
-                  }
+                <Link
+                  href="/library?filter=favorites"
                   className="flex w-full items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                 >
                   <Icons.heart className="h-5 w-5 text-red-600" />
@@ -284,10 +283,10 @@ export default function DashboardPage() {
                       {stats.favoritePrompts} saved
                     </p>
                   </div>
-                </button>
+                </Link>
 
-                <button
-                  onClick={() => (window.location.href = '/patterns')}
+                <Link
+                  href="/patterns"
                   className="flex w-full items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                 >
                   <Icons.sparkles className="h-5 w-5 text-purple-600" />
@@ -297,7 +296,7 @@ export default function DashboardPage() {
                       {stats.patternsLearned}/{stats.totalPatterns} learned
                     </p>
                   </div>
-                </button>
+                </Link>
               </CardContent>
             </Card>
 

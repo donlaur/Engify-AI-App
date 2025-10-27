@@ -28,34 +28,34 @@ export const learningPathways: LearningPathway[] = [
           'Start by reading a key article on how AI is impacting engineering leadership to understand the challenges and opportunities.',
         actionText: 'Read Article',
         type: 'article',
-        targetId: '7', // "How AI Is Impacting Engineering Leadership"
+        targetId: 'ai-adoption-challenges', // Real blog post slug
       },
       {
         id: 2,
         title: 'Define Your AI Policy',
         description:
-          'Before you can adopt AI, you need a clear and safe policy. Use this prompt playbook to draft a comprehensive AI usage policy for your team.',
-        actionText: 'Use Prompt Playbook',
+          'Before you can adopt AI, you need a clear and safe policy. Browse our prompt library to find templates for AI usage policies.',
+        actionText: 'Browse Library',
         type: 'playbook',
-        targetId: 'ai-usage-policy', // Assumes a new playbook id
+        targetId: 'cg-001', // Use first prompt as example
       },
       {
         id: 3,
         title: 'Set Measurable Goals',
         description:
           "A great strategy needs measurable goals. Use the 'Goal & OKR Architect' to define clear objectives for your team's AI adoption this quarter.",
-        actionText: 'Go to Workbench',
+        actionText: 'Try Demo',
         type: 'workbench',
-        targetId: 'okr-architect',
+        targetId: 'demo',
       },
       {
         id: 4,
         title: 'Learn from the Best',
         description:
-          'Read how leaders at OpenAI think about the intersection of Engineering Strategy and AI Product Strategy.',
+          'Read how we shipped a production platform in one day using strategic iteration.',
         actionText: 'Read Article',
         type: 'article',
-        targetId: '9', // "AI Product Strategy for Engineering Leaders"
+        targetId: '350-commits-one-day', // Real blog post slug
       },
       {
         id: 5,
@@ -81,7 +81,7 @@ export const learningPathways: LearningPathway[] = [
           "Taught by Google AI experts on Coursera, this course provides a solid, non-technical introduction to AI and machine learning concepts. It's the perfect starting point for understanding Google's ecosystem.",
         actionText: 'Explore on Coursera',
         type: 'external_link',
-        targetId: 'https://www.coursera.org/google-ai-essentials',
+        targetId: 'https://www.coursera.org/specializations/ai-essentials-google',
       },
       {
         id: 2,

@@ -14,28 +14,28 @@ import { Separator } from '@/components/ui/separator';
 
 const footerLinks = {
   product: [
-    { href: '/workbench', label: 'AI Workbench' },
+    { href: '/demo', label: 'AI Workbench' },
     { href: '/patterns', label: 'Patterns' },
     { href: '/library', label: 'Library' },
     { href: '/pricing', label: 'Pricing' },
   ],
   company: [
-    { href: '/about', label: 'About' },
+    { href: '/built-in-public', label: 'About' },
     { href: '/blog', label: 'Blog' },
-    { href: '/careers', label: 'Careers' },
-    { href: '/contact', label: 'Contact' },
+    { href: '/built-in-public', label: 'Careers' },
+    { href: 'mailto:hello@engify.ai', label: 'Contact' },
   ],
   resources: [
-    { href: '/docs', label: 'Documentation' },
-    { href: '/guides', label: 'Guides' },
-    { href: '/case-studies', label: 'Case Studies' },
-    { href: '/api', label: 'API' },
+    { href: '/learn', label: 'Documentation' },
+    { href: '/learn', label: 'Guides' },
+    { href: '/blog', label: 'Case Studies' },
+    { href: '/built-in-public', label: 'API' },
   ],
   legal: [
     { href: '/privacy', label: 'Privacy' },
     { href: '/terms', label: 'Terms' },
-    { href: '/security', label: 'Security' },
-    { href: '/cookies', label: 'Cookies' },
+    { href: '/built-in-public', label: 'Security' },
+    { href: '/privacy', label: 'Cookies' },
   ],
 };
 
@@ -141,12 +141,12 @@ export function Footer() {
             >
               Blog
             </Link>
-            <Link
-              href="/contact"
+            <a
+              href="mailto:hello@engify.ai"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               Contact
-            </Link>
+            </a>
             <Link
               href="/privacy"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"

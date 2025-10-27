@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import {
@@ -144,18 +145,15 @@ export default function PricingPage() {
                   className="w-full"
                   variant={plan.popular ? 'default' : 'outline'}
                   size="lg"
-                  onClick={() => {
-                    if (plan.name === 'Free') {
-                      window.location.href = '/library';
-                    } else if (plan.name === 'Team') {
-                      window.location.href = 'mailto:sales@engify.ai';
-                    } else {
-                      // Redirect to signup
-                      window.location.href = '/signup';
-                    }
-                  }}
+                  asChild
                 >
-                  {plan.cta}
+                  <Link href={
+                    plan.name === 'Free' ? '/library' :
+                    plan.name === 'Team' ? 'mailto:sales@engify.ai' :
+                    '/signup'
+                  }>
+                    {plan.cta}
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -254,20 +252,16 @@ export default function PricingPage() {
                 within 24 hours.
               </p>
               <div className="flex justify-center gap-4">
-                <Button
-                  variant="default"
-                  onClick={() =>
-                    (window.location.href = 'mailto:support@engify.ai')
-                  }
-                >
-                  <Icons.inbox className="mr-2 h-4 w-4" />
-                  Contact Support
+                <Button variant="default" asChild>
+                  <a href="mailto:support@engify.ai">
+                    <Icons.inbox className="mr-2 h-4 w-4" />
+                    Contact Support
+                  </a>
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => (window.location.href = '/library')}
-                >
-                  Browse Prompts
+                <Button variant="outline" asChild>
+                  <Link href="/library">
+                    Browse Prompts
+                  </Link>
                 </Button>
               </div>
             </CardContent>

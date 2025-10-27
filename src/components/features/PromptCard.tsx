@@ -26,33 +26,20 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useFavorites } from '@/hooks/use-favorites';
 import { MakeItMineButton } from './MakeItMineButton';
+import { PromptDetailModal } from './PromptDetailModal';
+import type { Prompt } from '@/lib/schemas/prompt';
 
-interface PromptCardProps {
-  id: string;
-  title: string;
-  description: string;
-  content: string;
-  category: string;
-  role?: string;
-  views?: number;
-  rating?: number;
+interface PromptCardProps extends Omit<Prompt, 'createdAt' | 'updatedAt'> {
   onView?: () => void;
 }
 
-export function PromptCard({
-  id,
-  title,
-  description,
-  content,
-  category,
-  role,
-  views = 0,
-  rating = 0,
-  onView,
-}: PromptCardProps) {
+export function PromptCard(props: PromptCardProps) {
   const [copied, setCopied] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const { toast } = useToast();
   const { isFavorite, toggleFavorite } = useFavorites();
+  
+  const { id, title, description, content, category, role, views = 0, rating = 0, onView } = props;
 
   const handleCopy = async () => {
     try {
@@ -73,12 +60,14 @@ export function PromptCard({
   };
 
   const handleView = () => {
+    setShowModal(true);
     if (onView) {
       onView();
     }
   };
 
   return (
+    <>
     <Card
       className="cursor-pointer transition-shadow hover:shadow-lg"
       onClick={handleView}
@@ -164,5 +153,12 @@ export function PromptCard({
         </div>
       </CardFooter>
     </Card>
+    
+    <PromptDetailModal 
+      prompt={props as Prompt}
+      isOpen={showModal}
+      onClose={() => setShowModal(false)}
+    />
+    </>
   );
 }
