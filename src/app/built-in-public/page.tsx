@@ -249,6 +249,69 @@ export default function BuiltInPublicPage() {
             </CardContent>
           </Card>
 
+          {/* Testing Strategy */}
+          <Card className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-yellow-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.alertTriangle className="h-6 w-6 text-orange-600" />
+                Why No Tests Yet? (A Teaching Moment)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-gray-700">
+                Notice there are minimal tests in this repo. This is <span className="font-semibold">intentional</span>, not lazy. Here&apos;s why:
+              </p>
+              <div className="space-y-3">
+                <div className="rounded-lg bg-white p-4 border-l-4 border-orange-500">
+                  <p className="font-semibold text-orange-900 mb-2">❌ Don&apos;t Test First When:</p>
+                  <ul className="text-sm text-orange-800 space-y-1 ml-4">
+                    <li>• APIs are still changing daily</li>
+                    <li>• User feedback hasn&apos;t validated features</li>
+                    <li>• You&apos;re in rapid prototyping mode</li>
+                    <li>• The code might be thrown away tomorrow</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg bg-white p-4 border-l-4 border-green-500">
+                  <p className="font-semibold text-green-900 mb-2">✅ Add Tests When:</p>
+                  <ul className="text-sm text-green-800 space-y-1 ml-4">
+                    <li>• APIs stabilize (we&apos;re almost there)</li>
+                    <li>• Users validate the features</li>
+                    <li>• You move from prototype → product</li>
+                    <li>• Bugs start appearing in production</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="rounded-lg bg-blue-50 p-4">
+                <p className="font-semibold text-blue-900 mb-2">💡 The Real Lesson:</p>
+                <p className="text-sm text-blue-800">
+                  Writing tests for code you&apos;ll delete is waste. Ship fast, validate with users, 
+                  THEN add tests when patterns emerge. This is how modern teams move fast without breaking things.
+                </p>
+              </div>
+              <div className="rounded-lg bg-purple-50 p-4">
+                <p className="font-semibold text-purple-900 mb-2">📅 Testing Roadmap:</p>
+                <div className="text-sm text-purple-800 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Icons.check className="h-4 w-4 text-green-600" />
+                    <span>Day 1-2: Ship features, validate concept</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Icons.clock className="h-4 w-4 text-orange-600" />
+                    <span>Day 3-4: Add tests for stable APIs (auth, AI execution)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Icons.clock className="h-4 w-4 text-orange-600" />
+                    <span>Week 2: E2E tests for critical user flows</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Icons.clock className="h-4 w-4 text-orange-600" />
+                    <span>Week 3: Integration tests, CI/CD pipeline</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Philosophy */}
           <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
             <CardHeader>
