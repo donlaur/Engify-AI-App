@@ -76,7 +76,9 @@ describe('sanitizeText', () => {
   });
 
   it('handles non-string input', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(sanitizeText(null as any)).toBe('');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(sanitizeText(undefined as any)).toBe('');
   });
 });
@@ -226,6 +228,7 @@ describe('sanitizeUrl', () => {
 
   it('handles empty input', () => {
     expect(sanitizeUrl('')).toBe('');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(sanitizeUrl(null as any)).toBe('');
   });
 });

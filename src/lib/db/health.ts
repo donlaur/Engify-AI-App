@@ -46,14 +46,17 @@ export async function checkDbHealth(): Promise<{
  * Fails fast if database is not available
  */
 export async function validateDbConnection(): Promise<void> {
+  // eslint-disable-next-line no-console
   console.log('🔍 Validating database connection...');
-
+  
   const health = await checkDbHealth();
-
+  
   if (health.status === 'unhealthy') {
+    // eslint-disable-next-line no-console
     console.error('❌ Database connection failed:', health.error);
     throw new Error(`Database connection failed: ${health.error}`);
   }
-
+  
+  // eslint-disable-next-line no-console
   console.log(`✅ Database connection healthy (${health.latency}ms)`);
 }

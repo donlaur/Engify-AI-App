@@ -99,9 +99,9 @@ export function sanitizeObject<T extends Record<string, unknown>>(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sanitized[key as keyof T] = sanitizeHtml(value, level) as any;
     } else if (Array.isArray(value)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sanitized[key as keyof T] = value.map(item =>
         typeof item === 'string' ? sanitizeHtml(item, level) : item
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ) as any;
     } else if (value && typeof value === 'object') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
