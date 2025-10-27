@@ -24,6 +24,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useFavorites } from '@/hooks/use-favorites';
 
 interface PromptCardProps {
   id: string;
@@ -38,7 +39,7 @@ interface PromptCardProps {
 }
 
 export function PromptCard({
-  id: _id,
+  id,
   title,
   description,
   content,
@@ -50,6 +51,7 @@ export function PromptCard({
 }: PromptCardProps) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const handleCopy = async () => {
     try {
@@ -86,6 +88,46 @@ export function PromptCard({
             <CardTitle className="text-lg">{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
           </div>
+          <div className="flex shrink-0 gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(id);
+                toast({
+                  title: isFavorite(id)
+                    ? 'Removed from favorites'
+                    : 'Added to favorites',
+                  description: isFavorite(id)
+                    ? 'Prompt removed from your favorites'
+                    : 'Prompt saved to your favorites',
+                });
+              }}
+              className="shrink-0"
+            >
+              {isFavorite(id) ? (
+                <Icons.heart className="h-4 w-4 fill-red-600 text-red-600" />
+              ) : (
+                <Icons.heart className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCopy();
+              }}
+              className="shrink-0"
+            >
+              {copied ? (
+                <Icons.check className="h-4 w-4 text-green-600" />
+              ) : (
+                <Icons.copy className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -97,18 +139,6 @@ export function PromptCard({
       <CardFooter className="flex justify-between text-sm text-muted-foreground">
         <div className="flex items-center space-x-4">
           <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleCopy}
-              title={copied ? 'Copied!' : 'Copy prompt'}
-            >
-              {copied ? (
-                <Icons.check className="h-4 w-4 text-green-600" />
-              ) : (
-                <Icons.copy className="h-4 w-4" />
-              )}
-            </Button>
             <Button variant="ghost" size="icon" onClick={onView}>
               <Icons.arrowRight className="h-4 w-4" />
             </Button>
