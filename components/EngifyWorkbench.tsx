@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'legacy-code-archaeologist' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
+type ActiveTab = 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
@@ -31,6 +32,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
                     <TabButton name="Legacy Code Archaeologist" isActive={activeTab === 'legacy-code-archaeologist'} onClick={() => setActiveTab('legacy-code-archaeologist')} />
+                    <TabButton name="Architectural Trade-Off Analyst" isActive={activeTab === 'architectural-tradeoff-analyst'} onClick={() => setActiveTab('architectural-tradeoff-analyst')} />
                     <TabButton name="Post-Mortem Facilitator" isActive={activeTab === 'post-mortem-facilitator'} onClick={() => setActiveTab('post-mortem-facilitator')} />
                     <TabButton name="Incident Co-Commander" isActive={activeTab === 'incident-co-commander'} onClick={() => setActiveTab('incident-co-commander')} />
                     <TabButton name="Incident Strategist" isActive={activeTab === 'incident-strategist'} onClick={() => setActiveTab('incident-strategist')} />
@@ -46,6 +48,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
                 {activeTab === 'legacy-code-archaeologist' && <LegacyCodeArchaeologist />}
+                {activeTab === 'architectural-tradeoff-analyst' && <ArchitecturalTradeoffAnalyst />}
                 {activeTab === 'post-mortem-facilitator' && <PostmortemFacilitator />}
                 {activeTab === 'incident-co-commander' && <IncidentCoCommander />}
                 {activeTab === 'incident-strategist' && <IncidentResponseStrategist />}
@@ -81,6 +84,135 @@ const FeatureStub: React.FC<{title: string, description: string}> = ({ title, de
         <span className="mt-4 px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 rounded-full">Coming Soon</span>
     </div>
 );
+
+const ArchitecturalTradeoffAnalyst: React.FC = () => {
+    const [step, setStep] = useState(1);
+    const [problem, setProblem] = useState("We need to build a real-time notification system for 1 million concurrent users.");
+    const [constraints, setConstraints] = useState("Must have less than 200ms latency, must be cost-effective, our team has deep expertise in Kafka but not in Pulsar.");
+    const [options, setOptions] = useState<any[]>([]);
+    const [evaluations, setEvaluations] = useState<any>({});
+    const [adr, setAdr] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleBrainstorm = async () => {
+        setIsLoading(true);
+        setOptions([]);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+            
+            const response = await fetch('/api/architectural-tradeoff-analyst', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'brainstorm_solutions', problem_statement: problem, constraints })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to brainstorm solutions.');
+            }
+            const data = await response.json();
+            setOptions(data.options);
+            const initialEvals = data.options.reduce((acc: any, option: any, index: number) => {
+                acc[index] = { score: 3, notes: '' };
+                return acc;
+            }, {});
+            setEvaluations(initialEvals);
+            setStep(2);
+        } catch (err: any) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleEvaluationChange = (index: number, field: string, value: string | number) => {
+        setEvaluations((prev: any) => ({
+            ...prev,
+            [index]: { ...prev[index], [field]: value }
+        }));
+    };
+
+    const handleGenerateAdr = async () => {
+        setIsLoading(true);
+        setAdr("");
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+            
+            const response = await fetch('/api/architectural-tradeoff-analyst', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({
+                    step: 'generate_adr',
+                    problem_statement: problem,
+                    constraints,
+                    options,
+                    evaluations
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate ADR.');
+            }
+            const data = await response.json();
+            setAdr(data.adr);
+            setStep(3);
+        } catch (err: any) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                <h2 className="font-semibold text-lg mb-1">Step 1: Frame the Problem</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Define the problem you are solving and the key constraints or quality attributes.</p>
+                <label className="text-sm font-medium">Problem Statement</label>
+                <textarea value={problem} onChange={(e) => setProblem(e.target.value)} rows={3} className="w-full p-2 mt-1 mb-3 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 1} />
+                <label className="text-sm font-medium">Key Constraints</label>
+                <textarea value={constraints} onChange={(e) => setConstraints(e.target.value)} rows={3} className="w-full p-2 mt-1 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 1} />
+                <button onClick={handleBrainstorm} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                    {isLoading ? 'Brainstorming...' : 'Brainstorm Solutions'}
+                </button>
+            </div>
+
+            {step >= 2 && (
+                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-4">Step 2: Evaluate Architectural Options</h2>
+                    <div className="space-y-4">
+                        {options.map((option, index) => (
+                            <div key={index} className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                                <h3 className="font-semibold">{option.title}</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{option.overview}</p>
+                                <div className="mt-4">
+                                    <label className="block text-sm font-medium">Your Evaluation Notes</label>
+                                    <textarea value={evaluations[index]?.notes || ''} onChange={(e) => handleEvaluationChange(index, 'notes', e.target.value)} rows={2} className="w-full p-2 mt-1 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 2} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <button onClick={handleGenerateAdr} disabled={isLoading || step > 2} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                        {isLoading ? 'Generating ADR...' : 'Generate Architecture Decision Record'}
+                    </button>
+                </div>
+            )}
+
+            {step >= 3 && (
+                 <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-4">Step 3: Your Architecture Decision Record (ADR)</h2>
+                     <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-[60vh] overflow-y-auto">
+                        <pre className="text-sm whitespace-pre-wrap font-sans">{adr}</pre>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 const LegacyCodeArchaeologist: React.FC = () => {
     const [step, setStep] = useState(1);
