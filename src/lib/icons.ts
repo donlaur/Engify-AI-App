@@ -106,6 +106,28 @@ import {
   RefreshCw,
   Database,
   type LucideIcon,
+,
+  Lightbulb,
+  Compass,
+  Mail,
+  Briefcase,
+  X,
+  Github,
+  Server,
+  Key,
+  Wrench,
+  TestTube2,
+  FileSearch,
+  GitCompare,
+  TrendingUp,
+  Layers,
+  GraduationCap,
+  Palette,
+  Building2,
+  DollarSign,
+  Hash,
+  Play,
+  Wifi
 } from 'lucide-react';
 
 // Export all icons with descriptive names
@@ -211,7 +233,30 @@ export const Icons = {
 export type IconName = keyof typeof Icons;
 
 // Export LucideIcon type for component props
-export type { LucideIcon };
+export type { LucideIcon 
+  // Auto-added icons
+  lightbulb: Lightbulb,
+  compass: Compass,
+  mail: Mail,
+  briefcase: Briefcase,
+  x: X,
+  github: Github,
+  server: Server,
+  key: Key,
+  tool: Wrench,
+  testTube: TestTube2,
+  fileSearch: FileSearch,
+  gitCompare: GitCompare,
+  trending: TrendingUp,
+  layers: Layers,
+  graduationCap: GraduationCap,
+  palette: Palette,
+  building: Building2,
+  dollarSign: DollarSign,
+  hash: Hash,
+  play: Play,
+  wifi: Wifi,
+};
 
 /**
  * Icon Usage Tracking
