@@ -9,8 +9,8 @@
  */
 
 import { initTRPC, TRPCError } from '@trpc/server';
-import { type CreateNextContextOptions } from '@trpc/server/adapters/next';
-import { auth } from '@/app/api/auth/[...nextauth]/route';
+import { type FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch';
+import { auth } from '@/lib/auth';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
 
@@ -21,13 +21,12 @@ import { ZodError } from 'zod';
  * - Request headers
  * - Any other per-request data
  */
-export async function createTRPCContext(opts: CreateNextContextOptions) {
+export async function createTRPCContext(opts: FetchCreateContextFnOptions) {
   const session = await auth();
 
   return {
     session,
     req: opts.req,
-    res: opts.res,
   };
 }
 
