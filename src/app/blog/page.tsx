@@ -1,45 +1,26 @@
+'use client';
+
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
+import { getAllBlogPosts } from '@/data/blog-posts';
+import Link from 'next/link';
 
 export default function BlogPage() {
-  const posts = [
-    {
-      id: 1,
-      title: '15 Prompt Engineering Patterns Every Developer Should Know',
-      excerpt: 'Master the essential patterns that will 10x your AI productivity.',
-      date: '2025-10-27',
-      category: 'Patterns',
-      readTime: '8 min',
-    },
-    {
-      id: 2,
-      title: 'How to Build an AI-First Development Workflow',
-      excerpt: 'Transform your team with these proven strategies and tools.',
-      date: '2025-10-26',
-      category: 'Strategy',
-      readTime: '12 min',
-    },
-    {
-      id: 3,
-      title: 'The Future of Prompt Engineering: Trends for 2026',
-      excerpt: 'What&apos;s coming next in AI and how to prepare your team.',
-      date: '2025-10-25',
-      category: 'Trends',
-      readTime: '10 min',
-    },
-  ];
+  const posts = getAllBlogPosts();
 
   return (
     <MainLayout>
-      <div className="container py-16">
-        <div className="mx-auto max-w-4xl">
-          <Badge variant="secondary" className="mb-4">
-            <Icons.book className="mr-2 h-3 w-3" />
-            Blog
-          </Badge>
-          <h1 className="text-4xl font-bold mb-4">Latest Insights</h1>
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-purple-50 to-white py-20">
+        <div className="container">
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="mb-4 text-5xl font-bold">Blog</h1>
+            <p className="text-xl text-gray-600">
+              Insights on AI adoption, rapid development, and engineering leadership
+            </p>
           </div>
         </div>
       </section>
