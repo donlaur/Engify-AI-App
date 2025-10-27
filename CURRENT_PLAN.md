@@ -155,9 +155,9 @@
 - [x] Avatar ✅
 - [x] Badge ✅
 - [x] Separator ✅
-- [ ] Dialog
-- [ ] Tabs
-- [ ] Select
+- [x] Dialog ✅ (used in modals)
+- [x] Tabs ✅ (used in dashboard)
+- [x] Select ✅ (used in filters)
 
 ### Layout Components
 
@@ -165,17 +165,17 @@
 - [x] Sidebar (desktop) ✅
 - [x] Footer ✅
 - [x] Main layout wrapper ✅
-- [ ] Dashboard layout
+- [x] Dashboard layout ✅
 
 ### Feature Components
 
 - [x] PromptCard ✅ (with tests)
 - [x] LoadingSpinner ✅ (with tests)
 - [x] EmptyState ✅ (with tests)
-- [ ] PromptList
-- [ ] PromptSearch
-- [ ] PromptFilters
-- [ ] ErrorBoundary
+- [x] PromptList ✅ (library page)
+- [x] PromptSearch ✅ (search bar)
+- [x] PromptFilters ✅ (category filters)
+- [x] ErrorBoundary ✅ (error.tsx)
 
 ### Component Tests
 
