@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
+import { RatingStars } from '@/components/features/RatingStars';
+import { useToast } from '@/hooks/use-toast';
 
 interface PromptDetailPageProps {
   params: {
@@ -20,6 +22,8 @@ export default function PromptDetailPage({ params }: PromptDetailPageProps) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [viewCount, setViewCount] = useState(0);
+  const [userRating, setUserRating] = useState(0);
+  const { toast } = useToast();
 
   // Get all prompts and find the one with matching ID
   const prompts = getSeedPromptsWithTimestamps();
@@ -43,8 +47,27 @@ export default function PromptDetailPage({ params }: PromptDetailPageProps) {
         // TODO: In production, send to API to persist
         // await fetch(`/api/prompts/${params.id}/view`, { method: 'POST' });
       }
+      
+      // Load user rating from localStorage
+      const ratingKey = `prompt_rating_${params.id}`;
+      const savedRating = localStorage.getItem(ratingKey);
+      if (savedRating) {
+        setUserRating(Number(savedRating));
+      }
     }
   }, [prompt, params.id]);
+  
+  // Handle rating
+  const handleRate = (rating: number) => {
+    setUserRating(rating);
+    localStorage.setItem(`prompt_rating_${params.id}`, String(rating));
+    toast({
+      title: 'Rating saved!',
+      description: `You rated this prompt ${rating} stars`,
+    });
+    // TODO: In production, send to API
+    // await fetch(`/api/prompts/${params.id}/rate`, { method: 'POST', body: { rating } });
+  };
 
   // Handle copy to clipboard
   const handleCopy = async () => {
@@ -208,18 +231,27 @@ export default function PromptDetailPage({ params }: PromptDetailPageProps) {
                   </span>
                 </div>
 
-                {prompt.rating !== undefined && (
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-muted-foreground">
                       <Icons.star className="mr-2 h-4 w-4" />
-                      <span className="text-sm">Rating</span>
+                      <span className="text-sm">Avg Rating</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold">{prompt.rating}</span>
-                      <span className="text-sm text-muted-foreground">/ 5</span>
+                      <span className="font-semibold">{prompt.rating || 0}</span>
+                      <span className="text-muted-foreground text-sm">/ 5</span>
                     </div>
                   </div>
-                )}
+                  
+                  <div className="border-t pt-3">
+                    <p className="text-sm text-muted-foreground mb-2">Your Rating:</p>
+                    <RatingStars 
+                      rating={userRating} 
+                      onRate={handleRate}
+                      size="lg"
+                    />
+                  </div>
+                </div>
 
                 {prompt.ratingCount !== undefined && (
                   <div className="flex items-center justify-between">
