@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   
   // Environment variables available to the browser
   env: {
@@ -11,7 +10,16 @@ const nextConfig = {
   
   // Image optimization
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: '**', // Allow all HTTPS images (tighten in production)
+      },
+    ],
     formats: ['image/avif', 'image/webp'],
   },
   
