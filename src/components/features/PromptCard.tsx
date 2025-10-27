@@ -21,8 +21,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 interface PromptCardProps {
@@ -86,21 +86,6 @@ export function PromptCard({
             <CardTitle className="text-lg">{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCopy();
-            }}
-            className="shrink-0"
-          >
-            {copied ? (
-              <Icons.check className="h-4 w-4 text-green-600" />
-            ) : (
-              <Icons.copy className="h-4 w-4" />
-            )}
-          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -111,6 +96,23 @@ export function PromptCard({
       </CardContent>
       <CardFooter className="flex justify-between text-sm text-muted-foreground">
         <div className="flex items-center space-x-4">
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCopy}
+              title={copied ? 'Copied!' : 'Copy prompt'}
+            >
+              {copied ? (
+                <Icons.check className="h-4 w-4 text-green-600" />
+              ) : (
+                <Icons.copy className="h-4 w-4" />
+              )}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={onView}>
+              <Icons.arrowRight className="h-4 w-4" />
+            </Button>
+          </div>
           <div className="flex items-center space-x-1">
             <Icons.view className="h-4 w-4" />
             <span>{views.toLocaleString()}</span>
