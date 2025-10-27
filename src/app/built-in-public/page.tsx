@@ -382,6 +382,73 @@ export default function BuiltInPublicPage() {
             </CardContent>
           </Card>
 
+          {/* Tools & Models Evolution */}
+          <Card className="border-2 border-purple-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.settings className="h-6 w-6 text-purple-600" />
+                Tools & Models Evolution
+              </CardTitle>
+              <CardDescription>What I actually used, hour by hour</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white text-sm font-bold flex-shrink-0">
+                    1
+                  </div>
+                  <div>
+                    <p className="font-semibold text-blue-900">Google AI Studio (Vibe Coder)</p>
+                    <p className="text-sm text-blue-800">Initial concept validation - brand new tool, perfect for ideation</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white text-sm font-bold flex-shrink-0">
+                    2
+                  </div>
+                  <div>
+                    <p className="font-semibold text-purple-900">Windsurf + Claude Sonnet 3.5</p>
+                    <p className="text-sm text-purple-800">Today&apos;s main development - 350+ commits with this combo</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-pink-50">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-600 text-white text-sm font-bold flex-shrink-0">
+                    ?
+                  </div>
+                  <div>
+                    <p className="font-semibold text-pink-900">Tomorrow: Maybe Cursor?</p>
+                    <p className="text-sm text-pink-800">Not locked in - use whatever works best for the task</p>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-lg bg-yellow-50 p-4">
+                <p className="font-semibold text-yellow-900 mb-2">💡 The Point:</p>
+                <p className="text-sm text-yellow-800">
+                  I&apos;m not married to any tool. Google AI Studio for ideation, Windsurf for today, 
+                  Cursor tomorrow if it&apos;s better. Use the right tool for the job, not the trendy one.
+                </p>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-600 mb-1">AI Models Used</p>
+                  <ul className="text-sm text-slate-700 space-y-1">
+                    <li>• Claude Sonnet 3.5 (primary)</li>
+                    <li>• Google Gemini (testing)</li>
+                    <li>• GPT-4 (validation)</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-600 mb-1">Development Tools</p>
+                  <ul className="text-sm text-slate-700 space-y-1">
+                    <li>• Windsurf (today)</li>
+                    <li>• Google AI Studio (ideation)</li>
+                    <li>• Cursor (maybe tomorrow)</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Stats */}
           <div className="grid gap-6 md:grid-cols-3">
             <Card>
