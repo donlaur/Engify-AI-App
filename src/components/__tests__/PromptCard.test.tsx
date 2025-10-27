@@ -56,8 +56,14 @@ describe('PromptCard', () => {
 
     const { user } = render(<PromptCard {...defaultProps} />);
 
-    const copyButton = screen.getByRole('button');
+    // Find the copy button (ghost variant button with icon)
+    const buttons = screen.getAllByRole('button');
+    const copyButton = buttons[0]; // First button is the copy button
+
     await user.click(copyButton);
+
+    // Wait a bit for async operation
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(mockClipboard.writeText).toHaveBeenCalledWith(
       'This is the prompt content'
@@ -82,10 +88,14 @@ describe('PromptCard', () => {
 
     const { user } = render(<PromptCard {...defaultProps} />);
 
-    const copyButton = screen.getByRole('button');
+    const buttons = screen.getAllByRole('button');
+    const copyButton = buttons[0];
+
     await user.click(copyButton);
 
-    // Check icon should appear (this is a simplified check)
+    // Wait for async operation
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     expect(mockClipboard.writeText).toHaveBeenCalled();
   });
 });

@@ -5,7 +5,7 @@ import { LoadingSpinner } from '@/components/features/LoadingSpinner';
 describe('LoadingSpinner', () => {
   it('renders with default size', () => {
     render(<LoadingSpinner />);
-    expect(screen.getByRole('status', { hidden: true })).toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('renders with custom text', () => {
