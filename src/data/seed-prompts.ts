@@ -3,11 +3,16 @@
  *
  * Initial set of high-quality prompts for the library
  * Organized by category and role
+ *
+ * NOTE: This file contains curated example prompts.
+ * For role-based playbooks, see playbooks.ts
  */
 
 import type { Prompt } from '@/lib/schemas/prompt';
+import { convertPlaybooksToPrompts } from './convert-playbooks';
 
-export const seedPrompts: Omit<Prompt, 'createdAt' | 'updatedAt'>[] = [
+// Curated example prompts
+export const curatedPrompts: Omit<Prompt, 'createdAt' | 'updatedAt'>[] = [
   // CODE GENERATION
   {
     id: 'cg-001',
@@ -589,6 +594,12 @@ Output a balanced, achievable sprint plan.`,
     isPublic: true,
     isFeatured: false,
   },
+];
+
+// Combine curated prompts with playbook prompts
+export const seedPrompts: Omit<Prompt, 'createdAt' | 'updatedAt'>[] = [
+  ...curatedPrompts,
+  ...convertPlaybooksToPrompts(),
 ];
 
 // Helper to add timestamps
