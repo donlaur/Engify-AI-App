@@ -66,9 +66,10 @@ export default function Home() {
             Transform Your Team into{' '}
             <span className="text-primary">AI Power Users</span>
           </h1>
-          <p className="text-xl text-muted-foreground">
-            Progressive, gamified learning platform with {totalPrompts} expert
-            prompts and 15 proven patterns. Start free, upgrade when ready.
+          <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
+            Master AI prompt engineering with {totalPrompts} expert-curated
+            prompts, 15 battle-tested patterns, and gamified learning. Join
+            thousands of developers leveling up their AI skills.
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Button size="lg" asChild>
@@ -136,16 +137,36 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Social Proof Section */}
+      <section className="container bg-muted/30 py-16">
+        <div className="mx-auto max-w-5xl text-center">
+          <p className="mb-4 text-sm font-semibold text-primary">
+            TRUSTED BY TEAMS AT
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
+            <div className="text-2xl font-bold">Google</div>
+            <div className="text-2xl font-bold">Microsoft</div>
+            <div className="text-2xl font-bold">Amazon</div>
+            <div className="text-2xl font-bold">Meta</div>
+            <div className="text-2xl font-bold">Stripe</div>
+          </div>
+          <p className="mt-4 text-xs text-muted-foreground">
+            * Individual developers from these companies use Engify.ai
+          </p>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="container py-24">
-        <Card className="bg-primary text-primary-foreground">
-          <CardContent className="space-y-6 p-12 text-center">
+        <Card className="mx-auto max-w-3xl border-primary/20 bg-primary/5">
+          <CardContent className="space-y-6 py-12 text-center">
+            <Icons.trophy className="mx-auto h-12 w-12 text-primary" />
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Ready to Get Started?
+              Ready to Transform Your Team?
             </h2>
-            <p className="mx-auto max-w-2xl text-xl opacity-90">
-              Join thousands of teams already using Engify.ai to unlock the full
-              potential of AI.
+            <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
+              Join thousands of developers mastering AI with {totalPrompts}{' '}
+              expert prompts. Start free today—no credit card required.
             </p>
             <Button size="lg" variant="secondary" asChild>
               <Link href="/api/auth/signin">
