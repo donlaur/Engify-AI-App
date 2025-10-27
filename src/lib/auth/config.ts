@@ -5,10 +5,9 @@
  */
 
 import { type NextAuthConfig } from 'next-auth';
-// import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-// import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import type { Session, User } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
@@ -42,9 +41,8 @@ export const authOptions: NextAuthConfig = {
             return null;
           }
 
-          // Verify password
-          // TODO: Re-enable bcrypt when auth is fully configured
-          const isValid = password === user.password; // Temporary - NOT SECURE!
+          // Verify password with bcrypt
+          const isValid = await bcrypt.compare(password, user.password);
           if (!isValid) {
             return null;
           }

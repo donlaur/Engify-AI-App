@@ -1,15 +1,21 @@
 /**
  * MongoDB Client
  * Singleton connection to MongoDB with connection pooling
+ *
+ * MVP MODE: Returns null if MONGODB_URI not set (uses static data instead)
  */
 
 import { MongoClient, Db } from 'mongodb';
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please define MONGODB_URI in .env.local');
+const uri = process.env.MONGODB_URI;
+
+if (!uri) {
+  throw new Error(
+    'MONGODB_URI is required. Please add it to your .env.local file.\n' +
+      'Get a free MongoDB Atlas cluster at: https://cloud.mongodb.com'
+  );
 }
 
-const uri = process.env.MONGODB_URI;
 const options = {
   maxPoolSize: 10,
   minPoolSize: 2,
