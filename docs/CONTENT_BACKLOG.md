@@ -83,3 +83,140 @@ This content is **excellent** and aligns perfectly with our mission. However:
 - We should **finish current work first**
 
 **Saved for future integration!** ✅
+
+---
+
+## Feature Idea: Cursor/Windsurf Rules Builder
+
+**Date Added**: Oct 27, 2025  
+**Relevance**: High - ties into AI Coding Assistant section  
+**Phase to Integrate**: Phase 6 (AI Coding Assistant Tools)  
+**Priority**: Medium-High
+
+### Concept
+
+An interactive tool in the Workbench that helps users build `.cursorrules` or `.windsurfrules` files.
+
+### Features
+
+1. **Interactive Form Builder**
+   - Tech stack selector (Next.js, React, Python, etc.)
+   - Code style preferences (tabs/spaces, naming conventions)
+   - Framework-specific options
+   - Custom rules input
+
+2. **Live Preview**
+   - Show generated rule file in real-time
+   - Syntax highlighting
+   - Format validation
+
+3. **Template Library**
+   - Pre-built templates for popular stacks
+   - Community-contributed rules
+   - Role-specific templates (Frontend, Backend, Full-stack)
+
+4. **Export Options**
+   - Download as `.cursorrules` file
+   - Download as `.windsurfrules` file
+   - Download as `AGENTS.md` file
+   - Copy to clipboard
+
+5. **Integration Points**
+   - Link from AI Coding Assistant section
+   - Accessible from Workbench
+   - Shareable URLs for team standards
+
+### Technical Implementation
+
+**Route**: `/workbench/rules-builder`
+
+**Components Needed:**
+
+- `RulesBuilderForm.tsx` - Interactive form
+- `RulesPreview.tsx` - Live preview panel
+- `TemplateSelector.tsx` - Choose from templates
+- `ExportOptions.tsx` - Download/copy buttons
+
+**Data Structure:**
+
+```typescript
+interface RuleBuilderConfig {
+  techStack: string[];
+  codeStyle: {
+    indentation: 'tabs' | 'spaces';
+    quotes: 'single' | 'double';
+    semicolons: boolean;
+  };
+  frameworks: string[];
+  customRules: string[];
+  template?: string;
+}
+```
+
+### User Flow
+
+1. User navigates to `/workbench/rules-builder`
+2. Selects tech stack (e.g., Next.js + TypeScript + Tailwind)
+3. Configures preferences via form
+4. Sees live preview of generated rules
+5. Adds custom rules if needed
+6. Downloads or copies to clipboard
+7. Adds file to their project
+
+### Value Proposition
+
+- **Saves time**: No need to write rules from scratch
+- **Best practices**: Templates include proven patterns
+- **Team alignment**: Easy to share and standardize
+- **Learning tool**: See examples of good rules
+- **Reduces errors**: Validated format
+
+### Integration with Existing Features
+
+**AI Coding Assistant Section:**
+
+- Link to Rules Builder from main page
+- "Generate Rules" CTA button
+- Examples show output from builder
+
+**Workbench:**
+
+- New tab: "Rules Builder"
+- Sits alongside prompt testing
+- Can test rules with AI
+
+**Prompt Library:**
+
+- Add "Rules" category
+- Prompts for generating custom rules
+- Link to builder tool
+
+### Future Enhancements
+
+- **AI-Powered Suggestions**: Analyze codebase, suggest rules
+- **Team Rules Manager**: Create and enforce team-wide rules
+- **Version Control**: Track rule changes over time
+- **Analytics**: See which rules are most effective
+- **Community Sharing**: Share and rate rules
+
+### Why This is Valuable
+
+1. **Addresses real pain**: Developers struggle with rules syntax
+2. **Differentiates us**: No one else has this tool
+3. **Drives engagement**: Interactive, useful tool
+4. **Supports main mission**: Better AI coding practices
+5. **Monetization potential**: Premium templates, team features
+
+### Action Items (For Phase 6)
+
+- [ ] Design Rules Builder UI
+- [ ] Create form components
+- [ ] Build live preview
+- [ ] Add 10+ templates
+- [ ] Implement export functionality
+- [ ] Add to Workbench navigation
+- [ ] Link from AI Coding Assistant section
+- [ ] Write documentation
+- [ ] Create demo video
+
+**Saved for Phase 6!** ✅
