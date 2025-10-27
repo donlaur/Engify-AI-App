@@ -43,21 +43,22 @@ export default function ForgotPasswordPage() {
             <CardDescription>
               {emailSent
                 ? "We've sent you a password reset link"
-                : 'Enter your email address and we'll send you a reset link'}
+                : "Enter your email address and we'll send you a reset link"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {emailSent ? (
               <div className="space-y-4">
-                <div className="rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4">
+                <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
                   <div className="flex items-start gap-3">
-                    <Icons.check className="h-5 w-5 text-green-600 mt-0.5" />
+                    <Icons.check className="mt-0.5 h-5 w-5 text-green-600" />
                     <div>
                       <p className="font-medium text-green-900 dark:text-green-100">
                         Check your email
                       </p>
-                      <p className="text-sm text-green-800 dark:text-green-200 mt-1">
-                        We sent a password reset link to <strong>{email}</strong>
+                      <p className="mt-1 text-sm text-green-800 dark:text-green-200">
+                        We sent a password reset link to{' '}
+                        <strong>{email}</strong>
                       </p>
                     </div>
                   </div>
@@ -65,7 +66,7 @@ export default function ForgotPasswordPage() {
 
                 <div className="space-y-2 text-center text-sm">
                   <p className="text-muted-foreground">
-                    Didn't receive the email? Check your spam folder or{' '}
+                    Didn&apos;t receive the email? Check your spam folder or{' '}
                     <button
                       onClick={() => setEmailSent(false)}
                       className="text-primary hover:underline"
