@@ -192,11 +192,13 @@
 
 ### Prompt Library (MVP Core)
 
-- [ ] Browse prompts page
-- [ ] Search functionality
-- [ ] Filter by category/role
+- [x] Browse prompts page ✅
+- [x] Search functionality ✅
+- [x] Filter by category/role ✅
+- [x] Prompt schema (Zod) ✅
+- [x] Mock data (3 prompts) ✅
 - [ ] Prompt detail page
-- [ ] Copy prompt button
+- [ ] Copy prompt button (in PromptCard)
 - [ ] View count tracking
 - [ ] Seed 50+ prompts
 
@@ -302,9 +304,9 @@
 
 ## 📊 Current Progress
 
-**Commits**: 96/150 (64%)
-**Phase**: 4/9 (UI Components - Complete ✅)
-**MVP Ready**: ~64%
+**Commits**: 99/150 (66%)
+**Phase**: 5/9 (Core Features - Prompt Library Started)
+**MVP Ready**: ~66%
 
 ### What Works Now
 
