@@ -143,7 +143,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Roles Section - Jellyfish style */}
+      {/* Roles Section */}
       <section className="container bg-gradient-to-b from-white to-gray-50 py-20">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
