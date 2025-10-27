@@ -31,7 +31,19 @@ const nextConfig = {
           },
           {
             key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            value: 'DENY', // Changed from SAMEORIGIN for better security
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://api.openai.com https://api.anthropic.com",
+              "frame-ancestors 'none'",
+            ].join('; '),
           },
           {
             key: 'X-Content-Type-Options',
