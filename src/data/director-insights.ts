@@ -35,7 +35,7 @@ export const directorPriorities: DirectorPriority[] = [
     description: 'Building RAG systems with document chunking, embeddings, vector search, and tool integration (Langchain, Langgraph).',
     category: 'ai-adoption',
     importance: 'critical',
-    relatedPrompts: ['cg-002', 'cg-010'],
+    relatedPrompts: ['dir-002'],
     keyQuestions: [
       'How do I build a RAG system?',
       'What tools should I use (Langchain, Langgraph)?',
@@ -48,7 +48,7 @@ export const directorPriorities: DirectorPriority[] = [
     description: 'Building systems that are easy to extend and maintain. Lower barriers to change. Some software is disposable - know when to rebuild vs maintain.',
     category: 'technical-excellence',
     importance: 'high',
-    relatedPrompts: ['cg-010', 'cg-011'],
+    relatedPrompts: ['dir-004'],
     keyQuestions: [
       'How important is extensibility today?',
       'When should we rebuild vs maintain?',
@@ -61,6 +61,7 @@ export const directorPriorities: DirectorPriority[] = [
     description: 'Helping teams adopt AI, change success metrics, and evolve from senior to staff-level thinking with AI tools.',
     category: 'team-coaching',
     importance: 'critical',
+    relatedPrompts: ['dir-003'],
     keyQuestions: [
       'How do I coach my team through AI adoption?',
       'What does success look like with AI?',
@@ -73,6 +74,7 @@ export const directorPriorities: DirectorPriority[] = [
     description: 'Partnering with product to identify problems AI can solve. Understanding what\'s newly possible with AI.',
     category: 'product-collab',
     importance: 'high',
+    relatedPrompts: ['dir-005'],
     keyQuestions: [
       'What problems should we solve with AI?',
       'How do we collaborate with product on AI features?',
@@ -85,7 +87,7 @@ export const directorPriorities: DirectorPriority[] = [
     description: 'Building new interfaces and frontends in ~1000 lines of code with AI. Speed and power of modern AI tools.',
     category: 'ai-adoption',
     importance: 'high',
-    relatedPrompts: ['cg-003', 'cg-002'],
+    relatedPrompts: ['dir-002', 'dir-005'],
     keyQuestions: [
       'How can I build faster with AI?',
       'What tools enable rapid development?',
@@ -98,6 +100,7 @@ export const directorPriorities: DirectorPriority[] = [
     description: 'Secure, stable, DRY, easy to develop on, usable. Focus on what matters for commercial success.',
     category: 'technical-excellence',
     importance: 'high',
+    relatedPrompts: ['dir-004'],
     keyQuestions: [
       'What makes a system well-designed?',
       'How do I balance security, stability, and speed?',
