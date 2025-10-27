@@ -135,13 +135,14 @@ A world where every engineering team has amplified their capabilities with AI, b
 ## 💬 **Taglines & Slogans**
 
 ### Main Tagline
-"Engineer + Amplify = Engify"
+"Engineer + Amplify + AI = Engify.ai"
 
 ### Alternatives
-- "Engify your workflow, amplify your impact"
+- "Amplifying engineers with AI"
+- "Engify your workflow with AI"
 - "Transform engineers into AI power users"
 - "Master AI prompt engineering"
-- "Amplify your team's capabilities"
+- "Engineer better, amplify with AI"
 
 ---
 
