@@ -17,7 +17,7 @@ const roles = [
   { id: 'engineers', label: 'Engineers', icon: Icons.code, href: '/for-engineers' },
   { id: 'designers', label: 'Designers', icon: Icons.palette, href: '/for-designers' },
   { id: 'pms', label: 'Product Managers', icon: Icons.target, href: '/for-pms' },
-  { id: 'qa', label: 'QA Engineers', icon: Icons.checkCircle, href: '/for-qa' },
+  { id: 'qa', label: 'QA Engineers', icon: Icons.check, href: '/for-qa' },
 ];
 
 export function RoleSelector() {
