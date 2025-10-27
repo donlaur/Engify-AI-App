@@ -215,6 +215,78 @@ export default function Home() {
                   </CardHeader>
                 </Card>
               );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Built in Public Section */}
+      <section className="container bg-white py-20">
+        <div className="mx-auto max-w-6xl">
+          <Card className="overflow-hidden border-2 border-purple-200">
+            <div className="grid md:grid-cols-2">
+              <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-blue-900 p-12 flex items-center justify-center">
+                <div className="text-center space-y-6">
+                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-white/10 backdrop-blur-sm border-2 border-white/20">
+                    <Icons.code className="h-12 w-12 text-white" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-6xl font-bold text-white">15+</div>
+                    <div className="text-xl text-gray-200">Commits Tonight</div>
+                  </div>
+                  <div className="space-y-1 text-sm text-gray-300">
+                    <div>✓ Real Auth</div>
+                    <div>✓ AI Integration</div>
+                    <div>✓ Production Ready</div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-12 space-y-6">
+                <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0">
+                  <Icons.github className="mr-2 h-3 w-3" />
+                  Built in Public
+                </Badge>
+                <h2 className="text-3xl font-bold">Watch This Being Built</h2>
+                <p className="text-lg text-gray-600">
+                  Built using AI-augmented development. See the code, follow the commits, learn how modern teams ship fast.
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Icons.check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold">AI-Augmented Development</div>
+                      <div className="text-sm text-gray-600">Cursor, Claude, modern AI tools</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Icons.check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold">Production Quality</div>
+                      <div className="text-sm text-gray-600">Real auth, DB, APIs</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Icons.check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold">Rapid Iteration</div>
+                      <div className="text-sm text-gray-600">Ship fast, learn faster</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600" asChild>
+                    <Link href="https://github.com/donlaur/Engify-AI-App" target="_blank">
+                      <Icons.github className="mr-2 h-4 w-4" />
+                      View Source
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild>
+                    <Link href="/signup">Try Free</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
       </section>
 
