@@ -22,8 +22,9 @@ export const blogPosts: BlogPost[] = [
     id: '1',
     title: 'From TypeScript Files to Production: Why We Ship Fast',
     slug: 'typescript-to-production',
-    excerpt: 'Most teams spend weeks planning. We spent 6 hours shipping. Here\'s why starting with TypeScript files instead of databases is the secret to rapid prototyping.',
-    author: 'Don Laurie',
+    excerpt:
+      "Most teams spend weeks planning. We spent 6 hours shipping. Here's why starting with TypeScript files instead of databases is the secret to rapid prototyping.",
+    author: 'Donnie Laur',
     date: '2025-10-27',
     readTime: '5 min',
     category: 'Development',
@@ -79,10 +80,11 @@ This is modern rapid prototyping.
   },
   {
     id: '2',
-    title: 'AI Adoption Challenges? We\'ve Been There',
+    title: "AI Adoption Challenges? We've Been There",
     slug: 'ai-adoption-challenges',
-    excerpt: 'Based on real conversations with engineering leaders. These are the challenges you\'re facing right now - and how to tackle them.',
-    author: 'Don Laurie',
+    excerpt:
+      "Based on real conversations with engineering leaders. These are the challenges you're facing right now - and how to tackle them.",
+    author: 'Donnie Laur',
     date: '2025-10-27',
     readTime: '7 min',
     category: 'Leadership',
@@ -166,8 +168,9 @@ Start small. Measure results. Share wins. Scale gradually.
     id: '3',
     title: '350+ Commits in One Day: Not Vibe Coding, Strategic Iteration',
     slug: '350-commits-one-day',
-    excerpt: 'How we shipped a production-ready platform in one evening - and why rapid iteration is the future of engineering.',
-    author: 'Don Laurie',
+    excerpt:
+      'How we shipped a production-ready platform in one evening - and why rapid iteration is the future of engineering.',
+    author: 'Donnie Laur',
     date: '2025-10-27',
     readTime: '6 min',
     category: 'Development',
@@ -262,9 +265,9 @@ export function getBlogPost(slug: string): BlogPost | undefined {
 }
 
 export function getAllBlogPosts(): BlogPost[] {
-  return blogPosts.filter((post) => post.published).sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+  return blogPosts
+    .filter((post) => post.published)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 export function getBlogPostsByCategory(category: string): BlogPost[] {
