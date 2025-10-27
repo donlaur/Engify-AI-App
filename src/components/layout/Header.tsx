@@ -13,7 +13,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Sparkles } from 'lucide-react';
+import { Icons } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -49,7 +49,7 @@ export function Header({ user }: HeaderProps) {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
-          <Sparkles className="h-6 w-6 text-primary" />
+          <Icons.sparkles className="h-6 w-6 text-primary" />
           <span className="text-xl font-bold">Engify.ai</span>
         </Link>
 
@@ -126,9 +126,9 @@ export function Header({ user }: HeaderProps) {
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
                 {mobileMenuOpen ? (
-                  <X className="h-6 w-6" />
+                  <Icons.close className="h-6 w-6" />
                 ) : (
-                  <Menu className="h-6 w-6" />
+                  <Icons.menu className="h-6 w-6" />
                 )}
               </Button>
             </SheetTrigger>

@@ -13,15 +13,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import {
-  Home,
-  Sparkles,
-  BookOpen,
-  Library,
-  Settings,
-  Trophy,
-  TrendingUp,
-} from 'lucide-react';
+import { Icons } from '@/lib/icons';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
@@ -30,16 +22,21 @@ interface SidebarProps {
 }
 
 const mainNavigation = [
-  { href: '/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/workbench', label: 'AI Workbench', icon: Sparkles, badge: 'New' },
-  { href: '/patterns', label: 'Patterns', icon: BookOpen },
-  { href: '/library', label: 'Library', icon: Library },
+  { href: '/dashboard', label: 'Dashboard', icon: Icons.home },
+  {
+    href: '/workbench',
+    label: 'AI Workbench',
+    icon: Icons.sparkles,
+    badge: 'New',
+  },
+  { href: '/patterns', label: 'Patterns', icon: Icons.book },
+  { href: '/library', label: 'Library', icon: Icons.library },
 ];
 
 const secondaryNavigation = [
-  { href: '/progress', label: 'Progress', icon: TrendingUp },
-  { href: '/achievements', label: 'Achievements', icon: Trophy },
-  { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/progress', label: 'Progress', icon: Icons.trendingUp },
+  { href: '/achievements', label: 'Achievements', icon: Icons.trophy },
+  { href: '/settings', label: 'Settings', icon: Icons.settings },
 ];
 
 export function Sidebar({ className }: SidebarProps) {
