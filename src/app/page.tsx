@@ -51,7 +51,7 @@ const features = [
 
 export default function Home() {
   const prompts = getSeedPromptsWithTimestamps();
-  const totalPrompts = prompts.length;
+  const totalPrompts = prompts.length; // Real count from seed + playbooks
 
   const stats = [
     { label: 'Prompt Templates', value: totalPrompts.toString() },
@@ -225,9 +225,9 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <Card className="overflow-hidden border-2 border-purple-200">
             <div className="grid md:grid-cols-2">
-              <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-blue-900 p-12 flex items-center justify-center">
-                <div className="text-center space-y-6">
-                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-white/10 backdrop-blur-sm border-2 border-white/20">
+              <div className="flex items-center justify-center bg-gradient-to-br from-purple-900 via-pink-900 to-blue-900 p-12">
+                <div className="space-y-6 text-center">
+                  <div className="inline-flex h-24 w-24 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 backdrop-blur-sm">
                     <Icons.code className="h-12 w-12 text-white" />
                   </div>
                   <div className="space-y-2">
@@ -241,47 +241,63 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="p-12 space-y-6">
-                <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0">
+              <div className="space-y-6 p-12">
+                <Badge className="border-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
                   <Icons.github className="mr-2 h-3 w-3" />
                   Built in Public
                 </Badge>
                 <h2 className="text-3xl font-bold">Watch This Being Built</h2>
                 <p className="text-lg text-gray-600">
-                  Built using AI-augmented development. See the code, follow the commits, learn how modern teams ship fast.
+                  Built using AI-augmented development. See the code, follow the
+                  commits, learn how modern teams ship fast.
                 </p>
                 <div className="rounded-lg bg-blue-50 p-4 text-sm">
-                  <p className="font-semibold text-blue-900 mb-1">The Philosophy:</p>
+                  <p className="mb-1 font-semibold text-blue-900">
+                    The Philosophy:
+                  </p>
                   <p className="text-blue-800">
-                    Start with TypeScript files, not databases. UI can be rebuilt in minutes. 
-                    Ship fast, validate, then optimize. This is modern rapid prototyping.
+                    Start with TypeScript files, not databases. UI can be
+                    rebuilt in minutes. Ship fast, validate, then optimize. This
+                    is modern rapid prototyping.
                   </p>
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
-                    <Icons.check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <Icons.check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
                     <div>
-                      <div className="font-semibold">AI-Augmented Development</div>
-                      <div className="text-sm text-gray-600">Cursor, Claude, modern AI tools</div>
+                      <div className="font-semibold">
+                        AI-Augmented Development
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Cursor, Claude, modern AI tools
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Icons.check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <Icons.check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
                     <div>
                       <div className="font-semibold">Production Quality</div>
-                      <div className="text-sm text-gray-600">Real auth, DB, APIs</div>
+                      <div className="text-sm text-gray-600">
+                        Real auth, DB, APIs
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Icons.check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <Icons.check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
                     <div>
                       <div className="font-semibold">Rapid Iteration</div>
-                      <div className="text-sm text-gray-600">Ship fast, learn faster</div>
+                      <div className="text-sm text-gray-600">
+                        Ship fast, learn faster
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div className="flex gap-3 pt-4">
-                  <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600" asChild>
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600"
+                    asChild
+                  >
                     <Link href="/built-in-public">
                       <Icons.code className="mr-2 h-4 w-4" />
                       See How It&apos;s Built
@@ -291,10 +307,12 @@ export default function Home() {
                     <Link href="/signup">Try Free</Link>
                   </Button>
                 </div>
-                <div className="pt-4 border-t text-sm text-gray-500">
+                <div className="border-t pt-4 text-sm text-gray-500">
                   <p>
-                    Part of the <span className="font-semibold">HireLadder.ai</span> ecosystem - 
-                    AI-powered career tools for engineers (resume builder coming soon)
+                    Part of the{' '}
+                    <span className="font-semibold">HireLadder.ai</span>{' '}
+                    ecosystem - AI-powered career tools for engineers (resume
+                    builder coming soon)
                   </p>
                 </div>
               </div>
@@ -306,7 +324,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-purple-900 via-pink-900 to-blue-900 py-24">
         <div className="absolute inset-0 animate-glow bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-blue-500/10" />
-        
+
         <div className="container relative">
           <Card className="mx-auto max-w-3xl border-white/20 bg-white/10 backdrop-blur-sm">
             <CardContent className="space-y-6 py-12 text-center">
@@ -315,11 +333,11 @@ export default function Home() {
                 Ready to Transform Your Team?
               </h2>
               <p className="mx-auto max-w-2xl text-xl text-gray-200">
-                Master AI with {totalPrompts} expert prompts. 
-                Start free today—no credit card required.
+                Master AI with {totalPrompts} expert prompts. Start free
+                today—no credit card required.
               </p>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-white text-purple-900 hover:bg-gray-100"
                 asChild
               >
