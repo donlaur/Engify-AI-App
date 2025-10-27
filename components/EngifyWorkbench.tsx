@@ -1,12 +1,16 @@
 
+
 import React, { useState, useEffect } from 'react';
+// FIX: Add imports for Gemini SDK and prompt template.
+import { GoogleGenAI } from '@google/genai';
+import { KICKOFF_PLAN_PROMPT_TEMPLATE } from '../services/agentService';
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
+type ActiveTab = 'roadmap-alignment' | 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [activeTab, setActiveTab] = useState<ActiveTab>('qualitative-insights');
+    const [activeTab, setActiveTab] = useState<ActiveTab>('roadmap-alignment');
 
     useEffect(() => {
         if (initialPrompt) {
@@ -33,6 +37,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Roadmap Alignment" isActive={activeTab === 'roadmap-alignment'} onClick={() => setActiveTab('roadmap-alignment')} />
                     <TabButton name="Qualitative Insights" isActive={activeTab === 'qualitative-insights'} onClick={() => setActiveTab('qualitative-insights')} />
                     <TabButton name="Feature Prioritization" isActive={activeTab === 'feature-prioritization'} onClick={() => setActiveTab('feature-prioritization')} />
                     <TabButton name="Codebase Onboarding" isActive={activeTab === 'codebase-onboarding'} onClick={() => setActiveTab('codebase-onboarding')} />
@@ -53,6 +58,7 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'roadmap-alignment' && <RoadmapAlignmentConsultant />}
                 {activeTab === 'qualitative-insights' && <QualitativeInsightsSynthesizer />}
                 {activeTab === 'feature-prioritization' && <FeaturePrioritizationFacilitator />}
                 {activeTab === 'codebase-onboarding' && <CodebaseOnboardingCompanion />}
@@ -94,6 +100,88 @@ const FeatureStub: React.FC<{title: string, description: string}> = ({ title, de
         <span className="mt-4 px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 rounded-full">Coming Soon</span>
     </div>
 );
+
+const RoadmapAlignmentConsultant: React.FC = () => {
+    const [step, setStep] = useState(1);
+    const [vision, setVision] = useState("To become the leading B2B platform for enterprise data analytics.");
+    const [objectives, setObjectives] = useState("Q4 OKRs:\n1. Increase new enterprise user sign-ups by 20%.\n2. Reduce customer churn from 5% to 3%.");
+    const [roadmap, setRoadmap] = useState("Current Roadmap Items:\n- Redesign user dashboard\n- Integrate with Salesforce\n- Build a new mobile app\n- Add two-factor authentication");
+    const [promptSequence, setPromptSequence] = useState('');
+    const [alignmentBriefing, setAlignmentBriefing] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+
+            const response = await fetch('/api/roadmap-alignment', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ product_vision: vision, strategic_objectives: objectives, roadmap_outline: roadmap })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to get a response from the server.");
+            }
+            const data = await response.json();
+            setPromptSequence(data.prompt_sequence);
+            setAlignmentBriefing(data.alignment_briefing);
+            setStep(2);
+        } catch (err: any) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                <h2 className="font-semibold text-lg mb-1">Step 1: Provide Strategic Context</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Input your high-level product vision, strategic objectives (like company OKRs), and your current roadmap or backlog.</p>
+                
+                <label className="block text-sm font-medium mb-1">Product Vision</label>
+                <input type="text" value={vision} onChange={e => setVision(e.target.value)} className="w-full p-2 mb-4 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 1} />
+
+                <label className="block text-sm font-medium mb-1">Strategic Objectives (OKRs)</label>
+                <textarea value={objectives} onChange={e => setObjectives(e.target.value)} rows={4} className="w-full p-2 mb-4 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 1} />
+                
+                <label className="block text-sm font-medium mb-1">Current Roadmap / Backlog Outline</label>
+                <textarea value={roadmap} onChange={e => setRoadmap(e.target.value)} rows={5} className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 1} />
+                
+                 <button onClick={handleSubmit} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:bg-indigo-400">
+                    {isLoading ? 'Analyzing...' : 'Generate Alignment Briefing'}
+                </button>
+            </div>
+            
+            {step >= 2 && (
+                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-4">Step 2: Your Generated Strategy Documents</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h3 className="font-semibold mb-2">AI Prompt Sequence (for your internal AI)</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <pre className="text-sm whitespace-pre-wrap font-mono">{promptSequence}</pre>
+                            </div>
+                        </div>
+                        <div>
+                             <h3 className="font-semibold mb-2">Alignment Strategy Briefing</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <pre className="text-sm whitespace-pre-wrap font-sans">{alignmentBriefing}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 const QualitativeInsightsSynthesizer: React.FC = () => {
     const [step, setStep] = useState(1);
@@ -846,24 +934,17 @@ const KnowledgeNavigator: React.FC = () => {
         setResult('');
 
         try {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) throw new Error("API key not found.");
+            // FIX: Use @google/genai SDK and a RAG-like prompt.
+            const prompt = `Based on the following text, please answer the question.\n\nText:\n"""\n${sourceText}\n"""\n\nQuestion: ${question}`;
 
-            const response = await fetch('/api/rag', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({ source_text: sourceText, question })
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+            // Using gemini-2.5-flash for a basic Q&A task as per guidelines.
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: prompt,
             });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to get response from RAG service.");
-            }
-            const data = await response.json();
-            setResult(data.answer);
 
+            setResult(response.text);
         } catch (err: any) {
             console.error(err);
             setResult(`Error: ${err.message}`);
@@ -925,25 +1006,18 @@ const ProjectKickoff: React.FC = () => {
         setResult('');
 
         try {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) throw new Error("API key not found.");
-
-            const response = await fetch('/api/generate-kickoff', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({ projectGoal, stakeholders })
+            // FIX: Use @google/genai SDK and prompt template.
+            const promptContent = KICKOFF_PLAN_PROMPT_TEMPLATE
+                .replace('{{projectGoal}}', projectGoal)
+                .replace('{{stakeholders}}', stakeholders);
+            
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+            // Using gemini-2.5-pro for a complex text task as per guidelines.
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-pro',
+                contents: promptContent,
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to generate kickoff document.");
-            }
-
-            const data = await response.json();
-            setResult(data.result);
+            setResult(response.text);
         } catch (err: any) {
             console.error(err);
             setResult(`Error: ${err.message}`);
@@ -1012,23 +1086,14 @@ const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
         setResult('');
 
         try {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) throw new Error("API key not found.");
-
-            const response = await fetch('/api/execute-prompt', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({ prompt, model })
+            // FIX: Use @google/genai SDK instead of fetch to a local API.
+            // API key is sourced from process.env.API_KEY as per guidelines.
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+            const response = await ai.models.generateContent({
+                model: model,
+                contents: prompt,
             });
-            if (!response.ok) {
-                 const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to execute prompt.");
-            }
-            const data = await response.json();
-            setResult(data.result);
+            setResult(response.text);
         } catch (err: any) {
              console.error(err);
              setResult(`Error: ${err.message}`);
@@ -1078,5 +1143,4 @@ const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
     );
 };
 
-{/* FIX: Removed extraneous text from the end of the file that was causing a syntax error. */}
 export default EngifyWorkbench;
