@@ -119,8 +119,8 @@ devDependencies:
     specifier: ^3.2.0
     version: 3.2.0
   '@types/node':
-    specifier: ^20.11.0
-    version: 20.19.23
+    specifier: ^24.9.1
+    version: 24.9.1
   '@types/pngjs':
     specifier: ^6.0.5
     version: 6.0.5
@@ -201,7 +201,7 @@ devDependencies:
     version: 5.9.3
   vitest:
     specifier: ^4.0.4
-    version: 4.0.4(@types/node@20.19.23)(@vitest/ui@4.0.4)(jsdom@27.0.1)
+    version: 4.0.4(@types/node@24.9.1)(@vitest/ui@4.0.4)(jsdom@27.0.1)
 
 packages:
 
@@ -2395,16 +2395,16 @@ packages:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
     dev: true
 
-  /@types/node@20.19.23:
-    resolution: {integrity: sha512-yIdlVVVHXpmqRhtyovZAcSy0MiPcYWGkoO4CGe/+jpP0hmNuihm4XhHbADpK++MsiLHP5MVlv+bcgdF99kSiFQ==}
+  /@types/node@24.9.1:
+    resolution: {integrity: sha512-QoiaXANRkSXK6p0Duvt56W208du4P9Uye9hWLWgGMDTEoKPhuenzNcC4vGUmrNkiOKTlIrBoyNQYNpSwfEZXSg==}
     dependencies:
-      undici-types: 6.21.0
+      undici-types: 7.16.0
     dev: true
 
   /@types/pngjs@6.0.5:
     resolution: {integrity: sha512-0k5eKfrA83JOZPppLtS2C7OUtyNAl2wKNxfyYl9Q5g9lPkgBl/9hNyAu6HuEH2J4XmIv2znEpkDd0SaZVxW6iQ==}
     dependencies:
-      '@types/node': 20.19.23
+      '@types/node': 24.9.1
     dev: true
 
   /@types/prop-types@15.7.15:
@@ -2458,7 +2458,7 @@ packages:
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
     requiresBuild: true
     dependencies:
-      '@types/node': 20.19.23
+      '@types/node': 24.9.1
     dev: true
     optional: true
 
@@ -2901,7 +2901,7 @@ packages:
       '@rolldown/pluginutils': 1.0.0-beta.43
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
-      vite: 7.1.12(@types/node@20.19.23)
+      vite: 7.1.12(@types/node@24.9.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2924,7 +2924,7 @@ packages:
       std-env: 3.10.0
       strip-literal: 2.1.1
       test-exclude: 6.0.0
-      vitest: 4.0.4(@types/node@20.19.23)(@vitest/ui@4.0.4)(jsdom@27.0.1)
+      vitest: 4.0.4(@types/node@24.9.1)(@vitest/ui@4.0.4)(jsdom@27.0.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2954,7 +2954,7 @@ packages:
       '@vitest/spy': 4.0.4
       estree-walker: 3.0.3
       magic-string: 0.30.21
-      vite: 7.1.12(@types/node@20.19.23)
+      vite: 7.1.12(@types/node@24.9.1)
     dev: true
 
   /@vitest/pretty-format@4.0.4:
@@ -2994,7 +2994,7 @@ packages:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vitest: 4.0.4(@types/node@20.19.23)(@vitest/ui@4.0.4)(jsdom@27.0.1)
+      vitest: 4.0.4(@types/node@24.9.1)(@vitest/ui@4.0.4)(jsdom@27.0.1)
     dev: true
 
   /@vitest/utils@4.0.4:
@@ -7242,8 +7242,8 @@ packages:
       which-boxed-primitive: 1.1.1
     dev: true
 
-  /undici-types@6.21.0:
-    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+  /undici-types@7.16.0:
+    resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
     dev: true
 
   /unrs-resolver@1.11.1:
@@ -7346,7 +7346,7 @@ packages:
       - '@types/react-dom'
     dev: false
 
-  /vite@7.1.12(@types/node@20.19.23):
+  /vite@7.1.12(@types/node@24.9.1):
     resolution: {integrity: sha512-ZWyE8YXEXqJrrSLvYgrRP7p62OziLW7xI5HYGWFzOvupfAlrLvURSzv/FyGyy0eidogEM3ujU+kUG1zuHgb6Ug==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
@@ -7386,7 +7386,7 @@ packages:
       yaml:
         optional: true
     dependencies:
-      '@types/node': 20.19.23
+      '@types/node': 24.9.1
       esbuild: 0.25.11
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
@@ -7397,7 +7397,7 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vitest@4.0.4(@types/node@20.19.23)(@vitest/ui@4.0.4)(jsdom@27.0.1):
+  /vitest@4.0.4(@types/node@24.9.1)(@vitest/ui@4.0.4)(jsdom@27.0.1):
     resolution: {integrity: sha512-hV31h0/bGbtmDQc0KqaxsTO1v4ZQeF8ojDFuy4sZhFadwAqqvJA0LDw68QUocctI5EDpFMql/jVWKuPYHIf2Ew==}
     engines: {node: ^20.0.0 || ^22.0.0 || >=24.0.0}
     hasBin: true
@@ -7431,7 +7431,7 @@ packages:
       jsdom:
         optional: true
     dependencies:
-      '@types/node': 20.19.23
+      '@types/node': 24.9.1
       '@vitest/expect': 4.0.4
       '@vitest/mocker': 4.0.4(vite@7.1.12)
       '@vitest/pretty-format': 4.0.4
@@ -7452,7 +7452,7 @@ packages:
       tinyexec: 0.3.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vite: 7.1.12(@types/node@20.19.23)
+      vite: 7.1.12(@types/node@24.9.1)
       why-is-node-running: 2.3.0
     transitivePeerDependencies:
       - jiti
