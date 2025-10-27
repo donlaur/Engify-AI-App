@@ -27,20 +27,36 @@ export default function WorkbenchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [provider, setProvider] = useState('openai');
 
-  // Mock execution - will be replaced with real API calls
+  // Real AI execution
   const handleExecute = async () => {
     if (!prompt.trim()) return;
 
     setIsLoading(true);
     setResponse('');
 
-    // Simulate API call
-    setTimeout(() => {
-      setResponse(
-        `[Mock Response from ${provider}]\n\nThis is a simulated response. In production, this will execute your prompt using the selected AI provider with proper rate limiting and security.\n\nYour prompt was:\n"${prompt}"\n\nThe actual implementation will:\n- Validate the prompt for security\n- Apply rate limiting\n- Track token usage\n- Return real AI-generated responses`
-      );
+    try {
+      const res = await fetch('/api/ai/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          model: provider === 'openai' ? 'gpt-3.5-turbo' : 'gpt-3.5-turbo',
+          temperature: 0.7,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setResponse(`Error: ${data.error || 'Failed to execute prompt'}`);
+      } else {
+        setResponse(data.response);
+      }
+    } catch (error) {
+      setResponse('Error: Failed to connect to AI service');
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleCopyResponse = () => {
