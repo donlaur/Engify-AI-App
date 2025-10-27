@@ -73,7 +73,6 @@ import {
   Zap,
   Trophy,
   Target,
-  TrendingUp,
   TrendingDown,
   BarChart,
   PieChart,
