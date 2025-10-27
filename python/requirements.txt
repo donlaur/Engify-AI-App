@@ -1,7 +1,7 @@
 # AI/ML Libraries
 openai==1.12.0
 anthropic==0.18.1
-google-generativeai==0.4.0
+google-generativeai==0.8.5
 
 # Vector/Embeddings
 sentence-transformers==2.5.1
