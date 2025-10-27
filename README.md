@@ -6,9 +6,11 @@
 
 An AI-powered platform that helps engineering teams transition from AI fear to AI fluency through curated learning pathways, 100+ role-specific prompt templates, and an interactive AI workbench.
 
+[![CI](https://github.com/donlaur/Engify-AI-App/actions/workflows/ci.yml/badge.svg)](https://github.com/donlaur/Engify-AI-App/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black.svg)](https://nextjs.org/)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://engify.ai)
 
 ---
 
