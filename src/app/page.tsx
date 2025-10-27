@@ -66,7 +66,7 @@ export default function Home() {
             <span className="text-primary">Engify</span> Your Engineering Team
           </h1>
           <p className="text-lg text-muted-foreground italic mb-2">
-            Engineer + Amplify = Engify
+            Engineer + Amplify + <span className="text-primary font-semibold">AI</span> = Engify.ai
           </p>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Transform engineers into AI power users. Master prompt engineering with {totalPrompts} expert-curated prompts, 

@@ -24,12 +24,15 @@ export default function AboutPage() {
           <Card className="bg-primary/5 border-primary/20">
             <CardContent className="pt-6">
               <p className="text-lg font-semibold mb-2">
-                <span className="text-primary">Engify</span> = Engineer + Amplify
+                <span className="text-primary">Engify.ai</span> = Engineer + Amplify + <span className="text-primary">AI</span>
               </p>
               <p className="text-muted-foreground">
-                We help engineers amplify their capabilities with AI. When you engify your workflow, 
-                you&apos;re not just using AI—you&apos;re mastering it, multiplying your impact, and 
-                transforming how you build.
+                We amplify engineers <strong>using AI</strong>. When you engify your workflow, 
+                you&apos;re not just using AI—you&apos;re mastering it, engineering better prompts, 
+                and multiplying your impact through artificial intelligence.
+              </p>
+              <p className="text-sm text-muted-foreground mt-2 italic">
+                The <strong>.ai</strong> isn&apos;t just a domain—it&apos;s our mission: amplifying engineers with AI.
               </p>
             </CardContent>
           </Card>
