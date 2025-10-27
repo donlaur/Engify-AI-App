@@ -17,64 +17,10 @@ import { LoadingSpinner } from '@/components/features/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import type { Prompt, PromptCategory, UserRole } from '@/lib/schemas/prompt';
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
+import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 
-// Mock data for now - will be replaced with API call
-const mockPrompts: Prompt[] = [
-  {
-    id: '1',
-    title: 'Code Review Assistant',
-    description: 'Get detailed code reviews with actionable feedback',
-    content:
-      'You are an expert code reviewer. Review the following code and provide:\n1. Security issues\n2. Performance concerns\n3. Best practice violations\n4. Suggestions for improvement\n\nCode:\n{code}',
-    category: 'code-generation',
-    role: 'engineer',
-    pattern: 'persona',
-    tags: ['code-review', 'best-practices'],
-    views: 1250,
-    rating: 4.5,
-    ratingCount: 42,
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-15'),
-    isPublic: true,
-    isFeatured: true,
-  },
-  {
-    id: '2',
-    title: 'Bug Investigation Helper',
-    description: 'Systematic approach to debugging complex issues',
-    content:
-      'Act as a senior debugging expert. Help me investigate this bug:\n\nSymptoms: {symptoms}\nExpected behavior: {expected}\nActual behavior: {actual}\n\nProvide:\n1. Potential root causes\n2. Debugging steps\n3. Questions to ask\n4. Tools to use',
-    category: 'debugging',
-    role: 'engineer',
-    pattern: 'chain-of-thought',
-    tags: ['debugging', 'troubleshooting'],
-    views: 890,
-    rating: 4.7,
-    ratingCount: 28,
-    createdAt: new Date('2024-01-16'),
-    updatedAt: new Date('2024-01-16'),
-    isPublic: true,
-    isFeatured: false,
-  },
-  {
-    id: '3',
-    title: 'Architecture Decision Document',
-    description: 'Create comprehensive ADRs for technical decisions',
-    content:
-      'You are a technical architect. Create an Architecture Decision Record (ADR) for:\n\nDecision: {decision}\nContext: {context}\n\nInclude:\n1. Status\n2. Context\n3. Decision\n4. Consequences\n5. Alternatives considered',
-    category: 'architecture',
-    role: 'engineering-manager',
-    pattern: 'template',
-    tags: ['architecture', 'documentation'],
-    views: 654,
-    rating: 4.3,
-    ratingCount: 15,
-    createdAt: new Date('2024-01-17'),
-    updatedAt: new Date('2024-01-17'),
-    isPublic: true,
-    isFeatured: true,
-  },
-];
+// Use seed data - will be replaced with API call
+const mockPrompts: Prompt[] = getSeedPromptsWithTimestamps();
 
 export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = useState('');
