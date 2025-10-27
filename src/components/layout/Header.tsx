@@ -57,12 +57,6 @@ export function Header({ user }: HeaderProps) {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex md:items-center md:space-x-6">
           <Link
-            href="/demo"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Workbench
-          </Link>
-          <Link
             href="/library"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
@@ -79,6 +73,12 @@ export function Header({ user }: HeaderProps) {
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             Pathways
+          </Link>
+          <Link
+            href="/demo"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Workbench
           </Link>
           <Link
             href="/built-in-public"
