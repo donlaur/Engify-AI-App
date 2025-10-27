@@ -132,9 +132,21 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Engify.ai. All rights reserved.
+            {currentYear} Engify.ai. All rights reserved.
           </p>
           <div className="flex space-x-6">
+            <Link
+              href="/blog"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Blog
+            </Link>
+            <Link
+              href="/contact"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Contact
+            </Link>
             <Link
               href="https://twitter.com/engify"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
