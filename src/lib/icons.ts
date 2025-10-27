@@ -118,13 +118,13 @@ export const Icons = {
   left: ChevronLeft,
   chevronDown: ChevronDown,
   chevronUp: ChevronUp,
-  arrowRight: ArrowRight,
+  arrowRightAlt: ArrowRight,
   arrowLeft: ArrowLeft,
 
   // Actions
   search: Search,
   copy: Copy,
-  check: Check,
+  checkAlt: Check,
   add: Plus,
   remove: Minus,
   edit: Edit,
