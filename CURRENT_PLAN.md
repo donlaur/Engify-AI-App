@@ -217,8 +217,8 @@
 - [x] "Make it Mine" button ✅
 - [x] Pro upgrade modal ✅
 - [x] Free trial logic (1/week) ✅
-- [ ] Pricing page
-- [ ] Checkout flow (Stripe)
+- [x] Pricing page ✅
+- [ ] Checkout flow (Stripe) - Phase 6
 
 ### Workbench (Basic) ✅ COMPLETE
 
