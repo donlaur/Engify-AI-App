@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 
 type Model = 'gemini-2.5-flash' | 'gemini-2.5-pro';
-type ActiveTab = 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
+type ActiveTab = 'qualitative-insights' | 'codebase-onboarding' | 'cicd-diagnostician' | 'legacy-code-archaeologist' | 'architectural-tradeoff-analyst' | 'feature-prioritization' | 'post-mortem-facilitator' | 'incident-co-commander' | 'incident-strategist' | 'tech-debt-strategist' | 'user-story-generator' | 'knowledge-navigator' | 'okr-architect' | 'project-kickoff' | 'prompt-lab' | 'core-values-architect';
 
 
 const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
-    const [activeTab, setActiveTab] = useState<ActiveTab>('codebase-onboarding');
+    const [activeTab, setActiveTab] = useState<ActiveTab>('qualitative-insights');
 
     useEffect(() => {
         if (initialPrompt) {
@@ -18,7 +19,9 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
     const OkrArchitect: React.FC = () => <FeatureStub title="Goal & OKR Architect" description="A guided, AI-powered experience that acts as an executive coach, helping you transform vague objectives into sharp, measurable Key Results." />;
     const CoreValuesArchitect: React.FC = () => <FeatureStub title="Core Values Architect" description="Guides a leader through the process of defining and articulating the values that will become the foundation of their team's culture."/>;
     const IncidentResponseStrategist: React.FC = () => <FeatureStub title="Incident Response Strategist" description="Helps you prepare for incidents by generating plans, roles, and proactive monitoring strategies to prevent outages in the first place."/>;
-
+    const PostmortemFacilitator: React.FC = () => <FeatureStub title="Post-Mortem Facilitator" description="Guides a team through a blameless post-mortem process to find root causes and create actionable follow-up items." />;
+    const IncidentCoCommander: React.FC = () => <FeatureStub title="Incident Co-Commander" description="Acts as an AI partner during a live incident, providing structured guidance, communication nudges, and a real-time log." />;
+    
     return (
         <div className="flex flex-col h-full">
             <header className="pb-4 border-b border-slate-200 dark:border-slate-700">
@@ -30,6 +33,8 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
 
             <div className="mt-4 border-b border-slate-200 dark:border-slate-700">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                    <TabButton name="Qualitative Insights" isActive={activeTab === 'qualitative-insights'} onClick={() => setActiveTab('qualitative-insights')} />
+                    <TabButton name="Feature Prioritization" isActive={activeTab === 'feature-prioritization'} onClick={() => setActiveTab('feature-prioritization')} />
                     <TabButton name="Codebase Onboarding" isActive={activeTab === 'codebase-onboarding'} onClick={() => setActiveTab('codebase-onboarding')} />
                     <TabButton name="CI/CD Diagnostician" isActive={activeTab === 'cicd-diagnostician'} onClick={() => setActiveTab('cicd-diagnostician')} />
                     <TabButton name="Legacy Code Archaeologist" isActive={activeTab === 'legacy-code-archaeologist'} onClick={() => setActiveTab('legacy-code-archaeologist')} />
@@ -48,6 +53,8 @@ const EngifyWorkbench: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }
             </div>
             
             <div className="mt-6 flex-1 overflow-y-auto pr-2 min-h-0">
+                {activeTab === 'qualitative-insights' && <QualitativeInsightsSynthesizer />}
+                {activeTab === 'feature-prioritization' && <FeaturePrioritizationFacilitator />}
                 {activeTab === 'codebase-onboarding' && <CodebaseOnboardingCompanion />}
                 {activeTab === 'cicd-diagnostician' && <CiCdDiagnostician />}
                 {activeTab === 'legacy-code-archaeologist' && <LegacyCodeArchaeologist />}
@@ -88,81 +95,121 @@ const FeatureStub: React.FC<{title: string, description: string}> = ({ title, de
     </div>
 );
 
-const CodebaseOnboardingCompanion: React.FC = () => {
-    const [projectScope, setProjectScope] = useState('E-commerce platform built in Rails with microservices for inventory, payments, and user accounts. The frontend is a React SPA. Key challenge is understanding the data flow between the monolith and the newer microservices.');
-    const [promptSequence, setPromptSequence] = useState('');
-    const [summaryDocument, setSummaryDocument] = useState('');
+const QualitativeInsightsSynthesizer: React.FC = () => {
+    const [step, setStep] = useState(1);
+    const [rawData, setRawData] = useState('User A: "The new dashboard is visually pleasing but loads very slowly with my large dataset."\nUser B: "I can\'t figure out what \'segmentation\' means. The terminology is confusing."\nUser C: "Love the new look! Wish I could export the charts to PowerPoint for my weekly report."\nUser D: "The login process is still frustrating. It keeps logging me out."');
+    const [researchGoal, setResearchGoal] = useState('We are exploring why users are churning from our analytics dashboard.');
+    const [clusters, setClusters] = useState<any[]>([]);
+    const [insightsReport, setInsightsReport] = useState('');
+    const [ost, setOst] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isGenerated, setIsGenerated] = useState(false);
 
-    const handleSubmit = async () => {
+    const handleAnalyzeThemes = async () => {
         setIsLoading(true);
-        setIsGenerated(false);
+        setClusters([]);
         try {
             const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) throw new Error("API key not found. Please set it in Settings.");
-
-            const response = await fetch('/api/codebase-onboarding', {
+            if (!apiKey) throw new Error("API key not found.");
+            
+            const response = await fetch('/api/qualitative-insights', {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({ project_scope: projectScope })
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'analyze_themes', raw_data: rawData, research_goal: researchGoal })
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to get a response from the server.");
+                throw new Error('Failed to analyze themes.');
             }
-
             const data = await response.json();
-            setPromptSequence(data.prompt_sequence);
-            setSummaryDocument(data.onboarding_summary);
-            setIsGenerated(true);
+            setClusters(data.clusters);
+            setStep(2);
         } catch (err: any) {
             console.error(err);
-            // You might want to display this error to the user
         } finally {
             setIsLoading(false);
         }
     };
     
+    const handleGenerateArtifacts = async () => {
+        setIsLoading(true);
+        setInsightsReport('');
+        setOst('');
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found.");
+            
+            const response = await fetch('/api/qualitative-insights', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({ step: 'generate_artifacts', clusters: clusters, research_goal: researchGoal })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate artifacts.');
+            }
+            const data = await response.json();
+            setInsightsReport(data.insights_report);
+            setOst(data.ost_starter_kit);
+            setStep(3);
+        } catch (err: any) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
     return (
         <div className="space-y-6">
             <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                <h2 className="font-semibold text-lg mb-1">Codebase Onboarding Companion</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Provide a high-level description of the project, including its scope, tech stack, and any known challenges. The AI will act as a senior mentor to generate an onboarding plan.</p>
-                
+                <h2 className="font-semibold text-lg mb-1">Step 1: Ingest Qualitative Data</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Paste unstructured text data (interview transcripts, survey responses, support tickets) and state your research goal.</p>
+                 <label className="block text-sm font-medium mb-1">Research Goal</label>
+                <input type="text" value={researchGoal} onChange={e => setResearchGoal(e.target.value)} className="w-full p-2 mb-4 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600" disabled={step > 1} />
+                <label className="block text-sm font-medium mb-1">Raw User Feedback</label>
                 <textarea 
-                    value={projectScope}
-                    onChange={(e) => setProjectScope(e.target.value)}
-                    rows={6}
-                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none transition font-sans text-sm"
-                    disabled={isGenerated}
+                    value={rawData}
+                    onChange={(e) => setRawData(e.target.value)}
+                    rows={8}
+                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 font-sans text-sm"
+                    disabled={step > 1}
                 />
-                
-                 <button onClick={handleSubmit} disabled={isLoading || isGenerated} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:bg-indigo-400">
-                    {isLoading ? 'Generating Plan...' : 'Generate Onboarding Plan'}
+                 <button onClick={handleAnalyzeThemes} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                    {isLoading ? 'Analyzing...' : 'Analyze Themes'}
                 </button>
             </div>
-            
-            {isGenerated && (
+
+            {step >= 2 && (
                 <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <h2 className="font-semibold text-lg mb-1">Your Generated Onboarding Documents</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Use the Prompt Sequence in your company's secure AI to explore the codebase, and share the Onboarding Summary with the new engineer.</p>
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <h2 className="font-semibold text-lg mb-4">Step 2: Curate and Refine Themes</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Review the AI-generated insight clusters. You can merge, rename, or delete clusters to refine the analysis. (Curation controls coming soon).</p>
+                    <div className="space-y-2">
+                        {clusters.map((cluster, index) => (
+                            <div key={index} className="p-3 bg-slate-100 dark:bg-slate-700/50 rounded-md">
+                                <p className="font-semibold text-sm">{cluster}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <button onClick={handleGenerateArtifacts} disabled={isLoading || step > 2} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm">
+                        {isLoading ? 'Generating...' : 'Generate Strategic Artifacts'}
+                    </button>
+                </div>
+            )}
+
+            {step >= 3 && (
+                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-4">Step 3: Your Strategic Artifacts</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
                         <div>
-                            <h3 className="font-semibold mb-2">AI Prompt Sequence (for your internal AI)</h3>
+                            <h3 className="font-semibold mb-2">Evidence-Backed Insights Report</h3>
                             <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
-                                <pre className="text-sm whitespace-pre-wrap font-mono">{promptSequence}</pre>
+                                <pre className="text-sm whitespace-pre-wrap font-sans">{insightsReport}</pre>
                             </div>
                         </div>
                         <div>
-                             <h3 className="font-semibold mb-2">Onboarding Summary Document</h3>
+                             <h3 className="font-semibold mb-2">Opportunity Solution Tree Starter Kit</h3>
                             <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
-                                <pre className="text-sm whitespace-pre-wrap font-sans">{summaryDocument}</pre>
+                                <pre className="text-sm whitespace-pre-wrap font-sans">{ost}</pre>
                             </div>
                         </div>
                     </div>
@@ -171,6 +218,8 @@ const CodebaseOnboardingCompanion: React.FC = () => {
         </div>
     );
 };
+
+// ... keep other implemented components like CiCdDiagnostician, CodebaseOnboardingCompanion, etc.
 
 const CiCdDiagnostician: React.FC = () => {
     const [step, setStep] = useState(1);
@@ -255,6 +304,89 @@ const CiCdDiagnostician: React.FC = () => {
     );
 };
 
+const CodebaseOnboardingCompanion: React.FC = () => {
+    const [projectScope, setProjectScope] = useState('E-commerce platform built in Rails with microservices for inventory, payments, and user accounts. The frontend is a React SPA. Key challenge is understanding the data flow between the monolith and the newer microservices.');
+    const [promptSequence, setPromptSequence] = useState('');
+    const [summaryDocument, setSummaryDocument] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isGenerated, setIsGenerated] = useState(false);
+
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        setIsGenerated(false);
+        try {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) throw new Error("API key not found. Please set it in Settings.");
+
+            const response = await fetch('/api/codebase-onboarding', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({ project_scope: projectScope })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to get a response from the server.");
+            }
+
+            const data = await response.json();
+            setPromptSequence(data.prompt_sequence);
+            setSummaryDocument(data.onboarding_summary);
+            setIsGenerated(true);
+        } catch (err: any) {
+            console.error(err);
+            // You might want to display this error to the user
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    return (
+        <div className="space-y-6">
+            <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                <h2 className="font-semibold text-lg mb-1">Codebase Onboarding Companion</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Provide a high-level description of the project, including its scope, tech stack, and any known challenges. The AI will act as a senior mentor to generate an onboarding plan.</p>
+                
+                <textarea 
+                    value={projectScope}
+                    onChange={(e) => setProjectScope(e.target.value)}
+                    rows={6}
+                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none transition font-sans text-sm"
+                    disabled={isGenerated}
+                />
+                
+                 <button onClick={handleSubmit} disabled={isLoading || isGenerated} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:bg-indigo-400">
+                    {isLoading ? 'Generating Plan...' : 'Generate Onboarding Plan'}
+                </button>
+            </div>
+            
+            {isGenerated && (
+                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-1">Your Generated Onboarding Documents</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Use the Prompt Sequence in your company's secure AI to explore the codebase, and share the Onboarding Summary with the new engineer.</p>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h3 className="font-semibold mb-2">AI Prompt Sequence (for your internal AI)</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <pre className="text-sm whitespace-pre-wrap font-mono">{promptSequence}</pre>
+                            </div>
+                        </div>
+                        <div>
+                             <h3 className="font-semibold mb-2">Onboarding Summary Document</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <pre className="text-sm whitespace-pre-wrap font-sans">{summaryDocument}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
 
 const ArchitecturalTradeoffAnalyst: React.FC = () => {
     const [step, setStep] = useState(1);
@@ -516,217 +648,99 @@ const LegacyCodeArchaeologist: React.FC = () => {
     );
 };
 
-const PostmortemFacilitator: React.FC = () => {
-    const [incidentSummary, setIncidentSummary] = useState('On Tuesday afternoon, the primary user authentication service experienced a 45-minute outage, resulting in a 100% login failure rate for all customers.');
-    const [timeline, setTimeline] = useState(`14:02 UTC - Deployment of new rate-limiting logic begins.
-14:05 UTC - First PagerDuty alerts fire for elevated 5xx errors.
-14:08 UTC - On-call engineer acknowledges the alert and begins investigation.
-14:15 UTC - Incident is escalated to the core services team.
-14:25 UTC - Root cause is suspected to be the new deployment. Rollback is initiated.
-14:35 UTC - Rollback is complete. System begins to recover.
-14:50 UTC - All services are confirmed to be stable. Incident is resolved.`);
-    const [customerImpact, setCustomerImpact] = useState('All users were unable to log in, access their accounts, or use any features requiring authentication. This led to a surge in customer support tickets and significant frustration expressed on social media.');
-    const [result, setResult] = useState('');
+const FeaturePrioritizationFacilitator: React.FC = () => {
+    const [step, setStep] = useState(1);
+    const [features, setFeatures] = useState('1. Build new mobile app (Effort: L)\n2. Redesign the onboarding flow (Effort: M)\n3. Integrate with Salesforce (Effort: XL)');
+    const [businessContext, setBusinessContext] = useState('Our primary OKR this quarter is to increase user retention by 15%. A secondary goal is to improve new user activation rate.');
+    const [promptSequence, setPromptSequence] = useState('');
+    const [prioritizedMemo, setPrioritizedMemo] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
         setIsLoading(true);
-        setResult('');
         try {
             const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) throw new Error("API key not found. Please set it in the Settings page.");
-            
-            const response = await fetch('/api/generate-postmortem', {
+            if (!apiKey) throw new Error("API key not found.");
+
+            const response = await fetch('/api/feature-prioritization', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify({ 
-                    incident_summary: incidentSummary,
-                    timeline: timeline,
-                    customer_impact: customerImpact 
-                })
+                body: JSON.stringify({ features, business_context: businessContext })
             });
-
-            if (!response.ok) {
-                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to generate post-mortem from the server.');
-            }
-            const data = await response.json();
-            setResult(data.result);
-        } catch (err: any) {
-            console.error(err);
-            setResult(`Error: ${err.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
-            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-                <div>
-                    <label htmlFor="incident-summary" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Incident Summary</label>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Provide a brief, high-level summary of what happened.</p>
-                    <textarea 
-                        id="incident-summary" 
-                        rows={3} 
-                        value={incidentSummary} 
-                        onChange={e => setIncidentSummary(e.target.value)} 
-                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="timeline" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Timeline of Events</label>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Paste a timestamped list of key events that occurred during the incident.</p>
-                    <textarea 
-                        id="timeline" 
-                        rows={8} 
-                        value={timeline} 
-                        onChange={e => setTimeline(e.target.value)} 
-                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 font-mono text-sm"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="customer-impact" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Customer Impact</label>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Describe how this incident affected your users.</p>
-                    <textarea 
-                        id="customer-impact" 
-                        rows={4} 
-                        value={customerImpact} 
-                        onChange={e => setCustomerImpact(e.target.value)} 
-                        className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600"
-                    />
-                </div>
-                <button type="submit" disabled={isLoading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 disabled:bg-indigo-400">
-                    {isLoading ? 'Facilitating...' : 'Generate Post-Mortem Draft'}
-                </button>
-            </form>
-             <div className="mt-6 lg:mt-0 bg-white dark:bg-slate-800/50 p-6 rounded-lg border border-slate-200 dark:border-slate-700 flex flex-col min-h-0">
-                <h2 className="text-xl font-semibold mb-3">Generated Post-Mortem Document</h2>
-                <div className="flex-1 mt-2 bg-slate-100 dark:bg-slate-900/50 rounded-lg p-4 overflow-y-auto relative border border-slate-200 dark:border-slate-700">
-                    {isLoading && <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center"><p>Thinking...</p></div>}
-                    {result ? <pre className="text-sm whitespace-pre-wrap font-sans">{result}</pre> : <p className="text-sm text-slate-500">The blameless post-mortem draft, including root cause analysis and action items, will be generated here.</p>}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-interface IncidentLogEntry {
-    author: 'user' | 'ai';
-    text: string;
-    timestamp: string;
-}
-
-const IncidentCoCommander: React.FC = () => {
-    const [log, setLog] = useState<IncidentLogEntry[]>([
-        { author: 'ai', text: "I'm your Incident Co-Commander. Describe the initial alert or symptom to begin the response process.", timestamp: new Date().toLocaleTimeString() }
-    ]);
-    const [userInput, setUserInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!userInput.trim()) return;
-
-        const userEntry: IncidentLogEntry = {
-            author: 'user',
-            text: userInput,
-            timestamp: new Date().toLocaleTimeString()
-        };
-        const updatedLog = [...log, userEntry];
-        setLog(updatedLog);
-        setUserInput('');
-        setIsLoading(true);
-
-        try {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) {
-                throw new Error("API key not found. Please set it in the Settings page.");
-            }
-
-            const response = await fetch('/api/incident-commander', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({ incident_log: updatedLog })
-            });
-
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to get a response from the AI co-commander.');
+                throw new Error(errorData.error || "Failed to get a response from the server.");
             }
             const data = await response.json();
-            
-            const aiEntry: IncidentLogEntry = {
-                author: 'ai',
-                text: data.result,
-                timestamp: new Date().toLocaleTimeString()
-            };
-            setLog(prevLog => [...prevLog, aiEntry]);
-
+            setPromptSequence(data.prompt_sequence);
+            setPrioritizedMemo(data.prioritized_memo);
+            setStep(2);
         } catch (err: any) {
             console.error(err);
-            const errorEntry: IncidentLogEntry = {
-                author: 'ai',
-                text: `Error: ${err.message}`,
-                timestamp: new Date().toLocaleTimeString()
-            };
-            setLog(prevLog => [...prevLog, errorEntry]);
         } finally {
             setIsLoading(false);
         }
     };
     
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-            <div className="p-4 border-b border-slate-200 dark:border-slate-700">
-                <h2 className="font-semibold text-lg">Incident Command Log</h2>
+        <div className="space-y-6">
+            <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                <h2 className="font-semibold text-lg mb-1">Step 1: List Features & Business Context</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Provide your list of potential features and the overarching business goals for this cycle.</p>
+                
+                <label htmlFor="features" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Proposed Features (one per line)</label>
+                <textarea 
+                    id="features"
+                    value={features}
+                    onChange={(e) => setFeatures(e.target.value)}
+                    rows={6}
+                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none transition font-sans text-sm"
+                    disabled={step > 1}
+                />
+                
+                <label htmlFor="businessContext" className="mt-4 block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Business Context / OKRs</label>
+                <textarea 
+                    id="businessContext"
+                    value={businessContext}
+                    onChange={(e) => setBusinessContext(e.target.value)}
+                    rows={3}
+                    className="w-full p-2 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none transition font-sans text-sm"
+                    disabled={step > 1}
+                />
+
+                 <button onClick={handleSubmit} disabled={isLoading || step > 1} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:bg-indigo-400">
+                    {isLoading ? 'Prioritizing...' : 'Generate Prioritization Plan'}
+                </button>
             </div>
-            <div className="flex-1 p-4 overflow-y-auto space-y-4">
-                {log.map((entry, index) => (
-                    <div key={index} className={`flex items-start gap-3 ${entry.author === 'user' ? 'justify-end' : ''}`}>
-                        {entry.author === 'ai' && <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300 text-sm flex-shrink-0">AI</div>}
-                        <div className={`p-3 rounded-lg max-w-full sm:max-w-xl ${entry.author === 'ai' ? 'bg-slate-100 dark:bg-slate-700/50' : 'bg-indigo-500 text-white'}`}>
-                            <p className="text-sm">{entry.text}</p>
-                            <p className="text-xs opacity-70 mt-1 text-right">{entry.timestamp}</p>
+            
+            {step >= 2 && (
+                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="font-semibold text-lg mb-1">Step 2: Your Generated Prioritization Documents</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Use the Prompt Sequence for deeper analysis and the Prioritized Memo to communicate your roadmap decisions.</p>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h3 className="font-semibold mb-2">AI Prompt Sequence (for your internal AI)</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <pre className="text-sm whitespace-pre-wrap font-mono">{promptSequence}</pre>
+                            </div>
                         </div>
-                         {entry.author === 'user' && <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 text-sm flex-shrink-0">You</div>}
-                    </div>
-                ))}
-                 {isLoading && (
-                    <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300 text-sm flex-shrink-0">AI</div>
-                        <div className="p-3 rounded-lg bg-slate-100 dark:bg-slate-700/50">
-                            <div className="flex items-center space-x-1">
-                                <span className="h-2 w-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                <span className="h-2 w-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                <span className="h-2 w-2 bg-indigo-500 rounded-full animate-bounce"></span>
+                        <div>
+                             <h3 className="font-semibold mb-2">Prioritized Feature Backlog Memo</h3>
+                            <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <pre className="text-sm whitespace-pre-wrap font-sans">{prioritizedMemo}</pre>
                             </div>
                         </div>
                     </div>
-                 )}
-            </div>
-            <div className="p-4 border-t border-slate-200 dark:border-slate-700">
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        value={userInput}
-                        onChange={(e) => setUserInput(e.target.value)}
-                        placeholder="Log an event or ask for a suggestion..."
-                        className="w-full p-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                        disabled={isLoading}
-                    />
-                </form>
-            </div>
+                </div>
+            )}
         </div>
     );
 };
+
 
 const TechnicalDebtStrategist: React.FC = () => {
     const [step, setStep] = useState(1);
@@ -1064,4 +1078,5 @@ const PromptLab: React.FC<{ initialPrompt?: string }> = ({ initialPrompt }) => {
     );
 };
 
+{/* FIX: Removed extraneous text from the end of the file that was causing a syntax error. */}
 export default EngifyWorkbench;
