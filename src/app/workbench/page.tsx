@@ -26,6 +26,7 @@ export default function WorkbenchPage() {
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [provider, setProvider] = useState('openai');
+  const [showSignupPrompt, setShowSignupPrompt] = useState(false);
 
   // Real AI execution
   const handleExecute = async () => {
