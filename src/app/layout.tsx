@@ -54,7 +54,10 @@ export const metadata: Metadata = {
   icons: {
     icon: '/icon-192.png',
     apple: '/apple-icon-180.png',
+    shortcut: '/favicon.ico',
   },
+  category: 'education',
+  classification: 'Education, AI, Prompt Engineering',
 };
 
 export const viewport: Viewport = {
