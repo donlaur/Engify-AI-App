@@ -1,7 +1,11 @@
-'use client';
-
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
@@ -12,7 +16,8 @@ export default function ForEngineersPage() {
   const engineerChallenges = [
     {
       title: 'Code Reviews Taking Too Long',
-      description: 'Spending hours on code reviews instead of building features',
+      description:
+        'Spending hours on code reviews instead of building features',
       solution: 'AI-assisted code review prompts that catch issues faster',
       promptId: 'cg-001',
     },
@@ -39,18 +44,21 @@ export default function ForEngineersPage() {
   return (
     <MainLayout>
       <RoleSelector />
-      
+
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
         <div className="absolute inset-0 animate-glow bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-purple-500/10" />
-        
+
         <div className="container relative py-24">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
-            <Badge variant="secondary" className="mb-4 border-white/20 bg-white/10 text-white">
+            <Badge
+              variant="secondary"
+              className="mb-4 border-white/20 bg-white/10 text-white"
+            >
               <Icons.code className="mr-2 h-3 w-3" />
               For Software Engineers
             </Badge>
-            
+
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-6xl">
               Code Faster.
               <br />
@@ -58,9 +66,10 @@ export default function ForEngineersPage() {
                 Ship Better.
               </span>
             </h1>
-            
+
             <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              AI prompts built by engineers, for engineers. Stop reinventing the wheel—use proven patterns.
+              AI prompts built by engineers, for engineers. Stop reinventing the
+              wheel—use proven patterns.
             </p>
           </div>
         </div>
@@ -84,7 +93,10 @@ export default function ForEngineersPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             {engineerChallenges.map((item, i) => (
-              <Card key={i} className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-200">
+              <Card
+                key={i}
+                className="group border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-2xl"
+              >
                 <CardHeader>
                   <CardTitle className="text-lg">
                     <Icons.alertTriangle className="mr-2 inline h-5 w-5 text-orange-600" />
@@ -120,10 +132,15 @@ export default function ForEngineersPage() {
             <Icons.code className="mx-auto h-16 w-16 text-blue-600" />
             <h2 className="text-4xl font-bold">Ready to Level Up?</h2>
             <p className="mx-auto max-w-2xl text-xl text-gray-600">
-              Join engineers using AI to ship faster, debug smarter, and learn continuously.
+              Join engineers using AI to ship faster, debug smarter, and learn
+              continuously.
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-cyan-600" asChild>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600"
+                asChild
+              >
                 <Link href="/signup">
                   Start Free
                   <Icons.arrowRight className="ml-2 h-4 w-4" />
