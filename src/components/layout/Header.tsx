@@ -81,6 +81,12 @@ export function Header({ user }: HeaderProps) {
             KERNEL
           </Link>
           <Link
+            href="/pattern-playground"
+            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+          >
+            Playground
+          </Link>
+          <Link
             href="/mcp"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
