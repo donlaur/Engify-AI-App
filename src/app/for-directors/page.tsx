@@ -1,16 +1,25 @@
-'use client';
-
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
-import { directorPriorities, directorChallenges } from '@/data/director-insights';
+import {
+  directorPriorities,
+  directorChallenges,
+} from '@/data/director-insights';
 import { RoleSelector } from '@/components/roles/RoleSelector';
 import Link from 'next/link';
 
 export default function ForDirectorsPage() {
-  const criticalPriorities = directorPriorities.filter((p) => p.importance === 'critical');
+  const criticalPriorities = directorPriorities.filter(
+    (p) => p.importance === 'critical'
+  );
 
   return (
     <MainLayout>
@@ -18,14 +27,17 @@ export default function ForDirectorsPage() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="absolute inset-0 animate-glow bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-blue-500/10" />
-        
+
         <div className="container relative py-24">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
-            <Badge variant="secondary" className="mb-4 border-white/20 bg-white/10 text-white">
+            <Badge
+              variant="secondary"
+              className="mb-4 border-white/20 bg-white/10 text-white"
+            >
               <Icons.briefcase className="mr-2 h-3 w-3" />
               For Directors of Engineering
             </Badge>
-            
+
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-6xl">
               AI Adoption Challenges?
               <br />
@@ -33,9 +45,10 @@ export default function ForDirectorsPage() {
                 We&apos;ve Been There.
               </span>
             </h1>
-            
+
             <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              Based on real conversations with engineering leaders. Tackle the challenges you&apos;re facing right now.
+              Based on real conversations with engineering leaders. Tackle the
+              challenges you&apos;re facing right now.
             </p>
           </div>
         </div>
@@ -51,7 +64,9 @@ export default function ForDirectorsPage() {
       <section className="container py-20">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold">What Directors Are Asking</h2>
+            <h2 className="mb-4 text-4xl font-bold">
+              What Directors Are Asking
+            </h2>
             <p className="text-xl text-gray-600">
               Common priorities from engineering leaders across industries
             </p>
@@ -59,7 +74,10 @@ export default function ForDirectorsPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             {criticalPriorities.map((priority) => (
-              <Card key={priority.id} className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-purple-200">
+              <Card
+                key={priority.id}
+                className="group border-2 transition-all duration-300 hover:border-purple-200 hover:shadow-2xl"
+              >
                 <CardHeader>
                   <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-pink-600">
                     <Icons.target className="h-6 w-6 text-white" />
@@ -71,24 +89,30 @@ export default function ForDirectorsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <p className="mb-2 text-sm font-semibold text-gray-700">Key Questions:</p>
+                    <p className="mb-2 text-sm font-semibold text-gray-700">
+                      Key Questions:
+                    </p>
                     <ul className="space-y-1">
                       {priority.keyQuestions.map((q, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                        <li
+                          key={i}
+                          className="flex items-start gap-2 text-sm text-gray-600"
+                        >
                           <Icons.check className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-600" />
                           <span>{q}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
-                  {priority.relatedPrompts && priority.relatedPrompts.length > 0 && (
-                    <Button variant="outline" className="w-full" asChild>
-                      <Link href={`/library/${priority.relatedPrompts[0]}`}>
-                        View Prompt
-                        <Icons.arrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  )}
+                  {priority.relatedPrompts &&
+                    priority.relatedPrompts.length > 0 && (
+                      <Button variant="outline" className="w-full" asChild>
+                        <Link href={`/library/${priority.relatedPrompts[0]}`}>
+                          View Prompt
+                          <Icons.arrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )}
                 </CardContent>
               </Card>
             ))}
@@ -122,7 +146,9 @@ export default function ForDirectorsPage() {
                         <Icons.lightbulb className="mr-2 inline h-4 w-4" />
                         AI Solution:
                       </p>
-                      <p className="text-sm text-green-800">{item.aiSolution}</p>
+                      <p className="text-sm text-green-800">
+                        {item.aiSolution}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -139,10 +165,15 @@ export default function ForDirectorsPage() {
             <Icons.trophy className="mx-auto h-16 w-16 text-purple-600" />
             <h2 className="text-4xl font-bold">Ready to Lead AI Adoption?</h2>
             <p className="mx-auto max-w-2xl text-xl text-gray-600">
-              Get the prompts, patterns, and playbooks engineering leaders are using to transform their teams.
+              Get the prompts, patterns, and playbooks engineering leaders are
+              using to transform their teams.
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600" asChild>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-pink-600"
+                asChild
+              >
                 <Link href="/signup">
                   Start Free
                   <Icons.arrowRight className="ml-2 h-4 w-4" />

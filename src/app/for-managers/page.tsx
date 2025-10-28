@@ -1,7 +1,11 @@
-'use client';
-
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
@@ -39,18 +43,21 @@ export default function ForManagersPage() {
   return (
     <MainLayout>
       <RoleSelector />
-      
+
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
         <div className="absolute inset-0 animate-glow bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-purple-500/10" />
-        
+
         <div className="container relative py-24">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
-            <Badge variant="secondary" className="mb-4 border-white/20 bg-white/10 text-white">
+            <Badge
+              variant="secondary"
+              className="mb-4 border-white/20 bg-white/10 text-white"
+            >
               <Icons.users className="mr-2 h-3 w-3" />
               For Engineering Managers
             </Badge>
-            
+
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-6xl">
               Lead Faster.
               <br />
@@ -58,9 +65,10 @@ export default function ForManagersPage() {
                 Ship Smarter.
               </span>
             </h1>
-            
+
             <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              AI tools to unblock your team, speed up delivery, and hit your sprint goals.
+              AI tools to unblock your team, speed up delivery, and hit your
+              sprint goals.
             </p>
           </div>
         </div>
@@ -84,7 +92,10 @@ export default function ForManagersPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             {managerChallenges.map((item, i) => (
-              <Card key={i} className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-200">
+              <Card
+                key={i}
+                className="group border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-2xl"
+              >
                 <CardHeader>
                   <CardTitle className="text-lg">
                     <Icons.alertTriangle className="mr-2 inline h-5 w-5 text-orange-600" />
@@ -123,7 +134,11 @@ export default function ForManagersPage() {
               Join managers using AI to hit sprint goals and ship faster.
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-cyan-600" asChild>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600"
+                asChild
+              >
                 <Link href="/signup">
                   Start Free
                   <Icons.arrowRight className="ml-2 h-4 w-4" />

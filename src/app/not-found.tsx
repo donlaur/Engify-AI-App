@@ -21,7 +21,7 @@ export default function NotFound() {
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link href="/library">
-              <Icons.library className="mr-2 h-4 w-4" />
+              <Icons.book className="mr-2 h-4 w-4" />
               Browse Library
             </Link>
           </Button>
