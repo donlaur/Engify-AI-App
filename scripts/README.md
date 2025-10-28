@@ -151,15 +151,6 @@ This directory contains utility scripts for development, testing, deployment, an
 
 ### 🔍 Analysis Scripts
 
-#### `run-gemini-research.ts`
-
-- **Purpose**: Run research tasks using Gemini AI
-- **Usage**: `tsx scripts/run-gemini-research.ts`
-- **Features**:
-  - Automated research tasks
-  - Content generation
-  - Data analysis
-
 #### `generate-articles.ts`
 
 - **Purpose**: Generate articles using AI

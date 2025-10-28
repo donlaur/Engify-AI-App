@@ -44,8 +44,8 @@ export const API_ROUTES = {
   health: '/api/health',
   auth: '/api/auth',
   prompts: '/api/prompts',
-  ai: '/api/v2/ai/execute', // Updated to v2 (SOLID interface-based)
-  aiLegacy: '/api/ai/execute', // Keep old route for backward compatibility
+  ai: '/api/v2/ai/execute', // SOLID interface-based AI execution
+  execution: '/api/v2/execution', // Execution strategy API
   analytics: '/api/analytics/track',
 } as const;
 

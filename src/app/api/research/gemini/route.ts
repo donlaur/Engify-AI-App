@@ -4,7 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { conductGeminiResearch, researchPromptPatterns } from '@/lib/ai/gemini-integration';
+import {
+  conductGeminiResearch,
+  researchPromptPatterns,
+} from '@/lib/ai/gemini-integration-v2';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,12 +19,18 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { topic, context, depth = 'standard', outputFormat = 'markdown', preset } = body;
+    const {
+      topic,
+      context,
+      depth = 'standard',
+      outputFormat = 'markdown',
+      preset,
+    } = body;
 
     // Check for preset research types
     if (preset === 'prompt-patterns') {
       const result = await researchPromptPatterns();
-      
+
       return NextResponse.json({
         success: true,
         result,
@@ -30,10 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Custom research
     if (!topic) {
-      return NextResponse.json(
-        { error: 'Topic is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
     }
 
     const result = await conductGeminiResearch({
@@ -47,12 +53,13 @@ export async function POST(request: NextRequest) {
       success: true,
       result,
     });
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.error('Gemini research error:', errorMessage);
 
-  } catch (error: any) {
-    console.error('Gemini research error:', error);
-    
     return NextResponse.json(
-      { 
+      {
         error: 'Research failed',
         message: error.message,
       },
@@ -72,23 +79,21 @@ export async function GET(request: NextRequest) {
 
     if (preset === 'prompt-patterns') {
       const result = await researchPromptPatterns();
-      
+
       return NextResponse.json({
         success: true,
         result,
       });
     }
 
-    return NextResponse.json(
-      { error: 'Invalid preset' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid preset' }, { status: 400 });
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.error('Gemini research error:', errorMessage);
 
-  } catch (error: any) {
-    console.error('Gemini research error:', error);
-    
     return NextResponse.json(
-      { 
+      {
         error: 'Research failed',
         message: error.message,
       },
