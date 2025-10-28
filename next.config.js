@@ -12,9 +12,9 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // Fix for Next.js 15 deploymentId error
+  // Experimental features
   experimental: {
-    deploymentId: process.env.VERCEL_DEPLOYMENT_ID || 'local',
+    // Add experimental features here as needed
   },
   
   // Environment variables available to the browser
