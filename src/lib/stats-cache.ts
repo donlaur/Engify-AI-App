@@ -18,37 +18,47 @@ interface CachedStats {
   timestamp: number;
 }
 
-export async function getStats() {
-  // Try cache first
-  if (typeof window !== 'undefined') {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      const parsed: CachedStats = JSON.parse(cached);
-      const age = Date.now() - parsed.timestamp;
+const STATIC_FALLBACK = {
+  stats: { prompts: 76, patterns: 23, pathways: 12, users: 0 },
+  categories: [],
+};
 
-      if (age < CACHE_DURATION) {
-        return parsed.data;
-      }
+export async function getStats() {
+  // During build (SSR), return static data
+  if (typeof window === 'undefined') {
+    return STATIC_FALLBACK;
+  }
+
+  // Try cache first (client-side only)
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    const parsed: CachedStats = JSON.parse(cached);
+    const age = Date.now() - parsed.timestamp;
+
+    if (age < CACHE_DURATION) {
+      return parsed.data;
     }
   }
 
-  // Fetch fresh data
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/stats`);
-  if (!res.ok) {
-    return { stats: { prompts: 0, patterns: 23, pathways: 0, users: 0 } };
-  }
+  // Fetch fresh data (client-side only)
+  try {
+    const res = await fetch('/api/stats');
+    if (!res.ok) {
+      return STATIC_FALLBACK;
+    }
 
-  const data = await res.json();
+    const data = await res.json();
 
-  // Cache it
-  if (typeof window !== 'undefined') {
-    const cached: CachedStats = {
+    // Cache it
+    const cachedData: CachedStats = {
       data,
       timestamp: Date.now(),
     };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
-  }
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cachedData));
 
-  return data;
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch stats:', error);
+    return STATIC_FALLBACK;
+  }
 }
