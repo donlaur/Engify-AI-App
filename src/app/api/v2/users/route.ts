@@ -1,24 +1,42 @@
 /**
  * Users API Route (v2)
- * 
- * New version using the Repository Pattern and Dependency Injection.
+ *
+ * Enhanced version using Repository Pattern, Dependency Injection, and CQRS.
  * This route demonstrates:
  * - Clean separation of concerns
  * - Dependency injection for testability
  * - Service layer for business logic
  * - Repository pattern for data access
- * 
+ * - CQRS pattern for command/query separation
+ *
  * SOLID Principles:
  * - Single Responsibility: Just handles HTTP request/response
  * - Open/Closed: Can extend functionality without modifying existing code
  * - Liskov Substitution: All services are interchangeable
  * - Interface Segregation: Depends only on what it needs
  * - Dependency Inversion: Depends on service abstractions
+ *
+ * CQRS Benefits:
+ * - Commands handle write operations (POST, PUT, DELETE)
+ * - Queries handle read operations (GET)
+ * - Optimized read/write performance
+ * - Clear separation of concerns
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserService } from '@/lib/di/Container';
+import { cqrsBus } from '@/lib/cqrs/bus';
+import { initializeCQRS } from '@/lib/cqrs/registration';
+import { UserCommands, UserQueries } from '@/lib/cqrs/commands/UserCommands';
+
+// Initialize CQRS on first load
+let cqrsInitialized = false;
+if (!cqrsInitialized) {
+  const userService = getUserService();
+  initializeCQRS(userService);
+  cqrsInitialized = true;
+}
 
 // Request validation schemas
 const createUserSchema = z.object({
@@ -29,25 +47,14 @@ const createUserSchema = z.object({
   organizationId: z.string().optional(),
 });
 
-const updateUserSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  role: z.string().optional(),
-  plan: z.enum(['free', 'basic', 'pro', 'enterprise']).optional(),
-  organizationId: z.string().optional(),
-  preferences: z.object({
-    theme: z.enum(['light', 'dark']).optional(),
-    notifications: z.boolean().optional(),
-    weeklyReports: z.boolean().optional(),
-  }).optional(),
-});
+// Note: updateUserSchema removed as it's not used in this route
 
 /**
  * GET /api/v2/users
- * Get all users or users with filters
+ * Query: Get all users or users with filters using CQRS pattern
  */
 export async function GET(request: NextRequest) {
   try {
-    const userService = getUserService();
     const { searchParams } = new URL(request.url);
 
     // Handle different query parameters
@@ -55,32 +62,73 @@ export async function GET(request: NextRequest) {
     const plan = searchParams.get('plan');
     const organizationId = searchParams.get('organizationId');
     const stats = searchParams.get('stats');
+    const search = searchParams.get('search');
+
+    let result;
 
     // Return user statistics if requested
     if (stats === 'true') {
-      const userStats = await userService.getUserStats();
-      return NextResponse.json({
-        success: true,
-        data: userStats,
+      const statsQuery = UserQueries.getStatistics({
+        correlationId: `stats-${Date.now()}`,
       });
+      result = await cqrsBus.send(statsQuery);
+    } else if (search) {
+      // Search users query
+      const searchQuery = UserQueries.search({
+        searchTerm: search,
+        filters: {
+          role: role || undefined,
+          plan: plan || undefined,
+          organizationId: organizationId || undefined,
+        },
+        correlationId: `search-${Date.now()}`,
+      });
+      result = await cqrsBus.send(searchQuery);
+    } else if (role) {
+      // Get users by role query
+      const roleQuery = UserQueries.getByRole({
+        role,
+        correlationId: `role-${Date.now()}`,
+      });
+      result = await cqrsBus.send(roleQuery);
+    } else if (plan) {
+      // Get users by plan query
+      const planQuery = UserQueries.getByPlan({
+        plan,
+        correlationId: `plan-${Date.now()}`,
+      });
+      result = await cqrsBus.send(planQuery);
+    } else if (organizationId) {
+      // Get users by organization query
+      const orgQuery = UserQueries.getByOrganization({
+        organizationId,
+        correlationId: `org-${Date.now()}`,
+      });
+      result = await cqrsBus.send(orgQuery);
+    } else {
+      // Get all users query
+      const allUsersQuery = UserQueries.getAll({
+        correlationId: `all-${Date.now()}`,
+      });
+      result = await cqrsBus.send(allUsersQuery);
     }
 
-    // Apply filters
-    let users;
-    if (role) {
-      users = await userService.getUsersByRole(role);
-    } else if (plan) {
-      users = await userService.getUsersByPlan(plan);
-    } else if (organizationId) {
-      users = await userService.getUsersByOrganization(organizationId);
-    } else {
-      users = await userService.getAllUsers();
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error,
+          correlationId: result.correlationId,
+        },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({
       success: true,
-      data: users,
-      count: users.length,
+      data: result.data,
+      totalCount: result.totalCount,
+      correlationId: result.correlationId,
     });
   } catch (error) {
     console.error('Error getting users:', error);
@@ -97,24 +145,47 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/v2/users
- * Create a new user
+ * Command: Create a new user using CQRS pattern
  */
 export async function POST(request: NextRequest) {
   try {
-    const userService = getUserService();
     const body = await request.json();
-    
+
     // Validate request body
     const validatedData = createUserSchema.parse(body);
 
-    // Create user
-    const newUser = await userService.createUser(validatedData);
+    // Create user command
+    const createCommand = UserCommands.createUser({
+      email: validatedData.email,
+      name: validatedData.name,
+      role: validatedData.role,
+      plan: validatedData.plan,
+      organizationId: validatedData.organizationId,
+      correlationId: `create-${Date.now()}`,
+    });
 
-    return NextResponse.json({
-      success: true,
-      data: newUser,
-      message: 'User created successfully',
-    }, { status: 201 });
+    const result = await cqrsBus.send(createCommand);
+
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error,
+          correlationId: result.correlationId,
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: result.data,
+        message: 'User created successfully',
+        correlationId: result.correlationId,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating user:', error);
 
