@@ -28,7 +28,7 @@
 
 **The Solution**: Engify.ai teaches prompt engineering through:
 
-- **66+ Expert Prompts** - Role-specific, battle-tested patterns
+- **100+ Expert Prompts** - Role-specific, battle-tested patterns
 - **15 Proven Patterns** - Learn the frameworks that work
 - **Progressive Learning** - Start simple, unlock advanced techniques
 - **Real AI Execution** - Try prompts instantly with OpenAI/Claude
