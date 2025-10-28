@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/github/connect
  * Redirect to GitHub OAuth
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Check if user is authenticated
     const session = await auth();

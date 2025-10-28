@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { WORKBENCH_TOOLS, WorkbenchToolId, WorkbenchTool } from '@/types/workbench';
 
