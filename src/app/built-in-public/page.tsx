@@ -30,7 +30,7 @@ export default function BuiltInPublicPage() {
             </h1>
             
             <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              391 commits. 350+ today. This is what rapid iteration looks like when you&apos;re not afraid to start over.
+              520 commits in one day. 553 total. This is what rapid iteration looks like when you&apos;re not afraid to start over.
             </p>
 
             <div className="flex justify-center gap-4">
@@ -317,12 +317,12 @@ export default function BuiltInPublicPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Icons.zap className="h-6 w-6 text-red-600" />
-                The REAL Philosophy: 391 Commits
+                The REAL Philosophy: 520 Commits in One Day
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-lg font-semibold text-red-900">
-                350+ commits TODAY. Not because I&apos;m sloppy - because I&apos;m not afraid to start over.
+                520 commits TODAY. Not because I&apos;m sloppy - because I&apos;m not afraid to start over.
               </p>
               <div className="space-y-3">
                 <div className="rounded-lg bg-white p-4 border-l-4 border-red-500">
@@ -408,7 +408,7 @@ export default function BuiltInPublicPage() {
                   </div>
                   <div>
                     <p className="font-semibold text-purple-900">Windsurf + Claude Sonnet 3.5</p>
-                    <p className="text-sm text-purple-800">Today&apos;s main development - 350+ commits with this combo</p>
+                    <p className="text-sm text-purple-800">Today&apos;s main development - 520 commits with this combo</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-pink-50">
@@ -453,9 +453,9 @@ export default function BuiltInPublicPage() {
           <div className="grid gap-6 md:grid-cols-3">
             <Card>
               <CardContent className="pt-6 text-center">
-                <div className="text-6xl font-bold text-purple-600">461</div>
+                <div className="text-6xl font-bold text-purple-600">520</div>
                 <div className="text-sm text-gray-600">Commits Today</div>
-                <div className="text-xs text-gray-500 mt-1">350+ today alone</div>
+                <div className="text-xs text-gray-500 mt-1">553 total commits</div>
               </CardContent>
             </Card>
             <Card>

@@ -2,13 +2,22 @@
 /**
  * AI-Powered Article Generator
  * 
- * Uses OpenAI GPT-4 to generate 10 high-quality learning articles
+ * Uses Claude to generate 10 high-quality learning articles
  * Adds them as ACTIVE resources in MongoDB
  */
 
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+import { resolve } from 'path';
 import Anthropic from '@anthropic-ai/sdk';
 import { MongoClient } from 'mongodb';
+
+// Load environment variables from .env.local
+dotenv.config({ path: resolve(process.cwd(), '.env.local') });
+
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.error('❌ ANTHROPIC_API_KEY not found in .env.local');
+  process.exit(1);
+}
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -120,13 +129,12 @@ Write the article now:`;
   try {
     const completion = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 3000,
+      max_tokens: 4000,
       temperature: 0.7,
-      system: 'You are an expert technical writer who creates high-quality, actionable content about AI and prompt engineering.',
       messages: [
         {
           role: 'user',
-          content: prompt,
+          content: `You are an expert technical writer who creates high-quality, actionable content about AI and prompt engineering.\n\n${prompt}`,
         },
       ],
     });
