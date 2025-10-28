@@ -3,6 +3,8 @@ export interface PlaybookRecipe {
   title: string;
   description: string;
   prompt: string;
+  patterns: string[]; // Which prompt patterns this uses (e.g., ['Persona', 'Chain-of-Thought'])
+  level?: 'beginner' | 'intermediate' | 'advanced'; // Difficulty level
 }
 
 export interface PlaybookCategory {
@@ -22,6 +24,8 @@ export const playbookCategories: PlaybookCategory[] = [
         title: 'Codebase Navigator',
         description:
           'Helps you quickly understand the purpose, structure, and key interactions of an unfamiliar code file or module. A safe space to ask basic questions.',
+        patterns: ['Persona', 'Cognitive Verifier'],
+        level: 'beginner',
         prompt:
           "Act as an expert Staff Engineer who is a patient mentor. I am a new developer on the team, and I'm trying to understand a part of our codebase. I'm going to paste a code file/module below.\n\nYour task is to be my guide. Analyze the code and provide the following in simple, clear terms:\n1. **Primary Responsibility:** In one sentence, what is the main purpose of this code?\n2. **Key Components:** List the most important functions/classes and briefly explain what each one does.\n3. **Inputs & Outputs:** What are the main data inputs this code expects, and what are the primary outputs or side effects it produces?\n4. **Potential 'Gotchas':** Based on your experience, are there any non-obvious behaviors, potential performance issues, or tricky parts I should be aware of?\n5. **Follow-up Questions:** Now, ask me 2-3 simple questions to check my understanding and prompt my curiosity.\n\nRemember, assume I have zero context. Explain it to me like I'm a smart intern.\n\n--- CODE ---\n[Paste your code snippet here]",
       },
