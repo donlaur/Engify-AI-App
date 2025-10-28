@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { Analytics } from '@vercel/analytics/next';
 
 // Validate environment variables at startup (Red Hat Review - Critical Fix #1)
 import '@/lib/env';
@@ -120,6 +121,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
