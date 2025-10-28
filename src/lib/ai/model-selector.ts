@@ -3,7 +3,7 @@
  * Intelligently selects the best AI model based on context, task, and availability
  */
 
-import { AI_MODELS, AIModel, getModel } from './providers';
+import { AI_MODELS, AIModel } from './providers';
 
 export type TaskType = 
   | 'chat'
