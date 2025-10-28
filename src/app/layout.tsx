@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Engify.ai - AI Prompt Engineering Education Platform',
   description:
-    'Transform your team into AI power users with 67+ expert prompts, 15 proven patterns, and gamified learning. Start free!',
+    'Transform your team into AI power users with 100+ expert prompts, 15 proven patterns, and gamified learning. Start free!',
   keywords: [
     'AI prompt engineering',
     'prompt templates',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     siteName: 'Engify.ai',
     title: 'Engify.ai - Master AI Prompt Engineering',
     description:
-      'Transform engineers into AI power users. 67+ expert prompts, 15 battle-tested patterns, gamified learning. Free forever.',
+      'Transform engineers into AI power users. 100+ expert prompts, 15 battle-tested patterns, gamified learning. Free forever.',
     images: [
       {
         url: 'https://engify.ai/og-image.png',
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Engify.ai - Master AI Prompt Engineering',
     description:
-      'Transform engineers into AI power users. 67+ expert prompts, 15 battle-tested patterns. Free forever.',
+      'Transform engineers into AI power users. 100+ expert prompts, 15 battle-tested patterns. Free forever.',
     images: ['https://engify.ai/og-image.png'],
     creator: '@engifyai',
   },
