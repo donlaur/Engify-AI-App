@@ -433,6 +433,3 @@ export default function PatternsPage() {
     </MainLayout>
   );
 }
-// Add missing imports
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
