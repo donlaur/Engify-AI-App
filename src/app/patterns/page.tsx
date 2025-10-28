@@ -64,7 +64,7 @@ const patterns = [
       'Debugging',
       'Architecture decisions',
     ],
-    icon: Icons.brain,
+    icon: Icons.zap,
   },
   {
     id: 4,
@@ -74,7 +74,7 @@ const patterns = [
     description: 'Encourages step-by-step reasoning to improve accuracy.',
     example: "Let's think step by step...",
     useCases: ['Math problems', 'Logic puzzles', 'Debugging', 'Planning'],
-    icon: Icons.link,
+    icon: Icons.arrowRight,
   },
   {
     id: 5,
@@ -85,7 +85,7 @@ const patterns = [
       'AI suggests better versions of your question before answering.',
     example: 'Suggest a better version of my question, then answer both.',
     useCases: ['Unclear requirements', 'Exploratory research', 'Learning'],
-    icon: Icons.help,
+    icon: Icons.search,
   },
   {
     id: 6,
@@ -121,7 +121,7 @@ const patterns = [
     description: 'Explicitly manages what context the AI should focus on.',
     example: 'Focus only on [specific context]. Ignore [other context].',
     useCases: ['Large codebases', 'Focused analysis', 'Token optimization'],
-    icon: Icons.focus,
+    icon: Icons.target,
   },
   {
     id: 9,
@@ -159,7 +159,7 @@ const patterns = [
       'Strategy planning',
       'Creative problem solving',
     ],
-    icon: Icons.tree,
+    icon: Icons.github,
   },
   {
     id: 12,
@@ -406,7 +406,7 @@ export default function PatternsPage() {
         {/* CTA */}
         <Card className="mt-12 border-primary/20 bg-primary/5">
           <CardContent className="py-8 text-center">
-            <Icons.library className="mx-auto mb-4 h-12 w-12 text-primary" />
+            <Icons.book className="mx-auto mb-4 h-12 w-12 text-primary" />
             <h3 className="mb-2 text-2xl font-bold">
               Ready to use these patterns?
             </h3>
