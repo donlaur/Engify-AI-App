@@ -65,7 +65,7 @@ export default function ForSecurityEngineersPage() {
           <Card className="border-2 transition-all hover:border-red-200">
             <CardHeader>
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-red-600 to-orange-600">
-                <Icons.alert className="h-6 w-6 text-white" />
+                <Icons.alertTriangle className="h-6 w-6 text-white" />
               </div>
               <CardTitle>Alert Fatigue</CardTitle>
               <CardDescription>
