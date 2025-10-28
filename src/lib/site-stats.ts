@@ -26,7 +26,7 @@ export function getSiteStats() {
     // Core metrics
     totalPrompts: playbookPrompts, // Dynamic from playbooks.ts
     totalPatterns: 15, // From PROMPT_PATTERNS_RESEARCH.md
-    aiProviders: 3, // OpenAI, Google AI, Anthropic
+    aiProviders: 4, // OpenAI, Anthropic Claude, Google Gemini, Groq
 
     // User metrics (will come from MongoDB later)
     totalUsers: 0,
@@ -77,7 +77,7 @@ export function getDisplayStats() {
     providers: {
       label: 'AI Providers',
       value: stats.aiProviders.toString(),
-      description: 'OpenAI, Google AI, Anthropic',
+      description: 'OpenAI, Claude, Gemini, Groq',
     },
     pricing: {
       label: 'Free Forever',
