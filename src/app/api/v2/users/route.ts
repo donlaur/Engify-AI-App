@@ -42,6 +42,11 @@ function ensureCQRSInitialized(): void {
   }
 }
 
+// Export for testing - allows resetting CQRS between tests
+export function resetCQRSForTesting(): void {
+  cqrsInitialized = false;
+}
+
 // Request validation schemas
 const createUserSchema = z.object({
   email: z.string().email('Invalid email address'),
