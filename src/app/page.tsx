@@ -132,14 +132,6 @@ export default function Home() {
                     </CardContent>
                   </Card>
                 </div>
-                <div className="text-center mt-8">
-                  <Button asChild variant="outline">
-                    <Link href="/mcp">
-                      Learn More About MCP
-                      <Icons.arrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
               </div>
             </div>
 
