@@ -1,43 +1,52 @@
 /**
  * Site Statistics - Single Source of Truth
- * 
+ *
  * All numbers displayed across the site come from here.
  * Update once, reflects everywhere.
  */
 
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import { playbookCategories } from '@/data/playbooks';
+
+/**
+ * Calculate total prompts from playbooks
+ */
+function calculateTotalPrompts() {
+  return playbookCategories.reduce((total, category) => {
+    return total + category.recipes.length;
+  }, 0);
+}
 
 /**
  * Get real-time site statistics
  */
 export function getSiteStats() {
-  const prompts = getSeedPromptsWithTimestamps();
-  
+  const playbookPrompts = calculateTotalPrompts();
+
   return {
     // Core metrics
-    totalPrompts: prompts.length,
+    totalPrompts: playbookPrompts, // Dynamic from playbooks.ts
     totalPatterns: 15, // From PROMPT_PATTERNS_RESEARCH.md
     aiProviders: 3, // OpenAI, Google AI, Anthropic
-    
+
     // User metrics (will come from MongoDB later)
     totalUsers: 0,
     activeUsers: 0,
-    
+
     // Engagement metrics
     promptViews: 0,
     promptCopies: 0,
-    
+
     // Business metrics
     pricing: {
       free: '$0',
       pro: '$29',
       team: '$99',
     },
-    
+
     // Feature counts
     roles: 6, // C-Level, Engineering Manager, Engineer, PM, Designer, QA
     blogPosts: 3,
-    
+
     // Marketing copy
     tagline: 'Transform your team into AI power users',
     valueProps: {
@@ -53,7 +62,7 @@ export function getSiteStats() {
  */
 export function getDisplayStats() {
   const stats = getSiteStats();
-  
+
   return {
     prompts: {
       label: 'Expert Prompts',

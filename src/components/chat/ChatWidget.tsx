@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
+import { siteStats } from '@/lib/constants';
 import { Badge } from '@/components/ui/badge';
 
 interface Message {
@@ -16,7 +17,8 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hi! I&apos;m your AI prompt engineering assistant. Ask me about patterns, prompts, or best practices!',
+      content:
+        'Hi! I&apos;m your AI prompt engineering assistant. Ask me about patterns, prompts, or best practices!',
     },
   ]);
   const [input, setInput] = useState('');
@@ -40,7 +42,10 @@ export function ChatWidget() {
     // Simulate AI response (replace with actual API call)
     setTimeout(() => {
       const response = generateResponse(input);
-      setMessages((prev) => [...prev, { role: 'assistant', content: response }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: response },
+      ]);
       setIsLoading(false);
     }, 1000);
   };
@@ -61,10 +66,10 @@ export function ChatWidget() {
     }
 
     if (lowerQuery.includes('example')) {
-      return 'Here&apos;s a great example:\n\n**Bad**: "Write code"\n\n**Good**: "Write a Python function that validates email addresses using regex. Include error handling and unit tests. Format: function definition, docstring, implementation, tests."\n\nBrowse 67+ examples in /library!';
+      return `Here&apos;s a great example:\n\n**Bad**: "Write code"\n\n**Good**: "Write a Python function that validates email addresses using regex. Include error handling and unit tests. Format: function definition, docstring, implementation, tests."\n\nBrowse ${siteStats.totalPrompts}+ examples in /library!`;
     }
 
-    return 'Great question! I can help with:\n\n• Prompt patterns and techniques\n• Best practices\n• Examples from our library\n• Learning resources\n\nTry asking about specific patterns or check out /library for 67+ prompts!';
+    return `Great question! I can help with:\n\n• Prompt patterns and techniques\n• Best practices\n• Examples from our library\n• Learning resources\n\nTry asking about specific patterns or check out /library for ${siteStats.totalPrompts}+ prompts!`;
   };
 
   if (!isOpen) {
