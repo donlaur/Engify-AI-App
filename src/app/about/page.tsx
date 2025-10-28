@@ -2,7 +2,15 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { siteStats } from '@/lib/constants';
+import { SITE_STATS } from '@/lib/constants';
+
+// Calculate total prompts dynamically
+const calculateTotalPrompts = () => {
+  // TODO: Get from database
+  return 150;
+};
+
+const totalPrompts = calculateTotalPrompts();
 
 export default function AboutPage() {
   return (
@@ -70,7 +78,7 @@ export default function AboutPage() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="mb-2 text-4xl font-bold text-primary">
-                  {siteStats.totalPrompts}+
+                  {SITE_STATS.totalPrompts}+
                 </div>
                 <p className="text-sm text-muted-foreground">Expert Prompts</p>
               </CardContent>
