@@ -35,7 +35,7 @@ export async function GET(_request: NextRequest) {
     const authUrl = getGitHubAuthUrl(state);
 
     return NextResponse.redirect(authUrl);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('GitHub connect error:', error);
     return NextResponse.json(
       { error: 'Failed to initiate GitHub connection' },
