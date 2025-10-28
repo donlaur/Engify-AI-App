@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       const statsQuery = UserQueries.getStatistics({
         correlationId: `stats-${Date.now()}`,
       });
-      result = await cqrsBus.send(statsQuery);
+      result = await cqrsBus.sendQuery(statsQuery);
     } else if (search) {
       // Search users query
       const searchQuery = UserQueries.search({
@@ -83,34 +83,34 @@ export async function GET(request: NextRequest) {
         },
         correlationId: `search-${Date.now()}`,
       });
-      result = await cqrsBus.send(searchQuery);
+      result = await cqrsBus.sendQuery(searchQuery);
     } else if (role) {
       // Get users by role query
       const roleQuery = UserQueries.getByRole({
         role,
         correlationId: `role-${Date.now()}`,
       });
-      result = await cqrsBus.send(roleQuery);
+      result = await cqrsBus.sendQuery(roleQuery);
     } else if (plan) {
       // Get users by plan query
       const planQuery = UserQueries.getByPlan({
         plan,
         correlationId: `plan-${Date.now()}`,
       });
-      result = await cqrsBus.send(planQuery);
+      result = await cqrsBus.sendQuery(planQuery);
     } else if (organizationId) {
       // Get users by organization query
       const orgQuery = UserQueries.getByOrganization({
         organizationId,
         correlationId: `org-${Date.now()}`,
       });
-      result = await cqrsBus.send(orgQuery);
+      result = await cqrsBus.sendQuery(orgQuery);
     } else {
       // Get all users query
       const allUsersQuery = UserQueries.getAll({
         correlationId: `all-${Date.now()}`,
       });
-      result = await cqrsBus.send(allUsersQuery);
+      result = await cqrsBus.sendQuery(allUsersQuery);
     }
 
     if (!result.success) {

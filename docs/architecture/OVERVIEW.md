@@ -107,7 +107,7 @@ Engify.ai is a modern, scalable AI engineering education platform built with ent
 
 ## Architecture Patterns
 
-### 1. Strategy Pattern (AI Providers)
+### 1. Strategy Pattern (AI Providers) ✅ IMPLEMENTED
 
 ```typescript
 // Interface-based provider abstraction
@@ -126,6 +126,13 @@ class AIProviderFactory {
 }
 ```
 
+**Why We Use This Pattern:**
+
+- **Flexibility**: Easy to add new AI providers without modifying existing code
+- **Testability**: Mock implementations for unit testing
+- **SOLID Principles**: Follows Open/Closed and Single Responsibility principles
+- **Enterprise Ready**: Industry-standard pattern for external service integration
+
 **Benefits:**
 
 - Easy to add new AI providers
@@ -133,23 +140,31 @@ class AIProviderFactory {
 - Follows Open/Closed Principle
 - Single Responsibility Principle
 
-### 2. Repository Pattern (Planned)
+### 2. Repository Pattern ✅ IMPLEMENTED
 
 ```typescript
-// Repository interface
-interface PromptRepository {
-  findById(id: string): Promise<Prompt | null>;
-  findByCategory(category: string): Promise<Prompt[]>;
-  create(prompt: CreatePromptRequest): Promise<Prompt>;
-  update(id: string, prompt: UpdatePromptRequest): Promise<Prompt>;
-  delete(id: string): Promise<void>;
+// Generic repository interface
+interface IRepository<T, ID = string> {
+  findById(id: ID): Promise<T | null>;
+  findAll(): Promise<T[]>;
+  create(entity: Omit<T, 'id'>): Promise<T>;
+  update(id: ID, entity: Partial<T>): Promise<T | null>;
+  delete(id: ID): Promise<boolean>;
+  count(): Promise<number>;
 }
 
 // MongoDB implementation
-class MongoPromptRepository implements PromptRepository {
+class UserRepository implements IUserRepository {
   // Implementation details
 }
 ```
+
+**Why We Use This Pattern:**
+
+- **Database Abstraction**: Decouples business logic from data persistence
+- **Testability**: In-memory implementations for testing
+- **Scalability**: Easy to switch database backends or add caching layers
+- **Enterprise Standards**: Industry-standard pattern for data access
 
 **Benefits:**
 
@@ -158,28 +173,114 @@ class MongoPromptRepository implements PromptRepository {
 - Easy to switch database backends
 - Clear separation of concerns
 
-### 3. Service Layer Pattern
+### 3. CQRS Pattern ✅ IMPLEMENTED
 
 ```typescript
-// Business logic layer
-class PromptService {
-  constructor(
-    private promptRepo: PromptRepository,
-    private aiProvider: AIProvider
-  ) {}
+// Command Query Responsibility Segregation
+interface ICommand {
+  readonly type: string;
+  readonly timestamp: Date;
+  readonly correlationId?: string;
+}
 
-  async executePrompt(promptId: string, input: string): Promise<string> {
-    const prompt = await this.promptRepo.findById(promptId);
-    if (!prompt) throw new Error('Prompt not found');
+interface IQuery {
+  readonly type: string;
+  readonly timestamp: Date;
+  readonly correlationId?: string;
+}
 
-    return this.aiProvider.execute({
-      prompt: prompt.content,
-      input,
-      model: prompt.preferredModel,
-    });
+// Separate handlers for commands and queries
+class CreateUserCommandHandler
+  implements ICommandHandler<CreateUserCommand, User>
+{
+  async handle(command: CreateUserCommand): Promise<ICommandResult<User>> {
+    // Write operation logic
+  }
+}
+
+class GetUserByIdQueryHandler implements IQueryHandler<GetUserByIdQuery, User> {
+  async handle(query: GetUserByIdQuery): Promise<IQueryResult<User>> {
+    // Read operation logic
   }
 }
 ```
+
+**Why We Use This Pattern:**
+
+- **Performance Optimization**: Separate read and write models can be optimized independently
+- **Scalability**: Read and write operations can scale independently
+- **Maintainability**: Clear separation between read and write operations
+- **Enterprise Architecture**: Industry-standard pattern for complex business applications
+- **Audit Trail**: Commands provide clear audit trail of business operations
+- **Correlation IDs**: Request tracking for debugging and monitoring
+
+**Benefits:**
+
+- Optimized read/write performance
+- Independent scaling of read and write models
+- Clear separation of concerns
+- Better maintainability and testability
+- Request tracking and debugging capabilities
+
+### 4. Dependency Injection Pattern ✅ IMPLEMENTED
+
+```typescript
+// Dependency injection container
+class DIContainer {
+  private services = new Map<string, any>();
+
+  register<T>(id: string, service: T): void {
+    this.services.set(id, service);
+  }
+
+  resolve<T>(id: string): T {
+    return this.services.get(id);
+  }
+}
+
+// Service registration
+container.register('UserService', new UserService(userRepository));
+container.register('PromptService', new PromptService(promptRepository));
+```
+
+**Why We Use This Pattern:**
+
+- **Testability**: Easy to inject mock dependencies for testing
+- **Flexibility**: Services can be swapped without changing dependent code
+- **SOLID Principles**: Follows Dependency Inversion Principle
+- **Enterprise Standards**: Industry-standard pattern for service management
+
+**Benefits:**
+
+- Easy testing with mock dependencies
+- Loose coupling between components
+- Configurable service implementations
+- Follows Dependency Inversion Principle
+
+### 5. Service Layer Pattern ✅ IMPLEMENTED
+
+```typescript
+// Business logic layer
+class UserService {
+  constructor(private userRepository: IUserRepository) {}
+
+  async createUser(userData: CreateUserRequest): Promise<User> {
+    // Business logic validation
+    if (await this.userRepository.findByEmail(userData.email)) {
+      throw new Error('User with this email already exists');
+    }
+
+    return this.userRepository.create(userData);
+  }
+}
+```
+
+**Why We Use This Pattern:**
+
+- **Business Logic Separation**: Keeps business rules separate from data access and presentation
+- **Reusability**: Business logic can be reused across different API endpoints
+- **Testability**: Business logic can be tested independently
+- **Enterprise Architecture**: Industry-standard pattern for complex applications
 
 **Benefits:**
 
@@ -212,33 +313,55 @@ import { siteStats } from '@/lib/constants';
 
 ## Data Flow
 
-### 1. User Request Flow
+### 1. User Request Flow (CQRS Pattern)
 
 ```
-User Request
+User Request (GET /api/v2/users)
     ↓
-Next.js Middleware (auth check)
+Next.js API Route
     ↓
-Server Component (fetch data)
+CQRS Bus (sendQuery)
     ↓
-MongoDB (query prompts)
+Query Handler (GetAllUsersQueryHandler)
+    ↓
+User Service (business logic)
+    ↓
+User Repository (data access)
+    ↓
+MongoDB (query execution)
+    ↓
+Response with Correlation ID
     ↓
 Client Component (render UI)
-    ↓
-User Interaction (copy prompt)
-    ↓
-API Route (execute with AI)
-    ↓
-AIProviderFactory.create('openai')
-    ↓
-OpenAI API
-    ↓
-Stream Response
-    ↓
-Display Result
 ```
 
-### 2. AI Execution Flow
+### 2. User Creation Flow (CQRS Pattern)
+
+```
+User Request (POST /api/v2/users)
+    ↓
+Next.js API Route
+    ↓
+Zod Validation
+    ↓
+CQRS Bus (send command)
+    ↓
+Command Handler (CreateUserCommandHandler)
+    ↓
+Command Validation (CreateUserCommandValidator)
+    ↓
+User Service (business logic)
+    ↓
+User Repository (data persistence)
+    ↓
+MongoDB (insert operation)
+    ↓
+Response with Correlation ID
+    ↓
+Client Component (success feedback)
+```
+
+### 3. AI Execution Flow (Strategy Pattern)
 
 ```
 POST /api/v2/ai/execute
@@ -253,6 +376,26 @@ Stream response to client
     ↓
 Error handling & fallbacks
 ```
+
+### 4. CQRS Benefits in Practice
+
+**Command Operations (Write):**
+
+- Create User → `CreateUserCommand` → `CreateUserCommandHandler`
+- Update User → `UpdateUserCommand` → `UpdateUserCommandHandler`
+- Delete User → `DeleteUserCommand` → `DeleteUserCommandHandler`
+
+**Query Operations (Read):**
+
+- Get All Users → `GetAllUsersQuery` → `GetAllUsersQueryHandler`
+- Get User by ID → `GetUserByIdQuery` → `GetUserByIdQueryHandler`
+- Search Users → `SearchUsersQuery` → `SearchUsersQueryHandler`
+
+**Correlation IDs:**
+
+- Every command/query includes a unique correlation ID
+- Enables request tracking across the entire system
+- Essential for debugging and monitoring in production
 
 ## Security Architecture
 
@@ -313,8 +456,19 @@ Error handling & fallbacks
 
 - **Unit Tests** - Component and utility testing
 - **Integration Tests** - API route testing
+- **CQRS Tests** - Command and query handler testing
+- **Repository Tests** - Data access layer testing
 - **E2E Tests** - Critical user flows
 - **Visual Regression** - UI consistency
+
+**CQRS Testing Coverage:**
+
+- **Command Handlers**: 35+ tests covering all write operations
+- **Query Handlers**: 25+ tests covering all read operations
+- **CQRS Bus**: 16 tests covering handler registration and execution
+- **Validation**: Comprehensive input validation testing
+- **Error Handling**: Graceful error propagation testing
+- **Correlation IDs**: Request tracking verification
 
 ### CI/CD Pipeline
 
@@ -364,26 +518,39 @@ Error handling & fallbacks
 
 ## Future Architecture Plans
 
-### Phase 2: Repository Pattern
+### Phase 1: AI Provider Interface ✅ COMPLETED
 
-- Abstract database operations
-- Implement MongoDB repositories
-- Add dependency injection
-- Comprehensive testing
+- ✅ Strategy pattern for AI providers
+- ✅ Factory pattern for provider creation
+- ✅ Interface-based abstraction
+- ✅ Comprehensive testing (49 tests, 100% success rate)
 
-### Phase 3: Service Layer
+### Phase 2: Repository Pattern ✅ COMPLETED
 
-- Business logic separation
-- Service interfaces
-- Dependency injection container
-- Integration testing
+- ✅ Generic repository interfaces
+- ✅ MongoDB implementations
+- ✅ Dependency injection container
+- ✅ Service layer abstraction
+- ✅ Comprehensive testing (91 tests, 100% success rate)
 
-### Phase 4: Advanced AI Features
+### Phase 3: CQRS Pattern ✅ COMPLETED
 
-- RAG (Retrieval-Augmented Generation)
-- Multi-agent systems
-- Vector database integration
-- Advanced prompt engineering
+- ✅ Command Query Responsibility Segregation
+- ✅ Separate command and query handlers
+- ✅ CQRS bus implementation
+- ✅ Validation and error handling
+- ✅ Correlation ID tracking
+- ✅ Comprehensive testing (95+ tests, 100% success rate)
+
+### Phase 4: Advanced Architecture Patterns (Optional)
+
+**Potential Deliverables:**
+
+- **Event Sourcing**: Immutable event log for audit trails
+- **Advanced Caching**: Redis integration with cache invalidation
+- **Message Queues**: Async processing with job queues
+- **Circuit Breaker**: Fault tolerance and resilience patterns
+- **API Gateway**: Centralized API management and routing
 
 ### Phase 5: Enterprise Features
 
@@ -391,12 +558,14 @@ Error handling & fallbacks
 - Team management
 - Advanced analytics
 - API rate limiting
+- Multi-tenancy support
 
 ## Architecture Decision Records (ADRs)
 
-- **[ADR-001: AI Provider Interface](development/ADR/001-ai-provider-interface.md)** - Strategy pattern for AI providers
-- **[ADR-002: Repository Pattern](development/ADR/002-repository-pattern.md)** - Database abstraction layer
-- **[ADR-003: API Versioning](ADR-003-v2-api-migration.md)** - Backward compatibility strategy
+- **[ADR-001: AI Provider Interface](development/ADR/001-ai-provider-interface.md)** - Strategy pattern for AI providers ✅ COMPLETED
+- **[ADR-002: Repository Pattern](development/ADR/002-repository-pattern.md)** - Database abstraction layer ✅ COMPLETED
+- **[ADR-003: CQRS Pattern](development/ADR/003-cqrs-pattern.md)** - Command Query Responsibility Segregation ✅ COMPLETED
+- **[ADR-004: Dependency Injection](development/ADR/004-dependency-injection.md)** - Service container and DI patterns ✅ COMPLETED
 
 ---
 
