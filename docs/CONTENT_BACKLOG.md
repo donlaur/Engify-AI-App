@@ -220,3 +220,158 @@ interface RuleBuilderConfig {
 - [ ] Create demo video
 
 **Saved for Phase 6!** ✅
+
+---
+
+## Research: AI Personalities & Mentor Matching
+
+**Source**: SonarSource - "The Coding Personalities of Leading LLMs"  
+**URL**: https://www.sonarsource.com/the-coding-personalities-of-leading-llms.pdf  
+**Date Added**: Oct 28, 2025  
+**Relevance**: High - aligns with role-based personalization  
+**Phase to Integrate**: Phase 6-7 (Learning System & Personalization)  
+**Priority**: High
+
+### Key Concept
+
+Different AI models have different "personalities" and strengths. Users should be able to pick the right AI mentor based on their needs and learning style.
+
+### Integration Ideas
+
+#### 1. AI Mentor Selector (Phase 6-7)
+
+Create a feature that helps users choose the right AI model based on:
+
+- **Learning Style**: Visual learner, hands-on, theoretical
+- **Experience Level**: Beginner, intermediate, advanced
+- **Task Type**: Code review, debugging, architecture, learning
+- **Personality Preference**: Patient teacher, direct feedback, encouraging coach
+
+#### 2. Model Personality Profiles
+
+Document each model's "personality":
+
+- **GPT-4**: Comprehensive, detailed, patient teacher
+- **Claude**: Thoughtful, ethical, step-by-step guide
+- **Gemini**: Fast, practical, hands-on mentor
+- **Groq**: Quick, efficient, direct feedback
+
+#### 3. Smart Model Routing (Phase 7)
+
+Auto-select the best model based on:
+
+- User's role (C-Level, Engineer, PM, Designer, QA)
+- Prompt type (learning, debugging, optimization)
+- User's past preferences
+- Task complexity
+
+#### 4. Workbench Feature: "Find Your AI Mentor"
+
+Interactive quiz/tool:
+
+1. Answer questions about learning style
+2. Describe your current challenge
+3. Get matched with best AI model
+4. See personality comparison chart
+5. Try different models side-by-side
+
+#### 5. Content Opportunities
+
+**Blog Posts:**
+
+- "Which AI Model is Your Perfect Coding Mentor?"
+- "Understanding AI Personalities: A Guide for Developers"
+- "How to Choose the Right LLM for Your Task"
+
+**Documentation:**
+
+- Model personality comparison chart
+- Use case recommendations
+- Strengths and weaknesses of each model
+
+**Learning Content:**
+
+- Video: "Meet Your AI Mentors"
+- Interactive demo: Compare model responses
+- Case studies: When to use which model
+
+### Technical Implementation
+
+**Route**: `/workbench/mentor-matcher`
+
+**Components:**
+
+- `MentorQuiz.tsx` - Interactive questionnaire
+- `PersonalityChart.tsx` - Visual comparison
+- `ModelRecommendation.tsx` - Show best match
+- `SideBySideTest.tsx` - Compare models live
+
+**Data Structure:**
+
+```typescript
+interface AIPersonality {
+  model: string;
+  traits: {
+    patience: number; // 1-10
+    detail: number; // 1-10
+    speed: number; // 1-10
+    creativity: number; // 1-10
+    directness: number; // 1-10
+  };
+  bestFor: string[];
+  learningStyle: string[];
+  examples: string[];
+}
+```
+
+### Research Integration
+
+**Action Items:**
+
+- [ ] Read SonarSource PDF thoroughly
+- [ ] Extract key personality traits per model
+- [ ] Map traits to user needs
+- [ ] Create personality profiles
+- [ ] Design mentor matching algorithm
+- [ ] Build interactive quiz
+- [ ] Add to Workbench
+- [ ] Write blog post with findings
+- [ ] Create comparison chart
+- [ ] Add to documentation
+
+### Why This Matters
+
+1. **Personalization**: Matches users with best AI for their needs
+2. **Education**: Teaches users about model differences
+3. **Engagement**: Interactive, fun feature
+4. **Differentiation**: Unique approach to model selection
+5. **Value**: Helps users get better results faster
+
+### Connection to Existing Features
+
+**Role-Based Personalization:**
+
+- C-Level → GPT-4 (comprehensive, strategic)
+- Engineer → Claude (detailed, step-by-step)
+- QA → Gemini (fast, practical)
+
+**Pattern Recommendations:**
+
+- Different models excel at different patterns
+- Route patterns to best model automatically
+
+**Gamification:**
+
+- Achievement: "Try all AI mentors"
+- Challenge: "Find your perfect match"
+- XP: Bonus for using recommended model
+
+### Future Enhancements
+
+- **AI Personality Quiz**: Fun, shareable quiz
+- **Team Matching**: Find best model for team dynamics
+- **Learning Path**: Adapt based on model personality
+- **Analytics**: Track which models users prefer
+- **Custom Blends**: Combine traits from multiple models
+
+**Saved for Phase 6-7!** ✅
