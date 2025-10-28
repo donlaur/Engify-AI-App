@@ -291,7 +291,7 @@ export default function AICodingPage() {
         <Card className="mt-12">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Icons.table className="h-6 w-6 text-blue-600" />
+              <Icons.grid className="h-6 w-6 text-blue-600" />
               Tool Comparison Matrix
             </CardTitle>
           </CardHeader>
