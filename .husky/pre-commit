@@ -6,7 +6,7 @@ echo ""
 
 # 1. Schema and code quality validation
 echo "📊 Validating schema and code quality..."
-node scripts/validate-schema.js
+node scripts/maintenance/validate-schema.js
 if [ $? -ne 0 ]; then
     exit 1
 fi
@@ -14,7 +14,7 @@ echo ""
 
 # 2. Security checks
 echo "🛡️  Checking for security issues..."
-node scripts/security-check.js
+node scripts/security/security-check.js
 if [ $? -ne 0 ]; then
     exit 1
 fi
