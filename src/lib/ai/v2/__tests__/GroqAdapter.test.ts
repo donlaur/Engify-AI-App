@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { GroqAdapter } from '../adapters/GroqAdapter';
 import { AIRequest } from '../interfaces/AIProvider';

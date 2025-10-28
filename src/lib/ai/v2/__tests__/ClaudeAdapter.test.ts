@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ClaudeAdapter } from '../adapters/ClaudeAdapter';
 import { AIRequest } from '../interfaces/AIProvider';
