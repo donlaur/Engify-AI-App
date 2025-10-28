@@ -73,6 +73,7 @@
     "github": "link:next-auth/providers/github",
     "groq-sdk": "^0.34.0",
     "lucide-react": "^0.344.0",
+    "marked": "^16.4.1",
     "mongodb": "^6.3.0",
     "next": "^15.5.4",
     "next-auth": "5.0.0-beta.29",
