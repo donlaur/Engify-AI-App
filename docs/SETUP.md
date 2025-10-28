@@ -67,6 +67,7 @@ engify-ai-app/
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **Next.js 14** (App Router)
 - **React 18**
 - **TypeScript** (strict mode)
@@ -75,12 +76,14 @@ engify-ai-app/
 - **Zustand** (state management)
 
 ### Backend
+
 - **Next.js API Routes**
 - **MongoDB** (Atlas)
 - **NextAuth.js v5** (authentication)
 - **Zod** (validation)
 
 ### Development
+
 - **ESLint** (strict TypeScript rules)
 - **Prettier** (code formatting)
 - **Husky** (pre-commit hooks)
@@ -112,21 +115,25 @@ pnpm test:coverage    # Run tests with coverage
 ## 🔧 Configuration Files
 
 ### Next.js (`next.config.js`)
+
 - Security headers configured
 - Image optimization enabled
 - MongoDB client-side fallbacks
 
 ### TypeScript (`tsconfig.json`)
+
 - Strict mode enabled
 - Path aliases: `@/*` → `./src/*`
 - Next.js plugin configured
 
 ### Tailwind CSS (`tailwind.config.ts`)
+
 - shadcn/ui theme configured
 - Dark mode support
 - Custom color system
 
 ### ESLint (`.eslintrc.json`)
+
 - No `any` types allowed
 - Unused variables flagged
 - TypeScript strict rules
@@ -166,17 +173,20 @@ MONGODB_URI="mongodb+srv://username:password@cluster.mongodb.net/engify-ai?retry
 ### NextAuth.js Configuration
 
 1. Generate secret:
+
 ```bash
 openssl rand -base64 32
 ```
 
 2. Add to `.env.local`:
+
 ```env
 NEXTAUTH_SECRET="your-generated-secret"
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
 3. OAuth providers (optional):
+
 ```env
 GOOGLE_CLIENT_ID="..."
 GOOGLE_CLIENT_SECRET="..."
@@ -187,13 +197,17 @@ GOOGLE_CLIENT_SECRET="..."
 ## 🚨 Common Issues
 
 ### "Cannot find module 'next'"
+
 **Solution**: Run `pnpm install`
 
 ### "MongoDB connection failed"
+
 **Solution**: Check `MONGODB_URI` in `.env.local`
 
 ### "Port 3000 already in use"
+
 **Solution**: Kill process or use different port:
+
 ```bash
 lsof -ti:3000 | xargs kill
 # or
@@ -201,6 +215,7 @@ PORT=3001 pnpm dev
 ```
 
 ### TypeScript errors
+
 **Solution**: All errors will resolve after `pnpm install`
 
 ---
