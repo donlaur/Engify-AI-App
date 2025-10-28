@@ -6,9 +6,9 @@
  * Adds them as ACTIVE resources in MongoDB
  */
 
+import 'dotenv/config';
 import OpenAI from 'openai';
 import { MongoClient } from 'mongodb';
-import { generateSlug, convertToHtml } from './migrate-learning-resources';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -92,7 +92,7 @@ const topicsToGenerate = [
   },
 ];
 
-async function generateArticle(topic: any): Promise<any> {
+async function generateArticle(topic: typeof topicsToGenerate[0]): Promise<typeof topicsToGenerate[0] & { content: string; contentLength: number; tokensUsed: number } | null> {
   console.log(`\n📝 Generating: "${topic.title}"...`);
   
   const prompt = `You are an expert technical writer specializing in AI and prompt engineering. Write a comprehensive, professional article on the following topic.
@@ -148,8 +148,9 @@ Write the article now:`;
       contentLength: content.length,
       tokensUsed: completion.usage?.total_tokens || 0,
     };
-  } catch (error) {
-    console.error(`❌ Failed to generate "${topic.title}":`, error.message);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`❌ Failed to generate "${topic.title}":`, errorMessage);
     return null;
   }
 }

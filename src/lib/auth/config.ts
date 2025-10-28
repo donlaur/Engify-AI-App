@@ -7,6 +7,7 @@
 import { type NextAuthConfig } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
+import GitHubProvider from 'next-auth/providers/github';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import type { Session, User } from 'next-auth';
@@ -67,6 +68,12 @@ export const authOptions: NextAuthConfig = {
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     }),
+
+    // GitHub OAuth
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID || '',
+      clientSecret: process.env.GITHUB_SECRET || '',
+    }),
   ],
 
   session: {
@@ -77,7 +84,7 @@ export const authOptions: NextAuthConfig = {
   pages: {
     signIn: '/login',
     signOut: '/logout',
-    error: '/login',
+    error: '/auth/error',
   },
 
   callbacks: {
@@ -85,7 +92,7 @@ export const authOptions: NextAuthConfig = {
       // Add user info to token on login
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = user.role || 'free';
         token.organizationId = user.organizationId;
       }
       return token;

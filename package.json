@@ -69,6 +69,8 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "dotenv": "^17.2.3",
+    "github": "link:next-auth/providers/github",
     "groq-sdk": "^0.34.0",
     "lucide-react": "^0.344.0",
     "mongodb": "^6.3.0",
