@@ -10,7 +10,7 @@
 import type { Metadata } from 'next';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { LibraryClient } from '@/components/features/LibraryClient';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+// import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts'; // TODO: Replace with database
 import { generateMetaTags, pageSEO } from '@/lib/seo';
 
 // SEO Metadata
@@ -18,8 +18,8 @@ export const metadata: Metadata = generateMetaTags(pageSEO.library) as Metadata;
 
 // Server Component - renders instantly with static data
 export default function LibraryPage() {
-  // Use static seed data for instant load
-  const prompts = getSeedPromptsWithTimestamps();
+  // TODO: Get from database
+  const prompts: any[] = [];
 
   return (
     <MainLayout>
