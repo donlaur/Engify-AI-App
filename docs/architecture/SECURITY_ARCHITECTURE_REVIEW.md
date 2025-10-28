@@ -12,6 +12,7 @@
 **Overall Security Posture**: **B- (Good Foundation, Needs Hardening)**
 
 **Strengths**:
+
 - ✅ Modern tech stack (Next.js 15, TypeScript)
 - ✅ Environment variable management
 - ✅ Rate limiting implemented
@@ -19,6 +20,7 @@
 - ✅ API key rotation capability
 
 **Critical Gaps**:
+
 - ❌ No authentication/authorization system
 - ❌ No audit logging
 - ❌ No data encryption at rest
@@ -27,6 +29,7 @@
 - ❌ No incident response plan
 
 **Compliance Readiness**:
+
 - SOC 2: **40%** (needs significant work)
 - FedRAMP: **20%** (not ready, major gaps)
 
@@ -39,6 +42,7 @@
 **Current State**: ⚠️ Partial
 
 **What's Missing**:
+
 - [ ] Security policies and procedures documentation
 - [ ] Role-based access control (RBAC)
 - [ ] Security awareness training
@@ -46,6 +50,7 @@
 - [ ] Vendor management program
 
 **Recommendations**:
+
 1. Create `SECURITY_POLICY.md`
 2. Document access control procedures
 3. Implement RBAC with NextAuth.js
@@ -58,12 +63,14 @@
 **Current State**: ⚠️ Partial
 
 **What's Missing**:
+
 - [ ] Risk assessment documentation
 - [ ] Security incident response plan
 - [ ] Business continuity plan
 - [ ] Disaster recovery procedures
 
 **Recommendations**:
+
 1. Create `RISK_ASSESSMENT.md`
 2. Document incident response procedures
 3. Define RTO/RPO targets
@@ -76,6 +83,7 @@
 **Current State**: ❌ Missing
 
 **Critical Gaps**:
+
 ```
 No formal risk assessment process
 No threat modeling
@@ -84,6 +92,7 @@ No penetration testing
 ```
 
 **Recommendations**:
+
 1. Conduct threat modeling (STRIDE framework)
 2. Implement vulnerability scanning (Snyk, Dependabot)
 3. Schedule quarterly penetration tests
@@ -96,10 +105,12 @@ No penetration testing
 **Current State**: ⚠️ Partial
 
 **What's Implemented**:
+
 - ✅ Basic error logging
 - ✅ Rate limiting
 
 **What's Missing**:
+
 - [ ] Centralized logging (ELK, Datadog)
 - [ ] Security event monitoring (SIEM)
 - [ ] Anomaly detection
@@ -107,6 +118,7 @@ No penetration testing
 - [ ] Log retention policy (7 years for SOC 2)
 
 **Recommendations**:
+
 ```typescript
 // Implement structured logging
 import winston from 'winston';
@@ -126,7 +138,7 @@ logger.info('User login', {
   userId: user.id,
   ip: request.ip,
   timestamp: new Date(),
-  action: 'LOGIN_SUCCESS'
+  action: 'LOGIN_SUCCESS',
 });
 ```
 
@@ -137,11 +149,13 @@ logger.info('User login', {
 **Current State**: ⚠️ Partial
 
 **What's Implemented**:
+
 - ✅ Input validation (Zod schemas)
 - ✅ Rate limiting
 - ✅ Environment variable separation
 
 **What's Missing**:
+
 - [ ] Authentication system
 - [ ] Authorization checks
 - [ ] Session management
@@ -168,12 +182,12 @@ export async function POST(request: Request) {
   if (!session) {
     return new Response('Unauthorized', { status: 401 });
   }
-  
+
   // 2. Check authorization
   if (!hasPermission(session.user, 'ai.execute')) {
     return new Response('Forbidden', { status: 403 });
   }
-  
+
   // 3. Audit log
   await auditLog({
     userId: session.user.id,
@@ -182,16 +196,16 @@ export async function POST(request: Request) {
     ip: request.headers.get('x-forwarded-for'),
     timestamp: new Date(),
   });
-  
+
   // 4. Rate limit per user
   const allowed = await checkRateLimit(session.user.id);
   if (!allowed) {
     return new Response('Rate limit exceeded', { status: 429 });
   }
-  
+
   // 5. Validate input
   const validated = executeSchema.parse(await request.json());
-  
+
   // 6. Execute
   // ...
 }
@@ -204,6 +218,7 @@ export async function POST(request: Request) {
 **Current State**: ❌ Critical Gaps
 
 **Authentication**: ❌ Not Implemented
+
 ```typescript
 // CRITICAL: Implement NextAuth.js
 // src/app/api/auth/[...nextauth]/route.ts
@@ -238,6 +253,7 @@ export { handler as GET, handler as POST };
 ```
 
 **Authorization**: ❌ Not Implemented
+
 ```typescript
 // Implement RBAC
 export enum Role {
@@ -255,10 +271,23 @@ export enum Permission {
 }
 
 const rolePermissions: Record<Role, Permission[]> = {
-  [Role.ADMIN]: [Permission.AI_EXECUTE, Permission.AI_COMPARE, Permission.RAG_QUERY, Permission.ADMIN_ACCESS],
-  [Role.PREMIUM]: [Permission.AI_EXECUTE, Permission.AI_COMPARE, Permission.RAG_QUERY],
+  [Role.ADMIN]: [
+    Permission.AI_EXECUTE,
+    Permission.AI_COMPARE,
+    Permission.RAG_QUERY,
+    Permission.ADMIN_ACCESS,
+  ],
+  [Role.PREMIUM]: [
+    Permission.AI_EXECUTE,
+    Permission.AI_COMPARE,
+    Permission.RAG_QUERY,
+  ],
   [Role.USER]: [Permission.AI_EXECUTE],
-  [Role.ENTERPRISE]: [Permission.AI_EXECUTE, Permission.AI_COMPARE, Permission.RAG_QUERY],
+  [Role.ENTERPRISE]: [
+    Permission.AI_EXECUTE,
+    Permission.AI_COMPARE,
+    Permission.RAG_QUERY,
+  ],
 };
 
 export function hasPermission(user: User, permission: Permission): boolean {
@@ -267,6 +296,7 @@ export function hasPermission(user: User, permission: Permission): boolean {
 ```
 
 **Session Management**: ❌ Not Implemented
+
 - No session timeout
 - No concurrent session limits
 - No session revocation
@@ -280,6 +310,7 @@ export function hasPermission(user: User, permission: Permission): boolean {
 **Current State**: ⚠️ Partial
 
 **What's Missing**:
+
 - [ ] Change management procedures
 - [ ] Deployment approval process
 - [ ] Rollback procedures
@@ -287,6 +318,7 @@ export function hasPermission(user: User, permission: Permission): boolean {
 - [ ] Performance monitoring
 
 **Recommendations**:
+
 1. Implement CI/CD with approval gates
 2. Use feature flags for gradual rollouts
 3. Set up APM (Application Performance Monitoring)
@@ -299,16 +331,19 @@ export function hasPermission(user: User, permission: Permission): boolean {
 **Current State**: ⚠️ Partial
 
 **What's Implemented**:
+
 - ✅ Git version control
 - ✅ Commit messages
 
 **What's Missing**:
+
 - [ ] Code review requirements
 - [ ] Security review for changes
 - [ ] Automated security scanning
 - [ ] Change approval workflow
 
 **Recommendations**:
+
 ```yaml
 # .github/workflows/security-scan.yml
 name: Security Scan
@@ -335,6 +370,7 @@ jobs:
 **Current State**: ❌ Missing
 
 **What's Missing**:
+
 - [ ] Backup procedures
 - [ ] Disaster recovery plan
 - [ ] Business continuity plan
@@ -348,63 +384,75 @@ jobs:
 ### High-Level Gaps for FedRAMP Moderate:
 
 **1. Boundary Protection** ❌
+
 - No WAF (Web Application Firewall)
 - No DDoS protection
 - No network segmentation
 
 **2. Identification & Authentication** ❌
+
 - No MFA
 - No password complexity requirements
 - No account lockout policies
 - No session timeout
 
 **3. Audit & Accountability** ❌
+
 - No comprehensive audit logging
 - No log correlation
 - No SIEM integration
 - No 7-year log retention
 
 **4. Configuration Management** ⚠️
+
 - Partial: Git version control
 - Missing: Configuration baselines
 - Missing: Security configuration checklists
 
 **5. Contingency Planning** ❌
+
 - No backup procedures
 - No disaster recovery plan
 - No alternate processing site
 
 **6. Incident Response** ❌
+
 - No incident response plan
 - No incident handling procedures
 - No incident reporting process
 
 **7. Maintenance** ⚠️
+
 - Partial: Dependency updates
 - Missing: Maintenance windows
 - Missing: Security patching SLA
 
 **8. Media Protection** ❌
+
 - No data classification
 - No data sanitization procedures
 - No secure disposal
 
 **9. Physical & Environmental Protection** N/A
+
 - Using cloud provider (Vercel)
 - Inherit from cloud provider's FedRAMP authorization
 
 **10. Security Assessment** ❌
+
 - No continuous monitoring
 - No vulnerability scanning
 - No penetration testing
 
 **11. System & Communications Protection** ⚠️
+
 - Partial: HTTPS
 - Missing: TLS 1.3 enforcement
 - Missing: Certificate management
 - Missing: Cryptographic key management
 
 **12. System & Information Integrity** ⚠️
+
 - Partial: Input validation
 - Missing: Malware protection
 - Missing: Integrity verification
@@ -432,10 +480,11 @@ export async function POST(request: Request) {
 import { z } from 'zod';
 
 const executeSchema = z.object({
-  prompt: z.string()
+  prompt: z
+    .string()
     .min(10, 'Prompt too short')
     .max(5000, 'Prompt too long')
-    .refine(val => !containsMaliciousPatterns(val), 'Invalid content'),
+    .refine((val) => !containsMaliciousPatterns(val), 'Invalid content'),
   provider: z.enum(['openai', 'anthropic', 'google', 'groq']),
   temperature: z.number().min(0).max(2).optional(),
 });
@@ -459,6 +508,7 @@ export async function POST(request: Request) {
 **Current State**: ⚠️ Needs Review
 
 **Recommendations**:
+
 ```typescript
 // Sanitize user-generated content
 import DOMPurify from 'isomorphic-dompurify';
@@ -483,6 +533,7 @@ function renderUserContent(content: string) {
 **Current State**: ❌ Leaks Information
 
 **Issues Found**:
+
 ```typescript
 // ❌ BAD: Exposes internal details
 catch (error) {
@@ -498,7 +549,7 @@ catch (error) {
     userId: session.user.id,
     timestamp: new Date(),
   });
-  
+
   return new Response(
     JSON.stringify({ error: 'An error occurred. Please try again.' }),
     { status: 500 }
@@ -511,6 +562,7 @@ catch (error) {
 **Current State**: ⚠️ Not Applicable Yet
 
 **When Implementing MongoDB**:
+
 ```typescript
 // ❌ BAD: String concatenation
 const query = `{ email: "${userInput}" }`;
@@ -530,6 +582,7 @@ await prisma.user.findUnique({
 **Current State**: ⚠️ Partial
 
 **Issues**:
+
 ```typescript
 // ❌ BAD: Hardcoded secrets (found in some files)
 const apiKey = 'sk-1234567890abcdef';
@@ -538,7 +591,10 @@ const apiKey = 'sk-1234567890abcdef';
 const apiKey = process.env.OPENAI_API_KEY;
 
 // ✅ BEST: Secrets manager
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from '@aws-sdk/client-secrets-manager';
 
 async function getSecret(secretName: string) {
   const client = new SecretsManagerClient({ region: 'us-east-1' });
@@ -554,6 +610,7 @@ async function getSecret(secretName: string) {
 **Current State**: ✅ Good (but needs enhancement)
 
 **Enhancements Needed**:
+
 ```typescript
 // Current: IP-based only
 // Add: User-based, endpoint-specific, adaptive
@@ -569,8 +626,8 @@ interface RateLimitConfig {
 // Different limits per endpoint
 const limits: Record<string, RateLimitConfig> = {
   'ai.execute': { window: 3600, max: 10 }, // 10/hour for free
-  'ai.compare': { window: 3600, max: 5 },  // 5/hour for free
-  'rag.query': { window: 3600, max: 50 },  // 50/hour for premium
+  'ai.compare': { window: 3600, max: 5 }, // 5/hour for free
+  'rag.query': { window: 3600, max: 50 }, // 50/hour for premium
 };
 ```
 
@@ -581,6 +638,7 @@ const limits: Record<string, RateLimitConfig> = {
 **Current State**: ❌ Not Configured
 
 **Required Headers**:
+
 ```typescript
 // next.config.js
 module.exports = {
@@ -648,12 +706,13 @@ module.exports = {
 **Current State**: ❌ Not Defined
 
 **Required**:
+
 ```typescript
 export enum DataClassification {
-  PUBLIC = 'public',           // Marketing content
-  INTERNAL = 'internal',       // Business data
+  PUBLIC = 'public', // Marketing content
+  INTERNAL = 'internal', // Business data
   CONFIDENTIAL = 'confidential', // User prompts
-  RESTRICTED = 'restricted',   // API keys, PII
+  RESTRICTED = 'restricted', // API keys, PII
 }
 
 interface DataAsset {
@@ -687,14 +746,17 @@ const dataAssets: DataAsset[] = [
 **Current State**: ⚠️ Partial
 
 **What's Encrypted**:
+
 - ✅ Data in transit (HTTPS)
 
 **What's NOT Encrypted**:
+
 - ❌ Data at rest (MongoDB when added)
 - ❌ Backups
 - ❌ Logs (may contain sensitive data)
 
 **Recommendations**:
+
 ```typescript
 // Encrypt sensitive fields
 import crypto from 'crypto';
@@ -736,6 +798,7 @@ await prisma.user.create({
 **Current State**: ❌ Not Addressed
 
 **GDPR/CCPA Requirements**:
+
 - [ ] Data inventory
 - [ ] Consent management
 - [ ] Right to access
@@ -744,6 +807,7 @@ await prisma.user.create({
 - [ ] Breach notification (72 hours)
 
 **Implementation**:
+
 ```typescript
 // PII detection
 import { PIIDetector } from 'pii-detector';
@@ -777,6 +841,7 @@ logger.info('User query', {
 ### Priority 1 (Immediate - Before Production)
 
 1. **Implement Authentication** ⏰ 2-3 days
+
    ```bash
    npm install next-auth @auth/prisma-adapter
    ```
@@ -827,6 +892,7 @@ logger.info('User query', {
 ## 💰 Cost Estimates
 
 ### Security Tooling:
+
 - **Snyk**: $0-99/month (free tier available)
 - **Datadog**: $15/host/month
 - **AWS Secrets Manager**: $0.40/secret/month
@@ -836,6 +902,7 @@ logger.info('User query', {
 - **FedRAMP Assessment**: $250,000-500,000 (if needed)
 
 ### Engineering Time:
+
 - **Priority 1 Fixes**: 1-2 weeks (1 engineer)
 - **Priority 2 Fixes**: 2-3 weeks (1 engineer)
 - **SOC 2 Preparation**: 3-6 months (1-2 engineers + consultant)
@@ -846,6 +913,7 @@ logger.info('User query', {
 ## 📋 Compliance Roadmap
 
 ### Phase 1: Foundation (Months 1-3)
+
 - ✅ Implement authentication/authorization
 - ✅ Add security headers
 - ✅ Set up audit logging
@@ -853,6 +921,7 @@ logger.info('User query', {
 - ✅ Vulnerability scanning
 
 ### Phase 2: SOC 2 Preparation (Months 4-6)
+
 - ✅ Document policies and procedures
 - ✅ Implement all controls
 - ✅ Conduct internal audit
@@ -860,11 +929,13 @@ logger.info('User query', {
 - ✅ Engage SOC 2 auditor
 
 ### Phase 3: SOC 2 Audit (Months 7-9)
+
 - ✅ Auditor testing (Type I)
 - ✅ 3-6 month observation period (Type II)
 - ✅ Final report
 
 ### Phase 4: FedRAMP (If Needed) (12-18 months)
+
 - ✅ Engage FedRAMP consultant
 - ✅ System Security Plan (SSP)
 - ✅ 3PAO assessment
@@ -875,18 +946,21 @@ logger.info('User query', {
 ## 🎯 Recommendations Summary
 
 ### For Startup/SMB Market:
+
 **Focus**: Priority 1 + 2 fixes
 **Timeline**: 1-2 months
 **Cost**: $10K-20K
 **Outcome**: Production-ready, secure
 
 ### For Enterprise Market (SOC 2):
+
 **Focus**: All priorities + SOC 2 audit
 **Timeline**: 6-9 months
 **Cost**: $50K-100K
 **Outcome**: SOC 2 Type II certified
 
 ### For Government Market (FedRAMP):
+
 **Focus**: Full FedRAMP compliance
 **Timeline**: 12-18 months
 **Cost**: $300K-600K
@@ -899,6 +973,7 @@ logger.info('User query', {
 **Overall**: 45/100
 
 **Breakdown**:
+
 - Authentication: 0/20 ❌
 - Authorization: 0/15 ❌
 - Input Validation: 8/15 ⚠️
