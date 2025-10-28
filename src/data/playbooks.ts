@@ -3,7 +3,7 @@ export interface PlaybookRecipe {
   title: string;
   description: string;
   prompt: string;
-  patterns: string[]; // Which prompt patterns this uses (e.g., ['Persona', 'Chain-of-Thought'])
+  patterns?: string[]; // Which prompt patterns this uses (e.g., ['Persona', 'Chain-of-Thought'])
   level?: 'beginner' | 'intermediate' | 'advanced'; // Difficulty level
 }
 
