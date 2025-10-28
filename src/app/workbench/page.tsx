@@ -21,12 +21,22 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface ProviderResponse {
+  provider: string;
+  response: string;
+  time: number;
+  tokens?: number;
+  error?: string;
+}
+
 export default function WorkbenchPage() {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [provider, setProvider] = useState('openai');
-  const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+  const [providerResponses, setProviderResponses] = useState<
+    ProviderResponse[]
+  >([]);
 
   // Real AI execution with history tracking
   const handleExecute = async () => {
@@ -42,19 +52,29 @@ export default function WorkbenchPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt,
-          model: provider === 'openai' ? 'gpt-3.5-turbo' : 'gpt-3.5-turbo',
+          provider,
+          model:
+            provider === 'openai'
+              ? 'gpt-3.5-turbo'
+              : provider === 'anthropic'
+                ? 'claude-3-haiku-20240307'
+                : provider === 'google'
+                  ? 'gemini-1.5-flash'
+                  : provider === 'groq'
+                    ? 'llama-3.1-8b-instant'
+                    : 'gpt-3.5-turbo',
           temperature: 0.7,
         }),
       });
 
       const data = await res.json();
       const executionTime = Date.now() - startTime;
-      
+
       if (!res.ok) {
         setResponse(`Error: ${data.error || 'Failed to execute prompt'}`);
       } else {
         setResponse(data.response);
-        
+
         // Save to history
         await fetch('/api/prompts/history', {
           method: 'POST',
@@ -77,7 +97,10 @@ export default function WorkbenchPage() {
           body: JSON.stringify({
             promptId: 'workbench',
             event: 'execute',
-            metadata: { model: data.model, tokensUsed: data.usage?.totalTokens },
+            metadata: {
+              model: data.model,
+              tokensUsed: data.usage?.totalTokens,
+            },
           }),
         });
       }
@@ -90,6 +113,60 @@ export default function WorkbenchPage() {
 
   const handleCopyResponse = () => {
     navigator.clipboard.writeText(response);
+  };
+
+  // Compare across all providers
+  const handleCompareAll = async () => {
+    if (!prompt.trim()) return;
+
+    setIsLoading(true);
+    setProviderResponses([]);
+    const providers = ['openai', 'anthropic', 'google', 'groq'];
+    const results: ProviderResponse[] = [];
+
+    for (const prov of providers) {
+      const startTime = Date.now();
+      try {
+        const res = await fetch('/api/ai/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt,
+            provider: prov,
+            model:
+              prov === 'openai'
+                ? 'gpt-3.5-turbo'
+                : prov === 'anthropic'
+                  ? 'claude-3-haiku-20240307'
+                  : prov === 'google'
+                    ? 'gemini-1.5-flash'
+                    : 'llama-3.1-8b-instant',
+            temperature: 0.7,
+          }),
+        });
+
+        const data = await res.json();
+        const time = Date.now() - startTime;
+
+        results.push({
+          provider: prov,
+          response: data.response || data.error,
+          time,
+          tokens: data.usage?.totalTokens,
+          error: res.ok ? undefined : data.error,
+        });
+      } catch (error) {
+        results.push({
+          provider: prov,
+          response: 'Failed to connect',
+          time: Date.now() - startTime,
+          error: 'Connection error',
+        });
+      }
+    }
+
+    setProviderResponses(results);
+    setIsLoading(false);
   };
 
   return (
@@ -158,8 +235,21 @@ export default function WorkbenchPage() {
                           Google Gemini
                         </div>
                       </SelectItem>
+                      <SelectItem value="groq">
+                        <div className="flex items-center gap-2">
+                          <Icons.zap className="h-4 w-4" />
+                          Groq (Fastest)
+                        </div>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {provider === 'openai' && 'Best overall • $0.50/1M tokens'}
+                    {provider === 'anthropic' &&
+                      'Complex reasoning • 200K context'}
+                    {provider === 'google' && 'Free tier • 1M context'}
+                    {provider === 'groq' && '10x faster • Free tier'}
+                  </p>
                 </div>
 
                 {/* Prompt Input */}
@@ -178,13 +268,13 @@ export default function WorkbenchPage() {
                   </p>
                 </div>
 
-                {/* Execute Button */}
+                {/* Execute Buttons */}
                 <div className="flex gap-2">
                   <Button
                     onClick={handleExecute}
                     disabled={!prompt.trim() || isLoading}
                     size="lg"
-                    className="w-full"
+                    className="flex-1"
                   >
                     {isLoading ? (
                       <>
@@ -194,13 +284,85 @@ export default function WorkbenchPage() {
                     ) : (
                       <>
                         <Icons.play className="mr-2 h-4 w-4" />
-                        Execute Prompt
+                        Execute
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleCompareAll}
+                    disabled={!prompt.trim() || isLoading}
+                    size="lg"
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                        Comparing...
+                      </>
+                    ) : (
+                      <>
+                        <Icons.refresh className="mr-2 h-4 w-4" />
+                        Compare All
                       </>
                     )}
                   </Button>
                 </div>
+                <p className="text-center text-xs text-muted-foreground">
+                  Compare All tests your prompt across 4 AI providers
+                </p>
               </CardContent>
             </Card>
+
+            {/* Comparison Results */}
+            {providerResponses.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Provider Comparison</CardTitle>
+                  <CardDescription>Results from 4 AI providers</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {providerResponses.map((result) => (
+                    <div
+                      key={result.provider}
+                      className="rounded-lg border p-4"
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={result.error ? 'destructive' : 'default'}
+                          >
+                            {result.provider.toUpperCase()}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {result.time}ms
+                          </span>
+                          {result.tokens && (
+                            <span className="text-xs text-muted-foreground">
+                              {result.tokens} tokens
+                            </span>
+                          )}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            navigator.clipboard.writeText(result.response)
+                          }
+                        >
+                          <Icons.copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="rounded bg-muted/50 p-3">
+                        <pre className="whitespace-pre-wrap text-xs">
+                          {result.response}
+                        </pre>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Usage Stats */}
             <Card>
