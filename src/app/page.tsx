@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { getStats } from '@/lib/stats-cache';
 
 const roles = [
   { name: 'Engineers', icon: Icons.code, count: '24 prompts' },
@@ -47,18 +48,6 @@ const features = [
     gradient: 'from-green-500 to-emerald-500',
   },
 ];
-
-async function getStats() {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/stats`,
-    {
-      next: { revalidate: 300 }, // Cache for 5 minutes
-    }
-  );
-  if (!res.ok)
-    return { stats: { prompts: 0, patterns: 23, pathways: 0, users: 0 } };
-  return res.json();
-}
 
 export default async function Home() {
   const data = await getStats();
