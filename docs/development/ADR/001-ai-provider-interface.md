@@ -311,16 +311,6 @@ export async function POST(req: NextRequest) {
 
 ---
 
-## Interview Talking Points
-
-**Before**: "I use switch statements to handle different AI providers"
-
-**After**: "I implemented the Strategy pattern with a common interface. All providers implement `AIProvider`, and I use a Factory for instantiation. This makes it trivial to add new providers—just implement the interface. It's fully testable with mocks and follows all SOLID principles."
-
-**Impact**: Shows ability to refactor toward enterprise patterns, not just talk about them.
-
----
-
 ## Approval
 
 - ✅ Code Review: Self-reviewed
