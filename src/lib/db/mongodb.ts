@@ -2,10 +2,15 @@
  * MongoDB Client
  * Singleton connection to MongoDB with connection pooling
  *
- * MVP MODE: Returns null if MONGODB_URI not set (uses static data instead)
+ * SERVER-SIDE ONLY - Do not import in client components
  */
 
 import { MongoClient, Db } from 'mongodb';
+
+// Ensure this only runs on server
+if (typeof window !== 'undefined') {
+  throw new Error('mongodb.ts should only be imported in server-side code');
+}
 
 const uri = process.env.MONGODB_URI;
 
@@ -15,14 +20,13 @@ if (!uri) {
 
 const options = {
   maxPoolSize: 10,
-  minPoolSize: 5,
+  minPoolSize: 2,
   serverSelectionTimeoutMS: 10000,
   socketTimeoutMS: 45000,
   connectTimeoutMS: 10000,
   retryWrites: true,
   retryReads: true,
-  w: 'majority',
-  minPoolSize: 2,
+  w: 'majority' as const,
   maxIdleTimeMS: 30000,
 };
 
