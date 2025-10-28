@@ -36,11 +36,12 @@ export function getSiteStats() {
     promptViews: 0,
     promptCopies: 0,
 
-    // Business metrics
+    // Business metrics (SaaS Freemium Model)
     pricing: {
-      free: '$0',
-      pro: '$29',
-      team: '$99',
+      free: 'Free Beta',      // Limited free tier during beta
+      pro: '$29/mo',          // Individual professionals
+      team: '$99/mo',         // Teams & companies
+      enterprise: 'Custom',   // Enterprise pricing
     },
 
     // Feature counts
@@ -80,9 +81,9 @@ export function getDisplayStats() {
       description: 'OpenAI, Claude, Gemini, Groq',
     },
     pricing: {
-      label: 'Free Forever',
+      label: 'Starting At',
       value: stats.pricing.free,
-      description: 'No credit card required',
+      description: 'Free beta access available',
     },
   };
 }
