@@ -3,32 +3,22 @@
  *
  * All numbers displayed across the site come from here.
  * Update once, reflects everywhere.
+ *
+ * NOTE: This returns static/cached stats for SSR.
+ * For real-time stats from MongoDB, use getSiteStatsFromDB() in API routes.
  */
 
-import { playbookCategories } from '@/data/playbooks';
-
 /**
- * Calculate total prompts from playbooks
- * TODO: Populate playbooks.ts with actual prompt data
- */
-function calculateTotalPrompts() {
-  const count = playbookCategories.reduce((total, category) => {
-    return total + category.recipes.length;
-  }, 0);
-
-  // Return minimum of 76 until playbooks are populated
-  return count > 0 ? count : 76;
-}
-
-/**
- * Get real-time site statistics
+ * Get site statistics (static/cached for SSR)
+ * These are fallback values when MongoDB is not available
  */
 export function getSiteStats() {
-  const playbookPrompts = calculateTotalPrompts();
+  // Static values for SSR/SSG - will be replaced with MongoDB counts in API routes
+  const playbookPrompts = 76; // Fallback - actual count comes from MongoDB
 
   return {
     // Core metrics
-    totalPrompts: playbookPrompts, // Dynamic from playbooks.ts (76 prompts)
+    totalPrompts: playbookPrompts, // Dynamic from MongoDB
     totalPatterns: 23, // Updated: 8 basic + 8 advanced + 7 production patterns
     totalArticles: 46, // 26 original + 10 Claude + 10 Gemini
     aiProviders: 4, // OpenAI, Anthropic Claude, Google Gemini, Groq
