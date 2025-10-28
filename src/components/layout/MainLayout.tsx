@@ -10,10 +10,8 @@
 
 import { ReactNode } from 'react';
 import { Header } from './Header';
-import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
-import { ChatWidget } from '@/components/chat/ChatWidget';
-import { Toaster } from '@/components/ui/toaster';
+import { ChatWidget } from '@/components/features/ChatWidget';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -25,6 +23,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
+      <ChatWidget />
       <ChatWidget />
     </div>
   );
