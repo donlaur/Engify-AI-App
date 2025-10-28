@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -10,7 +11,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
+import { PatternDetailDrawer } from '@/components/features/PatternDetailDrawer';
+import { getPatternById } from '@/data/pattern-details';
 
 // Pattern data from PROMPT_PATTERNS_RESEARCH.md
 const patterns = [
@@ -223,6 +227,10 @@ const levels = [
 export default function PatternsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
+  const [selectedPatternId, setSelectedPatternId] = useState<number | null>(
+    null
+  );
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const filteredPatterns = patterns.filter((pattern) => {
     const categoryMatch =
@@ -351,6 +359,19 @@ export default function PatternsPage() {
                     {pattern.description}
                   </CardDescription>
                 </CardHeader>
+                <CardContent>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedPatternId(pattern.id);
+                      setIsDrawerOpen(true);
+                    }}
+                  >
+                    Learn More
+                    <Icons.arrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
                 <CardContent className="space-y-4">
                   {/* Example */}
                   <div>
@@ -400,10 +421,18 @@ export default function PatternsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Pattern Detail Drawer */}
+      {selectedPatternId && (
+        <PatternDetailDrawer
+          pattern={getPatternById(selectedPatternId.toString()) || null}
+          open={isDrawerOpen}
+          onOpenChange={setIsDrawerOpen}
+        />
+      )}
     </MainLayout>
   );
 }
-
 // Add missing imports
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
