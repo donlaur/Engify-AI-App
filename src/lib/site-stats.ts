@@ -9,16 +9,13 @@
  */
 
 /**
- * Get site statistics (static/cached for SSR)
- * These are fallback values when MongoDB is not available
+ * DEPRECATED: Use StatsService.getQuickStats() for real MongoDB data
+ * This function returns placeholder values only
  */
 export function getSiteStats() {
-  // Static values for SSR/SSG - will be replaced with MongoDB counts in API routes
-  const playbookPrompts = 76; // Fallback - actual count comes from MongoDB
-
   return {
-    // Core metrics
-    totalPrompts: playbookPrompts, // Dynamic from MongoDB
+    // Core metrics - PLACEHOLDERS ONLY
+    totalPrompts: 0, // Use StatsService.getQuickStats() for real count
     totalPatterns: 23, // Updated: 8 basic + 8 advanced + 7 production patterns
     totalArticles: 46, // 26 original + 10 Claude + 10 Gemini
     aiProviders: 4, // OpenAI, Anthropic Claude, Google Gemini, Groq
