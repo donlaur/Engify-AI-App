@@ -83,8 +83,8 @@ export default function AboutPage() {
             </Card>
             <Card className="text-center">
               <CardContent className="pt-6">
-                <div className="mb-2 text-4xl font-bold text-primary">100%</div>
-                <p className="text-sm text-muted-foreground">Free Forever</p>
+                <div className="mb-2 text-4xl font-bold text-primary">Free Beta</div>
+                <p className="text-sm text-muted-foreground">During Launch</p>
               </CardContent>
             </Card>
           </div>
@@ -113,9 +113,10 @@ export default function AboutPage() {
                 <CardTitle>Community Driven</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Built by developers, for developers. We listen to our
-                  community and evolve based on real needs.
+                <p className="text-lg text-gray-600">
+                  Engify.ai offers a <strong>freemium SaaS model</strong> with free beta access
+                  for individuals and paid plans for teams and enterprises. We believe
+                  prompt engineering skills should be accessible while building a sustainable business.
                 </p>
               </CardContent>
             </Card>
