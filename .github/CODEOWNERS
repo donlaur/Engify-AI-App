@@ -1,0 +1,44 @@
+# Code Owners
+# This file defines who is responsible for different parts of the codebase
+
+# Global owners - responsible for the entire repository
+* @donlaur
+
+# Core application code
+/src/ @donlaur
+/src/app/ @donlaur
+/src/components/ @donlaur
+/src/lib/ @donlaur
+
+# Documentation
+/docs/ @donlaur
+README.md @donlaur
+DEVELOPMENT.md @donlaur
+CHANGELOG.md @donlaur
+CONTRIBUTING.md @donlaur
+
+# Configuration files
+package.json @donlaur
+tsconfig.json @donlaur
+next.config.js @donlaur
+tailwind.config.ts @donlaur
+.eslintrc.json @donlaur
+
+# Testing
+/tests/ @donlaur
+playwright.config.ts @donlaur
+vitest.config.ts @donlaur
+
+# Scripts and automation
+/scripts/ @donlaur
+.husky/ @donlaur
+
+# Python workbench
+/python/ @donlaur
+
+# GitHub workflows and templates
+/.github/ @donlaur
+
+# Security and compliance
+SECURITY.md @donlaur
+LICENSE @donlaur
