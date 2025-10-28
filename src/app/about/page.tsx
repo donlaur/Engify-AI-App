@@ -2,9 +2,10 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { siteStats } from '@/lib/constants';
+import { getStats } from '@/lib/stats-cache';
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const data = await getStats();
   return (
     <MainLayout>
       <div className="container py-16">
@@ -70,7 +71,7 @@ export default function AboutPage() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="mb-2 text-4xl font-bold text-primary">
-                  {siteStats.totalPrompts}+
+                  {data.stats.prompts}+
                 </div>
                 <p className="text-sm text-muted-foreground">Expert Prompts</p>
               </CardContent>
@@ -83,7 +84,9 @@ export default function AboutPage() {
             </Card>
             <Card className="text-center">
               <CardContent className="pt-6">
-                <div className="mb-2 text-4xl font-bold text-primary">Free Beta</div>
+                <div className="mb-2 text-4xl font-bold text-primary">
+                  Free Beta
+                </div>
                 <p className="text-sm text-muted-foreground">During Launch</p>
               </CardContent>
             </Card>
@@ -114,9 +117,10 @@ export default function AboutPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-lg text-gray-600">
-                  Engify.ai offers a <strong>freemium SaaS model</strong> with free beta access
-                  for individuals and paid plans for teams and enterprises. We believe
-                  prompt engineering skills should be accessible while building a sustainable business.
+                  Engify.ai offers a <strong>freemium SaaS model</strong> with
+                  free beta access for individuals and paid plans for teams and
+                  enterprises. We believe prompt engineering skills should be
+                  accessible while building a sustainable business.
                 </p>
               </CardContent>
             </Card>

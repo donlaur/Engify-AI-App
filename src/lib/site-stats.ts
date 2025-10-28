@@ -3,28 +3,19 @@
  *
  * All numbers displayed across the site come from here.
  * Update once, reflects everywhere.
+ *
+ * NOTE: This returns static/cached stats for SSR.
+ * For real-time stats from MongoDB, use getSiteStatsFromDB() in API routes.
  */
 
-import { playbookCategories } from '@/data/playbooks';
-
 /**
- * Calculate total prompts from playbooks
- */
-function calculateTotalPrompts() {
-  return playbookCategories.reduce((total, category) => {
-    return total + category.recipes.length;
-  }, 0);
-}
-
-/**
- * Get real-time site statistics
+ * DEPRECATED: Use StatsService.getQuickStats() for real MongoDB data
+ * This function returns placeholder values only
  */
 export function getSiteStats() {
-  const playbookPrompts = calculateTotalPrompts();
-
   return {
-    // Core metrics
-    totalPrompts: playbookPrompts, // Dynamic from playbooks.ts (76 prompts)
+    // Core metrics - PLACEHOLDERS ONLY
+    totalPrompts: 0, // Use StatsService.getQuickStats() for real count
     totalPatterns: 23, // Updated: 8 basic + 8 advanced + 7 production patterns
     totalArticles: 46, // 26 original + 10 Claude + 10 Gemini
     aiProviders: 4, // OpenAI, Anthropic Claude, Google Gemini, Groq
@@ -39,10 +30,10 @@ export function getSiteStats() {
 
     // Business metrics (SaaS Freemium Model)
     pricing: {
-      free: 'Free Beta',      // Limited free tier during beta
-      pro: '$29/mo',          // Individual professionals
-      team: '$99/mo',         // Teams & companies
-      enterprise: 'Custom',   // Enterprise pricing
+      free: 'Free Beta', // Limited free tier during beta
+      pro: '$29/mo', // Individual professionals
+      team: '$99/mo', // Teams & companies
+      enterprise: 'Custom', // Enterprise pricing
     },
 
     // Feature counts

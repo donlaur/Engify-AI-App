@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { OpenAIAdapter } from '../adapters/OpenAIAdapter';
 import { AIRequest } from '../interfaces/AIProvider';
