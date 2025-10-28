@@ -1,12 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import type { Metadata } from 'next';
-import { generateMetaTags, pageSEO } from '@/lib/seo';
-
-// SEO Metadata
-export const metadata: Metadata = generateMetaTags(pageSEO.learning) as Metadata;
-
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
