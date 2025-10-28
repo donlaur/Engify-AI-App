@@ -3,7 +3,7 @@
  * Handles requests to all AI providers with consistent interface
  */
 
-import { AIProvider, AIModel, getModel } from './providers';
+import { AIModel, getModel } from './providers';
 import { parseAIResponse, ParsedResponse } from './response-parser';
 
 export interface AIRequest {

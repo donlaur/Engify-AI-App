@@ -8,7 +8,7 @@
 import type {
   Prompt,
   PromptCategory,
-  UserRole,
+  // UserRole,
   PromptPattern,
 } from '@/lib/schemas/prompt';
 import { playbookCategories } from './playbooks';
