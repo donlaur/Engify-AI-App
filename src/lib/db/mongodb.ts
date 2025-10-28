@@ -21,13 +21,14 @@ if (!uri) {
 const options = {
   maxPoolSize: 10,
   minPoolSize: 2,
-  serverSelectionTimeoutMS: 10000,
+  serverSelectionTimeoutMS: 30000, // Increased for DNS issues
   socketTimeoutMS: 45000,
-  connectTimeoutMS: 10000,
+  connectTimeoutMS: 30000, // Increased for DNS issues
   retryWrites: true,
   retryReads: true,
   w: 'majority' as const,
   maxIdleTimeMS: 30000,
+  family: 4, // Force IPv4 to avoid DNS issues
 };
 
 let client: MongoClient;
