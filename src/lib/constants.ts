@@ -57,6 +57,22 @@ export const LIMITS = {
   maxHistoryPerUser: 1000,
 } as const;
 
+import { playbookCategories } from '@/data/playbooks';
+
+// Calculate total prompts dynamically
+const calculateTotalPrompts = () => {
+  return playbookCategories.reduce((total, category) => {
+    return total + category.recipes.length;
+  }, 0);
+};
+
+export const siteStats = {
+  totalPrompts: calculateTotalPrompts(),
+  totalPatterns: 15,
+  totalUsers: '1K+',
+  avgTimeSaved: '2hrs',
+};
+
 export const PAGINATION = {
   defaultPageSize: 20,
   maxPageSize: 100,
