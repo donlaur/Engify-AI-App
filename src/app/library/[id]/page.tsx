@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+// import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts'; // TODO: Replace with database
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
 import { RatingStars } from '@/components/features/RatingStars';
 import { MakeItMineButton } from '@/components/features/MakeItMineButton';
