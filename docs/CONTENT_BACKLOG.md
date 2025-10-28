@@ -220,3 +220,554 @@ interface RuleBuilderConfig {
 - [ ] Create demo video
 
 **Saved for Phase 6!** ✅
+
+---
+
+## Research: AI Personalities & Mentor Matching
+
+**Source**: SonarSource - "The Coding Personalities of Leading LLMs"  
+**URL**: https://www.sonarsource.com/the-coding-personalities-of-leading-llms.pdf  
+**Date Added**: Oct 28, 2025  
+**Relevance**: High - aligns with role-based personalization  
+**Phase to Integrate**: Phase 6-7 (Learning System & Personalization)  
+**Priority**: High
+
+### Key Concept
+
+Different AI models have different "personalities" and strengths. Users should be able to pick the right AI mentor based on their needs and learning style.
+
+### Integration Ideas
+
+#### 1. AI Mentor Selector (Phase 6-7)
+
+Create a feature that helps users choose the right AI model based on:
+
+- **Learning Style**: Visual learner, hands-on, theoretical
+- **Experience Level**: Beginner, intermediate, advanced
+- **Task Type**: Code review, debugging, architecture, learning
+- **Personality Preference**: Patient teacher, direct feedback, encouraging coach
+
+#### 2. Model Personality Profiles
+
+Document each model's "personality":
+
+- **GPT-4**: Comprehensive, detailed, patient teacher
+- **Claude**: Thoughtful, ethical, step-by-step guide
+- **Gemini**: Fast, practical, hands-on mentor
+- **Groq**: Quick, efficient, direct feedback
+
+#### 3. Smart Model Routing (Phase 7)
+
+Auto-select the best model based on:
+
+- User's role (C-Level, Engineer, PM, Designer, QA)
+- Prompt type (learning, debugging, optimization)
+- User's past preferences
+- Task complexity
+
+#### 4. Workbench Feature: "Find Your AI Mentor"
+
+Interactive quiz/tool:
+
+1. Answer questions about learning style
+2. Describe your current challenge
+3. Get matched with best AI model
+4. See personality comparison chart
+5. Try different models side-by-side
+
+#### 5. Content Opportunities
+
+**Blog Posts:**
+
+- "Which AI Model is Your Perfect Coding Mentor?"
+- "Understanding AI Personalities: A Guide for Developers"
+- "How to Choose the Right LLM for Your Task"
+
+**Documentation:**
+
+- Model personality comparison chart
+- Use case recommendations
+- Strengths and weaknesses of each model
+
+**Learning Content:**
+
+- Video: "Meet Your AI Mentors"
+- Interactive demo: Compare model responses
+- Case studies: When to use which model
+
+### Technical Implementation
+
+**Route**: `/workbench/mentor-matcher`
+
+**Components:**
+
+- `MentorQuiz.tsx` - Interactive questionnaire
+- `PersonalityChart.tsx` - Visual comparison
+- `ModelRecommendation.tsx` - Show best match
+- `SideBySideTest.tsx` - Compare models live
+
+**Data Structure:**
+
+```typescript
+interface AIPersonality {
+  model: string;
+  traits: {
+    patience: number; // 1-10
+    detail: number; // 1-10
+    speed: number; // 1-10
+    creativity: number; // 1-10
+    directness: number; // 1-10
+  };
+  bestFor: string[];
+  learningStyle: string[];
+  examples: string[];
+}
+```
+
+### Research Integration
+
+**Action Items:**
+
+- [ ] Read SonarSource PDF thoroughly
+- [ ] Extract key personality traits per model
+- [ ] Map traits to user needs
+- [ ] Create personality profiles
+- [ ] Design mentor matching algorithm
+- [ ] Build interactive quiz
+- [ ] Add to Workbench
+- [ ] Write blog post with findings
+- [ ] Create comparison chart
+- [ ] Add to documentation
+
+### Why This Matters
+
+1. **Personalization**: Matches users with best AI for their needs
+2. **Education**: Teaches users about model differences
+3. **Engagement**: Interactive, fun feature
+4. **Differentiation**: Unique approach to model selection
+5. **Value**: Helps users get better results faster
+
+### Connection to Existing Features
+
+**Role-Based Personalization:**
+
+- C-Level → GPT-4 (comprehensive, strategic)
+- Engineer → Claude (detailed, step-by-step)
+- QA → Gemini (fast, practical)
+
+**Pattern Recommendations:**
+
+- Different models excel at different patterns
+- Route patterns to best model automatically
+
+**Gamification:**
+
+- Achievement: "Try all AI mentors"
+- Challenge: "Find your perfect match"
+- XP: Bonus for using recommended model
+
+### Future Enhancements
+
+- **AI Personality Quiz**: Fun, shareable quiz
+- **Team Matching**: Find best model for team dynamics
+- **Learning Path**: Adapt based on model personality
+- **Analytics**: Track which models users prefer
+- **Custom Blends**: Combine traits from multiple models
+
+**Saved for Phase 6-7!** ✅
+
+---
+
+## Learning Material: Claude Connectors Review
+
+**Source**: Elephas.app Blog  
+**URL**: https://elephas.app/blog/claude-connectors-review  
+**Date Added**: Oct 28, 2025  
+**Relevance**: Medium-High - Claude integration patterns  
+**Phase to Integrate**: Phase 6-7 (AI Integrations & Learning Content)  
+**Priority**: Medium
+
+### Key Topic
+
+Review of Claude Connectors - how to integrate Claude with various tools and workflows.
+
+### Potential Use Cases
+
+1. **Integration Guides**: Learn how others integrate Claude
+2. **Best Practices**: Connector patterns and approaches
+3. **Tutorial Content**: Create similar guides for our users
+4. **Workbench Features**: Implement connector-style integrations
+5. **Documentation**: Reference for integration patterns
+
+### Action Items (For Later)
+
+- [ ] Read full article and extract key insights
+- [ ] Document integration patterns
+- [ ] Consider implementing similar connectors
+- [ ] Add to learning content library
+- [ ] Create tutorial based on findings
+- [ ] Reference in AI provider documentation
+
+**Saved for Phase 6-7!** ✅
+
+---
+
+## MCP Integration Strategy
+
+**Date Added**: Oct 28, 2025  
+**Relevance**: High - Improve development workflow  
+**Phase to Integrate**: Phase 2-3 (Infrastructure)  
+**Priority**: High
+
+### Recommended MCPs for Engify.ai
+
+#### 1. **@modelcontextprotocol/server-filesystem** (HIGHEST PRIORITY)
+
+**Why**: Access and manage project files
+**Use Cases**:
+
+- Read prompt templates from `/data/` folder
+- Access documentation for context
+- Read/write user-generated prompts
+- Manage content files
+
+**Integration**:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/donlaur/dev/Engify-AI-App"
+      ]
+    }
+  }
+}
+```
+
+#### 2. **@modelcontextprotocol/server-mongodb** (HIGH PRIORITY)
+
+**Why**: Direct database access for development
+**Use Cases**:
+
+- Query user data during debugging
+- Test database operations
+- Analyze usage patterns
+- Debug prompt storage
+
+**Integration**:
+
+```json
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-mongodb",
+        "mongodb://localhost:27017/engify"
+      ]
+    }
+  }
+}
+```
+
+#### 3. **@modelcontextprotocol/server-github** (MEDIUM PRIORITY)
+
+**Why**: Manage GitHub issues, PRs, and repo
+**Use Cases**:
+
+- Create issues from bugs
+- Review PRs
+- Check commit history
+- Manage project board
+
+**Integration**:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "your-token"
+      }
+    }
+  }
+}
+```
+
+#### 4. **Custom MCP: Prompt Pattern Server** (BUILD THIS!)
+
+**Why**: Domain-specific MCP for prompt engineering
+**Use Cases**:
+
+- Validate prompts against patterns
+- Suggest pattern improvements
+- Analyze prompt effectiveness
+- Generate pattern variations
+
+### Implementation Plan
+
+#### Phase 1: Setup (Now)
+
+- [ ] Install filesystem MCP
+- [ ] Configure in `.windsurf/mcp.json`
+- [ ] Test with project files
+- [ ] Document usage
+
+#### Phase 2: Database Access (Phase 2)
+
+- [ ] Install MongoDB MCP
+- [ ] Configure connection
+- [ ] Test queries
+- [ ] Add to development workflow
+
+#### Phase 3: GitHub Integration (Phase 3)
+
+- [ ] Install GitHub MCP
+- [ ] Generate token
+- [ ] Configure repo access
+- [ ] Test issue creation
+
+#### Phase 4: Custom MCP (Phase 6-7)
+
+- [ ] Design Prompt Pattern Server
+- [ ] Implement validation logic
+- [ ] Add pattern matching
+- [ ] Integrate with workbench
+- [ ] Publish as npm package
+
+### Immediate Action: Add Filesystem MCP
+
+**File**: `.windsurf/mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/donlaur/dev/Engify-AI-App"
+      ]
+    }
+  }
+}
+```
+
+### Benefits
+
+1. **Faster Development**: Direct file access
+2. **Better Context**: AI understands project structure
+3. **Database Debugging**: Query data directly
+4. **GitHub Workflow**: Manage issues/PRs
+5. **Custom Tools**: Domain-specific MCPs
+
+**Saved for Phase 2-3!** ✅
+
+---
+
+## MCP Integration: MongoDB Performance Advisor
+
+**Source**: MongoDB Atlas Documentation  
+**URL**: https://www.mongodb.com/docs/atlas/performance-advisor/access-with-mcp/  
+**Date Added**: Oct 28, 2025  
+**Relevance**: High - Database performance optimization  
+**Phase to Integrate**: Phase 2 (Repository Pattern & Database)  
+**Priority**: High
+
+### What It Does
+
+MongoDB Performance Advisor MCP provides AI-powered database performance insights through Model Context Protocol.
+
+### Key Features
+
+1. **Query Performance Analysis**: Identify slow queries automatically
+2. **Index Recommendations**: AI suggests optimal indexes
+3. **Schema Optimization**: Detect schema anti-patterns
+4. **Real-time Monitoring**: Track query performance over time
+5. **MCP Integration**: Access via AI assistants (like Cascade)
+
+### Use Cases for Engify.ai
+
+#### 1. Development Optimization
+
+- Analyze prompt storage queries
+- Optimize user data retrieval
+- Improve session management
+- Speed up analytics queries
+
+#### 2. Production Monitoring
+
+- Catch slow queries before users notice
+- Auto-suggest index improvements
+- Monitor database health
+- Track query patterns
+
+#### 3. Cost Optimization
+
+- Reduce unnecessary reads
+- Optimize aggregation pipelines
+- Minimize database load
+- Lower Atlas costs
+
+### Implementation Plan
+
+#### Phase 2: Repository Pattern (Immediate)
+
+- [ ] Install MongoDB Performance Advisor MCP
+- [ ] Configure Atlas connection
+- [ ] Set up performance monitoring
+- [ ] Create baseline metrics
+
+#### Phase 3: Optimization (Next)
+
+- [ ] Analyze existing queries
+- [ ] Implement recommended indexes
+- [ ] Refactor slow queries
+- [ ] Add query performance tests
+
+#### Phase 4: Automation (Future)
+
+- [ ] Auto-apply safe index recommendations
+- [ ] Alert on performance degradation
+- [ ] Track improvements over time
+- [ ] Generate performance reports
+
+### Integration Steps
+
+**1. Install MCP Server**
+
+```bash
+npm install @modelcontextprotocol/server-mongodb-atlas
+```
+
+**2. Configure in `.windsurf/mcp.json`**
+
+```json
+{
+  "mcpServers": {
+    "mongodb-performance": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-mongodb-atlas",
+        "--performance-advisor"
+      ],
+      "env": {
+        "MONGODB_ATLAS_PUBLIC_KEY": "your-public-key",
+        "MONGODB_ATLAS_PRIVATE_KEY": "your-private-key",
+        "MONGODB_ATLAS_PROJECT_ID": "your-project-id"
+      }
+    }
+  }
+}
+```
+
+**3. Use During Development**
+
+- Ask AI: "Analyze slow queries in prompts collection"
+- Ask AI: "Suggest indexes for user lookups"
+- Ask AI: "Optimize this aggregation pipeline"
+
+### Expected Benefits
+
+**Performance**:
+
+- 50-80% faster query times
+- Reduced database load
+- Better user experience
+
+**Cost**:
+
+- Lower Atlas bills
+- Fewer compute resources
+- Optimized storage
+
+**Development**:
+
+- Faster debugging
+- Better query design
+- Proactive optimization
+
+### Technical Details
+
+**Collections to Optimize**:
+
+- `users` - User authentication and profiles
+- `prompts` - Prompt templates and history
+- `sessions` - User sessions and activity
+- `analytics` - Usage tracking and metrics
+
+**Common Optimizations**:
+
+- Add indexes on frequently queried fields
+- Optimize aggregation pipelines
+- Reduce document scanning
+- Improve query selectivity
+
+### Documentation Needed
+
+**Internal Docs**:
+
+- [ ] How to use Performance Advisor MCP
+- [ ] Query optimization guidelines
+- [ ] Index strategy documentation
+- [ ] Performance benchmarks
+
+**NOT for Website**:
+
+- This is an internal development tool
+- Don't mention in marketing materials
+- Keep as competitive advantage
+- Document in developer guides only
+
+### Action Items
+
+**Immediate (Phase 2)**:
+
+- [ ] Set up MongoDB Atlas Performance Advisor
+- [ ] Install MCP integration
+- [ ] Configure access credentials
+- [ ] Run initial performance analysis
+
+**Short-term (Phase 3)**:
+
+- [ ] Implement recommended indexes
+- [ ] Optimize slow queries
+- [ ] Set up monitoring alerts
+- [ ] Document query patterns
+
+**Long-term (Phase 4+)**:
+
+- [ ] Automate performance checks in CI/CD
+- [ ] Create performance dashboard
+- [ ] Track optimization metrics
+- [ ] Share learnings with team
+
+### Why This Matters
+
+1. **Proactive**: Catch issues before production
+2. **AI-Powered**: Smart recommendations, not just alerts
+3. **Integrated**: Works with our development workflow
+4. **Cost-Effective**: Optimize spend on database
+5. **Competitive**: Better performance = better product
+
+### Connection to Phase 2
+
+Phase 2 focuses on Repository Pattern for database abstraction. This MCP will help us:
+
+- Design optimal repository methods
+- Choose right indexes from the start
+- Validate query performance
+- Build with best practices
+
+**Perfect timing to add this during Phase 2!** ✅
+
+**Saved for Phase 2!** ✅
