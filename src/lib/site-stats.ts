@@ -5,31 +5,11 @@
  * Update once, reflects everywhere.
  */
 
-import { playbookCategories } from '@/data/playbooks';
-
-/**
- * Calculate total prompts from playbooks
- */
-function calculateTotalPrompts() {
-  return playbookCategories.reduce((total, category) => {
-    return total + category.recipes.length;
-  }, 0);
-}
-
-/**
- * Calculate total prompts from database
- * TODO: Connect to actual database
- */
-export function getTotalPrompts(): number {
-  // Placeholder - will be replaced with database query
-  return 150;
-}
-
 /**
  * Get real-time site statistics
  */
 export function getSiteStats() {
-  const playbookPrompts = calculateTotalPrompts();
+  const playbookPrompts = 150; // TODO: Get from database
 
   return {
     // Core metrics
