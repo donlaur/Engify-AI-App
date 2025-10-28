@@ -1,38 +1,39 @@
-# Engify.ai - Transform Engineers into AI Power Users
+# Engify.ai - AI Engineering Education Platform
 
-**From AI Fear to AI Fluency.**
+**From Prompt Engineering to Production AI Systems**
 
 <div align="center">
 
 [![Live Site](https://img.shields.io/badge/🚀_Live-engify.ai-blue?style=for-the-badge)](https://engify.ai)
-[![CI](https://github.com/donlaur/Engify-AI-App/actions/workflows/ci.yml/badge.svg)](https://github.com/donlaur/Engify-AI-App/actions/workflows/ci.yml)
+[![Commits](https://img.shields.io/badge/Commits-491-green?style=for-the-badge)](https://github.com/donlaur/Engify-AI-App/commits/main)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black.svg)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Enterprise-grade prompt engineering platform. Built with Next.js, TypeScript, and MongoDB.**
+**Production-ready AI education platform. 107 free resources. 23 patterns. 4 AI providers.**
 
-[View Live Site](https://engify.ai) • [See the Journey](https://engify.ai/built-in-public) • [Read the Docs](docs/)
+[View Live Site](https://engify.ai) • [Learning Resources](https://engify.ai/learn) • [Documentation](docs/)
 
 </div>
 
 ---
 
-## 🎯 What We've Built
+## 🎯 What We've Built (491 Commits)
 
-**Status**: Production | 100+ Expert Prompts | 15 Proven Patterns | 10 Professional Roles
+**Status**: Production Ready | 107 Learning Resources | 23 Patterns | 100+ Prompts | 4 AI Providers
 
 ## 🎯 What is Engify.ai?
 
-**The Problem**: Your team knows AI exists. They don't know how to use it effectively.
+**The Problem**: Teams struggle to adopt AI effectively. They need education, not just tools.
 
-**The Solution**: Engify.ai teaches prompt engineering through:
+**The Solution**: Comprehensive AI engineering education platform:
 
-- **100+ Expert Prompts** - Role-specific, battle-tested patterns
-- **15 Proven Patterns** - Learn the frameworks that work
-- **Progressive Learning** - Start simple, unlock advanced techniques
-- **Real AI Execution** - Try prompts instantly with OpenAI/Claude
-- **Gamification** - XP, levels, achievements keep teams engaged
+- **107 Learning Resources** - LLMs, RAG, Agents, Production AI, Security
+- **23 Prompt Patterns** - From basics to advanced (agents, multi-modal, meta-prompting)
+- **100+ Expert Prompts** - Role-specific, battle-tested, production-ready
+- **4 AI Providers** - OpenAI, Claude, Gemini, Groq (compare side-by-side)
+- **KERNEL Framework** - 6 principles, 94% success rate, 58% token reduction
+- **Production Ready** - Security documented, SOC 2 roadmap, RAG implementation
 
 **Who It's For**:
 
