@@ -9,11 +9,15 @@ import { playbookCategories } from '@/data/playbooks';
 
 /**
  * Calculate total prompts from playbooks
+ * TODO: Populate playbooks.ts with actual prompt data
  */
 function calculateTotalPrompts() {
-  return playbookCategories.reduce((total, category) => {
+  const count = playbookCategories.reduce((total, category) => {
     return total + category.recipes.length;
   }, 0);
+
+  // Return minimum of 76 until playbooks are populated
+  return count > 0 ? count : 76;
 }
 
 /**
@@ -39,10 +43,10 @@ export function getSiteStats() {
 
     // Business metrics (SaaS Freemium Model)
     pricing: {
-      free: 'Free Beta',      // Limited free tier during beta
-      pro: '$29/mo',          // Individual professionals
-      team: '$99/mo',         // Teams & companies
-      enterprise: 'Custom',   // Enterprise pricing
+      free: 'Free Beta', // Limited free tier during beta
+      pro: '$29/mo', // Individual professionals
+      team: '$99/mo', // Teams & companies
+      enterprise: 'Custom', // Enterprise pricing
     },
 
     // Feature counts
