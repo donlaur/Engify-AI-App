@@ -204,7 +204,7 @@ export class CircuitBreaker implements ICircuitBreaker {
   /**
    * Register success event handler
    */
-  onSuccess(callback: (result: any) => void): void {
+  onSuccess(callback: (result: unknown) => void): void {
     this.eventHandlers.push({
       onStateChange: () => {},
       onFailure: () => {},

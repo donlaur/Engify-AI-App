@@ -21,7 +21,7 @@ describe('QStash Message Queue', () => {
   beforeEach(() => {
     // Mock environment variables
     process.env.QSTASH_URL = 'https://qstash.upstash.io/v2';
-    process.env.QSTASH_TOKEN = 'test-token';
+    process.env.QSTASH_TOKEN = process.env.QSTASH_TOKEN || 'test-token';
     process.env.QSTASH_WEBHOOK_URL = 'https://example.com';
 
     config = {
@@ -410,9 +410,9 @@ describe('QStash Message Queue', () => {
       await queue.publish(lowMessage);
 
       // Check that critical message has 0s delay and low message has 30s delay
-      const calls = (global.fetch as any).mock.calls;
-      expect(calls[0][1].body).toContain('"delay":"0s"');
-      expect(calls[1][1].body).toContain('"delay":"30s"');
+      const calls = (global.fetch as unknown).mock.calls;
+      expect(calls[0]?.[1]?.body).toContain('"delay":"0s"');
+      expect(calls[1]?.[1]?.body).toContain('"delay":"30s"');
     });
   });
 });

@@ -224,7 +224,7 @@ export class MessageBroker implements IMessageBroker {
         try {
           const info = await this.redis.info('memory');
           const memoryMatch = info.match(/used_memory:(\d+)/);
-          if (memoryMatch) {
+          if (memoryMatch?.[1]) {
             memoryUsage = parseInt(memoryMatch[1]);
           }
 
@@ -288,7 +288,7 @@ export class MessageBroker implements IMessageBroker {
    */
   async publishToQueue(
     queueName: string,
-    message: any
+    message: IMessage
   ): Promise<void> {
     const queue = await this.getQueue(queueName);
     if (!queue) {

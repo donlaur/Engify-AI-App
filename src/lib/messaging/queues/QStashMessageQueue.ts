@@ -51,8 +51,8 @@ export class QStashMessageQueue implements IMessageQueue {
   private async makeRequest(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    body?: any
-  ): Promise<any> {
+    body?: unknown
+  ): Promise<unknown> {
     const url = `${this.baseUrl}${endpoint}`;
 
     try {
@@ -383,7 +383,7 @@ export class QStashMessageQueue implements IMessageQueue {
   /**
    * Process a message (called by webhook)
    */
-  async processMessage(messageData: any): Promise<MessageResult> {
+  async processMessage(messageData: unknown): Promise<MessageResult> {
     const startTime = Date.now();
     
     try {

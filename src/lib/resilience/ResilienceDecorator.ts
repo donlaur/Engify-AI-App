@@ -267,8 +267,9 @@ export class ResilienceDecorator implements IResilienceDecorator {
 
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error(`Operation timed out after ${this.config.timeout!.timeout}ms`));
-      }, this.config.timeout!.timeout);
+        const timeoutMs = this.config.timeout?.timeout || 5000;
+        reject(new Error(`Operation timed out after ${timeoutMs}ms`));
+      }, this.config.timeout?.timeout || 5000);
 
       operation()
         .then(result => {
