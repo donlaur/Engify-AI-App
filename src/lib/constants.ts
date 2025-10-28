@@ -57,16 +57,13 @@ export const LIMITS = {
   maxHistoryPerUser: 1000,
 } as const;
 
-import { playbookCategories } from '@/data/playbooks';
-
 // Calculate total prompts dynamically
 const calculateTotalPrompts = () => {
-  return playbookCategories.reduce((total, category) => {
-    return total + category.recipes.length;
-  }, 0);
+  // TODO: Get from database
+  return 150;
 };
 
-export const siteStats = {
+export const SITE_STATS = {
   totalPrompts: calculateTotalPrompts(),
   totalPatterns: 15,
   totalUsers: '1K+',
