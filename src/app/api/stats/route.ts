@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
+import type { Db } from 'mongodb';
 
 /**
  * GET /api/stats
@@ -7,16 +8,23 @@ import { getMongoDb } from '@/lib/db/mongodb';
  */
 export async function GET() {
   try {
-    // Try MongoDB first
+    // Try MongoDB first with timeout
     try {
-      const db = await getMongoDb();
+      const dbPromise = getMongoDb();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('MongoDB connection timeout')), 5000)
+      );
 
-      const [promptCount, patternCount, pathwayCount, userCount] = await Promise.all([
-        db.collection('prompts').countDocuments(),
-        db.collection('patterns').countDocuments(),
-        db.collection('pathways').countDocuments(),
-        db.collection('users').countDocuments(),
-      ]);
+      const db = (await Promise.race([dbPromise, timeoutPromise])) as Db;
+
+      // Direct DB access in API routes for performance
+      const [promptCount, patternCount, pathwayCount, userCount] =
+        await Promise.all([
+          db.collection('prompts').countDocuments(),
+          db.collection('patterns').countDocuments(),
+          db.collection('pathways').countDocuments(),
+          db.collection('users').countDocuments(),
+        ]);
 
       // Get most viewed prompts
       const topPrompts = await db

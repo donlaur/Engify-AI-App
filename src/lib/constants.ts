@@ -44,7 +44,8 @@ export const API_ROUTES = {
   health: '/api/health',
   auth: '/api/auth',
   prompts: '/api/prompts',
-  ai: '/api/ai/execute',
+  ai: '/api/v2/ai/execute', // Updated to v2 (SOLID interface-based)
+  aiLegacy: '/api/ai/execute', // Keep old route for backward compatibility
   analytics: '/api/analytics/track',
 } as const;
 
@@ -57,17 +58,11 @@ export const LIMITS = {
   maxHistoryPerUser: 1000,
 } as const;
 
-import { playbookCategories } from '@/data/playbooks';
-
-// Calculate total prompts dynamically
-const calculateTotalPrompts = () => {
-  return playbookCategories.reduce((total, category) => {
-    return total + category.recipes.length;
-  }, 0);
-};
-
+// DEPRECATED: Use StatsService.getQuickStats() for real MongoDB data
+// This is only for backwards compatibility with ChatWidget
+// TODO: Remove after migrating ChatWidget to use MongoDB stats
 export const siteStats = {
-  totalPrompts: calculateTotalPrompts(),
+  totalPrompts: 0, // Placeholder - use StatsService for real count
   totalPatterns: 15,
   totalUsers: '1K+',
   avgTimeSaved: '2hrs',

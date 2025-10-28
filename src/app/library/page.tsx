@@ -3,23 +3,31 @@
  *
  * Browse and search prompts
  * Filter by category and role
- * 
- * Performance: Server-side rendering for instant load
+ *
+ * Performance: Server-side rendering with MongoDB data
  */
 
 import type { Metadata } from 'next';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { LibraryClient } from '@/components/features/LibraryClient';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 import { generateMetaTags, pageSEO } from '@/lib/seo';
+import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import { getStats } from '@/lib/stats-cache';
 
 // SEO Metadata
 export const metadata: Metadata = generateMetaTags(pageSEO.library) as Metadata;
 
-// Server Component - renders instantly with static data
-export default function LibraryPage() {
-  // Use static seed data for instant load
+// Server Component
+export default async function LibraryPage() {
+  // Use seed prompts for now (MongoDB prompts will come in Phase 2)
   const prompts = getSeedPromptsWithTimestamps();
+
+  // Get stats from cache
+  const data = await getStats();
+
+  // Category counts for display
+  const categoryStats = data.categories || [];
+  const totalPrompts = data.stats.prompts;
 
   return (
     <MainLayout>
@@ -28,12 +36,29 @@ export default function LibraryPage() {
         <div className="mb-8">
           <h1 className="mb-2 text-4xl font-bold">Prompt Library</h1>
           <p className="text-lg text-muted-foreground">
-            Browse and discover proven prompts for your workflow
+            Browse and discover {totalPrompts} proven prompts for your workflow
           </p>
+
+          {/* Category counts */}
+          {Object.keys(categoryStats).length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {Object.entries(categoryStats).map(([category, count]) => (
+                <div
+                  key={category}
+                  className="rounded-full bg-muted px-3 py-1 text-sm"
+                >
+                  <span className="font-medium capitalize">
+                    {category.replace('-', ' ')}
+                  </span>
+                  <span className="ml-1 text-muted-foreground">({count})</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Client-side filtering component */}
-        <LibraryClient initialPrompts={prompts} />
+        <LibraryClient initialPrompts={prompts as never} />
       </div>
     </MainLayout>
   );
