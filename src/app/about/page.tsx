@@ -2,6 +2,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
+import { siteStats } from '@/lib/constants';
 
 export default function AboutPage() {
   return (
@@ -13,26 +14,29 @@ export default function AboutPage() {
             <Icons.sparkles className="mr-2 h-3 w-3" />
             About Engify.ai
           </Badge>
-          <h1 className="text-4xl font-bold mb-4">
+          <h1 className="mb-4 text-4xl font-bold">
             Empowering Teams to Master AI
           </h1>
-          <p className="text-xl text-muted-foreground mb-4">
-            We believe every developer should have the skills to leverage AI effectively. 
-            Engify.ai makes prompt engineering accessible through expert-curated content 
-            and hands-on learning.
+          <p className="mb-4 text-xl text-muted-foreground">
+            We believe every developer should have the skills to leverage AI
+            effectively. Engify.ai makes prompt engineering accessible through
+            expert-curated content and hands-on learning.
           </p>
-          <Card className="bg-primary/5 border-primary/20">
+          <Card className="border-primary/20 bg-primary/5">
             <CardContent className="pt-6">
-              <p className="text-lg font-semibold mb-2">
-                <span className="text-primary">Engify.ai</span> = Engineer + Amplify + <span className="text-primary">AI</span>
+              <p className="mb-2 text-lg font-semibold">
+                <span className="text-primary">Engify.ai</span> = Engineer +
+                Amplify + <span className="text-primary">AI</span>
               </p>
               <p className="text-muted-foreground">
-                We amplify engineers <strong>using AI</strong>. When you engify your workflow, 
-                you&apos;re not just using AI—you&apos;re mastering it, engineering better prompts, 
-                and multiplying your impact through artificial intelligence.
+                We amplify engineers <strong>using AI</strong>. When you engify
+                your workflow, you&apos;re not just using AI—you&apos;re
+                mastering it, engineering better prompts, and multiplying your
+                impact through artificial intelligence.
               </p>
-              <p className="text-sm text-muted-foreground mt-2 italic">
-                The <strong>.ai</strong> isn&apos;t just a domain—it&apos;s our mission: amplifying engineers with AI.
+              <p className="mt-2 text-sm italic text-muted-foreground">
+                The <strong>.ai</strong> isn&apos;t just a domain—it&apos;s our
+                mission: amplifying engineers with AI.
               </p>
             </CardContent>
           </Card>
@@ -65,7 +69,9 @@ export default function AboutPage() {
           <div className="grid gap-6 md:grid-cols-3">
             <Card className="text-center">
               <CardContent className="pt-6">
-                <div className="mb-2 text-4xl font-bold text-primary">67+</div>
+                <div className="mb-2 text-4xl font-bold text-primary">
+                  {siteStats.totalPrompts}+
+                </div>
                 <p className="text-sm text-muted-foreground">Expert Prompts</p>
               </CardContent>
             </Card>

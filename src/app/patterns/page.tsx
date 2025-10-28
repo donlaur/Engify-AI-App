@@ -13,6 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
+import { siteStats } from '@/lib/constants';
 import { PatternDetailDrawer } from '@/components/features/PatternDetailDrawer';
 import { getPatternById } from '@/data/pattern-details';
 
@@ -283,7 +284,7 @@ export default function PatternsPage() {
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold">67</div>
+              <div className="text-2xl font-bold">{siteStats.totalPrompts}</div>
               <p className="text-xs text-muted-foreground">Example Prompts</p>
             </CardContent>
           </Card>
@@ -410,7 +411,8 @@ export default function PatternsPage() {
               Ready to use these patterns?
             </h3>
             <p className="mb-6 text-muted-foreground">
-              Browse our library of 67 expert prompts that use these patterns
+              Browse our library of {siteStats.totalPrompts}+ expert prompts
+              that use these patterns
             </p>
             <Button size="lg" asChild>
               <Link href="/library">
