@@ -1,30 +1,30 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ExecutionContextManager } from '../context/ExecutionContextManager';
 import { ExecutionStrategyFactory } from '../factory/ExecutionStrategyFactory';
-import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
+// import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 import { AIRequest, ExecutionContext } from '../interfaces/IExecutionStrategy';
 
 // Mock AI Provider Factory
-jest.mock('@/lib/ai/v2/factory/AIProviderFactory');
+vi.mock('@/lib/ai/v2/factory/AIProviderFactory');
 
 describe('Execution Strategy System', () => {
   let contextManager: ExecutionContextManager;
   let strategyFactory: ExecutionStrategyFactory;
-  let mockAIProviderFactory: jest.Mocked<AIProviderFactory>;
+  let mockAIProviderFactory: Record<string, unknown>;
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock AI provider factory
     mockAIProviderFactory = {
-      create: jest.fn(),
-      getAvailableProviders: jest
+      create: vi.fn(),
+      getAvailableProviders: vi
         .fn()
         .mockReturnValue(['openai', 'claude', 'gemini']),
-      registerProvider: jest.fn(),
-      unregisterProvider: jest.fn(),
-    } as unknown as jest.Mocked<AIProviderFactory>;
+      registerProvider: vi.fn(),
+      unregisterProvider: vi.fn(),
+    };
 
     // Create strategy factory
     strategyFactory = new ExecutionStrategyFactory(mockAIProviderFactory);
@@ -79,7 +79,7 @@ describe('Execution Strategy System', () => {
       mockAIProviderFactory.create.mockReturnValue({
         name: 'openai',
         provider: 'openai',
-        execute: jest.fn().mockResolvedValue({
+        execute: vi.fn().mockResolvedValue({
           content: 'Test response',
           usage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 },
           cost: { input: 0.001, output: 0.002, total: 0.003 },
@@ -87,8 +87,8 @@ describe('Execution Strategy System', () => {
           provider: 'openai',
           model: 'gpt-3.5-turbo',
         }),
-        validateRequest: jest.fn().mockReturnValue(true),
-      } as unknown as jest.Mocked<AIProviderFactory>);
+        validateRequest: vi.fn().mockReturnValue(true),
+      });
     });
 
     it('should select cache strategy for repeated requests', () => {
@@ -154,7 +154,7 @@ describe('Execution Strategy System', () => {
       mockAIProviderFactory.create.mockReturnValue({
         name: 'openai',
         provider: 'openai',
-        execute: jest.fn().mockResolvedValue({
+        execute: vi.fn().mockResolvedValue({
           content: 'Test response',
           usage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 },
           cost: { input: 0.001, output: 0.002, total: 0.003 },
@@ -162,8 +162,8 @@ describe('Execution Strategy System', () => {
           provider: 'openai',
           model: 'gpt-3.5-turbo',
         }),
-        validateRequest: jest.fn().mockReturnValue(true),
-      } as unknown as jest.Mocked<AIProviderFactory>);
+        validateRequest: vi.fn().mockReturnValue(true),
+      });
     });
 
     it('should execute request successfully', async () => {
