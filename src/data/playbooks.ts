@@ -534,4 +534,209 @@ export const playbookCategories: PlaybookCategory[] = [
       },
     ],
   },
+  // == Additional High-Value Prompts ==
+  {
+    id: 'eng-advanced',
+    title: 'Engineer: Advanced',
+    recipes: [
+      {
+        id: 'eng-adv-performance-optimizer',
+        title: 'Performance Optimization Analyzer',
+        description:
+          'Identifies performance bottlenecks and suggests optimizations for slow code',
+        prompt:
+          'You are a performance optimization expert. Analyze this code for performance issues:\n\n[CODE]\n\nProvide:\n1. Identified bottlenecks (with Big O analysis)\n2. Specific optimization recommendations\n3. Expected performance improvements\n4. Trade-offs to consider',
+      },
+      {
+        id: 'eng-adv-security-audit',
+        title: 'Security Vulnerability Scanner',
+        description:
+          'Reviews code for common security vulnerabilities and suggests fixes',
+        prompt:
+          'You are a security expert. Review this code for vulnerabilities:\n\n[CODE]\n\nCheck for:\n- SQL injection\n- XSS attacks\n- CSRF vulnerabilities\n- Authentication issues\n- Data exposure\n\nProvide severity ratings and fix recommendations.',
+      },
+      {
+        id: 'eng-adv-refactor-guide',
+        title: 'Refactoring Guide',
+        description:
+          'Suggests refactoring strategies to improve code quality and maintainability',
+        prompt:
+          'You are a clean code expert. Analyze this code and suggest refactorings:\n\n[CODE]\n\nProvide:\n1. Code smells identified\n2. Refactoring patterns to apply\n3. Step-by-step refactoring plan\n4. Expected benefits',
+      },
+      {
+        id: 'eng-adv-test-generator',
+        title: 'Test Case Generator',
+        description: 'Generates comprehensive test cases including edge cases',
+        prompt:
+          'You are a testing expert. Generate test cases for this function:\n\n[CODE]\n\nProvide:\n1. Happy path tests\n2. Edge cases\n3. Error scenarios\n4. Integration test ideas\n5. Test data examples',
+      },
+      {
+        id: 'eng-adv-api-designer',
+        title: 'API Design Consultant',
+        description: 'Designs RESTful APIs following best practices',
+        prompt:
+          'You are an API design expert. Design an API for:\n\n[REQUIREMENTS]\n\nProvide:\n1. Endpoint structure\n2. Request/response schemas\n3. Error handling strategy\n4. Versioning approach\n5. Authentication method',
+      },
+    ],
+  },
+  {
+    id: 'pm-advanced',
+    title: 'Product Manager: Advanced',
+    recipes: [
+      {
+        id: 'pm-adv-roadmap-builder',
+        title: 'Product Roadmap Builder',
+        description:
+          'Creates strategic product roadmaps aligned with business goals',
+        prompt:
+          'You are a product strategy expert. Help me build a roadmap for:\n\n[PRODUCT/FEATURE]\n\nProvide:\n1. Strategic themes (quarterly)\n2. Key initiatives\n3. Success metrics\n4. Dependencies and risks\n5. Resource requirements',
+      },
+      {
+        id: 'pm-adv-user-story-writer',
+        title: 'User Story Generator',
+        description: 'Writes detailed user stories with acceptance criteria',
+        prompt:
+          'You are a product owner expert. Write user stories for:\n\n[FEATURE]\n\nFormat:\n- As a [user type]\n- I want [goal]\n- So that [benefit]\n\nInclude:\n- Acceptance criteria\n- Edge cases\n- Dependencies\n- Estimated complexity',
+      },
+      {
+        id: 'pm-adv-metrics-framework',
+        title: 'Metrics Framework Designer',
+        description:
+          'Designs comprehensive metrics frameworks for product success',
+        prompt:
+          'You are a product analytics expert. Design metrics for:\n\n[PRODUCT/FEATURE]\n\nProvide:\n1. North Star Metric\n2. Leading indicators\n3. Lagging indicators\n4. Counter-metrics\n5. Measurement plan',
+      },
+      {
+        id: 'pm-adv-pricing-strategy',
+        title: 'Pricing Strategy Consultant',
+        description: 'Develops pricing models and strategies',
+        prompt:
+          'You are a pricing strategy expert. Design pricing for:\n\n[PRODUCT]\n\nAnalyze:\n1. Value-based pricing\n2. Competitive positioning\n3. Packaging tiers\n4. Pricing psychology\n5. Revenue projections',
+      },
+      {
+        id: 'pm-adv-ab-test-designer',
+        title: 'A/B Test Designer',
+        description: 'Designs statistically valid A/B tests',
+        prompt:
+          'You are an experimentation expert. Design an A/B test for:\n\n[HYPOTHESIS]\n\nProvide:\n1. Test hypothesis\n2. Success metrics\n3. Sample size calculation\n4. Test duration\n5. Variants to test\n6. Analysis plan',
+      },
+    ],
+  },
+  {
+    id: 'designer-advanced',
+    title: 'Designer: Advanced',
+    recipes: [
+      {
+        id: 'des-adv-design-system',
+        title: 'Design System Architect',
+        description: 'Creates comprehensive design system documentation',
+        prompt:
+          'You are a design systems expert. Create a design system for:\n\n[PRODUCT]\n\nInclude:\n1. Color palette (with accessibility)\n2. Typography scale\n3. Spacing system\n4. Component library structure\n5. Usage guidelines',
+      },
+      {
+        id: 'des-adv-ux-audit',
+        title: 'UX Audit Specialist',
+        description:
+          'Conducts thorough UX audits with actionable recommendations',
+        prompt:
+          'You are a UX audit expert. Audit this experience:\n\n[DESCRIPTION/SCREENSHOTS]\n\nAnalyze:\n1. Usability issues\n2. Accessibility problems\n3. Information architecture\n4. Visual hierarchy\n5. Interaction patterns\n\nProvide prioritized recommendations.',
+      },
+      {
+        id: 'des-adv-user-flow',
+        title: 'User Flow Designer',
+        description: 'Maps detailed user flows and journey maps',
+        prompt:
+          'You are a user experience expert. Design user flows for:\n\n[TASK/GOAL]\n\nProvide:\n1. Entry points\n2. Decision points\n3. Happy path\n4. Error states\n5. Exit points\n6. Pain points to address',
+      },
+      {
+        id: 'des-adv-accessibility',
+        title: 'Accessibility Consultant',
+        description: 'Ensures designs meet WCAG standards',
+        prompt:
+          'You are an accessibility expert. Review this design:\n\n[DESIGN/DESCRIPTION]\n\nCheck:\n1. WCAG 2.1 AA compliance\n2. Color contrast ratios\n3. Keyboard navigation\n4. Screen reader support\n5. ARIA labels\n\nProvide specific fixes.',
+      },
+      {
+        id: 'des-adv-microcopy',
+        title: 'Microcopy Writer',
+        description: 'Crafts effective UI copy and error messages',
+        prompt:
+          'You are a UX writer. Write microcopy for:\n\n[CONTEXT]\n\nProvide:\n1. Button labels\n2. Error messages\n3. Empty states\n4. Success messages\n5. Helper text\n\nMake it clear, concise, and friendly.',
+      },
+    ],
+  },
+  {
+    id: 'qa-advanced',
+    title: 'QA Engineer: Advanced',
+    recipes: [
+      {
+        id: 'qa-adv-test-strategy',
+        title: 'Test Strategy Architect',
+        description: 'Designs comprehensive test strategies',
+        prompt:
+          'You are a test strategy expert. Create a test strategy for:\n\n[FEATURE/PRODUCT]\n\nInclude:\n1. Test levels (unit, integration, e2e)\n2. Test types (functional, performance, security)\n3. Automation strategy\n4. Risk assessment\n5. Coverage goals',
+      },
+      {
+        id: 'qa-adv-automation-framework',
+        title: 'Test Automation Framework Designer',
+        description: 'Designs scalable test automation frameworks',
+        prompt:
+          'You are a test automation expert. Design a framework for:\n\n[TECH STACK]\n\nProvide:\n1. Framework architecture\n2. Tool selection\n3. Page object model structure\n4. CI/CD integration\n5. Reporting strategy',
+      },
+      {
+        id: 'qa-adv-performance-test',
+        title: 'Performance Test Designer',
+        description: 'Creates performance and load testing scenarios',
+        prompt:
+          'You are a performance testing expert. Design tests for:\n\n[SYSTEM]\n\nProvide:\n1. Load scenarios\n2. Performance metrics\n3. Baseline targets\n4. Stress test cases\n5. Monitoring strategy',
+      },
+      {
+        id: 'qa-adv-security-test',
+        title: 'Security Test Planner',
+        description: 'Plans security testing and penetration tests',
+        prompt:
+          'You are a security testing expert. Plan security tests for:\n\n[APPLICATION]\n\nInclude:\n1. Threat modeling\n2. Vulnerability scanning\n3. Penetration test scenarios\n4. Security test cases\n5. Compliance checks',
+      },
+      {
+        id: 'qa-adv-bug-report',
+        title: 'Bug Report Generator',
+        description: 'Creates detailed, reproducible bug reports',
+        prompt:
+          'You are a QA expert. Write a bug report for:\n\n[BUG DESCRIPTION]\n\nFormat:\n1. Title (clear, specific)\n2. Steps to reproduce\n3. Expected vs actual behavior\n4. Environment details\n5. Screenshots/logs\n6. Severity and priority\n7. Suggested fix (if known)',
+      },
+    ],
+  },
+  {
+    id: 'devops-advanced',
+    title: 'DevOps/SRE: Advanced',
+    recipes: [
+      {
+        id: 'devops-adv-ci-cd',
+        title: 'CI/CD Pipeline Designer',
+        description: 'Designs robust CI/CD pipelines',
+        prompt:
+          'You are a DevOps expert. Design a CI/CD pipeline for:\n\n[PROJECT]\n\nInclude:\n1. Build stages\n2. Test automation\n3. Deployment strategy\n4. Rollback plan\n5. Security scanning\n6. Performance checks',
+      },
+      {
+        id: 'devops-adv-monitoring',
+        title: 'Monitoring Strategy Designer',
+        description: 'Creates comprehensive monitoring and alerting strategies',
+        prompt:
+          'You are an SRE expert. Design monitoring for:\n\n[SYSTEM]\n\nProvide:\n1. Key metrics (RED/USE)\n2. Alert thresholds\n3. Dashboards\n4. Log aggregation\n5. Incident response\n6. SLO/SLA definitions',
+      },
+      {
+        id: 'devops-adv-infrastructure',
+        title: 'Infrastructure as Code Architect',
+        description: 'Designs IaC solutions with best practices',
+        prompt:
+          'You are an infrastructure expert. Design IaC for:\n\n[REQUIREMENTS]\n\nProvide:\n1. Tool selection (Terraform/CloudFormation)\n2. Module structure\n3. State management\n4. Environment strategy\n5. Security best practices',
+      },
+      {
+        id: 'devops-adv-incident',
+        title: 'Incident Response Planner',
+        description: 'Creates incident response procedures',
+        prompt:
+          'You are an incident management expert. Create a response plan for:\n\n[SYSTEM/SERVICE]\n\nInclude:\n1. Severity definitions\n2. Escalation paths\n3. Communication templates\n4. Runbooks\n5. Post-mortem process',
+      },
+    ],
+  },
 ];
