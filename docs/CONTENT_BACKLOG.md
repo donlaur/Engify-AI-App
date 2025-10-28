@@ -375,3 +375,37 @@ interface AIPersonality {
 - **Custom Blends**: Combine traits from multiple models
 
 **Saved for Phase 6-7!** ✅
+
+---
+
+## Learning Material: Claude Connectors Review
+
+**Source**: Elephas.app Blog  
+**URL**: https://elephas.app/blog/claude-connectors-review  
+**Date Added**: Oct 28, 2025  
+**Relevance**: Medium-High - Claude integration patterns  
+**Phase to Integrate**: Phase 6-7 (AI Integrations & Learning Content)  
+**Priority**: Medium
+
+### Key Topic
+
+Review of Claude Connectors - how to integrate Claude with various tools and workflows.
+
+### Potential Use Cases
+
+1. **Integration Guides**: Learn how others integrate Claude
+2. **Best Practices**: Connector patterns and approaches
+3. **Tutorial Content**: Create similar guides for our users
+4. **Workbench Features**: Implement connector-style integrations
+5. **Documentation**: Reference for integration patterns
+
+### Action Items (For Later)
+
+- [ ] Read full article and extract key insights
+- [ ] Document integration patterns
+- [ ] Consider implementing similar connectors
+- [ ] Add to learning content library
+- [ ] Create tutorial based on findings
+- [ ] Reference in AI provider documentation
+
+**Saved for Phase 6-7!** ✅
