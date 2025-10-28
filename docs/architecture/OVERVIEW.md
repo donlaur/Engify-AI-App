@@ -361,6 +361,52 @@ Response with Correlation ID
 Client Component (success feedback)
 ```
 
+### 3. AI Processing Flow (Redis + QStash)
+
+```
+User Creates Prompt
+    ↓
+API Route (/api/v2/ai/execute)
+    ↓
+Check Redis Cache (cached responses)
+    ↓
+If Cache Miss:
+    ↓
+Queue AI Analysis Job (QStash)
+    ↓
+Background Processing:
+    - OpenAI API Call
+    - Claude API Call
+    - Gemini API Call
+    ↓
+Cache Results (Redis - 30min TTL)
+    ↓
+Queue Notification (QStash)
+    ↓
+User Receives Real-time Update
+```
+
+### 4. Statistics and Analytics Flow
+
+```
+User Action (create prompt, view content)
+    ↓
+API Route
+    ↓
+Update MongoDB (persistent data)
+    ↓
+Queue Analytics Event (QStash)
+    ↓
+Background Processing:
+    - Update user stats
+    - Update site analytics
+    - Generate reports
+    ↓
+Cache Updated Stats (Redis - 15min TTL)
+    ↓
+Dashboard Shows Real-time Data
+```
+
 ### 3. AI Execution Flow (Strategy Pattern)
 
 ```
@@ -451,6 +497,160 @@ Error handling & fallbacks
 - **ESLint** - Code quality rules
 - **Prettier** - Consistent formatting
 - **Husky** - Pre-commit hooks
+
+## Redis and QStash Integration
+
+### Redis Usage Patterns
+
+**Purpose**: Fast, temporary data storage for performance optimization
+
+**Data Types Stored**:
+- **User Sessions** (15 minutes - 24 hours TTL)
+  ```typescript
+  const sessionKey = `session:${sessionId}`;
+  await redis.setex(sessionKey, 86400, JSON.stringify({
+    userId: 'user123',
+    email: 'user@example.com',
+    role: 'premium',
+    lastActivity: new Date(),
+    preferences: { theme: 'dark', language: 'en' }
+  }));
+  ```
+
+- **AI Response Cache** (30 minutes TTL)
+  ```typescript
+  const responseKey = `ai:response:${hash(prompt + provider)}`;
+  await redis.setex(responseKey, 1800, JSON.stringify(aiResponse));
+  ```
+
+- **User Dashboard Data** (15 minutes TTL)
+  ```typescript
+  const dashboardKey = `dashboard:${userId}`;
+  await redis.setex(dashboardKey, 900, JSON.stringify({
+    stats: { totalPrompts: 45, successfulAnalyses: 42 },
+    recentActivity: [...],
+    favoriteProviders: ['openai', 'claude']
+  }));
+  ```
+
+- **Rate Limiting Counters** (1 hour TTL)
+  ```typescript
+  const rateLimitKey = `rate:${userId}:${endpoint}`;
+  await redis.incr(rateLimitKey);
+  await redis.expire(rateLimitKey, 3600);
+  ```
+
+### QStash Usage Patterns
+
+**Purpose**: Reliable, asynchronous processing for non-blocking operations
+
+**Message Types**:
+
+1. **AI Processing Jobs**
+   ```typescript
+   const aiJob = {
+     type: 'ai-analysis',
+     userId: 'user123',
+     promptId: 'prompt456',
+     providers: ['openai', 'claude', 'gemini'],
+     priority: 'normal',
+     payload: {
+       prompt: "Analyze this complex prompt pattern...",
+       context: { domain: 'marketing', complexity: 'high' }
+     }
+   };
+   await qstash.publish(aiJob);
+   ```
+
+2. **User Notifications**
+   ```typescript
+   const notificationJob = {
+     type: 'notification',
+     userId: 'user123',
+     priority: 'high',
+     payload: {
+       type: 'prompt-completed',
+       message: 'Your AI analysis is ready!',
+       promptId: 'prompt456',
+       results: { providers: 3, success: true }
+     }
+   };
+   await qstash.publish(notificationJob);
+   ```
+
+3. **Analytics Events**
+   ```typescript
+   const analyticsEvent = {
+     type: 'analytics',
+     userId: 'user123',
+     priority: 'low',
+     payload: {
+       event: 'prompt_created',
+       timestamp: new Date(),
+       metadata: {
+         promptLength: 150,
+         provider: 'openai',
+         success: true,
+         responseTime: 1200
+       }
+     }
+   };
+   await qstash.publish(analyticsEvent);
+   ```
+
+4. **Background Data Processing**
+   ```typescript
+   const dataJob = {
+     type: 'data-processing',
+     priority: 'low',
+     payload: {
+       operation: 'import-prompts',
+       source: 'csv-upload',
+       userId: 'user123',
+       fileId: 'file789',
+       batchSize: 1000
+     }
+   };
+   await qstash.publish(dataJob);
+   ```
+
+### Circuit Breaker Integration
+
+```typescript
+// Protect Redis and QStash calls with circuit breakers
+const redisCircuit = circuitBreakerManager.getCircuit('cache');
+const qstashCircuit = circuitBreakerManager.getCircuit('messaging');
+
+// Safe Redis operation
+const userData = await redisCircuit.execute(() => 
+  redis.get(`user:${userId}`)
+);
+
+// Safe QStash operation
+await qstashCircuit.execute(() => 
+  qstash.publish(notificationJob)
+);
+```
+
+### Data Flow Summary
+
+- **Redis**: Fast, temporary data storage
+  - User sessions (15 minutes - 24 hours TTL)
+  - Cached AI responses (30 minutes TTL)
+  - Rate limiting counters (1 hour TTL)
+  - User preferences (1 hour TTL)
+
+- **QStash**: Reliable, async processing
+  - AI analysis jobs (processed in background)
+  - Email notifications (delivered asynchronously)
+  - Analytics events (batched and processed)
+  - Data imports/exports (heavy operations)
+
+- **MongoDB**: Persistent, structured data
+  - User accounts and profiles
+  - Prompt templates and patterns
+  - Analysis results and history
+  - System configuration
 
 ### Testing Strategy
 
