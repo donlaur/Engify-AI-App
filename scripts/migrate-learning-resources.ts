@@ -11,6 +11,7 @@
 import { MongoClient } from 'mongodb';
 import fs from 'fs';
 import path from 'path';
+import { suggestTags, getTagById } from '../src/lib/tags-taxonomy';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const DB_NAME = 'engify';
@@ -163,8 +164,26 @@ async function migrateResources() {
         const slug = generateSlug(item.title);
         const keywords = extractKeywords(item.title, item.description, item.tags || []);
         
+        // Auto-suggest tags based on content
+        const suggestedTagIds = suggestTags(item.title, item.description, item.content);
+        const existingTags = item.tags || [];
+        
+        // Combine existing tags with suggested tag names
+        const allTags = [
+          ...existingTags,
+          ...suggestedTagIds.map(id => {
+            const tag = getTagById(id);
+            return tag ? tag.name : null;
+          }).filter(Boolean)
+        ];
+        
+        // Remove duplicates
+        const uniqueTags = Array.from(new Set(allTags));
+        
         const resource: LearningResource = {
           ...item,
+          tags: uniqueTags,
+          tagIds: suggestedTagIds, // Store tag IDs for hierarchical filtering
           status,
           contentHtml: hasContent ? convertToHtml(item.content) : undefined,
           seo: {
