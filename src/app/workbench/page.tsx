@@ -52,23 +52,14 @@ export default function WorkbenchPage() {
     const startTime = Date.now();
 
     try {
-      const res = await fetch('/api/ai/execute', {
+      const res = await fetch('/api/v2/ai/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt,
           provider,
-          model:
-            provider === 'openai'
-              ? 'gpt-3.5-turbo'
-              : provider === 'anthropic'
-                ? 'claude-3-haiku-20240307'
-                : provider === 'google'
-                  ? 'gemini-1.5-flash'
-                  : provider === 'groq'
-                    ? 'llama-3.1-8b-instant'
-                    : 'gpt-3.5-turbo',
           temperature: 0.7,
+          maxTokens: 2000,
         }),
       });
 
