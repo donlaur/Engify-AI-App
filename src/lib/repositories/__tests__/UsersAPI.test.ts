@@ -9,35 +9,37 @@
  * - Integration with dependency injection
  */
 
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../../../app/api/v2/users/route';
-import { getUserService } from '../../../di/Container';
+import { getUserService } from '../../di/Container';
+import { UserService } from '../../services/UserService';
 import type { User } from '@/lib/db/schema';
 
 // Mock the DI container
-jest.mock('../../../di/Container', () => ({
-  getUserService: jest.fn(),
+vi.mock('../../di/Container', () => ({
+  getUserService: vi.fn(),
 }));
 
 describe('/api/v2/users', () => {
-  let mockUserService: any;
+  let mockUserService: UserService;
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock user service
     mockUserService = {
-      getAllUsers: jest.fn(),
-      getUsersByRole: jest.fn(),
-      getUsersByPlan: jest.fn(),
-      getUsersByOrganization: jest.fn(),
-      getUserStats: jest.fn(),
-      createUser: jest.fn(),
+      getAllUsers: vi.fn(),
+      getUsersByRole: vi.fn(),
+      getUsersByPlan: vi.fn(),
+      getUsersByOrganization: vi.fn(),
+      getUserStats: vi.fn(),
+      createUser: vi.fn(),
     };
 
     // Mock the DI container
-    (getUserService as jest.Mock).mockReturnValue(mockUserService);
+    (getUserService as any).mockReturnValue(mockUserService);
   });
 
   describe('GET /api/v2/users', () => {
@@ -56,8 +58,8 @@ describe('/api/v2/users', () => {
           password: null,
           stripeCustomerId: null,
           stripeSubscriptionId: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: '2025-10-28T20:01:34.445Z',
+          updatedAt: '2025-10-28T20:01:34.445Z',
         },
         {
           _id: '507f1f77bcf86cd799439012',
@@ -71,8 +73,8 @@ describe('/api/v2/users', () => {
           password: null,
           stripeCustomerId: null,
           stripeSubscriptionId: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: '2025-10-28T20:01:34.445Z',
+          updatedAt: '2025-10-28T20:01:34.445Z',
         },
       ];
 
@@ -109,8 +111,8 @@ describe('/api/v2/users', () => {
           password: null,
           stripeCustomerId: null,
           stripeSubscriptionId: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: '2025-10-28T20:01:34.445Z',
+          updatedAt: '2025-10-28T20:01:34.445Z',
         },
       ];
 
@@ -147,8 +149,8 @@ describe('/api/v2/users', () => {
           password: null,
           stripeCustomerId: null,
           stripeSubscriptionId: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: '2025-10-28T20:01:34.445Z',
+          updatedAt: '2025-10-28T20:01:34.445Z',
         },
       ];
 
@@ -239,8 +241,8 @@ describe('/api/v2/users', () => {
         password: null,
         stripeCustomerId: null,
         stripeSubscriptionId: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: '2025-10-28T20:04:46.142Z',
+        updatedAt: '2025-10-28T20:04:46.142Z',
       };
 
       mockUserService.createUser.mockResolvedValue(createdUser);

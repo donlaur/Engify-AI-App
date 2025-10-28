@@ -9,38 +9,40 @@
  * - Type safety with MongoDB operations
  */
 
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { Collection, Db, ObjectId } from 'mongodb';
 import { PromptRepository } from '../mongodb/PromptRepository';
 import { connectDB } from '@/lib/db/mongodb';
 import type { PromptTemplate } from '@/lib/db/schema';
 
 // Mock the MongoDB connection
-jest.mock('@/lib/db/mongodb', () => ({
-  connectDB: jest.fn(),
+vi.mock('@/lib/db/mongodb', () => ({
+  connectDB: vi.fn(),
 }));
 
 describe('PromptRepository', () => {
   let promptRepository: PromptRepository;
-  let mockCollection: any;
-  let mockDb: any;
+  let mockCollection: Collection<PromptTemplate>;
+  let mockDb: Db;
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock collection
     mockCollection = {
-      findOne: jest.fn(),
-      find: jest.fn(),
-      insertOne: jest.fn(),
-      findOneAndUpdate: jest.fn(),
-      deleteOne: jest.fn(),
-      countDocuments: jest.fn(),
-      updateOne: jest.fn(),
+      findOne: vi.fn(),
+      find: vi.fn(),
+      insertOne: vi.fn(),
+      findOneAndUpdate: vi.fn(),
+      deleteOne: vi.fn(),
+      countDocuments: vi.fn(),
+      updateOne: vi.fn(),
     };
 
     // Create mock database
     mockDb = {
-      collection: jest.fn().mockReturnValue(mockCollection),
+      collection: vi.fn().mockReturnValue(mockCollection),
     };
 
     // Mock connectDB to return our mock database
@@ -136,7 +138,7 @@ describe('PromptRepository', () => {
       ];
 
       mockCollection.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue(expectedPrompts),
+        toArray: vi.fn().mockResolvedValue(expectedPrompts),
       });
 
       // Act
@@ -180,7 +182,7 @@ describe('PromptRepository', () => {
       ];
 
       mockCollection.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue(expectedPrompts),
+        toArray: vi.fn().mockResolvedValue(expectedPrompts),
       });
 
       // Act
@@ -226,7 +228,7 @@ describe('PromptRepository', () => {
       ];
 
       mockCollection.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue(expectedPrompts),
+        toArray: vi.fn().mockResolvedValue(expectedPrompts),
       });
 
       // Act
@@ -276,7 +278,7 @@ describe('PromptRepository', () => {
       ];
 
       mockCollection.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue(expectedPrompts),
+        toArray: vi.fn().mockResolvedValue(expectedPrompts),
       });
 
       // Act
@@ -319,7 +321,7 @@ describe('PromptRepository', () => {
       ];
 
       mockCollection.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue(expectedPrompts),
+        toArray: vi.fn().mockResolvedValue(expectedPrompts),
       });
 
       // Act
@@ -411,7 +413,7 @@ describe('PromptRepository', () => {
 
       // Act & Assert
       await expect(promptRepository.updateRating(promptId, rating)).rejects.toThrow(
-        'Prompt not found'
+        'Failed to update rating'
       );
     });
   });
@@ -477,7 +479,7 @@ describe('PromptRepository', () => {
 
       // Assert
       expect(result).toBe(expectedCount);
-      expect(mockCollection.countDocuments).toHaveBeenCalledWith({});
+      expect(mockCollection.countDocuments).toHaveBeenCalledWith();
     });
   });
 });

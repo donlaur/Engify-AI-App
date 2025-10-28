@@ -9,38 +9,40 @@
  * - Type safety with MongoDB operations
  */
 
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { Collection, Db, ObjectId } from 'mongodb';
 import { UserRepository } from '../mongodb/UserRepository';
 import { connectDB } from '@/lib/db/mongodb';
 import type { User } from '@/lib/db/schema';
 
 // Mock the MongoDB connection
-jest.mock('@/lib/db/mongodb', () => ({
-  connectDB: jest.fn(),
+vi.mock('@/lib/db/mongodb', () => ({
+  connectDB: vi.fn(),
 }));
 
 describe('UserRepository', () => {
   let userRepository: UserRepository;
-  let mockCollection: any;
-  let mockDb: any;
+  let mockCollection: Collection<User>;
+  let mockDb: Db;
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock collection
     mockCollection = {
-      findOne: jest.fn(),
-      find: jest.fn(),
-      insertOne: jest.fn(),
-      findOneAndUpdate: jest.fn(),
-      deleteOne: jest.fn(),
-      countDocuments: jest.fn(),
-      updateOne: jest.fn(),
+      findOne: vi.fn(),
+      find: vi.fn(),
+      insertOne: vi.fn(),
+      findOneAndUpdate: vi.fn(),
+      deleteOne: vi.fn(),
+      countDocuments: vi.fn(),
+      updateOne: vi.fn(),
     };
 
     // Create mock database
     mockDb = {
-      collection: jest.fn().mockReturnValue(mockCollection),
+      collection: vi.fn().mockReturnValue(mockCollection),
     };
 
     // Mock connectDB to return our mock database
@@ -330,7 +332,7 @@ describe('UserRepository', () => {
       ];
 
       mockCollection.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue(expectedUsers),
+        toArray: vi.fn().mockResolvedValue(expectedUsers),
       });
 
       // Act
@@ -353,7 +355,7 @@ describe('UserRepository', () => {
 
       // Assert
       expect(result).toBe(expectedCount);
-      expect(mockCollection.countDocuments).toHaveBeenCalledWith({});
+      expect(mockCollection.countDocuments).toHaveBeenCalledWith();
     });
   });
 

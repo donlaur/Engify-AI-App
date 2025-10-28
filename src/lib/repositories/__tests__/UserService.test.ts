@@ -9,28 +9,29 @@
  * - Business logic validation
  */
 
-import { UserService } from '../services/UserService';
-import { IUserRepository } from '../repositories/interfaces/IRepository';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { UserService } from '../../services/UserService';
+import { IUserRepository } from '../interfaces/IRepository';
 import type { User } from '@/lib/db/schema';
 
 // Mock repository implementation
-const createMockUserRepository = (): jest.Mocked<IUserRepository> => ({
-  findById: jest.fn(),
-  findAll: jest.fn(),
-  create: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  count: jest.fn(),
-  findByEmail: jest.fn(),
-  findByProvider: jest.fn(),
-  findByRole: jest.fn(),
-  findByOrganization: jest.fn(),
-  updateLastLogin: jest.fn(),
+const createMockUserRepository = (): IUserRepository => ({
+  findById: vi.fn(),
+  findAll: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+  count: vi.fn(),
+  findByEmail: vi.fn(),
+  findByProvider: vi.fn(),
+  findByRole: vi.fn(),
+  findByOrganization: vi.fn(),
+  updateLastLogin: vi.fn(),
 });
 
 describe('UserService', () => {
   let userService: UserService;
-  let mockRepository: jest.Mocked<IUserRepository>;
+  let mockRepository: IUserRepository;
 
   beforeEach(() => {
     mockRepository = createMockUserRepository();
@@ -38,7 +39,7 @@ describe('UserService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createUser', () => {
@@ -67,8 +68,8 @@ describe('UserService', () => {
         updatedAt: new Date(),
       };
 
-      mockRepository.findByEmail.mockResolvedValue(null);
-      mockRepository.create.mockResolvedValue(expectedUser);
+      (mockRepository.findByEmail as any).mockResolvedValue(null);
+      (mockRepository.create as any).mockResolvedValue(expectedUser);
 
       // Act
       const result = await userService.createUser(userData);

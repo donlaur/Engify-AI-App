@@ -21,6 +21,7 @@ import { UserRepository } from '../repositories/mongodb/UserRepository';
 import { PromptRepository } from '../repositories/mongodb/PromptRepository';
 import { UserService } from '../services/UserService';
 import { PromptService } from '../services/PromptService';
+import { vi } from 'vitest';
 
 /**
  * Service identifiers for type-safe registration
@@ -192,32 +193,34 @@ export class TestDIContainer extends DIContainer {
   registerMocks(): void {
     // Mock repositories
     const mockUserRepository: IUserRepository = {
-      findById: jest.fn(),
-      findAll: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-      findByEmail: jest.fn(),
-      findByProvider: jest.fn(),
-      findByRole: jest.fn(),
-      findByOrganization: jest.fn(),
+      findById: vi.fn(),
+      findAll: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      count: vi.fn(),
+      findByEmail: vi.fn(),
+      findByProvider: vi.fn(),
+      findByRole: vi.fn(),
+      findByOrganization: vi.fn(),
     };
 
     const mockPromptRepository: IPromptRepository = {
-      findById: jest.fn(),
-      findAll: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-      findByUserId: jest.fn(),
-      findByPattern: jest.fn(),
-      findByTag: jest.fn(),
-      findByCategory: jest.fn(),
-      findPublic: jest.fn(),
-      findFeatured: jest.fn(),
-      search: jest.fn(),
+      findById: vi.fn(),
+      findAll: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      count: vi.fn(),
+      findByUserId: vi.fn(),
+      findByPattern: vi.fn(),
+      findByTag: vi.fn(),
+      findByCategory: vi.fn(),
+      findPublic: vi.fn(),
+      findFeatured: vi.fn(),
+      search: vi.fn(),
+      incrementViews: vi.fn(),
+      updateRating: vi.fn(),
     };
 
     this.register(SERVICE_IDS.USER_REPOSITORY, mockUserRepository);

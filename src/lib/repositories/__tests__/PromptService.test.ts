@@ -9,30 +9,33 @@
  * - Business rule enforcement
  */
 
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { PromptService } from '../../services/PromptService';
 import { IPromptRepository } from '../interfaces/IRepository';
 import type { PromptTemplate } from '@/lib/db/schema';
 
 // Mock repository implementation
-const createMockPromptRepository = (): jest.Mocked<IPromptRepository> => ({
-  findById: jest.fn(),
-  findAll: jest.fn(),
-  create: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  count: jest.fn(),
-  findByUserId: jest.fn(),
-  findByPattern: jest.fn(),
-  findByTag: jest.fn(),
-  findByCategory: jest.fn(),
-  findPublic: jest.fn(),
-  findFeatured: jest.fn(),
-  search: jest.fn(),
+const createMockPromptRepository = (): IPromptRepository => ({
+  findById: vi.fn(),
+  findAll: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+  count: vi.fn(),
+  findByUserId: vi.fn(),
+  findByPattern: vi.fn(),
+  findByTag: vi.fn(),
+  findByCategory: vi.fn(),
+  findPublic: vi.fn(),
+  findFeatured: vi.fn(),
+  search: vi.fn(),
+  incrementViews: vi.fn(),
+  updateRating: vi.fn(),
 });
 
 describe('PromptService', () => {
   let promptService: PromptService;
-  let mockRepository: jest.Mocked<IPromptRepository>;
+  let mockRepository: IPromptRepository;
 
   beforeEach(() => {
     mockRepository = createMockPromptRepository();
@@ -40,7 +43,7 @@ describe('PromptService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createPrompt', () => {
@@ -428,7 +431,9 @@ describe('PromptService', () => {
         },
       ];
 
-      mockRepository.findByTag.mockResolvedValue(tagPrompts);
+      mockRepository.findByTag
+        .mockResolvedValueOnce(tagPrompts) // First call for 'javascript'
+        .mockResolvedValueOnce([]); // Second call for 'react' returns empty
 
       // Act
       const result = await promptService.getPromptsWithFilters(filters);
