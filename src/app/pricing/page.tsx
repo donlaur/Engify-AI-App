@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
+import { siteStats } from '@/lib/constants';
 
 export default function PricingPage() {
   const plans = [
@@ -21,7 +22,7 @@ export default function PricingPage() {
       period: 'forever',
       description: 'Perfect for trying out Engify',
       features: [
-        { text: '67 static prompt templates', included: true },
+        { text: `${siteStats.totalPrompts}+ prompt templates`, included: true },
         { text: '1 custom prompt per week', included: true },
         { text: 'Browse all 15 patterns', included: true },
         { text: '10 workbench executions/day', included: true },
@@ -147,11 +148,15 @@ export default function PricingPage() {
                   size="lg"
                   asChild
                 >
-                  <Link href={
-                    plan.name === 'Free' ? '/library' :
-                    plan.name === 'Team' ? 'mailto:sales@engify.ai' :
-                    '/signup'
-                  }>
+                  <Link
+                    href={
+                      plan.name === 'Free'
+                        ? '/library'
+                        : plan.name === 'Team'
+                          ? 'mailto:sales@engify.ai'
+                          : '/signup'
+                    }
+                  >
                     {plan.cta}
                   </Link>
                 </Button>
@@ -259,9 +264,7 @@ export default function PricingPage() {
                   </a>
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href="/library">
-                    Browse Prompts
-                  </Link>
+                  <Link href="/library">Browse Prompts</Link>
                 </Button>
               </div>
             </CardContent>
