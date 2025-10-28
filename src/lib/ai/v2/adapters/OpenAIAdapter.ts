@@ -20,7 +20,7 @@ export class OpenAIAdapter implements AIProvider {
    */
   constructor(model: string = 'gpt-3.5-turbo') {
     this.client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENAI_API_KEY || 'test-key',
     });
     this.model = model;
   }

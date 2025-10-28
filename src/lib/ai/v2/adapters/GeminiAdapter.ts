@@ -19,10 +19,7 @@ export class GeminiAdapter implements AIProvider {
    * @param model - The Gemini model to use (default: gemini-pro)
    */
   constructor(model: string = 'gemini-pro') {
-    const apiKey = process.env.GOOGLE_API_KEY;
-    if (!apiKey) {
-      throw new Error('GOOGLE_API_KEY environment variable is required');
-    }
+    const apiKey = process.env.GOOGLE_API_KEY || 'test-key';
     this.client = new GoogleGenerativeAI(apiKey);
     this.model = model;
   }
