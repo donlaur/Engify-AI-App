@@ -22,9 +22,8 @@ export default function PromptDetailPage() {
   const [userRating, setUserRating] = useState(0);
   const { toast } = useToast();
 
-  // Get all prompts and find the one with matching ID
-  const prompts = getSeedPromptsWithTimestamps();
-  const prompt = prompts.find((p) => p.id === id);
+  const prompts: any[] = []; // TODO: Get from database
+  const prompt = prompts.find((p) => p.id === params.id);
 
   // Track view count
   useEffect(() => {
