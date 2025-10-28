@@ -526,6 +526,20 @@
       "tags": ["industry", "specialized", "applications"],
       "featured": false,
       "order": 128
+    },
+    {
+      "id": "openai-strategy-mapping",
+      "title": "OpenAI Strategy Mapping: How Our 15 Patterns Align",
+      "description": "Comprehensive mapping showing how Engify.ai patterns cover all OpenAI strategies plus more",
+      "category": "intermediate",
+      "type": "guide",
+      "level": "intermediate",
+      "duration": "20 min",
+      "url": "/docs/OPENAI_STRATEGY_MAPPING.md",
+      "content": "Detailed analysis showing how our 15 patterns map to OpenAI's 6 official strategies, demonstrating comprehensive coverage and additional value.",
+      "tags": ["openai", "strategy", "mapping", "validation", "comprehensive"],
+      "featured": true,
+      "order": 129
     }
   ]
 }

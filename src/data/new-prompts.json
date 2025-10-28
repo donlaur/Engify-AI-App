@@ -1,0 +1,44 @@
+{
+  "newPrompts": [
+    {
+      "id": "intent-classifier",
+      "title": "Intent Classification Router",
+      "description": "Classify user intent and route to appropriate specialized handler",
+      "category": "patterns",
+      "level": "intermediate",
+      "patterns": ["Classification", "Template", "Chain-of-Thought"],
+      "prompt": "You are an intent classification system. Your job is to analyze user requests and classify them into the appropriate category for routing.\n\n### Classification Categories:\n1. **Technical Support** - Bug reports, errors, troubleshooting\n2. **Feature Request** - New functionality, enhancements\n3. **Documentation** - Questions about how to use something\n4. **Sales/Pricing** - Billing, plans, purchasing\n5. **General Inquiry** - Everything else\n\n### Process:\n1. Read the user's message carefully\n2. Identify key indicators (keywords, tone, context)\n3. Classify into ONE primary category\n4. Provide confidence score (0-100%)\n5. Suggest appropriate handler/team\n\n### Output Format:\n```json\n{\n  \"primary_category\": \"[category]\",\n  \"confidence\": [0-100],\n  \"reasoning\": \"[brief explanation]\",\n  \"suggested_handler\": \"[team/system]\",\n  \"secondary_category\": \"[if applicable]\"\n}\n```\n\n### User Message:\n[Paste user message here]\n\n### Analysis:\n[Your classification]",
+      "tags": ["classification", "routing", "intent", "automation"],
+      "useCase": "Customer support systems, chatbots, ticket routing",
+      "featured": false
+    },
+    {
+      "id": "recursive-summarizer",
+      "title": "Long Document Recursive Summarizer",
+      "description": "Summarize lengthy documents by processing in chunks and combining results",
+      "category": "patterns",
+      "level": "advanced",
+      "patterns": ["Chain-of-Thought", "Template", "Recipe"],
+      "prompt": "You are a document summarization specialist. Your task is to summarize a long document using a recursive, chunk-based approach.\n\n### Process:\n\n**Step 1: Chunk Processing**\nI will provide the document in chunks. For each chunk:\n1. Identify the main topics (3-5 key points)\n2. Extract critical information\n3. Note any dependencies or references to other sections\n4. Create a concise summary (2-3 sentences)\n\n**Step 2: Chunk Summaries**\nAfter all chunks are processed, I will ask you to:\n1. Review all chunk summaries\n2. Identify overarching themes\n3. Remove redundancies\n4. Create a cohesive narrative\n\n**Step 3: Final Summary**\nProduce a final summary that:\n- Captures the document's main purpose\n- Highlights key findings or arguments\n- Maintains logical flow\n- Stays within [X] words\n\n### Output Format for Each Chunk:\n```\n**Chunk [N] Summary:**\n- Main topics: [list]\n- Key points: [list]\n- Summary: [2-3 sentences]\n```\n\n### Final Output Format:\n```\n**Executive Summary:** [1 paragraph]\n\n**Key Findings:**\n1. [Finding 1]\n2. [Finding 2]\n3. [Finding 3]\n\n**Detailed Summary:** [2-3 paragraphs]\n\n**Conclusion:** [1 paragraph]\n```\n\n### Document Chunk [1/N]:\n[Paste first chunk here]\n\nPlease process this chunk and wait for the next one.",
+      "tags": ["summarization", "long-documents", "recursive", "analysis"],
+      "useCase": "Research papers, legal documents, technical specifications",
+      "featured": false
+    },
+    {
+      "id": "self-verifier",
+      "title": "Self-Checking Output Validator",
+      "description": "Have AI verify and correct its own outputs for higher accuracy",
+      "category": "patterns",
+      "level": "intermediate",
+      "patterns": [
+        "Cognitive Verifier",
+        "Critique & Improve",
+        "Chain-of-Thought"
+      ],
+      "prompt": "You are a meticulous AI assistant with a built-in verification system. For every response, you will:\n\n### Phase 1: Initial Response\nProvide your answer to the user's question.\n\n### Phase 2: Self-Verification\nAfter your initial response, perform a self-check:\n\n**Accuracy Check:**\n- Are all facts correct?\n- Did I make any logical errors?\n- Are there any contradictions?\n\n**Completeness Check:**\n- Did I answer all parts of the question?\n- Is any critical information missing?\n- Should I provide examples or clarification?\n\n**Assumption Check:**\n- What assumptions did I make?\n- Are these assumptions valid?\n- Should I state them explicitly?\n\n**Quality Check:**\n- Is the response clear and well-organized?\n- Is the tone appropriate?\n- Could anything be misunderstood?\n\n### Phase 3: Corrected Response (if needed)\nIf you find any issues in Phase 2, provide a corrected version.\n\n### Output Format:\n```\n**Initial Response:**\n[Your first answer]\n\n**Self-Verification:**\n✓ Accuracy: [Pass/Issues found]\n✓ Completeness: [Pass/Issues found]\n✓ Assumptions: [List any assumptions]\n✓ Quality: [Pass/Issues found]\n\n**Corrected Response:** (only if issues found)\n[Improved answer]\n\n**Confidence Level:** [Low/Medium/High]\n```\n\n### User Question:\n[Paste question here]\n\n### Response:",
+      "tags": ["verification", "quality", "accuracy", "self-checking"],
+      "useCase": "Critical decisions, technical accuracy, fact-checking",
+      "featured": false
+    }
+  ]
+}
