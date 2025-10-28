@@ -13,8 +13,26 @@
     "prompt-patterns",
     "kernel-framework",
     "prompt-audit",
-    "ai-tools"
+    "ai-tools",
+    "nextjs",
+    "typescript",
+    "mongodb",
+    "education"
   ],
+  "author": {
+    "name": "Donnie Laur",
+    "email": "donlaur@gmail.com",
+    "url": "https://www.linkedin.com/in/donlaur/"
+  },
+  "license": "MIT",
+  "homepage": "https://engify.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/donlaur/Engify-AI-App.git"
+  },
+  "bugs": {
+    "url": "https://github.com/donlaur/Engify-AI-App/issues"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -37,7 +55,7 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:visual": "vitest run tests/e2e/visual-regression.test.ts",
+    "test:visual": "vitest run tests/visual-regression/visual-regression.test.ts",
     "dev:test": "PORT=3005 next dev",
     "prepare": "husky install",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",

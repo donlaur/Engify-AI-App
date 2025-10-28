@@ -39,6 +39,33 @@ Quick start guides and tutorials.
 
 - **[QUICK_START.md](./guides/QUICK_START.md)** - Quick start guide to get from zero to working MVP (setup, accounts, first steps)
 
+### 📋 Planning & Roadmap (`/planning`)
+
+Project planning, roadmaps, and strategic initiatives.
+
+- **[ROADMAP.md](./planning/ROADMAP.md)**: Product roadmap and feature timeline
+- **[NEXT_STEPS.md](./planning/NEXT_STEPS.md)**: Immediate next steps and priorities
+- **[LAUNCH_CHECKLIST.md](./planning/LAUNCH_CHECKLIST.md)**: Pre-launch checklist
+- **[PARTNERSHIP_OUTREACH.md](./planning/PARTNERSHIP_OUTREACH.md)**: Partnership strategy
+- **[PRICING_MODEL.md](./planning/PRICING_MODEL.md)**: Pricing tiers and strategy
+
+### 🔧 Development (`/development`)
+
+Technical architecture, code quality, and development standards.
+
+- **[ARCHITECTURE.md](./development/ARCHITECTURE.md)**: System architecture overview
+- **[CODE_QUALITY_REVIEW.md](./development/CODE_QUALITY_REVIEW.md)**: Code quality standards
+- **[SECURITY_ARCHITECTURE_REVIEW.md](./development/SECURITY_ARCHITECTURE_REVIEW.md)**: Security architecture
+- **[BUILD_FIXES_NEEDED.md](./development/BUILD_FIXES_NEEDED.md)**: Known build issues
+
+### 📝 Content & Learning (`/content`)
+
+Content strategy and learning resource documentation.
+
+- **[CONTENT_GENERATION_PROMPT.md](./content/CONTENT_GENERATION_PROMPT.md)**: AI content generation prompts
+- **[LEARNING_CONTENT_AUDIT.md](./content/LEARNING_CONTENT_AUDIT.md)**: Learning content audit
+- **[CONTENT_AUDIT_FINAL.md](./content/CONTENT_AUDIT_FINAL.md)**: Final content audit
+
 ### 📚 Available Documentation
 
 - **[Tech Stack](./TECH_STACK.md)**: Complete technology stack overview
@@ -49,6 +76,10 @@ Quick start guides and tutorials.
 - **[Git Workflow](./GIT_WORKFLOW.md)**: Git best practices and workflow
 - **[Quick Reference](./QUICK_REFERENCE.md)**: Quick reference card for common tasks
 - **[Prompt Patterns Research](./PROMPT_PATTERNS_RESEARCH.md)**: 15 proven prompt engineering patterns with misuse prevention
+
+### 📦 Archived (`/archived`)
+
+Completed milestones, sprint summaries, and historical documentation.
 
 ### 🤖 For AI Models (`/`)
 

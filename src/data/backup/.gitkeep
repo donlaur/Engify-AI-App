@@ -1,0 +1,2 @@
+# This folder contains JSON backups of MongoDB data
+# These are fallbacks only - MongoDB is the source of truth
