@@ -246,11 +246,11 @@ export class ApiKeyService {
   /**
    * List all API keys (without decrypting)
    */
-  async listKeys(provider?: string): Promise<Omit<ApiKey, 'encryptedKey'>[]> {
+  async listKeys(provider?: 'openai' | 'anthropic' | 'google' | 'groq'): Promise<Omit<ApiKey, 'encryptedKey'>[]> {
     const db = await getDb();
     const collection = db.collection<ApiKey>(this.collectionName);
 
-    const query = provider ? { provider } : {};
+    const query: any = provider ? { provider } : {};
     
     const keys = await collection
       .find(query, {
