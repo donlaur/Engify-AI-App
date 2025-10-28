@@ -16,7 +16,9 @@
 **Red Hat Review**: Critical Fix Implemented
 
 #### Standard
+
 **ALL user-generated content MUST be sanitized before:**
+
 - Storing in database
 - Displaying to users
 - Passing to external APIs
@@ -25,8 +27,13 @@
 #### Implementation
 
 **Use the sanitization utilities:**
+
 ```typescript
-import { sanitizeText, sanitizePrompt, sanitizeRichContent } from '@/lib/security/sanitizer';
+import {
+  sanitizeText,
+  sanitizePrompt,
+  sanitizeRichContent,
+} from '@/lib/security/sanitizer';
 
 // For plain text (usernames, titles, search)
 const username = sanitizeText(userInput);
@@ -39,6 +46,7 @@ const description = sanitizeRichContent(userInput);
 ```
 
 **Use the tRPC middleware:**
+
 ```typescript
 import { sanitizedProcedure } from '@/server/middleware/sanitization';
 
@@ -52,6 +60,7 @@ export const createPrompt = sanitizedProcedure
 ```
 
 #### Testing Requirements
+
 - ✅ Test with `<script>` tags
 - ✅ Test with inline event handlers (`onclick`, `onerror`)
 - ✅ Test with `javascript:` URLs
@@ -60,7 +69,9 @@ export const createPrompt = sanitizedProcedure
 - ✅ Test with nested objects
 
 #### Violations
+
 **NEVER do this:**
+
 ```typescript
 // ❌ WRONG - No sanitization
 const title = req.body.title;
@@ -71,6 +82,7 @@ await db.insert({ title });
 ```
 
 **ALWAYS do this:**
+
 ```typescript
 // ✅ CORRECT - Sanitize before storing
 const title = sanitizeText(req.body.title);
@@ -88,13 +100,16 @@ await db.insert({ title });
 **Implementation**: Phase 5
 
 #### Standard
+
 **ALL API endpoints MUST have rate limiting:**
+
 - Authentication endpoints: 5 attempts/15 minutes
 - AI execution: Based on user tier
 - Public endpoints: 1,000/hour
 - Anonymous users: 100/hour
 
 #### Implementation
+
 ```typescript
 import { rateLimitedProcedure } from '@/server/middleware/rateLimit';
 
@@ -112,21 +127,23 @@ export const executePrompt = rateLimitedProcedure
 **Status**: 🔴 CRITICAL - ALWAYS REQUIRED
 
 #### Standard
+
 **ALL protected routes MUST:**
+
 - Verify user authentication
 - Check user permissions
 - Validate session token
 - Log access attempts
 
 #### Implementation
+
 ```typescript
 import { protectedProcedure } from '@/server/trpc';
 
-export const getSecretData = protectedProcedure
-  .query(async ({ ctx }) => {
-    // ctx.session.user is guaranteed to exist
-    return await getData(ctx.session.user.id);
-  });
+export const getSecretData = protectedProcedure.query(async ({ ctx }) => {
+  // ctx.session.user is guaranteed to exist
+  return await getData(ctx.session.user.id);
+});
 ```
 
 ---
@@ -136,13 +153,16 @@ export const getSecretData = protectedProcedure
 **Status**: 🔴 CRITICAL - ALWAYS REQUIRED
 
 #### Standard
+
 **ALL inputs MUST be validated with Zod:**
+
 - Type validation
 - Format validation
 - Range validation
 - Custom validation rules
 
 #### Implementation
+
 ```typescript
 import { z } from 'zod';
 
@@ -168,7 +188,9 @@ export const createPrompt = sanitizedProcedure
 **Implementation**: Phase 5
 
 #### Standard
+
 **MUST log:**
+
 - Authentication events (login, logout, failed attempts)
 - Data modifications (create, update, delete)
 - Permission changes
@@ -176,6 +198,7 @@ export const createPrompt = sanitizedProcedure
 - Admin actions
 
 #### Implementation
+
 ```typescript
 import { auditLog } from '@/lib/audit';
 
@@ -195,7 +218,9 @@ await auditLog.log({
 **Status**: 🔴 CRITICAL - ALWAYS REQUIRED
 
 #### Standard
+
 **NEVER expose:**
+
 - Stack traces to users
 - Database errors
 - Internal paths
@@ -203,19 +228,20 @@ await auditLog.log({
 - User data from other users
 
 #### Implementation
+
 ```typescript
 try {
   await dangerousOperation();
 } catch (error) {
   // ❌ WRONG - Exposes internal details
   throw new Error(error.message);
-  
+
   // ✅ CORRECT - Generic user-facing message
   throw new TRPCError({
     code: 'INTERNAL_SERVER_ERROR',
     message: 'An error occurred. Please try again.',
   });
-  
+
   // ✅ CORRECT - Log full error for debugging
   console.error('Operation failed:', error);
 }
@@ -228,13 +254,16 @@ try {
 **Status**: 🔴 CRITICAL - ALWAYS REQUIRED
 
 #### Standard
+
 **ALL environment variables MUST:**
+
 - Be validated at startup (using `src/lib/env.ts`)
 - Never be committed to git
 - Use strong secrets (min 32 characters)
 - Be different per environment
 
 #### Implementation
+
 ```typescript
 // ✅ CORRECT - Import validated env
 import { env } from '@/lib/env';
@@ -252,13 +281,16 @@ const apiKey = process.env.OPENAI_API_KEY;
 **Status**: 🔴 CRITICAL - ALWAYS REQUIRED
 
 #### Standard
+
 **MUST:**
+
 - Use parameterized queries (MongoDB does this automatically)
 - Validate ObjectIds
 - Implement row-level security (check organizationId)
 - Never trust client-provided IDs
 
 #### Implementation
+
 ```typescript
 // ✅ CORRECT - Validate and check ownership
 const prompt = await promptService.findById(id);
@@ -277,13 +309,16 @@ const prompt = await promptService.findById(id);
 **Status**: 🟠 HIGH - Required for Phase 9
 
 #### Standard
+
 **MUST:**
+
 - Enforce HTTPS in production
 - Use secure cookie flags
 - Implement HSTS headers
 - Validate SSL certificates
 
 #### Implementation
+
 ```typescript
 // next.config.js
 headers: [
@@ -301,13 +336,16 @@ headers: [
 **Status**: 🟢 ACTIVE - Automated
 
 #### Standard
+
 **MUST:**
+
 - Scan dependencies weekly (Dependabot)
 - Update critical vulnerabilities within 24 hours
 - Update high vulnerabilities within 7 days
 - Review all dependency changes
 
 #### Implementation
+
 - ✅ Dependabot configured
 - ✅ CVE scanning daily
 - ✅ CodeQL analysis on every commit
@@ -317,6 +355,7 @@ headers: [
 ## 🔍 Security Review Checklist
 
 ### Before Every PR
+
 - [ ] All user inputs sanitized
 - [ ] All inputs validated with Zod
 - [ ] Authentication checked on protected routes
@@ -325,6 +364,7 @@ headers: [
 - [ ] Tests include security test cases
 
 ### Before Every Release
+
 - [ ] Security scan passed (no critical/high vulnerabilities)
 - [ ] All dependencies up to date
 - [ ] Audit logs working
@@ -336,12 +376,14 @@ headers: [
 ## 🚨 Incident Response
 
 ### If XSS Vulnerability Found
+
 1. **Immediate**: Deploy fix within 4 hours
 2. **Notify**: Security team and affected users
 3. **Audit**: Check logs for exploitation
 4. **Document**: Post-mortem and prevention
 
 ### If Data Breach Suspected
+
 1. **Immediate**: Isolate affected systems
 2. **Investigate**: Determine scope and impact
 3. **Notify**: Legal, security team, affected users
@@ -353,11 +395,13 @@ headers: [
 ## 📚 Security Resources
 
 ### Internal
+
 - [RED_HAT_REVIEW.md](./RED_HAT_REVIEW.md) - Security audit findings
 - [TECH_DEBT_AUDIT.md](./TECH_DEBT_AUDIT.md) - Known issues
 - [SECURITY_MONITORING.md](./SECURITY_MONITORING.md) - Monitoring strategy
 
 ### External
+
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [OWASP Cheat Sheets](https://cheatsheetseries.owasp.org/)
 - [CWE Top 25](https://cwe.mitre.org/top25/)
@@ -367,6 +411,7 @@ headers: [
 ## 🎓 Security Training
 
 ### Required for All Developers
+
 - [ ] OWASP Top 10 overview
 - [ ] XSS prevention techniques
 - [ ] Authentication best practices
@@ -374,6 +419,7 @@ headers: [
 - [ ] Incident response procedures
 
 ### Quarterly Reviews
+
 - Security standards updates
 - Recent vulnerabilities discussion
 - Lessons learned from incidents
@@ -384,6 +430,7 @@ headers: [
 ## ✅ Compliance
 
 ### SOC2 Requirements
+
 - [x] Input sanitization
 - [x] Authentication & authorization
 - [x] Audit logging (Phase 5)
@@ -392,6 +439,7 @@ headers: [
 - [x] Access controls
 
 ### GDPR Requirements
+
 - [ ] Data retention policy (Phase 7)
 - [ ] Data export API (Phase 7)
 - [ ] Data deletion API (Phase 7)
