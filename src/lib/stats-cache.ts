@@ -33,7 +33,8 @@ export async function getStats() {
   }
 
   // Fetch fresh data
-  const res = await fetch('/api/stats');
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/stats`);
   if (!res.ok) {
     return { stats: { prompts: 0, patterns: 23, pathways: 0, users: 0 } };
   }
