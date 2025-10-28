@@ -2,23 +2,10 @@
 
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { generateMetadata as generateSEOMetadata } from '@/lib/seo';
+import { generateMetaTags, pageSEO } from '@/lib/seo';
 
 // SEO Metadata
-export const metadata: Metadata = generateSEOMetadata({
-  title: 'Learning Pathways - 46 Expert Articles',
-  description: '46 comprehensive articles on prompt engineering, RAG, fine-tuning, SQL generation, data visualization, and more. Learn from AI experts.',
-  keywords: [
-    'prompt engineering tutorials',
-    'AI learning',
-    'RAG tutorial',
-    'fine-tuning guide',
-    'LLM education',
-    'AI articles',
-    'prompt engineering course',
-  ],
-  canonical: '/learn',
-});
+export const metadata: Metadata = generateMetaTags(pageSEO.learning);
 
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
