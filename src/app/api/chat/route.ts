@@ -1,24 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json();
+    const { messages } = await request.json();
 
-    // TODO: Replace with actual LLM API call (OpenAI, Anthropic, etc.)
-    // For now, return intelligent mock responses based on our content
-    
-    const response = generateKnowledgeResponse(message);
+    // Use OpenAI to generate response
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a helpful AI assistant for Engify.ai, a prompt engineering education platform. 
+          
+You help users:
+- Find the right prompts from our library of 66+ expert prompts
+- Learn about 15 proven prompt patterns (Persona, Few-Shot, Chain-of-Thought, etc.)
+- Understand best practices for AI-assisted coding
+- Navigate our learning pathways
+
+Be concise, friendly, and always reference our content when relevant.
+Suggest specific pages: /library, /patterns, /learn, /ai-coding, /mcp`,
+        },
+        ...messages,
+      ],
+      temperature: 0.7,
+      max_tokens: 300,
+    });
+
+    const response =
+      completion.choices[0]?.message?.content ||
+      'Sorry, I could not generate a response.';
 
     return NextResponse.json({
       message: response,
-      sources: getSources(message),
     });
   } catch (error) {
     console.error('Chat API error:', error);
-    return NextResponse.json(
-      { error: 'Failed to process message' },
-      { status: 500 }
-    );
+
+    // Fallback to knowledge-based response if OpenAI fails
+    const { messages } = await request.json();
+    const lastMessage = messages[messages.length - 1]?.content || '';
+    const response = generateKnowledgeResponse(lastMessage);
+
+    return NextResponse.json({
+      message: response,
+    });
   }
 }
 
@@ -57,7 +88,7 @@ Now: Input: 'angry' → Output: ?"
 
 🎯 67+ examples in /library`,
 
-    'role': `**Role Prompting** defines who the AI should be!
+    role: `**Role Prompting** defines who the AI should be!
 
 **Pattern:**
 "You are a [role] with expertise in [domain]..."
@@ -97,21 +128,4 @@ Or explore:
 📚 /library - Browse all prompts
 🎯 /patterns - Learn techniques
 📖 /learn - Guided pathways`;
-}
-
-function getSources(query: string): string[] {
-  const lowerQuery = query.toLowerCase();
-  const sources: string[] = [];
-
-  if (lowerQuery.includes('pattern')) {
-    sources.push('/patterns');
-  }
-  if (lowerQuery.includes('example') || lowerQuery.includes('prompt')) {
-    sources.push('/library');
-  }
-  if (lowerQuery.includes('learn') || lowerQuery.includes('guide')) {
-    sources.push('/learn');
-  }
-
-  return sources.length > 0 ? sources : ['/library', '/patterns'];
 }
