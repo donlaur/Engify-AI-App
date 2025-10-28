@@ -1,0 +1,138 @@
+/**
+ * Library Client Component
+ * 
+ * Client-side filtering and search for the library page
+ * Separated from server component for performance
+ */
+
+'use client';
+
+import { useState } from 'react';
+import { Icons } from '@/lib/icons';
+import { Input } from '@/components/ui/input';
+import { PromptCard } from '@/components/features/PromptCard';
+import { EmptyState } from '@/components/features/EmptyState';
+import { Badge } from '@/components/ui/badge';
+import type { Prompt, PromptCategory, UserRole } from '@/lib/schemas/prompt';
+import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
+
+interface LibraryClientProps {
+  initialPrompts: Prompt[];
+}
+
+export function LibraryClient({ initialPrompts }: LibraryClientProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<PromptCategory | 'all'>('all');
+  const [selectedRole, setSelectedRole] = useState<UserRole | 'all'>('all');
+
+  // Filter prompts
+  const filteredPrompts = initialPrompts.filter((prompt) => {
+    const matchesSearch =
+      prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      prompt.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategory === 'all' || prompt.category === selectedCategory;
+    const matchesRole = selectedRole === 'all' || prompt.role === selectedRole;
+
+    return matchesSearch && matchesCategory && matchesRole;
+  });
+
+  const categories: Array<PromptCategory | 'all'> = [
+    'all',
+    'code-generation',
+    'debugging',
+    'documentation',
+    'testing',
+    'architecture',
+  ];
+  
+  const roles: Array<UserRole | 'all'> = [
+    'all',
+    'c-level',
+    'engineering-manager',
+    'engineer',
+    'product-manager',
+    'designer',
+    'qa',
+  ];
+
+  return (
+    <>
+      {/* Search and Filters */}
+      <div className="mb-8 space-y-4">
+        {/* Search */}
+        <div className="relative">
+          <Icons.search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+          <Input
+            placeholder="Search prompts..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Category Filter */}
+        <div>
+          <p className="mb-2 text-sm font-medium">Category</p>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <Badge
+                key={category}
+                variant={selectedCategory === category ? 'default' : 'outline'}
+                className="cursor-pointer"
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category === 'all' ? 'All' : categoryLabels[category]}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {/* Role Filter */}
+        <div>
+          <p className="mb-2 text-sm font-medium">Role</p>
+          <div className="flex flex-wrap gap-2">
+            {roles.map((role) => (
+              <Badge
+                key={role}
+                variant={selectedRole === role ? 'default' : 'outline'}
+                className="cursor-pointer"
+                onClick={() => setSelectedRole(role)}
+              >
+                {role === 'all' ? 'All' : roleLabels[role]}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Results */}
+      {filteredPrompts.length > 0 ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredPrompts.map((prompt) => (
+            <PromptCard
+              key={prompt.id}
+              {...prompt}
+              role={prompt.role ? roleLabels[prompt.role as UserRole] : undefined}
+              category={categoryLabels[prompt.category as PromptCategory]}
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          icon={Icons.brain}
+          title="No prompts found"
+          description="Try adjusting your search or filters"
+          action={{
+            label: 'Clear Filters',
+            onClick: () => {
+              setSearchQuery('');
+              setSelectedCategory('all');
+              setSelectedRole('all');
+            },
+          }}
+        />
+      )}
+    </>
+  );
+}
