@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import { generateMetaTags, pageSEO } from '@/lib/seo';
 
 // SEO Metadata
-export const metadata: Metadata = generateMetaTags(pageSEO.patterns);
+export const metadata: Metadata = generateMetaTags(pageSEO.patterns) as Metadata;
 
 import { MainLayout } from '@/components/layout/MainLayout';
 import {

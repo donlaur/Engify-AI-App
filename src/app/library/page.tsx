@@ -14,7 +14,7 @@ import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 import { generateMetaTags, pageSEO } from '@/lib/seo';
 
 // SEO Metadata
-export const metadata: Metadata = generateMetaTags(pageSEO.library);
+export const metadata: Metadata = generateMetaTags(pageSEO.library) as Metadata;
 
 // Server Component - renders instantly with static data
 export default function LibraryPage() {
