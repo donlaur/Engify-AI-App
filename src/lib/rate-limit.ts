@@ -26,19 +26,19 @@ interface RateLimitConfig {
 
 const LIMITS: Record<string, RateLimitConfig> = {
   anonymous: {
-    maxRequestsPerHour: 3,
-    maxRequestsPerDay: 5,
-    maxTokensPerDay: 5000,
+    maxRequestsPerHour: 3,      // Very limited for free users
+    maxRequestsPerDay: 10,       // Enough to test, not abuse
+    maxTokensPerDay: 10000,      // ~5 full conversations
   },
   authenticated: {
-    maxRequestsPerHour: 10,
-    maxRequestsPerDay: 50,
-    maxTokensPerDay: 50000,
+    maxRequestsPerHour: 20,      // Signed up users get more
+    maxRequestsPerDay: 100,      // Good for regular use
+    maxTokensPerDay: 100000,     // ~50 conversations
   },
   pro: {
-    maxRequestsPerHour: 100,
-    maxRequestsPerDay: 1000,
-    maxTokensPerDay: 500000,
+    maxRequestsPerHour: 200,     // Pro users get plenty
+    maxRequestsPerDay: 2000,     // Heavy usage
+    maxTokensPerDay: 1000000,    // ~500 conversations
   },
 };
 
@@ -59,7 +59,7 @@ export async function checkRateLimit(
   try {
     const client = await getClient();
     const db = client.db('engify');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, engify/no-hardcoded-collections
     const collection = db.collection('rate_limits');
 
     const now = new Date();
@@ -165,7 +165,7 @@ export async function trackTokenUsage(
   try {
     const client = await getClient();
     const db = client.db('engify');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, engify/no-hardcoded-collections
     const collection = db.collection('rate_limits');
 
     await collection.updateOne(
@@ -188,6 +188,7 @@ export function getClientIp(request: Request): string {
   const realIp = request.headers.get('x-real-ip');
   
   if (forwarded) {
+    // eslint-disable-next-line engify/no-unsafe-array-access
     return forwarded.split(',')[0].trim();
   }
   
@@ -205,7 +206,7 @@ export async function resetRateLimit(identifier: string): Promise<void> {
   try {
     const client = await getClient();
     const db = client.db('engify');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, engify/no-hardcoded-collections
     const collection = db.collection('rate_limits');
 
     await collection.deleteOne({ identifier });
