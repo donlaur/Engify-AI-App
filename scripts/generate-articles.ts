@@ -7,11 +7,11 @@
  */
 
 import 'dotenv/config';
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { MongoClient } from 'mongodb';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
@@ -118,23 +118,20 @@ End with key takeaways or next steps.
 Write the article now:`;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+    const completion = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 3000,
+      temperature: 0.7,
+      system: 'You are an expert technical writer who creates high-quality, actionable content about AI and prompt engineering.',
       messages: [
-        {
-          role: 'system',
-          content: 'You are an expert technical writer who creates high-quality, actionable content about AI and prompt engineering.',
-        },
         {
           role: 'user',
           content: prompt,
         },
       ],
-      temperature: 0.7,
-      max_tokens: 3000,
     });
 
-    const content = completion.choices[0].message.content;
+    const content = completion.content[0].type === 'text' ? completion.content[0].text : '';
     
     if (!content || content.length < 500) {
       throw new Error('Generated content too short');
@@ -146,7 +143,7 @@ Write the article now:`;
       ...topic,
       content,
       contentLength: content.length,
-      tokensUsed: completion.usage?.total_tokens || 0,
+      tokensUsed: (completion.usage.input_tokens + completion.usage.output_tokens) || 0,
     };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
