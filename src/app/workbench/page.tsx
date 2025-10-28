@@ -115,16 +115,23 @@ export default function WorkbenchPage() {
     navigator.clipboard.writeText(response);
   };
 
-  // Compare across all providers
+  // Compare across all providers - REAL IMPLEMENTATION
   const handleCompareAll = async () => {
     if (!prompt.trim()) return;
 
     setIsLoading(true);
     setProviderResponses([]);
-    const providers = ['openai', 'anthropic', 'google', 'groq'];
-    const results: ProviderResponse[] = [];
+    setResponse(''); // Clear single response
 
-    for (const prov of providers) {
+    const providers: Array<'openai' | 'anthropic' | 'google' | 'groq'> = [
+      'openai',
+      'anthropic',
+      'google',
+      'groq',
+    ];
+
+    // Execute all providers in parallel for speed
+    const promises = providers.map(async (prov) => {
       const startTime = Date.now();
       try {
         const res = await fetch('/api/ai/execute', {
@@ -133,38 +140,31 @@ export default function WorkbenchPage() {
           body: JSON.stringify({
             prompt,
             provider: prov,
-            model:
-              prov === 'openai'
-                ? 'gpt-3.5-turbo'
-                : prov === 'anthropic'
-                  ? 'claude-3-haiku-20240307'
-                  : prov === 'google'
-                    ? 'gemini-1.5-flash'
-                    : 'llama-3.1-8b-instant',
             temperature: 0.7,
           }),
         });
 
         const data = await res.json();
-        const time = Date.now() - startTime;
+        const executionTime = Date.now() - startTime;
 
-        results.push({
+        return {
           provider: prov,
-          response: data.response || data.error,
-          time,
+          response: data.error || data.response,
+          time: executionTime,
           tokens: data.usage?.totalTokens,
-          error: res.ok ? undefined : data.error,
-        });
+          error: data.error,
+        };
       } catch (error) {
-        results.push({
+        return {
           provider: prov,
-          response: 'Failed to connect',
+          response: 'Failed to execute',
           time: Date.now() - startTime,
-          error: 'Connection error',
-        });
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
       }
-    }
+    });
 
+    const results = await Promise.all(promises);
     setProviderResponses(results);
     setIsLoading(false);
   };
