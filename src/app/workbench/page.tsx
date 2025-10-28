@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { API_ROUTES } from '@/lib/constants';
 import {
   Card,
   CardContent,
@@ -139,7 +140,7 @@ export default function WorkbenchPage() {
     const promises = providers.map(async (prov) => {
       const startTime = Date.now();
       try {
-        const res = await fetch('/api/ai/execute', {
+        const res = await fetch(API_ROUTES.ai, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
