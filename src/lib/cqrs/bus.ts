@@ -33,6 +33,16 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
   private queryValidators = new Map<string, IQueryValidator<IQuery>>();
 
   /**
+   * Reset all handlers and validators (for testing)
+   */
+  reset(): void {
+    this.commandHandlers.clear();
+    this.queryHandlers.clear();
+    this.commandValidators.clear();
+    this.queryValidators.clear();
+  }
+
+  /**
    * Register a command handler
    */
   registerCommandHandler<TCommand extends ICommand, TResult = unknown>(
