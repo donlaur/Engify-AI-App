@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * Bulk Content Importer for Admin Use
- * 
+ *
  * Imports learning articles and prompt playbooks from structured JSON
  * Validates, processes, and stores in MongoDB
  */
@@ -58,7 +58,7 @@ async function importArticles(articles: ArticleInput[]): Promise<void> {
   for (const article of articles) {
     try {
       const slug = generateSlug(article.title);
-      
+
       // Check if already exists
       const existing = await collection.findOne({ slug });
       if (existing) {
@@ -69,9 +69,10 @@ async function importArticles(articles: ArticleInput[]): Promise<void> {
 
       // Convert markdown to HTML
       const contentHtml = await marked(article.content);
-      
+
       // Calculate read time if not provided
-      const readTime = article.estimatedReadTime || estimateReadTime(article.content);
+      const readTime =
+        article.estimatedReadTime || estimateReadTime(article.content);
 
       // Prepare document
       const doc = {
@@ -101,7 +102,8 @@ async function importArticles(articles: ArticleInput[]): Promise<void> {
       console.log(`✅ Imported: "${article.title}" (${readTime} min read)`);
       imported++;
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       console.error(`❌ Failed to import "${article.title}":`, errorMessage);
     }
   }
@@ -123,7 +125,7 @@ async function importPlaybooks(playbooks: PlaybookInput[]): Promise<void> {
   for (const playbook of playbooks) {
     try {
       const slug = generateSlug(playbook.title);
-      
+
       // Check if already exists
       const existing = await collection.findOne({ slug });
       if (existing) {
@@ -155,7 +157,8 @@ async function importPlaybooks(playbooks: PlaybookInput[]): Promise<void> {
       console.log(`✅ Imported: "${playbook.title}" (${playbook.role})`);
       imported++;
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       console.error(`❌ Failed to import "${playbook.title}":`, errorMessage);
     }
   }
@@ -169,7 +172,7 @@ async function importFromFile(filePath: string): Promise<void> {
   console.log(`\n🔄 Loading content from: ${filePath}\n`);
 
   const fullPath = path.resolve(filePath);
-  
+
   if (!fs.existsSync(fullPath)) {
     throw new Error(`File not found: ${fullPath}`);
   }

@@ -8,18 +8,20 @@ import { getSeedPromptsWithTimestamps } from '../src/data/seed-prompts';
 
 // Generate SEO-friendly slug from title
 function generateSlug(title: string, id: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .substring(0, 60) + `-${id}`;
+  return (
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .substring(0, 60) + `-${id}`
+  );
 }
 
 async function seedDatabase() {
   // Try to load from .env.local
   const fs = require('fs');
   const path = require('path');
-  
+
   try {
     const envPath = path.join(process.cwd(), '.env.local');
     if (fs.existsSync(envPath)) {
@@ -27,19 +29,23 @@ async function seedDatabase() {
       const mongoMatch = envContent.match(/MONGODB_URI=(.+)/);
       if (mongoMatch) {
         // Remove quotes if present
-        process.env.MONGODB_URI = mongoMatch[1].trim().replace(/^["']|["']$/g, '');
+        process.env.MONGODB_URI = mongoMatch[1]
+          .trim()
+          .replace(/^["']|["']$/g, '');
       }
     }
   } catch (e) {
     // Ignore
   }
-  
+
   const uri = process.env.MONGODB_URI;
-  
+
   if (!uri) {
     console.error('❌ MONGODB_URI not found in environment variables');
     console.log('💡 Add MONGODB_URI to your .env.local file');
-    console.log('   Example: MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/engify');
+    console.log(
+      '   Example: MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/engify'
+    );
     process.exit(1);
   }
 
@@ -54,7 +60,7 @@ async function seedDatabase() {
 
     // Get all prompts with timestamps
     const prompts = getSeedPromptsWithTimestamps();
-    
+
     console.log(`📊 Found ${prompts.length} prompts to seed`);
 
     // Add slugs to each prompt
@@ -84,10 +90,12 @@ async function seedDatabase() {
     console.log('✅ Created indexes');
 
     // Show summary by category
-    const categories = await promptsCollection.aggregate([
-      { $group: { _id: '$category', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
-    ]).toArray();
+    const categories = await promptsCollection
+      .aggregate([
+        { $group: { _id: '$category', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ])
+      .toArray();
 
     console.log('\n📊 Prompts by Category:');
     categories.forEach((cat) => {
@@ -95,11 +103,13 @@ async function seedDatabase() {
     });
 
     // Show summary by role
-    const roles = await promptsCollection.aggregate([
-      { $match: { role: { $exists: true, $ne: null } } },
-      { $group: { _id: '$role', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
-    ]).toArray();
+    const roles = await promptsCollection
+      .aggregate([
+        { $match: { role: { $exists: true, $ne: null } } },
+        { $group: { _id: '$role', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ])
+      .toArray();
 
     console.log('\n👥 Prompts by Role:');
     roles.forEach((role) => {
@@ -112,7 +122,6 @@ async function seedDatabase() {
     samplePrompts.forEach((p) => {
       console.log(`   /library/${p.slug}`);
     });
-
   } catch (error) {
     console.error('❌ Error seeding database:', error);
     process.exit(1);
