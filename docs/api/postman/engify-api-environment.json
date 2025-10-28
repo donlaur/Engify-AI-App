@@ -1,0 +1,43 @@
+{
+  "id": "engify-api-environment",
+  "name": "Engify.ai API Environment",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "https://engify.ai/api/v2",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "sessionToken",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "requestId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "testEmail",
+      "value": "test@example.com",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "testPassword",
+      "value": "password123",
+      "type": "secret",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}

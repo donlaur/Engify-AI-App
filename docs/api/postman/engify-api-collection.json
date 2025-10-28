@@ -1,0 +1,415 @@
+{
+  "info": {
+    "name": "Engify.ai API v2",
+    "description": "Complete API collection for Engify.ai v2 endpoints",
+    "version": "2.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://engify.ai/api/v2",
+      "type": "string"
+    },
+    {
+      "key": "sessionToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AI Execution",
+      "item": [
+        {
+          "name": "Execute AI Prompt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Explain the SOLID principles in software engineering\",\n  \"provider\": \"openai\",\n  \"temperature\": 0.7,\n  \"maxTokens\": 1000,\n  \"systemPrompt\": \"You are a senior software engineer explaining concepts to other developers.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai", "execute"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Execute with Streaming",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Write a detailed explanation of microservices architecture\",\n  \"provider\": \"claude\",\n  \"stream\": true,\n  \"temperature\": 0.5,\n  \"maxTokens\": 2000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai", "execute"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Execute with Gemini",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Analyze the pros and cons of different database types\",\n  \"provider\": \"gemini\",\n  \"temperature\": 0.3,\n  \"maxTokens\": 1500\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai", "execute"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Execution Strategy",
+      "item": [
+        {
+          "name": "Execute with Strategy Selection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"request\": {\n    \"prompt\": \"Create a comprehensive test plan for an e-commerce application\",\n    \"maxTokens\": 2000,\n    \"temperature\": 0.4,\n    \"stream\": false\n  },\n  \"context\": {\n    \"userId\": \"user123\",\n    \"requestId\": \"req_456789\",\n    \"priority\": \"high\",\n    \"metadata\": {\n      \"domain\": \"testing\",\n      \"complexity\": \"high\"\n    }\n  },\n  \"provider\": \"openai\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/execution",
+              "host": ["{{baseUrl}}"],
+              "path": ["execution"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Execute with Cache Strategy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"request\": {\n    \"prompt\": \"What is the difference between REST and GraphQL?\",\n    \"maxTokens\": 1000,\n    \"temperature\": 0.5\n  },\n  \"context\": {\n    \"userId\": \"user123\",\n    \"requestId\": \"req_cache_001\",\n    \"priority\": \"normal\",\n    \"metadata\": {\n      \"isRepeated\": true,\n      \"cacheKey\": \"rest-vs-graphql\"\n    }\n  },\n  \"provider\": \"claude\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/execution",
+              "host": ["{{baseUrl}}"],
+              "path": ["execution"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{sessionToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"name\": \"New User\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{sessionToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/user123",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "user123"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health & Status",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "API Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["status"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Testing",
+      "item": [
+        {
+          "name": "Invalid Request Body",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invalidField\": \"test\",\n  \"prompt\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai", "execute"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unauthorized Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"This should fail without authentication\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai", "execute"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Rate Limit Test",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{sessionToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Rate limit test request\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai", "execute"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set default values if not already set",
+          "if (!pm.variables.get('baseUrl')) {",
+          "    pm.variables.set('baseUrl', 'https://engify.ai/api/v2');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Common test scripts",
+          "pm.test('Response time is less than 5000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "pm.test('Response has success field', function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('success');",
+          "});",
+          "",
+          "pm.test('Response has timestamp', function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('timestamp');",
+          "});"
+        ]
+      }
+    }
+  ]
+}
