@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       filesAnalyzed: context.files.length,
       totalSize: context.files.reduce((sum, f) => sum + f.content.length, 0),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Code context error:', error);
     return NextResponse.json(
       { error: 'Failed to extract code context', message: error.message },

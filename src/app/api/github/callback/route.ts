@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
 
     // Redirect back to settings with success
     return NextResponse.redirect('/settings?github_connected=true');
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('GitHub callback error:', error);
     return NextResponse.redirect('/settings?error=github_connection_failed');
   }
