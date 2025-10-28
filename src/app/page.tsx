@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { getQuickStats } from '@/lib/services/StatsService';
-import { getSiteStats, getDisplayStats } from '@/lib/site-stats'; // Fallback for build time
+import { getDisplayStats } from '@/lib/site-stats';
 
 const roles = [
   { name: 'Engineers', icon: Icons.code, count: '24 prompts' },
@@ -51,24 +51,15 @@ const features = [
 ];
 
 export default async function Home() {
-  // Get real stats from MongoDB
-  let mongoStats;
-  try {
-    mongoStats = await getQuickStats();
-  } catch (error) {
-    console.error('Failed to fetch MongoDB stats, using fallback:', error);
-    mongoStats = null;
-  }
+  // Get real stats from MongoDB - no fallbacks
+  const mongoStats = await getQuickStats();
 
-  // Use MongoDB stats if available, otherwise fallback to static
-  const siteStats = mongoStats
-    ? {
-        totalPrompts: mongoStats.prompts.total,
-        totalPatterns: mongoStats.patterns.total,
-        totalArticles: 46,
-        aiProviders: mongoStats.providers.total,
-      }
-    : getSiteStats();
+  const siteStats = {
+    totalPrompts: mongoStats.prompts.total,
+    totalPatterns: mongoStats.patterns.total,
+    totalArticles: 46,
+    aiProviders: mongoStats.providers.total,
+  };
 
   const displayStats = getDisplayStats();
 
