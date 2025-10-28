@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { provider, model, prompt } = await request.json();
+    const { provider, model, prompt: _prompt } = await request.json();
 
     // Check if API keys are configured
     const apiKeys = {
