@@ -540,6 +540,64 @@
       "tags": ["openai", "strategy", "mapping", "validation", "comprehensive"],
       "featured": true,
       "order": 129
+    },
+    {
+      "id": "white-prompt-pattern-catalog",
+      "title": "A Prompt Pattern Catalog (White et al. 2023)",
+      "description": "Academic research paper cataloging prompt engineering patterns - foundational research",
+      "category": "advanced",
+      "type": "article",
+      "level": "advanced",
+      "duration": "1 hour",
+      "url": "https://arxiv.org/abs/2302.11382",
+      "tags": ["research", "academic", "patterns", "catalog", "foundational"],
+      "author": "White et al.",
+      "source": "Vanderbilt University",
+      "featured": true,
+      "order": 130
+    },
+    {
+      "id": "mollick-good-enough",
+      "title": "Good Enough Prompting (Ethan Mollick)",
+      "description": "Practical approach to prompting from Wharton professor - iterate quickly, don't overthink",
+      "category": "basics",
+      "type": "article",
+      "level": "beginner",
+      "duration": "15 min",
+      "url": "https://www.oneusefulthing.org/p/getting-started-with-ai-good-enough",
+      "tags": ["practical", "beginner-friendly", "wharton", "quick-start"],
+      "author": "Ethan Mollick",
+      "source": "One Useful Thing",
+      "featured": true,
+      "order": 131
+    },
+    {
+      "id": "mit-prompt-templates",
+      "title": "Prompt Templates Over Engineering (MIT Sloan)",
+      "description": "Why reusable prompt libraries beat one-off engineering - validates our approach",
+      "category": "intermediate",
+      "type": "article",
+      "level": "intermediate",
+      "duration": "10 min",
+      "url": "https://mitsloan.mit.edu/ideas-made-to-matter/prompt-engineering-so-2024-try-these-prompt-templates-instead",
+      "tags": ["templates", "library", "reusable", "efficiency"],
+      "source": "MIT Sloan",
+      "featured": true,
+      "order": 132
+    },
+    {
+      "id": "vanderbilt-ai-business",
+      "title": "Vanderbilt AI for Business Guide",
+      "description": "Comprehensive research guide covering prompting, patterns, and business applications",
+      "category": "basics",
+      "type": "guide",
+      "level": "beginner",
+      "duration": "30 min",
+      "url": "https://researchguides.library.vanderbilt.edu/AI4Biz/Prompting",
+      "tags": ["business", "university", "comprehensive", "research"],
+      "source": "Vanderbilt University",
+      "featured": false,
+      "order": 133
     }
   ]
 }
