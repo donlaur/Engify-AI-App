@@ -45,7 +45,7 @@ const roles = [
   { id: 'qa', label: 'QA Engineers', icon: Icons.check, href: '/for-qa' },
 ];
 
-export default function RoleSelector() {
+export function RoleSelector() {
   const pathname = usePathname();
 
   return (
@@ -81,5 +81,3 @@ export default function RoleSelector() {
     </div>
   );
 }
-
-export { RoleSelector };
