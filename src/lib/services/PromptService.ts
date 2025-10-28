@@ -1,55 +1,362 @@
 /**
- * Prompt Service
+ * Prompt Service Layer
+ * 
+ * Implements business logic for prompt operations using the Repository Pattern.
+ * This service layer:
+ * - Depends on IPromptRepository interface (Dependency Inversion)
+ * - Contains business logic and validation
+ * - Is easily testable with mock repositories
+ * - Follows Single Responsibility Principle
+ * 
+ * SOLID Principles:
+ * - Single Responsibility: Handles prompt business logic only
+ * - Open/Closed: Can extend functionality without modifying existing code
+ * - Liskov Substitution: Works with any IPromptRepository implementation
+ * - Interface Segregation: Depends only on what it needs
+ * - Dependency Inversion: Depends on abstraction (IPromptRepository)
  */
 
-import { ObjectId } from 'mongodb';
-import { BaseService } from './BaseService';
-import { PromptTemplate, PromptTemplateSchema } from '@/lib/db/schema';
+import { IPromptRepository } from '../repositories/interfaces/IRepository';
+import type { PromptTemplate } from '@/lib/db/schema';
 
-export class PromptService extends BaseService<PromptTemplate> {
-  constructor() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    super('prompt_templates', PromptTemplateSchema as any); // Zod schema type mismatch
-  }
+// Use PromptTemplate as the Prompt type for the service
+type Prompt = PromptTemplate;
 
-  async findByCategory(category: string): Promise<PromptTemplate[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.find({ category, isPublic: true } as any); // MongoDB filter type
-  }
-
-  async findByRole(role: string): Promise<PromptTemplate[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.find({ role, isPublic: true } as any); // MongoDB filter type
-  }
-
-  async search(query: string): Promise<PromptTemplate[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filter: any = { // MongoDB query operators
-      $or: [
-        { title: { $regex: query, $options: 'i' } },
-        { description: { $regex: query, $options: 'i' } },
-        { tags: { $in: [query] } },
-      ],
-      isPublic: true,
-    };
-    return this.find(filter);
-  }
-
-  async incrementViews(id: string): Promise<void> {
-    const collection = await this.getCollection();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filter: any = { _id: new ObjectId(id) }; // MongoDB filter type
-    await collection.updateOne(filter, { $inc: { 'stats.views': 1 } });
-  }
-
-  async updateRating(id: string, rating: number): Promise<void> {
-    const collection = await this.getCollection();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filter: any = { _id: new ObjectId(id) }; // MongoDB filter type
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const update: any = { $push: { 'stats.ratings': rating } }; // MongoDB update operators
-    await collection.updateOne(filter, update);
-  }
+export interface CreatePromptData {
+  title: string;
+  description: string;
+  content: string;
+  category: string;
+  role?: string;
+  tags?: string[];
+  difficulty?: string;
+  estimatedTime?: number;
+  isPublic?: boolean;
+  isFeatured?: boolean;
+  authorId?: string;
+  organizationId?: string;
 }
 
-export const promptService = new PromptService();
+export interface UpdatePromptData {
+  title?: string;
+  description?: string;
+  content?: string;
+  category?: string;
+  role?: string;
+  tags?: string[];
+  difficulty?: string;
+  estimatedTime?: number;
+  isPublic?: boolean;
+  isFeatured?: boolean;
+}
+
+export interface PromptSearchFilters {
+  category?: string;
+  role?: string;
+  difficulty?: string;
+  tags?: string[];
+  isPublic?: boolean;
+  isFeatured?: boolean;
+  authorId?: string;
+  organizationId?: string;
+}
+
+export class PromptService {
+  constructor(private promptRepository: IPromptRepository) {}
+
+  /**
+   * Create a new prompt
+   */
+  async createPrompt(promptData: CreatePromptData): Promise<Prompt> {
+    // Business logic validation
+    if (!promptData.title || !promptData.content) {
+      throw new Error('Title and content are required');
+    }
+
+    if (promptData.title.length > 200) {
+      throw new Error('Title must be 200 characters or less');
+    }
+
+    if (promptData.description && promptData.description.length > 1000) {
+      throw new Error('Description must be 1000 characters or less');
+    }
+
+    // Create prompt with defaults
+    const newPromptData = {
+      title: promptData.title,
+      description: promptData.description || '',
+      content: promptData.content,
+      category: promptData.category,
+      role: promptData.role || null,
+      tags: promptData.tags || [],
+      difficulty: promptData.difficulty || 'beginner',
+      estimatedTime: promptData.estimatedTime || null,
+      isPublic: promptData.isPublic ?? true,
+      isFeatured: promptData.isFeatured ?? false,
+      authorId: promptData.authorId || null,
+      organizationId: promptData.organizationId || null,
+      stats: {
+        views: 0,
+        favorites: 0,
+        uses: 0,
+        averageRating: 0,
+        totalRatings: 0,
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    return await this.promptRepository.create(newPromptData);
+  }
+
+  /**
+   * Get prompt by ID
+   */
+  async getPromptById(id: string): Promise<Prompt | null> {
+    if (!id) {
+      throw new Error('Prompt ID is required');
+    }
+
+    return await this.promptRepository.findById(id);
+  }
+
+  /**
+   * Update prompt
+   */
+  async updatePrompt(id: string, promptData: UpdatePromptData): Promise<Prompt | null> {
+    if (!id) {
+      throw new Error('Prompt ID is required');
+    }
+
+    // Check if prompt exists
+    const existingPrompt = await this.promptRepository.findById(id);
+    if (!existingPrompt) {
+      throw new Error('Prompt not found');
+    }
+
+    // Business logic validation
+    if (promptData.title && promptData.title.length > 200) {
+      throw new Error('Title must be 200 characters or less');
+    }
+
+    if (promptData.description && promptData.description.length > 1000) {
+      throw new Error('Description must be 1000 characters or less');
+    }
+
+    return await this.promptRepository.update(id, promptData);
+  }
+
+  /**
+   * Delete prompt
+   */
+  async deletePrompt(id: string): Promise<boolean> {
+    if (!id) {
+      throw new Error('Prompt ID is required');
+    }
+
+    // Check if prompt exists
+    const existingPrompt = await this.promptRepository.findById(id);
+    if (!existingPrompt) {
+      throw new Error('Prompt not found');
+    }
+
+    return await this.promptRepository.delete(id);
+  }
+
+  /**
+   * Get all prompts
+   */
+  async getAllPrompts(): Promise<Prompt[]> {
+    return await this.promptRepository.findAll();
+  }
+
+  /**
+   * Get prompts by user
+   */
+  async getPromptsByUser(userId: string): Promise<Prompt[]> {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
+    return await this.promptRepository.findByUserId(userId);
+  }
+
+  /**
+   * Get prompts by category
+   */
+  async getPromptsByCategory(category: string): Promise<Prompt[]> {
+    if (!category) {
+      throw new Error('Category is required');
+    }
+
+    return await this.promptRepository.findByCategory(category);
+  }
+
+  /**
+   * Get prompts by pattern
+   */
+  async getPromptsByPattern(pattern: string): Promise<Prompt[]> {
+    if (!pattern) {
+      throw new Error('Pattern is required');
+    }
+
+    return await this.promptRepository.findByPattern(pattern);
+  }
+
+  /**
+   * Get prompts by tag
+   */
+  async getPromptsByTag(tag: string): Promise<Prompt[]> {
+    if (!tag) {
+      throw new Error('Tag is required');
+    }
+
+    return await this.promptRepository.findByTag(tag);
+  }
+
+  /**
+   * Get public prompts
+   */
+  async getPublicPrompts(): Promise<Prompt[]> {
+    return await this.promptRepository.findPublic();
+  }
+
+  /**
+   * Get featured prompts
+   */
+  async getFeaturedPrompts(): Promise<Prompt[]> {
+    return await this.promptRepository.findFeatured();
+  }
+
+  /**
+   * Search prompts
+   */
+  async searchPrompts(query: string): Promise<Prompt[]> {
+    if (!query || query.trim().length < 2) {
+      throw new Error('Search query must be at least 2 characters');
+    }
+
+    return await this.promptRepository.search(query.trim());
+  }
+
+  /**
+   * Get prompts with filters
+   */
+  async getPromptsWithFilters(filters: PromptSearchFilters): Promise<Prompt[]> {
+    let prompts: Prompt[] = [];
+
+    // Apply filters sequentially
+    if (filters.category) {
+      prompts = await this.promptRepository.findByCategory(filters.category);
+    } else if (filters.role) {
+      prompts = await this.promptRepository.findByRole(filters.role);
+    } else if (filters.difficulty) {
+      prompts = await this.promptRepository.findByDifficulty(filters.difficulty);
+    } else if (filters.tags && filters.tags.length > 0) {
+      // Find prompts that contain any of the specified tags
+      const tagPrompts = await Promise.all(
+        filters.tags.map(tag => this.promptRepository.findByTag(tag))
+      );
+      prompts = tagPrompts.flat();
+    } else if (filters.isPublic !== undefined) {
+      prompts = filters.isPublic 
+        ? await this.promptRepository.findPublic()
+        : await this.promptRepository.findAll();
+    } else if (filters.isFeatured) {
+      prompts = await this.promptRepository.findFeatured();
+    } else {
+      prompts = await this.promptRepository.findAll();
+    }
+
+    // Apply additional filters
+    if (filters.authorId) {
+      prompts = prompts.filter(p => p.authorId?.toString() === filters.authorId);
+    }
+
+    if (filters.organizationId) {
+      prompts = prompts.filter(p => p.organizationId?.toString() === filters.organizationId);
+    }
+
+    return prompts;
+  }
+
+  /**
+   * Increment prompt views
+   */
+  async incrementViews(id: string): Promise<void> {
+    if (!id) {
+      throw new Error('Prompt ID is required');
+    }
+
+    await this.promptRepository.incrementViews(id);
+  }
+
+  /**
+   * Update prompt rating
+   */
+  async updateRating(id: string, rating: number): Promise<void> {
+    if (!id) {
+      throw new Error('Prompt ID is required');
+    }
+
+    if (rating < 1 || rating > 5) {
+      throw new Error('Rating must be between 1 and 5');
+    }
+
+    await this.promptRepository.updateRating(id, rating);
+  }
+
+  /**
+   * Get prompt statistics
+   */
+  async getPromptStats(): Promise<{
+    totalPrompts: number;
+    promptsByCategory: Record<string, number>;
+    promptsByRole: Record<string, number>;
+    promptsByDifficulty: Record<string, number>;
+    featuredPrompts: number;
+    publicPrompts: number;
+  }> {
+    const allPrompts = await this.promptRepository.findAll();
+    const totalPrompts = allPrompts.length;
+
+    // Group by category
+    const promptsByCategory = allPrompts.reduce((acc, prompt) => {
+      acc[prompt.category] = (acc[prompt.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Group by role
+    const promptsByRole = allPrompts.reduce((acc, prompt) => {
+      if (prompt.role) {
+        acc[prompt.role] = (acc[prompt.role] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Group by difficulty
+    const promptsByDifficulty = allPrompts.reduce((acc, prompt) => {
+      acc[prompt.difficulty] = (acc[prompt.difficulty] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const featuredPrompts = allPrompts.filter(p => p.isFeatured).length;
+    const publicPrompts = allPrompts.filter(p => p.isPublic).length;
+
+    return {
+      totalPrompts,
+      promptsByCategory,
+      promptsByRole,
+      promptsByDifficulty,
+      featuredPrompts,
+      publicPrompts,
+    };
+  }
+
+  /**
+   * Get prompt count
+   */
+  async getPromptCount(): Promise<number> {
+    return await this.promptRepository.count();
+  }
+}
