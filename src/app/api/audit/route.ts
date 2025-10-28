@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   const session = await auth();
   const auditService = new AuditService();
-  const logs = await auditService.getByUser(session!.user.id);
+  const logs = await auditService.getByUser(session?.user?.id || '');
 
   return NextResponse.json(logs);
 }

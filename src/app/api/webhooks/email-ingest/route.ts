@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
-  const formData = await req.formData();
+  const _formData = await req.formData();
   
   // TODO: Process with SendGrid Inbound Parse
   // TODO: Extract email content
