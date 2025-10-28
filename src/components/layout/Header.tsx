@@ -75,6 +75,12 @@ export function Header({ user }: HeaderProps) {
             Pathways
           </Link>
           <Link
+            href="/mcp"
+            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+          >
+            MCP
+          </Link>
+          <Link
             href="/demo"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
