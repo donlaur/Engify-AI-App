@@ -31,6 +31,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.67.0",
     "@auth/mongodb-adapter": "^3.0.0",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.10.0",
@@ -53,6 +54,7 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "groq-sdk": "^0.34.0",
     "lucide-react": "^0.344.0",
     "mongodb": "^6.3.0",
     "next": "^15.5.4",
