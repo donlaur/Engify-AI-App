@@ -10,8 +10,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { getQuickStats } from '@/lib/services/StatsService';
-import { getDisplayStats } from '@/lib/site-stats';
 
 const roles = [
   { name: 'Engineers', icon: Icons.code, count: '24 prompts' },
@@ -50,24 +48,33 @@ const features = [
   },
 ];
 
+async function getStats() {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/stats`,
+    {
+      next: { revalidate: 300 }, // Cache for 5 minutes
+    }
+  );
+  if (!res.ok)
+    return { stats: { prompts: 0, patterns: 23, pathways: 0, users: 0 } };
+  return res.json();
+}
+
 export default async function Home() {
-  // Get real stats from MongoDB - no fallbacks
-  const mongoStats = await getQuickStats();
+  const data = await getStats();
 
   const siteStats = {
-    totalPrompts: mongoStats.prompts.total,
-    totalPatterns: mongoStats.patterns.total,
+    totalPrompts: data.stats.prompts,
+    totalPatterns: data.stats.patterns,
     totalArticles: 46,
-    aiProviders: mongoStats.providers.total,
+    aiProviders: 4,
   };
 
-  const displayStats = getDisplayStats();
-
   const stats = [
-    displayStats.prompts,
-    displayStats.patterns,
-    displayStats.providers,
-    displayStats.pricing,
+    { label: 'Expert Prompts', value: `${data.stats.prompts}+` },
+    { label: 'Proven Patterns', value: '23' },
+    { label: 'AI Providers', value: '4' },
+    { label: 'Starting At', value: 'Free Beta' },
   ];
 
   return (

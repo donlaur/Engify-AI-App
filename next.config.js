@@ -102,7 +102,13 @@ const nextConfig = {
         dns: false,
         child_process: false,
         'mongodb-client-encryption': false,
+        'timers/promises': false,
+        timers: false,
       };
+      
+      // Exclude MongoDB from client bundle
+      config.externals = config.externals || [];
+      config.externals.push('mongodb');
     }
     
     return config;
