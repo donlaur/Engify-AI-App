@@ -1,23 +1,24 @@
 #!/usr/bin/env tsx
 
-/**
- * Run Gemini Deep Research
- * Script to conduct research and update documentation
- */
+/\*\*
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { researchPromptPatterns } from '../src/lib/ai/gemini-integration';
+- Run Gemini Deep Research
+- Script to conduct research and update documentation
+  \*/
+
+import _ as fs from 'fs';
+import _ as path from 'path';
+import { researchPromptPatterns, GeminiResearchResult } from '../src/lib/ai/gemini-integration-v2';
 
 async function main() {
-  console.log('🔬 Starting Gemini Deep Research...\n');
-  console.log('Topic: Prompt Engineering Patterns');
-  console.log('Model: Gemini 1.5 Pro (2M token context)\n');
+console.log('🔬 Starting Gemini Deep Research...\n');
+console.log('Topic: Prompt Engineering Patterns');
+console.log('Model: Gemini 1.5 Pro (2M token context)\n');
 
-  try {
-    // Conduct research
-    console.log('⏳ Conducting research (this may take 1-2 minutes)...\n');
-    const result = await researchPromptPatterns();
+try {
+// Conduct research
+console.log('⏳ Conducting research (this may take 1-2 minutes)...\n');
+const result = await researchPromptPatterns();
 
     // Display results
     console.log('✅ Research Complete!\n');
@@ -77,79 +78,61 @@ async function main() {
     }
 
     console.log('🎉 Research integration complete!');
-  } catch (error: any) {
-    console.error('❌ Research failed:', error.message);
 
-    if (error.message.includes('GOOGLE_API_KEY')) {
+} catch (error: unknown) {
+const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+console.error('❌ Research failed:', errorMessage);
+
+    if (errorMessage.includes('GOOGLE_API_KEY')) {
       console.error('\n💡 Tip: Set GOOGLE_API_KEY in .env.local');
       console.error('   Get your key at: https://ai.google.dev\n');
     }
 
     process.exit(1);
-  }
+
+}
 }
 
-/**
- * Build markdown output
- */
-function buildMarkdownOutput(result: any): string {
+/\*\*
+
+- Build markdown output
+  \*/
+  function buildMarkdownOutput(result: GeminiResearchResult): string {
   let md = '# Gemini Deep Research Results\n\n';
   md += `**Date**: ${new Date().toISOString().split('T')[0]}\n`;
   md += `**Topic**: Prompt Engineering Patterns\n`;
   md += `**Model**: Gemini 1.5 Pro\n\n`;
 
-  md += '## Metadata\n\n';
-  md += `- **Tokens Used**: ${result.metadata.tokensUsed.toLocaleString()}\n`;
-  md += `- **Research Time**: ${(result.metadata.researchTime / 1000).toFixed(2)}s\n`;
-  md += `- **Confidence**: ${result.metadata.confidence}\n`;
-  md += `- **Sources**: ${result.sources.length}\n\n`;
+md += '## Metadata\n\n';
+md += `- **Tokens Used**: ${result.metadata.tokenUsage.total.toLocaleString()}\n`;
+md += `- **Research Time**: ${(result.metadata.processingTime / 1000).toFixed(2)}s\n`;
+md += `- **Research Areas**: ${result.metadata.researchAreas.length}\n`;
+md += `- **Sources**: ${result.metadata.sources.length}\n\n`;
 
-  if (result.sources.length > 0) {
-    md += '## Sources\n\n';
-    result.sources.forEach((source: string) => {
-      md += `- ${source}\n`;
-    });
-    md += '\n';
-  }
+md += '---\n\n';
+md += '## Full Research Results\n\n';
+md += result.content;
 
-  if (result.keyFindings.length > 0) {
-    md += '## Key Findings\n\n';
-    result.keyFindings.forEach((finding: string) => {
-      md += `- ${finding}\n`;
-    });
-    md += '\n';
-  }
-
-  if (result.recommendations.length > 0) {
-    md += '## Recommendations\n\n';
-    result.recommendations.forEach((rec: string) => {
-      md += `- ${rec}\n`;
-    });
-    md += '\n';
-  }
-
-  md += '---\n\n';
-  md += '## Full Research Results\n\n';
-  md += result.content;
-
-  return md;
+return md;
 }
 
-/**
- * Merge research results with existing patterns
- */
-function mergeResearchResults(existing: string, newContent: string): string {
+/\*\*
+
+- Merge research results with existing patterns
+  \*/
+  function mergeResearchResults(existing: string, newContent: string): string {
   // Add Gemini research section if not exists
   if (!existing.includes('## Gemini Research Integration')) {
-    const header = existing.split('\n').slice(0, 10).join('\n');
-    const body = existing.split('\n').slice(10).join('\n');
+  const header = existing.split('\n').slice(0, 10).join('\n');
+  const body = existing.split('\n').slice(10).join('\n');
 
-    const geminiSection = `\n\n---\n\n## Gemini Research Integration\n\n**Last Updated**: ${new Date().toISOString().split('T')[0]}\n\n${newContent}\n\n---\n\n`;
+      const geminiSection = `\n\n---\n\n## Gemini Research Integration\n\n**Last Updated**: ${new Date().toISOString().split('T')[0]}\n\n${newContent}\n\n---\n\n`;
 
-    return header + geminiSection + body;
+      return header + geminiSection + body;
+
   }
 
-  return existing;
+return existing;
 }
 
 // Run the script

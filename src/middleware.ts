@@ -11,8 +11,8 @@ export function middleware(request: NextRequest) {
   // Everything else is public (library, patterns, learn, etc.)
 
   const protectedPaths = [
-    '/api/ai/execute', // Legacy
     '/api/v2/ai/execute', // New v2 route
+    '/api/v2/execution', // Execution strategy route
     '/api/prompts/history',
     '/api/user/',
     '/workbench',
