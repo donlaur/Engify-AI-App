@@ -2,10 +2,10 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { getQuickStats } from '@/lib/services/StatsService';
+import { getStats } from '@/lib/stats-cache';
 
 export default async function AboutPage() {
-  const stats = await getQuickStats();
+  const data = await getStats();
   return (
     <MainLayout>
       <div className="container py-16">
@@ -71,7 +71,7 @@ export default async function AboutPage() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="mb-2 text-4xl font-bold text-primary">
-                  {stats.prompts.total}+
+                  {data.stats.prompts}+
                 </div>
                 <p className="text-sm text-muted-foreground">Expert Prompts</p>
               </CardContent>

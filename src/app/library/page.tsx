@@ -11,41 +11,23 @@ import type { Metadata } from 'next';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { LibraryClient } from '@/components/features/LibraryClient';
 import { generateMetaTags, pageSEO } from '@/lib/seo';
-import { PromptService } from '@/lib/services/PromptService';
-import { getQuickStats } from '@/lib/services/StatsService';
+import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import { getStats } from '@/lib/stats-cache';
 
 // SEO Metadata
 export const metadata: Metadata = generateMetaTags(pageSEO.library) as Metadata;
 
-// Server Component - queries MongoDB for real data
+// Server Component
 export default async function LibraryPage() {
-  // Get prompts from MongoDB - no fallbacks
-  const promptService = new PromptService();
-  const promptsData = await promptService.find({ isPublic: true });
+  // Use seed prompts for now (MongoDB prompts will come in Phase 2)
+  const prompts = getSeedPromptsWithTimestamps();
 
-  // Convert to format expected by client - schema mismatch between MongoDB and client types
-  const prompts = promptsData.map((p) => {
-    const doc = p as unknown as Record<string, unknown>;
-    return {
-      ...p,
-      id: doc._id?.toString() || '',
-      views: ((doc.stats as Record<string, unknown>)?.views as number) || 0,
-      rating:
-        ((doc.stats as Record<string, unknown>)?.averageRating as number) || 0,
-      ratingCount:
-        ((doc.stats as Record<string, unknown>)?.ratings as unknown[])
-          ?.length || 0,
-      createdAt: (doc.createdAt as Date) || new Date(),
-      updatedAt: (doc.updatedAt as Date) || new Date(),
-    };
-  });
+  // Get stats from cache
+  const data = await getStats();
 
-  // Get category counts from MongoDB
-  const stats = await getQuickStats();
-
-  // Category counts for display - real data from MongoDB
-  const categoryStats = stats.prompts.byCategory;
-  const totalPrompts = stats.prompts.total;
+  // Category counts for display
+  const categoryStats = data.categories || [];
+  const totalPrompts = data.stats.prompts;
 
   return (
     <MainLayout>
