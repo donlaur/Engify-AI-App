@@ -37,6 +37,11 @@ export default function WorkbenchPage() {
   const [providerResponses, setProviderResponses] = useState<
     ProviderResponse[]
   >([]);
+  const [rateLimitInfo, setRateLimitInfo] = useState<{
+    remaining: number;
+    resetAt: string;
+    tier: string;
+  } | null>(null);
 
   // Real AI execution with history tracking
   const handleExecute = async () => {
@@ -69,6 +74,15 @@ export default function WorkbenchPage() {
 
       const data = await res.json();
       const executionTime = Date.now() - startTime;
+
+      // Update rate limit info
+      if (data.rateLimit) {
+        setRateLimitInfo({
+          remaining: data.rateLimit.remaining,
+          resetAt: data.rateLimit.resetAt,
+          tier: data.rateLimit.tier,
+        });
+      }
 
       if (!res.ok) {
         setResponse(`Error: ${data.error || 'Failed to execute prompt'}`);
@@ -176,25 +190,34 @@ export default function WorkbenchPage() {
         <div className="mb-8">
           <h1 className="mb-2 text-4xl font-bold">AI Workbench</h1>
           <p className="text-muted-foreground">
-            Test prompts with multiple AI providers. Rate-limited for security.
+            Test prompts across 4 AI providers. Free to use with rate limits.
           </p>
         </div>
 
-        {/* Pro Feature Banner */}
-        <Card className="mb-6 border-primary/50 bg-primary/5">
+        {/* Rate Limit Info Banner */}
+        <Card className="mb-6 border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950">
           <CardContent className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <Icons.sparkles className="h-5 w-5 text-primary" />
+              <Icons.shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <div>
-                <p className="font-medium">
-                  Upgrade to Pro for unlimited executions
+                <p className="font-medium text-blue-900 dark:text-blue-100">
+                  Free Tier: 10 requests per day
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  Free users: 10 executions/day • Pro: Unlimited
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  {rateLimitInfo ? (
+                    <>
+                      {rateLimitInfo.remaining} requests remaining • Resets{' '}
+                      {new Date(rateLimitInfo.resetAt).toLocaleTimeString()}
+                    </>
+                  ) : (
+                    '3 requests per hour • Sign up for more capacity'
+                  )}
                 </p>
               </div>
             </div>
-            <Button variant="default">Upgrade to Pro</Button>
+            <Button variant="outline" size="sm">
+              Sign Up for More
+            </Button>
           </CardContent>
         </Card>
 
