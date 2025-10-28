@@ -570,3 +570,204 @@ Review of Claude Connectors - how to integrate Claude with various tools and wor
 5. **Custom Tools**: Domain-specific MCPs
 
 **Saved for Phase 2-3!** ✅
+
+---
+
+## MCP Integration: MongoDB Performance Advisor
+
+**Source**: MongoDB Atlas Documentation  
+**URL**: https://www.mongodb.com/docs/atlas/performance-advisor/access-with-mcp/  
+**Date Added**: Oct 28, 2025  
+**Relevance**: High - Database performance optimization  
+**Phase to Integrate**: Phase 2 (Repository Pattern & Database)  
+**Priority**: High
+
+### What It Does
+
+MongoDB Performance Advisor MCP provides AI-powered database performance insights through Model Context Protocol.
+
+### Key Features
+
+1. **Query Performance Analysis**: Identify slow queries automatically
+2. **Index Recommendations**: AI suggests optimal indexes
+3. **Schema Optimization**: Detect schema anti-patterns
+4. **Real-time Monitoring**: Track query performance over time
+5. **MCP Integration**: Access via AI assistants (like Cascade)
+
+### Use Cases for Engify.ai
+
+#### 1. Development Optimization
+
+- Analyze prompt storage queries
+- Optimize user data retrieval
+- Improve session management
+- Speed up analytics queries
+
+#### 2. Production Monitoring
+
+- Catch slow queries before users notice
+- Auto-suggest index improvements
+- Monitor database health
+- Track query patterns
+
+#### 3. Cost Optimization
+
+- Reduce unnecessary reads
+- Optimize aggregation pipelines
+- Minimize database load
+- Lower Atlas costs
+
+### Implementation Plan
+
+#### Phase 2: Repository Pattern (Immediate)
+
+- [ ] Install MongoDB Performance Advisor MCP
+- [ ] Configure Atlas connection
+- [ ] Set up performance monitoring
+- [ ] Create baseline metrics
+
+#### Phase 3: Optimization (Next)
+
+- [ ] Analyze existing queries
+- [ ] Implement recommended indexes
+- [ ] Refactor slow queries
+- [ ] Add query performance tests
+
+#### Phase 4: Automation (Future)
+
+- [ ] Auto-apply safe index recommendations
+- [ ] Alert on performance degradation
+- [ ] Track improvements over time
+- [ ] Generate performance reports
+
+### Integration Steps
+
+**1. Install MCP Server**
+
+```bash
+npm install @modelcontextprotocol/server-mongodb-atlas
+```
+
+**2. Configure in `.windsurf/mcp.json`**
+
+```json
+{
+  "mcpServers": {
+    "mongodb-performance": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-mongodb-atlas",
+        "--performance-advisor"
+      ],
+      "env": {
+        "MONGODB_ATLAS_PUBLIC_KEY": "your-public-key",
+        "MONGODB_ATLAS_PRIVATE_KEY": "your-private-key",
+        "MONGODB_ATLAS_PROJECT_ID": "your-project-id"
+      }
+    }
+  }
+}
+```
+
+**3. Use During Development**
+
+- Ask AI: "Analyze slow queries in prompts collection"
+- Ask AI: "Suggest indexes for user lookups"
+- Ask AI: "Optimize this aggregation pipeline"
+
+### Expected Benefits
+
+**Performance**:
+
+- 50-80% faster query times
+- Reduced database load
+- Better user experience
+
+**Cost**:
+
+- Lower Atlas bills
+- Fewer compute resources
+- Optimized storage
+
+**Development**:
+
+- Faster debugging
+- Better query design
+- Proactive optimization
+
+### Technical Details
+
+**Collections to Optimize**:
+
+- `users` - User authentication and profiles
+- `prompts` - Prompt templates and history
+- `sessions` - User sessions and activity
+- `analytics` - Usage tracking and metrics
+
+**Common Optimizations**:
+
+- Add indexes on frequently queried fields
+- Optimize aggregation pipelines
+- Reduce document scanning
+- Improve query selectivity
+
+### Documentation Needed
+
+**Internal Docs**:
+
+- [ ] How to use Performance Advisor MCP
+- [ ] Query optimization guidelines
+- [ ] Index strategy documentation
+- [ ] Performance benchmarks
+
+**NOT for Website**:
+
+- This is an internal development tool
+- Don't mention in marketing materials
+- Keep as competitive advantage
+- Document in developer guides only
+
+### Action Items
+
+**Immediate (Phase 2)**:
+
+- [ ] Set up MongoDB Atlas Performance Advisor
+- [ ] Install MCP integration
+- [ ] Configure access credentials
+- [ ] Run initial performance analysis
+
+**Short-term (Phase 3)**:
+
+- [ ] Implement recommended indexes
+- [ ] Optimize slow queries
+- [ ] Set up monitoring alerts
+- [ ] Document query patterns
+
+**Long-term (Phase 4+)**:
+
+- [ ] Automate performance checks in CI/CD
+- [ ] Create performance dashboard
+- [ ] Track optimization metrics
+- [ ] Share learnings with team
+
+### Why This Matters
+
+1. **Proactive**: Catch issues before production
+2. **AI-Powered**: Smart recommendations, not just alerts
+3. **Integrated**: Works with our development workflow
+4. **Cost-Effective**: Optimize spend on database
+5. **Competitive**: Better performance = better product
+
+### Connection to Phase 2
+
+Phase 2 focuses on Repository Pattern for database abstraction. This MCP will help us:
+
+- Design optimal repository methods
+- Choose right indexes from the start
+- Validate query performance
+- Build with best practices
+
+**Perfect timing to add this during Phase 2!** ✅
+
+**Saved for Phase 2!** ✅
