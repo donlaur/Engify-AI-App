@@ -771,3 +771,350 @@ Phase 2 focuses on Repository Pattern for database abstraction. This MCP will he
 **Perfect timing to add this during Phase 2!** ✅
 
 **Saved for Phase 2!** ✅
+
+---
+
+## MCP Integration: Jira Automation
+
+**Source**: Composio Blog  
+**URL**: https://composio.dev/blog/jira-mcp-server  
+**Date Added**: Oct 28, 2025  
+**Relevance**: Critical - Automate Jira workflow  
+**Phase to Integrate**: Immediate (Setup Now)  
+**Priority**: Critical
+
+### What It Does
+
+Jira MCP Server allows AI assistants to interact with Jira directly - create tickets, update status, add comments, track time, all from your IDE.
+
+### Key Features
+
+1. **Create Tickets**: Ask AI to create Jira tickets from code
+2. **Update Status**: Auto-transition tickets based on git actions
+3. **Add Comments**: Document decisions in Jira automatically
+4. **Track Time**: Log time spent on tasks
+5. **Search Issues**: Find related tickets instantly
+6. **Link PRs**: Auto-link pull requests to tickets
+
+### Use Cases for Engify.ai
+
+#### 1. Automated Ticket Creation
+
+```
+You: "Create a Jira ticket for adding email notifications"
+AI: Creates MBA-23 with proper description, labels, and sprint
+```
+
+#### 2. Status Updates
+
+```
+# When you commit:
+git commit -m "feat(MBA-12): create repository interfaces"
+# AI can auto-update MBA-12 to "In Progress"
+```
+
+#### 3. Code-to-Ticket Linking
+
+```
+You: "What's the Jira ticket for this file?"
+AI: "This is part of MBA-12: Create Repository Interfaces"
+```
+
+#### 4. Sprint Planning
+
+```
+You: "Show me all TO DO tickets for Phase 2"
+AI: Lists MBA-12, MBA-13, MBA-14, MBA-15, MBA-16
+```
+
+### Installation
+
+**1. Install Composio CLI**
+
+```bash
+npm install -g composio-core
+```
+
+**2. Authenticate with Jira**
+
+```bash
+composio add jira
+# Follow OAuth flow to connect your Jira account
+```
+
+**3. Install Jira MCP Server**
+
+```bash
+npm install @composio/mcp-server-jira
+```
+
+**4. Configure in `.windsurf/mcp.json`**
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "npx",
+      "args": ["-y", "@composio/mcp-server-jira"],
+      "env": {
+        "COMPOSIO_API_KEY": "your-composio-api-key",
+        "JIRA_SITE_URL": "https://engify.atlassian.net",
+        "JIRA_PROJECT_KEY": "MBA"
+      }
+    }
+  }
+}
+```
+
+### Common Commands
+
+**Create Ticket**:
+
+```
+"Create a Jira ticket for implementing user authentication with OAuth"
+```
+
+**Update Ticket**:
+
+```
+"Move MBA-12 to In Progress"
+"Add comment to MBA-12: Completed interface definitions"
+```
+
+**Search Tickets**:
+
+```
+"Show me all tickets assigned to me"
+"Find tickets related to repository pattern"
+```
+
+**Link Code to Ticket**:
+
+```
+"Link this file to MBA-12"
+"What ticket is this related to?"
+```
+
+### Automation Workflows
+
+#### Workflow 1: Start Task
+
+```
+You: "Start working on MBA-12"
+AI:
+- Moves ticket to "In Progress"
+- Creates feature branch
+- Updates assignee
+- Logs start time
+```
+
+#### Workflow 2: Commit Code
+
+```
+You: Commit with "feat(MBA-12): add interfaces"
+AI:
+- Adds commit link to ticket
+- Updates ticket with progress
+- Logs time spent
+```
+
+#### Workflow 3: Create PR
+
+```
+You: "Create PR for MBA-12"
+AI:
+- Creates PR with Jira link
+- Moves ticket to "In Review"
+- Notifies reviewers
+- Links PR to ticket
+```
+
+#### Workflow 4: Complete Task
+
+```
+You: "MBA-12 is done"
+AI:
+- Moves ticket to "Done"
+- Logs completion time
+- Updates sprint progress
+- Notifies team
+```
+
+### Integration with Our Workflow
+
+**Current Manual Process**:
+
+1. Open Jira in browser
+2. Find ticket
+3. Update status
+4. Add comment
+5. Switch back to IDE
+6. Continue coding
+
+**With Jira MCP**:
+
+1. Ask AI: "Start MBA-12"
+2. Code
+3. Commit
+4. Ask AI: "Update MBA-12 with progress"
+5. Done - never leave IDE
+
+### Setup Steps (Do Now)
+
+**Step 1: Install**
+
+```bash
+cd /Users/donlaur/dev/Engify-AI-App
+npm install -g composio-core
+composio add jira
+npm install @composio/mcp-server-jira
+```
+
+**Step 2: Configure**
+Create `.windsurf/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/donlaur/dev/Engify-AI-App"
+      ]
+    },
+    "jira": {
+      "command": "npx",
+      "args": ["-y", "@composio/mcp-server-jira"],
+      "env": {
+        "COMPOSIO_API_KEY": "get-from-composio-dashboard",
+        "JIRA_SITE_URL": "https://engify.atlassian.net",
+        "JIRA_PROJECT_KEY": "MBA"
+      }
+    }
+  }
+}
+```
+
+**Step 3: Test**
+
+```
+Ask AI: "Show me ticket MBA-10"
+Ask AI: "Create a test ticket"
+Ask AI: "Move MBA-12 to In Progress"
+```
+
+**Step 4: Use in Workflow**
+
+```bash
+# Start Phase 2 task
+AI: "Start MBA-12"
+
+# Code...
+
+# Update progress
+AI: "Add comment to MBA-12: Completed base interfaces"
+
+# Finish
+AI: "Move MBA-12 to Done"
+```
+
+### Benefits
+
+**Time Saved**:
+
+- No context switching to browser
+- Instant ticket updates
+- Automated status transitions
+- Quick ticket creation
+
+**Better Tracking**:
+
+- All work linked to tickets
+- Accurate time logging
+- Clear progress visibility
+- Automated documentation
+
+**Team Collaboration**:
+
+- Real-time updates
+- Automatic notifications
+- Better sprint tracking
+- Clear accountability
+
+### Configuration File
+
+Create `.windsurf/mcp.json` in project root:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/donlaur/dev/Engify-AI-App"
+      ]
+    },
+    "mongodb-performance": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-mongodb-atlas",
+        "--performance-advisor"
+      ],
+      "env": {
+        "MONGODB_ATLAS_PUBLIC_KEY": "your-public-key",
+        "MONGODB_ATLAS_PRIVATE_KEY": "your-private-key",
+        "MONGODB_ATLAS_PROJECT_ID": "your-project-id"
+      }
+    },
+    "jira": {
+      "command": "npx",
+      "args": ["-y", "@composio/mcp-server-jira"],
+      "env": {
+        "COMPOSIO_API_KEY": "your-composio-api-key",
+        "JIRA_SITE_URL": "https://engify.atlassian.net",
+        "JIRA_PROJECT_KEY": "MBA"
+      }
+    }
+  }
+}
+```
+
+### Action Items (Do Now)
+
+**Immediate**:
+
+- [ ] Install Composio CLI
+- [ ] Authenticate with Jira
+- [ ] Install Jira MCP server
+- [ ] Create `.windsurf/mcp.json`
+- [ ] Test with MBA-12
+
+**Next**:
+
+- [ ] Set up automation rules
+- [ ] Configure smart commits
+- [ ] Train team on AI commands
+- [ ] Document common workflows
+
+### Example Usage for Phase 2
+
+```bash
+# Starting MBA-12
+You: "Start working on MBA-12"
+AI: "✅ Moved MBA-12 to In Progress, created branch feature/MBA-12-repository-interfaces"
+
+# During development
+You: "Add comment to MBA-12: Completed IRepository interface"
+AI: "✅ Comment added to MBA-12"
+
+# Finishing
+You: "MBA-12 is ready for review"
+AI: "✅ Moved MBA-12 to In Review, created PR #23"
+```
+
+**Install this NOW before starting Phase 2!** ✅
