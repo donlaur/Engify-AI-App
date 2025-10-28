@@ -21,7 +21,7 @@ export class GroqAdapter implements AIProvider {
    */
   constructor(model: string = 'llama3-8b-8192') {
     this.client = new Groq({
-      apiKey: process.env.GROQ_API_KEY,
+      apiKey: process.env.GROQ_API_KEY || 'test-key',
     });
     this.model = model;
   }
