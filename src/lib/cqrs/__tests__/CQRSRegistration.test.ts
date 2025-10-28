@@ -159,7 +159,7 @@ describe('CQRS Registration', () => {
       (mockUserService.getUserById as unknown).mockResolvedValue(mockUser);
 
       // Act
-      const result = await cqrsBus.send({
+      const result = await cqrsBus.sendQuery({
         type: 'GetUserById',
         userId: '507f1f77bcf86cd799439011',
         timestamp: new Date(),
@@ -190,7 +190,7 @@ describe('CQRS Registration', () => {
 
     it('should validate queries after registration', async () => {
       // Act - Try to get user with empty ID
-      const result = await cqrsBus.send({
+      const result = await cqrsBus.sendQuery({
         type: 'GetUserById',
         userId: '',
         timestamp: new Date(),
@@ -257,7 +257,9 @@ describe('CQRS Registration', () => {
         });
 
         // Should not fail with "No handler found"
-        expect(result.error).not.toContain('No handler found');
+        if (result.error) {
+          expect(result.error).not.toContain('No handler found');
+        }
       }
     });
 
@@ -275,7 +277,7 @@ describe('CQRS Registration', () => {
       ];
 
       for (const queryType of queryTypes) {
-        const result = await cqrsBus.send({
+        const result = await cqrsBus.sendQuery({
           type: queryType,
           userId: '507f1f77bcf86cd799439011',
           timestamp: new Date(),
@@ -283,7 +285,9 @@ describe('CQRS Registration', () => {
         });
 
         // Should not fail with "No handler found"
-        expect(result.error).not.toContain('No handler found');
+        if (result.error) {
+          expect(result.error).not.toContain('No handler found');
+        }
       }
     });
   });

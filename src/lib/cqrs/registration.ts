@@ -5,7 +5,7 @@
  * This centralizes the configuration of the CQRS pattern.
  */
 
-import { cqrsBus } from '../bus';
+import { cqrsBus } from './bus';
 import { UserService } from '../../services/UserService';
 
 // Command Handlers
@@ -18,7 +18,7 @@ import {
   AssignUserToOrganizationCommandHandler,
   RemoveUserFromOrganizationCommandHandler,
   CreateUserCommandValidator,
-} from './UserCommandHandlers';
+} from './handlers/UserCommandHandlers';
 
 // Query Handlers
 import {
@@ -32,7 +32,7 @@ import {
   GetUserStatisticsQueryHandler,
   GetUserCountQueryHandler,
   GetUserByIdQueryValidator,
-} from './UserQueryHandlers';
+} from './handlers/UserQueryHandlers';
 
 /**
  * CQRS Registration Service

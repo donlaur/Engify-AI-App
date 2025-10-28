@@ -28,14 +28,18 @@ import { z } from 'zod';
 import { getUserService } from '@/lib/di/Container';
 import { cqrsBus } from '@/lib/cqrs/bus';
 import { initializeCQRS } from '@/lib/cqrs/registration';
-import { UserCommands, UserQueries } from '@/lib/cqrs/commands/UserCommands';
+import { UserCommands } from '@/lib/cqrs/commands/UserCommands';
+import { UserQueries } from '@/lib/cqrs/queries/UserQueries';
 
-// Initialize CQRS on first load
+// Initialize CQRS lazily
 let cqrsInitialized = false;
-if (!cqrsInitialized) {
-  const userService = getUserService();
-  initializeCQRS(userService);
-  cqrsInitialized = true;
+
+function ensureCQRSInitialized(): void {
+  if (!cqrsInitialized) {
+    const userService = getUserService();
+    initializeCQRS(userService);
+    cqrsInitialized = true;
+  }
 }
 
 // Request validation schemas
@@ -55,6 +59,9 @@ const createUserSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
+    // Ensure CQRS is initialized
+    ensureCQRSInitialized();
+
     const { searchParams } = new URL(request.url);
 
     // Handle different query parameters
@@ -149,6 +156,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Ensure CQRS is initialized
+    ensureCQRSInitialized();
+
     const body = await request.json();
 
     // Validate request body

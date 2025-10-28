@@ -180,6 +180,9 @@ describe('CQRSBus', () => {
     });
 
     it('should fail for unregistered command types', async () => {
+      // Create a new bus instance without handlers
+      const emptyBus = new CQRSBus();
+
       const command: TestCommand = {
         type: 'TestCommand',
         data: 'test data',
@@ -187,8 +190,7 @@ describe('CQRSBus', () => {
         correlationId: 'test-correlation-id',
       };
 
-      // Don't register the handler
-      const result = await bus.send(command);
+      const result = await emptyBus.send(command);
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('No handler found');
@@ -233,7 +235,7 @@ describe('CQRSBus', () => {
         correlationId: 'test-correlation-id',
       };
 
-      const result = await bus.send(query);
+      const result = await bus.sendQuery(query);
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(['Result for test filter']);
@@ -249,7 +251,7 @@ describe('CQRSBus', () => {
         correlationId: 'test-correlation-id',
       };
 
-      const result = await bus.send(query);
+      const result = await bus.sendQuery(query);
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Validation failed');
@@ -257,6 +259,9 @@ describe('CQRSBus', () => {
     });
 
     it('should fail for unregistered query types', async () => {
+      // Create a new bus instance without handlers
+      const emptyBus = new CQRSBus();
+
       const query: TestQuery = {
         type: 'TestQuery',
         filter: 'test filter',
@@ -264,8 +269,7 @@ describe('CQRSBus', () => {
         correlationId: 'test-correlation-id',
       };
 
-      // Don't register the handler
-      const result = await bus.send(query);
+      const result = await emptyBus.sendQuery(query);
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('No handler found');
@@ -289,7 +293,7 @@ describe('CQRSBus', () => {
         correlationId: 'test-correlation-id',
       };
 
-      const result = await bus.send(query);
+      const result = await bus.sendQuery(query);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Query handler execution failed');
@@ -372,7 +376,7 @@ describe('CQRSBus', () => {
         correlationId: 'test-correlation-id',
       };
 
-      const result = await bus.send(query);
+      const result = await bus.sendQuery(query);
 
       if (result.success && result.data) {
         // TypeScript should know result.data is string[]
