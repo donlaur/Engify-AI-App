@@ -1,0 +1,82 @@
+[
+  {
+    "id": "agent-pattern",
+    "name": "Agent Pattern",
+    "category": "Advanced",
+    "level": "Expert",
+    "description": "Give the AI autonomy to plan, use tools, and complete multi-step tasks",
+    "example": "You are an autonomous research agent. Goal: Research and summarize the top 3 competitors for [product].\n\nAvailable tools:\n- web_search(query): Search the internet\n- scrape_page(url): Extract content from a URL\n- save_note(content): Save information for later\n\nProcess:\n1. Plan your research strategy\n2. Use tools to gather information\n3. Analyze and synthesize findings\n4. Present a comprehensive summary\n\nWork autonomously until the goal is complete. Show your reasoning at each step.",
+    "useCases": ["Research tasks", "Data analysis", "Complex problem-solving", "Multi-step automation"],
+    "icon": "zap"
+  },
+  {
+    "id": "function-calling-pattern",
+    "name": "Function Calling Pattern",
+    "category": "Integration",
+    "level": "Advanced",
+    "description": "Enable AI to call external functions, APIs, and tools",
+    "example": "You are a customer support assistant with access to these functions:\n\n1. search_knowledge_base(query): Search our help docs\n2. get_order_status(order_id): Check order status\n3. create_ticket(issue, priority): Create support ticket\n4. send_email(to, subject, body): Send email to customer\n\nUser query: \"Where is my order #12345?\"\n\nYour response should:\n1. Decide which function(s) to call\n2. Call them with appropriate parameters\n3. Use the results to answer the user\n\nAlways explain what you're doing and why.",
+    "useCases": ["API integration", "Database queries", "External tool use", "Action automation"],
+    "icon": "code"
+  },
+  {
+    "id": "chain-of-thought-verification",
+    "name": "Chain-of-Thought with Verification",
+    "category": "Reasoning",
+    "level": "Advanced",
+    "description": "Combine step-by-step reasoning with self-verification",
+    "example": "Solve this problem using verified chain-of-thought:\n\n[Problem]: A store has 150 items. 40% are sold on Monday, 25% of the remainder on Tuesday. How many items are left?\n\nProcess:\n1. **Initial Reasoning**: Show your step-by-step calculation\n2. **Verification**: Check each step for errors\n3. **Alternative Approach**: Solve using a different method\n4. **Comparison**: Do both methods agree?\n5. **Final Answer**: State your confident answer\n\nIf methods disagree, identify and fix the error.",
+    "useCases": ["Math problems", "Logic puzzles", "Critical decisions", "High-stakes calculations"],
+    "icon": "check"
+  },
+  {
+    "id": "meta-prompting",
+    "name": "Meta-Prompting Pattern",
+    "category": "Advanced",
+    "level": "Expert",
+    "description": "Have the AI generate or improve its own prompts",
+    "example": "You are a prompt engineering expert. I need help with [task].\n\nStep 1: Analyze my goal and constraints\nStep 2: Generate 3 different prompt approaches:\n  - Approach A: [describe strategy]\n  - Approach B: [describe strategy]\n  - Approach C: [describe strategy]\n\nStep 3: For each approach, write the actual prompt\nStep 4: Explain pros/cons of each\nStep 5: Recommend the best one and why\n\nThen, use your recommended prompt to complete my task.",
+    "useCases": ["Prompt optimization", "Self-improvement", "Automated prompt generation", "A/B testing"],
+    "icon": "sparkles"
+  },
+  {
+    "id": "multi-agent-collaboration",
+    "name": "Multi-Agent Collaboration",
+    "category": "Advanced",
+    "level": "Expert",
+    "description": "Multiple AI agents with different roles working together",
+    "example": "Simulate a team of experts working on [project]:\n\n**Researcher Agent**: Gather information and data\n- Focus: Facts, sources, evidence\n- Output: Research findings\n\n**Analyst Agent**: Analyze the research\n- Focus: Patterns, insights, implications\n- Output: Analysis report\n\n**Writer Agent**: Create final deliverable\n- Focus: Clarity, structure, audience\n- Output: Polished document\n\n**Critic Agent**: Review and improve\n- Focus: Quality, accuracy, completeness\n- Output: Feedback and revisions\n\nEach agent should:\n1. State their role\n2. Do their specialized work\n3. Pass results to the next agent\n4. Iterate based on feedback",
+    "useCases": ["Complex projects", "Quality assurance", "Diverse perspectives", "Specialized tasks"],
+    "icon": "users"
+  },
+  {
+    "id": "constitutional-ai",
+    "name": "Constitutional AI Pattern",
+    "category": "Safety",
+    "level": "Advanced",
+    "description": "Build in ethical guidelines and safety checks",
+    "example": "You are an AI assistant with these constitutional principles:\n\n**Core Values**:\n1. Helpful: Provide accurate, useful information\n2. Harmless: Never suggest illegal or dangerous actions\n3. Honest: Admit uncertainty, cite sources\n4. Fair: Avoid bias, consider multiple perspectives\n\n**Safety Checks**:\nBefore responding, verify:\n- Is this request ethical?\n- Could this cause harm?\n- Am I qualified to answer?\n- Should I suggest human oversight?\n\n**Response Format**:\n1. Acknowledge the request\n2. Apply constitutional check\n3. Provide response OR explain why I can't\n4. Suggest safer alternatives if needed\n\nNow respond to: [user request]",
+    "useCases": ["Sensitive topics", "High-risk decisions", "Compliance", "Ethical AI"],
+    "icon": "shield"
+  },
+  {
+    "id": "iterative-refinement",
+    "name": "Iterative Refinement Pattern",
+    "category": "Quality",
+    "level": "Intermediate",
+    "description": "Progressively improve output through multiple iterations",
+    "example": "Create [deliverable] using iterative refinement:\n\n**Iteration 1 - Draft**:\n- Create initial version quickly\n- Focus on getting ideas down\n- Don't worry about perfection\n\n**Iteration 2 - Structure**:\n- Review the draft\n- Improve organization and flow\n- Add missing sections\n\n**Iteration 3 - Quality**:\n- Enhance clarity and precision\n- Strengthen weak points\n- Add examples and details\n\n**Iteration 4 - Polish**:\n- Final editing pass\n- Check grammar and style\n- Ensure consistency\n\nShow each iteration and explain improvements made.",
+    "useCases": ["Content creation", "Code refactoring", "Design iteration", "Quality improvement"],
+    "icon": "refresh"
+  },
+  {
+    "id": "context-stuffing",
+    "name": "Context Stuffing Pattern",
+    "category": "Optimization",
+    "level": "Intermediate",
+    "description": "Maximize context window usage for better results",
+    "example": "I'm providing extensive context for optimal results:\n\n**Background** (500 words):\n[Detailed background information]\n\n**Requirements** (300 words):\n[Specific requirements and constraints]\n\n**Examples** (400 words):\n[Multiple examples of desired output]\n\n**Style Guide** (200 words):\n[Tone, voice, formatting preferences]\n\n**Reference Materials** (600 words):\n[Relevant documentation and resources]\n\n**Task**:\nUsing ALL the context above, [specific task].\n\nDo not ignore any part of the context. Reference specific sections in your response.",
+    "useCases": ["Long documents", "Complex tasks", "High-quality output", "Specialized domains"],
+    "icon": "database"
+  }
+]
