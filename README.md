@@ -10,7 +10,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black.svg)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**498 commits in one day. Built in public. Production-ready.**
+**Enterprise-grade prompt engineering platform. Built with Next.js, TypeScript, and MongoDB.**
 
 [View Live Site](https://engify.ai) • [See the Journey](https://engify.ai/built-in-public) • [Read the Docs](docs/)
 
@@ -20,7 +20,7 @@
 
 ## 🎯 What We've Built
 
-**Current Status**: 498 commits | Production deployed on Vercel | 100+ prompts | 3 new roles
+**Status**: Production | 100+ Expert Prompts | 15 Proven Patterns | 10 Professional Roles
 
 ## 🎯 What is Engify.ai?
 
