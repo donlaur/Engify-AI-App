@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect } from 'vitest';
 import { AIProviderFactory } from '../factory/AIProviderFactory';
 import { OpenAIAdapter } from '../adapters/OpenAIAdapter';
