@@ -16,11 +16,12 @@
     "ai-tools"
   ],
   "scripts": {
-    "dev": "next dev -p 3005",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "audit:icons": "tsx scripts/audit-icons.ts",
     "seed": "tsx src/lib/db/seed.ts",
     "seed:prompts": "tsx scripts/seed-prompts-to-db.ts",
     "test:prompts": "tsx scripts/test-prompts-batch.ts",

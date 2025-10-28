@@ -20,6 +20,7 @@ import {
   ChevronUp,
   ArrowRight,
   ArrowLeft,
+  ExternalLink,
 
   // Actions
   Search,
@@ -32,6 +33,7 @@ import {
   Download,
   Upload,
   Share2,
+  Send,
 
   // Status & Feedback
   AlertCircle,
@@ -40,6 +42,7 @@ import {
   XCircle,
   Info,
   Loader2,
+  Flag,
 
   // Content
   Eye,
@@ -77,12 +80,21 @@ import {
   BarChart,
   PieChart,
 
-  // Navigation Icons
+  // Navigation
   Home,
   BookOpen,
   Library,
   Code,
   Terminal,
+
+  // Social
+  Twitter,
+  Linkedin,
+  Facebook,
+
+  // Additional
+  Calculator,
+  Rocket,
 
   // Misc
   MoreVertical,
@@ -145,21 +157,27 @@ export const Icons = {
   copy: Copy,
   checkAlt: Check,
   add: Plus,
+  plus: Plus,
   remove: Minus,
   edit: Edit,
   delete: Trash2,
   download: Download,
   upload: Upload,
   share: Share2,
+  send: Send,
+  externalLink: ExternalLink,
 
   // Status & Feedback
   warning: AlertTriangle,
   alertTriangle: AlertTriangle,
+  alertCircle: AlertCircle,
   error: AlertCircle,
   success: CheckCircle,
+  checkCircle: CheckCircle,
   info: Info,
   spinner: Loader2,
   cancel: XCircle,
+  flag: Flag,
 
   // Content
   view: Eye,
@@ -168,6 +186,7 @@ export const Icons = {
   heart: Heart,
   bookmark: Bookmark,
   comment: MessageSquare,
+  messageSquare: MessageSquare,
   like: ThumbsUp,
   dislike: ThumbsDown,
 
@@ -186,6 +205,7 @@ export const Icons = {
   userRemove: UserMinus,
   settings: Settings,
   logout: LogOut,
+  logOut: LogOut,
   login: LogIn,
 
   // Features
@@ -201,6 +221,7 @@ export const Icons = {
   // Navigation
   home: Home,
   book: BookOpen,
+  bookOpen: BookOpen,
   library: Library,
   code: Code,
   terminal: Terminal,
@@ -247,6 +268,15 @@ export const Icons = {
   hash: Hash,
   play: Play,
   wifi: Wifi,
+  
+  // Social
+  twitter: Twitter,
+  linkedin: Linkedin,
+  facebook: Facebook,
+  
+  // Additional
+  calculator: Calculator,
+  rocket: Rocket,
 } as const;
 
 // Export type for icon names
