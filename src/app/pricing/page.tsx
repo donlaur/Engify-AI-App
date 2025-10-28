@@ -12,9 +12,10 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { siteStats } from '@/lib/constants';
+import { getQuickStats } from '@/lib/services/StatsService';
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const stats = await getQuickStats();
   const plans = [
     {
       name: 'Free',
@@ -22,7 +23,7 @@ export default function PricingPage() {
       period: 'forever',
       description: 'Perfect for trying out Engify',
       features: [
-        { text: `${siteStats.totalPrompts}+ prompt templates`, included: true },
+        { text: `${stats.prompts.total}+ prompt templates`, included: true },
         { text: '1 custom prompt per week', included: true },
         { text: 'Browse all 15 patterns', included: true },
         { text: '10 workbench executions/day', included: true },
