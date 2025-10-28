@@ -196,7 +196,9 @@ export function Header({ user }: HeaderProps) {
                         <Link href="/api/auth/signin">Sign in</Link>
                       </Button>
                       <Button className="w-full" asChild>
-                        <Link href="/api/auth/signin">Get Started</Link>
+                        <Link href="/pattern-playground">
+                          Pattern Playground
+                        </Link>
                       </Button>
                     </div>
                   </>
