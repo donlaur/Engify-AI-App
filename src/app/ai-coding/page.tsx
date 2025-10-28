@@ -290,10 +290,7 @@ export default function AICodingPage() {
         {/* Tool Comparison Matrix */}
         <Card className="mt-12">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icons.grid className="h-6 w-6 text-blue-600" />
-              Tool Comparison Matrix
-            </CardTitle>
+            <CardTitle>Tool Comparison Matrix</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -378,7 +375,7 @@ export default function AICodingPage() {
                     <ul className="space-y-1">
                       {tool.weaknesses.map((weakness, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm">
-                          <Icons.alert className="mt-0.5 h-4 w-4 flex-shrink-0 text-orange-600" />
+                          <Icons.x className="mt-0.5 h-4 w-4 flex-shrink-0 text-orange-600" />
                           {weakness}
                         </li>
                       ))}
@@ -529,7 +526,7 @@ export default function AICodingPage() {
         <Card className="mt-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Icons.workflow className="h-6 w-6 text-purple-600" />
+              <Icons.arrowRight className="h-6 w-6 text-purple-600" />
               Example Workflow
             </CardTitle>
           </CardHeader>
