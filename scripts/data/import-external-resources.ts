@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * Import External Learning Resources
- * 
+ *
  * Adds curated external resources to MongoDB
  */
 
@@ -20,7 +20,8 @@ const externalResources = [
   {
     id: 'ext-portkey-low-resource',
     title: 'Prompt Engineering for Low-Resource Languages',
-    description: 'Learn how to effectively prompt engineer for languages with limited training data and resources.',
+    description:
+      'Learn how to effectively prompt engineer for languages with limited training data and resources.',
     url: 'https://portkey.ai/blog/prompt-engineering-for-low-resource-languages/',
     category: 'advanced',
     type: 'article',
@@ -35,7 +36,8 @@ const externalResources = [
   {
     id: 'ext-google-what-is-pe',
     title: 'What is Prompt Engineering? - Google Cloud',
-    description: 'Comprehensive introduction to prompt engineering from Google Cloud, covering fundamentals and best practices.',
+    description:
+      'Comprehensive introduction to prompt engineering from Google Cloud, covering fundamentals and best practices.',
     url: 'https://cloud.google.com/discover/what-is-prompt-engineering?hl=en',
     category: 'basics',
     type: 'guide',
@@ -50,7 +52,8 @@ const externalResources = [
   {
     id: 'ext-auditboard-ai-platform',
     title: 'AI Platform for Audit & Risk Management',
-    description: 'Real-world application of AI in audit and compliance workflows, showing practical enterprise use cases.',
+    description:
+      'Real-world application of AI in audit and compliance workflows, showing practical enterprise use cases.',
     url: 'https://auditboard.com/platform/ai',
     category: 'production',
     type: 'case-study',
@@ -65,7 +68,8 @@ const externalResources = [
   {
     id: 'ext-azure-evaluate-ai',
     title: 'Evaluate Generative AI Apps - Azure AI Foundry',
-    description: 'Microsoft\'s guide to evaluating and testing generative AI applications in production environments.',
+    description:
+      "Microsoft's guide to evaluating and testing generative AI applications in production environments.",
     url: 'https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/evaluate-generative-ai-app',
     category: 'production',
     type: 'guide',
@@ -80,7 +84,8 @@ const externalResources = [
   {
     id: 'ext-tableau-ai-pros-cons',
     title: 'AI Advantages and Disadvantages in Data Analytics',
-    description: 'Balanced perspective on AI benefits and limitations in data visualization and analytics workflows.',
+    description:
+      'Balanced perspective on AI benefits and limitations in data visualization and analytics workflows.',
     url: 'https://www.tableau.com/data-insights/ai/advantages-disadvantages',
     category: 'basics',
     type: 'article',
@@ -95,13 +100,20 @@ const externalResources = [
   {
     id: 'ext-bizway-data-viz',
     title: 'ChatGPT Prompts for Data Visualization',
-    description: 'Practical prompts and techniques for creating dashboards and data visualizations using AI.',
+    description:
+      'Practical prompts and techniques for creating dashboards and data visualizations using AI.',
     url: 'https://www.bizway.io/blog/chatgpt-prompts-for-data-visualization-and-dashboard-creation',
     category: 'patterns',
     type: 'tutorial',
     level: 'intermediate',
     duration: '9 min',
-    tags: ['data-visualization', 'dashboards', 'chatgpt', 'prompts', 'visual-ai'],
+    tags: [
+      'data-visualization',
+      'dashboards',
+      'chatgpt',
+      'prompts',
+      'visual-ai',
+    ],
     featured: true,
     status: 'active',
     source: 'Bizway',
@@ -110,7 +122,8 @@ const externalResources = [
   {
     id: 'ext-luzmo-chatgpt-viz',
     title: 'ChatGPT for Data Visualization - Complete Guide',
-    description: 'Step-by-step guide to leveraging ChatGPT for creating compelling data visualizations and charts.',
+    description:
+      'Step-by-step guide to leveraging ChatGPT for creating compelling data visualizations and charts.',
     url: 'https://www.luzmo.com/blog/chatgpt-for-data-visualization',
     category: 'patterns',
     type: 'guide',
@@ -125,7 +138,8 @@ const externalResources = [
   {
     id: 'ext-optimizesmart-sql',
     title: 'AI Prompt Engineering for SQL Generation: 7 Lessons',
-    description: 'Hard-won lessons on using AI to generate SQL queries effectively and safely.',
+    description:
+      'Hard-won lessons on using AI to generate SQL queries effectively and safely.',
     url: 'https://www.optimizesmart.com/ai-prompt-engineering-for-sql-generation-7-lessons-i-learned/',
     category: 'engineering',
     type: 'article',
@@ -140,7 +154,8 @@ const externalResources = [
   {
     id: 'ext-galaxy-sql-prompting',
     title: 'Prompt Engineering for SQL Generation - Glossary',
-    description: 'Comprehensive glossary and reference guide for SQL generation using prompt engineering techniques.',
+    description:
+      'Comprehensive glossary and reference guide for SQL generation using prompt engineering techniques.',
     url: 'https://www.getgalaxy.io/learn/glossary/prompt-engineering-for-sql-generation',
     category: 'engineering',
     type: 'reference',
@@ -155,7 +170,8 @@ const externalResources = [
   {
     id: 'ext-prompting-guide-rag',
     title: 'RAG (Retrieval-Augmented Generation) Research',
-    description: 'Academic and practical research on RAG systems, implementation patterns, and best practices.',
+    description:
+      'Academic and practical research on RAG systems, implementation patterns, and best practices.',
     url: 'https://www.promptingguide.ai/research/rag',
     category: 'advanced',
     type: 'research',
@@ -170,7 +186,8 @@ const externalResources = [
   {
     id: 'ext-moveo-rag-vs-finetuning',
     title: 'Fine-Tuning vs RAG vs Prompt Engineering',
-    description: 'Comparison guide helping you choose between fine-tuning, RAG, and prompt engineering for your use case.',
+    description:
+      'Comparison guide helping you choose between fine-tuning, RAG, and prompt engineering for your use case.',
     url: 'https://moveo.ai/blog/fine-tuning-rag-or-prompt-engineering',
     category: 'advanced',
     type: 'comparison',
@@ -196,7 +213,7 @@ async function main() {
     const collection = db.collection(COLLECTION);
 
     // Add metadata to each resource
-    const resources = externalResources.map(resource => ({
+    const resources = externalResources.map((resource) => ({
       ...resource,
       seo: {
         metaTitle: `${resource.title} | Engify.ai`,
@@ -215,11 +232,13 @@ async function main() {
 
     await collection.insertMany(resources);
 
-    console.log(`✅ Successfully added ${resources.length} resources to MongoDB\n`);
+    console.log(
+      `✅ Successfully added ${resources.length} resources to MongoDB\n`
+    );
 
     // Show what was added by category
     const byCategory: Record<string, number> = {};
-    resources.forEach(r => {
+    resources.forEach((r) => {
       byCategory[r.category] = (byCategory[r.category] || 0) + 1;
     });
 
@@ -229,21 +248,24 @@ async function main() {
     });
 
     console.log('\n🎯 Featured Resources:');
-    resources.filter(r => r.featured).forEach(r => {
-      console.log(`   • ${r.title}`);
-    });
+    resources
+      .filter((r) => r.featured)
+      .forEach((r) => {
+        console.log(`   • ${r.title}`);
+      });
 
     console.log('\n🔍 New Topics Added:');
-    const uniqueTags = [...new Set(resources.flatMap(r => r.tags))];
+    const uniqueTags = [...new Set(resources.flatMap((r) => r.tags))];
     console.log(`   ${uniqueTags.join(', ')}`);
-
   } catch (error) {
     console.error('❌ Error:', error);
   } finally {
     await client.close();
   }
 
-  console.log('\n🎉 Done! External resources are now available in the learning library.');
+  console.log(
+    '\n🎉 Done! External resources are now available in the learning library.'
+  );
 }
 
 main();

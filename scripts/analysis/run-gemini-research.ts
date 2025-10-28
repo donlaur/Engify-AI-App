@@ -22,8 +22,12 @@ async function main() {
     // Display results
     console.log('✅ Research Complete!\n');
     console.log('📊 Metadata:');
-    console.log(`  - Tokens Used: ${result.metadata.tokensUsed.toLocaleString()}`);
-    console.log(`  - Research Time: ${(result.metadata.researchTime / 1000).toFixed(2)}s`);
+    console.log(
+      `  - Tokens Used: ${result.metadata.tokensUsed.toLocaleString()}`
+    );
+    console.log(
+      `  - Research Time: ${(result.metadata.researchTime / 1000).toFixed(2)}s`
+    );
     console.log(`  - Confidence: ${result.metadata.confidence}`);
     console.log(`  - Sources Found: ${result.sources.length}`);
     console.log(`  - Key Findings: ${result.keyFindings.length}`);
@@ -48,31 +52,39 @@ async function main() {
     }
 
     // Save to file
-    const outputPath = path.join(process.cwd(), 'docs/GEMINI_RESEARCH_RESULTS.md');
+    const outputPath = path.join(
+      process.cwd(),
+      'docs/GEMINI_RESEARCH_RESULTS.md'
+    );
     const content = buildMarkdownOutput(result);
     fs.writeFileSync(outputPath, content);
 
     console.log(`📝 Full research saved to: ${outputPath}\n`);
 
     // Update PROMPT_PATTERNS_RESEARCH.md
-    const patternsPath = path.join(process.cwd(), 'docs/PROMPT_PATTERNS_RESEARCH.md');
+    const patternsPath = path.join(
+      process.cwd(),
+      'docs/PROMPT_PATTERNS_RESEARCH.md'
+    );
     if (fs.existsSync(patternsPath)) {
       const existingContent = fs.readFileSync(patternsPath, 'utf8');
-      const updatedContent = mergeResearchResults(existingContent, result.content);
+      const updatedContent = mergeResearchResults(
+        existingContent,
+        result.content
+      );
       fs.writeFileSync(patternsPath, updatedContent);
       console.log(`✅ Updated: ${patternsPath}\n`);
     }
 
     console.log('🎉 Research integration complete!');
-
   } catch (error: any) {
     console.error('❌ Research failed:', error.message);
-    
+
     if (error.message.includes('GOOGLE_API_KEY')) {
       console.error('\n💡 Tip: Set GOOGLE_API_KEY in .env.local');
       console.error('   Get your key at: https://ai.google.dev\n');
     }
-    
+
     process.exit(1);
   }
 }
@@ -131,12 +143,12 @@ function mergeResearchResults(existing: string, newContent: string): string {
   if (!existing.includes('## Gemini Research Integration')) {
     const header = existing.split('\n').slice(0, 10).join('\n');
     const body = existing.split('\n').slice(10).join('\n');
-    
+
     const geminiSection = `\n\n---\n\n## Gemini Research Integration\n\n**Last Updated**: ${new Date().toISOString().split('T')[0]}\n\n${newContent}\n\n---\n\n`;
-    
+
     return header + geminiSection + body;
   }
-  
+
   return existing;
 }
 
