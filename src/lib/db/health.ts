@@ -1,62 +1,12 @@
-/**
- * Database Health Check
- *
- * Red Hat Review - Critical Fix #2
- * Validates MongoDB connection at startup and provides health check endpoint
- */
+import { getMongoDb } from './mongodb';
 
-import clientPromise from './client';
-
-/**
- * Check if MongoDB connection is healthy
- * @throws {Error} If connection fails
- */
-export async function checkDbHealth(): Promise<{
-  status: 'healthy' | 'unhealthy';
-  latency: number;
-  error?: string;
-}> {
-  const startTime = Date.now();
-
+export async function checkDatabaseHealth(): Promise<boolean> {
   try {
-    const client = await clientPromise;
-
-    // Ping the database
-    await client.db().admin().ping();
-
-    const latency = Date.now() - startTime;
-
-    return {
-      status: 'healthy',
-      latency,
-    };
+    const db = await getMongoDb();
+    await db.admin().ping();
+    return true;
   } catch (error) {
-    const latency = Date.now() - startTime;
-
-    return {
-      status: 'unhealthy',
-      latency,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
+    console.error('Database health check failed:', error);
+    return false;
   }
-}
-
-/**
- * Validate DB connection at startup
- * Fails fast if database is not available
- */
-export async function validateDbConnection(): Promise<void> {
-  // eslint-disable-next-line no-console
-  console.log('🔍 Validating database connection...');
-  
-  const health = await checkDbHealth();
-  
-  if (health.status === 'unhealthy') {
-    // eslint-disable-next-line no-console
-    console.error('❌ Database connection failed:', health.error);
-    throw new Error(`Database connection failed: ${health.error}`);
-  }
-  
-  // eslint-disable-next-line no-console
-  console.log(`✅ Database connection healthy (${health.latency}ms)`);
 }
