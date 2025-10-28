@@ -150,6 +150,21 @@ export interface IPromptRepository extends IRepository<Prompt> {
    * @returns Promise with array of matching prompts
    */
   search(query: string): Promise<Prompt[]>;
+
+  /**
+   * Increment view count for a prompt
+   * @param id - Prompt ID
+   * @returns Promise that resolves when view count is incremented
+   */
+  incrementViews(id: string): Promise<void>;
+
+  /**
+   * Update rating for a prompt
+   * @param id - Prompt ID
+   * @param rating - New rating value
+   * @returns Promise that resolves when rating is updated
+   */
+  updateRating(id: string, rating: number): Promise<void>;
 }
 
 /**

@@ -9,40 +9,43 @@
  * - Testing utilities with mocks
  */
 
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { DIContainer, TestDIContainer, SERVICE_IDS } from '../../di/Container';
 import { IUserRepository, IPromptRepository } from '../interfaces/IRepository';
 import { UserService } from '../../services/UserService';
 import { PromptService } from '../../services/PromptService';
 
 // Mock implementations
-const createMockUserRepository = (): jest.Mocked<IUserRepository> => ({
-  findById: jest.fn(),
-  findAll: jest.fn(),
-  create: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  count: jest.fn(),
-  findByEmail: jest.fn(),
-  findByProvider: jest.fn(),
-  findByRole: jest.fn(),
-  findByOrganization: jest.fn(),
-  updateLastLogin: jest.fn(),
+const createMockUserRepository = (): IUserRepository => ({
+  findById: vi.fn(),
+  findAll: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+  count: vi.fn(),
+  findByEmail: vi.fn(),
+  findByProvider: vi.fn(),
+  findByRole: vi.fn(),
+  findByOrganization: vi.fn(),
+  updateLastLogin: vi.fn(),
 });
 
-const createMockPromptRepository = (): jest.Mocked<IPromptRepository> => ({
-  findById: jest.fn(),
-  findAll: jest.fn(),
-  create: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  count: jest.fn(),
-  findByUserId: jest.fn(),
-  findByPattern: jest.fn(),
-  findByTag: jest.fn(),
-  findByCategory: jest.fn(),
-  findPublic: jest.fn(),
-  findFeatured: jest.fn(),
-  search: jest.fn(),
+const createMockPromptRepository = (): IPromptRepository => ({
+  findById: vi.fn(),
+  findAll: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+  count: vi.fn(),
+  findByUserId: vi.fn(),
+  findByPattern: vi.fn(),
+  findByTag: vi.fn(),
+  findByCategory: vi.fn(),
+  findPublic: vi.fn(),
+  findFeatured: vi.fn(),
+  search: vi.fn(),
+  incrementViews: vi.fn(),
+  updateRating: vi.fn(),
 });
 
 describe('DIContainer', () => {

@@ -9,6 +9,8 @@
  * - Error handling across the entire stack
  */
 
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
+import { Collection, Db, ObjectId } from 'mongodb';
 import { DIContainer, SERVICE_IDS } from '../../di/Container';
 import { UserRepository } from '../mongodb/UserRepository';
 import { PromptRepository } from '../mongodb/PromptRepository';
@@ -18,44 +20,44 @@ import { connectDB } from '@/lib/db/mongodb';
 import type { User, PromptTemplate } from '@/lib/db/schema';
 
 // Mock MongoDB connection
-jest.mock('@/lib/db/mongodb', () => ({
-  connectDB: jest.fn(),
+vi.mock('@/lib/db/mongodb', () => ({
+  connectDB: vi.fn(),
 }));
 
 describe('Repository Pattern Integration', () => {
   let container: DIContainer;
-  let mockDb: any;
-  let mockUserCollection: any;
-  let mockPromptCollection: any;
+  let mockDb: Db;
+  let mockUserCollection: Collection<User>;
+  let mockPromptCollection: Collection<PromptTemplate>;
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock collections
     mockUserCollection = {
-      findOne: jest.fn(),
-      find: jest.fn(),
-      insertOne: jest.fn(),
-      findOneAndUpdate: jest.fn(),
-      deleteOne: jest.fn(),
-      countDocuments: jest.fn(),
-      updateOne: jest.fn(),
+      findOne: vi.fn(),
+      find: vi.fn(),
+      insertOne: vi.fn(),
+      findOneAndUpdate: vi.fn(),
+      deleteOne: vi.fn(),
+      countDocuments: vi.fn(),
+      updateOne: vi.fn(),
     };
 
     mockPromptCollection = {
-      findOne: jest.fn(),
-      find: jest.fn(),
-      insertOne: jest.fn(),
-      findOneAndUpdate: jest.fn(),
-      deleteOne: jest.fn(),
-      countDocuments: jest.fn(),
-      updateOne: jest.fn(),
+      findOne: vi.fn(),
+      find: vi.fn(),
+      insertOne: vi.fn(),
+      findOneAndUpdate: vi.fn(),
+      deleteOne: vi.fn(),
+      countDocuments: vi.fn(),
+      updateOne: vi.fn(),
     };
 
     // Create mock database
     mockDb = {
-      collection: jest.fn().mockImplementation((name) => {
+      collection: vi.fn().mockImplementation((name) => {
         if (name === 'users') return mockUserCollection;
         if (name === 'prompts') return mockPromptCollection;
         return {};
@@ -114,7 +116,9 @@ describe('Repository Pattern Integration', () => {
 
       // Mock database operations
       mockUserCollection.insertOne.mockResolvedValue({ insertedId: createdUser._id });
-      mockUserCollection.findOne.mockResolvedValue(createdUser);
+      mockUserCollection.findOne
+        .mockResolvedValueOnce(null) // findByEmail returns null (no existing user)
+        .mockResolvedValueOnce(createdUser); // findById returns the created user
 
       // Act
       const userService = container.resolve(SERVICE_IDS.USER_SERVICE);
@@ -236,7 +240,7 @@ describe('Repository Pattern Integration', () => {
       // Mock database operations
       mockPromptCollection.insertOne.mockResolvedValue({ insertedId: createdPrompt._id });
       mockPromptCollection.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue(searchResults),
+        toArray: vi.fn().mockResolvedValue(searchResults),
       });
 
       // Act
@@ -313,7 +317,7 @@ describe('Repository Pattern Integration', () => {
 
       // Mock database operations
       mockUserCollection.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue(users),
+        toArray: vi.fn().mockResolvedValue(users),
       });
 
       // Act
@@ -387,7 +391,7 @@ describe('Repository Pattern Integration', () => {
 
       // Mock database operations
       mockPromptCollection.find.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue(prompts),
+        toArray: vi.fn().mockResolvedValue(prompts),
       });
 
       // Act
@@ -428,7 +432,7 @@ describe('Repository Pattern Integration', () => {
       // Arrange
       const error = new Error('MongoDB operation failed');
       mockUserCollection.find.mockReturnValue({
-        toArray: jest.fn().mockRejectedValue(error),
+        toArray: vi.fn().mockRejectedValue(error),
       });
 
       // Act
