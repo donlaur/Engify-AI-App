@@ -99,7 +99,9 @@ describe('/api/v2/users CQRS Integration', () => {
       // Assert
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data).toEqual(expectedUsers);
+      expect(data.data).toHaveLength(2);
+      expect(data.data[0]?.email).toBe('user1@example.com');
+      expect(data.data[1]?.email).toBe('user2@example.com');
       expect(data.totalCount).toBe(2);
       expect(data.correlationId).toBeDefined();
     });

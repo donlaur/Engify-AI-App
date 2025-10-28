@@ -88,7 +88,7 @@ export interface ICommandBus {
  * Query bus interface for dispatching queries
  */
 export interface IQueryBus {
-  send<TQuery extends IQuery, TResult = unknown>(
+  sendQuery<TQuery extends IQuery, TResult = unknown>(
     query: TQuery
   ): Promise<IQueryResult<TResult>>;
 }

@@ -26,11 +26,11 @@ import {
 export class CQRSBus implements ICQRSBus, IHandlerRegistry {
   private commandHandlers = new Map<
     string,
-    ICommandHandler<unknown, unknown>
+    ICommandHandler<ICommand, unknown>
   >();
-  private queryHandlers = new Map<string, IQueryHandler<unknown, unknown>>();
-  private commandValidators = new Map<string, ICommandValidator<unknown>>();
-  private queryValidators = new Map<string, IQueryValidator<unknown>>();
+  private queryHandlers = new Map<string, IQueryHandler<IQuery, unknown>>();
+  private commandValidators = new Map<string, ICommandValidator<ICommand>>();
+  private queryValidators = new Map<string, IQueryValidator<IQuery>>();
 
   /**
    * Register a command handler
@@ -41,7 +41,7 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
   ): void {
     this.commandHandlers.set(
       commandType,
-      handler as ICommandHandler<unknown, unknown>
+      handler as ICommandHandler<ICommand, unknown>
     );
   }
 
@@ -54,7 +54,7 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
   ): void {
     this.queryHandlers.set(
       queryType,
-      handler as IQueryHandler<unknown, unknown>
+      handler as IQueryHandler<IQuery, unknown>
     );
   }
 
@@ -67,7 +67,7 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
   ): void {
     this.commandValidators.set(
       commandType,
-      validator as ICommandValidator<unknown>
+      validator as ICommandValidator<ICommand>
     );
   }
 
@@ -78,7 +78,7 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
     queryType: string,
     validator: IQueryValidator<TQuery>
   ): void {
-    this.queryValidators.set(queryType, validator as IQueryValidator<unknown>);
+    this.queryValidators.set(queryType, validator as IQueryValidator<IQuery>);
   }
 
   /**
@@ -91,7 +91,7 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
       // Validate command
       const validationResult = await this.validateCommand(command);
       if (!validationResult.isValid) {
-        return this.createErrorResult(
+        return this.createErrorResult<TResult>(
           `Validation failed: ${validationResult.errors.map((e) => e.message).join(', ')}`,
           command.correlationId
         );
@@ -100,7 +100,7 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
       // Get handler
       const handler = this.commandHandlers.get(command.type);
       if (!handler) {
-        return this.createErrorResult(
+        return this.createErrorResult<TResult>(
           `No handler found for command type: ${command.type}`,
           command.correlationId
         );
@@ -110,10 +110,10 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
       const result = await (
         handler as ICommandHandler<TCommand, TResult>
       ).handle(command);
-      return result;
+      return result as ICommandResult<TResult>;
     } catch (error) {
       console.error('Command execution error:', error);
-      return this.createErrorResult(
+      return this.createErrorResult<TResult>(
         error instanceof Error ? error.message : 'Unknown error',
         command.correlationId
       );
@@ -123,14 +123,14 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
   /**
    * Send a query
    */
-  async send<TQuery extends IQuery, TResult = unknown>(
+  async sendQuery<TQuery extends IQuery, TResult = unknown>(
     query: TQuery
   ): Promise<IQueryResult<TResult>> {
     try {
       // Validate query
       const validationResult = await this.validateQuery(query);
       if (!validationResult.isValid) {
-        return this.createQueryErrorResult(
+        return this.createQueryErrorResult<TResult>(
           `Validation failed: ${validationResult.errors.map((e) => e.message).join(', ')}`,
           query.correlationId
         );
@@ -139,7 +139,7 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
       // Get handler
       const handler = this.queryHandlers.get(query.type);
       if (!handler) {
-        return this.createQueryErrorResult(
+        return this.createQueryErrorResult<TResult>(
           `No handler found for query type: ${query.type}`,
           query.correlationId
         );
@@ -149,10 +149,10 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
       const result = await (handler as IQueryHandler<TQuery, TResult>).handle(
         query
       );
-      return result;
+      return result as IQueryResult<TResult>;
     } catch (error) {
       console.error('Query execution error:', error);
-      return this.createQueryErrorResult(
+      return this.createQueryErrorResult<TResult>(
         error instanceof Error ? error.message : 'Unknown error',
         query.correlationId
       );
@@ -186,10 +186,10 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
   /**
    * Create error result for commands
    */
-  private createErrorResult(
+  private createErrorResult<TResult = unknown>(
     error: string,
     correlationId?: string
-  ): ICommandResult {
+  ): ICommandResult<TResult> {
     return {
       success: false,
       error,
@@ -201,10 +201,10 @@ export class CQRSBus implements ICQRSBus, IHandlerRegistry {
   /**
    * Create error result for queries
    */
-  private createQueryErrorResult(
+  private createQueryErrorResult<TResult = unknown>(
     error: string,
     correlationId?: string
-  ): IQueryResult {
+  ): IQueryResult<TResult> {
     return {
       success: false,
       error,
