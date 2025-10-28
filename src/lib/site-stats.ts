@@ -17,6 +17,15 @@ function calculateTotalPrompts() {
 }
 
 /**
+ * Calculate total prompts from database
+ * TODO: Connect to actual database
+ */
+export function getTotalPrompts(): number {
+  // Placeholder - will be replaced with database query
+  return 150;
+}
+
+/**
  * Get real-time site statistics
  */
 export function getSiteStats() {
