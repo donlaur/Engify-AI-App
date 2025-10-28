@@ -2,6 +2,25 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import type { Metadata } from 'next';
+import { generateMetadata as generateSEOMetadata } from '@/lib/seo';
+
+// SEO Metadata
+export const metadata: Metadata = generateSEOMetadata({
+  title: 'Prompt Patterns - 23 Battle-Tested Techniques',
+  description: 'Master 23 proven prompt engineering patterns: persona, few-shot, chain-of-thought, and more. Learn techniques used by top AI practitioners worldwide.',
+  keywords: [
+    'prompt patterns',
+    'prompt engineering',
+    'AI techniques',
+    'few-shot learning',
+    'chain-of-thought',
+    'persona pattern',
+    'prompt optimization',
+  ],
+  canonical: '/patterns',
+});
+
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
