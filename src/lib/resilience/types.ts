@@ -117,7 +117,7 @@ export interface ICircuitBreaker {
   // Event handling
   onStateChange(callback: (state: CircuitBreakerState) => void): void;
   onFailure(callback: (error: Error) => void): void;
-  onSuccess(callback: (result: any) => void): void;
+  onSuccess(callback: (result: unknown) => void): void;
 }
 
 /**
@@ -126,7 +126,7 @@ export interface ICircuitBreaker {
 export interface ICircuitBreakerEventHandler {
   onStateChange(state: CircuitBreakerState, circuitName: string): void;
   onFailure(error: Error, circuitName: string): void;
-  onSuccess(result: any, circuitName: string): void;
+  onSuccess(result: unknown, circuitName: string): void;
   onTimeout(timeout: number, circuitName: string): void;
 }
 
