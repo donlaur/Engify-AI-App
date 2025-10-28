@@ -9,18 +9,23 @@
 ## 🎯 Security Principles
 
 ### 1. Defense in Depth
+
 Multiple layers of security, so if one fails, others protect
 
 ### 2. Least Privilege
+
 Users and services get minimum permissions needed
 
 ### 3. Fail Securely
+
 When something goes wrong, fail safely (don't expose data)
 
 ### 4. Never Trust Input
+
 Validate and sanitize all user input
 
 ### 5. Secrets Never in Code
+
 No API keys, passwords, or tokens in source code
 
 ---
@@ -73,7 +78,10 @@ if (!process.env.OPENAI_API_KEY) {
 }
 
 // ✅ CORRECT - Use AWS Secrets Manager (production)
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from '@aws-sdk/client-secrets-manager';
 
 async function getSecret(secretName: string): Promise<string> {
   const client = new SecretsManagerClient({ region: 'us-east-1' });
@@ -109,7 +117,7 @@ const createUserSchema = z.object({
 
 export async function createUser(req: Request) {
   const body = await req.json();
-  
+
   // Validate input
   const result = createUserSchema.safeParse(body);
   if (!result.success) {
@@ -118,15 +126,15 @@ export async function createUser(req: Request) {
       { status: 400 }
     );
   }
-  
+
   const { email, name, role } = result.data;
-  
+
   // Now safe to use
   await db.collection('users').insertOne({
     email,
     name,
     role: role || 'member',
-    createdAt: new Date()
+    createdAt: new Date(),
   });
 }
 ```
@@ -137,7 +145,7 @@ export async function createUser(req: Request) {
 // ❌ WRONG - String concatenation (vulnerable to injection)
 const userId = req.query.id;
 const user = await db.collection('users').findOne({
-  _id: new ObjectId(userId) // If userId is malicious, this could fail
+  _id: new ObjectId(userId), // If userId is malicious, this could fail
 });
 
 // ✅ CORRECT - Validate input first
@@ -149,7 +157,7 @@ if (!result.success) {
 }
 
 const user = await db.collection('users').findOne({
-  _id: new ObjectId(result.data)
+  _id: new ObjectId(result.data),
 });
 ```
 
@@ -188,14 +196,11 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   // User is authenticated
   const data = await getData(session.user.id);
   return NextResponse.json(data);
@@ -211,14 +216,14 @@ export async function DELETE(
   { params }: { params: { userId: string } }
 ) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   // Get requesting user
   const requestingUser = await getUserById(session.user.id);
-  
+
   // Check if user is admin
   if (!isAdmin(requestingUser)) {
     return NextResponse.json(
@@ -226,7 +231,7 @@ export async function DELETE(
       { status: 403 }
     );
   }
-  
+
   // Check if user is in same organization
   const targetUser = await getUserById(params.userId);
   if (targetUser.organizationId !== requestingUser.organizationId) {
@@ -235,10 +240,10 @@ export async function DELETE(
       { status: 403 }
     );
   }
-  
+
   // Now safe to delete
   await deleteUser(params.userId);
-  
+
   // Audit log
   await logAuditEvent(
     requestingUser.organizationId,
@@ -249,7 +254,7 @@ export async function DELETE(
     { email: targetUser.email },
     req
   );
-  
+
   return NextResponse.json({ success: true });
 }
 ```
@@ -265,14 +270,14 @@ export async function createUser(email: string, password: string) {
   if (password.length < 12) {
     throw new Error('Password must be at least 12 characters');
   }
-  
+
   // Hash with cost factor 12 (secure but not too slow)
   const hashedPassword = await hash(password, 12);
-  
+
   await db.collection('users').insertOne({
     email,
     password: hashedPassword,
-    createdAt: new Date()
+    createdAt: new Date(),
   });
 }
 
@@ -304,13 +309,17 @@ const ALGORITHM = 'aes-256-gcm';
 
 export function encrypt(text: string): string {
   const iv = randomBytes(16);
-  const cipher = createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
-  
+  const cipher = createCipheriv(
+    ALGORITHM,
+    Buffer.from(ENCRYPTION_KEY, 'hex'),
+    iv
+  );
+
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
-  
+
   const authTag = cipher.getAuthTag();
-  
+
   // Return iv + authTag + encrypted
   return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
 }
@@ -320,22 +329,28 @@ export function decrypt(encryptedData: string): string {
   const iv = Buffer.from(parts[0], 'hex');
   const authTag = Buffer.from(parts[1], 'hex');
   const encrypted = parts[2];
-  
-  const decipher = createDecipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
+
+  const decipher = createDecipheriv(
+    ALGORITHM,
+    Buffer.from(ENCRYPTION_KEY, 'hex'),
+    iv
+  );
   decipher.setAuthTag(authTag);
-  
+
   let decrypted = decipher.update(encrypted, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
-  
+
   return decrypted;
 }
 
 // Usage: Encrypt user's API keys
 const encryptedKey = encrypt(userApiKey);
-await db.collection('users').updateOne(
-  { _id: userId },
-  { $set: { 'settings.apiKeys.openai.encrypted': encryptedKey } }
-);
+await db
+  .collection('users')
+  .updateOne(
+    { _id: userId },
+    { $set: { 'settings.apiKeys.openai.encrypted': encryptedKey } }
+  );
 ```
 
 ### Data Isolation (Multi-Tenant)
@@ -347,20 +362,26 @@ export async function getConversations(
   userId: string
 ) {
   const db = await getDb();
-  
-  return db.collection('conversations').find({
-    organizationId: organizationId || null, // CRITICAL
-    userId: userId
-  }).toArray();
+
+  return db
+    .collection('conversations')
+    .find({
+      organizationId: organizationId || null, // CRITICAL
+      userId: userId,
+    })
+    .toArray();
 }
 
 // ❌ WRONG - Missing organizationId (DATA LEAK!)
 export async function getConversations(userId: string) {
   const db = await getDb();
-  
-  return db.collection('conversations').find({
-    userId: userId // Missing organizationId - can see other orgs' data!
-  }).toArray();
+
+  return db
+    .collection('conversations')
+    .find({
+      userId: userId, // Missing organizationId - can see other orgs' data!
+    })
+    .toArray();
 }
 ```
 
@@ -393,7 +414,7 @@ export async function GET(req: Request) {
   } catch (error) {
     // Log full error for debugging
     console.error('Error fetching user:', error);
-    
+
     // Return generic message to user
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -415,7 +436,7 @@ export async function GET(req: Request) {
         { status: error.statusCode }
       );
     }
-    
+
     // Unknown error - log and return generic message
     console.error('Unexpected error:', error);
     return NextResponse.json(
@@ -442,7 +463,7 @@ await logAuditEvent(
   user._id,
   {
     ipAddress: req.headers.get('x-forwarded-for'),
-    userAgent: req.headers.get('user-agent')
+    userAgent: req.headers.get('user-agent'),
   },
   req
 );
@@ -456,7 +477,7 @@ await logAuditEvent(
   user._id,
   {
     reason: 'invalid_password',
-    ipAddress: req.headers.get('x-forwarded-for')
+    ipAddress: req.headers.get('x-forwarded-for'),
   },
   req
 );
@@ -512,14 +533,11 @@ const ratelimit = new Ratelimit({
 export async function POST(req: Request) {
   const ip = req.headers.get('x-forwarded-for') || 'unknown';
   const { success } = await ratelimit.limit(ip);
-  
+
   if (!success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429 }
-    );
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
-  
+
   // Process request
 }
 ```

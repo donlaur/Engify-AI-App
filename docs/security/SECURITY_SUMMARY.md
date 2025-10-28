@@ -7,7 +7,9 @@
 ## ✅ What We've Implemented
 
 ### 1. Comprehensive Security Guide
+
 **[SECURITY_GUIDE.md](./SECURITY_GUIDE.md)** - Complete security standards covering:
+
 - What NEVER goes in code (secrets, passwords, keys)
 - Input validation (Zod for all user input)
 - Authentication & authorization patterns
@@ -18,7 +20,9 @@
 - Dependency security
 
 ### 2. Automated Security Checks
+
 **Pre-commit hooks** that automatically check for:
+
 - ✅ Hardcoded secrets (API keys, passwords, tokens)
 - ✅ MongoDB connection strings with credentials
 - ✅ AWS access keys
@@ -29,15 +33,19 @@
 - ✅ Exposed error stack traces
 
 ### 3. Security Check Script
+
 **[scripts/security-check.js](../scripts/security-check.js)** - Runs before every commit:
+
 - Scans all staged files
 - Detects security issues
 - Blocks commits with critical/high issues
 - Provides clear error messages
 
 ### 4. Updated .gitignore
+
 **[.gitignore](../.gitignore)** - Prevents committing:
-- All environment files (.env*)
+
+- All environment files (.env\*)
 - Secrets and credentials
 - Build artifacts
 - Dependencies
@@ -105,10 +113,7 @@ const userSchema = z.object({
 // Validate
 const result = userSchema.safeParse(input);
 if (!result.success) {
-  return NextResponse.json(
-    { error: 'Invalid input' },
-    { status: 400 }
-  );
+  return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
 }
 ```
 
@@ -117,13 +122,13 @@ if (!result.success) {
 ```typescript
 // ✅ ALWAYS include organizationId
 const conversations = await db.collection('conversations').find({
-  organizationId: user.organizationId,  // CRITICAL
-  userId: user._id
+  organizationId: user.organizationId, // CRITICAL
+  userId: user._id,
 });
 
 // ❌ NEVER - Missing organizationId (DATA LEAK!)
 const conversations = await db.collection('conversations').find({
-  userId: user._id  // Missing organizationId!
+  userId: user._id, // Missing organizationId!
 });
 ```
 
@@ -203,13 +208,8 @@ pnpm add -D lint-staged
     "prepare": "husky install"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md}": [
-      "prettier --write"
-    ]
+    "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md}": ["prettier --write"]
   }
 }
 ```
@@ -315,6 +315,7 @@ if (!apiKey) {
 ### For Every Pull Request
 
 **Reviewer Checklist**:
+
 - [ ] No secrets in code
 - [ ] All user input validated
 - [ ] Authentication checked on protected routes
@@ -329,6 +330,7 @@ if (!apiKey) {
 ### Security-Critical Changes
 
 If PR touches:
+
 - Authentication/authorization
 - Database queries
 - User input handling
@@ -337,6 +339,7 @@ If PR touches:
 - Session management
 
 **Require**:
+
 - Two approvals (one from security-aware reviewer)
 - Comprehensive tests
 - Security documentation update
@@ -348,16 +351,19 @@ If PR touches:
 ### Track These
 
 **Code Quality**:
+
 - Zero secrets committed (enforced by pre-commit)
 - 100% input validation coverage
 - Zero data isolation violations
 
 **Vulnerability Management**:
+
 - npm audit clean (no high/critical vulnerabilities)
 - Dependencies updated monthly
 - Security patches applied within 24 hours
 
 **Incident Response**:
+
 - Time to detect: < 1 hour
 - Time to respond: < 4 hours
 - Time to resolve: < 24 hours
@@ -434,6 +440,7 @@ If PR touches:
 6. ✅ Clear documentation
 
 **Every commit is automatically checked for**:
+
 - Hardcoded secrets
 - Data isolation violations
 - Unsafe patterns
