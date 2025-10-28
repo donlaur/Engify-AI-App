@@ -409,3 +409,164 @@ Review of Claude Connectors - how to integrate Claude with various tools and wor
 - [ ] Reference in AI provider documentation
 
 **Saved for Phase 6-7!** ✅
+
+---
+
+## MCP Integration Strategy
+
+**Date Added**: Oct 28, 2025  
+**Relevance**: High - Improve development workflow  
+**Phase to Integrate**: Phase 2-3 (Infrastructure)  
+**Priority**: High
+
+### Recommended MCPs for Engify.ai
+
+#### 1. **@modelcontextprotocol/server-filesystem** (HIGHEST PRIORITY)
+
+**Why**: Access and manage project files
+**Use Cases**:
+
+- Read prompt templates from `/data/` folder
+- Access documentation for context
+- Read/write user-generated prompts
+- Manage content files
+
+**Integration**:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/donlaur/dev/Engify-AI-App"
+      ]
+    }
+  }
+}
+```
+
+#### 2. **@modelcontextprotocol/server-mongodb** (HIGH PRIORITY)
+
+**Why**: Direct database access for development
+**Use Cases**:
+
+- Query user data during debugging
+- Test database operations
+- Analyze usage patterns
+- Debug prompt storage
+
+**Integration**:
+
+```json
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-mongodb",
+        "mongodb://localhost:27017/engify"
+      ]
+    }
+  }
+}
+```
+
+#### 3. **@modelcontextprotocol/server-github** (MEDIUM PRIORITY)
+
+**Why**: Manage GitHub issues, PRs, and repo
+**Use Cases**:
+
+- Create issues from bugs
+- Review PRs
+- Check commit history
+- Manage project board
+
+**Integration**:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "your-token"
+      }
+    }
+  }
+}
+```
+
+#### 4. **Custom MCP: Prompt Pattern Server** (BUILD THIS!)
+
+**Why**: Domain-specific MCP for prompt engineering
+**Use Cases**:
+
+- Validate prompts against patterns
+- Suggest pattern improvements
+- Analyze prompt effectiveness
+- Generate pattern variations
+
+### Implementation Plan
+
+#### Phase 1: Setup (Now)
+
+- [ ] Install filesystem MCP
+- [ ] Configure in `.windsurf/mcp.json`
+- [ ] Test with project files
+- [ ] Document usage
+
+#### Phase 2: Database Access (Phase 2)
+
+- [ ] Install MongoDB MCP
+- [ ] Configure connection
+- [ ] Test queries
+- [ ] Add to development workflow
+
+#### Phase 3: GitHub Integration (Phase 3)
+
+- [ ] Install GitHub MCP
+- [ ] Generate token
+- [ ] Configure repo access
+- [ ] Test issue creation
+
+#### Phase 4: Custom MCP (Phase 6-7)
+
+- [ ] Design Prompt Pattern Server
+- [ ] Implement validation logic
+- [ ] Add pattern matching
+- [ ] Integrate with workbench
+- [ ] Publish as npm package
+
+### Immediate Action: Add Filesystem MCP
+
+**File**: `.windsurf/mcp.json`
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/donlaur/dev/Engify-AI-App"
+      ]
+    }
+  }
+}
+```
+
+### Benefits
+
+1. **Faster Development**: Direct file access
+2. **Better Context**: AI understands project structure
+3. **Database Debugging**: Query data directly
+4. **GitHub Workflow**: Manage issues/PRs
+5. **Custom Tools**: Domain-specific MCPs
+
+**Saved for Phase 2-3!** ✅
