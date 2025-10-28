@@ -11,6 +11,8 @@
     "type-check": "tsc --noEmit",
     "seed": "tsx src/lib/db/seed.ts",
     "seed:prompts": "tsx scripts/seed-prompts-to-db.ts",
+    "test:prompts": "tsx scripts/test-prompts-batch.ts",
+    "analyze:tests": "tsx scripts/analyze-test-results.ts",
     "db:seed": "npm run seed",
     "db:reset": "npm run seed",
     "test:api": "tests/api/run-all-tests.sh",
