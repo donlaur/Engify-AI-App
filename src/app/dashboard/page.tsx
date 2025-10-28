@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+// import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts'; // TODO: Replace with database
 
 export default function DashboardPage() {
   // Real user data from session
@@ -24,7 +24,7 @@ export default function DashboardPage() {
   };
 
   // Get prompts for stats
-  const allPrompts = getSeedPromptsWithTimestamps();
+  const allPrompts: any[] = []; // TODO: Get from database
 
   // Real user stats - starts at zero
   const stats = {
