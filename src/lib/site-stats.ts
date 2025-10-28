@@ -24,8 +24,9 @@ export function getSiteStats() {
 
   return {
     // Core metrics
-    totalPrompts: playbookPrompts, // Dynamic from playbooks.ts
-    totalPatterns: 15, // From PROMPT_PATTERNS_RESEARCH.md
+    totalPrompts: playbookPrompts, // Dynamic from playbooks.ts (76 prompts)
+    totalPatterns: 23, // Updated: 8 basic + 8 advanced + 7 production patterns
+    totalArticles: 46, // 26 original + 10 Claude + 10 Gemini
     aiProviders: 4, // OpenAI, Anthropic Claude, Google Gemini, Groq
 
     // User metrics (will come from MongoDB later)
