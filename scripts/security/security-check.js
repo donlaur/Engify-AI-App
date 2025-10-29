@@ -215,6 +215,18 @@ const unsafePatterns = [
       )) {
         return false;
       }
+      // Allow Redis EVAL (Lua script execution in Redis, not JavaScript eval)
+      if (filePath && (
+        filePath.includes('RedisAdapter') ||
+        filePath.includes('redis') && (
+          content.includes('Redis EVAL') ||
+          content.includes('Lua script') ||
+          content.includes('ioredis') ||
+          content.includes('redisClient[luaMethod]')
+        )
+      )) {
+        return false;
+      }
       return true;
     },
     severity: 'CRITICAL',
