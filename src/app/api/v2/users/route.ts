@@ -30,6 +30,7 @@ import { cqrsBus } from '@/lib/cqrs/bus';
 import { initializeCQRS } from '@/lib/cqrs/registration';
 import { UserCommands } from '@/lib/cqrs/commands/UserCommands';
 import { UserQueries } from '@/lib/cqrs/queries/UserQueries';
+import { RBACPresets } from '@/lib/middleware/rbac';
 
 // Initialize CQRS lazily
 let cqrsInitialized = false;
@@ -61,8 +62,13 @@ const createUserSchema = z.object({
 /**
  * GET /api/v2/users
  * Query: Get all users or users with filters using CQRS pattern
+ * Requires users:read permission
  */
 export async function GET(request: NextRequest) {
+  // RBAC: users:read permission
+  const rbacCheck = await RBACPresets.requireUserRead()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     // Ensure CQRS is initialized
     ensureCQRSInitialized();
@@ -158,8 +164,13 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/v2/users
  * Command: Create a new user using CQRS pattern
+ * Requires users:write permission
  */
 export async function POST(request: NextRequest) {
+  // RBAC: users:write permission
+  const rbacCheck = await RBACPresets.requireUserWrite()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     // Ensure CQRS is initialized
     ensureCQRSInitialized();

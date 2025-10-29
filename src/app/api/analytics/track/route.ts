@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { z } from 'zod';
+import { RBACPresets } from '@/lib/middleware/rbac';
 
 const trackSchema = z.object({
   promptId: z.string(),
@@ -20,12 +21,17 @@ export async function POST(req: NextRequest) {
 
     const db = await getMongoDb();
     const now = new Date();
-    
+
     // Track event
+    // ISO string always contains 'T', so split will always have at least 2 elements
+    const isoString = now.toISOString();
+    const dateParts = isoString.split('T');
+    const date =
+      dateParts.length >= 1 ? dateParts[0] : isoString.substring(0, 10);
     await db.collection('analytics_events').insertOne({
       ...data,
       timestamp: now,
-      date: now.toISOString().split('T')[0], // For daily aggregation
+      date, // For daily aggregation
     });
 
     // Update prompt stats (aggregated)
@@ -57,19 +63,25 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  // RBAC: analytics:read permission
+  const rbacCheck = await RBACPresets.requireAnalyticsAccess()(req);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const { searchParams } = new URL(req.url);
     const promptId = searchParams.get('promptId');
 
     const db = await getMongoDb();
-    
+
     if (promptId) {
-      // Get stats for specific prompt
+      // Get stats for specific prompt (public analytics - no org isolation needed)
+      // Note: prompt_stats collection stores aggregated public analytics data
       const stats = await db.collection('prompt_stats').findOne({ promptId });
       return NextResponse.json({ stats: stats || {} });
     }
 
-    // Get top prompts
+    // Get top prompts (public analytics - no org isolation needed)
+    // Note: prompt_stats collection stores aggregated public analytics data
     const topPrompts = await db
       .collection('prompt_stats')
       .find({})

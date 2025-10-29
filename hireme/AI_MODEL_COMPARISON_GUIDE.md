@@ -250,4 +250,9 @@ For each AI-generated resume, score 1-10 on:
 
 ---
 
+## Context
+
+- **YouTube EDU**: Platform for educational content, long-form playback for lectures, enhancing accessibility and engagement.
+- **SIU's iTunesU**: Managed content distribution, expanded podcasts and coursework availability.
+
 **Remember**: The goal is callbacks, not perfection. Ship it, test it, iterate.

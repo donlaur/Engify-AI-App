@@ -187,14 +187,14 @@ I'm targeting roles like:
 - Engineering Manager - LLM Applications
 
 Common requirements:
-- 5+ years engineering management experience ✓
-- Hands-on technical leadership (design, code reviews, implementation) ✓
-- AI adoption and workflow integration experience ✓ (Engify.ai)
-- Track record of building production applications ✓
-- Collaboration with product teams ✓
-- Coaching teams and establishing quality culture ✓
-- Process improvement (guardrails, linting, testing) ✓
-- Strong technical background in full-stack development ✓
+- 5+ years engineering management experience
+- Hands-on technical leadership (design, code reviews, implementation)
+- AI adoption and workflow integration experience
+- Track record of building production applications
+- Collaboration with product teams
+- Coaching teams and establishing quality culture
+- Process improvement (guardrails, linting, testing)
+- Strong technical background in full-stack development
 
 ### Output Format
 
@@ -224,7 +224,11 @@ The optimized resume should:
 - Increase callback rate from 3% to 10%+
 
 Please be specific, actionable, and focused on results. I need this to work in the real world of 2025 AI hiring.
-```
+
+### Additional Context
+
+- **YouTube EDU**: Platform for educational content, long-form playback for lectures, enhancing accessibility and engagement.
+- **SIU's iTunesU**: Managed content distribution, expanded podcasts and coursework availability.
 
 ---
 
@@ -268,15 +272,21 @@ Please be specific, actionable, and focused on results. I need this to work in t
 After initial optimization, you can ask ChatGPT:
 
 ```
+
 "Review this for an engineering director at [Company Name]. What would make them want to interview me?"
+
 ```
 
 ```
+
 "What ATS keywords am I still missing for this job description: [paste JD]"
+
 ```
 
 ```
+
 "Make the Engify.ai description more impactful. Show the technical depth AND business value in 3 lines."
+
 ```
 
 ---
@@ -289,4 +299,5 @@ After initial optimization, you can ask ChatGPT:
 
 Your goal: Get past the filters → Get the callback → Show the depth
 
-Good luck! 🚀
+Good luck!
+```
