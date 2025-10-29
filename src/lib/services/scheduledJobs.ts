@@ -9,10 +9,8 @@
  */
 
 import { QStashMessageQueue } from '@/lib/messaging/queues/QStashMessageQueue';
-import { _apiKeyUsageService } from './ApiKeyUsageService';
-import { _sendEmail } from './emailService';
-import { _SendGridTemplateBuilders } from './sendgridTemplates';
-import { _getDb } from '@/lib/mongodb';
+import { logger } from '@/lib/logging/logger';
+import type { QueueConfig } from '@/lib/messaging/types';
 
 export interface ScheduledJob {
   id: string;
@@ -28,7 +26,18 @@ export class ScheduledJobsService {
   private baseUrl: string;
 
   constructor() {
-    this.queue = new QStashMessageQueue('scheduled-jobs', 'redis');
+    const config: QueueConfig = {
+      name: 'scheduled-jobs',
+      type: 'redis',
+      maxRetries: 3,
+      retryDelay: 5000,
+      visibilityTimeout: 60000,
+      batchSize: 10,
+      concurrency: 1,
+      enableDeadLetter: false,
+      enableMetrics: false,
+    };
+    this.queue = new QStashMessageQueue('scheduled-jobs', 'redis', config);
     this.baseUrl =
       process.env.QSTASH_WEBHOOK_URL ||
       process.env.NEXTAUTH_URL ||
@@ -54,7 +63,7 @@ export class ScheduledJobsService {
 
       await this.queue.publish({
         id: `job-${jobName}-${Date.now()}`,
-        type: 'scheduled-job',
+        type: 'job',
         payload: {
           jobName,
           schedule,
@@ -69,7 +78,7 @@ export class ScheduledJobsService {
         jobId: `job-${jobName}-${Date.now()}`,
       };
     } catch (error) {
-      console.error(`Error scheduling job ${jobName}:`, error);
+      logger.apiError('scheduledJobs.scheduleJob', error, { jobName });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
