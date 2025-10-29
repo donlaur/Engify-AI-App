@@ -8,6 +8,7 @@ import { auth } from '@/lib/auth';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { z } from 'zod';
 import { RBACPresets } from '@/lib/middleware/rbac';
+import { logger } from '@/lib/logging/logger';
 
 const favoriteSchema = z.object({
   promptId: z.string(),
@@ -51,8 +52,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Favorites API error:', error);
+    logger.apiError('/api/prompts/favorites', error, { method: 'POST' });
     return NextResponse.json(
       {
         error: 'Failed to add favorite',
@@ -86,8 +86,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ favorites });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Favorites API error:', error);
+    logger.apiError('/api/prompts/favorites', error, { method: 'GET' });
     return NextResponse.json(
       {
         error: 'Failed to fetch favorites',
@@ -127,8 +126,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Favorites API error:', error);
+    logger.apiError('/api/prompts/favorites', error, { method: 'DELETE' });
     return NextResponse.json(
       {
         error: 'Failed to remove favorite',
