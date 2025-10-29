@@ -155,8 +155,6 @@ export async function PUT(
     const body = await request.json();
 
     // Validate request body
-
-    // Validate request body
     const validatedData = updateUserSchema.parse(body);
 
     // Update user
