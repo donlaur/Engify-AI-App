@@ -1,9 +1,25 @@
 # Gemini Deep Research Prompt: Enterprise Design System for Engify.ai
 
+## Context
+
+**IMPORTANT**: This design system is specifically for **SECONDARY/WORK PAGES** (Library, Patterns, Workbench, Multi-Agent, etc.) where users spend 30+ minutes reading and working.
+
+**Homepage Design**: We already have a vibrant, eye-catching homepage with bold gradients (red→purple→blue) and high-energy visuals. This is perfect for marketing and first impressions. **Keep the homepage design as-is.**
+
+**Secondary Pages Need**: A completely different, text-optimized design system that prioritizes readability, reduces eye strain, and supports extended work sessions. Think "productive workspace" not "marketing landing page."
+
 ## Prompt for Gemini
 
 ```
-I need you to create a comprehensive design system and brand guide for Engify.ai, an enterprise AI-powered prompt engineering education platform. The design must be:
+I need you to create a comprehensive design system and brand guide for Engify.ai's SECONDARY/WORK PAGES (not the homepage). This is for an enterprise AI-powered prompt engineering education platform.
+
+CRITICAL CONTEXT:
+- Homepage: Already has vibrant gradients and bold colors (perfect for marketing)
+- Secondary Pages: Need professional, readable, text-rich workspace design
+- Users spend 30+ minutes on these pages reading documentation, using tools, learning
+- Must support both light mode (daytime work) and dark mode (extended coding sessions)
+
+The design must be:
 
 1. PROFESSIONAL & ENTERPRISE-READY
    - Suitable for Fortune 500 companies
@@ -25,6 +41,90 @@ I need you to create a comprehensive design system and brand guide for Engify.ai
      * Distinct visual identity (not just inverted colors)
      * Proper depth and hierarchy
      * Comfortable for 8+ hour work sessions
+
+## TECHNICAL STACK TO RESEARCH:
+
+Before designing, please research these technologies we're using:
+
+1. **Tailwind CSS v3.4+**
+   - Understand the color palette system
+   - Research dark mode implementation (`class` strategy)
+   - Study the spacing scale and typography utilities
+   - Review best practices for custom color definitions
+
+2. **Shadcn/UI Component Library**
+   - Analyze their default color system
+   - Understand how they handle light/dark mode
+   - Study their component variants and states
+   - Review their accessibility approach
+
+3. **Next.js 15 + React 18**
+   - Understand CSS custom properties support
+   - Research theme switching patterns
+   - Study SSR implications for dark mode
+
+4. **Modern Enterprise SaaS Design**
+   - Analyze Linear's color system and dark mode
+   - Study Stripe's professional palette
+   - Review Vercel's developer-focused design
+   - Examine Notion's comfortable workspace design
+   - Look at GitHub's code-focused dark mode
+
+## PAGES THAT NEED COLOR PALETTES:
+
+Please provide specific color recommendations for these page types:
+
+### 1. Documentation/Learning Pages
+**Examples**: `/patterns`, `/learn`, `/library`
+**Needs**:
+- Background colors for long-form text
+- Syntax highlighting colors (code blocks)
+- Callout/alert box colors (info, warning, tip, danger)
+- Inline code background
+- Link colors (default, hover, visited)
+- Heading hierarchy colors
+- Blockquote styling
+- Table row alternating colors
+
+### 2. Interactive Tool Pages
+**Examples**: `/workbench/multi-agent`, `/demo`, `/playground`
+**Needs**:
+- Card backgrounds (multiple elevation levels)
+- Input field colors (default, focus, error, disabled)
+- Button variants (primary, secondary, outline, ghost, destructive)
+- Badge/pill colors for status indicators
+- Progress bar colors
+- Loading state colors
+- Success/error feedback colors
+
+### 3. Data-Heavy Pages
+**Examples**: `/dashboard`, `/analytics`, `/reports`
+**Needs**:
+- Chart/graph color palette (8-10 distinct colors)
+- Data table colors (header, row, hover, selected)
+- Metric card backgrounds
+- Trend indicators (up/down/neutral)
+- Heatmap colors
+
+### 4. Navigation & Chrome
+**Examples**: Header, sidebar, footer
+**Needs**:
+- Header background (with backdrop blur)
+- Active navigation indicator
+- Hover states for menu items
+- Breadcrumb colors
+- Footer background and text
+
+### 5. Form & Input Pages
+**Examples**: `/settings`, `/profile`, `/onboarding`
+**Needs**:
+- Form field backgrounds
+- Label colors
+- Placeholder text
+- Helper text
+- Error message colors
+- Validation states (success, error, warning)
+- Disabled state colors
 
 ## SPECIFIC REQUIREMENTS:
 
