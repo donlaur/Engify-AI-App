@@ -141,6 +141,11 @@ const validationRules = [
         return false;
       }
       
+      // Skip user-scoped queries (filtered by userId, not organizationId)
+      if (match.includes('userId') && (content.includes('user-scoped') || content.includes('user-specific'))) {
+        return false;
+      }
+      
       // Check if this is a multi-tenant collection
       const multiTenantCollections = ['users', 'conversations', 'prompt_templates', 'audit_logs'];
       const isMultiTenant = multiTenantCollections.some(col => content.includes(`'${col}'`) || content.includes(`"${col}"`));

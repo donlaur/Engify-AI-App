@@ -1,0 +1,125 @@
+================================================================================
+                              DONNIE LAUR
+================================================================================
+
+Engineering Manager | AI Adoption | Technical Leadership
+
++16182014460 ◇ donlaur@gmail.com ◇ Snellville, Georgia
+◇ LinkedIn: linkedin.com/in/donlaur ◇ GitHub: github.com/donlaur
+
+================================================================================
+SUMMARY
+================================================================================
+
+Results-driven Engineering Manager with 20+ years of experience building and 
+leading high-performing, remote-first teams. Proven ability to bridge strategic 
+leadership with hands-on technical contribution, directly impacting team velocity 
+and product quality. A champion for practical AI adoption, demonstrated by founding 
+and building two SaaS platforms (Engify.ai, HireLadder.ai) to solve real-world 
+workflow challenges. Expertise in the full people management lifecycle, having 
+hired 15+ engineers and achieved zero attrition through empathy-driven coaching 
+and structured career development. BS in Computer Science with graduate-level 
+coursework in Interactive Multimedia and Project Management.
+
+================================================================================
+AREAS OF EXPERTISE
+================================================================================
+
+* People Leadership:      Hiring, Onboarding, 1-on-1 Coaching, Performance Mgmt, 
+                          Career Ladders, Retention (Zero Attrition), Team Building
+* AI & Modernization:     Gen AI Integration, Prompt Engineering, AI Copilot Adoption, 
+                          AI-Augmented SDLC, Multi-Provider AI Strategy
+* Technical Execution:    Full-Stack Architecture, Code Reviews, Design Leadership, 
+                          TypeScript, Node.js, React, Next.js, Python, Go, PHP
+* Process & Quality:      Agile/Scrum, CI/CD, Quality Gates, Automated Testing (Jest, 
+                          Playwright), SDLC Optimization, DORA Metrics
+* Organizational Impact:  Risk Management, Governance, FedRAMP/SOC 2 Compliance, 
+                          Cross-Functional Collaboration, Strategic Planning
+
+================================================================================
+PROFESSIONAL EXPERIENCE
+================================================================================
+
+FOUNDER & PRINCIPAL ENGINEER, Engify.ai & HireLadder.ai | 2024 – Present
+--------------------------------------------------------------------------------
+* **Product Innovation:** Conceived and built two production-ready SaaS platforms 
+  (Engify.ai, HireLadder.ai) to address market needs in AI adoption and hiring.
+* **Full-Stack Execution:** Architected and coded entire platforms using Next.js, 
+  TypeScript, and MongoDB, demonstrating hands-on technical leadership. 
+  (4,300+ GitHub contributions in the last year).
+* **AI Integration:** Implemented multi-provider AI (OpenAI, Anthropic, Google) 
+  with intelligent routing, showcasing practical application of Gen AI.
+* **Quality Engineering:** Established a full quality suite including unit tests 
+  (80%+ coverage), E2E tests, and CI/CD pipelines with automated quality gates.
+
+TECHNICAL DELIVERY MANAGER, Juvare | 2025 – 2025
+--------------------------------------------------------------------------------
+* **Team Leadership (14 Engineers):** Led 4 teams in a high-compliance FedRAMP 
+  environment, managing the full people lifecycle from hiring to career growth.
+* **AI Adoption:** Mentored team on integrating AI copilots (Copilot, Claude), 
+  improving team velocity by 25% while maintaining security standards.
+* **Process Improvement:** Reduced recurring client issues by 40% by implementing 
+  a formal RCA process. Decreased mid-sprint blockers by 35% through improved 
+  Agile planning.
+* **Stakeholder Management:** Collaborated with federal clients (VA, DoD, FEMA) to 
+  align technical solutions with mission-critical business requirements.
+
+SOFTWARE ENGINEERING MANAGER, Valimail | 2022 – 2024
+--------------------------------------------------------------------------------
+* **People Development:** Designed and rolled out a comprehensive Career Ladder 
+  framework from scratch. Hired 4 engineers and promoted 2, achieving zero 
+  attrition during tenure through structured coaching and weekly 1-on-1s.
+* **Project Delivery:** Increased project efficiency by 20% and reduced cycle time 
+  by 20% by standardizing Agile ceremonies and improving cross-functional 
+  collaboration with product and design.
+* **Organizational Leadership:** Served on the company-wide Values/Behaviors and 
+  Risk Management Councils, contributing to culture and governance beyond the 
+  engineering department.
+* **Compliance & Security:** Led engineering efforts for FedRAMP, SOC 2, and Pen 
+  Testing initiatives, demonstrating enterprise-level security ownership.
+
+ENGINEERING MANAGER / TECHNICAL LEAD, Variant | 2020 – 2022
+--------------------------------------------------------------------------------
+* **Team Scaling (12 Engineers):** Grew team from 8 to 12 by hiring 4 engineers 
+  (offshore & domestic). Reduced new-hire ramp-up time by 40% by creating a 
+  structured onboarding program.
+* **Process Optimization:** Enhanced team efficiency by 50% by implementing a new 
+  technical planning process and acting as the central communication point to 
+  remove blockers.
+* **Global Team Management:** Successfully managed distributed teams across a 
+  10-hour time zone difference, establishing robust asynchronous communication 
+  protocols.
+
+================================================================================
+EARLY CAREER (2000 – 2020)
+================================================================================
+
+* **JAVASCRIPT DEVELOPER, Piksel Inc.:** Provided technical leadership on a global 
+  team building HTML5 video players for OTT platforms, improving load times by 15%.
+* **SENIOR CREATIVE APPLICATION DEVELOPER, Visix, Inc.:** Led development of custom 
+  web apps, earning 20+ industry awards for software innovation.
+* **DIGITAL MEDIA SYSTEMS SPECIALIST, Southern Illinois University:** Spearheaded 
+  100+ web projects, saving the university $30K annually. Led the university's 
+  pioneering iTunesU and YouTube EDU initiatives and served on the A/P Staff Council.
+* **EARLY ROLES:** Senior Software Engineer (Kellen Digital), Software Engineer 
+  (Dechow Consulting).
+
+================================================================================
+EDUCATION & PROFESSIONAL DEVELOPMENT
+================================================================================
+
+* **BACHELOR OF SCIENCE IN COMPUTER SCIENCE**
+  Southern Illinois University, Carbondale, IL
+
+* **PROFESSIONAL DEVELOPMENT**
+  - Multiple formal Engineering Management & Executive Leadership training programs.
+  - Extensive training in Agile/Scrum, Project Management, and SDLC optimization.
+  - Continuous learning in AI/ML, cloud architecture, and modern JS frameworks.
+
+================================================================================
+GENERATED BY: Gemini 2.5 Pro (Simulated)
+APPROACH: Data-driven and outcome-focused. Structured for high scannability by 
+          busy executives. Prioritizes quantifiable metrics and balances the 4 
+          key CTO requirements: hands-on leadership, AI adoption, product 
+          collaboration, and team coaching.
+================================================================================

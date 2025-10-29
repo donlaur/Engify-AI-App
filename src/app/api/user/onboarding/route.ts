@@ -8,8 +8,13 @@ import { auth } from '@/lib/auth';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { onboardingSchema } from '@/lib/schemas/user-profile';
 import { ObjectId } from 'mongodb';
+import { RBACPresets } from '@/lib/middleware/rbac';
 
 export async function POST(req: NextRequest) {
+  // RBAC: users:write permission (users can update their own onboarding data)
+  const rbacCheck = await RBACPresets.requireUserWrite()(req);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
     if (!session?.user) {
@@ -20,7 +25,7 @@ export async function POST(req: NextRequest) {
     const data = onboardingSchema.parse(body);
 
     const db = await getMongoDb();
-    
+
     // Update user with onboarding data
     await db.collection('users').updateOne(
       { _id: new ObjectId(session.user.id) },
@@ -39,9 +44,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Onboarding error:', error);
     return NextResponse.json(
-      { error: 'Failed to save onboarding data' },
+      {
+        error: 'Failed to save onboarding data',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
