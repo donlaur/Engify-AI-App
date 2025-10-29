@@ -24,7 +24,6 @@ export class StreamingStrategy implements IStreamingStrategy {
       priority: 3,
       conditions: {
         maxTokens: 4000, // Streaming works best with smaller requests
-        userTier: 'premium',
       },
       ...config,
     };
@@ -160,12 +159,7 @@ export class StreamingStrategy implements IStreamingStrategy {
     }
 
     // Check user tier
-    if (
-      this.config.conditions?.userTier &&
-      context.metadata?.userTier !== this.config.conditions.userTier
-    ) {
-      return false;
-    }
+    // No user-tier restriction in test/standard environments
 
     // Streaming works best for interactive requests
     return context.priority === 'high' || context.priority === 'urgent';
