@@ -52,10 +52,10 @@ export class ScheduledJobsService {
     jobName: string,
     schedule: string, // Cron: "0 9 * * *" or Duration: "PT1H"
     payload: unknown,
-    endpoint: string
+    _endpoint: string
   ): Promise<{ success: boolean; jobId?: string; error?: string }> {
     try {
-      const _fullUrl = `${this.baseUrl}${endpoint}`;
+      // const fullUrl = `${this.baseUrl}${endpoint}`; // reserved for direct invokes
 
       // QStash supports scheduled messages via delay or cron
       // Using QStash publish with delay for now
@@ -69,7 +69,6 @@ export class ScheduledJobsService {
           schedule,
           ...(typeof payload === 'object' ? payload : { data: payload }),
         },
-        timestamp: Date.now(),
         priority: 'normal',
       });
 
