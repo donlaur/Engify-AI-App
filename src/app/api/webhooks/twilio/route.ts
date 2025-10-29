@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         userId: 'system',
         action: 'TWILIO_WEBHOOK_SIGNATURE_FAILED',
         resource: 'webhook',
-        metadata: {
+        details: {
           url,
         },
       });
@@ -108,7 +108,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Twilio expects 200 response with TwiML or empty
-    return NextResponse.xml('<Response></Response>', {
+    return new NextResponse('<Response></Response>', {
+      status: 200,
       headers: {
         'Content-Type': 'text/xml',
       },
@@ -122,13 +123,14 @@ export async function POST(request: NextRequest) {
       userId: 'system',
       action: 'TWILIO_WEBHOOK_ERROR',
       resource: 'webhook',
-      metadata: {
+      details: {
         error: error instanceof Error ? error.message : String(error),
       },
     });
 
     // Still return 200 to prevent Twilio retries
-    return NextResponse.xml('<Response></Response>', {
+    return new NextResponse('<Response></Response>', {
+      status: 200,
       headers: {
         'Content-Type': 'text/xml',
       },
@@ -147,7 +149,7 @@ async function processSMSStatus(callback: TwilioStatusCallback) {
     userId: 'system',
     action: 'SMS_STATUS_UPDATE',
     resource: 'sms',
-    metadata: {
+    details: {
       messageId,
       status,
       to: callback.To,
@@ -186,7 +188,7 @@ async function processCallStatus(callback: TwilioStatusCallback) {
     userId: 'system',
     action: 'CALL_STATUS_UPDATE',
     resource: 'voice',
-    metadata: {
+    details: {
       callSid: callback.CallSid,
       status: callback.CallStatus,
       duration: callback.CallDuration,

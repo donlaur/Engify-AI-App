@@ -55,7 +55,12 @@ export type AuditAction =
   | 'message_processing_error'
   | 'message_callback_received'
   | 'callback_processing_error'
-  | 'INBOUND_EMAIL_RECEIVED';
+  | 'INBOUND_EMAIL_RECEIVED'
+  | 'WEBHOOK_ERROR'
+  | 'TWILIO_WEBHOOK_SIGNATURE_FAILED'
+  | 'TWILIO_WEBHOOK_ERROR'
+  | 'SMS_STATUS_UPDATE'
+  | 'CALL_STATUS_UPDATE';
 
 export type AuditSeverity = 'info' | 'warning' | 'error' | 'critical';
 
