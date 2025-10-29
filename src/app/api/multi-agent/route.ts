@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+// Use Groq (free tier) if OpenAI key not available
+const apiKey = process.env.OPENAI_API_KEY || process.env.GROQ_API_KEY;
+const baseURL =
+  process.env.GROQ_API_KEY && !process.env.OPENAI_API_KEY
+    ? 'https://api.groq.com/openai/v1'
+    : undefined;
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey,
+  baseURL,
 });
 
 interface MultiAgentRequest {
@@ -121,9 +129,11 @@ export async function POST(request: NextRequest) {
     // Build the multi-agent prompt
     const prompt = buildMultiAgentPrompt(idea, roles, mode);
 
-    // Call OpenAI
+    // Call OpenAI or Groq
+    const model = baseURL ? 'llama-3.1-70b-versatile' : 'gpt-4';
+
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model,
       messages: [
         {
           role: 'system',
@@ -150,7 +160,7 @@ export async function POST(request: NextRequest) {
         idea,
         roles,
         mode,
-        model: 'gpt-4',
+        model,
         timestamp: new Date().toISOString(),
       },
     });
