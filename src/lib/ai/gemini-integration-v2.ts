@@ -31,7 +31,7 @@ export interface GeminiResearchResult {
   };
 }
 
-const aiProviderFactory = new AIProviderFactory();
+// Using static factory methods; no instance needed
 
 /**
  * Conduct comprehensive research using Gemini's large context window
@@ -42,7 +42,7 @@ export async function conductGeminiResearch(
   const startTime = Date.now();
 
   // Get Gemini provider
-  const geminiProvider = aiProviderFactory.create('gemini-pro');
+  const geminiProvider = AIProviderFactory.create('gemini-pro');
   if (!geminiProvider) {
     throw new Error('Gemini provider not available');
   }

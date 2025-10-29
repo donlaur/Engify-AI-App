@@ -7,7 +7,10 @@ export interface FirewallRule {
   id: string;
   name: string;
   description: string;
-  check: (prompt: string, metadata?: any) => Promise<FirewallResult>;
+  check: (
+    prompt: string,
+    metadata?: Record<string, unknown>
+  ) => Promise<FirewallResult>;
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
@@ -24,35 +27,77 @@ export interface FirewallResult {
  */
 const PROHIBITED_TOPICS = [
   // Personal advice
-  'dating', 'relationship', 'romance', 'love advice', 'breakup',
-  
+  'dating',
+  'relationship',
+  'romance',
+  'love advice',
+  'breakup',
+
   // Gambling
-  'betting', 'gambling', 'casino', 'poker strategy', 'sports betting',
-  
+  'betting',
+  'gambling',
+  'casino',
+  'poker strategy',
+  'sports betting',
+
   // Medical/Legal (liability)
-  'medical diagnosis', 'legal advice', 'lawsuit', 'prescription',
-  
+  'medical diagnosis',
+  'legal advice',
+  'lawsuit',
+  'prescription',
+
   // Harmful content
-  'hack', 'exploit', 'vulnerability', 'jailbreak', 'bypass security',
-  'malware', 'virus', 'ddos', 'phishing',
-  
+  'hack',
+  'exploit',
+  'vulnerability',
+  'jailbreak',
+  'bypass security',
+  'malware',
+  'virus',
+  'ddos',
+  'phishing',
+
   // Off-topic entertainment
-  'write a novel', 'write a screenplay', 'creative writing',
-  'song lyrics', 'poem about love',
-  
+  'write a novel',
+  'write a screenplay',
+  'creative writing',
+  'song lyrics',
+  'poem about love',
+
   // Spam/Abuse
-  'generate spam', 'mass email', 'seo spam',
+  'generate spam',
+  'mass email',
+  'seo spam',
 ];
 
 /**
  * Required topics for valid use (must match at least one)
  */
 const REQUIRED_TOPICS = [
-  'code', 'programming', 'software', 'development', 'engineering',
-  'api', 'database', 'architecture', 'design pattern', 'algorithm',
-  'testing', 'debugging', 'review', 'documentation', 'technical',
-  'product', 'feature', 'requirement', 'user story', 'specification',
-  'prompt engineering', 'ai', 'machine learning', 'llm',
+  'code',
+  'programming',
+  'software',
+  'development',
+  'engineering',
+  'api',
+  'database',
+  'architecture',
+  'design pattern',
+  'algorithm',
+  'testing',
+  'debugging',
+  'review',
+  'documentation',
+  'technical',
+  'product',
+  'feature',
+  'requirement',
+  'user story',
+  'specification',
+  'prompt engineering',
+  'ai',
+  'machine learning',
+  'llm',
 ];
 
 /**
@@ -105,7 +150,7 @@ export const FIREWALL_RULES: FirewallRule[] = [
     severity: 'high',
     check: async (prompt: string) => {
       const lowerPrompt = prompt.toLowerCase();
-      
+
       for (const topic of PROHIBITED_TOPICS) {
         if (lowerPrompt.includes(topic)) {
           return {
@@ -131,17 +176,18 @@ export const FIREWALL_RULES: FirewallRule[] = [
     severity: 'medium',
     check: async (prompt: string) => {
       const lowerPrompt = prompt.toLowerCase();
-      
+
       // Check if prompt contains any required topics
-      const hasRelevantTopic = REQUIRED_TOPICS.some(topic => 
+      const hasRelevantTopic = REQUIRED_TOPICS.some((topic) =>
         lowerPrompt.includes(topic)
       );
-      
+
       if (!hasRelevantTopic) {
         return {
           allowed: false,
           rule: 'topic-relevance',
-          reason: 'Prompt does not appear to be related to software engineering or product management',
+          reason:
+            'Prompt does not appear to be related to software engineering or product management',
           severity: 'medium',
           suggestions: [
             'Include technical terms like "code", "API", "feature", etc.',
@@ -162,7 +208,7 @@ export const FIREWALL_RULES: FirewallRule[] = [
     check: async (prompt: string) => {
       const wordCount = prompt.split(/\s+/).length;
       const charCount = prompt.length;
-      
+
       if (wordCount > 2000) {
         return {
           allowed: false,
@@ -175,7 +221,7 @@ export const FIREWALL_RULES: FirewallRule[] = [
           ],
         };
       }
-      
+
       if (charCount > 15000) {
         return {
           allowed: false,
@@ -188,7 +234,7 @@ export const FIREWALL_RULES: FirewallRule[] = [
           ],
         };
       }
-      
+
       return { allowed: true };
     },
   },
@@ -202,13 +248,14 @@ export const FIREWALL_RULES: FirewallRule[] = [
       // Check for repeated words/phrases
       const words = prompt.toLowerCase().split(/\s+/);
       const wordCounts: Record<string, number> = {};
-      
-      words.forEach(word => {
-        if (word.length > 3) { // Ignore short words
+
+      words.forEach((word) => {
+        if (word.length > 3) {
+          // Ignore short words
           wordCounts[word] = (wordCounts[word] || 0) + 1;
         }
       });
-      
+
       // If any word appears more than 20% of the time, it's suspicious
       const maxCount = Math.max(...Object.values(wordCounts));
       if (maxCount > words.length * 0.2) {
@@ -223,7 +270,7 @@ export const FIREWALL_RULES: FirewallRule[] = [
           ],
         };
       }
-      
+
       return { allowed: true };
     },
   },
@@ -233,9 +280,9 @@ export const FIREWALL_RULES: FirewallRule[] = [
     name: 'Suspicious Pattern Detection',
     description: 'Detects patterns that indicate abuse',
     severity: 'high',
-    check: async (prompt: string, metadata?: any) => {
+    check: async (prompt: string, _metadata?: Record<string, unknown>) => {
       const lowerPrompt = prompt.toLowerCase();
-      
+
       // Check for mass generation requests
       if (/generate \d+ (emails|messages|posts|articles)/i.test(prompt)) {
         return {
@@ -248,11 +295,13 @@ export const FIREWALL_RULES: FirewallRule[] = [
           ],
         };
       }
-      
+
       // Check for attempts to extract training data
-      if (lowerPrompt.includes('training data') || 
-          lowerPrompt.includes('memorized') ||
-          lowerPrompt.includes('repeat back')) {
+      if (
+        lowerPrompt.includes('training data') ||
+        lowerPrompt.includes('memorized') ||
+        lowerPrompt.includes('repeat back')
+      ) {
         return {
           allowed: false,
           rule: 'suspicious-patterns',
@@ -260,7 +309,7 @@ export const FIREWALL_RULES: FirewallRule[] = [
           severity: 'high',
         };
       }
-      
+
       return { allowed: true };
     },
   },
@@ -271,12 +320,12 @@ export const FIREWALL_RULES: FirewallRule[] = [
  */
 export async function checkFirewall(
   prompt: string,
-  metadata?: any
+  metadata?: Record<string, unknown>
 ): Promise<FirewallResult> {
   // Run all rules
   for (const rule of FIREWALL_RULES) {
     const result = await rule.check(prompt, metadata);
-    
+
     if (!result.allowed) {
       // Log the violation
       console.warn(`Firewall violation: ${rule.id}`, {
@@ -284,11 +333,11 @@ export async function checkFirewall(
         reason: result.reason,
         severity: result.severity,
       });
-      
+
       return result;
     }
   }
-  
+
   return { allowed: true };
 }
 
@@ -303,7 +352,7 @@ export async function isPromptSafe(prompt: string): Promise<boolean> {
 /**
  * Get firewall statistics
  */
-export async function getFirewallStats(userId?: string) {
+export async function getFirewallStats(_userId?: string) {
   // TODO: Implement stats from MongoDB
   return {
     totalChecks: 0,
