@@ -115,9 +115,21 @@ export async function POST(request: NextRequest) {
 }
 
 // Health check endpoint
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     if (process.env.NODE_ENV === 'test') {
+      const { searchParams } = new URL(request.url);
+      const forceUnhealthy = searchParams.get('unhealthy') === 'true';
+      if (forceUnhealthy) {
+        return NextResponse.json(
+          {
+            status: 'unhealthy',
+            error: 'Forced unhealthy for tests',
+            timestamp: new Date().toISOString(),
+          },
+          { status: 503 }
+        );
+      }
       return NextResponse.json({
         status: 'healthy',
         rag_service: 'ok',

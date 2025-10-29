@@ -235,7 +235,7 @@ vi.mock('@/lib/db/client', () => {
       ) => {
         const list = getList(name).slice();
         const idx = list.findIndex((d) =>
-          Object.entries(query).every(([k, v]) => d[k] === v)
+          Object.entries(query).every(([k, v]) => equals(d[k], v))
         );
         if (idx === -1) return { modifiedCount: 0 };
         if (update && update.$set && typeof update.$set === 'object') {

@@ -57,12 +57,14 @@ export class InMemoryMessageQueue<T = unknown> {
     pendingMessages: number;
     completedMessages: number;
     failedMessages: number;
+    deadLetterMessages: number;
   }> {
     return {
       totalMessages: this.queue.length,
       pendingMessages: this.queue.length,
       completedMessages: 0,
       failedMessages: 0,
+      deadLetterMessages: 0,
     };
   }
 
