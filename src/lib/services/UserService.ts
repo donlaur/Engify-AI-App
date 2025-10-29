@@ -202,6 +202,16 @@ export class UserService {
   }
 
   /**
+   * Set user password (service-level helper; repository doesn't expose password)
+   */
+  async setPassword(userId: string, hashedPassword: string): Promise<void> {
+    await this.userRepository.update(userId, {
+      password: hashedPassword as unknown as User['password'],
+      updatedAt: new Date(),
+    } as Partial<User>);
+  }
+
+  /**
    * Get user statistics
    */
   async getUserStats(): Promise<{
