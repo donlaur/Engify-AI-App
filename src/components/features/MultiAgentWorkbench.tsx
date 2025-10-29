@@ -10,18 +10,81 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Loader2, Users, CheckCircle, Sparkles, Play } from 'lucide-react';
+import { Loader2, CheckCircle, Sparkles, Play, Users2 } from 'lucide-react';
 
 const AVAILABLE_ROLES = [
-  { id: 'engineer', name: 'Engineer', icon: '👨‍💻', color: 'bg-green-500' },
-  { id: 'architect', name: 'Architect', icon: '🏗️', color: 'bg-purple-500' },
-  { id: 'director', name: 'Director', icon: '💼', color: 'bg-gray-500' },
-  { id: 'pm', name: 'Product Manager', icon: '📊', color: 'bg-indigo-500' },
-  { id: 'tech_lead', name: 'Tech Lead', icon: '⚡', color: 'bg-teal-500' },
-  { id: 'designer', name: 'Designer', icon: '🎨', color: 'bg-pink-500' },
-  { id: 'qa', name: 'QA', icon: '🔍', color: 'bg-orange-500' },
-  { id: 'security', name: 'Security', icon: '🔒', color: 'bg-red-500' },
-  { id: 'devops', name: 'DevOps', icon: '🚀', color: 'bg-cyan-500' },
+  {
+    id: 'engineer',
+    name: 'Engineer',
+    icon: '👨‍💻',
+    color: 'bg-emerald-500',
+    lightColor: 'bg-emerald-50',
+    textColor: 'text-emerald-700',
+  },
+  {
+    id: 'architect',
+    name: 'Architect',
+    icon: '🏗️',
+    color: 'bg-purple-500',
+    lightColor: 'bg-purple-50',
+    textColor: 'text-purple-700',
+  },
+  {
+    id: 'director',
+    name: 'Director',
+    icon: '💼',
+    color: 'bg-slate-500',
+    lightColor: 'bg-slate-50',
+    textColor: 'text-slate-700',
+  },
+  {
+    id: 'pm',
+    name: 'Product Manager',
+    icon: '📊',
+    color: 'bg-indigo-500',
+    lightColor: 'bg-indigo-50',
+    textColor: 'text-indigo-700',
+  },
+  {
+    id: 'tech_lead',
+    name: 'Tech Lead',
+    icon: '⚡',
+    color: 'bg-teal-500',
+    lightColor: 'bg-teal-50',
+    textColor: 'text-teal-700',
+  },
+  {
+    id: 'designer',
+    name: 'Designer',
+    icon: '🎨',
+    color: 'bg-pink-500',
+    lightColor: 'bg-pink-50',
+    textColor: 'text-pink-700',
+  },
+  {
+    id: 'qa',
+    name: 'QA',
+    icon: '🔍',
+    color: 'bg-orange-500',
+    lightColor: 'bg-orange-50',
+    textColor: 'text-orange-700',
+  },
+  {
+    id: 'security',
+    name: 'Security',
+    icon: '🔒',
+    color: 'bg-red-500',
+    lightColor: 'bg-red-50',
+    textColor: 'text-red-700',
+  },
+  {
+    id: 'devops',
+    name: 'DevOps',
+    icon: '🚀',
+    color: 'bg-cyan-500',
+    lightColor: 'bg-cyan-50',
+    textColor: 'text-cyan-700',
+  },
 ];
 
 const EXAMPLE_SCENARIOS = [
@@ -135,233 +198,281 @@ export function MultiAgentWorkbench() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl p-4 md:p-6">
-      {/* Header */}
-      <div className="mb-6 text-center">
-        <h1 className="mb-2 flex items-center justify-center gap-2 text-3xl font-bold">
-          <Users className="h-8 w-8 text-blue-600" />
-          Multi-Agent Team Simulation
-        </h1>
-        <p className="text-gray-600">
-          See how different roles evaluate your ideas - learn to think like a
-          team
-        </p>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left: Input & Controls */}
-        <div className="space-y-4 lg:col-span-2">
-          {/* Quick Examples */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Sparkles className="h-5 w-5 text-yellow-500" />
-                Try an Example
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {EXAMPLE_SCENARIOS.map((example, index) => (
-                  <button
-                    key={index}
-                    onClick={() => loadExample(example)}
-                    className="group relative overflow-hidden rounded-lg border-2 border-gray-200 p-3 text-left transition-all hover:border-blue-500 hover:shadow-md"
-                  >
-                    <div className="mb-1 text-sm font-semibold">
-                      {example.title}
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {example.roles.slice(0, 4).map((role) => {
-                        const roleInfo = AVAILABLE_ROLES.find(
-                          (r) => r.id === role
-                        );
-                        return (
-                          <span key={role} className="text-xs">
-                            {roleInfo?.icon}
-                          </span>
-                        );
-                      })}
-                      {example.roles.length > 4 && (
-                        <span className="text-xs text-gray-500">
-                          +{example.roles.length - 4}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Input */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Your Idea</CardTitle>
-              <CardDescription>
-                What do you want the team to evaluate?
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Textarea
-                placeholder="Example: Add real-time collaboration to our document editor..."
-                value={idea}
-                onChange={(e) => setIdea(e.target.value)}
-                rows={3}
-                className="resize-none"
-              />
-
-              {/* Mode Selection - Compact */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Mode:</span>
-                <Button
-                  variant={mode === 'sequential' ? 'default' : 'outline'}
-                  onClick={() => setMode('sequential')}
-                  size="sm"
-                >
-                  Sequential Review
-                </Button>
-                <Button
-                  variant={mode === 'debate' ? 'default' : 'outline'}
-                  onClick={() => setMode('debate')}
-                  size="sm"
-                >
-                  Team Debate
-                </Button>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                <Button
-                  onClick={runSimulation}
-                  disabled={
-                    isLoading || !idea.trim() || selectedRoles.length === 0
-                  }
-                  className="flex-1"
-                  size="lg"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Simulating...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="mr-2 h-4 w-4" />
-                      Run Simulation
-                    </>
-                  )}
-                </Button>
-                {simulation && (
-                  <Button onClick={reset} variant="outline" size="lg">
-                    Reset
-                  </Button>
-                )}
-              </div>
-
-              {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-                  {error}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Simulation Output */}
-          {simulation && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  Team Simulation Results
-                </CardTitle>
-                <CardDescription>
-                  {mode === 'sequential' ? 'Sequential Review' : 'Team Debate'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="max-h-[500px] overflow-y-auto rounded-lg border-2 border-gray-200 bg-white p-4">
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-900">
-                    {simulation}
-                  </div>
-                </div>
-
-                {/* Feedback */}
-                <div className="mt-4 flex items-center gap-2 border-t pt-4">
-                  <span className="text-sm font-medium">Helpful?</span>
-                  <Button size="sm" variant="outline">
-                    👍
-                  </Button>
-                  <Button size="sm" variant="outline">
-                    😐
-                  </Button>
-                  <Button size="sm" variant="outline">
-                    👎
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      <div className="mx-auto max-w-7xl p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm">
+            <Sparkles className="h-4 w-4" />
+            Beta Feature
+          </div>
+          <h1 className="mb-2 text-4xl font-bold tracking-tight text-gray-900">
+            Multi-Agent Team Simulation
+          </h1>
+          <p className="text-lg text-gray-600">
+            See how different roles evaluate your ideas • Learn to think like a
+            team
+          </p>
         </div>
 
-        {/* Right: Role Selection */}
-        <div className="lg:col-span-1">
-          <Card className="sticky top-6">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">
-                Select Roles ({selectedRoles.length}/7)
-              </CardTitle>
-              <CardDescription>Who should review this idea?</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {AVAILABLE_ROLES.map((role) => {
-                  const isSelected = selectedRoles.includes(role.id);
-                  return (
+        {/* Main Content */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Left: Input & Controls */}
+          <div className="space-y-6 lg:col-span-2">
+            {/* Quick Examples */}
+            <Card className="border-gray-200 shadow-sm">
+              <CardHeader className="border-b bg-gradient-to-r from-yellow-50 to-orange-50 pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                  <Sparkles className="h-5 w-5 text-yellow-600" />
+                  Try an Example
+                </CardTitle>
+                <CardDescription className="text-gray-600">
+                  Click to load a pre-built scenario
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {EXAMPLE_SCENARIOS.map((example, index) => (
                     <button
-                      key={role.id}
-                      onClick={() => toggleRole(role.id)}
-                      className={`w-full rounded-lg border-2 p-3 text-left transition-all ${
-                        isSelected
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      key={index}
+                      onClick={() => loadExample(example)}
+                      className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-4 text-left transition-all hover:border-blue-400 hover:shadow-md"
                     >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-full text-xl ${
-                            isSelected
-                              ? role.color + ' text-white'
-                              : 'bg-gray-100'
-                          }`}
-                        >
-                          {role.icon}
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-sm font-semibold">
-                            {role.name}
-                          </div>
-                        </div>
-                        {isSelected && (
-                          <CheckCircle className="h-5 w-5 text-blue-600" />
+                      <div className="mb-2 text-base font-semibold text-gray-900 group-hover:text-blue-600">
+                        {example.title}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {example.roles.slice(0, 4).map((role) => {
+                          const roleInfo = AVAILABLE_ROLES.find(
+                            (r) => r.id === role
+                          );
+                          return (
+                            <span key={role} className="text-lg">
+                              {roleInfo?.icon}
+                            </span>
+                          );
+                        })}
+                        {example.roles.length > 4 && (
+                          <span className="text-sm text-gray-500">
+                            +{example.roles.length - 4}
+                          </span>
                         )}
                       </div>
                     </button>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Info */}
-              <div className="mt-4 rounded-lg bg-blue-50 p-3 text-xs text-blue-800">
-                <p className="mb-1 font-semibold">💡 How it works</p>
-                <ul className="space-y-0.5">
-                  <li>• AI simulates each role&apos;s perspective</li>
-                  <li>• Surfaces blind spots & hidden costs</li>
-                  <li>• Learn how different roles think</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
+            {/* Input */}
+            <Card className="border-gray-200 shadow-sm">
+              <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50 pb-4">
+                <CardTitle className="text-lg font-semibold text-gray-900">
+                  Your Idea
+                </CardTitle>
+                <CardDescription className="text-gray-600">
+                  What do you want the team to evaluate?
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                <Textarea
+                  placeholder="Example: Add real-time collaboration to our document editor..."
+                  value={idea}
+                  onChange={(e) => setIdea(e.target.value)}
+                  rows={4}
+                  className="resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                />
+
+                {/* Mode Selection */}
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-gray-700">
+                    Mode:
+                  </span>
+                  <Button
+                    variant={mode === 'sequential' ? 'default' : 'outline'}
+                    onClick={() => setMode('sequential')}
+                    size="sm"
+                    className={
+                      mode === 'sequential'
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : ''
+                    }
+                  >
+                    Sequential Review
+                  </Button>
+                  <Button
+                    variant={mode === 'debate' ? 'default' : 'outline'}
+                    onClick={() => setMode('debate')}
+                    size="sm"
+                    className={
+                      mode === 'debate' ? 'bg-blue-600 hover:bg-blue-700' : ''
+                    }
+                  >
+                    Team Debate
+                  </Button>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={runSimulation}
+                    disabled={
+                      isLoading || !idea.trim() || selectedRoles.length === 0
+                    }
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Simulating...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="mr-2 h-5 w-5" />
+                        Run Simulation
+                      </>
+                    )}
+                  </Button>
+                  {simulation && (
+                    <Button
+                      onClick={reset}
+                      variant="outline"
+                      size="lg"
+                      className="border-gray-300"
+                    >
+                      Reset
+                    </Button>
+                  )}
+                </div>
+
+                {error && (
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                    <strong className="font-semibold">Error:</strong> {error}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Simulation Output */}
+            {simulation && (
+              <Card className="border-gray-200 shadow-sm">
+                <CardHeader className="border-b bg-gradient-to-r from-green-50 to-emerald-50 pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    Team Simulation Results
+                  </CardTitle>
+                  <CardDescription className="text-gray-600">
+                    {mode === 'sequential'
+                      ? 'Sequential Review'
+                      : 'Team Debate'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <div className="max-h-[600px] overflow-y-auto rounded-lg border-2 border-gray-200 bg-white p-6">
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800">
+                      {simulation}
+                    </div>
+                  </div>
+
+                  {/* Feedback */}
+                  <div className="mt-4 flex items-center gap-3 border-t pt-4">
+                    <span className="text-sm font-medium text-gray-700">
+                      Was this helpful?
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-gray-300 hover:bg-green-50"
+                    >
+                      👍 Yes
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-gray-300 hover:bg-yellow-50"
+                    >
+                      😐 Somewhat
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-gray-300 hover:bg-red-50"
+                    >
+                      👎 No
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right: Role Selection */}
+          <div className="lg:col-span-1">
+            <Card className="sticky top-6 border-gray-200 shadow-sm">
+              <CardHeader className="border-b bg-gradient-to-r from-purple-50 to-pink-50 pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                  <Users2 className="h-5 w-5 text-purple-600" />
+                  Select Roles ({selectedRoles.length}/7)
+                </CardTitle>
+                <CardDescription className="text-gray-600">
+                  Who should review this idea?
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="space-y-2">
+                  {AVAILABLE_ROLES.map((role) => {
+                    const isSelected = selectedRoles.includes(role.id);
+                    return (
+                      <button
+                        key={role.id}
+                        onClick={() => toggleRole(role.id)}
+                        className={`w-full rounded-lg border-2 p-3 text-left transition-all ${
+                          isSelected
+                            ? 'border-blue-500 bg-blue-50 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-full text-xl ${
+                              isSelected
+                                ? role.color + ' text-white'
+                                : role.lightColor
+                            }`}
+                          >
+                            {role.icon}
+                          </div>
+                          <div className="flex-1">
+                            <div
+                              className={`text-sm font-semibold ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}
+                            >
+                              {role.name}
+                            </div>
+                          </div>
+                          {isSelected && (
+                            <CheckCircle className="h-5 w-5 text-blue-600" />
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Info */}
+                <div className="mt-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+                  <p className="mb-2 text-sm font-semibold text-blue-900">
+                    💡 How it works
+                  </p>
+                  <ul className="space-y-1 text-xs text-blue-800">
+                    <li>• AI simulates each role&apos;s perspective</li>
+                    <li>• Surfaces blind spots & hidden costs</li>
+                    <li>• Learn how different roles think</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
