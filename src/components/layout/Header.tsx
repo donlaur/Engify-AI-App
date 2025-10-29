@@ -62,7 +62,7 @@ export function Header({ user }: HeaderProps) {
             href="/library"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
-            Prompt Playbooks
+            Library
           </Link>
           <Link
             href="/patterns"

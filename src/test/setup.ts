@@ -32,7 +32,7 @@ vi.mock('next/navigation', () => ({
 // Note: These are test-only values, not real secrets
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
 // Avoid hardcoded DB URIs in repo; tests should mock DB access
-process.env.MONGODB_URI = process.env.MONGODB_URI || '';
+// Do not set MONGODB_URI in repo; mock DB modules instead in tests
 // Avoid setting secrets in repo; tests should inject via env if required
 
 // Provide minimal globals
@@ -49,6 +49,13 @@ if (!globalWithEncoders.TextEncoder || !globalWithEncoders.TextDecoder) {
 const mockedFetch = vi.fn(
   async (_input: RequestInfo | URL, _init?: RequestInit) => {
     const url = typeof _input === 'string' ? _input : _input.toString();
+    // Mock RAG health endpoint explicitly
+    if (url.includes('/api/rag/health')) {
+      return new Response(
+        JSON.stringify({ status: 'healthy', rag_service: 'ok' }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
     // Mock RAG endpoint responses
     if (url.includes('/api/rag')) {
       return new Response(
@@ -131,6 +138,14 @@ vi.mock('@/lib/db/mongodb', () => {
   return {
     getMongoDb: vi.fn(async () => ({ collection: collectionMock })),
     getMongoClient: vi.fn(async () => ({})),
+  };
+});
+
+// Also mock MongoDB low-level client module if imported directly
+vi.mock('@/lib/db/client', () => {
+  return {
+    getMongoClient: vi.fn(async () => ({})),
+    getMongoDb: vi.fn(async () => ({ collection: () => ({}) })),
   };
 });
 
