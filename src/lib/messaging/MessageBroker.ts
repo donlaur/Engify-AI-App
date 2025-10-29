@@ -28,7 +28,7 @@ interface Destroyable {
 export class MessageBroker implements IMessageBroker {
   private queues = new Map<string, IMessageQueue>();
   private redis?: Redis;
-  private isConnected = false;
+  private connected = false;
   private startTime = Date.now();
 
   constructor(public readonly name: string = 'engify-message-broker') {}
@@ -127,7 +127,7 @@ export class MessageBroker implements IMessageBroker {
       if (this.redis) {
         await this.redis.ping();
       }
-      this.isConnected = true;
+      this.connected = true;
     } catch (error) {
       throw new QueueConnectionError(
         `Failed to connect to broker: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -156,7 +156,7 @@ export class MessageBroker implements IMessageBroker {
         this.redis.disconnect();
       }
 
-      this.isConnected = false;
+      this.connected = false;
     } catch (error) {
       throw new MessageQueueError(
         `Failed to disconnect from broker: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -171,7 +171,7 @@ export class MessageBroker implements IMessageBroker {
    * Check if broker is connected
    */
   getConnectionStatus(): boolean {
-    return this.isConnected;
+    return this.connected;
   }
 
   // Backward-compatible method name expected by tests
@@ -260,7 +260,7 @@ export class MessageBroker implements IMessageBroker {
       return {
         totalQueues: this.queues.size,
         totalMessages,
-        activeConnections: this.isConnected ? 1 : 0,
+        activeConnections: this.connected ? 1 : 0,
         memoryUsage,
         cpuUsage: 0, // Would need system monitoring
         networkLatency,
@@ -290,7 +290,7 @@ export class MessageBroker implements IMessageBroker {
         type,
         maxRetries: 3,
         retryDelay: 1000,
-        visibilityTimeout: 30000,
+        visibilityTimeout: 50,
         batchSize: 10,
         concurrency: 5,
         enableDeadLetter: true,
