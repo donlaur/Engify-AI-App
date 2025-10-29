@@ -184,12 +184,12 @@ export function MultiAgentWorkbench() {
                 <button
                   key={index}
                   onClick={() => loadExample(example)}
-                  className="rounded-lg border-2 p-5 text-left transition-all hover:border-blue-500 hover:bg-blue-50 hover:shadow-md"
+                  className="group rounded-lg border-2 p-5 text-left transition-all hover:border-blue-500 hover:bg-blue-50 hover:shadow-md"
                 >
-                  <h3 className="mb-2 text-base font-semibold">
+                  <h3 className="mb-2 text-base font-semibold text-gray-900 group-hover:text-blue-900">
                     {example.title}
                   </h3>
-                  <p className="mb-3 min-h-[40px] text-sm text-gray-600">
+                  <p className="mb-3 min-h-[40px] text-sm text-gray-600 group-hover:text-gray-700">
                     {example.idea}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
