@@ -60,11 +60,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.sentry.io https://*.ingest.us.sentry.io",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.openai.com https://api.anthropic.com",
+              "connect-src 'self' https://api.openai.com https://api.anthropic.com https://api.groq.com https://*.sentry.io https://*.ingest.us.sentry.io",
               "frame-ancestors 'none'",
             ].join('; '),
           },
