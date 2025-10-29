@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendWelcomeEmail, sendPromptEmail, sendContactEmail, sendPasswordResetEmail } from '@/lib/services/emailService';
+import {
+  sendWelcomeEmail,
+  sendPromptEmail,
+  sendContactEmail,
+  sendPasswordResetEmail,
+} from '@/lib/services/emailService';
+import { logger } from '@/lib/logging/logger';
+import { RBACPresets } from '@/lib/middleware/rbac';
 
 /**
  * Send welcome email to new users
@@ -10,6 +17,7 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'welcome':
+        // Welcome emails are typically internal - but allow with auth or rate-limit in future
         const { userEmail, userName } = data;
         if (!userEmail || !userName) {
           return NextResponse.json(
@@ -17,19 +25,31 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-        
+
         const welcomeResult = await sendWelcomeEmail(userEmail, userName);
         return NextResponse.json(welcomeResult);
 
       case 'share-prompt':
-        const { recipientEmail, senderName, promptTitle, promptContent, promptUrl } = data;
+        // Sharing prompts requires authentication
+        const shareRbacCheck = await RBACPresets.requireUserWrite()(request);
+        if (shareRbacCheck) return shareRbacCheck;
+        const {
+          recipientEmail,
+          senderName,
+          promptTitle,
+          promptContent,
+          promptUrl,
+        } = data;
         if (!recipientEmail || !senderName || !promptTitle || !promptContent) {
           return NextResponse.json(
-            { success: false, error: 'Missing required fields for prompt sharing' },
+            {
+              success: false,
+              error: 'Missing required fields for prompt sharing',
+            },
             { status: 400 }
           );
         }
-        
+
         const shareResult = await sendPromptEmail(
           recipientEmail,
           senderName,
@@ -47,30 +67,50 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-        
-        const contactResult = await sendContactEmail(name, email, subject, message);
+
+        const contactResult = await sendContactEmail(
+          name,
+          email,
+          subject,
+          message
+        );
         return NextResponse.json(contactResult);
 
       case 'password-reset':
-        const { userEmail: resetEmail, resetToken, userName: resetUserName } = data;
+        const {
+          userEmail: resetEmail,
+          resetToken,
+          userName: resetUserName,
+        } = data;
         if (!resetEmail || !resetToken || !resetUserName) {
           return NextResponse.json(
-            { success: false, error: 'Missing required fields for password reset' },
+            {
+              success: false,
+              error: 'Missing required fields for password reset',
+            },
             { status: 400 }
           );
         }
-        
-        const resetResult = await sendPasswordResetEmail(resetEmail, resetToken, resetUserName);
+
+        const resetResult = await sendPasswordResetEmail(
+          resetEmail,
+          resetToken,
+          resetUserName
+        );
         return NextResponse.json(resetResult);
 
       default:
         return NextResponse.json(
-          { success: false, error: 'Invalid action. Supported actions: welcome, share-prompt, contact, password-reset' },
+          {
+            success: false,
+            error:
+              'Invalid action. Supported actions: welcome, share-prompt, contact, password-reset',
+          },
           { status: 400 }
         );
     }
   } catch (error) {
-    console.error('Email API error:', error);
+    logger.apiError('/api/email', error, { method: 'POST' });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

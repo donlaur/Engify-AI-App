@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { RBACPresets } from '@/lib/middleware/rbac';
+import { logger } from '@/lib/logging/logger';
 
 /**
  * GET /api/prompts
@@ -48,7 +49,9 @@ export async function GET(request: NextRequest) {
       });
     } catch (dbError) {
       // Fallback to static data
-      console.warn('MongoDB not available, using static data:', dbError);
+      logger.warn('MongoDB not available, using static data', {
+        error: dbError instanceof Error ? dbError.message : 'Unknown error',
+      });
 
       const { seedPrompts } = await import('@/data/seed-prompts');
       let filtered = seedPrompts;
@@ -77,7 +80,7 @@ export async function GET(request: NextRequest) {
       });
     }
   } catch (error) {
-    console.error('API error:', error);
+    logger.apiError('/api/prompts', error, { method: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch prompts' },
       { status: 500 }
@@ -129,7 +132,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Create prompt error:', error);
+    logger.apiError('/api/prompts', error, { method: 'POST' });
     return NextResponse.json(
       { error: 'Failed to create prompt' },
       { status: 500 }
