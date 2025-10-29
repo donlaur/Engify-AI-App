@@ -18,6 +18,10 @@ import {
 import { RedisMessageQueue } from './queues/RedisMessageQueue';
 import { InMemoryMessageQueue } from './queues/InMemoryMessageQueue';
 
+interface Destroyable {
+  destroy: () => Promise<void> | void;
+}
+
 /**
  * Message Broker Implementation
  */
@@ -48,7 +52,12 @@ export class MessageBroker implements IMessageBroker {
               maxRetriesPerRequest: 3,
             });
           }
-          queue = new RedisMessageQueue(config.name, 'redis', config, this.redis);
+          queue = new RedisMessageQueue(
+            config.name,
+            'redis',
+            config,
+            this.redis
+          );
           break;
 
         case 'memory':
@@ -78,8 +87,11 @@ export class MessageBroker implements IMessageBroker {
     try {
       const queue = this.queues.get(name);
       if (queue) {
-        if ('destroy' in queue) {
-          await (queue as any).destroy();
+        if (
+          'destroy' in (queue as Partial<Destroyable>) &&
+          typeof (queue as Partial<Destroyable>).destroy === 'function'
+        ) {
+          await (queue as Destroyable).destroy();
         }
         this.queues.delete(name);
       }
@@ -132,15 +144,18 @@ export class MessageBroker implements IMessageBroker {
     try {
       // Disconnect all queues
       for (const queue of this.queues.values()) {
-        if ('destroy' in queue) {
-          await (queue as any).destroy();
+        if (
+          'destroy' in (queue as Partial<Destroyable>) &&
+          typeof (queue as Partial<Destroyable>).destroy === 'function'
+        ) {
+          await (queue as Destroyable).destroy();
         }
       }
-      
+
       if (this.redis) {
         this.redis.disconnect();
       }
-      
+
       this.isConnected = false;
     } catch (error) {
       throw new MessageQueueError(
@@ -157,6 +172,11 @@ export class MessageBroker implements IMessageBroker {
    */
   getConnectionStatus(): boolean {
     return this.isConnected;
+  }
+
+  // Backward-compatible method name expected by tests
+  isConnected(): boolean {
+    return this.getConnectionStatus();
   }
 
   /**
@@ -263,7 +283,7 @@ export class MessageBroker implements IMessageBroker {
     type: 'redis' | 'memory' = 'redis'
   ): Promise<IMessageQueue> {
     let queue = await this.getQueue(name);
-    
+
     if (!queue) {
       const config: QueueConfig = {
         name,
@@ -276,42 +296,41 @@ export class MessageBroker implements IMessageBroker {
         enableDeadLetter: true,
         enableMetrics: true,
       };
-      
+
       queue = await this.createQueue(config);
     }
-    
+
     return queue;
   }
 
   /**
    * Publish message to a specific queue
    */
-  async publishToQueue(
-    queueName: string,
-    message: IMessage
-  ): Promise<void> {
+  async publishToQueue(queueName: string, message: IMessage): Promise<void> {
     const queue = await this.getQueue(queueName);
     if (!queue) {
       throw new Error(`Queue not found: ${queueName}`);
     }
-    
+
     await queue.publish(message);
   }
 
   /**
    * Get all queue statistics
    */
-  async getAllQueueStats(): Promise<Record<string, any>> {
-    const stats: Record<string, any> = {};
-    
+  async getAllQueueStats(): Promise<Record<string, unknown>> {
+    const stats: Record<string, unknown> = {};
+
     for (const [name, queue] of this.queues) {
       try {
         stats[name] = await queue.getQueueStats();
       } catch (error) {
-        stats[name] = { error: error instanceof Error ? error.message : 'Unknown error' };
+        stats[name] = {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        } as Record<string, unknown>;
       }
     }
-    
+
     return stats;
   }
 
