@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: users,
       totalCount: users.length,
-      correlationId,
+      correlationId: `all-${Date.now()}`,
     });
   } catch (error) {
     const session = await auth();
