@@ -1,6 +1,6 @@
 /**
  * Base Service Class
- * 
+ *
  * Abstract base class for all database services
  * Provides common CRUD operations with type safety
  */
@@ -9,7 +9,7 @@ import { Collection, Filter, ObjectId, OptionalId } from 'mongodb';
 import { ZodSchema } from 'zod';
 import { getDb } from '@/lib/db/client';
 
-export abstract class BaseService<T extends { _id: ObjectId }> {
+export abstract class BaseService<T extends { _id?: ObjectId }> {
   protected collectionName: string;
   protected schema: ZodSchema<T>;
 
@@ -31,7 +31,9 @@ export abstract class BaseService<T extends { _id: ObjectId }> {
    */
   async findById(id: string): Promise<T | null> {
     const collection = await this.getCollection();
-    const doc = await collection.findOne({ _id: new ObjectId(id) } as Filter<T>);
+    const doc = await collection.findOne({
+      _id: new ObjectId(id),
+    } as Filter<T>);
     return doc as T | null;
   }
 
@@ -90,6 +92,13 @@ export abstract class BaseService<T extends { _id: ObjectId }> {
   }
 
   /**
+   * Alias used by services/tests: create
+   */
+  async create(data: OptionalId<T>): Promise<T> {
+    return this.insertOne(data);
+  }
+
+  /**
    * Update one document
    */
   async updateOne(
@@ -113,7 +122,9 @@ export abstract class BaseService<T extends { _id: ObjectId }> {
    */
   async deleteOne(id: string): Promise<boolean> {
     const collection = await this.getCollection();
-    const result = await collection.deleteOne({ _id: new ObjectId(id) } as Filter<T>);
+    const result = await collection.deleteOne({
+      _id: new ObjectId(id),
+    } as Filter<T>);
     return result.deletedCount > 0;
   }
 
