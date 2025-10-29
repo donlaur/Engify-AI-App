@@ -136,6 +136,11 @@ const validationRules = [
         return false;
       }
       
+      // Skip system-wide scheduled jobs (they intentionally query all users)
+      if (content.includes('System-wide scheduled job') || content.includes('SECURITY: This query is intentionally system-wide')) {
+        return false;
+      }
+      
       // Check if this is a multi-tenant collection
       const multiTenantCollections = ['users', 'conversations', 'prompt_templates', 'audit_logs'];
       const isMultiTenant = multiTenantCollections.some(col => content.includes(`'${col}'`) || content.includes(`"${col}"`));

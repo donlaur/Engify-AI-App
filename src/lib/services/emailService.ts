@@ -1,8 +1,14 @@
 import sgMail from '@sendgrid/mail';
+import {
+  SendGridTemplateBuilders,
+  type ApiKeyAlertTemplateData,
+} from './sendgridTemplates';
 
 // Initialize SendGrid
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// Support both SENDGRID_API and SENDGRID_API_KEY for flexibility
+const sendGridApiKey = process.env.SENDGRID_API_KEY || process.env.SENDGRID_API;
+if (sendGridApiKey) {
+  sgMail.setApiKey(sendGridApiKey);
 }
 
 export interface EmailData {
@@ -26,8 +32,12 @@ export interface EmailResponse {
  */
 export async function sendEmail(emailData: EmailData): Promise<EmailResponse> {
   try {
-    if (!process.env.SENDGRID_API_KEY) {
-      throw new Error('SendGrid API key not configured');
+    const sendGridApiKey =
+      process.env.SENDGRID_API_KEY || process.env.SENDGRID_API;
+    if (!sendGridApiKey) {
+      throw new Error(
+        'SendGrid API key not configured. Set SENDGRID_API_KEY or SENDGRID_API environment variable.'
+      );
     }
 
     const msg = {
@@ -41,11 +51,11 @@ export async function sendEmail(emailData: EmailData): Promise<EmailResponse> {
     };
 
     const response = await sgMail.send(msg);
-    
+
     if (response.length === 0 || !response[0]?.headers) {
       throw new Error('Invalid response from SendGrid');
     }
-    
+
     return {
       success: true,
       messageId: response[0].headers['x-message-id'] as string,
@@ -60,9 +70,31 @@ export async function sendEmail(emailData: EmailData): Promise<EmailResponse> {
 }
 
 /**
- * Send a welcome email to new users
+ * Send a welcome email to new users using SendGrid template
  */
-export async function sendWelcomeEmail(userEmail: string, userName: string): Promise<EmailResponse> {
+export async function sendWelcomeEmail(
+  userEmail: string,
+  userName: string,
+  useTemplate = true
+): Promise<EmailResponse> {
+  if (useTemplate && process.env.SENDGRID_WELCOME_TEMPLATE_ID) {
+    const template = SendGridTemplateBuilders.welcome({
+      userName,
+      userEmail,
+      loginUrl: `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/login`,
+      libraryUrl: `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/library`,
+      workbenchUrl: `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/workbench`,
+      supportUrl: `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/contact`,
+    });
+
+    return sendEmail({
+      to: userEmail,
+      templateId: template.templateId,
+      dynamicTemplateData: template.dynamicTemplateData,
+    });
+  }
+
+  // Fallback to HTML email if template not configured
   return sendEmail({
     to: userEmail,
     subject: 'Welcome to Engify.ai! 🚀',
@@ -161,15 +193,32 @@ export async function sendContactEmail(
 }
 
 /**
- * Send a password reset email
+ * Send a password reset email using SendGrid template
  */
 export async function sendPasswordResetEmail(
   userEmail: string,
   resetToken: string,
-  userName: string
+  userName: string,
+  useTemplate = true
 ): Promise<EmailResponse> {
-  const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${resetToken}`;
-  
+  const resetUrl = `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/auth/reset-password?token=${resetToken}`;
+
+  if (useTemplate && process.env.SENDGRID_PASSWORD_RESET_TEMPLATE_ID) {
+    const template = SendGridTemplateBuilders.passwordReset({
+      userName,
+      resetUrl,
+      expirationMinutes: 60,
+      supportUrl: `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/contact`,
+    });
+
+    return sendEmail({
+      to: userEmail,
+      templateId: template.templateId,
+      dynamicTemplateData: template.dynamicTemplateData,
+    });
+  }
+
+  // Fallback to HTML email
   return sendEmail({
     to: userEmail,
     subject: 'Reset your Engify.ai password',
@@ -189,6 +238,53 @@ export async function sendPasswordResetEmail(
         
         <p>This link will expire in 1 hour.</p>
         <p>If you didn't request this reset, please ignore this email.</p>
+        
+        <p>Best regards,<br>The Engify.ai Team</p>
+      </div>
+    `,
+  });
+}
+
+/**
+ * Send API key usage alert email using SendGrid template
+ */
+export async function sendApiKeyAlertEmail(
+  userEmail: string,
+  alertData: ApiKeyAlertTemplateData,
+  useTemplate = true
+): Promise<EmailResponse> {
+  if (useTemplate && process.env.SENDGRID_API_KEY_ALERT_TEMPLATE_ID) {
+    const template = SendGridTemplateBuilders.apiKeyAlert(alertData);
+    return sendEmail({
+      to: userEmail,
+      templateId: template.templateId,
+      dynamicTemplateData: template.dynamicTemplateData,
+    });
+  }
+
+  // Fallback to HTML email
+  return sendEmail({
+    to: userEmail,
+    subject: `API Key Alert: ${alertData.metric} threshold exceeded`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #dc2626;">API Key Usage Alert</h1>
+        
+        <p>Hi ${alertData.userName},</p>
+        <p>Your API key <strong>${alertData.keyName}</strong> (${alertData.provider}) has exceeded the ${alertData.metric} threshold.</p>
+        
+        <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+          <p><strong>Current ${alertData.metric}:</strong> ${alertData.currentValue.toLocaleString()}</p>
+          <p><strong>Threshold:</strong> ${alertData.threshold.toLocaleString()}</p>
+          <p><strong>Period:</strong> ${alertData.period}</p>
+        </div>
+        
+        <div style="margin: 30px 0;">
+          <a href="${alertData.dashboardUrl}" 
+             style="background: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
+            View Usage Dashboard
+          </a>
+        </div>
         
         <p>Best regards,<br>The Engify.ai Team</p>
       </div>
