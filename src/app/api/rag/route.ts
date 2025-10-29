@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+// Future: Log usage for authenticated users
+// import { auth } from '@/lib/auth';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { z } from 'zod';
 
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Optional: Log usage for authenticated users (future enhancement)
-    const _session = await auth();
+    // const session = await auth();
 
     const body = await request.json();
     const { query, collection, top_k, filter } = RAGQuerySchema.parse(body);

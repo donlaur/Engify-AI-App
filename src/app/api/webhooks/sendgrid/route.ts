@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { QStashMessageQueue } from '@/lib/messaging/queues/QStashMessageQueue';
 import { auditLog, type AuditAction } from '@/lib/logging/audit';
-import type { MessagePriority } from '@/lib/messaging/types';
+import type { MessagePriority, IMessage } from '@/lib/messaging/types';
 import {
   createEmailProcessingJob,
   type ParsedEmail,
@@ -149,7 +149,8 @@ async function processInboundEmail(email: SendGridInboundEmail) {
         ? 'normal'
         : 'low';
 
-  await queue.publish({
+  // Create full IMessage object with all required fields
+  const message: IMessage = {
     id: emailId,
     type: 'event', // Use 'event' instead of 'inbound-email' (not in MessageType union)
     payload: {
@@ -158,7 +159,15 @@ async function processInboundEmail(email: SendGridInboundEmail) {
       priority: processingJob.priority,
     },
     priority: messagePriority,
-  });
+    status: 'pending',
+    metadata: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    retryCount: 0,
+    maxRetries: 3,
+  };
+
+  await queue.publish(message);
 
   // Log for audit trail
   await auditLog({
