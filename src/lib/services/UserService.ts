@@ -17,6 +17,7 @@
  */
 
 import { IUserRepository } from '../repositories/interfaces/IRepository';
+import { UserRepository } from '../repositories/mongodb/UserRepository';
 import type { User } from '@/lib/db/schema';
 
 export interface CreateUserData {
@@ -96,6 +97,13 @@ export class UserService {
     }
 
     return await this.userRepository.findByEmail(email);
+  }
+
+  /**
+   * Find user by email (alias for getUserByEmail)
+   */
+  async findByEmail(email: string): Promise<User | null> {
+    return this.getUserByEmail(email);
   }
 
   /**
@@ -260,4 +268,4 @@ export class UserService {
 }
 
 // Export singleton instance for dependency injection
-export const userService = new UserService();
+export const userService = new UserService(new UserRepository());

@@ -594,6 +594,156 @@ Output a balanced, achievable sprint plan.`,
     isPublic: true,
     isFeatured: false,
   },
+  // ENGINEERING MANAGEMENT
+  {
+    id: 'em-001',
+    title: 'Sprint Planning Facilitator',
+    description: 'Facilitate effective sprint planning sessions with your team',
+    content: `You are an experienced Scrum Master facilitating a sprint planning session. Help structure the meeting with:
+
+**Sprint Planning Agenda:**
+1. **Sprint Goal Definition** (15 mins)
+   - Review product backlog priorities
+   - Define clear, measurable sprint goal
+   - Ensure team alignment
+
+2. **Story Estimation** (30 mins)
+   - Review user stories and acceptance criteria
+   - Use story points or t-shirt sizing
+   - Identify dependencies and blockers
+
+3. **Capacity Planning** (15 mins)
+   - Account for holidays, PTO, and other commitments
+   - Calculate team velocity
+   - Select stories that fit capacity
+
+4. **Task Breakdown** (20 mins)
+   - Break stories into specific tasks
+   - Assign ownership and estimates
+   - Identify technical spikes needed
+
+**Current Sprint Context:**
+- Team Size: {team_size}
+- Sprint Length: {sprint_length}
+- Previous Velocity: {previous_velocity}
+- Key Priorities: {priorities}
+
+Provide a structured agenda and facilitation tips for each section.`,
+    category: 'management',
+    role: 'manager',
+    pattern: 'persona',
+    tags: ['sprint-planning', 'agile', 'facilitation', 'team-management'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'em-002',
+    title: 'Performance Review Builder',
+    description: 'Create comprehensive performance reviews for engineering team members',
+    content: `You are an engineering manager conducting annual performance reviews. Create a comprehensive review covering:
+
+**Performance Review Structure:**
+
+1. **Achievements & Accomplishments**
+   - Key projects delivered
+   - Technical contributions
+   - Process improvements
+   - Team collaboration
+
+2. **Core Competencies Assessment**
+   - Technical skills (rate 1-5)
+   - Problem-solving ability
+   - Communication skills
+   - Leadership potential
+   - Initiative and ownership
+
+3. **Goals & Objectives Review**
+   - Previous year's goals achievement
+   - SMART goal setting for next year
+   - Career development aspirations
+   - Skill gap identification
+
+4. **Feedback & Development Plan**
+   - Strengths to leverage
+   - Areas for improvement
+   - Specific development actions
+   - Mentoring and training needs
+
+**Employee Context:**
+- Role: {role}
+- Tenure: {tenure}
+- Key Projects: {projects}
+- Team Impact: {team_impact}
+
+Provide specific, actionable feedback and development recommendations.`,
+    category: 'management',
+    role: 'manager',
+    pattern: 'structured',
+    tags: ['performance-review', 'feedback', 'career-development', 'management'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'em-003',
+    title: 'Technical Debt Assessment',
+    description: 'Assess and prioritize technical debt in your codebase',
+    content: `You are a senior engineering manager conducting a technical debt assessment. Analyze the following areas:
+
+**Technical Debt Categories:**
+
+1. **Code Quality Issues**
+   - Code duplication and complexity
+   - Inconsistent patterns and standards
+   - Poor test coverage
+   - Legacy code maintenance
+
+2. **Architecture & Design**
+   - Tight coupling and dependencies
+   - Missing abstractions
+   - Scalability bottlenecks
+   - Security vulnerabilities
+
+3. **Infrastructure & Tooling**
+   - Outdated dependencies
+   - CI/CD pipeline issues
+   - Monitoring and observability gaps
+   - Development environment problems
+
+4. **Documentation & Knowledge**
+   - Missing or outdated documentation
+   - Knowledge silos
+   - Onboarding difficulties
+   - Process documentation gaps
+
+**Assessment Framework:**
+- **Impact**: High/Medium/Low business impact
+- **Effort**: High/Medium/Low implementation effort
+- **Risk**: High/Medium/Low risk if not addressed
+- **Priority**: Critical/High/Medium/Low
+
+**Current Context:**
+- Codebase Size: {codebase_size}
+- Team Size: {team_size}
+- Key Technologies: {technologies}
+- Recent Issues: {recent_issues}
+
+Provide a prioritized action plan with business justification for each item.`,
+    category: 'management',
+    role: 'manager',
+    pattern: 'structured',
+    tags: ['technical-debt', 'architecture', 'code-quality', 'prioritization'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
 ];
 
 // Combine curated prompts with playbook prompts

@@ -1,78 +1,88 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Icons } from '@/lib/icons';
+import { ContactForm } from '@/components/forms/ContactForm';
 
 export default function ContactPage() {
   return (
     <MainLayout>
-      <div className="container py-16">
-        <div className="mx-auto max-w-2xl">
-          <Badge variant="secondary" className="mb-4">
-            <Icons.users className="mr-2 h-3 w-3" />
-            Get in Touch
-          </Badge>
-          <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
-          <p className="text-xl text-muted-foreground mb-12">
-            Have questions? We&apos;d love to hear from you.
+      <div className="container py-8">
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-4xl font-bold">Contact Us</h1>
+          <p className="text-muted-foreground">
+            Have questions about Engify.ai? We'd love to hear from you.
           </p>
+        </div>
 
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Contact Form */}
+          <div>
+            <ContactForm />
+          </div>
+
+          {/* Contact Information */}
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icons.users className="h-5 w-5" />
-                  General Inquiries
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-2">
-                  For general questions about Engify.ai
-                </p>
-                <a href="mailto:hello@engify.ai" className="text-primary hover:underline">
-                  hello@engify.ai
-                </a>
-              </CardContent>
-            </Card>
+            <div className="rounded-lg border p-6">
+              <h3 className="mb-4 text-lg font-semibold">Get in Touch</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                    📧
+                  </div>
+                  <div>
+                    <p className="font-medium">Email</p>
+                    <a 
+                      href="mailto:donlaur@engify.ai" 
+                      className="text-primary hover:underline"
+                    >
+                      donlaur@engify.ai
+                    </a>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                    🌐
+                  </div>
+                  <div>
+                    <p className="font-medium">Website</p>
+                    <a 
+                      href="https://engify.ai" 
+                      className="text-primary hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      engify.ai
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icons.shield className="h-5 w-5" />
-                  Security
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-2">
-                  Report security vulnerabilities
-                </p>
-                <a href="mailto:security@engify.ai" className="text-primary hover:underline">
-                  security@engify.ai
-                </a>
-              </CardContent>
-            </Card>
+            <div className="rounded-lg border p-6">
+              <h3 className="mb-4 text-lg font-semibold">What We Can Help With</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>• Prompt engineering questions</li>
+                <li>• AI pattern recommendations</li>
+                <li>• Workbench tool usage</li>
+                <li>• Technical support</li>
+                <li>• Feature requests</li>
+                <li>• Partnership opportunities</li>
+              </ul>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icons.code className="h-5 w-5" />
-                  GitHub
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-2">
-                  Contribute or report issues
+            <div className="rounded-lg border p-6">
+              <h3 className="mb-4 text-lg font-semibold">Response Time</h3>
+              <div className="space-y-2 text-sm">
+                <p className="text-muted-foreground">
+                  <strong>General inquiries:</strong> Within 24 hours
                 </p>
-                <a
-                  href="https://github.com/donlaur/Engify-AI-App"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  github.com/donlaur/Engify-AI-App
-                </a>
-              </CardContent>
-            </Card>
+                <p className="text-muted-foreground">
+                  <strong>Technical support:</strong> Within 12 hours
+                </p>
+                <p className="text-muted-foreground">
+                  <strong>Urgent matters:</strong> Email us directly
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

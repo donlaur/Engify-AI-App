@@ -76,7 +76,7 @@ export default function RAGChatPage() {
   ];
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold">RAG-Powered AI Assistant</h1>
         <p className="text-muted-foreground">
@@ -86,15 +86,15 @@ export default function RAGChatPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         {/* Chat Interface */}
-        <div className="lg:col-span-2">
-          <Card className="flex h-[600px] flex-col">
-            <CardHeader className="flex flex-row items-center justify-between">
+        <div className="lg:col-span-3">
+          <Card className="flex h-[700px] flex-col">
+            <CardHeader className="flex flex-row items-center justify-between border-b">
               <div className="flex items-center gap-2">
                 <Icons.bot className="h-5 w-5 text-primary" />
-                <CardTitle>Knowledge Base Chat</CardTitle>
-                <Badge variant="secondary">RAG Enabled</Badge>
+                <CardTitle className="text-lg">RAG Chatbot</CardTitle>
+                <Badge variant="secondary" className="text-xs">Beta</Badge>
               </div>
             </CardHeader>
             <CardContent className="flex flex-1 flex-col p-0">
@@ -106,15 +106,17 @@ export default function RAGChatPage() {
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                      className={`max-w-[85%] rounded-lg px-4 py-3 ${
                         message.role === 'user'
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-foreground'
                       }`}
                     >
-                      <p className="whitespace-pre-wrap text-sm">
-                        {message.content}
-                      </p>
+                      <div className="break-words">
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                          {message.content}
+                        </p>
+                      </div>
 
                       {/* Show sources if available */}
                       {message.sources && message.sources.length > 0 && (
@@ -128,9 +130,9 @@ export default function RAGChatPage() {
                                 key={idx}
                                 className="flex items-center gap-2 text-xs text-gray-600"
                               >
-                                <Icons.fileText className="h-3 w-3" />
-                                {source.title}
-                                <Badge variant="outline" className="text-xs">
+                                <Icons.fileText className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate">{source.title}</span>
+                                <Badge variant="outline" className="text-xs flex-shrink-0">
                                   {source.score.toFixed(2)}
                                 </Badge>
                               </div>
@@ -153,7 +155,7 @@ export default function RAGChatPage() {
                 ))}
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="max-w-[80%] rounded-lg bg-muted px-4 py-3">
+                    <div className="max-w-[85%] rounded-lg bg-muted px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Icons.spinner className="h-4 w-4 animate-spin" />
                         <span className="text-sm">
@@ -171,13 +173,15 @@ export default function RAGChatPage() {
                   <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask about prompt engineering, AI patterns, or best practices..."
+                    placeholder="Ask me anything..."
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                     disabled={isLoading}
+                    className="flex-1"
                   />
                   <Button
                     onClick={sendMessage}
                     disabled={isLoading || !input.trim()}
+                    size="icon"
                   >
                     <Icons.send className="h-4 w-4" />
                   </Button>
@@ -188,7 +192,7 @@ export default function RAGChatPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-4">
+        <div className="lg:col-span-1 space-y-4">
           {/* Quick Questions */}
           <Card>
             <CardHeader>
@@ -200,11 +204,11 @@ export default function RAGChatPage() {
                   key={index}
                   variant="outline"
                   size="sm"
-                  className="h-auto w-full justify-start p-3 text-left"
+                  className="h-auto w-full justify-start p-4 text-left hover:bg-muted/50"
                   onClick={() => setInput(question)}
                 >
-                  <Icons.messageSquare className="mr-2 h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm">{question}</span>
+                  <Icons.messageSquare className="mr-3 h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm break-words">{question}</span>
                 </Button>
               ))}
             </CardContent>
@@ -217,15 +221,15 @@ export default function RAGChatPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2">
-                <Icons.search className="h-4 w-4 text-green-600" />
+                <Icons.search className="h-4 w-4 text-green-600 flex-shrink-0" />
                 <span className="text-sm">Vector Search: Active</span>
               </div>
               <div className="flex items-center gap-2">
-                <Icons.database className="h-4 w-4 text-blue-600" />
+                <Icons.database className="h-4 w-4 text-blue-600 flex-shrink-0" />
                 <span className="text-sm">Knowledge Base: Connected</span>
               </div>
               <div className="flex items-center gap-2">
-                <Icons.brain className="h-4 w-4 text-purple-600" />
+                <Icons.brain className="h-4 w-4 text-purple-600 flex-shrink-0" />
                 <span className="text-sm">AI Model: GPT-3.5-turbo</span>
               </div>
             </CardContent>
