@@ -160,7 +160,10 @@ async function processInboundEmail(email: SendGridInboundEmail) {
     },
     priority: messagePriority,
     status: 'pending',
-    metadata: {},
+    metadata: {
+      source: 'sendgrid-webhook',
+      version: '1.0.0',
+    },
     createdAt: new Date(),
     updatedAt: new Date(),
     retryCount: 0,
