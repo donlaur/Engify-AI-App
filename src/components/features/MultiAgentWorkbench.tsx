@@ -89,25 +89,29 @@ const AVAILABLE_ROLES = [
 
 const EXAMPLE_SCENARIOS = [
   {
-    title: '🚀 Real-Time Collaboration',
+    title: 'Real-Time Collaboration',
+    description: 'Add WebSocket-based real-time editing',
     idea: 'Add real-time collaboration to our document editor using WebSockets. Users can see each other editing in real-time with cursor positions and live updates.',
     roles: ['engineer', 'architect', 'director', 'pm', 'tech_lead', 'qa'],
     mode: 'sequential' as const,
   },
   {
-    title: '🏗️ Microservices Migration',
+    title: 'Microservices Migration',
+    description: 'Break monolith into services',
     idea: 'Migrate our monolithic application to microservices. Current app has 500K lines of code, 50 developers, and handles 10M requests/day.',
     roles: ['engineer', 'architect', 'director', 'tech_lead', 'devops'],
     mode: 'debate' as const,
   },
   {
-    title: '🤖 AI Code Review Tool',
+    title: 'AI Code Review Tool',
+    description: 'Automated PR review system',
     idea: 'Build an AI-powered code review tool that automatically reviews pull requests, suggests improvements, and catches bugs before human review.',
     roles: ['engineer', 'architect', 'pm', 'tech_lead', 'qa', 'security'],
     mode: 'sequential' as const,
   },
   {
-    title: '👥 Hiring Decision',
+    title: 'Hiring Decision',
+    description: '5 juniors vs 2 seniors?',
     idea: 'We have budget for 5 junior engineers OR 2 senior engineers. Which should we hire? Team is currently 15 people, mostly mid-level.',
     roles: ['director', 'tech_lead', 'engineer', 'pm'],
     mode: 'debate' as const,
@@ -238,25 +242,18 @@ export function MultiAgentWorkbench() {
                       onClick={() => loadExample(example)}
                       className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-4 text-left transition-all hover:border-blue-400 hover:shadow-md"
                     >
-                      <div className="mb-2 text-base font-semibold text-gray-900 group-hover:text-blue-600">
+                      <div className="mb-1 text-base font-semibold text-gray-900 group-hover:text-blue-600">
                         {example.title}
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {example.roles.slice(0, 4).map((role) => {
-                          const roleInfo = AVAILABLE_ROLES.find(
-                            (r) => r.id === role
-                          );
-                          return (
-                            <span key={role} className="text-lg">
-                              {roleInfo?.icon}
-                            </span>
-                          );
-                        })}
-                        {example.roles.length > 4 && (
-                          <span className="text-sm text-gray-500">
-                            +{example.roles.length - 4}
-                          </span>
-                        )}
+                      <div className="mb-2 text-xs text-gray-500">
+                        {example.description}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <span className="font-medium">
+                          {example.roles.length} roles
+                        </span>
+                        <span>•</span>
+                        <span className="capitalize">{example.mode}</span>
                       </div>
                     </button>
                   ))}
