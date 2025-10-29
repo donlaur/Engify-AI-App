@@ -1,13 +1,13 @@
 /**
  * User Service Layer
- * 
+ *
  * Implements business logic for user operations using the Repository Pattern.
  * This service layer:
  * - Depends on IUserRepository interface (Dependency Inversion)
  * - Contains business logic and validation
  * - Is easily testable with mock repositories
  * - Follows Single Responsibility Principle
- * 
+ *
  * SOLID Principles:
  * - Single Responsibility: Handles user business logic only
  * - Open/Closed: Can extend functionality without modifying existing code
@@ -205,24 +205,31 @@ export class UserService {
     const totalUsers = allUsers.length;
 
     // Group by role
-    const usersByRole = allUsers.reduce((acc, user) => {
-      acc[user.role] = (acc[user.role] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const usersByRole = allUsers.reduce(
+      (acc, user) => {
+        acc[user.role] = (acc[user.role] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     // Group by plan
-    const usersByPlan = allUsers.reduce((acc, user) => {
-      acc[user.plan] = (acc[user.plan] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const usersByPlan = allUsers.reduce(
+      (acc, user) => {
+        acc[user.plan] = (acc[user.plan] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     // Get recent users (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const recentUsers = allUsers.filter(user => 
-      user.createdAt >= thirtyDaysAgo
-    ).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 10);
+
+    const recentUsers = allUsers
+      .filter((user) => user.createdAt >= thirtyDaysAgo)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 10);
 
     return {
       totalUsers,
@@ -251,3 +258,6 @@ export class UserService {
     return await this.userRepository.count();
   }
 }
+
+// Export singleton instance for dependency injection
+export const userService = new UserService();
