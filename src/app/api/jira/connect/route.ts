@@ -10,7 +10,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { jiraConnectionService } from '@/lib/integrations/jira';
 import { z } from 'zod';
-import { _protectRoute, RBACPresets } from '@/lib/middleware/rbac';
+import { RBACPresets } from '@/lib/middleware/rbac';
+import { auditLog } from '@/lib/logging/audit';
 
 const connectSchema = z.object({
   domain: z.string().min(1, 'Domain is required'),
@@ -44,6 +45,17 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    // Audit log: Jira connection established
+    await auditLog({
+      action: 'jira_connected',
+      userId: session.user.id,
+      severity: 'info',
+      metadata: {
+        domain: validated.domain,
+        hasProjectKey: !!validated.projectKey,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       message: 'Jira connected successfully',
@@ -54,6 +66,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Jira connect error:', error);
 
     if (error instanceof z.ZodError) {
@@ -63,8 +76,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Try to get userId for audit log
+    let userId = 'unknown';
+    try {
+      const session = await auth();
+      userId = session?.user?.id || 'unknown';
+    } catch {
+      // Session fetch failed
+    }
+
+    // Audit log: Jira connection failed
+    await auditLog({
+      action: 'jira_connect_failed',
+      userId,
+      severity: 'warning',
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+    });
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
@@ -89,9 +124,13 @@ export async function GET(request: NextRequest) {
       connected: isConnected,
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Jira status error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
@@ -112,6 +151,15 @@ export async function DELETE(request: NextRequest) {
       session.user.id
     );
 
+    // Audit log: Jira disconnected
+    if (disconnected) {
+      await auditLog({
+        action: 'jira_disconnected',
+        userId: session.user.id,
+        severity: 'info',
+      });
+    }
+
     return NextResponse.json({
       success: disconnected,
       message: disconnected
@@ -119,9 +167,13 @@ export async function DELETE(request: NextRequest) {
         : 'Jira connection not found',
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Jira disconnect error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
