@@ -147,7 +147,7 @@ export class StreamingStrategy implements IStreamingStrategy {
   /**
    * Check if this strategy can handle the request
    */
-  canHandle(request: AIRequest, context: ExecutionContext): boolean {
+  canHandle(request: AIRequest, _context: ExecutionContext): boolean {
     if (!this.config.enabled) return false;
 
     // Check token limits
@@ -161,8 +161,9 @@ export class StreamingStrategy implements IStreamingStrategy {
     // Check user tier
     // No user-tier restriction in test/standard environments
 
-    // Streaming works best for interactive requests
-    return context.priority === 'high' || context.priority === 'urgent';
+    // Streaming can handle any priority when enabled and conditions are met
+    // Preferred for high/urgent, but can handle normal/low if enabled
+    return true;
   }
 
   /**
