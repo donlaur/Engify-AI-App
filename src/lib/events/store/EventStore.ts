@@ -22,7 +22,7 @@ export class MongoDBEventStore implements IEventStore {
 
   constructor(
     private mongoClient: MongoClient,
-    private databaseName: string = 'engify_events'
+    databaseName: string = 'engify_events'
   ) {
     this.db = mongoClient.db(databaseName);
     this.eventsCollection = this.db.collection<IEvent>('events');

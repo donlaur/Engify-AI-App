@@ -179,7 +179,6 @@ export async function POST(request: NextRequest) {
       plan: validatedData.plan as unknown as CreateUserArg['plan'],
     };
     if (validatedData.organizationId) {
-      // @ts-expect-error - conditional property based on service type
       payload.organizationId = validatedData.organizationId;
     }
     const created = await userService.createUser(payload as CreateUserArg);
