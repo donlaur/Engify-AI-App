@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { logger } from '@/lib/logging/logger';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { sendEmail } from '@/lib/services/emailService';
 import { auditLog } from '@/lib/logging/audit';
@@ -98,8 +99,11 @@ export async function POST(req: NextRequest) {
       });
     } catch (emailError) {
       // Log but don't fail the request
-      // eslint-disable-next-line no-console
-      console.error('Failed to send confirmation email:', emailError);
+      logger.error('Failed to send confirmation email', {
+        email: data.email,
+        error:
+          emailError instanceof Error ? emailError.message : String(emailError),
+      });
     }
 
     // Send notification email to admin (you)
@@ -140,8 +144,11 @@ export async function POST(req: NextRequest) {
       });
     } catch (emailError) {
       // Log but don't fail
-      // eslint-disable-next-line no-console
-      console.error('Failed to send admin notification:', emailError);
+      logger.error('Failed to send admin notification', {
+        adminEmail,
+        error:
+          emailError instanceof Error ? emailError.message : String(emailError),
+      });
     }
 
     // Audit log
@@ -164,8 +171,9 @@ export async function POST(req: NextRequest) {
         "Access request received. We'll review and get back to you within 24 hours.",
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Access request error:', error);
+    logger.apiError('/api/access-request', error, {
+      method: 'POST',
+    });
 
     // Audit log failure
     await auditLog({
