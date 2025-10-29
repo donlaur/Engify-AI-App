@@ -19,6 +19,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { getUserService } from '@/lib/di/Container';
 
@@ -96,8 +97,11 @@ export async function GET(
       data: user,
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error getting user:', error);
+    const session = await auth();
+    logger.apiError(`/api/v2/users/${id}`, error, {
+      userId: session?.user?.id,
+      method: 'GET',
+    });
     return NextResponse.json(
       {
         success: false,
@@ -176,8 +180,11 @@ export async function PUT(
       message: 'User updated successfully',
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error updating user:', error);
+    const session = await auth();
+    logger.apiError(`/api/v2/users/${id}`, error, {
+      userId: session?.user?.id,
+      method: 'PUT',
+    });
 
     // Handle validation errors
     if (error instanceof z.ZodError) {
@@ -275,8 +282,11 @@ export async function DELETE(
       message: 'User deleted successfully',
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error deleting user:', error);
+    const session = await auth();
+    logger.apiError(`/api/v2/users/${id}`, error, {
+      userId: session?.user?.id,
+      method: 'DELETE',
+    });
     return NextResponse.json(
       {
         success: false,
@@ -318,8 +328,11 @@ export async function PATCH(
       message: 'Last login updated successfully',
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error updating last login:', error);
+    const session = await auth();
+    logger.apiError(`/api/v2/users/${id}/update-last-login`, error, {
+      userId: session?.user?.id,
+      method: 'POST',
+    });
     return NextResponse.json(
       {
         success: false,

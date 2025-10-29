@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { ExecutionContextManager } from '@/lib/execution/context/ExecutionContextManager';
 import { ExecutionStrategyFactory } from '@/lib/execution/factory/ExecutionStrategyFactory';
@@ -131,8 +132,11 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Execution API error:', error);
+    const session = await auth();
+    logger.apiError('/api/v2/execution', error, {
+      userId: session?.user?.id,
+      method: 'POST',
+    });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -232,8 +236,9 @@ export async function GET(request: NextRequest) {
         });
     }
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Execution API GET error:', error);
+    logger.apiError('/api/v2/execution', error, {
+      method: 'GET',
+    });
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Internal server error',
