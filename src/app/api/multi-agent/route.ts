@@ -104,14 +104,31 @@ End with final decision and next steps.`;
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if API key is configured
+    if (!apiKey) {
+      console.error('No API key found in environment variables');
+      return NextResponse.json(
+        {
+          error:
+            'No AI API key configured. Please add OPENAI_API_KEY or GROQ_API_KEY to .env.local',
+        },
+        { status: 500 }
+      );
+    }
+
     const body: MultiAgentRequest = await request.json();
     const { idea, roles, mode = 'sequential' } = body;
+
+    console.log('Multi-agent request:', {
+      idea: idea.substring(0, 50) + '...',
+      roles,
+      mode,
+    });
 
     // Validation
     if (!idea || idea.trim().length === 0) {
       return NextResponse.json({ error: 'Idea is required' }, { status: 400 });
     }
-
     if (!roles || roles.length === 0) {
       return NextResponse.json(
         { error: 'At least one role is required' },
@@ -153,6 +170,11 @@ export async function POST(request: NextRequest) {
       completion.choices[0]?.message?.content ||
       'Unable to generate simulation.';
 
+    console.log(
+      'Simulation generated successfully. Length:',
+      simulation.length
+    );
+
     return NextResponse.json({
       success: true,
       simulation,
@@ -166,6 +188,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Multi-agent simulation error:', error);
+    console.error(
+      'Error details:',
+      error instanceof Error ? error.message : 'Unknown error'
+    );
 
     if (error instanceof Error && error.message.includes('API key')) {
       return NextResponse.json(
