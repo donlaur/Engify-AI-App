@@ -220,7 +220,7 @@ export function MultiAgentWorkbench() {
           {/* Left: Input & Controls */}
           <div className="space-y-6 lg:col-span-2">
             {/* Quick Examples */}
-            <Card className="border-gray-200 shadow-sm">
+            <Card className="border-gray-200 bg-white shadow-sm">
               <CardHeader className="border-b bg-gradient-to-r from-yellow-50 to-orange-50 pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                   <Sparkles className="h-5 w-5 text-yellow-600" />
@@ -230,7 +230,7 @@ export function MultiAgentWorkbench() {
                   Click to load a pre-built scenario
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pt-4">
+              <CardContent className="bg-white pt-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {EXAMPLE_SCENARIOS.map((example, index) => (
                     <button
@@ -265,7 +265,7 @@ export function MultiAgentWorkbench() {
             </Card>
 
             {/* Input */}
-            <Card className="border-gray-200 shadow-sm">
+            <Card className="border-gray-200 bg-white shadow-sm">
               <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50 pb-4">
                 <CardTitle className="text-lg font-semibold text-gray-900">
                   Your Idea
@@ -274,13 +274,13 @@ export function MultiAgentWorkbench() {
                   What do you want the team to evaluate?
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 pt-4">
+              <CardContent className="space-y-4 bg-white pt-4">
                 <Textarea
                   placeholder="Example: Add real-time collaboration to our document editor..."
                   value={idea}
                   onChange={(e) => setIdea(e.target.value)}
                   rows={4}
-                  className="resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  className="resize-none border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
 
                 {/* Mode Selection */}
@@ -356,7 +356,7 @@ export function MultiAgentWorkbench() {
 
             {/* Simulation Output */}
             {simulation && (
-              <Card className="border-gray-200 shadow-sm">
+              <Card className="border-gray-200 bg-white shadow-sm">
                 <CardHeader className="border-b bg-gradient-to-r from-green-50 to-emerald-50 pb-4">
                   <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                     <CheckCircle className="h-5 w-5 text-green-600" />
@@ -368,7 +368,7 @@ export function MultiAgentWorkbench() {
                       : 'Team Debate'}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-4">
+                <CardContent className="bg-white pt-4">
                   <div className="max-h-[600px] overflow-y-auto rounded-lg border-2 border-gray-200 bg-white p-6">
                     <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800">
                       {simulation}
@@ -409,7 +409,7 @@ export function MultiAgentWorkbench() {
 
           {/* Right: Role Selection */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-6 border-gray-200 shadow-sm">
+            <Card className="sticky top-6 border-gray-200 bg-white shadow-sm">
               <CardHeader className="border-b bg-gradient-to-r from-purple-50 to-pink-50 pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                   <Users2 className="h-5 w-5 text-purple-600" />
@@ -419,7 +419,7 @@ export function MultiAgentWorkbench() {
                   Who should review this idea?
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pt-4">
+              <CardContent className="bg-white pt-4">
                 <div className="space-y-2">
                   {AVAILABLE_ROLES.map((role) => {
                     const isSelected = selectedRoles.includes(role.id);
