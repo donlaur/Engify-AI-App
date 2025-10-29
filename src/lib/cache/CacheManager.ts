@@ -5,22 +5,25 @@
  * Provides a unified API for all caching operations with advanced features.
  */
 
-import { 
-  ICacheManager, 
-  ICacheStrategy, 
-  ICacheAdapter, 
+import {
+  ICacheManager,
+  ICacheStrategy,
+  ICacheAdapter,
   ICacheEventHandler,
-  CacheStats, 
+  CacheStats,
   CacheOptions,
   CacheEvent,
-  CacheError
+  CacheError,
 } from './types';
 import { RedisCacheAdapter, RedisConfig } from './adapters/RedisAdapter';
-import { MemoryCacheAdapter, MemoryCacheConfig } from './adapters/MemoryAdapter';
-import { 
-  WriteThroughStrategy, 
-  CacheAsideStrategy, 
-  RefreshAheadStrategy 
+import {
+  MemoryCacheAdapter,
+  MemoryCacheConfig,
+} from './adapters/MemoryAdapter';
+import {
+  WriteThroughStrategy,
+  CacheAsideStrategy,
+  RefreshAheadStrategy,
 } from './strategies/CacheStrategies';
 
 /**
@@ -28,7 +31,11 @@ import {
  */
 export interface CacheManagerConfig {
   readonly adapter: 'redis' | 'memory' | 'hybrid';
-  readonly strategy: 'write-through' | 'write-behind' | 'cache-aside' | 'refresh-ahead';
+  readonly strategy:
+    | 'write-through'
+    | 'write-behind'
+    | 'cache-aside'
+    | 'refresh-ahead';
   readonly defaultTtl: number;
   readonly maxSize?: number;
   readonly redis?: RedisConfig;
@@ -43,7 +50,7 @@ export interface CacheManagerConfig {
 export class CacheManager implements ICacheManager {
   readonly strategy: ICacheStrategy;
   readonly adapter: ICacheAdapter;
-  
+
   private eventHandlers: ICacheEventHandler[] = [];
   private stats = {
     hits: 0,
@@ -68,7 +75,7 @@ export class CacheManager implements ICacheManager {
           throw new Error('Redis configuration is required for Redis adapter');
         }
         return new RedisCacheAdapter(this.config.redis);
-        
+
       case 'memory':
         return new MemoryCacheAdapter(
           this.config.memory ?? {
@@ -78,7 +85,7 @@ export class CacheManager implements ICacheManager {
             enableCompression: false,
           }
         );
-        
+
       case 'hybrid':
         // Hybrid adapter would combine memory and Redis
         // For now, fall back to memory
@@ -90,7 +97,7 @@ export class CacheManager implements ICacheManager {
             enableCompression: false,
           }
         );
-        
+
       default:
         throw new Error(`Unsupported adapter type: ${this.config.adapter}`);
     }
@@ -107,7 +114,7 @@ export class CacheManager implements ICacheManager {
         console.log(`Data store get: ${key}`);
         return null;
       },
-      set: async <T>(key: string, value: T): Promise<void> => {
+      set: async <T>(key: string, _value: T): Promise<void> => {
         console.log(`Data store set: ${key}`);
       },
       delete: async (key: string): Promise<boolean> => {
@@ -119,13 +126,13 @@ export class CacheManager implements ICacheManager {
     switch (this.config.strategy) {
       case 'write-through':
         return new WriteThroughStrategy(this.adapter, mockDataStore);
-        
+
       case 'cache-aside':
         return new CacheAsideStrategy(this.adapter, mockDataStore);
-        
+
       case 'refresh-ahead':
         return new RefreshAheadStrategy(this.adapter, mockDataStore);
-        
+
       default:
         throw new Error(`Unsupported strategy: ${this.config.strategy}`);
     }
@@ -137,7 +144,9 @@ export class CacheManager implements ICacheManager {
   async initialize(): Promise<void> {
     try {
       await this.adapter.connect();
-      console.log(`Cache manager initialized with ${this.config.adapter} adapter and ${this.config.strategy} strategy`);
+      console.log(
+        `Cache manager initialized with ${this.config.adapter} adapter and ${this.config.strategy} strategy`
+      );
     } catch (error) {
       throw new CacheError(
         'Failed to initialize cache manager',
@@ -151,10 +160,10 @@ export class CacheManager implements ICacheManager {
   /**
    * Get value from cache
    */
-  async get<T>(key: string, options?: CacheOptions): Promise<T | null> {
+  async get<T>(key: string, _options?: CacheOptions): Promise<T | null> {
     try {
       const entry = await this.strategy.get<T>(key);
-      
+
       if (entry) {
         this.stats.hits++;
         this.emitEvent({
@@ -191,9 +200,9 @@ export class CacheManager implements ICacheManager {
     try {
       const ttl = options?.ttl ?? this.config.defaultTtl;
       const tags = options?.tags;
-      
+
       await this.strategy.set(key, value, ttl, tags);
-      
+
       this.stats.sets++;
       this.emitEvent({
         type: 'set',
@@ -218,7 +227,7 @@ export class CacheManager implements ICacheManager {
   async delete(key: string): Promise<boolean> {
     try {
       const result = await this.strategy.delete(key);
-      
+
       if (result) {
         this.stats.deletes++;
         this.emitEvent({
@@ -227,7 +236,7 @@ export class CacheManager implements ICacheManager {
           timestamp: new Date(),
         });
       }
-      
+
       return result;
     } catch (error) {
       throw new CacheError(
@@ -257,8 +266,8 @@ export class CacheManager implements ICacheManager {
    * Get or set pattern - core caching pattern
    */
   async getOrSet<T>(
-    key: string, 
-    fetcher: () => Promise<T>, 
+    key: string,
+    fetcher: () => Promise<T>,
     options?: CacheOptions
   ): Promise<T> {
     try {
@@ -271,7 +280,7 @@ export class CacheManager implements ICacheManager {
       // Cache miss - fetch and cache
       const value = await fetcher();
       await this.set(key, value, options);
-      
+
       return value;
     } catch (error) {
       throw new CacheError(
@@ -304,11 +313,11 @@ export class CacheManager implements ICacheManager {
     try {
       const values = await this.adapter.mget<T>(keys);
       const result = new Map<string, T | null>();
-      
+
       keys.forEach((key, index) => {
         result.set(key, values[index]);
       });
-      
+
       return result;
     } catch (error) {
       throw new CacheError(
@@ -323,16 +332,21 @@ export class CacheManager implements ICacheManager {
   /**
    * Set multiple values
    */
-  async mset<T>(entries: Map<string, T>, options?: CacheOptions): Promise<void> {
+  async mset<T>(
+    entries: Map<string, T>,
+    options?: CacheOptions
+  ): Promise<void> {
     try {
-      const adapterEntries = Array.from(entries.entries()).map(([key, value]) => ({
-        key,
-        value,
-        ttl: options?.ttl ?? this.config.defaultTtl,
-      }));
-      
+      const adapterEntries = Array.from(entries.entries()).map(
+        ([key, value]) => ({
+          key,
+          value,
+          ttl: options?.ttl ?? this.config.defaultTtl,
+        })
+      );
+
       await this.adapter.mset(adapterEntries);
-      
+
       // Emit events for each set
       for (const [key] of entries) {
         this.emitEvent({
@@ -359,7 +373,7 @@ export class CacheManager implements ICacheManager {
   async mdelete(keys: string[]): Promise<number> {
     try {
       const deletedCount = await this.adapter.mdelete(keys);
-      
+
       // Emit events for each deletion
       for (const key of keys) {
         this.emitEvent({
@@ -368,7 +382,7 @@ export class CacheManager implements ICacheManager {
           timestamp: new Date(),
         });
       }
-      
+
       return deletedCount;
     } catch (error) {
       throw new CacheError(
@@ -385,7 +399,7 @@ export class CacheManager implements ICacheManager {
    */
   async getStats(): Promise<CacheStats> {
     const adapterStats = await this.strategy.getStats();
-    
+
     return {
       ...adapterStats,
       hits: this.stats.hits,
@@ -397,10 +411,13 @@ export class CacheManager implements ICacheManager {
   /**
    * Get cache health status
    */
-  async getHealth(): Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; details: string }> {
+  async getHealth(): Promise<{
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    details: string;
+  }> {
     try {
       const isConnected = this.adapter.isConnected();
-      
+
       if (!isConnected) {
         return {
           status: 'unhealthy',
@@ -459,7 +476,7 @@ export class CacheManager implements ICacheManager {
     }
 
     for (const handler of this.eventHandlers) {
-      handler.handle(event).catch(error => {
+      handler.handle(event).catch((error) => {
         console.error('Error in cache event handler:', error);
       });
     }
