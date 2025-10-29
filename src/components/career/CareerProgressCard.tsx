@@ -6,7 +6,13 @@
 'use client';
 
 import { Icons } from '@/lib/icons';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -61,7 +67,8 @@ export function CareerProgressCard({
               Career Progress
             </CardTitle>
             <CardDescription>
-              Track your path to {targetLevel ? getLevelDisplay(targetLevel) : 'the next level'}
+              Track your path to{' '}
+              {targetLevel ? getLevelDisplay(targetLevel) : 'the next level'}
             </CardDescription>
           </div>
           <Badge variant="outline" className="text-lg">
@@ -75,7 +82,9 @@ export function CareerProgressCard({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Promotion Readiness</span>
-              <span className={`text-2xl font-bold ${getReadinessColor(promotionReadiness)}`}>
+              <span
+                className={`text-2xl font-bold ${getReadinessColor(promotionReadiness)}`}
+              >
                 {promotionReadiness}%
               </span>
             </div>
@@ -88,7 +97,7 @@ export function CareerProgressCard({
 
         {/* Skills Developed */}
         <div className="space-y-3">
-          <h4 className="text-sm font-medium">Skills You're Developing</h4>
+          <h4 className="text-sm font-medium">Skills You&apos;re Developing</h4>
           <div className="space-y-2">
             {topSkills.slice(0, 3).map(({ skill, improvement }) => {
               const skillInfo = SKILL_INFO[skill as keyof typeof SKILL_INFO];
@@ -112,14 +121,14 @@ export function CareerProgressCard({
 
         {/* Next Milestone */}
         {nextMilestone && (
-          <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+          <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
             <div className="flex items-start gap-2">
-              <Icons.flag className="h-4 w-4 text-blue-600 mt-0.5" />
+              <Icons.flag className="mt-0.5 h-4 w-4 text-blue-600" />
               <div className="text-sm">
                 <p className="font-medium text-blue-900 dark:text-blue-100">
                   Next Milestone
                 </p>
-                <p className="text-blue-800 dark:text-blue-200 mt-1">
+                <p className="mt-1 text-blue-800 dark:text-blue-200">
                   {nextMilestone}
                 </p>
               </div>
@@ -128,12 +137,16 @@ export function CareerProgressCard({
         )}
 
         {/* Career Impact */}
-        <div className="pt-4 border-t">
-          <h4 className="text-sm font-medium mb-2">Career Impact</h4>
+        <div className="border-t pt-4">
+          <h4 className="mb-2 text-sm font-medium">Career Impact</h4>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Demonstrating</p>
-              <p className="font-medium">{targetLevel ? `${getLevelDisplay(targetLevel)} skills` : 'Current level mastery'}</p>
+              <p className="font-medium">
+                {targetLevel
+                  ? `${getLevelDisplay(targetLevel)} skills`
+                  : 'Current level mastery'}
+              </p>
             </div>
             <div>
               <p className="text-muted-foreground">Building</p>

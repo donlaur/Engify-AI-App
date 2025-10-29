@@ -4,7 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { Persona, ImpersonationMode, getPersonaDescription } from '@/types/persona';
+import {
+  Persona,
+  ImpersonationMode,
+  getPersonaDescription,
+} from '@/types/persona';
 
 interface ImpersonationBannerProps {
   actualPersona: Persona;
@@ -54,24 +58,33 @@ export function ImpersonationBanner({
   };
 
   return (
-    <Card className="border-2 border-primary bg-primary/5 sticky top-0 z-50">
+    <Card className="sticky top-0 z-50 border-2 border-primary bg-primary/5">
       <CardContent className="pt-4">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1">
+          <div className="flex flex-1 items-center gap-3">
             <div className="rounded-full bg-primary/20 p-2">
               <Icons.users className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="font-semibold text-sm">Impersonation Mode Active</p>
-                <Badge variant="secondary" className={getReasonColor(impersonation.reason)}>
-                  <span className="mr-1">{getReasonIcon(impersonation.reason)}</span>
+              <div className="mb-1 flex items-center gap-2">
+                <p className="text-sm font-semibold">
+                  Impersonation Mode Active
+                </p>
+                <Badge
+                  variant="secondary"
+                  className={getReasonColor(impersonation.reason)}
+                >
+                  <span className="mr-1">
+                    {getReasonIcon(impersonation.reason)}
+                  </span>
                   {impersonation.reason}
                 </Badge>
               </div>
               <div className="text-xs text-muted-foreground">
                 <span className="opacity-60">You:</span>{' '}
-                <span className="font-medium">{getPersonaDescription(actualPersona)}</span>
+                <span className="font-medium">
+                  {getPersonaDescription(actualPersona)}
+                </span>
                 <span className="mx-2">→</span>
                 <span className="opacity-60">Viewing as:</span>{' '}
                 <span className="font-medium text-primary">
@@ -79,8 +92,8 @@ export function ImpersonationBanner({
                 </span>
               </div>
               {impersonation.notes && (
-                <p className="text-xs text-muted-foreground mt-1 italic">
-                  "{impersonation.notes}"
+                <p className="mt-1 text-xs italic text-muted-foreground">
+                  &quot;{impersonation.notes}&quot;
                 </p>
               )}
             </div>
@@ -91,7 +104,9 @@ export function ImpersonationBanner({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const insights = prompt('What did you learn from this perspective?');
+                  const insights = prompt(
+                    'What did you learn from this perspective?'
+                  );
                   if (insights) onSaveInsights(insights);
                 }}
               >

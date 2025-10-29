@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,7 +29,7 @@ export function PromptOptimizer() {
     if (!originalPrompt.trim()) return;
 
     setIsOptimizing(true);
-    
+
     // Simulate processing time
     setTimeout(() => {
       const optimizationResult = optimizePrompt(originalPrompt);
@@ -43,11 +49,12 @@ export function PromptOptimizer() {
     setShowDiff(false);
   };
 
-  const suggestions = originalPrompt.length > 10 
-    ? getOptimizationSuggestions(originalPrompt) 
-    : [];
+  const suggestions =
+    originalPrompt.length > 10
+      ? getOptimizationSuggestions(originalPrompt)
+      : [];
 
-  const improvementScore = result 
+  const improvementScore = result
     ? calculateImprovementScore(result.original, result.optimized)
     : 0;
 
@@ -75,7 +82,7 @@ export function PromptOptimizer() {
         <CardHeader>
           <CardTitle className="text-base">Original Prompt</CardTitle>
           <CardDescription>
-            Enter your prompt below and we'll suggest improvements
+            Enter your prompt below and we&apos;ll suggest improvements
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -91,7 +98,11 @@ export function PromptOptimizer() {
               {originalPrompt.length} characters
             </p>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={handleReset} disabled={!originalPrompt}>
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                disabled={!originalPrompt}
+              >
                 <Icons.refresh className="mr-2 h-4 w-4" />
                 Reset
               </Button>
@@ -120,7 +131,7 @@ export function PromptOptimizer() {
       {suggestions.length > 0 && !result && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Icons.lightbulb className="h-4 w-4 text-yellow-500" />
               Suggestions
             </CardTitle>
@@ -145,8 +156,12 @@ export function PromptOptimizer() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Improvement Score</p>
-                  <p className="text-3xl font-bold text-green-500">{improvementScore}/100</p>
+                  <p className="text-sm text-muted-foreground">
+                    Improvement Score
+                  </p>
+                  <p className="text-3xl font-bold text-green-500">
+                    {improvementScore}/100
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Tokens Added</p>
@@ -154,7 +169,9 @@ export function PromptOptimizer() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Improvements</p>
-                  <p className="text-2xl font-bold">{result.improvements.length}</p>
+                  <p className="text-2xl font-bold">
+                    {result.improvements.length}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -169,8 +186,10 @@ export function PromptOptimizer() {
               <ul className="space-y-2">
                 {result.improvements.map((improvement, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <Icons.check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-muted-foreground">{improvement}</span>
+                    <Icons.check className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
+                    <span className="text-sm text-muted-foreground">
+                      {improvement}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -203,21 +222,26 @@ export function PromptOptimizer() {
             </CardHeader>
             <CardContent>
               {showDiff ? (
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <Badge variant="secondary" className="mb-2">Before</Badge>
-                    <div className="rounded-lg bg-red-500/10 p-4 border border-red-500/20">
-                      <pre className="whitespace-pre-wrap text-sm font-mono">
+                    <Badge variant="secondary" className="mb-2">
+                      Before
+                    </Badge>
+                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4">
+                      <pre className="whitespace-pre-wrap font-mono text-sm">
                         {result.original}
                       </pre>
                     </div>
                   </div>
                   <div>
-                    <Badge variant="secondary" className="mb-2 bg-green-500/10 text-green-500">
+                    <Badge
+                      variant="secondary"
+                      className="mb-2 bg-green-500/10 text-green-500"
+                    >
                       After
                     </Badge>
-                    <div className="rounded-lg bg-green-500/10 p-4 border border-green-500/20">
-                      <pre className="whitespace-pre-wrap text-sm font-mono">
+                    <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-4">
+                      <pre className="whitespace-pre-wrap font-mono text-sm">
                         {result.optimized}
                       </pre>
                     </div>
@@ -225,7 +249,7 @@ export function PromptOptimizer() {
                 </div>
               ) : (
                 <div className="rounded-lg bg-muted p-4">
-                  <pre className="whitespace-pre-wrap text-sm font-mono">
+                  <pre className="whitespace-pre-wrap font-mono text-sm">
                     {result.optimized}
                   </pre>
                 </div>
@@ -239,13 +263,14 @@ export function PromptOptimizer() {
       <Card className="bg-muted/50">
         <CardContent className="pt-6">
           <div className="flex items-start gap-3">
-            <Icons.info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+            <Icons.info className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500" />
             <div className="text-sm text-muted-foreground">
-              <p className="font-semibold mb-1">How it works</p>
+              <p className="mb-1 font-semibold">How it works</p>
               <p>
-                This optimizer uses rule-based improvements to enhance your prompts. It adds
-                structure, clarity, examples, and constraints based on best practices. For
-                AI-powered optimization, connect your API keys in settings.
+                This optimizer uses rule-based improvements to enhance your
+                prompts. It adds structure, clarity, examples, and constraints
+                based on best practices. For AI-powered optimization, connect
+                your API keys in settings.
               </p>
             </div>
           </div>
