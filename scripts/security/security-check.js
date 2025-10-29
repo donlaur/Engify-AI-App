@@ -67,6 +67,13 @@ const securityPatterns = [
   {
     name: 'Generic Secrets',
     pattern: /(password|secret|token|api[_-]?key)\s*[:=]\s*['"][^'"]{8,}['"]/gi,
+    check: (match, content, filePath) => {
+      // Skip test files - they legitimately use test passwords
+      if (filePath && (filePath.includes('__tests__') || filePath.includes('.test.') || filePath.includes('.spec.'))) {
+        return false;
+      }
+      return true;
+    },
     severity: 'HIGH',
     message: 'Potential hardcoded secret detected. Use environment variables.',
   },
@@ -242,10 +249,15 @@ function checkFile(filePath) {
   const issues = [];
 
   // Check for hardcoded secrets
-  securityPatterns.forEach(({ name, pattern, severity, message }) => {
+  securityPatterns.forEach(({ name, pattern, check, severity, message }) => {
     const matches = content.match(pattern);
     if (matches) {
       matches.forEach(match => {
+        // Apply custom check function if provided
+        if (check && !check(match, content, filePath)) {
+          return; // Skip this match
+        }
+        
         // Find line number
         const lines = content.split('\n');
         const lineNumber = lines.findIndex(line => line.includes(match)) + 1;
