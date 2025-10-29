@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
+import { RBACPresets } from '@/lib/middleware/rbac';
 
 /**
  * GET /api/prompts
  * Fetch prompts from MongoDB (or fallback to static data)
+ * Public access - no authentication required
  */
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +21,7 @@ export async function GET(request: NextRequest) {
       const collection = db.collection('prompts');
 
       // Build query
-      const query: any = {};
+      const query: Record<string, unknown> = {};
       if (category && category !== 'all') {
         query.category = category;
       }
@@ -47,7 +49,7 @@ export async function GET(request: NextRequest) {
     } catch (dbError) {
       // Fallback to static data
       console.warn('MongoDB not available, using static data:', dbError);
-      
+
       const { seedPrompts } = await import('@/data/seed-prompts');
       let filtered = seedPrompts;
 
@@ -85,9 +87,13 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/prompts
- * Create a new prompt (requires authentication in production)
+ * Create a new prompt (requires prompts:write permission)
  */
 export async function POST(request: NextRequest) {
+  // RBAC: prompts:write permission
+  const rbacCheck = await RBACPresets.requirePromptWrite()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const body = await request.json();
 

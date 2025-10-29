@@ -92,6 +92,10 @@ const databasePatterns = [
       if (match.match(/\{\s*_id:\s*[^}]+\s*\}/)) {
         return false;
       }
+      // Skip public analytics collections (aggregated public data)
+      if (content.includes('prompt_stats') && (content.includes('public analytics') || content.includes('aggregated public'))) {
+        return false;
+      }
       // Check if organizationId is in the query
       return !match.includes('organizationId');
     },
@@ -108,6 +112,10 @@ const databasePatterns = [
       }
       // Skip if querying by _id only
       if (match.match(/\{\s*_id:\s*[^}]+\s*\}/)) {
+        return false;
+      }
+      // Skip public analytics collections (aggregated public data)
+      if (content.includes('prompt_stats') && (content.includes('public analytics') || content.includes('aggregated public'))) {
         return false;
       }
       return !match.includes('organizationId');
