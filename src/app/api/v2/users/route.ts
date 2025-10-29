@@ -156,13 +156,17 @@ export async function POST(request: NextRequest) {
     const validatedData = createUserSchema.parse(body);
 
     type CreateUserArg = Parameters<typeof userService.createUser>[0];
-    const created = await userService.createUser({
-      email: validatedData.email,
-      name: validatedData.name,
-      role: validatedData.role,
-      plan: validatedData.plan,
-      organizationId: validatedData.organizationId ?? null,
-    } as unknown as CreateUserArg);
+    const payload: Partial<CreateUserArg> = {
+      email: validatedData.email as unknown as CreateUserArg['email'],
+      name: validatedData.name as unknown as CreateUserArg['name'],
+      role: validatedData.role as unknown as CreateUserArg['role'],
+      plan: validatedData.plan as unknown as CreateUserArg['plan'],
+    };
+    if (validatedData.organizationId) {
+      // @ts-expect-error - conditional property based on service type
+      payload.organizationId = validatedData.organizationId;
+    }
+    const created = await userService.createUser(payload as CreateUserArg);
 
     return NextResponse.json(
       {
