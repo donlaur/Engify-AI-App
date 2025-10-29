@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 
 /**
  * RAG Integration Tests
@@ -34,7 +35,7 @@ describe('RAG Integration', () => {
       });
 
       const { POST } = await import('@/app/api/rag/route');
-      const request = new Request('http://localhost:3000/api/rag', {
+      const request = new NextRequest('http://localhost:3000/api/rag', {
         method: 'POST',
         body: JSON.stringify({
           query: 'test query',
@@ -64,7 +65,7 @@ describe('RAG Integration', () => {
       });
 
       const { POST } = await import('@/app/api/rag/route');
-      const request = new Request('http://localhost:3000/api/rag', {
+      const request = new NextRequest('http://localhost:3000/api/rag', {
         method: 'POST',
         body: JSON.stringify({
           query: 'test query',

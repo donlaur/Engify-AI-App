@@ -12,7 +12,7 @@ import { POST } from '../route';
 vi.mock('@/lib/services/UserService', () => ({
   userService: {
     findByEmail: vi.fn(),
-    insertOne: vi.fn(),
+    createUser: vi.fn(),
   },
 }));
 
@@ -30,7 +30,7 @@ describe('POST /api/auth/signup', () => {
     const { hash } = await import('bcryptjs');
 
     vi.mocked(userService.findByEmail).mockResolvedValue(null);
-    vi.mocked(userService.insertOne).mockResolvedValue({
+    vi.mocked(userService.createUser).mockResolvedValue({
       _id: '507f1f77bcf86cd799439011',
       email: 'test@example.com',
       name: 'Test User',
@@ -66,7 +66,7 @@ describe('POST /api/auth/signup', () => {
     expect(data.data.password).toBeUndefined(); // Should not return password
     expect(hash).toHaveBeenCalledWith('Password123', 12);
     expect(userService.findByEmail).toHaveBeenCalledWith('test@example.com');
-    expect(userService.insertOne).toHaveBeenCalled();
+    expect(userService.createUser).toHaveBeenCalled();
   });
 
   it('should reject invalid email format', async () => {

@@ -29,7 +29,7 @@ export async function POST(
     await auditLog({
       action: 'message_callback_received',
       severity: 'info',
-      metadata: {
+      details: {
         queueName,
         messageId,
         status: callbackData.status || 'success',
@@ -61,7 +61,7 @@ export async function POST(
     await auditLog({
       action: 'callback_processing_error',
       severity: 'error',
-      metadata: {
+      details: {
         queueName: params.queueName,
         error: errorMessage,
       },

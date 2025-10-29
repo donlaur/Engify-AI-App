@@ -64,7 +64,7 @@ describe('POST /api/auth/mfa/verify', () => {
   it('should return 401 when user is not authenticated', async () => {
     const { auth } = await import('@/lib/auth');
 
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as any);
 
     const request = new NextRequest(
       'http://localhost:3000/api/auth/mfa/verify',

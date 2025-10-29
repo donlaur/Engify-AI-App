@@ -8,7 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { QStashMessageQueue } from '@/lib/messaging/queues/QStashMessageQueue';
-import { auditLog } from '@/lib/logging/audit';
+import { auditLog, type AuditAction } from '@/lib/logging/audit';
 import {
   createEmailProcessingJob,
   type ParsedEmail,
@@ -62,9 +62,9 @@ async function processEmailEvent(event: SendGridEvent) {
   // Log email event for analytics
   await auditLog({
     userId: 'system',
-    action: `EMAIL_${event.event.toUpperCase()}`,
+    action: `EMAIL_${event.event.toUpperCase()}` as AuditAction,
     resource: 'email',
-    metadata: {
+    details: {
       email: event.email,
       event: event.event,
       timestamp: new Date(event.timestamp * 1000),
@@ -117,7 +117,7 @@ async function processInboundEmail(email: SendGridInboundEmail) {
     text: email.text,
     html: email.html,
     receivedAt: new Date(),
-    metadata: {
+    details: {
       messageId: email.envelope,
       categories: [],
     },
@@ -152,7 +152,7 @@ async function processInboundEmail(email: SendGridInboundEmail) {
     userId: 'system',
     action: 'INBOUND_EMAIL_RECEIVED',
     resource: 'email',
-    metadata: {
+    details: {
       from: email.from,
       to: email.to,
       subject: email.subject,
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
       userId: 'system',
       action: 'WEBHOOK_ERROR',
       resource: 'sendgrid',
-      metadata: {
+      details: {
         error: error instanceof Error ? error.message : String(error),
       },
     });

@@ -192,14 +192,26 @@ export async function GET(request: NextRequest) {
         const priority = url.searchParams.get('priority') || 'normal';
         const maxTokens = parseInt(url.searchParams.get('maxTokens') || '1000');
 
-        const recommendations = strategyFactory.getStrategyRecommendations(
-          { prompt, maxTokens },
-          {
-            userId: 'test',
-            requestId: 'test',
-            priority: priority as 'low' | 'normal' | 'high' | 'urgent',
-          }
+        // Create factory instance for recommendations
+        const factory = new ExecutionStrategyFactory(AIProviderFactory);
+        const mockRequest: AIRequest = { prompt, maxTokens };
+        const mockContext: ExecutionContext = {
+          userId: 'test',
+          requestId: 'test',
+          priority: priority as 'low' | 'normal' | 'high' | 'urgent',
+        };
+
+        // Get compatible strategies sorted by priority
+        const compatibleStrategies = factory.getCompatibleStrategies(
+          mockRequest,
+          mockContext
         );
+        const recommendations = compatibleStrategies.map((s) => ({
+          name: s.name,
+          priority: s.getPriority(mockRequest, mockContext),
+          canHandle: s.canHandle(mockRequest, mockContext),
+          estimatedTime: s.getEstimatedTime(mockRequest, mockContext),
+        }));
 
         return NextResponse.json({
           success: true,

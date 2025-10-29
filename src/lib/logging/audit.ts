@@ -29,6 +29,8 @@ export type AuditAction =
   | 'api_key_rotated'
   | 'api_key_created'
   | 'api_key_revoked'
+  | 'api_key_rotate_failed'
+  | 'api_key_revoke_failed'
   | 'usage_alert_created'
   | 'usage_alert_triggered'
   | 'usage_alert_deleted'
@@ -41,7 +43,19 @@ export type AuditAction =
   | 'data_export'
   | 'data_import'
   | 'admin_action'
-  | 'security_alert';
+  | 'security_alert'
+  | 'beta_access_requested'
+  | 'beta_access_request_failed'
+  | 'jira_connected'
+  | 'jira_connect_failed'
+  | 'jira_disconnected'
+  | 'message_received'
+  | 'message_processed'
+  | 'message_failed'
+  | 'message_processing_error'
+  | 'message_callback_received'
+  | 'callback_processing_error'
+  | 'INBOUND_EMAIL_RECEIVED';
 
 export type AuditSeverity = 'info' | 'warning' | 'error' | 'critical';
 

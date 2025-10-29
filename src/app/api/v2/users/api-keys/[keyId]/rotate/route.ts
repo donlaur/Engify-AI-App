@@ -46,7 +46,7 @@ export async function POST(
       action: 'api_key_rotated',
       userId: session.user.id,
       severity: 'info',
-      metadata: {
+      details: {
         keyId: params.keyId,
       },
     });
@@ -74,7 +74,7 @@ export async function POST(
       action: 'api_key_rotate_failed',
       userId,
       severity: 'warning',
-      metadata: {
+      details: {
         keyId: params.keyId,
         error: error instanceof Error ? error.message : 'Unknown error',
       },

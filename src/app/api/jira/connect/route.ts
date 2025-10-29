@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       action: 'jira_connected',
       userId: session.user.id,
       severity: 'info',
-      metadata: {
+      details: {
         domain: validated.domain,
         hasProjectKey: !!validated.projectKey,
       },
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       action: 'jira_connect_failed',
       userId,
       severity: 'warning',
-      metadata: {
+      details: {
         error: error instanceof Error ? error.message : 'Unknown error',
       },
     });

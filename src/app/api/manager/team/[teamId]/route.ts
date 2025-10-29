@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
  * Get team details
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { teamId: string } }
 ) {
   try {
@@ -37,8 +37,10 @@ export async function GET(
       pipeline,
       roi,
     });
-  } catch (error: any) {
-    console.error('Team details error:', error);
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.error('Team details error:', errorMessage);
     return NextResponse.json(
       { error: 'Failed to load team details' },
       { status: 500 }
