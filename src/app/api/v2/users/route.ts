@@ -31,6 +31,9 @@ import { getUserService } from '@/lib/di/Container';
 import { RBACPresets } from '@/lib/middleware/rbac';
 
 // For V2 tests, we directly use UserService methods (DI) instead of CQRS
+export function resetCQRSForTesting(): void {
+  // No-op: kept for backward-compatibility with tests
+}
 
 // Request validation schemas
 const createUserSchema = z.object({

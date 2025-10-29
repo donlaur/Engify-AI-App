@@ -49,6 +49,12 @@ if (!globalWithEncoders.TextEncoder || !globalWithEncoders.TextDecoder) {
 const mockedFetch = vi.fn(
   async (_input: RequestInfo | URL, _init?: RequestInit) => {
     const url = typeof _input === 'string' ? _input : _input.toString();
+    if (url.endsWith('/health')) {
+      return new Response(JSON.stringify({ status: 'ok' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
     // Mock RAG health endpoint explicitly
     if (url.includes('/api/rag/health')) {
       return new Response(
@@ -143,29 +149,82 @@ vi.mock('@/lib/db/mongodb', () => {
 
 // Also mock MongoDB low-level client module if imported directly
 vi.mock('@/lib/db/client', () => {
-  const makeCollection = () => ({
-    findOne: vi.fn(async () => null),
-    find: vi.fn(() => {
+  type Doc = Record<string, unknown> & { _id?: string };
+  const store = new Map<string, Doc[]>();
+  const getList = (name: string) => store.get(name) || [];
+  const setList = (name: string, list: Doc[]) => store.set(name, list);
+  const makeCollection = (name: string) => ({
+    findOne: vi.fn(async (query: Record<string, unknown>) => {
+      return (
+        getList(name).find((d) =>
+          Object.entries(query).every(([k, v]) => d[k] === v)
+        ) || null
+      );
+    }),
+    find: vi.fn((query: Record<string, unknown> = {}) => {
+      let arr = getList(name).filter((d) =>
+        Object.entries(query).every(([k, v]) =>
+          v === undefined ? true : d[k] === v
+        )
+      );
       const chain = {
-        sort: vi.fn(() => chain),
-        skip: vi.fn(() => chain),
-        limit: vi.fn(() => chain),
-        toArray: vi.fn(async () => []),
+        sort: vi.fn((s: Record<string, number>) => {
+          const [[key, dir]] = Object.entries(s);
+          arr = arr
+            .slice()
+            .sort(
+              (a, b) => ((a[key] as number) || 0) - ((b[key] as number) || 0)
+            );
+          if (dir < 0) arr.reverse();
+          return chain;
+        }),
+        skip: vi.fn((_n: number) => chain),
+        limit: vi.fn((_n: number) => chain),
+        toArray: vi.fn(async () => arr),
       };
       return chain;
     }),
-    deleteOne: vi.fn(async () => ({ deletedCount: 1 })),
-    deleteMany: vi.fn(async () => ({ deletedCount: 1 })),
-    updateOne: vi.fn(async () => ({ modifiedCount: 1 })),
-    updateMany: vi.fn(async () => ({ modifiedCount: 1 })),
-    countDocuments: vi.fn(async () => 0),
-    aggregate: vi.fn(() => ({ toArray: vi.fn(async () => []) })),
-    insertOne: vi.fn(async () => ({ insertedId: '507f1f77bcf86cd799439011' })),
+    deleteOne: vi.fn(async (query: Record<string, unknown>) => {
+      const before = getList(name);
+      const idx = before.findIndex((d) =>
+        Object.entries(query).every(([k, v]) => d[k] === v)
+      );
+      if (idx === -1) return { deletedCount: 0 };
+      const after = before.slice();
+      after.splice(idx, 1);
+      setList(name, after);
+      return { deletedCount: 1 };
+    }),
+    deleteMany: vi.fn(async () => ({ deletedCount: 0 })),
+    updateOne: vi.fn(async (query: Record<string, unknown>) => {
+      const list = getList(name);
+      const idx = list.findIndex((d) =>
+        Object.entries(query).every(([k, v]) => d[k] === v)
+      );
+      if (idx === -1) return { modifiedCount: 0 };
+      return { modifiedCount: 1 };
+    }),
+    updateMany: vi.fn(async () => ({ modifiedCount: 0 })),
+    countDocuments: vi.fn(async (query: Record<string, unknown> = {}) => {
+      return getList(name).filter((d) =>
+        Object.entries(query).every(([k, v]) =>
+          v === undefined ? true : d[k] === v
+        )
+      ).length;
+    }),
+    aggregate: vi.fn((_pipeline: unknown[]) => ({
+      toArray: vi.fn(async () => []),
+    })),
+    insertOne: vi.fn(async (doc: Doc) => {
+      const list = getList(name).slice();
+      const insertedId = doc._id || '507f1f77bcf86cd799439011';
+      list.push({ ...doc, _id: insertedId });
+      setList(name, list);
+      return { insertedId };
+    }),
   });
-  const db = { collection: vi.fn(() => makeCollection()) };
-  return {
-    getDb: vi.fn(async () => db),
-  };
+  const db = { collection: vi.fn((name: string) => makeCollection(name)) };
+  return { getDb: vi.fn(async () => db) };
 });
 
 // Mock NextAuth where needed by route code (default export and named auth)
