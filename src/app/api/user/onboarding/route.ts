@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    const session = await auth();
     logger.apiError('/api/user/onboarding', error, {
       method: 'POST',
       userId: session?.user?.id,

@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getMongoDb } from '@/lib/db/mongodb';
+import { ObjectId } from 'mongodb';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { logger } from '@/lib/logging/logger';
 
@@ -24,7 +25,9 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
 
     // Get user data (querying by _id only - no org isolation needed)
-    const user = await db.collection('users').findOne({ _id: userId });
+    const user = await db
+      .collection('users')
+      .findOne({ _id: new ObjectId(userId) });
 
     // Get prompt usage count
     // Query is user-scoped (filtered by userId) - no organizationId needed
