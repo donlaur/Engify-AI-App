@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 import { mfaService } from '@/lib/services/mfaService';
 
 export async function GET(_request: NextRequest) {
@@ -21,7 +22,11 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({ status });
   } catch (error) {
-    console.error('Error getting MFA status:', error);
+    const session = await auth();
+    logger.apiError('/api/auth/mfa/status', error, {
+      userId: session?.user?.id,
+      method: 'GET',
+    });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

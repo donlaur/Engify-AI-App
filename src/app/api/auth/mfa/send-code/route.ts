@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 import { mfaService } from '@/lib/services/mfaService';
 import { z } from 'zod';
 
@@ -46,7 +47,11 @@ export async function POST(request: NextRequest) {
       expiresAt: result.expiresAt,
     });
   } catch (error) {
-    console.error('Error sending MFA code:', error);
+    const session = await auth();
+    logger.apiError('/api/auth/mfa/send-code', error, {
+      userId: session?.user?.id,
+      method: 'POST',
+    });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

@@ -1,6 +1,6 @@
 /**
  * Signup API Route
- * 
+ *
  * Create new user account with email/password
  */
 
@@ -8,6 +8,7 @@ import { NextRequest } from 'next/server';
 import { hash } from 'bcryptjs';
 import { z } from 'zod';
 import { ObjectId } from 'mongodb';
+import { logger } from '@/lib/logging/logger';
 import { userService } from '@/lib/services/UserService';
 import { success, fail, validationError } from '@/lib/api/response';
 
@@ -23,26 +24,28 @@ const signupSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  let body: { email?: string; password?: string; name?: string } = {};
+
   try {
-    const body = await req.json();
-    
+    body = await req.json();
+
     // Validate input
     const result = signupSchema.safeParse(body);
     if (!result.success) {
       return validationError(result.error.flatten());
     }
-    
+
     const { email, password, name } = result.data;
-    
+
     // Check if user already exists
     const existing = await userService.findByEmail(email);
     if (existing) {
       return fail('Email already registered', 400);
     }
-    
+
     // Hash password
     const hashedPassword = await hash(password, 12);
-    
+
     // Create user
     const user = await userService.insertOne({
       _id: new ObjectId(),
@@ -59,7 +62,7 @@ export async function POST(req: NextRequest) {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    
+
     // Return success (don't include password)
     return success({
       id: user._id.toString(),
@@ -68,7 +71,10 @@ export async function POST(req: NextRequest) {
       role: user.role,
     });
   } catch (error) {
-    console.error('Signup error:', error);
+    logger.apiError('/api/auth/signup', error, {
+      method: 'POST',
+      email: body?.email || 'unknown',
+    });
     return fail('Failed to create account', 500);
   }
 }
