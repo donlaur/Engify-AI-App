@@ -50,10 +50,13 @@ const mockedFetch = vi.fn(
   async (_input: RequestInfo | URL, _init?: RequestInit) => {
     const url = typeof _input === 'string' ? _input : _input.toString();
     if (url.endsWith('/health')) {
-      return new Response(JSON.stringify({ status: 'ok' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ status: 'healthy', rag_service: 'ok' }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
     // Mock RAG health endpoint explicitly
     if (url.includes('/api/rag/health')) {
@@ -153,41 +156,70 @@ vi.mock('@/lib/db/client', () => {
   const store = new Map<string, Doc[]>();
   const getList = (name: string) => store.get(name) || [];
   const setList = (name: string, list: Doc[]) => store.set(name, list);
+  type Stringable = { toString: () => string };
+  const toStr = (v: unknown): string => {
+    if (
+      typeof v === 'object' &&
+      v !== null &&
+      'toString' in v &&
+      typeof (v as Stringable).toString === 'function'
+    ) {
+      return (v as Stringable).toString();
+    }
+    return String(v);
+  };
+  const equals = (a: unknown, b: unknown) => toStr(a) === toStr(b);
   const makeCollection = (name: string) => ({
     findOne: vi.fn(async (query: Record<string, unknown>) => {
       return (
         getList(name).find((d) =>
-          Object.entries(query).every(([k, v]) => d[k] === v)
+          Object.entries(query).every(([k, v]) => equals(d[k], v))
         ) || null
       );
     }),
     find: vi.fn((query: Record<string, unknown> = {}) => {
       let arr = getList(name).filter((d) =>
         Object.entries(query).every(([k, v]) =>
-          v === undefined ? true : d[k] === v
+          v === undefined ? true : equals(d[k], v)
         )
       );
-      const chain = {
+      let offset = 0;
+      let take: number | undefined;
+      type FindChain = {
+        sort: (s: Record<string, number>) => FindChain;
+        skip: (n: number) => FindChain;
+        limit: (n: number) => FindChain;
+        toArray: () => Promise<Array<Record<string, unknown>>>;
+      };
+      const chain: FindChain = {
         sort: vi.fn((s: Record<string, number>) => {
           const [[key, dir]] = Object.entries(s);
           arr = arr
             .slice()
-            .sort(
-              (a, b) => ((a[key] as number) || 0) - ((b[key] as number) || 0)
-            );
-          if (dir < 0) arr.reverse();
+            .sort((a, b) => Number(a[key] ?? 0) - Number(b[key] ?? 0));
+          if (Number(dir) < 0) arr.reverse();
           return chain;
         }),
-        skip: vi.fn((_n: number) => chain),
-        limit: vi.fn((_n: number) => chain),
-        toArray: vi.fn(async () => arr),
+        skip: vi.fn((n: number) => {
+          offset = n;
+          return chain;
+        }),
+        limit: vi.fn((n: number) => {
+          take = n;
+          return chain;
+        }),
+        toArray: vi.fn(async () =>
+          take === undefined
+            ? arr.slice(offset)
+            : arr.slice(offset, offset + take)
+        ),
       };
       return chain;
     }),
     deleteOne: vi.fn(async (query: Record<string, unknown>) => {
       const before = getList(name);
       const idx = before.findIndex((d) =>
-        Object.entries(query).every(([k, v]) => d[k] === v)
+        Object.entries(query).every(([k, v]) => equals(d[k], v))
       );
       if (idx === -1) return { deletedCount: 0 };
       const after = before.slice();
@@ -196,15 +228,43 @@ vi.mock('@/lib/db/client', () => {
       return { deletedCount: 1 };
     }),
     deleteMany: vi.fn(async () => ({ deletedCount: 0 })),
-    updateOne: vi.fn(async (query: Record<string, unknown>) => {
-      const list = getList(name);
-      const idx = list.findIndex((d) =>
-        Object.entries(query).every(([k, v]) => d[k] === v)
-      );
-      if (idx === -1) return { modifiedCount: 0 };
-      return { modifiedCount: 1 };
-    }),
-    updateMany: vi.fn(async () => ({ modifiedCount: 0 })),
+    updateOne: vi.fn(
+      async (
+        query: Record<string, unknown>,
+        update?: Record<string, unknown>
+      ) => {
+        const list = getList(name).slice();
+        const idx = list.findIndex((d) =>
+          Object.entries(query).every(([k, v]) => d[k] === v)
+        );
+        if (idx === -1) return { modifiedCount: 0 };
+        if (update && update.$set && typeof update.$set === 'object') {
+          list[idx] = { ...list[idx], ...update.$set };
+          setList(name, list);
+        }
+        return { modifiedCount: 1 };
+      }
+    ),
+    updateMany: vi.fn(
+      async (
+        query: Record<string, unknown>,
+        update?: Record<string, unknown>
+      ) => {
+        const list = getList(name).slice();
+        let modified = 0;
+        for (let i = 0; i < list.length; i++) {
+          const d = list[i];
+          if (Object.entries(query).every(([k, v]) => equals(d[k], v))) {
+            if (update && update.$set && typeof update.$set === 'object') {
+              list[i] = { ...d, ...update.$set };
+              modified++;
+            }
+          }
+        }
+        if (modified > 0) setList(name, list);
+        return { modifiedCount: modified };
+      }
+    ),
     countDocuments: vi.fn(async (query: Record<string, unknown> = {}) => {
       return getList(name).filter((d) =>
         Object.entries(query).every(([k, v]) =>
@@ -212,12 +272,54 @@ vi.mock('@/lib/db/client', () => {
         )
       ).length;
     }),
-    aggregate: vi.fn((_pipeline: unknown[]) => ({
-      toArray: vi.fn(async () => []),
+    aggregate: vi.fn((pipeline: Array<Record<string, unknown>>) => ({
+      toArray: vi.fn(async () => {
+        let arr: Array<Record<string, unknown>> = getList(name).slice();
+        for (const stageUnknown of pipeline) {
+          const stage = stageUnknown as Record<string, unknown>;
+          if (stage.$match) {
+            const q = stage.$match as Record<string, unknown>;
+            arr = arr.filter((d) =>
+              Object.entries(q).every(([k, v]) => d[k] === v)
+            );
+          }
+          if (stage.$group) {
+            const group = stage.$group as Record<string, unknown> & {
+              _id: unknown;
+            };
+            const groupId = group._id;
+            const out: Array<Record<string, unknown>> = [];
+            const map = new Map<string, number>();
+            for (const d of arr) {
+              const id =
+                typeof groupId === 'string' &&
+                (groupId as string).startsWith('$')
+                  ? String(d[(groupId as string).slice(1)])
+                  : JSON.stringify(groupId);
+              map.set(id, (map.get(id) || 0) + 1);
+            }
+            for (const [id, count] of map.entries()) {
+              out.push({ _id: id, count } as Record<string, unknown>);
+            }
+            arr = out;
+          }
+          if (stage.$sort) {
+            const sort = stage.$sort as Record<string, number>;
+            const [[key, dir]] = Object.entries(sort);
+            arr = arr.sort((a, b) => Number(a[key] ?? 0) - Number(b[key] ?? 0));
+            if (Number(dir) < 0) arr.reverse();
+          }
+          if (stage.$limit) {
+            arr = arr.slice(0, Number(stage.$limit));
+          }
+        }
+        return arr;
+      }),
     })),
     insertOne: vi.fn(async (doc: Doc) => {
       const list = getList(name).slice();
-      const insertedId = doc._id || '507f1f77bcf86cd799439011';
+      const insertedId =
+        doc._id || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
       list.push({ ...doc, _id: insertedId });
       setList(name, list);
       return { insertedId };
