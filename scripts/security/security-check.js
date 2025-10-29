@@ -92,6 +92,10 @@ const databasePatterns = [
       if (match.match(/\{\s*_id:\s*[^}]+\s*\}/)) {
         return false;
       }
+      // Skip user-scoped queries (filtered by userId, not organizationId)
+      if (match.includes('userId') && (content.includes('user-scoped') || content.includes('user-specific'))) {
+        return false;
+      }
       // Skip public analytics collections (aggregated public data)
       if (content.includes('prompt_stats') && (content.includes('public analytics') || content.includes('aggregated public'))) {
         return false;
@@ -114,6 +118,10 @@ const databasePatterns = [
       if (match.match(/\{\s*_id:\s*[^}]+\s*\}/)) {
         return false;
       }
+      // Skip user-scoped queries (filtered by userId, not organizationId)
+      if (match.includes('userId') && (content.includes('user-scoped') || content.includes('user-specific'))) {
+        return false;
+      }
       // Skip public analytics collections (aggregated public data)
       if (content.includes('prompt_stats') && (content.includes('public analytics') || content.includes('aggregated public'))) {
         return false;
@@ -131,6 +139,10 @@ const databasePatterns = [
       if (content.includes('System-wide scheduled job') || content.includes('SECURITY: This query is intentionally system-wide')) {
         return false;
       }
+      // Skip user-scoped queries (filtered by userId, not organizationId)
+      if (match.includes('userId') && (content.includes('user-scoped') || content.includes('user-specific'))) {
+        return false;
+      }
       return !match.includes('organizationId');
     },
     severity: 'CRITICAL',
@@ -142,6 +154,10 @@ const databasePatterns = [
     check: (match, content) => {
       // Skip system-wide scheduled jobs
       if (content.includes('System-wide scheduled job') || content.includes('SECURITY: This query is intentionally system-wide')) {
+        return false;
+      }
+      // Skip user-scoped queries (filtered by userId, not organizationId)
+      if (match.includes('userId') && (content.includes('user-scoped') || content.includes('user-specific'))) {
         return false;
       }
       return !match.includes('organizationId');

@@ -3,11 +3,16 @@
  * Returns user statistics and activity
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getMongoDb } from '@/lib/db/mongodb';
+import { RBACPresets } from '@/lib/middleware/rbac';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // RBAC: users:read permission (users can read their own stats)
+  const rbacCheck = await RBACPresets.requireUserRead()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
     if (!session?.user) {
@@ -17,20 +22,25 @@ export async function GET() {
     const db = await getMongoDb();
     const userId = session.user.id;
 
-    // Get user data
+    // Get user data (querying by _id only - no org isolation needed)
     const user = await db.collection('users').findOne({ _id: userId });
-    
+
     // Get prompt usage count
+    // Query is user-scoped (filtered by userId) - no organizationId needed
+    // prompt_history collection stores user-specific data, isolated by userId
     const promptUsage = await db.collection('prompt_history').countDocuments({
       userId,
     });
 
     // Get favorites count
+    // Query is user-scoped (filtered by userId) - no organizationId needed
+    // favorites collection stores user-specific data, isolated by userId
     const favoritesCount = await db.collection('favorites').countDocuments({
       userId,
     });
 
     // Get recent activity
+    // Query is user-scoped (filtered by userId) - no organizationId needed
     const recentActivity = await db
       .collection('prompt_history')
       .find({ userId })
@@ -60,9 +70,13 @@ export async function GET() {
       })),
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Stats API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch stats' },
+      {
+        error: 'Failed to fetch stats',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

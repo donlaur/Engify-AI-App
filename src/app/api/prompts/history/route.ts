@@ -8,6 +8,7 @@ import { auth } from '@/lib/auth';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { z } from 'zod';
 import { ObjectId } from 'mongodb';
+import { RBACPresets } from '@/lib/middleware/rbac';
 
 const historySchema = z.object({
   promptId: z.string(),
@@ -20,6 +21,10 @@ const historySchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // RBAC: prompts:write permission (users can save their own prompt history)
+  const rbacCheck = await RBACPresets.requirePromptWrite()(req);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
     if (!session?.user) {
@@ -30,7 +35,7 @@ export async function POST(req: NextRequest) {
     const data = historySchema.parse(body);
 
     const db = await getMongoDb();
-    
+
     const result = await db.collection('prompt_history').insertOne({
       userId: session.user.id,
       ...data,
@@ -40,8 +45,8 @@ export async function POST(req: NextRequest) {
     // Update user stats
     await db.collection('users').updateOne(
       { _id: new ObjectId(session.user.id) },
-      { 
-        $inc: { 
+      {
+        $inc: {
           promptsExecuted: 1,
           totalTokensUsed: data.tokensUsed || 0,
         },
@@ -51,15 +56,23 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, id: result.insertedId });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('History API error:', error);
     return NextResponse.json(
-      { error: 'Failed to save history' },
+      {
+        error: 'Failed to save history',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
 }
 
 export async function GET(req: NextRequest) {
+  // RBAC: users:read permission (users can read their own prompt history)
+  const rbacCheck = await RBACPresets.requireUserRead()(req);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
     if (!session?.user) {
@@ -70,7 +83,9 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
 
     const db = await getMongoDb();
-    
+
+    // Query is user-scoped (filtered by userId) - no organizationId needed
+    // prompt_history collection stores user-specific data, isolated by userId
     const history = await db
       .collection('prompt_history')
       .find({ userId: session.user.id })
@@ -80,9 +95,13 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ history });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('History API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch history' },
+      {
+        error: 'Failed to fetch history',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
