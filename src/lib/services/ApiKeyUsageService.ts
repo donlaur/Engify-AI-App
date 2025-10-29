@@ -10,6 +10,7 @@
  */
 
 import { getDb } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 import { auditLog } from '@/lib/logging/audit';
 
 export interface ApiKeyUsage {
@@ -412,7 +413,7 @@ export class ApiKeyUsageService {
     const db = await getDb();
     const collection = db.collection<UsageAlert>(this.alertsCollectionName);
 
-    await collection.deleteOne({ _id: alertId, userId });
+    await collection.deleteOne({ _id: new ObjectId(alertId), userId });
 
     await auditLog({
       action: 'usage_alert_deleted',

@@ -40,27 +40,41 @@ export async function sendEmail(emailData: EmailData): Promise<EmailResponse> {
       );
     }
 
-    const msg = {
-      to: emailData.to,
-      from: emailData.from || 'donlaur@engify.ai',
-      subject: emailData.subject,
-      text: emailData.text,
-      html: emailData.html,
-      templateId: emailData.templateId,
-      dynamicTemplateData: emailData.dynamicTemplateData,
-    };
+    // Build message conforming to SendGrid union types:
+    // If templateId is provided, SendGrid doesn't require content.
+    // Otherwise, ensure at least html is provided.
+    let msg: Parameters<typeof sgMail.send>[0];
+    if (emailData.templateId) {
+      msg = {
+        to: emailData.to,
+        from: emailData.from || 'donlaur@engify.ai',
+        subject: emailData.subject || 'Engify.ai Notification',
+        templateId: emailData.templateId,
+        dynamicTemplateData: emailData.dynamicTemplateData,
+      } as Parameters<typeof sgMail.send>[0];
+    } else {
+      msg = {
+        to: emailData.to,
+        from: emailData.from || 'donlaur@engify.ai',
+        subject: emailData.subject || 'Engify.ai Notification',
+        html:
+          emailData.html ??
+          (emailData.text ? `<pre>${emailData.text}</pre>` : ' '),
+      } as Parameters<typeof sgMail.send>[0];
+    }
 
-    const response = await sgMail.send(msg);
+    const [response] = await sgMail.send(msg);
 
-    if (response.length === 0 || !response[0]?.headers) {
+    if (!response?.headers) {
       throw new Error('Invalid response from SendGrid');
     }
 
     return {
       success: true,
-      messageId: response[0].headers['x-message-id'] as string,
+      messageId: (response.headers['x-message-id'] as string) || undefined,
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('SendGrid error:', error);
     return {
       success: false,
@@ -89,6 +103,7 @@ export async function sendWelcomeEmail(
 
     return sendEmail({
       to: userEmail,
+      subject: 'Welcome to Engify.ai! 🚀',
       templateId: template.templateId,
       dynamicTemplateData: template.dynamicTemplateData,
     });
@@ -213,6 +228,7 @@ export async function sendPasswordResetEmail(
 
     return sendEmail({
       to: userEmail,
+      subject: 'Reset your Engify.ai password',
       templateId: template.templateId,
       dynamicTemplateData: template.dynamicTemplateData,
     });
@@ -257,6 +273,7 @@ export async function sendApiKeyAlertEmail(
     const template = SendGridTemplateBuilders.apiKeyAlert(alertData);
     return sendEmail({
       to: userEmail,
+      subject: `API Key Alert: ${alertData.metric} threshold exceeded`,
       templateId: template.templateId,
       dynamicTemplateData: template.dynamicTemplateData,
     });
