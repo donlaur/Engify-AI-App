@@ -67,17 +67,22 @@ export async function GET(request: NextRequest) {
     const stats = searchParams.get('stats');
     const search = searchParams.get('search');
 
+    const correlationId = `query-${Date.now()}`;
     if (stats === 'true') {
       const statsData = await userService.getUserStats();
-      return NextResponse.json({ success: true, data: statsData });
+      return NextResponse.json({
+        success: true,
+        data: statsData,
+        correlationId,
+      });
     }
-
     if (role) {
       const users = await userService.getUsersByRole(role);
       return NextResponse.json({
         success: true,
         data: users,
-        count: users.length,
+        totalCount: users.length,
+        correlationId,
       });
     }
 
@@ -86,7 +91,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: users,
-        count: users.length,
+        totalCount: users.length,
+        correlationId,
       });
     }
 
@@ -95,7 +101,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: users,
-        count: users.length,
+        totalCount: users.length,
+        correlationId,
       });
     }
 
@@ -114,7 +121,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: filtered,
-        count: filtered.length,
+        totalCount: filtered.length,
+        correlationId,
       });
     }
 
@@ -122,7 +130,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: users,
-      count: users.length,
+      totalCount: users.length,
+      correlationId,
     });
   } catch (error) {
     const session = await auth();
@@ -130,13 +139,17 @@ export async function GET(request: NextRequest) {
       userId: session?.user?.id,
       method: 'GET',
     });
+    const isDbError =
+      error instanceof Error &&
+      (error.message.includes('Database') ||
+        error.message.includes('connection failed'));
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to get users',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        correlationId: `query-error-${Date.now()}`,
       },
-      { status: 500 }
+      { status: isDbError ? 400 : 500 }
     );
   }
 }
@@ -176,6 +189,7 @@ export async function POST(request: NextRequest) {
         success: true,
         data: created,
         message: 'User created successfully',
+        correlationId: `create-${Date.now()}`,
       },
       { status: 201 }
     );
@@ -203,10 +217,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'User already exists',
-          message: error.message,
+          error: error.message,
+          correlationId: `create-error-${Date.now()}`,
         },
-        { status: 409 }
+        { status: 400 }
       );
     }
 
