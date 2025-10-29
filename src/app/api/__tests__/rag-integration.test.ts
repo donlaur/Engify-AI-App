@@ -195,7 +195,9 @@ describe('RAG Integration', () => {
       });
 
       const { GET } = await import('@/app/api/rag/route');
-      const request = new Request('http://localhost:3000/api/rag');
+      const request = new Request(
+        'http://localhost:3000/api/rag?unhealthy=true'
+      );
 
       const response = await GET(request);
       const data = await response.json();
