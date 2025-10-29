@@ -1,13 +1,15 @@
 /**
  * API Key Management API
- * 
+ *
  * GET /api/v2/users/api-keys - List user's API keys
  * POST /api/v2/users/api-keys - Add new API key
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 import { apiKeyService } from '@/lib/services/ApiKeyService';
+import { _protectRoute, RBACPresets } from '@/lib/middleware/rbac';
 import { z } from 'zod';
 
 const createKeySchema = z.object({
@@ -19,6 +21,10 @@ const createKeySchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  // RBAC: users:read permission
+  const rbacCheck = await RBACPresets.requireUserRead()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
 
@@ -38,12 +44,23 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ keys });
   } catch (error) {
-    console.error('Error fetching API keys:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const session = await auth();
+    logger.apiError('/api/v2/users/api-keys', error, {
+      userId: session?.user?.id,
+      method: 'GET',
+    });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
+  // RBAC: users:write permission (users can add their own API keys)
+  const rbacCheck = await RBACPresets.requireUserWrite()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
 
@@ -68,11 +85,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ keyId, success: true });
   } catch (error) {
-    console.error('Error creating API key:', error);
+    const session = await auth();
+    logger.apiError('/api/v2/users/api-keys', error, {
+      userId: session?.user?.id,
+      method: 'POST',
+    });
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid input', details: error.errors }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid input', details: error.errors },
+        { status: 400 }
+      );
     }
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
-

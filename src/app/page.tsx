@@ -51,6 +51,7 @@ const features = [
 
 export default async function Home() {
   const data = await getStats();
+  const allowSignup = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
 
   const siteStats = {
     totalPrompts: data.stats.prompts,
@@ -169,7 +170,9 @@ export default async function Home() {
                     className="border-white/30 text-white hover:bg-white/10"
                     asChild
                   >
-                    <Link href="/signup">Start Free</Link>
+                    <Link href="/signup">
+                      {allowSignup ? 'Start Free' : 'Request Beta Access'}
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -368,7 +371,9 @@ export default async function Home() {
                     </Link>
                   </Button>
                   <Button size="lg" variant="outline" asChild>
-                    <Link href="/signup">Try Free</Link>
+                    <Link href="/signup">
+                      {allowSignup ? 'Try Free' : 'Request Access'}
+                    </Link>
                   </Button>
                 </div>
                 <div className="border-t pt-4 text-sm text-gray-500">
@@ -406,7 +411,7 @@ export default async function Home() {
                 asChild
               >
                 <Link href="/signup">
-                  Start Learning Now
+                  {allowSignup ? 'Start Learning Now' : 'Request Beta Access'}
                   <Icons.arrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>

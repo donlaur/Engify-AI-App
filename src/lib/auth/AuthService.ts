@@ -1,6 +1,6 @@
 /**
  * Authentication Service
- * 
+ *
  * Comprehensive auth service supporting:
  * - Email/password authentication
  * - OAuth providers (Google, GitHub, etc.)
@@ -14,7 +14,13 @@
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { userService } from '@/lib/services/UserService';
-import { RBACService, type UserRole, type Permission, type Resource, type Action } from './rbac';
+import {
+  RBACService,
+  type UserRole,
+  type Permission,
+  type Resource,
+  type Action,
+} from './rbac';
 import type { User } from '@/lib/db/schema';
 
 // Validation schemas
@@ -62,7 +68,9 @@ export class AuthService {
   /**
    * Register a new user
    */
-  async register(userData: z.infer<typeof registerSchema>): Promise<RegisterResult> {
+  async register(
+    userData: z.infer<typeof registerSchema>
+  ): Promise<RegisterResult> {
     try {
       // Validate input
       const validatedData = registerSchema.parse(userData);
@@ -72,12 +80,15 @@ export class AuthService {
       if (existingUser) {
         return {
           success: false,
-          error: 'User with this email already exists'
+          error: 'User with this email already exists',
         };
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(validatedData.password, this.saltRounds);
+      const hashedPassword = await bcrypt.hash(
+        validatedData.password,
+        this.saltRounds
+      );
 
       // Create user
       const newUser = await userService.createUser({
@@ -89,18 +100,20 @@ export class AuthService {
       });
 
       // Generate verification token (for email verification)
-      const verificationToken = this.generateVerificationToken(newUser._id.toString());
+      const verificationToken = this.generateVerificationToken(
+        newUser._id.toString()
+      );
 
       return {
         success: true,
         user: newUser,
-        verificationToken
+        verificationToken,
       };
     } catch (error) {
       console.error('Registration error:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Registration failed'
+        error: error instanceof Error ? error.message : 'Registration failed',
       };
     }
   }
@@ -118,7 +131,7 @@ export class AuthService {
       if (!user || !user.password) {
         return {
           success: false,
-          error: 'Invalid email or password'
+          error: 'Invalid email or password',
         };
       }
 
@@ -127,16 +140,19 @@ export class AuthService {
         return {
           success: false,
           error: 'Please verify your email address before logging in',
-          requiresVerification: true
+          requiresVerification: true,
         };
       }
 
       // Verify password
-      const isValidPassword = await bcrypt.compare(validatedData.password, user.password);
+      const isValidPassword = await bcrypt.compare(
+        validatedData.password,
+        user.password
+      );
       if (!isValidPassword) {
         return {
           success: false,
-          error: 'Invalid email or password'
+          error: 'Invalid email or password',
         };
       }
 
@@ -146,7 +162,7 @@ export class AuthService {
           success: false,
           error: 'MFA verification required',
           requiresMFA: true,
-          user
+          user,
         };
       }
 
@@ -159,13 +175,13 @@ export class AuthService {
       return {
         success: true,
         user,
-        sessionToken
+        sessionToken,
       };
     } catch (error) {
       console.error('Login error:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Login failed'
+        error: error instanceof Error ? error.message : 'Login failed',
       };
     }
   }
@@ -173,12 +189,15 @@ export class AuthService {
   /**
    * Login with OAuth provider
    */
-  async loginWithOAuth(provider: string, providerData: {
-    id: string;
-    email: string;
-    name: string;
-    image?: string;
-  }): Promise<LoginResult> {
+  async loginWithOAuth(
+    provider: string,
+    providerData: {
+      id: string;
+      email: string;
+      name: string;
+      image?: string;
+    }
+  ): Promise<LoginResult> {
     try {
       // Check if user exists with this provider
       let user = await userService.findByEmail(providerData.email);
@@ -204,13 +223,13 @@ export class AuthService {
       return {
         success: true,
         user,
-        sessionToken
+        sessionToken,
       };
     } catch (error) {
       console.error('OAuth login error:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'OAuth login failed'
+        error: error instanceof Error ? error.message : 'OAuth login failed',
       };
     }
   }
@@ -223,11 +242,11 @@ export class AuthService {
       // In a real implementation, you'd validate the token
       // For now, we'll assume the token is valid
       const userId = this.extractUserIdFromToken(token);
-      
+
       if (!userId) {
         return {
           success: false,
-          error: 'Invalid verification token'
+          error: 'Invalid verification token',
         };
       }
 
@@ -235,24 +254,24 @@ export class AuthService {
       if (!user) {
         return {
           success: false,
-          error: 'User not found'
+          error: 'User not found',
         };
       }
 
       // Mark email as verified
       await userService.updateUser(userId, {
-        emailVerified: new Date()
+        emailVerified: new Date(),
       });
 
       return {
         success: true,
-        user
+        user,
       };
     } catch (error) {
       console.error('Email verification error:', error);
       return {
         success: false,
-        error: 'Email verification failed'
+        error: 'Email verification failed',
       };
     }
   }
@@ -263,29 +282,29 @@ export class AuthService {
   async requestPasswordReset(email: string): Promise<AuthResult> {
     try {
       const validatedEmail = z.string().email().parse(email);
-      
+
       const user = await userService.findByEmail(validatedEmail);
       if (!user) {
         // Don't reveal if user exists or not
         return {
-          success: true
+          success: true,
         };
       }
 
       // Generate reset token
       const _resetToken = this.generateResetToken(user._id.toString());
-      
+
       // TODO: In a real implementation, send email with reset token
       // For now, we'll just return success
-      
+
       return {
-        success: true
+        success: true,
       };
     } catch (error) {
       console.error('Password reset request error:', error);
       return {
         success: false,
-        error: 'Password reset request failed'
+        error: 'Password reset request failed',
       };
     }
   }
@@ -296,11 +315,11 @@ export class AuthService {
   async resetPassword(token: string, newPassword: string): Promise<AuthResult> {
     try {
       const userId = this.extractUserIdFromToken(token);
-      
+
       if (!userId) {
         return {
           success: false,
-          error: 'Invalid reset token'
+          error: 'Invalid reset token',
         };
       }
 
@@ -308,7 +327,7 @@ export class AuthService {
       if (!user) {
         return {
           success: false,
-          error: 'User not found'
+          error: 'User not found',
         };
       }
 
@@ -317,18 +336,18 @@ export class AuthService {
 
       // Update password
       await userService.updateUser(userId, {
-        password: hashedPassword
+        password: hashedPassword,
       });
 
       return {
         success: true,
-        user
+        user,
       };
     } catch (error) {
       console.error('Password reset error:', error);
       return {
         success: false,
-        error: 'Password reset failed'
+        error: 'Password reset failed',
       };
     }
   }
@@ -336,7 +355,10 @@ export class AuthService {
   /**
    * Change password (for logged-in users)
    */
-  async changePassword(userId: string, passwords: z.infer<typeof changePasswordSchema>): Promise<AuthResult> {
+  async changePassword(
+    userId: string,
+    passwords: z.infer<typeof changePasswordSchema>
+  ): Promise<AuthResult> {
     try {
       const validatedData = changePasswordSchema.parse(passwords);
 
@@ -344,61 +366,70 @@ export class AuthService {
       if (!user || !user.password) {
         return {
           success: false,
-          error: 'User not found'
+          error: 'User not found',
         };
       }
 
       // Verify current password
-      const isValidPassword = await bcrypt.compare(validatedData.currentPassword, user.password);
+      const isValidPassword = await bcrypt.compare(
+        validatedData.currentPassword,
+        user.password
+      );
       if (!isValidPassword) {
         return {
           success: false,
-          error: 'Current password is incorrect'
+          error: 'Current password is incorrect',
         };
       }
 
       // Hash new password
-      const hashedPassword = await bcrypt.hash(validatedData.newPassword, this.saltRounds);
+      const hashedPassword = await bcrypt.hash(
+        validatedData.newPassword,
+        this.saltRounds
+      );
 
       // Update password
       await userService.updateUser(userId, {
-        password: hashedPassword
+        password: hashedPassword,
       });
 
       return {
         success: true,
-        user
+        user,
       };
     } catch (error) {
       console.error('Change password error:', error);
       return {
         success: false,
-        error: 'Password change failed'
+        error: 'Password change failed',
       };
     }
   }
 
   /**
-   * Enable MFA for user
+   * Enable MFA for user (SMS-based via Twilio)
+   * Note: For TOTP (authenticator apps), use a separate TOTP library
    */
-  async enableMFA(_userId: string): Promise<{ secret: string; qrCode: string }> {
-    // In a real implementation, you'd generate TOTP secret and QR code
-    // For now, we'll return mock data
-    // TODO: Replace with actual TOTP secret generation from environment variable
-    const mockSecret = process.env.MFA_MOCK_SECRET || 'DEV_ONLY_MOCK_SECRET_NOT_FOR_PRODUCTION';
-    return {
-      secret: mockSecret,
-      qrCode: 'data:image/png;base64,MOCK_QR_CODE'
-    };
+  async enableMFA(
+    userId: string,
+    phoneNumber: string
+  ): Promise<{ success: boolean; error?: string }> {
+    // Use MFA service which integrates with Twilio
+    const { mfaService } = await import('@/lib/services/mfaService');
+    return mfaService.enableMFA(userId, phoneNumber);
   }
 
   /**
-   * Verify MFA token
+   * Verify MFA token (SMS code)
    */
-  async verifyMFAToken(userId: string, token: string): Promise<boolean> {
-    // In a real implementation, you'd verify the TOTP token
-    // For now, we'll accept any 6-digit token
-    return /^\d{6}$/.test(token);
+  async verifyMFAToken(
+    userId: string,
+    phoneNumber: string,
+    token: string
+  ): Promise<boolean> {
+    const { mfaService } = await import('@/lib/services/mfaService');
+    const result = await mfaService.verifyMFACode(userId, phoneNumber, token);
+    return result.success;
   }
 
   /**
@@ -412,7 +443,11 @@ export class AuthService {
    * Check if user can access resource
    */
   canAccess(userRole: UserRole, resource: string, action: string): boolean {
-    return RBACService.canAccess(userRole, resource as Resource, action as Action);
+    return RBACService.canAccess(
+      userRole,
+      resource as Resource,
+      action as Action
+    );
   }
 
   // Private helper methods

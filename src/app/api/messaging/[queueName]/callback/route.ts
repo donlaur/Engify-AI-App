@@ -1,10 +1,16 @@
 /**
  * QStash Callback Webhook
- * 
+ *
  * Handles success callbacks from QStash after message processing.
+ *
+ * Features:
+ * - Success confirmation logging
+ * - Metrics tracking
+ * - Audit trail for compliance
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { auditLog } from '@/lib/logging/audit';
 
 /**
  * POST /api/messaging/[queueName]/callback
@@ -17,24 +23,57 @@ export async function POST(
   try {
     const queueName = params.queueName;
     const callbackData = await request.json();
-    
-    console.log(`QStash success callback for queue ${queueName}:`, callbackData);
-    
+    const messageId = callbackData.messageId || callbackData.id || 'unknown';
+
+    // Log success callback for audit trail
+    await auditLog({
+      action: 'message_callback_received',
+      severity: 'info',
+      metadata: {
+        queueName,
+        messageId,
+        status: callbackData.status || 'success',
+        ...(callbackData.metadata || {}),
+      },
+    });
+
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log(
+        `QStash success callback for queue ${queueName}:`,
+        callbackData
+      );
+    }
+
     // Update queue statistics or perform other success actions
     // In a real implementation, you might update metrics, send notifications, etc.
-    
+
     return NextResponse.json({
       success: true,
       message: 'Callback processed successfully',
+      messageId,
     });
-    
   } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+
+    // Log error for monitoring
+    await auditLog({
+      action: 'callback_processing_error',
+      severity: 'error',
+      metadata: {
+        queueName: params.queueName,
+        error: errorMessage,
+      },
+    });
+
+    // eslint-disable-next-line no-console
     console.error('QStash callback processing error:', error);
-    
+
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
       },
       { status: 500 }
     );

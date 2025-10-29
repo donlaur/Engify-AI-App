@@ -1,13 +1,13 @@
 /**
  * Individual User API Route (v2)
- * 
+ *
  * Handles operations on individual users using the Repository Pattern.
  * This route demonstrates:
  * - Clean separation of concerns
  * - Dependency injection for testability
  * - Service layer for business logic
  * - Repository pattern for data access
- * 
+ *
  * SOLID Principles:
  * - Single Responsibility: Just handles HTTP request/response for individual users
  * - Open/Closed: Can extend functionality without modifying existing code
@@ -18,6 +18,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
+import { RBACPresets } from '@/lib/middleware/rbac';
 import { getUserService } from '@/lib/di/Container';
 
 // Request validation schemas
@@ -26,24 +29,46 @@ const updateUserSchema = z.object({
   role: z.string().optional(),
   plan: z.enum(['free', 'basic', 'pro', 'enterprise']).optional(),
   organizationId: z.string().optional(),
-  preferences: z.object({
-    theme: z.enum(['light', 'dark']).optional(),
-    notifications: z.boolean().optional(),
-    weeklyReports: z.boolean().optional(),
-  }).optional(),
+  preferences: z
+    .object({
+      theme: z.enum(['light', 'dark']).optional(),
+      notifications: z.boolean().optional(),
+      weeklyReports: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 /**
  * GET /api/v2/users/[id]
  * Get user by ID
+ * Requires users:read permission
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // RBAC: users:read permission
+  const rbacCheck = await RBACPresets.requireUserRead()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
-    const userService = getUserService();
+    const session = await auth();
     const { id } = await params;
+
+    // Users can only read their own data unless they're admins
+    if (
+      session?.user?.id !== id &&
+      session?.user?.role !== 'admin' &&
+      session?.user?.role !== 'super_admin'
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Forbidden - You can only view your own profile',
+        },
+        { status: 403 }
+      );
+    }
 
     if (!id) {
       return NextResponse.json(
@@ -72,7 +97,11 @@ export async function GET(
       data: user,
     });
   } catch (error) {
-    console.error('Error getting user:', error);
+    const session = await auth();
+    logger.apiError(`/api/v2/users/${id}`, error, {
+      userId: session?.user?.id,
+      method: 'GET',
+    });
     return NextResponse.json(
       {
         success: false,
@@ -87,15 +116,34 @@ export async function GET(
 /**
  * PUT /api/v2/users/[id]
  * Update user by ID
+ * Requires users:write permission
  */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // RBAC: users:write permission
+  const rbacCheck = await RBACPresets.requireUserWrite()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
-    const userService = getUserService();
+    const session = await auth();
     const { id } = await params;
-    const body = await request.json();
+
+    // Users can only update their own data unless they're admins
+    if (
+      session?.user?.id !== id &&
+      session?.user?.role !== 'admin' &&
+      session?.user?.role !== 'super_admin'
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Forbidden - You can only update your own profile',
+        },
+        { status: 403 }
+      );
+    }
 
     if (!id) {
       return NextResponse.json(
@@ -106,6 +154,9 @@ export async function PUT(
         { status: 400 }
       );
     }
+
+    const userService = getUserService();
+    const body = await request.json();
 
     // Validate request body
     const validatedData = updateUserSchema.parse(body);
@@ -129,7 +180,11 @@ export async function PUT(
       message: 'User updated successfully',
     });
   } catch (error) {
-    console.error('Error updating user:', error);
+    const session = await auth();
+    logger.apiError(`/api/v2/users/${id}`, error, {
+      userId: session?.user?.id,
+      method: 'PUT',
+    });
 
     // Handle validation errors
     if (error instanceof z.ZodError) {
@@ -169,14 +224,34 @@ export async function PUT(
 /**
  * DELETE /api/v2/users/[id]
  * Delete user by ID
+ * Requires users:write permission (users can delete their own account or admins can delete any)
  */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // RBAC: users:write permission
+  const rbacCheck = await RBACPresets.requireUserWrite()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
-    const userService = getUserService();
+    const session = await auth();
     const { id } = await params;
+
+    // Users can only delete their own account unless they're admins
+    if (
+      session?.user?.id !== id &&
+      session?.user?.role !== 'admin' &&
+      session?.user?.role !== 'super_admin'
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Forbidden - You can only delete your own account',
+        },
+        { status: 403 }
+      );
+    }
 
     if (!id) {
       return NextResponse.json(
@@ -188,6 +263,7 @@ export async function DELETE(
       );
     }
 
+    const userService = getUserService();
     // Delete user
     const deleted = await userService.deleteUser(id);
 
@@ -206,7 +282,11 @@ export async function DELETE(
       message: 'User deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting user:', error);
+    const session = await auth();
+    logger.apiError(`/api/v2/users/${id}`, error, {
+      userId: session?.user?.id,
+      method: 'DELETE',
+    });
     return NextResponse.json(
       {
         success: false,
@@ -248,7 +328,11 @@ export async function PATCH(
       message: 'Last login updated successfully',
     });
   } catch (error) {
-    console.error('Error updating last login:', error);
+    const session = await auth();
+    logger.apiError(`/api/v2/users/${id}/update-last-login`, error, {
+      userId: session?.user?.id,
+      method: 'POST',
+    });
     return NextResponse.json(
       {
         success: false,

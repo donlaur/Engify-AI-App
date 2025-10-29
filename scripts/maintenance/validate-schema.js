@@ -136,6 +136,16 @@ const validationRules = [
         return false;
       }
       
+      // Skip system-wide scheduled jobs (they intentionally query all users)
+      if (content.includes('System-wide scheduled job') || content.includes('SECURITY: This query is intentionally system-wide')) {
+        return false;
+      }
+      
+      // Skip user-scoped queries (filtered by userId, not organizationId)
+      if (match.includes('userId') && (content.includes('user-scoped') || content.includes('user-specific'))) {
+        return false;
+      }
+      
       // Check if this is a multi-tenant collection
       const multiTenantCollections = ['users', 'conversations', 'prompt_templates', 'audit_logs'];
       const isMultiTenant = multiTenantCollections.some(col => content.includes(`'${col}'`) || content.includes(`"${col}"`));

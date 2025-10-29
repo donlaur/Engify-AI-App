@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { RBACPresets } from '@/lib/middleware/rbac';
 import { z } from 'zod';
 
 // RAG API route that integrates with Python FastAPI service
@@ -24,7 +26,14 @@ const RAGResponseSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // RBAC: workbench:basic permission (RAG is a workbench feature)
+  const rbacCheck = await RBACPresets.requireWorkbenchAccess()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
+    // Optional: Log usage for authenticated users (future enhancement)
+    const _session = await auth();
+
     const body = await request.json();
     const { query, collection, top_k, filter } = RAGQuerySchema.parse(body);
 
@@ -60,7 +69,39 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('RAG API error:', error);
+
+    // Better error handling based on error type
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid request',
+          details: error.errors,
+          results: [],
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check if RAG service is unavailable
+    if (
+      error instanceof Error &&
+      (error.message.includes('fetch failed') ||
+        error.message.includes('ECONNREFUSED'))
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'RAG service unavailable',
+          message:
+            'The knowledge base service is currently unavailable. Please try again later.',
+          results: [],
+        },
+        { status: 503 }
+      );
+    }
 
     return NextResponse.json(
       {
