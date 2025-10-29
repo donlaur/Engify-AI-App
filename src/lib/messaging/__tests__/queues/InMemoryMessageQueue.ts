@@ -3,20 +3,25 @@ export interface Message<T = unknown> {
   payload: T;
 }
 
+type Handler<T> = {
+  handle?: (m: Message<T>) => Promise<void> | void;
+  onMessage?: (m: Message<T>) => Promise<void> | void;
+  canHandle?: (m: Message<T>) => boolean;
+};
+
 export class InMemoryMessageQueue<T = unknown> {
   private queue: Array<Message<T>> = [];
-  private handlers: Array<(m: Message<T>) => Promise<void> | void> = [];
+  private handlers: Array<
+    Handler<T> | ((m: Message<T>) => Promise<void> | void)
+  > = [];
   private paused = false;
+  private completed = 0;
+  private failed = 0;
+  private deadLetter = 0;
 
   async enqueue(message: Message<T>): Promise<void> {
     this.queue.push(message);
-    if (!this.paused) {
-      for (const h of this.handlers) {
-        if (typeof h === 'function') {
-          await h(message);
-        }
-      }
-    }
+    if (!this.paused) await this.processMessage(message);
   }
 
   async dequeue(): Promise<Message<T> | undefined> {
@@ -33,22 +38,36 @@ export class InMemoryMessageQueue<T = unknown> {
   }
 
   async publishBatch(messages: Array<Message<T>>): Promise<void> {
-    for (const m of messages) await this.publish(m);
+    const priorityOf = (m: Message<T>) => {
+      const p =
+        (m as unknown as { payload: { priority?: string } }).payload
+          ?.priority || 'normal';
+      switch (p) {
+        case 'critical':
+          return 0;
+        case 'high':
+          return 1;
+        case 'normal':
+          return 2;
+        case 'low':
+          return 3;
+        default:
+          return 4;
+      }
+    };
+    const sorted = messages
+      .slice()
+      .sort((a, b) => priorityOf(a) - priorityOf(b));
+    for (const m of sorted) await this.publish(m);
   }
 
   async subscribe(
-    handler:
-      | ((m: Message<T>) => Promise<void> | void)
-      | {
-          handle?: (m: Message<T>) => Promise<void> | void;
-          onMessage?: (m: Message<T>) => Promise<void> | void;
-        }
+    handler: ((m: Message<T>) => Promise<void> | void) | Handler<T>
   ): Promise<void> {
     if (typeof handler === 'function') {
       this.handlers.push(handler);
     } else if (handler && typeof handler === 'object') {
-      const fn = handler.handle || handler.onMessage;
-      if (fn) this.handlers.push(fn.bind(handler));
+      this.handlers.push(handler);
     }
   }
 
@@ -61,10 +80,13 @@ export class InMemoryMessageQueue<T = unknown> {
   }> {
     return {
       totalMessages: this.queue.length,
-      pendingMessages: this.queue.length,
-      completedMessages: 0,
-      failedMessages: 0,
-      deadLetterMessages: 0,
+      pendingMessages: Math.max(
+        this.queue.length - this.completed - this.failed,
+        0
+      ),
+      completedMessages: this.completed,
+      failedMessages: this.failed,
+      deadLetterMessages: this.deadLetter,
     };
   }
 
@@ -106,5 +128,29 @@ export class InMemoryMessageQueue<T = unknown> {
     this.queue = [];
     this.handlers = [];
     this.paused = false;
+    this.completed = 0;
+    this.failed = 0;
+    this.deadLetter = 0;
+  }
+
+  private async processMessage(message: Message<T>): Promise<void> {
+    const handlers = this.handlers.slice();
+    for (const h of handlers) {
+      try {
+        if (typeof h === 'function') {
+          await h(message);
+          this.completed += 1;
+        } else {
+          const can = h.canHandle ? h.canHandle(message) : true;
+          const fn = h.handle || h.onMessage;
+          if (can && fn) {
+            await fn.call(h, message);
+            this.completed += 1;
+          }
+        }
+      } catch {
+        this.failed += 1;
+      }
+    }
   }
 }

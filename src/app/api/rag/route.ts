@@ -130,11 +130,7 @@ export async function GET(request: NextRequest) {
           { status: 503 }
         );
       }
-      return NextResponse.json({
-        status: 'healthy',
-        rag_service: 'ok',
-        timestamp: new Date().toISOString(),
-      });
+      // In tests, still perform fetch so tests can simulate failures via mocks
     }
     const healthResponse = await fetch(`${RAG_API_URL}/health`);
 
