@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { auth } from '@/lib/auth';
+import { RBACPresets } from '@/lib/middleware/rbac';
 import { ExecutionContextManager } from '@/lib/execution/context/ExecutionContextManager';
 import { ExecutionStrategyFactory } from '@/lib/execution/factory/ExecutionStrategyFactory';
 import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
@@ -40,17 +42,28 @@ for (const strategyName of strategies) {
 }
 
 export async function POST(request: NextRequest) {
+  // RBAC: workbench:ai_execution permission
+  const rbacCheck = await RBACPresets.requireAIExecution()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
+    // Get authenticated user
+    const session = await auth();
+    const userId = session?.user?.id || 'anonymous';
+
     // Parse and validate request body
     const body = await request.json();
     const validatedData = ExecuteRequestSchema.parse(body);
 
     // Create execution context
     const context: ExecutionContext = {
-      userId: 'anonymous', // TODO: Get from auth
+      userId,
       requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       priority: validatedData.priority || 'normal',
-      metadata: validatedData.metadata || {},
+      metadata: {
+        ...validatedData.metadata,
+        ...(session?.user ? { userEmail: session.user.email } : {}),
+      },
     };
 
     // Create AI request
@@ -118,6 +131,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Execution API error:', error);
 
     if (error instanceof z.ZodError) {
@@ -218,6 +232,7 @@ export async function GET(request: NextRequest) {
         });
     }
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Execution API GET error:', error);
     return NextResponse.json(
       {
