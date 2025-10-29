@@ -18,13 +18,17 @@ export interface Activity {
     success?: boolean;
     tokensUsed?: number;
     cost?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
 export class ActivityService extends BaseService<Activity> {
   constructor() {
-    super('activities');
+    // BaseService expects a Zod schema. Provide a minimal placeholder schema via lazy import.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const schema = {} as unknown as import('zod').ZodSchema<Activity>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    super('activities', schema as any);
   }
 
   /**
@@ -57,7 +61,8 @@ export class ActivityService extends BaseService<Activity> {
     limit: number = 50,
     offset: number = 0
   ): Promise<Activity[]> {
-    const activities = await this.collection
+    const collection = await this.getCollection();
+    const activities = await collection
       .find({ userId })
       .sort({ timestamp: -1 })
       .skip(offset)
@@ -75,7 +80,8 @@ export class ActivityService extends BaseService<Activity> {
     type: Activity['type'],
     limit: number = 50
   ): Promise<Activity[]> {
-    const activities = await this.collection
+    const collection = await this.getCollection();
+    const activities = await collection
       .find({ userId, type })
       .sort({ timestamp: -1 })
       .limit(limit)
@@ -92,12 +98,17 @@ export class ActivityService extends BaseService<Activity> {
     itemType?: Activity['itemType'],
     limit: number = 10
   ): Promise<Activity[]> {
-    const query: any = { userId, type: 'view' };
+    const query: {
+      userId: string;
+      type: Activity['type'];
+      itemType?: Activity['itemType'];
+    } = { userId, type: 'view' };
     if (itemType) {
       query.itemType = itemType;
     }
 
-    const activities = await this.collection
+    const collection = await this.getCollection();
+    const activities = await collection
       .find(query)
       .sort({ timestamp: -1 })
       .limit(limit)
@@ -115,36 +126,49 @@ export class ActivityService extends BaseService<Activity> {
     byItemType: Record<string, number>;
     recentActivity: Activity[];
   }> {
-    const [totalActivities, byType, byItemType, recentActivity] = await Promise.all([
-      this.collection.countDocuments({ userId }),
-      
-      this.collection
-        .aggregate([
-          { $match: { userId } },
-          { $group: { _id: '$type', count: { $sum: 1 } } },
-        ])
-        .toArray(),
-      
-      this.collection
-        .aggregate([
-          { $match: { userId } },
-          { $group: { _id: '$itemType', count: { $sum: 1 } } },
-        ])
-        .toArray(),
-      
-      this.getUserActivity(userId, 10),
-    ]);
+    const collection = await this.getCollection();
+    const [totalActivities, byType, byItemType, recentActivity] =
+      await Promise.all([
+        collection.countDocuments({ userId }),
+
+        collection
+          .aggregate([
+            { $match: { userId } },
+            { $group: { _id: '$type', count: { $sum: 1 } } },
+          ])
+          .toArray(),
+
+        collection
+          .aggregate([
+            { $match: { userId } },
+            { $group: { _id: '$itemType', count: { $sum: 1 } } },
+          ])
+          .toArray(),
+
+        this.getUserActivity(userId, 10),
+      ]);
+
+    type GroupDoc = { _id: string; count: number };
+    const byTypeMap = (byType as GroupDoc[]).reduce(
+      (acc: Record<string, number>, item) => {
+        acc[item._id] = item.count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    const byItemTypeMap = (byItemType as GroupDoc[]).reduce(
+      (acc: Record<string, number>, item) => {
+        acc[item._id] = item.count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalActivities,
-      byType: byType.reduce((acc: any, item: any) => {
-        acc[item._id] = item.count;
-        return acc;
-      }, {}),
-      byItemType: byItemType.reduce((acc: any, item: any) => {
-        acc[item._id] = item.count;
-        return acc;
-      }, {}),
+      byType: byTypeMap,
+      byItemType: byItemTypeMap,
       recentActivity,
     };
   }
@@ -157,7 +181,8 @@ export class ActivityService extends BaseService<Activity> {
     type: Activity['type'] = 'view',
     limit: number = 10
   ): Promise<Array<{ itemId: string; count: number }>> {
-    const results = await this.collection
+    const collection = await this.getCollection();
+    const results = await collection
       .aggregate([
         { $match: { itemType, type } },
         {
@@ -171,7 +196,7 @@ export class ActivityService extends BaseService<Activity> {
       ])
       .toArray();
 
-    return results.map((r: any) => ({
+    return results.map((r: { _id: string; count: number }) => ({
       itemId: r._id,
       count: r.count,
     }));

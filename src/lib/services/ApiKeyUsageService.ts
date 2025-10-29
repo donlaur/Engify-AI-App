@@ -12,6 +12,7 @@
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { auditLog } from '@/lib/logging/audit';
+import { logger } from '@/lib/logging/logger';
 
 export interface ApiKeyUsage {
   _id?: string;
@@ -105,7 +106,11 @@ export class ApiKeyUsageService {
 
     // Check for alerts asynchronously (don't block)
     this.checkAlerts(userId, keyId, provider).catch((error) => {
-      console.error('Error checking alerts:', error);
+      logger.apiError('ApiKeyUsageService.checkAlerts', error, {
+        userId,
+        keyId,
+        provider,
+      });
     });
 
     return result.insertedId.toString();
