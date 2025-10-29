@@ -420,39 +420,35 @@ export function MultiAgentWorkbench() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="bg-white pt-4">
-                <div className="space-y-2">
+                <div className="grid grid-cols-3 gap-2">
                   {AVAILABLE_ROLES.map((role) => {
                     const isSelected = selectedRoles.includes(role.id);
                     return (
                       <button
                         key={role.id}
                         onClick={() => toggleRole(role.id)}
-                        className={`w-full rounded-lg border-2 p-3 text-left transition-all ${
+                        className={`relative flex flex-col items-center gap-1.5 rounded-lg border-2 p-2.5 transition-all ${
                           isSelected
                             ? 'border-blue-500 bg-blue-50 shadow-sm'
                             : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`flex h-10 w-10 items-center justify-center rounded-full text-xl ${
-                              isSelected
-                                ? role.color + ' text-white'
-                                : role.lightColor
-                            }`}
-                          >
-                            {role.icon}
-                          </div>
-                          <div className="flex-1">
-                            <div
-                              className={`text-sm font-semibold ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}
-                            >
-                              {role.name}
-                            </div>
-                          </div>
-                          {isSelected && (
-                            <CheckCircle className="h-5 w-5 text-blue-600" />
-                          )}
+                        {isSelected && (
+                          <CheckCircle className="absolute right-1 top-1 h-4 w-4 text-blue-600" />
+                        )}
+                        <div
+                          className={`flex h-8 w-8 items-center justify-center rounded-full text-lg ${
+                            isSelected
+                              ? role.color + ' text-white'
+                              : role.lightColor
+                          }`}
+                        >
+                          {role.icon}
+                        </div>
+                        <div
+                          className={`text-center text-xs font-medium ${isSelected ? 'text-blue-900' : 'text-gray-700'}`}
+                        >
+                          {role.name}
                         </div>
                       </button>
                     );
