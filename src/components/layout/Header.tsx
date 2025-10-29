@@ -36,12 +36,10 @@ interface HeaderProps {
 }
 
 const navigationLinks = [
-  { href: '/demo', label: 'AI Workbench' },
-  { href: '/rag-chat', label: 'RAG Chat' },
   { href: '/patterns', label: 'Patterns' },
   { href: '/library', label: 'Library' },
   { href: '/learn', label: 'Learn' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/workbench/multi-agent', label: 'Multi-Agent' },
 ];
 
 export function Header({ user }: HeaderProps) {
