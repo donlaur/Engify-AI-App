@@ -208,14 +208,14 @@ export class MessageBroker implements IMessageBroker {
         status,
         details,
         lastChecked: new Date(),
-        uptime: Date.now() - this.startTime,
+        uptime: Math.max(1, Date.now() - this.startTime),
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         details: `Health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         lastChecked: new Date(),
-        uptime: Date.now() - this.startTime,
+        uptime: Math.max(1, Date.now() - this.startTime),
       };
     }
   }
