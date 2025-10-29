@@ -346,7 +346,7 @@ export interface IPromptRepository extends IRepository<Prompt> {
 #### 4.1 Execution Strategy Interface
 
 - **Strategy Interface**: Define common execution contract
-- **Context Class**: Manages strategy selection and execution
+- **Context Class**: Manages strateogy selection and execution
 - **Strategy Factory**: Creates appropriate strategy instances
 - **Benefits**: Flexible execution patterns, easy to extend
 

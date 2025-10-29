@@ -14,6 +14,8 @@ import { Icons } from '@/lib/icons';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  sources?: Array<{ title: string; score: number }>;
+  usedRAG?: boolean;
 }
 
 export function ChatWidget() {
@@ -50,7 +52,12 @@ export function ChatWidget() {
       const data = await response.json();
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: data.message },
+        {
+          role: 'assistant',
+          content: data.message,
+          sources: data.sources,
+          usedRAG: data.usedRAG,
+        },
       ]);
     } catch (error) {
       setMessages((prev) => [
@@ -104,6 +111,30 @@ export function ChatWidget() {
                   }`}
                 >
                   <p className="text-sm">{message.content}</p>
+
+                  {/* Show sources if available */}
+                  {message.sources && message.sources.length > 0 && (
+                    <div className="mt-2 border-t border-gray-200 pt-2">
+                      <p className="mb-1 text-xs text-gray-500">Sources:</p>
+                      <div className="space-y-1">
+                        {message.sources.map((source, idx) => (
+                          <div key={idx} className="text-xs text-gray-600">
+                            • {source.title} (score: {source.score.toFixed(2)})
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Show RAG indicator */}
+                  {message.usedRAG && (
+                    <div className="mt-1">
+                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                        <Icons.search className="mr-1 h-3 w-3" />
+                        Knowledge Base
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
