@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 import { mfaService } from '@/lib/services/mfaService';
 
 export async function POST(_request: NextRequest) {
@@ -31,7 +32,11 @@ export async function POST(_request: NextRequest) {
       message: 'MFA disabled successfully',
     });
   } catch (error) {
-    console.error('Error disabling MFA:', error);
+    const session = await auth();
+    logger.apiError('/api/auth/mfa/disable', error, {
+      userId: session?.user?.id,
+      method: 'POST',
+    });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 import { mfaService } from '@/lib/services/mfaService';
 import { z } from 'zod';
 
@@ -47,7 +48,11 @@ export async function POST(request: NextRequest) {
       message: 'MFA code verified successfully',
     });
   } catch (error) {
-    console.error('Error verifying MFA code:', error);
+    const session = await auth();
+    logger.apiError('/api/auth/mfa/verify', error, {
+      userId: session?.user?.id,
+      method: 'POST',
+    });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
