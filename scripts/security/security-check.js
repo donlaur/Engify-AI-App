@@ -198,6 +198,16 @@ const unsafePatterns = [
       if (filePath.includes('security-check.js')) {
         return false;
       }
+      // Allow Puppeteer's evaluate methods (safe, not actual eval)
+      if (filePath && (
+        filePath.includes('e2e/') || 
+        filePath.includes('puppeteer') ||
+        content.includes('page.evaluate') ||
+        content.includes('page.$eval') ||
+        content.includes('page.$$eval')
+      )) {
+        return false;
+      }
       return true;
     },
     severity: 'CRITICAL',
