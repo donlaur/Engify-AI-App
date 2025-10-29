@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { ObjectId } from 'mongodb';
+import { RBACPresets } from '@/lib/middleware/rbac';
+import { logger } from '@/lib/logging/logger';
+import { auth } from '@/lib/auth';
 
 /**
  * GET /api/prompts/[id]
@@ -12,6 +15,10 @@ export async function GET(
 ) {
   try {
     const { id } = params;
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     // Try MongoDB first
     try {
@@ -21,7 +28,10 @@ export async function GET(
       const prompt = await collection.findOne({ _id: new ObjectId(id) });
 
       if (!prompt) {
-        return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
+        return NextResponse.json(
+          { error: 'Prompt not found' },
+          { status: 404 }
+        );
       }
 
       // Increment view count
@@ -37,13 +47,16 @@ export async function GET(
       const prompt = seedPrompts.find((p) => p.id === id);
 
       if (!prompt) {
-        return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
+        return NextResponse.json(
+          { error: 'Prompt not found' },
+          { status: 404 }
+        );
       }
 
       return NextResponse.json({ prompt, source: 'static' });
     }
   } catch (error) {
-    console.error('API error:', error);
+    logger.apiError('/api/prompts/[id]', error, { method: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch prompt' },
       { status: 500 }
@@ -59,6 +72,10 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // RBAC: prompts:write permission required
+  const rbacCheck = await RBACPresets.requirePromptWrite()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const { id } = params;
     const body = await request.json();
@@ -67,7 +84,12 @@ export async function PATCH(
     const collection = db.collection('prompts');
 
     const result = await collection.updateOne(
-      { _id: new ObjectId(id) },
+      // User- and org-scoped update: restrict to documents owned by the user in their org
+      {
+        _id: new ObjectId(id),
+        userId: session.user.id,
+        organizationId: session.user.organizationId,
+      },
       {
         $set: {
           ...body,
@@ -82,7 +104,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Update prompt error:', error);
+    logger.apiError('/api/prompts/[id]', error, { method: 'PATCH' });
     return NextResponse.json(
       { error: 'Failed to update prompt' },
       { status: 500 }
@@ -98,13 +120,26 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // RBAC: prompts:write permission required
+  const rbacCheck = await RBACPresets.requirePromptWrite()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const { id } = params;
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const db = await getMongoDb();
     const collection = db.collection('prompts');
 
-    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    // User- and org-scoped delete: restrict to documents owned by the user in their org
+    const result = await collection.deleteOne({
+      _id: new ObjectId(id),
+      userId: session.user.id,
+      organizationId: session.user.organizationId,
+    });
 
     if (result.deletedCount === 0) {
       return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
@@ -112,7 +147,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Delete prompt error:', error);
+    logger.apiError('/api/prompts/[id]', error, { method: 'DELETE' });
     return NextResponse.json(
       { error: 'Failed to delete prompt' },
       { status: 500 }
