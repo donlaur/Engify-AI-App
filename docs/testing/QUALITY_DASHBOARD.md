@@ -48,6 +48,16 @@ npm run test:visual
   - CQRS V2 suite: 0/14 passing (pending reset shim)
   - Stats timeouts (API/integration): 0/2 passing (both timeouts)
 
+- 2025-10-29 21:46 UTC: Progress snapshot
+  - Services
+    - ActivityService: 13/13 passing (was 8/13)
+    - FavoriteService: 14/14 passing (was 9/14)
+    - NotificationService: 15/15 passing (was 10/15)
+  - RAG Integration: 5/6 passing (unhealthy case pending)
+  - Messaging (In-Memory Queue): 20/26 passing (handlers/broker/priority pending)
+  - Header: 6/6 passing
+  - Users API v2: 9/9 passing; AI Execute v2: 8/8 passing
+
 Notes:
 
 - TypeScript and ESLint counts will be recomputed after service/CQRS fixes.

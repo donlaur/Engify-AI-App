@@ -136,19 +136,21 @@
 
 ## Quality Dashboard (live)
 
-- Unit tests snapshot (2025-10-29 21:27 UTC):
+- Unit tests snapshot (2025-10-29 21:46 UTC):
   - Users API v2: 9/9 passing
   - AI Execute v2: 8/8 passing
-  - Header: 5/6 passing
+  - Header: 6/6 passing
   - Services
-    - ActivityService: 8/13 passing (5 failing)
-    - FavoriteService: 9/14 passing (5 failing)
-    - NotificationService: 10/15 passing (5 failing)
+    - ActivityService: 13/13 passing
+    - FavoriteService: 14/14 passing
+    - NotificationService: 15/15 passing
   - Execution Strategy System: 10/13 passing (3 failing)
-  - RAG Integration: 4/6 passing (2 failing)
+  - RAG Integration: 5/6 passing (unhealthy case pending)
   - CQRS V2: 0/14 passing (needs reset shim)
   - Stats timeouts (API/integration): 0/2 passing
+  - Messaging (In-Memory Queue): 20/26 passing (handlers/broker/priority pending)
 
 ### Update Log
 
 - 2025-10-29 21:27 UTC: First reduction; API v2 routes and execute green; services partially green; CQRS suite pending.
+- 2025-10-29 21:46 UTC: Services now all green; RAG health nearly green; messaging suite partially green. Next: queue handler metrics and broker stubs.
