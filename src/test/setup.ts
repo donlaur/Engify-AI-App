@@ -92,6 +92,48 @@ vi.mock('openai', () => {
   };
 });
 
+// Mock Anthropic SDK to avoid browser env errors
+vi.mock('@anthropic-ai/sdk', () => {
+  class AnthropicMock {
+    constructor(_opts?: unknown) {}
+    messages = {
+      create: vi.fn(async () => ({
+        content: [{ text: 'Test response' }],
+        usage: { input_tokens: 10, output_tokens: 20 },
+      })),
+    };
+  }
+  return { default: AnthropicMock };
+});
+
+// Mock Groq SDK to avoid browser env errors
+vi.mock('groq-sdk', () => {
+  class GroqMock {
+    constructor(_opts?: unknown) {}
+    chat = {
+      completions: {
+        create: vi.fn(async () => ({
+          choices: [{ message: { content: 'Test response' } }],
+        })),
+      },
+    };
+  }
+  return { default: GroqMock };
+});
+
+// Mock MongoDB module used in server-only code during route tests
+vi.mock('@/lib/db/mongodb', () => {
+  const collectionMock = () => ({
+    findOne: vi.fn(async () => null),
+    aggregate: vi.fn(() => ({ toArray: vi.fn(async () => []) })),
+    countDocuments: vi.fn(async () => 0),
+  });
+  return {
+    getMongoDb: vi.fn(async () => ({ collection: collectionMock })),
+    getMongoClient: vi.fn(async () => ({})),
+  };
+});
+
 // Mock NextAuth where needed by route code
 vi.mock('next-auth', () => ({
   auth: vi.fn(async () => ({

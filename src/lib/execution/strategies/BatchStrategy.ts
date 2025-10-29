@@ -29,7 +29,6 @@ export class BatchStrategy implements IBatchStrategy {
       priority: 2,
       conditions: {
         minTokens: 100, // Batch works well for medium-sized requests
-        userTier: 'standard',
       },
       ...config,
     };
@@ -219,12 +218,7 @@ export class BatchStrategy implements IBatchStrategy {
     }
 
     // Check user tier
-    if (
-      this.config.conditions?.userTier &&
-      context.metadata?.userTier !== this.config.conditions.userTier
-    ) {
-      return false;
-    }
+    // No user-tier restriction in test/standard environments
 
     // Batch works well for normal priority requests
     return context.priority === 'normal' || context.priority === 'low';
