@@ -420,7 +420,7 @@ export function MultiAgentWorkbench() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="bg-white pt-4">
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
                   {AVAILABLE_ROLES.map((role) => {
                     const isSelected = selectedRoles.includes(role.id);
                     return (
