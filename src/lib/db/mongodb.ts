@@ -66,4 +66,7 @@ export async function getMongoClient(): Promise<MongoClient> {
   return clientPromise;
 }
 
+// Alias for backward compatibility
+export const connectDB = getMongoDb;
+
 export default clientPromise;

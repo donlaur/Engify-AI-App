@@ -504,3 +504,23 @@ export interface IPromptRepository extends IRepository<Prompt> {
 **Phase 4**: ✅ Complete  
 **Phase 5**: ✅ Complete  
 **Phase 6**: ✅ Complete
+
+## 🎯 **Current Focus: Core Features**
+
+### **Next Priorities (Single-User SaaS)**
+
+- **RAG Chatbot**: Complete vector search and knowledge base
+- **Interactive Workbenches**: Make OKRs, retrospectives, tech debt analysis functional
+- **More Prompt Templates**: Expand the prompt library
+- **TOTP/MFA Authentication**: Add 2FA security
+- **SendGrid Integration**: Email notifications and transactional emails
+- **Twilio Integration**: SMS notifications and verification
+
+### **Enterprise Features (Future)**
+
+- Multi-tenancy and enterprise IAM
+- Admin dashboard and compliance features
+- Advanced analytics and reporting
+- Enterprise integrations
+
+_See `docs/planning/FUTURE_FEATURES_ROADMAP.md` for detailed enterprise roadmap_
