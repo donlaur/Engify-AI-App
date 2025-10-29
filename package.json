@@ -152,7 +152,7 @@
     "pngjs": "^7.0.0",
     "postcss": "^8.4.0",
     "prettier": "^3.2.0",
-    "prettier-plugin-tailwindcss": "^0.5.0",
+    "prettier-plugin-tailwindcss": "^0.7.1",
     "puppeteer": "^24.26.1",
     "tailwindcss": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
