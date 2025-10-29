@@ -83,7 +83,7 @@ vi.mock('openai', () => {
       chat = {
         completions: {
           create: vi.fn(async () => ({
-            choices: [{ message: { content: 'Test response' } }],
+            choices: [{ message: { content: 'Chain of Thought response' } }],
           })),
         },
       };
@@ -134,9 +134,15 @@ vi.mock('@/lib/db/mongodb', () => {
   };
 });
 
-// Mock NextAuth where needed by route code
-vi.mock('next-auth', () => ({
-  auth: vi.fn(async () => ({
+// Mock NextAuth where needed by route code (default export and named auth)
+vi.mock('next-auth', () => {
+  const auth = vi.fn(async () => ({
     user: { id: 'test-user', email: 'test@example.com' },
-  })),
-}));
+  }));
+  const defaultExport = vi.fn(() => ({
+    auth,
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+  }));
+  return { default: defaultExport, auth };
+});

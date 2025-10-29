@@ -25,7 +25,7 @@ export class CacheStrategy implements ICacheStrategy {
     this.config = {
       name: 'cache',
       enabled: true,
-      priority: 4, // Highest priority when cache hit
+      priority: 0, // Base priority is low; boosts apply on cache hit
       conditions: {
         maxTokens: 2000, // Cache works well for smaller requests
         userTier: 'any',

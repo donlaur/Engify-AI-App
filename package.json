@@ -65,7 +65,7 @@
     "test:pages": "tests/api/page-tests.sh",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run src",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:visual": "vitest run tests/visual-regression/visual-regression.test.ts",

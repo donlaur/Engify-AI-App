@@ -91,7 +91,7 @@ export class ExecutionContextManager {
       const result = await strategy.execute(request, context, provider);
 
       // Add execution metadata
-      result.executionTime = Date.now() - startTime;
+      result.executionTime = Math.max(1, Date.now() - startTime);
       result.strategy = strategy.name;
 
       return result;
