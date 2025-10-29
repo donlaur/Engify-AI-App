@@ -8,6 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logging/logger';
 import { getDb } from '@/lib/mongodb';
 import { sendEmail } from '@/lib/services/emailService';
 import { SendGridTemplateBuilders } from '@/lib/services/sendgridTemplates';
@@ -50,7 +51,12 @@ export async function POST(_request: NextRequest) {
           _id: string;
           count: number;
           title?: string;
-        }>([{ $match: { userId: user.id, createdAt: { $gte: oneWeekAgo } } }, { $group: { _id: '$promptId', count: { $sum: 1 } } }, { $sort: { count: -1 } }, { $limit: 5 }])
+        }>([
+          { $match: { userId: user.id, createdAt: { $gte: oneWeekAgo } } },
+          { $group: { _id: '$promptId', count: { $sum: 1 } } },
+          { $sort: { count: -1 } },
+          { $limit: 5 },
+        ])
         .toArray();
       const topPrompts = topPromptsAgg || [];
 
@@ -102,7 +108,9 @@ export async function POST(_request: NextRequest) {
       totalUsers: activeUsers.length,
     });
   } catch (error) {
-    console.error('Weekly digest job error:', error);
+    logger.apiError('/api/jobs/weekly-digest', error, {
+      method: 'POST',
+    });
     return NextResponse.json(
       {
         success: false,

@@ -12,6 +12,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logging/logger';
 import { mfaService } from '@/lib/services/mfaService';
 import { getDb } from '@/lib/mongodb';
 
@@ -54,7 +55,9 @@ export async function POST(_request: NextRequest) {
       stats: cleanupStats,
     });
   } catch (error) {
-    console.error('Cleanup job error:', error);
+    logger.apiError('/api/jobs/cleanup', error, {
+      method: 'POST',
+    });
     return NextResponse.json(
       {
         success: false,

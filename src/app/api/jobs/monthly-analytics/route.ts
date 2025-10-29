@@ -8,6 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logging/logger';
 import { getDb } from '@/lib/mongodb';
 import { apiKeyUsageService } from '@/lib/services/ApiKeyUsageService';
 
@@ -139,7 +140,9 @@ export async function POST(_request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Monthly analytics job error:', error);
+    logger.apiError('/api/jobs/monthly-analytics', error, {
+      method: 'POST',
+    });
     return NextResponse.json(
       {
         success: false,
