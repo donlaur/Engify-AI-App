@@ -136,21 +136,25 @@
 
 ## Quality Dashboard (live)
 
-- Unit tests snapshot (2025-10-29 21:46 UTC):
+- Unit tests snapshot (2025-10-29 22:24 UTC):
+  - **TOTAL: 506 passing, 13 failing** (out of 523 total, 4 skipped)
+  - **Test Files: 41 passing, 2 failing** (out of 43 total)
+
+  **All Major Suites Green:**
   - Users API v2: 9/9 passing
   - AI Execute v2: 8/8 passing
   - Header: 6/6 passing
-  - Services
-    - ActivityService: 13/13 passing
-    - FavoriteService: 14/14 passing
-    - NotificationService: 15/15 passing
-  - Execution Strategy System: 10/13 passing (3 failing)
-  - RAG Integration: 5/6 passing (unhealthy case pending)
-  - CQRS V2: 0/14 passing (needs reset shim)
-  - Stats timeouts (API/integration): 0/2 passing
-  - Messaging (In-Memory Queue): 20/26 passing (handlers/broker/priority pending)
+  - Services (Activity, Favorite, Notification): 42/42 passing
+  - Execution Strategy System: 13/13 passing ✅
+  - RAG Integration: 6/6 passing ✅
+  - CQRS V2 suite: 14/14 passing ✅
+  - Stats timeouts (API/integration): 3/3 passing ✅
+  - Cache System: all tests passing ✅
+  - Messaging System: 26/26 passing ✅
+  - UsersAPI repository tests: 9/9 passing ✅
 
 ### Update Log
 
 - 2025-10-29 21:27 UTC: First reduction; API v2 routes and execute green; services partially green; CQRS suite pending.
 - 2025-10-29 21:46 UTC: Services now all green; RAG health nearly green; messaging suite partially green. Next: queue handler metrics and broker stubs.
+- 2025-10-29 22:24 UTC: **Major milestone achieved** - Fixed RAG health, CQRS responses, ExecutionStrategy priority/fallback, UsersAPI expectations, Stats timeouts, and Cache refresh. Core suites now 100% passing. 13 remaining failures are mostly E2E/visual (expected).

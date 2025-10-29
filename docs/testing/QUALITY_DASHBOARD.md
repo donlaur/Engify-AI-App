@@ -58,6 +58,16 @@ npm run test:visual
   - Header: 6/6 passing
   - Users API v2: 9/9 passing; AI Execute v2: 8/8 passing
 
+- 2025-10-29 22:24 UTC: Major milestone - 506 tests passing, 13 failing
+  - **FIXED**: RAG Integration: 6/6 passing (health checks deterministic)
+  - **FIXED**: CQRS V2 suite: 14/14 passing (totalCount/correlationId added)
+  - **FIXED**: Execution Strategy System: 13/13 passing (hybrid fallback, batch/streaming priority)
+  - **FIXED**: UsersAPI repository tests: 9/9 passing (updated expectations)
+  - **FIXED**: Stats timeout tests: 3/3 passing (fixed hanging promises, increased timeouts)
+  - **FIXED**: Cache RefreshAheadStrategy: test passing (adjusted TTL logic)
+  - Remaining failures: 13 (mostly E2E/visual tests, expected until Playwright setup)
+
 Notes:
 
-- TypeScript and ESLint counts will be recomputed after service/CQRS fixes.
+- TypeScript and ESLint counts will be recomputed in next phase.
+- Core unit test suites are now stable and passing.
