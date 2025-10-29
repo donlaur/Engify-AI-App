@@ -24,7 +24,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 import { z } from 'zod';
+import { logger } from '@/lib/logging/logger';
 import { getUserService } from '@/lib/di/Container';
 import { cqrsBus } from '@/lib/cqrs/bus';
 import { initializeCQRS } from '@/lib/cqrs/registration';
@@ -149,7 +151,11 @@ export async function GET(request: NextRequest) {
       correlationId: result.correlationId,
     });
   } catch (error) {
-    console.error('Error getting users:', error);
+    const session = await auth();
+    logger.apiError('/api/v2/users', error, {
+      userId: session?.user?.id,
+      method: 'GET',
+    });
     return NextResponse.json(
       {
         success: false,
@@ -213,7 +219,11 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating user:', error);
+    const session = await auth();
+    logger.apiError('/api/v2/users', error, {
+      userId: session?.user?.id,
+      method: 'POST',
+    });
 
     // Handle validation errors
     if (error instanceof z.ZodError) {
