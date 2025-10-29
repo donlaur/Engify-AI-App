@@ -179,30 +179,34 @@ export function MultiAgentWorkbench() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {EXAMPLE_SCENARIOS.map((example, index) => (
                 <button
                   key={index}
                   onClick={() => loadExample(example)}
-                  className="rounded-lg border p-4 text-left transition-colors hover:border-blue-500 hover:bg-blue-50"
+                  className="rounded-lg border-2 p-5 text-left transition-all hover:border-blue-500 hover:bg-blue-50 hover:shadow-md"
                 >
-                  <h3 className="mb-1 text-sm font-semibold">
+                  <h3 className="mb-2 text-base font-semibold">
                     {example.title}
                   </h3>
-                  <p className="line-clamp-2 text-xs text-gray-600">
+                  <p className="mb-3 min-h-[40px] text-sm text-gray-600">
                     {example.idea}
                   </p>
-                  <div className="mt-2 flex gap-1">
-                    {example.roles.slice(0, 3).map((role) => (
-                      <Badge key={role} variant="outline" className="text-xs">
-                        {AVAILABLE_ROLES.find((r) => r.id === role)?.name}
-                      </Badge>
-                    ))}
-                    {example.roles.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{example.roles.length - 3}
-                      </Badge>
-                    )}
+                  <div className="flex flex-wrap gap-1.5">
+                    {example.roles.map((role) => {
+                      const roleInfo = AVAILABLE_ROLES.find(
+                        (r) => r.id === role
+                      );
+                      return (
+                        <Badge
+                          key={role}
+                          variant="secondary"
+                          className="px-2 py-0.5 text-xs"
+                        >
+                          {roleInfo?.name}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </button>
               ))}
