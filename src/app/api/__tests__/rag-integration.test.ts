@@ -11,6 +11,7 @@ global.fetch = vi.fn() as unknown as typeof fetch;
 describe('RAG Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.RAG_TEST_MODE = 'true';
   });
 
   describe('RAG API Route', () => {
