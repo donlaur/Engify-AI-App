@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 import { apiKeyService } from '@/lib/services/ApiKeyService';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { auditLog } from '@/lib/logging/audit';
@@ -52,8 +53,12 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error rotating API key:', error);
+    const session = await auth();
+    logger.apiError(`/api/v2/users/api-keys/${params.keyId}/rotate`, error, {
+      userId: session?.user?.id,
+      method: 'POST',
+      keyId: params.keyId,
+    });
 
     // Try to get userId from session for audit log
     let userId = 'unknown';

@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 import { apiKeyService } from '@/lib/services/ApiKeyService';
 import { _protectRoute, RBACPresets } from '@/lib/middleware/rbac';
 import { z } from 'zod';
@@ -43,7 +44,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ keys });
   } catch (error) {
-    console.error('Error fetching API keys:', error);
+    const session = await auth();
+    logger.apiError('/api/v2/users/api-keys', error, {
+      userId: session?.user?.id,
+      method: 'GET',
+    });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -80,7 +85,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ keyId, success: true });
   } catch (error) {
-    console.error('Error creating API key:', error);
+    const session = await auth();
+    logger.apiError('/api/v2/users/api-keys', error, {
+      userId: session?.user?.id,
+      method: 'POST',
+    });
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid input', details: error.errors },
