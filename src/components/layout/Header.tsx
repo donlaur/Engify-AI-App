@@ -86,7 +86,7 @@ export function Header({ user }: HeaderProps) {
             href="/demo"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
-            Workbench
+            AI Workbench
           </Link>
           <Link
             href="/rag-chat"
