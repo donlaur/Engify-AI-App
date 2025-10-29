@@ -122,9 +122,18 @@ export function MultiAgentWorkbench() {
         throw new Error(data.error || 'Failed to generate simulation');
       }
 
+      if (!data.simulation || data.simulation.trim() === '') {
+        throw new Error('Empty simulation received. Please try again.');
+      }
+
       setSimulation(data.simulation);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Multi-agent simulation error:', err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'An error occurred. Check console for details.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -333,8 +342,8 @@ export function MultiAgentWorkbench() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-wrap rounded border bg-gray-50 p-4 font-mono text-sm">
+            <div className="rounded-lg border-2 border-gray-200 bg-white p-6">
+              <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-900">
                 {simulation}
               </div>
             </div>
