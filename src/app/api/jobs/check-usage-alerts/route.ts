@@ -34,11 +34,30 @@ export async function POST(_request: NextRequest) {
     const alertsTriggered = [];
 
     for (const alert of activeAlerts) {
+      // Calculate date range based on period
+      const now = new Date();
+      let startDate: Date;
+      const endDate: Date = now;
+
+      if (alert.period === 'daily') {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      } else if (alert.period === 'weekly') {
+        const daysSinceMonday = now.getDay() === 0 ? 6 : now.getDay() - 1;
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - daysSinceMonday);
+        startDate.setHours(0, 0, 0, 0);
+      } else {
+        // monthly
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+
       // Get usage summary for the alert period
       const summary = await apiKeyUsageService.getUsageSummary(alert.userId, {
         keyId: alert.keyId,
         provider: alert.provider,
         period: alert.period,
+        startDate,
+        endDate,
       });
 
       // Get current value based on metric
