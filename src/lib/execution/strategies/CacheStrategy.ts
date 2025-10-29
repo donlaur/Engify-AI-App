@@ -197,7 +197,7 @@ export class CacheStrategy implements ICacheStrategy {
 
     // Boost for frequently accessed patterns
     if (context.metadata?.isRepeated) {
-      priority += 2;
+      priority += 5;
     }
 
     // Boost for smaller requests (better cache efficiency)
@@ -328,7 +328,7 @@ export class CacheStrategy implements ICacheStrategy {
     if ((request.temperature || 0.7) > 0.9) return false;
 
     // Don't cache very short prompts (might be unique)
-    if (request.prompt.length < 10) return false;
+    if (request.prompt.length < 5) return false;
 
     // Don't cache urgent requests (they need fresh responses)
     if (context.priority === 'urgent') return false;

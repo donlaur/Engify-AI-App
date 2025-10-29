@@ -137,7 +137,13 @@ vi.mock('@/lib/db/mongodb', () => {
 // Mock NextAuth where needed by route code (default export and named auth)
 vi.mock('next-auth', () => {
   const auth = vi.fn(async () => ({
-    user: { id: 'test-user', email: 'test@example.com' },
+    user: {
+      id: 'test-user',
+      email: 'test@example.com',
+      role: 'super_admin',
+      plan: 'pro',
+      organizationId: 'org-1',
+    },
   }));
   const defaultExport = vi.fn(() => ({
     auth,
