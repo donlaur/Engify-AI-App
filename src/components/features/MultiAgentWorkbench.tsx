@@ -202,22 +202,22 @@ export function MultiAgentWorkbench() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/30 to-slate-50">
+    <div className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-7xl p-6">
         {/* Header */}
         <div className="mb-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm">
             <Sparkles className="h-4 w-4" />
             Decision-Making Gym
           </div>
-          <h1 className="mb-2 text-4xl font-bold tracking-tight text-gray-900">
+          <h1 className="mb-2 text-4xl font-bold tracking-tight text-slate-900">
             Multi-Agent Team Simulation
           </h1>
-          <p className="text-lg text-gray-800">
+          <p className="text-lg text-slate-700">
             Practice thinking from multiple perspectives • Train your
             collaborative decision-making skills
           </p>
-          <p className="mt-2 text-sm text-gray-700">
+          <p className="mt-2 text-sm text-slate-600">
             This is a training tool to help you understand how different roles
             think. Use it to practice, not to replace real team discussions.
           </p>
@@ -228,8 +228,8 @@ export function MultiAgentWorkbench() {
           {/* Left: Input & Controls */}
           <div className="space-y-6 lg:col-span-2">
             {/* Quick Examples */}
-            <Card className="border-stone-200 bg-stone-50/50 shadow-sm backdrop-blur-sm">
-              <CardHeader className="border-b border-stone-200 bg-gradient-to-r from-amber-50 to-orange-50 pb-4">
+            <Card className="border-slate-200 bg-white shadow-sm">
+              <CardHeader className="border-b border-slate-200 pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                   <Sparkles className="h-5 w-5 text-yellow-600" />
                   Try an Example
@@ -238,13 +238,13 @@ export function MultiAgentWorkbench() {
                   Click to load a pre-built scenario
                 </CardDescription>
               </CardHeader>
-              <CardContent className="bg-stone-50/30 pt-4">
+              <CardContent className="bg-white pt-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {EXAMPLE_SCENARIOS.map((example, index) => (
                     <button
                       key={index}
                       onClick={() => loadExample(example)}
-                      className="group relative overflow-hidden rounded-xl border-2 border-stone-200 bg-white/80 p-4 text-left transition-all hover:border-blue-400 hover:bg-white hover:shadow-md"
+                      className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 text-left transition-all hover:border-blue-500 hover:bg-white hover:shadow-md"
                     >
                       <div className="mb-1 text-base font-semibold text-gray-900 group-hover:text-blue-600">
                         {example.title}
@@ -266,8 +266,8 @@ export function MultiAgentWorkbench() {
             </Card>
 
             {/* Input */}
-            <Card className="border-stone-200 bg-stone-50/50 shadow-sm backdrop-blur-sm">
-              <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50 pb-4">
+            <Card className="border-slate-200 bg-white shadow-sm">
+              <CardHeader className="border-b border-slate-200 pb-4">
                 <CardTitle className="text-lg font-semibold text-gray-900">
                   Your Idea
                 </CardTitle>
@@ -275,7 +275,7 @@ export function MultiAgentWorkbench() {
                   What do you want the team to evaluate?
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 bg-stone-50/30 pt-4">
+              <CardContent className="space-y-4 bg-white pt-4">
                 <Textarea
                   placeholder="Example: Add real-time collaboration to our document editor..."
                   value={idea}
@@ -357,8 +357,8 @@ export function MultiAgentWorkbench() {
 
             {/* Simulation Output */}
             {simulation && (
-              <Card className="border-stone-200 bg-stone-50/50 shadow-sm backdrop-blur-sm">
-                <CardHeader className="border-b bg-gradient-to-r from-green-50 to-emerald-50 pb-4">
+              <Card className="border-slate-200 bg-white shadow-sm">
+                <CardHeader className="border-b border-slate-200 pb-4">
                   <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                     <CheckCircle className="h-5 w-5 text-green-600" />
                     Team Simulation Results
@@ -369,7 +369,7 @@ export function MultiAgentWorkbench() {
                       : 'Team Debate'}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="bg-stone-50/30 pt-4">
+                <CardContent className="bg-white pt-4">
                   <div className="max-h-[600px] overflow-y-auto rounded-lg border-2 border-gray-200 bg-white p-6">
                     <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800">
                       {simulation}
@@ -452,8 +452,8 @@ export function MultiAgentWorkbench() {
 
           {/* Right: Role Selection */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-6 border-stone-200 bg-stone-50/50 shadow-sm backdrop-blur-sm">
-              <CardHeader className="border-b bg-gradient-to-r from-purple-50 to-pink-50 pb-4">
+            <Card className="sticky top-6 border-slate-200 bg-white shadow-sm">
+              <CardHeader className="border-b border-slate-200 pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                   <Users2 className="h-5 w-5 text-purple-600" />
                   Select Roles ({selectedRoles.length}/7)
@@ -462,7 +462,7 @@ export function MultiAgentWorkbench() {
                   Who should review this idea?
                 </CardDescription>
               </CardHeader>
-              <CardContent className="bg-stone-50/30 pt-4">
+              <CardContent className="bg-white pt-4">
                 <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
                   {AVAILABLE_ROLES.map((role) => {
                     const isSelected = selectedRoles.includes(role.id);
