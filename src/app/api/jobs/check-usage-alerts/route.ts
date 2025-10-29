@@ -8,6 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logging/logger';
 import { getDb } from '@/lib/mongodb';
 import { apiKeyUsageService } from '@/lib/services/ApiKeyUsageService';
 import { sendApiKeyAlertEmail } from '@/lib/services/emailService';
@@ -114,7 +115,9 @@ export async function POST(_request: NextRequest) {
       alertsTriggered: alertsTriggered.length,
     });
   } catch (error) {
-    console.error('Usage alerts check job error:', error);
+    logger.apiError('/api/jobs/check-usage-alerts', error, {
+      method: 'POST',
+    });
     return NextResponse.json(
       {
         success: false,

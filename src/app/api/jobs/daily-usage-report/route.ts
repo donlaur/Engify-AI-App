@@ -8,6 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logging/logger';
 import { apiKeyUsageService } from '@/lib/services/ApiKeyUsageService';
 import { getDb } from '@/lib/mongodb';
 import { QStashMessageQueue } from '@/lib/messaging/queues/QStashMessageQueue';
@@ -68,7 +69,9 @@ export async function POST(_request: NextRequest) {
       reportsProcessed: reports.length,
     });
   } catch (error) {
-    console.error('Daily usage report job error:', error);
+    logger.apiError('/api/jobs/daily-usage-report', error, {
+      method: 'POST',
+    });
     return NextResponse.json(
       {
         success: false,
