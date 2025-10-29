@@ -145,12 +145,15 @@ vi.mock('@/lib/db/mongodb', () => {
 vi.mock('@/lib/db/client', () => {
   const makeCollection = () => ({
     findOne: vi.fn(async () => null),
-    find: vi.fn(() => ({
-      sort: vi.fn(() => ({
-        limit: vi.fn(() => ({ toArray: vi.fn(async () => []) })),
-      })),
-      toArray: vi.fn(async () => []),
-    })),
+    find: vi.fn(() => {
+      const chain = {
+        sort: vi.fn(() => chain),
+        skip: vi.fn(() => chain),
+        limit: vi.fn(() => chain),
+        toArray: vi.fn(async () => []),
+      };
+      return chain;
+    }),
     deleteOne: vi.fn(async () => ({ deletedCount: 1 })),
     deleteMany: vi.fn(async () => ({ deletedCount: 1 })),
     updateOne: vi.fn(async () => ({ modifiedCount: 1 })),
