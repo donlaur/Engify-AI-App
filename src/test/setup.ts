@@ -49,15 +49,7 @@ if (!globalWithEncoders.TextEncoder || !globalWithEncoders.TextDecoder) {
 const mockedFetch = vi.fn(
   async (_input: RequestInfo | URL, _init?: RequestInit) => {
     const url = typeof _input === 'string' ? _input : _input.toString();
-    if (url.endsWith('/health')) {
-      return new Response(
-        JSON.stringify({ status: 'healthy', rag_service: 'ok' }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
+    // Do not force external /health to succeed; tests may override to simulate unhealthy
     // Mock RAG health endpoint explicitly
     if (url.includes('/api/rag/health')) {
       return new Response(

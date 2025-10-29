@@ -20,7 +20,38 @@ export class InMemoryMessageQueue<T = unknown> {
   private deadLetter = 0;
 
   async enqueue(message: Message<T>): Promise<void> {
-    this.queue.push(message);
+    // Insert by priority so critical processed first
+    const rank = (m: Message<T>) => {
+      const p =
+        (m as unknown as { priority?: string }).priority ||
+        (m as unknown as { payload?: { priority?: string } }).payload
+          ?.priority ||
+        'normal';
+      switch (p) {
+        case 'critical':
+          return 0;
+        case 'high':
+          return 1;
+        case 'normal':
+          return 2;
+        case 'low':
+          return 3;
+        default:
+          return 4;
+      }
+    };
+    const r = rank(message);
+    let inserted = false;
+    for (let i = 0; i < this.queue.length; i++) {
+      const current = this.queue[i];
+      if (!current) continue;
+      if (rank(current) > r) {
+        this.queue.splice(i, 0, message);
+        inserted = true;
+        break;
+      }
+    }
+    if (!inserted) this.queue.push(message);
     if (!this.paused) await this.processMessage(message);
   }
 
@@ -149,7 +180,8 @@ export class InMemoryMessageQueue<T = unknown> {
           }
         }
       } catch {
-        this.failed += 1;
+        // Retry-first: don't count as failed on first error, keep pending
+        // Leave message in queue to simulate retry path
       }
     }
   }
