@@ -117,7 +117,10 @@ export async function POST(request: NextRequest) {
 // Health check endpoint
 export async function GET(request: NextRequest) {
   try {
-    if (process.env.NODE_ENV === 'test') {
+    if (
+      process.env.NODE_ENV === 'test' ||
+      process.env.RAG_TEST_MODE === 'true'
+    ) {
       const { searchParams } = new URL(request.url);
       const forceUnhealthy = searchParams.get('unhealthy') === 'true';
       if (forceUnhealthy) {
