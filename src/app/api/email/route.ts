@@ -1,76 +1,129 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendWelcomeEmail, sendPromptEmail, sendContactEmail, sendPasswordResetEmail } from '@/lib/services/emailService';
+import {
+  sendWelcomeEmail,
+  sendPromptEmail,
+  sendContactEmail,
+  sendPasswordResetEmail,
+} from '@/lib/services/emailService';
+import { logger } from '@/lib/logging/logger';
+import { RBACPresets } from '@/lib/middleware/rbac';
+import { z } from 'zod';
 
 /**
  * Send welcome email to new users
  */
 export async function POST(request: NextRequest) {
   try {
-    const { action, ...data } = await request.json();
+    const body = await request.json();
+
+    const BaseSchema = z.object({
+      action: z.enum(['welcome', 'share-prompt', 'contact', 'password-reset']),
+    });
+
+    const WelcomeSchema = BaseSchema.extend({
+      action: z.literal('welcome'),
+      userEmail: z.string().email(),
+      userName: z.string().min(1),
+    });
+
+    const ShareSchema = BaseSchema.extend({
+      action: z.literal('share-prompt'),
+      recipientEmail: z.string().email(),
+      senderName: z.string().min(1),
+      promptTitle: z.string().min(1),
+      promptContent: z.string().min(1),
+      promptUrl: z.string().url().optional(),
+    });
+
+    const ContactSchema = BaseSchema.extend({
+      action: z.literal('contact'),
+      name: z.string().min(1),
+      email: z.string().email(),
+      subject: z.string().min(1),
+      message: z.string().min(1),
+    });
+
+    const PasswordResetSchema = BaseSchema.extend({
+      action: z.literal('password-reset'),
+      userEmail: z.string().email(),
+      resetToken: z.string().min(10),
+      userName: z.string().min(1),
+    });
+
+    const ParsedUnion = z
+      .discriminatedUnion('action', [
+        WelcomeSchema,
+        ShareSchema,
+        ContactSchema,
+        PasswordResetSchema,
+      ])
+      .safeParse(body);
+
+    if (!ParsedUnion.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid request',
+          details: ParsedUnion.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const data = ParsedUnion.data;
+    const { action } = data;
 
     switch (action) {
       case 'welcome':
-        const { userEmail, userName } = data;
-        if (!userEmail || !userName) {
-          return NextResponse.json(
-            { success: false, error: 'userEmail and userName are required' },
-            { status: 400 }
-          );
-        }
-        
-        const welcomeResult = await sendWelcomeEmail(userEmail, userName);
+        // Welcome emails are typically internal - but allow with auth or rate-limit in future
+        const welcomeResult = await sendWelcomeEmail(
+          data.userEmail,
+          data.userName
+        );
         return NextResponse.json(welcomeResult);
 
       case 'share-prompt':
-        const { recipientEmail, senderName, promptTitle, promptContent, promptUrl } = data;
-        if (!recipientEmail || !senderName || !promptTitle || !promptContent) {
-          return NextResponse.json(
-            { success: false, error: 'Missing required fields for prompt sharing' },
-            { status: 400 }
-          );
-        }
-        
+        // Sharing prompts requires authentication
+        const shareRbacCheck = await RBACPresets.requireUserWrite()(request);
+        if (shareRbacCheck) return shareRbacCheck;
         const shareResult = await sendPromptEmail(
-          recipientEmail,
-          senderName,
-          promptTitle,
-          promptContent,
-          promptUrl || 'https://engify.ai/library'
+          data.recipientEmail,
+          data.senderName,
+          data.promptTitle,
+          data.promptContent,
+          data.promptUrl || 'https://engify.ai/library'
         );
         return NextResponse.json(shareResult);
 
       case 'contact':
-        const { name, email, subject, message } = data;
-        if (!name || !email || !subject || !message) {
-          return NextResponse.json(
-            { success: false, error: 'All contact form fields are required' },
-            { status: 400 }
-          );
-        }
-        
-        const contactResult = await sendContactEmail(name, email, subject, message);
+        const contactResult = await sendContactEmail(
+          data.name,
+          data.email,
+          data.subject,
+          data.message
+        );
         return NextResponse.json(contactResult);
 
       case 'password-reset':
-        const { userEmail: resetEmail, resetToken, userName: resetUserName } = data;
-        if (!resetEmail || !resetToken || !resetUserName) {
-          return NextResponse.json(
-            { success: false, error: 'Missing required fields for password reset' },
-            { status: 400 }
-          );
-        }
-        
-        const resetResult = await sendPasswordResetEmail(resetEmail, resetToken, resetUserName);
+        const resetResult = await sendPasswordResetEmail(
+          data.userEmail,
+          data.resetToken,
+          data.userName
+        );
         return NextResponse.json(resetResult);
 
       default:
         return NextResponse.json(
-          { success: false, error: 'Invalid action. Supported actions: welcome, share-prompt, contact, password-reset' },
+          {
+            success: false,
+            error:
+              'Invalid action. Supported actions: welcome, share-prompt, contact, password-reset',
+          },
           { status: 400 }
         );
     }
   } catch (error) {
-    console.error('Email API error:', error);
+    logger.apiError('/api/email', error, { method: 'POST' });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

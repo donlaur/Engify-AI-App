@@ -1,6 +1,6 @@
 /**
  * Audit Logging System
- * 
+ *
  * Comprehensive audit trail for security and compliance
  * 7-year retention for SOC 2 / FedRAMP compliance
  */
@@ -20,8 +20,18 @@ export type AuditAction =
   | 'user_delete'
   | 'password_change'
   | 'password_reset'
+  | 'MFA_CODE_SENT'
+  | 'MFA_CODE_VERIFIED'
+  | 'MFA_VERIFICATION_FAILED'
+  | 'MFA_VERIFICATION_FAILED_MAX_ATTEMPTS'
+  | 'MFA_ENABLED'
+  | 'MFA_DISABLED'
+  | 'api_key_rotated'
   | 'api_key_created'
   | 'api_key_revoked'
+  | 'usage_alert_created'
+  | 'usage_alert_triggered'
+  | 'usage_alert_deleted'
   | 'prompt_executed'
   | 'rate_limit_exceeded'
   | 'validation_failed'
@@ -39,7 +49,7 @@ export interface AuditLogEntry {
   action: AuditAction;
   userId?: string;
   resource?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   severity?: AuditSeverity;
   ipAddress?: string;
   userAgent?: string;
@@ -67,7 +77,7 @@ const auditLogger = winston.createLogger({
       maxFiles: '2555d', // 7 years retention
       level: 'info',
     }),
-    
+
     // Separate file for security alerts
     new DailyRotateFile({
       filename: 'logs/security-%DATE%.log',
@@ -101,16 +111,17 @@ export async function auditLog(entry: AuditLogEntry): Promise<void> {
     timestamp: entry.timestamp || new Date(),
     severity: entry.severity || 'info',
   };
-  
+
   // Determine log level
-  const level = logEntry.severity === 'critical' || logEntry.severity === 'error' 
-    ? 'error' 
-    : logEntry.severity === 'warning' 
-    ? 'warn' 
-    : 'info';
-  
+  const level =
+    logEntry.severity === 'critical' || logEntry.severity === 'error'
+      ? 'error'
+      : logEntry.severity === 'warning'
+        ? 'warn'
+        : 'info';
+
   auditLogger.log(level, 'Audit Event', logEntry);
-  
+
   // For critical events, also log to MongoDB for real-time alerting
   if (logEntry.severity === 'critical') {
     await logCriticalEvent(logEntry);
@@ -134,7 +145,7 @@ async function logCriticalEvent(entry: AuditLogEntry): Promise<void> {
 export async function logUserAction(
   action: AuditAction,
   userId: string,
-  details?: Record<string, any>
+  details?: Record<string, unknown>
 ): Promise<void> {
   await auditLog({
     action,
@@ -146,7 +157,7 @@ export async function logUserAction(
 
 export async function logSecurityEvent(
   action: AuditAction,
-  details: Record<string, any>,
+  details: Record<string, unknown>,
   severity: AuditSeverity = 'warning'
 ): Promise<void> {
   await auditLog({
@@ -202,16 +213,16 @@ export interface AuditQuery {
   severity?: AuditSeverity;
 }
 
-export async function queryAuditLogs(query: AuditQuery): Promise<any[]> {
+export async function queryAuditLogs(_query: AuditQuery): Promise<unknown[]> {
   // TODO: Implement audit log querying
   // This is required for compliance reporting and investigations
   return [];
 }
 
 export async function generateComplianceReport(
-  startDate: Date,
-  endDate: Date
-): Promise<any> {
+  _startDate: Date,
+  _endDate: Date
+): Promise<unknown> {
   // TODO: Implement compliance reporting
   // Required for SOC 2 / FedRAMP audits
   return {};

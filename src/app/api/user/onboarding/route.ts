@@ -9,6 +9,7 @@ import { getMongoDb } from '@/lib/db/mongodb';
 import { onboardingSchema } from '@/lib/schemas/user-profile';
 import { ObjectId } from 'mongodb';
 import { RBACPresets } from '@/lib/middleware/rbac';
+import { logger } from '@/lib/logging/logger';
 
 export async function POST(req: NextRequest) {
   // RBAC: users:write permission (users can update their own onboarding data)
@@ -44,8 +45,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Onboarding error:', error);
+    logger.apiError('/api/user/onboarding', error, {
+      method: 'POST',
+      userId: session?.user?.id,
+    });
     return NextResponse.json(
       {
         error: 'Failed to save onboarding data',
