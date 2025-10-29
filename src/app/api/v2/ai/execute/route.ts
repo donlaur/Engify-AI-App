@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { RBACPresets } from '@/lib/middleware/rbac';
+import { logger } from '@/lib/logging/logger';
 import { z } from 'zod';
 import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 
@@ -23,7 +26,16 @@ const executeSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
+
+  // Check RBAC permission
+  const rbacCheck = await RBACPresets.requireAIExecution()(req);
+  if (rbacCheck) {
+    return rbacCheck; // Return 403 if no permission
+  }
+
   try {
+    const session = await auth();
     // Parse and validate request body
     const body = await req.json();
     const request = executeSchema.parse(body);
@@ -57,6 +69,15 @@ export async function POST(req: NextRequest) {
     // Execute AI request
     const response = await provider.execute(request);
 
+    const duration = Date.now() - startTime;
+    logger.apiRequest('/api/v2/ai/execute', {
+      userId: session?.user?.id,
+      method: 'POST',
+      statusCode: 200,
+      duration,
+      provider: response.provider,
+    });
+
     // Return successful response
     return NextResponse.json({
       success: true,
@@ -68,7 +89,12 @@ export async function POST(req: NextRequest) {
       model: response.model,
     });
   } catch (error) {
-    console.error('AI execution error:', error);
+    const duration = Date.now() - startTime;
+    logger.apiError('/api/v2/ai/execute', error, {
+      userId: session?.user?.id,
+      method: 'POST',
+      duration,
+    });
 
     // Handle validation errors
     if (error instanceof z.ZodError) {

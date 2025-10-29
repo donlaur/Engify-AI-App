@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { z } from 'zod';
+import { RBACPresets } from '@/lib/middleware/rbac';
 
 const favoriteSchema = z.object({
   promptId: z.string(),
@@ -15,6 +16,10 @@ const favoriteSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // RBAC: prompts:write permission (users can add their own favorites)
+  const rbacCheck = await RBACPresets.requirePromptWrite()(req);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
     if (!session?.user) {
@@ -25,8 +30,10 @@ export async function POST(req: NextRequest) {
     const data = favoriteSchema.parse(body);
 
     const db = await getMongoDb();
-    
+
     // Check if already favorited
+    // Query is user-scoped (filtered by userId) - no organizationId needed
+    // favorites collection stores user-specific data, isolated by userId
     const existing = await db.collection('favorites').findOne({
       userId: session.user.id,
       promptId: data.promptId,
@@ -44,15 +51,23 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Favorites API error:', error);
     return NextResponse.json(
-      { error: 'Failed to add favorite' },
+      {
+        error: 'Failed to add favorite',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // RBAC: users:read permission (users can read their own favorites)
+  const rbacCheck = await RBACPresets.requireUserRead()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
     if (!session?.user) {
@@ -60,7 +75,9 @@ export async function GET() {
     }
 
     const db = await getMongoDb();
-    
+
+    // Query is user-scoped (filtered by userId) - no organizationId needed
+    // favorites collection stores user-specific data, isolated by userId
     const favorites = await db
       .collection('favorites')
       .find({ userId: session.user.id })
@@ -69,15 +86,23 @@ export async function GET() {
 
     return NextResponse.json({ favorites });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Favorites API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch favorites' },
+      {
+        error: 'Failed to fetch favorites',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
 }
 
 export async function DELETE(req: NextRequest) {
+  // RBAC: prompts:write permission (users can remove their own favorites)
+  const rbacCheck = await RBACPresets.requirePromptWrite()(req);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
     if (!session?.user) {
@@ -92,7 +117,9 @@ export async function DELETE(req: NextRequest) {
     }
 
     const db = await getMongoDb();
-    
+
+    // Query is user-scoped (filtered by userId) - no organizationId needed
+    // favorites collection stores user-specific data, isolated by userId
     await db.collection('favorites').deleteOne({
       userId: session.user.id,
       promptId,
@@ -100,9 +127,13 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Favorites API error:', error);
     return NextResponse.json(
-      { error: 'Failed to remove favorite' },
+      {
+        error: 'Failed to remove favorite',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

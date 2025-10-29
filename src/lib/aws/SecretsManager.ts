@@ -75,6 +75,7 @@ export class SecretsManagerService {
   /**
    * Get secret from AWS Secrets Manager
    * Note: Requires AWS SDK v3 to be installed: npm install @aws-sdk/client-secrets-manager
+   * Supports IAM roles (when running on EC2/Lambda) or explicit credentials
    */
   private async getSecretFromAWS(secretName: string): Promise<string> {
     // Dynamic import to avoid requiring AWS SDK in development
@@ -83,14 +84,19 @@ export class SecretsManagerService {
         '@aws-sdk/client-secrets-manager'
       );
 
+      // Build credentials - supports IAM roles, environment variables, or explicit config
+      const credentials = process.env.AWS_ACCESS_KEY_ID
+        ? {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+          }
+        : undefined; // Let SDK use IAM role (for EC2/Lambda/ECS)
+
       const client = new SecretsManagerClient({
         region: this.region,
-        credentials: process.env.AWS_ACCESS_KEY_ID
-          ? {
-              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-            }
-          : undefined,
+        credentials,
+        // Retry configuration
+        maxAttempts: 3,
       });
 
       const command = new GetSecretValueCommand({
@@ -104,7 +110,9 @@ export class SecretsManagerService {
       }
 
       if (response.SecretBinary) {
-        return Buffer.from(response.SecretBinary).toString('utf-8');
+        return Buffer.from(response.SecretBinary as Uint8Array).toString(
+          'utf-8'
+        );
       }
 
       throw new Error(`Secret ${secretName} has no string or binary value`);
@@ -118,6 +126,67 @@ export class SecretsManagerService {
         );
       }
       throw error;
+    }
+  }
+
+  /**
+   * Get and parse JSON secret from AWS Secrets Manager
+   * Useful for secrets that store multiple values (e.g., database credentials)
+   */
+  async getSecretJSON<T = unknown>(
+    secretName: string,
+    fallbackEnvVar?: string
+  ): Promise<T> {
+    const secretString = await this.getSecret(secretName, fallbackEnvVar);
+    try {
+      return JSON.parse(secretString) as T;
+    } catch (error) {
+      throw new Error(
+        `Secret ${secretName} is not valid JSON: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  /**
+   * Check if AWS Secrets Manager is available and accessible
+   * Useful for health checks and startup validation
+   */
+  async healthCheck(): Promise<{ healthy: boolean; error?: string }> {
+    // Test with a dummy secret name to check connectivity
+    // This won't fail if the secret doesn't exist, just if we can't reach AWS
+    try {
+      const { SecretsManagerClient } = await import(
+        '@aws-sdk/client-secrets-manager'
+      );
+
+      const client = new SecretsManagerClient({
+        region: this.region,
+        maxAttempts: 1, // Fast failure for health checks
+      });
+
+      // Use ListSecrets as a lightweight health check (no permissions needed)
+      // But if we have permissions, we can check a known secret
+      if (process.env.AWS_ACCESS_KEY_ID || process.env.AWS_EXECUTION_ENV) {
+        // We're either configured or running on AWS - try to list secrets (will fail gracefully if no permissions)
+        const { ListSecretsCommand } = await import(
+          '@aws-sdk/client-secrets-manager'
+        );
+        await client.send(new ListSecretsCommand({ MaxResults: 1 }));
+      }
+
+      return { healthy: true };
+    } catch (error) {
+      // In development, this is expected if AWS is not configured
+      if (process.env.NODE_ENV !== 'production') {
+        return {
+          healthy: false,
+          error: `AWS Secrets Manager not accessible (expected in development): ${error instanceof Error ? error.message : String(error)}`,
+        };
+      }
+      return {
+        healthy: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 

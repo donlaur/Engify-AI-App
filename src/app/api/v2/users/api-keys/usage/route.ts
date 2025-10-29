@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 import { apiKeyUsageService } from '@/lib/services/ApiKeyUsageService';
 import { z } from 'zod';
 
@@ -84,7 +85,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ summary });
   } catch (error) {
-    console.error('Error fetching usage data:', error);
+    const session = await auth();
+    logger.apiError('/api/v2/users/api-keys/usage', error, {
+      userId: session?.user?.id,
+      method: 'GET',
+    });
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid query parameters', details: error.errors },
