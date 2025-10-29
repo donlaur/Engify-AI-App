@@ -208,14 +208,18 @@ export function MultiAgentWorkbench() {
         <div className="mb-8">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm">
             <Sparkles className="h-4 w-4" />
-            Beta Feature
+            Decision-Making Gym
           </div>
           <h1 className="mb-2 text-4xl font-bold tracking-tight text-gray-900">
             Multi-Agent Team Simulation
           </h1>
           <p className="text-lg text-gray-600">
-            See how different roles evaluate your ideas • Learn to think like a
-            team
+            Practice thinking from multiple perspectives • Train your
+            collaborative decision-making skills
+          </p>
+          <p className="mt-2 text-sm text-gray-500">
+            This is a training tool to help you understand how different roles
+            think. Use it to practice, not to replace real team discussions.
           </p>
         </div>
 
@@ -372,8 +376,50 @@ export function MultiAgentWorkbench() {
                     </div>
                   </div>
 
+                  {/* Reflection Questions */}
+                  <div className="mt-6 space-y-4 border-t pt-6">
+                    <h3 className="font-semibold text-gray-900">
+                      💡 Reflection & Learning
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Take a moment to consolidate your learning:
+                    </p>
+
+                    <div className="space-y-3">
+                      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                        <p className="mb-2 text-sm font-medium text-blue-900">
+                          1. What was the core disagreement in this discussion?
+                        </p>
+                        <p className="text-xs text-blue-700">
+                          Identify the main tension or trade-off that different
+                          roles prioritized differently.
+                        </p>
+                      </div>
+
+                      <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
+                        <p className="mb-2 text-sm font-medium text-purple-900">
+                          2. Which perspective surprised you most?
+                        </p>
+                        <p className="text-xs text-purple-700">
+                          Which role&apos;s concerns or priorities did you
+                          initially underestimate?
+                        </p>
+                      </div>
+
+                      <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                        <p className="mb-2 text-sm font-medium text-green-900">
+                          3. How would you apply this to your real team?
+                        </p>
+                        <p className="text-xs text-green-700">
+                          What specific question or concern from this simulation
+                          should you raise in your next project discussion?
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Feedback */}
-                  <div className="mt-4 flex items-center gap-3 border-t pt-4">
+                  <div className="mt-6 flex items-center gap-3 border-t pt-4">
                     <span className="text-sm font-medium text-gray-700">
                       Was this helpful?
                     </span>
