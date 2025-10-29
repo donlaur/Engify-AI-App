@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { _protectRoute, RBACPresets } from '@/lib/middleware/rbac';
 import { z } from 'zod';
 import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 
@@ -23,6 +24,12 @@ const executeSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // Check RBAC permission
+  const rbacCheck = await RBACPresets.requireAIExecution()(req);
+  if (rbacCheck) {
+    return rbacCheck; // Return 403 if no permission
+  }
+
   try {
     // Parse and validate request body
     const body = await req.json();
