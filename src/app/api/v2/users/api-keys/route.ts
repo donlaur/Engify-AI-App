@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logging/logger';
 import { apiKeyService } from '@/lib/services/ApiKeyService';
-import { _protectRoute, RBACPresets } from '@/lib/middleware/rbac';
+import { RBACPresets } from '@/lib/middleware/rbac';
 import { z } from 'zod';
 
 const createKeySchema = z.object({
