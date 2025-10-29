@@ -8,6 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logging/logger';
 import { auditLog } from '@/lib/logging/audit';
 import crypto from 'crypto';
 
@@ -38,7 +39,7 @@ function verifyTwilioSignature(
   const authToken = process.env.TWILIO_AUTH_TOKEN;
 
   if (!authToken) {
-    console.warn('TWILIO_AUTH_TOKEN not set - skipping signature verification');
+    logger.warn('TWILIO_AUTH_TOKEN not set - skipping signature verification');
     return true; // Allow in dev, but log warning
   }
 
@@ -113,8 +114,9 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Twilio webhook error:', error);
+    logger.apiError('/api/webhooks/twilio', error, {
+      method: 'POST',
+    });
 
     await auditLog({
       userId: 'system',
