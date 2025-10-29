@@ -143,9 +143,25 @@ vi.mock('@/lib/db/mongodb', () => {
 
 // Also mock MongoDB low-level client module if imported directly
 vi.mock('@/lib/db/client', () => {
+  const makeCollection = () => ({
+    findOne: vi.fn(async () => null),
+    find: vi.fn(() => ({
+      sort: vi.fn(() => ({
+        limit: vi.fn(() => ({ toArray: vi.fn(async () => []) })),
+      })),
+      toArray: vi.fn(async () => []),
+    })),
+    deleteOne: vi.fn(async () => ({ deletedCount: 1 })),
+    deleteMany: vi.fn(async () => ({ deletedCount: 1 })),
+    updateOne: vi.fn(async () => ({ modifiedCount: 1 })),
+    updateMany: vi.fn(async () => ({ modifiedCount: 1 })),
+    countDocuments: vi.fn(async () => 0),
+    aggregate: vi.fn(() => ({ toArray: vi.fn(async () => []) })),
+    insertOne: vi.fn(async () => ({ insertedId: '507f1f77bcf86cd799439011' })),
+  });
+  const db = { collection: vi.fn(() => makeCollection()) };
   return {
-    getMongoClient: vi.fn(async () => ({})),
-    getMongoDb: vi.fn(async () => ({ collection: () => ({}) })),
+    getDb: vi.fn(async () => db),
   };
 });
 
