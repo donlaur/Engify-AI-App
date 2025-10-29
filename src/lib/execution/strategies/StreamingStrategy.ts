@@ -172,9 +172,11 @@ export class StreamingStrategy implements IStreamingStrategy {
   getPriority(request: AIRequest, context: ExecutionContext): number {
     let priority = this.config.priority;
 
-    // Boost priority for urgent requests
+    // Boost priority for urgent/high requests, reduce for normal/low
     if (context.priority === 'urgent') priority += 2;
-    if (context.priority === 'high') priority += 1;
+    else if (context.priority === 'high') priority += 1;
+    else if (context.priority === 'normal' || context.priority === 'low')
+      priority -= 2;
 
     // Boost for smaller requests (better for streaming)
     if ((request.maxTokens || 0) < 2000) priority += 1;
