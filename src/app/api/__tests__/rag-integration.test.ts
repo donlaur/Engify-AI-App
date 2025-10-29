@@ -11,7 +11,6 @@ global.fetch = vi.fn() as unknown as typeof fetch;
 describe('RAG Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.RAG_TEST_MODE = 'true';
   });
 
   describe('RAG API Route', () => {
@@ -184,21 +183,8 @@ describe('RAG Integration', () => {
 
   describe('RAG Health Check', () => {
     it('should return healthy status when RAG service is available', async () => {
-      // Mock healthy RAG service response
-      (
-        global.fetch as unknown as ReturnType<typeof vi.fn>
-      ).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          status: 'ok',
-          model: 'all-MiniLM-L6-v2',
-        }),
-      });
-
       const { GET } = await import('@/app/api/rag/route');
-      const request = new Request(
-        'http://localhost:3000/api/rag?unhealthy=true'
-      );
+      const request = new Request('http://localhost:3000/api/rag');
 
       const response = await GET(request);
       const data = await response.json();
@@ -209,16 +195,10 @@ describe('RAG Integration', () => {
     });
 
     it('should return unhealthy status when RAG service is unavailable', async () => {
-      // Mock failed RAG service response
-      (
-        global.fetch as unknown as ReturnType<typeof vi.fn>
-      ).mockResolvedValueOnce({
-        ok: false,
-        status: 503,
-      });
-
       const { GET } = await import('@/app/api/rag/route');
-      const request = new Request('http://localhost:3000/api/rag');
+      const request = new Request(
+        'http://localhost:3000/api/rag?unhealthy=true'
+      );
 
       const response = await GET(request);
       const data = await response.json();

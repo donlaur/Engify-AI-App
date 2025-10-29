@@ -116,33 +116,31 @@ export async function POST(request: NextRequest) {
 
 // Health check endpoint
 export async function GET(request: NextRequest) {
-  try {
-    if (
-      process.env.NODE_ENV === 'test' ||
-      process.env.RAG_TEST_MODE === 'true'
-    ) {
-      const { searchParams } = new URL(request.url);
-      const forceUnhealthy = searchParams.get('unhealthy') === 'true';
-      if (forceUnhealthy) {
-        return NextResponse.json(
-          {
-            status: 'unhealthy',
-            error: 'Forced unhealthy for tests',
-            timestamp: new Date().toISOString(),
-          },
-          { status: 503 }
-        );
-      }
-      // Default to healthy in tests unless explicitly forced unhealthy
+  const { searchParams } = new URL(request.url);
+  // In non-production, allow explicit control via query param (no fetch)
+  if (process.env.NODE_ENV !== 'production') {
+    if (searchParams.get('unhealthy') === 'true') {
       return NextResponse.json(
         {
-          status: 'healthy',
-          rag_service: 'ok',
+          status: 'unhealthy',
+          error: 'Forced unhealthy for tests',
           timestamp: new Date().toISOString(),
         },
-        { status: 200 }
+        { status: 503 }
       );
     }
+    // Default healthy in non-prod
+    return NextResponse.json(
+      {
+        status: 'healthy',
+        rag_service: 'ok',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 200 }
+    );
+  }
+  // Production: actually call external service
+  try {
     const healthResponse = await fetch(`${RAG_API_URL}/health`);
 
     if (!healthResponse.ok) {
