@@ -74,7 +74,7 @@ export function Header({ user }: HeaderProps) {
             href="/learn"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
-            Pathways
+            Learn
           </Link>
           <Link
             href="/pattern-playground"
