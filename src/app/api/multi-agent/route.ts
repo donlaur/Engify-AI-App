@@ -20,22 +20,76 @@ interface MultiAgentRequest {
 }
 
 const ROLE_CONTEXTS = {
-  engineer:
-    'Focus on technical feasibility, implementation details, effort estimation, and code quality',
-  architect:
-    'Focus on system design, scalability, technical debt, long-term implications, and architectural patterns',
-  director:
-    'Focus on budget, ROI, resource allocation, business impact, and strategic alignment',
-  pm: 'Focus on customer needs, market fit, prioritization, user data, and product strategy',
-  tech_lead:
-    'Focus on realistic timelines, team capacity, risk assessment, and execution planning',
-  designer:
-    'Focus on UX implications, user impact, design complexity, and accessibility',
-  qa: 'Focus on testing requirements, quality concerns, edge cases, and reliability',
-  security:
-    'Focus on security vulnerabilities, compliance, data protection, and threat modeling',
-  devops:
-    'Focus on deployment, infrastructure, monitoring, and operational concerns',
+  engineer: {
+    focus:
+      'Technical feasibility, implementation details, effort estimation, and code quality',
+    personality:
+      'Pragmatic and detail-oriented. High conscientiousness. Asks clarifying questions about technical constraints.',
+    expertise:
+      'Act as a Senior Software Engineer with 8+ years of experience in production systems.',
+  },
+  architect: {
+    focus:
+      'System design, scalability, technical debt, long-term implications, and architectural patterns',
+    personality:
+      'Strategic and cautious. High openness to new patterns but skeptical of shortcuts. Challenges assumptions.',
+    expertise:
+      'Act as a Principal Architect who has seen multiple systems scale from startup to enterprise.',
+  },
+  director: {
+    focus:
+      'Budget, ROI, resource allocation, business impact, and strategic alignment',
+    personality:
+      'Results-driven and decisive. Moderate agreeableness. Asks about business value and trade-offs.',
+    expertise:
+      'Act as a Director of Engineering who balances technical excellence with business realities.',
+  },
+  pm: {
+    focus:
+      'Customer needs, market fit, prioritization, user data, and product strategy',
+    personality:
+      'User-focused and collaborative. High extraversion. Pushes for clarity on user impact.',
+    expertise:
+      'Act as a Senior Product Manager with deep understanding of user research and market dynamics.',
+  },
+  tech_lead: {
+    focus:
+      'Realistic timelines, team capacity, risk assessment, and execution planning',
+    personality:
+      'Balanced and practical. High conscientiousness. Questions overly optimistic estimates.',
+    expertise:
+      'Act as a Tech Lead who has successfully delivered complex projects and knows where things go wrong.',
+  },
+  designer: {
+    focus: 'UX implications, user impact, design complexity, and accessibility',
+    personality:
+      'Empathetic and creative. High openness. Advocates for user experience over technical convenience.',
+    expertise:
+      'Act as a Senior UX Designer who champions accessibility and inclusive design.',
+  },
+  qa: {
+    focus:
+      'Testing requirements, quality concerns, edge cases, and reliability',
+    personality:
+      'Meticulous and skeptical. Very high conscientiousness. Identifies risks others miss.',
+    expertise:
+      'Act as a Principal QA Engineer known for catching critical bugs before production.',
+  },
+  security: {
+    focus:
+      'Security vulnerabilities, compliance, data protection, and threat modeling',
+    personality:
+      'Vigilant and risk-averse. Low agreeableness when security is at stake. Challenges unsafe assumptions.',
+    expertise:
+      'Act as a Security Engineer with expertise in threat modeling and compliance (SOC2, GDPR).',
+  },
+  devops: {
+    focus: 'Deployment, infrastructure, monitoring, and operational concerns',
+    personality:
+      'Reliability-focused and systematic. Asks about observability and failure modes.',
+    expertise:
+      'Act as a DevOps Engineer who has managed large-scale production systems and incident response.',
+  },
 };
 
 function buildMultiAgentPrompt(
@@ -44,11 +98,15 @@ function buildMultiAgentPrompt(
   mode: string
 ): string {
   const roleDescriptions = roles
-    .map(
-      (role) =>
-        `- ${role.toUpperCase()}: ${ROLE_CONTEXTS[role as keyof typeof ROLE_CONTEXTS] || 'General perspective'}`
-    )
-    .join('\n');
+    .map((role) => {
+      const context = ROLE_CONTEXTS[role as keyof typeof ROLE_CONTEXTS];
+      if (!context) return `- ${role.toUpperCase()}: General perspective`;
+
+      return `- ${role.toUpperCase()}: ${context.expertise}
+  Focus: ${context.focus}
+  Personality: ${context.personality}`;
+    })
+    .join('\n\n');
 
   if (mode === 'sequential') {
     return `You are simulating a team review process. Play ALL of these roles sequentially:
@@ -78,27 +136,40 @@ End with final status: ✅ APPROVED or ⚠️ NEEDS WORK
 
 Make it feel like a real workflow with realistic feedback.`;
   } else {
-    // Debate mode
-    return `You are simulating a team meeting where these roles DEBATE this idea:
+    // Debate mode - using 4-step Debate Prompting methodology
+    return `You are simulating a team meeting using structured debate methodology. Play ALL of these roles:
 
 ${roleDescriptions}
 
-IDEA TO DISCUSS:
+IDEA TO DEBATE:
 "${idea}"
 
-Simulate a realistic team discussion where:
-1. Each role speaks 2-3 times
-2. Roles respond to each other's points
-3. Roles can disagree and push back
-4. Conversation feels natural (not robotic)
-5. End with consensus or vote
+Use this 4-STEP DEBATE STRUCTURE:
+
+STEP 1 - INTRODUCE POLARIZED PERSPECTIVES:
+- Identify the core tension or trade-off in this idea
+- Have 2-3 roles present opposing viewpoints clearly
+
+STEP 2 - EXPLORE EACH SIDE:
+- Each side presents their strongest arguments
+- Use specific examples, data points, or past experiences
+- Ask probing questions: "Have you considered...?" "What about...?"
+
+STEP 3 - CRITICAL COMPARISON:
+- Roles directly address and critique each other's points
+- Acknowledge valid concerns while defending their position
+- Use phrases like "I understand your concern about X, but..."
+- Challenge assumptions: "That assumes we have unlimited time, but..."
+
+STEP 4 - SYNTHESIZE AND CONCLUDE:
+- Find common ground or acknowledge irreconcilable differences
+- Propose a balanced path forward or a clear decision
+- Outline next steps and who owns what
 
 Format as a meeting transcript:
 [ROLE NAME]: "What they say..."
 
-Show realistic back-and-forth debate.
-Include disagreements and resolution.
-End with final decision and next steps.`;
+Make it feel like a real, high-stakes team debate where smart people disagree respectfully.`;
   }
 }
 
