@@ -109,7 +109,7 @@ const databasePatterns = [
   {
     name: 'Missing organizationId in findOne()',
     pattern: /\.findOne\(\{[^}]*\}\)/g,
-    check: (match, content) => {
+    check: (match, content, filePath, lineNumber) => {
       // Skip system-wide scheduled jobs
       if (content.includes('System-wide scheduled job') || content.includes('SECURITY: This query is intentionally system-wide')) {
         return false;
@@ -120,6 +120,10 @@ const databasePatterns = [
       }
       // Skip user-scoped queries (filtered by userId, not organizationId)
       if (match.includes('userId') && (content.includes('user-scoped') || content.includes('user-specific'))) {
+        return false;
+      }
+      // Skip email-scoped queries (access_requests, signup validations - NOT multi-tenant)
+      if (match.includes('email') && (content.includes('user-scoped') || content.includes('NOT a multi-tenant') || content.includes('NOT a multi-tenant collection'))) {
         return false;
       }
       // Skip public analytics collections (aggregated public data)

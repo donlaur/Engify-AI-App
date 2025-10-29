@@ -1,21 +1,33 @@
 /**
  * Signup Page
- * User registration with email/password
+ * User registration with email/password OR Request Access form
+ * Gates signup behind environment variable for beta control
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Icons } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RequestAccessForm } from '@/components/forms/RequestAccessForm';
 
-export default function SignupPage() {
+// Check if public signup is enabled
+const ALLOW_PUBLIC_SIGNUP = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
+
+function SignupContent() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
@@ -29,7 +41,7 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
@@ -88,9 +100,12 @@ export default function SignupPage() {
       setTimeout(() => {
         router.push('/login?registered=true');
       }, 2000);
-
-    } catch (err: any) {
-      setError(err.message || 'An error occurred. Please try again.');
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'An error occurred. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -98,32 +113,70 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="flex items-center justify-center mb-4">
-              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+            <div className="mb-4 flex items-center justify-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
                 <Icons.check className="h-6 w-6 text-green-600" />
               </div>
             </div>
             <CardTitle>Account created!</CardTitle>
-            <CardDescription>
-              Redirecting you to login...
-            </CardDescription>
+            <CardDescription>Redirecting you to login...</CardDescription>
           </CardHeader>
         </Card>
       </div>
     );
   }
 
+  // Show Request Access form if signup is disabled
+  if (!ALLOW_PUBLIC_SIGNUP) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <div className="mb-4 flex items-center justify-center">
+              <Icons.sparkles className="h-8 w-8 text-blue-600" />
+            </div>
+            <CardTitle className="text-center text-2xl">
+              Request Beta Access
+            </CardTitle>
+            <CardDescription className="text-center">
+              Engify.ai is currently in private beta. Request access to get
+              started.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Suspense fallback={<div>Loading...</div>}>
+              <RequestAccessForm />
+            </Suspense>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <div className="text-center text-sm text-gray-600">
+              Already have an account?{' '}
+              <Link
+                href="/login"
+                className="font-medium text-blue-600 hover:underline"
+              >
+                Sign in
+              </Link>
+            </div>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
+          <div className="mb-4 flex items-center justify-center">
             <Icons.sparkles className="h-8 w-8 text-blue-600" />
           </div>
-          <CardTitle className="text-2xl text-center">Create an account</CardTitle>
+          <CardTitle className="text-center text-2xl">
+            Create an account
+          </CardTitle>
           <CardDescription className="text-center">
             Start your AI learning journey with Engify.ai
           </CardDescription>
@@ -193,12 +246,14 @@ export default function SignupPage() {
               <Checkbox
                 id="terms"
                 checked={agreedToTerms}
-                onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+                onCheckedChange={(checked) =>
+                  setAgreedToTerms(checked as boolean)
+                }
                 disabled={isLoading}
               />
               <label
                 htmlFor="terms"
-                className="text-sm text-gray-600 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 I agree to the{' '}
                 <Link href="/terms" className="text-blue-600 hover:underline">
@@ -212,17 +267,13 @@ export default function SignupPage() {
             </div>
 
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md flex items-center gap-2">
+              <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-600">
                 <Icons.alertTriangle className="h-4 w-4" />
                 {error}
               </div>
             )}
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -235,14 +286,31 @@ export default function SignupPage() {
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <div className="text-sm text-center text-gray-600">
+          <div className="text-center text-sm text-gray-600">
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 hover:underline font-medium">
+            <Link
+              href="/login"
+              className="font-medium text-blue-600 hover:underline"
+            >
               Sign in
             </Link>
           </div>
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <Icons.spinner className="h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
+      <SignupContent />
+    </Suspense>
   );
 }
