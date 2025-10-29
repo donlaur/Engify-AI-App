@@ -318,8 +318,11 @@ vi.mock('@/lib/db/client', () => {
     })),
     insertOne: vi.fn(async (doc: Doc) => {
       const list = getList(name).slice();
-      const insertedId =
-        doc._id || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const genHex = () =>
+        Array.from({ length: 24 }, () =>
+          Math.floor(Math.random() * 16).toString(16)
+        ).join('');
+      const insertedId = doc._id || genHex();
       list.push({ ...doc, _id: insertedId });
       setList(name, list);
       return { insertedId };

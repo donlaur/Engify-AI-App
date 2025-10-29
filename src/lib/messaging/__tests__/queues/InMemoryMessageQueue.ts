@@ -12,7 +12,9 @@ export class InMemoryMessageQueue<T = unknown> {
     this.queue.push(message);
     if (!this.paused) {
       for (const h of this.handlers) {
-        await h(message);
+        if (typeof h === 'function') {
+          await h(message);
+        }
       }
     }
   }
@@ -35,13 +37,33 @@ export class InMemoryMessageQueue<T = unknown> {
   }
 
   async subscribe(
-    handler: (m: Message<T>) => Promise<void> | void
+    handler:
+      | ((m: Message<T>) => Promise<void> | void)
+      | {
+          handle?: (m: Message<T>) => Promise<void> | void;
+          onMessage?: (m: Message<T>) => Promise<void> | void;
+        }
   ): Promise<void> {
-    this.handlers.push(handler);
+    if (typeof handler === 'function') {
+      this.handlers.push(handler);
+    } else if (handler && typeof handler === 'object') {
+      const fn = handler.handle || handler.onMessage;
+      if (fn) this.handlers.push(fn.bind(handler));
+    }
   }
 
-  async getQueueStats(): Promise<{ totalMessages: number }> {
-    return { totalMessages: this.queue.length };
+  async getQueueStats(): Promise<{
+    totalMessages: number;
+    pendingMessages: number;
+    completedMessages: number;
+    failedMessages: number;
+  }> {
+    return {
+      totalMessages: this.queue.length,
+      pendingMessages: this.queue.length,
+      completedMessages: 0,
+      failedMessages: 0,
+    };
   }
 
   async purge(): Promise<void> {
@@ -56,8 +78,8 @@ export class InMemoryMessageQueue<T = unknown> {
     this.paused = false;
   }
 
-  async getMessage(id: string): Promise<Message<T> | undefined> {
-    return this.queue.find((m) => m.id === id);
+  async getMessage(id: string): Promise<Message<T> | null> {
+    return this.queue.find((m) => m.id === id) || null;
   }
 
   async deleteMessage(id: string): Promise<boolean> {
@@ -69,7 +91,13 @@ export class InMemoryMessageQueue<T = unknown> {
 
   async retryMessage(id: string): Promise<void> {
     const msg = await this.getMessage(id);
-    if (msg) await this.publish(msg);
+    if (msg) {
+      (msg as unknown as { retryCount?: number; status?: string }).retryCount =
+        ((msg as unknown as { retryCount?: number }).retryCount || 0) + 1;
+      (msg as unknown as { retryCount?: number; status?: string }).status =
+        'pending';
+      await this.publish(msg);
+    }
   }
 
   async destroy(): Promise<void> {
