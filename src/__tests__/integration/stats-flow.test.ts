@@ -19,16 +19,23 @@ describe('Stats Flow Integration', () => {
   it('should complete full stats flow: MongoDB → API → Client → Cache', async () => {
     // Step 1: MongoDB returns data
     const { getMongoDb } = await import('@/lib/db/mongodb');
-    
+
     const mockDb = {
       collection: vi.fn().mockReturnValue({
         countDocuments: vi.fn().mockResolvedValue(150),
         find: vi.fn().mockReturnValue({
           sort: vi.fn().mockReturnValue({
             limit: vi.fn().mockReturnValue({
-              toArray: vi.fn().mockResolvedValue([
-                { _id: '1', title: 'Popular Prompt', views: 500, rating: 4.8 },
-              ]),
+              toArray: vi
+                .fn()
+                .mockResolvedValue([
+                  {
+                    _id: '1',
+                    title: 'Popular Prompt',
+                    views: 500,
+                    rating: 4.8,
+                  },
+                ]),
             }),
           }),
         }),
@@ -76,7 +83,7 @@ describe('Stats Flow Integration', () => {
     });
 
     const { getStats } = await import('@/lib/stats-cache');
-    
+
     // Mock fetch for cache test
     global.fetch = vi.fn().mockResolvedValueOnce({
       ok: true,
@@ -92,14 +99,14 @@ describe('Stats Flow Integration', () => {
   });
 
   it('should handle MongoDB timeout and use fallback', async () => {
-    // Step 1: MongoDB times out
+    // Step 1: MongoDB times out (never resolves)
     const { getMongoDb } = await import('@/lib/db/mongodb');
-    
-    (getMongoDb as any).mockImplementation(() => 
-      new Promise((resolve) => setTimeout(resolve, 10000))
+
+    (getMongoDb as any).mockImplementation(
+      () => new Promise(() => {}) // Never resolves - hang indefinitely
     );
 
-    // Step 2: API returns fallback
+    // Step 2: API returns fallback after route's 5s timeout
     const { GET } = await import('@/app/api/stats/route');
     const apiResponse = await GET();
     const apiData = await apiResponse.json();
@@ -117,7 +124,7 @@ describe('Stats Flow Integration', () => {
     const clientData = await clientResponse.json();
 
     expect(clientData.source).toBe('static');
-  });
+  }, 10000); // Increase test timeout to allow route's 5s timeout
 
   it('should use cached data on subsequent requests', async () => {
     const cachedData = {
@@ -154,7 +161,7 @@ describe('Stats Flow Integration', () => {
         stats: { prompts: 100, patterns: 23, pathways: 12, users: 30 },
         categories: [],
       },
-      timestamp: Date.now() - (2 * 60 * 60 * 1000), // 2 hours ago
+      timestamp: Date.now() - 2 * 60 * 60 * 1000, // 2 hours ago
     };
 
     const localStorageMock = {
