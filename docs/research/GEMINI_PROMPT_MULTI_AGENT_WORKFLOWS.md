@@ -91,20 +91,258 @@ Focus on innovation that's:
 - Defensible (hard to copy)
 - Scalable (low marginal cost)
 
-CONTEXT ABOUT OUR PLATFORM:
-- Engify.ai teaches prompt engineering through interactive patterns
-- 76 expert prompts, 23 patterns, 4 AI providers
-- Progressive learning system (5 levels, gamification)
-- Role-based content (C-Level, Manager, Engineer, PM, Designer, QA)
-- AI Workbench for testing prompts across providers
-- Target: Engineering teams, product managers, technical leaders
+DETAILED CONTEXT ABOUT ENGIFY.AI:
+
+## Our Platform (Current State)
+
+**What We Are**:
+- AI prompt engineering education platform for enterprise teams
+- Live at engify.ai (production, deployed on Vercel)
+- Built with Next.js 15.5.4, TypeScript, MongoDB, NextAuth
+- 76 expert prompts (role-specific, production-ready)
+- 16 learning articles (in-depth educational content)
+- 23 documented prompt patterns (beginner to advanced)
+- 4 AI providers (OpenAI, Anthropic, Google, Groq)
+- Interactive AI Workbench (test prompts, compare providers)
+
+**Tech Stack**:
+- Frontend: Next.js 15.5.4, React 18, TypeScript (strict mode)
+- Backend: Next.js API routes, serverless
+- Database: MongoDB Atlas
+- Auth: NextAuth.js v5
+- AI: Direct API integration (OpenAI, Anthropic, Google, Groq)
+- Deployment: Vercel (edge functions, global CDN)
+- Monitoring: Sentry
+
+**Learning System**:
+- Progressive unlocking (5 levels: Beginner → Expert)
+- Gamification (XP, achievements, challenges)
+- Role-based content (C-Level, Engineering Manager, Engineer, PM, Designer, QA)
+- Pattern library (copy-paste templates)
+- "Behind the scenes" explanations (teach why, not just what)
+
+## Problems We Solve
+
+**Primary Problem**:
+Engineers and product teams waste time writing ineffective prompts, getting poor AI results, and don't understand how to leverage AI effectively.
+
+**Specific Pain Points**:
+1. **Trial and error is expensive** - Teams burn API credits testing random prompts
+2. **No structured learning** - ChatGPT doesn't teach you HOW to prompt
+3. **Role-specific needs ignored** - A VP needs different prompts than a junior engineer
+4. **No quality control** - Hard to know if a prompt is "good" or just "works once"
+5. **Provider confusion** - Which AI to use when? (GPT-4 vs Claude vs Gemini)
+6. **Team inconsistency** - Everyone prompts differently, no shared best practices
+
+**Our Solution**:
+- Curated, battle-tested prompts (not generic)
+- Progressive learning (start simple, unlock advanced)
+- Role-based personalization (content for your job)
+- Multi-provider testing (compare side-by-side)
+- Educational focus (teach principles, not just templates)
+
+## Target Market
+
+**Primary Market**:
+B2B SaaS - Engineering teams at tech companies (10-500 employees)
+
+**User Personas**:
+1. **Engineering Managers** (30% of users)
+   - Need: Better code reviews, technical specs, team communication
+   - Pain: Spending 10+ hours/week on documentation
+   - Goal: 10x their team's productivity with AI
+
+2. **Product Managers** (25% of users)
+   - Need: PRDs, user stories, prioritization frameworks
+   - Pain: Repetitive writing, stakeholder alignment
+   - Goal: Ship faster with better specs
+
+3. **Senior Engineers** (20% of users)
+   - Need: Code generation, debugging, architecture docs
+   - Pain: Boilerplate code, technical debt documentation
+   - Goal: Focus on hard problems, automate the rest
+
+4. **C-Level/Directors** (15% of users)
+   - Need: Strategic summaries, decision frameworks, exec comms
+   - Pain: Information overload, need quick insights
+   - Goal: Make better decisions faster
+
+5. **Designers & QA** (10% of users)
+   - Need: Design specs, test cases, bug reports
+   - Pain: Repetitive documentation
+   - Goal: More time for creative/critical work
+
+**Market Size**:
+- 27M developers worldwide
+- 5M product managers
+- Growing AI adoption (70% of companies experimenting)
+- Prompt engineering becoming core skill (like Git in 2010)
+
+## Business Model
+
+**Current Model**: Freemium SaaS
+
+**Free Tier**:
+- Access to basic patterns (Level 1-2)
+- 76 expert prompts (view-only)
+- 16 learning articles
+- AI Workbench (limited: 10 prompts/month)
+- Community features
+
+**Paid Tier** ($15-25/month per user):
+- All patterns unlocked (Level 1-5)
+- Unlimited AI Workbench usage
+- Advanced patterns (multi-agent, strategic planning)
+- Priority support
+- Team features (shared library)
+- Analytics (track usage, ROI)
+
+**Enterprise Tier** ($99-499/month):
+- Team accounts (5-50 users)
+- SSO integration
+- Custom patterns
+- Admin dashboard
+- Usage analytics
+- White-label option
+- Priority support + training
+
+**Revenue Strategy**:
+- Land: Free tier (learn, get value)
+- Expand: Individual paid ($15/mo)
+- Scale: Team/Enterprise ($99-499/mo)
+
+**Current Traction**:
+- Live product (engify.ai)
+- Active development (Phase 5 of 6)
+- Building content library
+- No paying customers yet (pre-revenue)
+- Focus: Product-market fit, then growth
+
+## Competitive Landscape
+
+**We compete with**:
+
+1. **Generic AI assistants** (ChatGPT, Claude)
+   - They have: Broad capabilities, huge user base
+   - We have: Structured learning, role-specific content, quality control
+   - Differentiation: We teach, they just answer
+
+2. **AI coding tools** (GitHub Copilot, Cursor)
+   - They have: IDE integration, code generation
+   - We have: Educational focus, multi-domain (not just code)
+   - Differentiation: Learn prompt engineering, not just use AI
+
+3. **Prompt libraries** (PromptBase, ShareGPT)
+   - They have: Large collections, community-driven
+   - We have: Curated quality, progressive learning, role-based
+   - Differentiation: Education + quality over quantity
+
+4. **Corporate training** (Udemy, Coursera)
+   - They have: Video courses, certificates
+   - We have: Interactive, hands-on, immediate value
+   - Differentiation: Learn by doing, not watching
+
+**Our Unique Position**:
+- Only platform combining education + interactive workbench + role-based content
+- Progressive learning (not overwhelming firehose)
+- Multi-provider testing (compare AI models)
+- Enterprise-grade (production-ready, not hobby project)
+
+## Strategic Goals
+
+**6-Month Goals** (Q1-Q2 2026):
+- 1,000 active users (free tier)
+- 100 paying users ($1,500 MRR)
+- 5 enterprise pilots
+- Product-market fit validated
+- Content library: 100+ prompts, 30+ articles, 30+ patterns
+
+**12-Month Goals** (Full 2026):
+- 10,000 active users
+- 500 paying users ($7,500 MRR)
+- 20 enterprise customers ($20K+ MRR)
+- Team of 3-5 (currently solo founder)
+- Series A ready (if venture path)
+
+**Long-Term Vision**:
+- The "Duolingo for prompt engineering"
+- Standard tool for every engineering team
+- Platform for AI-powered workflows (not just prompts)
+- Community-driven content (user-generated patterns)
+- Enterprise training standard
+
+## Key Metrics We Track
+
+**User Engagement**:
+- Daily Active Users (DAU)
+- Prompts tested per session
+- Pattern completion rate
+- Time spent in workbench
+- Return usage (7-day, 30-day)
+
+**Learning Outcomes**:
+- Level progression (how fast users advance)
+- Pattern unlock rate
+- User surveys (understanding, confidence)
+- Before/after prompt quality
+
+**Business Metrics**:
+- Free → Paid conversion rate
+- Monthly Recurring Revenue (MRR)
+- Customer Acquisition Cost (CAC)
+- Lifetime Value (LTV)
+- Churn rate
+- Net Promoter Score (NPS)
+
+## Current Challenges
+
+**Product Challenges**:
+1. Content creation is slow (writing quality prompts takes time)
+2. Balancing education vs productivity (teach or just give templates?)
+3. Multi-provider complexity (each AI has quirks)
+4. Measuring learning outcomes (not just engagement)
+
+**Business Challenges**:
+1. Pre-revenue (no paying customers yet)
+2. Solo founder (limited bandwidth)
+3. Competitive market (lots of AI tools)
+4. Proving ROI (how do we measure value?)
+
+**Technical Challenges**:
+1. API costs (AI providers are expensive)
+2. Rate limiting (managing usage)
+3. Quality control (ensuring prompts work)
+4. Scalability (as user base grows)
+
+## Why Multi-Agent Workflows Matter
+
+**Strategic Importance**:
+1. **Unique differentiator** - No competitor has this
+2. **Educational value** - Teaches role perspectives + prompt engineering
+3. **Viral potential** - Users share interesting debates
+4. **Premium feature** - Justifies paid tier
+5. **Enterprise appeal** - Training + decision support
+
+**Fits Our Mission**:
+- Teach prompt engineering (multi-agent = advanced pattern)
+- Role-based learning (simulate different roles)
+- Interactive education (not passive)
+- Immediate value (use for real decisions)
+
+**Market Opportunity**:
+- Teams struggle with decision-making
+- Lack of diverse perspectives (echo chambers)
+- Expensive to hire consultants
+- AI can simulate expert input
 
 CONSTRAINTS:
-- Must work with current stack (no Python/AWS yet)
-- Must be implementable in 4-12 weeks
+- Must work with current stack (Next.js, MongoDB, OpenAI API - no Python/AWS yet)
+- Must be implementable in 4-12 weeks (solo founder, limited time)
 - Must fit freemium model (free tier + paid premium)
 - Must be educational, not just productivity tool
 - Must avoid legal issues (no company names, no reverse engineering)
+- Must be low marginal cost (scalable SaaS economics)
+- Must differentiate from competitors (defensible moat)
 
 Please conduct deep research and provide comprehensive, innovative recommendations.
 ```
