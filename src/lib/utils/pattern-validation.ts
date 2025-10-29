@@ -47,7 +47,7 @@ export function validatePatterns(patterns?: string[]): PatternValidationResult {
   }
 
   // Recommend pattern combinations
-  if (patterns.length === 1 && patterns[0] === 'persona') {
+  if (patterns.length === 1 && patterns.at(0) === 'persona') {
     result.warnings.push(
       'Consider combining Persona with other patterns for better results'
     );
@@ -98,12 +98,19 @@ export function suggestComplementaryPatterns(
 export function calculatePatternDiversity(patterns: string[]): number {
   if (!patterns || patterns.length === 0) return 0;
 
-  const categories = new Set(
+  type Category = 'FOUNDATIONAL' | 'STRUCTURAL' | 'COGNITIVE' | 'ITERATIVE';
+  const categories = new Set<Category>(
     patterns
       .map((p) => getPatternById(p))
       .filter((p) => p !== undefined)
-      .map((p) => p?.category)
-      .filter((c): c is string => c !== undefined)
+      .map((p) => p?.category as unknown)
+      .filter(
+        (c): c is Category =>
+          c === 'FOUNDATIONAL' ||
+          c === 'STRUCTURAL' ||
+          c === 'COGNITIVE' ||
+          c === 'ITERATIVE'
+      )
   );
 
   // Score based on category diversity
