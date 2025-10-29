@@ -87,15 +87,15 @@ export function ToolSelector({ selectedTool, onSelectTool }: ToolSelectorProps) 
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-muted-foreground">Features:</p>
                 <ul className="space-y-1">
-                  {tool.features.slice(0, 3).map((feature, idx) => (
+                  {(tool.features || []).slice(0, 3).map((feature, idx) => (
                     <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1">
                       <span className="text-primary mt-0.5">•</span>
                       {feature}
                     </li>
                   ))}
-                  {tool.features.length > 3 && (
+                  {(tool.features || []).length > 3 && (
                     <li className="text-xs text-muted-foreground italic">
-                      +{tool.features.length - 3} more features
+                      +{(tool.features || []).length - 3} more features
                     </li>
                   )}
                 </ul>

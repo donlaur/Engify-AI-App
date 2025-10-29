@@ -1,0 +1,16 @@
+{
+  "name": "engify-rag-lambda",
+  "version": "1.0.0",
+  "description": "RAG service for Engify.ai deployed on AWS Lambda",
+  "main": "rag-lambda.py",
+  "scripts": {
+    "deploy": "zip -r rag-lambda.zip rag-lambda.py && aws lambda update-function-code --function-name engify-rag --zip-file fileb://rag-lambda.zip",
+    "create": "aws lambda create-function --function-name engify-rag --runtime python3.9 --role arn:aws:iam::825765419928:role/lambda-execution-role --handler rag-lambda.lambda_handler --zip-file fileb://rag-lambda.zip"
+  },
+  "dependencies": {
+    "boto3": "^1.26.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.1400.0"
+  }
+}

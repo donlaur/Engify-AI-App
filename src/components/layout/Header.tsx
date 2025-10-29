@@ -41,6 +41,7 @@ const navigationLinks = [
   { href: '/patterns', label: 'Patterns' },
   { href: '/library', label: 'Library' },
   { href: '/learn', label: 'Learn' },
+  { href: '/contact', label: 'Contact' },
 ];
 
 export function Header({ user }: HeaderProps) {
@@ -92,6 +93,12 @@ export function Header({ user }: HeaderProps) {
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
             RAG Chat
+          </Link>
+          <Link
+            href="/contact"
+            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+          >
+            Contact
           </Link>
           <Link
             href="/built-in-public"

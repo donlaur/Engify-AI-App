@@ -115,6 +115,7 @@ import {
   TreePine,
   RefreshCw,
   Database,
+  Bot,
   type LucideIcon,
   Lightbulb,
   Compass,
@@ -193,6 +194,7 @@ export const Icons = {
   // Files & Data
   file: File,
   document: FileText,
+  fileText: FileText,
   folder: Folder,
   folderOpen: FolderOpen,
   inbox: Inbox,
@@ -245,6 +247,7 @@ export const Icons = {
   tree: TreePine,
   refresh: RefreshCw,
   database: Database,
+  bot: Bot,
   
   // Auto-added icons
   lightbulb: Lightbulb,
@@ -256,6 +259,7 @@ export const Icons = {
   server: Server,
   key: Key,
   tool: Wrench,
+  wrench: Wrench, // Alias for tool
   testTube: TestTube2,
   fileSearch: FileSearch,
   gitCompare: GitCompare,
