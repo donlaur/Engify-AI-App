@@ -195,7 +195,7 @@ export class ApiKeyService {
    */
   async getActiveKey(
     userId: string,
-    provider: string,
+    provider: 'openai' | 'anthropic' | 'google' | 'groq',
     modelId?: string
   ): Promise<string | null> {
     if (!userId || userId.trim() === '') {
@@ -209,7 +209,7 @@ export class ApiKeyService {
 
     const query: {
       userId: string;
-      provider: string;
+      provider: 'openai' | 'anthropic' | 'google' | 'groq';
       isActive: boolean;
       $or: Array<Record<string, unknown>>;
       allowedModels?: string;

@@ -90,7 +90,7 @@ export class MFAService {
           userId,
           action: 'MFA_CODE_SENT',
           resource: 'mfa',
-          metadata: {
+          details: {
             phoneNumber: this.maskPhoneNumber(phoneNumber),
             method: 'sms',
             provider: 'twilio_verify',
@@ -120,7 +120,7 @@ export class MFAService {
         userId,
         action: 'MFA_CODE_SENT',
         resource: 'mfa',
-        metadata: {
+        details: {
           phoneNumber: this.maskPhoneNumber(phoneNumber),
           method: 'sms',
           provider: 'manual',
@@ -210,7 +210,7 @@ export class MFAService {
               userId,
               action: 'MFA_VERIFICATION_FAILED_MAX_ATTEMPTS',
               resource: 'mfa',
-              metadata: {
+              details: {
                 phoneNumber: this.maskPhoneNumber(phoneNumber),
                 attempts: failedAttempt.attempts + 1,
               },
@@ -226,7 +226,7 @@ export class MFAService {
           userId,
           action: 'MFA_VERIFICATION_FAILED',
           resource: 'mfa',
-          metadata: {
+          details: {
             phoneNumber: this.maskPhoneNumber(phoneNumber),
             reason: 'Invalid or expired code',
           },
@@ -248,7 +248,7 @@ export class MFAService {
         userId,
         action: 'MFA_CODE_VERIFIED',
         resource: 'mfa',
-        metadata: {
+        details: {
           phoneNumber: this.maskPhoneNumber(phoneNumber),
           method: 'sms',
           provider: 'manual',
@@ -294,7 +294,7 @@ export class MFAService {
         userId,
         action: 'MFA_ENABLED',
         resource: 'mfa',
-        metadata: {
+        details: {
           phoneNumber: this.maskPhoneNumber(phoneNumber),
           method: 'sms',
         },

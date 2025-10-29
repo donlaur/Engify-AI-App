@@ -120,6 +120,7 @@ Engify.ai is a comprehensive AI engineering education platform designed for ente
 
 **Test Documentation**
 
+- [Testing Strategy & Methodology](docs/testing/TESTING_STRATEGY.md) - Complete testing approach including unit/integration/smoke/regression/E2E, coverage targets, pre-commit gates, and AI-specific testing
 - [Complete Test Suite Guide](tests/README.md) - Comprehensive testing documentation
 - [Repository Pattern Tests](src/lib/repositories/__tests__/README.md) - Detailed Repository Pattern coverage
 - [Phase 1 Test Report](docs/testing/PHASE_1_TEST_REPORT.md) - AI Provider interface results

@@ -9,6 +9,7 @@ import { getMongoDb } from '@/lib/db/mongodb';
 import { z } from 'zod';
 import { ObjectId } from 'mongodb';
 import { RBACPresets } from '@/lib/middleware/rbac';
+import { logger } from '@/lib/logging/logger';
 
 const historySchema = z.object({
   promptId: z.string(),
@@ -56,8 +57,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, id: result.insertedId });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('History API error:', error);
+    logger.apiError('/api/prompts/history', error, { method: 'POST' });
     return NextResponse.json(
       {
         error: 'Failed to save history',
@@ -95,8 +95,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ history });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('History API error:', error);
+    logger.apiError('/api/prompts/history', error, { method: 'GET' });
     return NextResponse.json(
       {
         error: 'Failed to fetch history',

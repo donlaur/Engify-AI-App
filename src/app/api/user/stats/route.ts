@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { RBACPresets } from '@/lib/middleware/rbac';
+import { logger } from '@/lib/logging/logger';
 
 export async function GET(request: NextRequest) {
   // RBAC: users:read permission (users can read their own stats)
@@ -70,8 +71,11 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Stats API error:', error);
+    const session = await auth();
+    logger.apiError('/api/user/stats', error, {
+      method: 'GET',
+      userId: session?.user?.id,
+    });
     return NextResponse.json(
       {
         error: 'Failed to fetch stats',

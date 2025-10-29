@@ -20,10 +20,16 @@ type TwilioClient = {
   verify: {
     services: (serviceSid: string) => {
       verifications: {
-        create: (options: unknown) => Promise<{ sid: string }>;
+        create: (options: {
+          to: string;
+          channel: 'sms' | 'call';
+        }) => Promise<{ sid: string }>;
       };
       verificationChecks: {
-        create: (options: unknown) => Promise<{ status: string }>;
+        create: (options: {
+          to: string;
+          code: string;
+        }) => Promise<{ status: string }>;
       };
     };
   };
@@ -57,7 +63,10 @@ class TwilioService {
           this.config.authToken
         );
       } catch (error) {
-        console.warn('Twilio not available:', error);
+        const { logger } = await import('@/lib/logging/logger');
+        logger.warn('Twilio not available', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
       }
     }
   }
@@ -88,7 +97,8 @@ class TwilioService {
         sid: result.sid,
       };
     } catch (error) {
-      console.error('Twilio SMS error:', error);
+      const { logger } = await import('@/lib/logging/logger');
+      logger.apiError('Twilio SMS error', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -112,7 +122,7 @@ class TwilioService {
     // Use Twilio Verify service if available (more secure)
     if (this.config.verifyServiceSid) {
       try {
-        const result = await this.client.verify.v2
+        const result = await this.client.verify
           .services(this.config.verifyServiceSid)
           .verifications.create({
             to: phoneNumber,
@@ -124,7 +134,8 @@ class TwilioService {
           sid: result.sid,
         };
       } catch (error) {
-        console.error('Twilio Verify error:', error);
+        const { logger } = await import('@/lib/logging/logger');
+        logger.apiError('Twilio Verify error', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Unknown error',
@@ -169,12 +180,9 @@ class TwilioService {
     // Use Twilio Verify service if available
     if (this.config.verifyServiceSid) {
       try {
-        const result = await this.client.verify.v2
+        const result = await this.client.verify
           .services(this.config.verifyServiceSid)
-          .verificationChecks.create({
-            to: phoneNumber,
-            code,
-          });
+          .verificationChecks.create({ to: phoneNumber, code });
 
         return {
           success: result.status === 'approved',
@@ -184,7 +192,8 @@ class TwilioService {
               : undefined,
         };
       } catch (error) {
-        console.error('Twilio Verify check error:', error);
+        const { logger } = await import('@/lib/logging/logger');
+        logger.apiError('Twilio Verify check error', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Unknown error',

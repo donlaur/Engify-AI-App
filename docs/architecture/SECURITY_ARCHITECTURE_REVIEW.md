@@ -25,6 +25,7 @@
 - ✅ Audit logging (Winston + daily rotate; audit events and API errors)
 - ✅ Input validation via Zod across core APIs
 - ✅ Logging standardization (no console in production APIs)
+- ✅ RBAC tightened on prompts write/delete routes
 
 **Remaining Gaps**:
 
