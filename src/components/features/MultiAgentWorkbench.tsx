@@ -213,11 +213,11 @@ export function MultiAgentWorkbench() {
           <h1 className="mb-2 text-4xl font-bold tracking-tight text-gray-900">
             Multi-Agent Team Simulation
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-800">
             Practice thinking from multiple perspectives • Train your
             collaborative decision-making skills
           </p>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-700">
             This is a training tool to help you understand how different roles
             think. Use it to practice, not to replace real team discussions.
           </p>
