@@ -52,7 +52,7 @@ export class UserAggregate {
    * Build state from events
    */
   private buildStateFromEvents(events: IEvent[]): UserState {
-    let state: Partial<UserState> = {
+    let state: Partial<Omit<UserState, 'version'>> & { version?: number } = {
       version: -1,
     };
 
@@ -83,42 +83,54 @@ export class UserAggregate {
    * Apply an event to the state
    */
   private applyEvent(
-    state: Partial<UserState>,
+    state: Partial<Omit<UserState, 'version'>> & { version?: number },
     event: IEvent
-  ): Partial<UserState> {
+  ): Partial<Omit<UserState, 'version'>> & { version?: number } {
     switch (event.eventType) {
       case 'UserCreated':
-        return this.applyUserCreated(state, event as UserCreatedEvent);
+        return this.applyUserCreated(
+          state,
+          event as unknown as UserCreatedEvent
+        );
       case 'UserUpdated':
-        return this.applyUserUpdated(state, event as UserUpdatedEvent);
+        return this.applyUserUpdated(
+          state,
+          event as unknown as UserUpdatedEvent
+        );
       case 'UserDeleted':
-        return this.applyUserDeleted(state, event as UserDeletedEvent);
+        return this.applyUserDeleted(
+          state,
+          event as unknown as UserDeletedEvent
+        );
       case 'UserLastLoginUpdated':
         return this.applyUserLastLoginUpdated(
           state,
-          event as UserLastLoginUpdatedEvent
+          event as unknown as UserLastLoginUpdatedEvent
         );
       case 'UserPlanChanged':
-        return this.applyUserPlanChanged(state, event as UserPlanChangedEvent);
+        return this.applyUserPlanChanged(
+          state,
+          event as unknown as UserPlanChangedEvent
+        );
       case 'UserAssignedToOrganization':
         return this.applyUserAssignedToOrganization(
           state,
-          event as UserAssignedToOrganizationEvent
+          event as unknown as UserAssignedToOrganizationEvent
         );
       case 'UserRemovedFromOrganization':
         return this.applyUserRemovedFromOrganization(
           state,
-          event as UserRemovedFromOrganizationEvent
+          event as unknown as UserRemovedFromOrganizationEvent
         );
       case 'UserEmailVerified':
         return this.applyUserEmailVerified(
           state,
-          event as UserEmailVerifiedEvent
+          event as unknown as UserEmailVerifiedEvent
         );
       case 'UserPasswordChanged':
         return this.applyUserPasswordChanged(
           state,
-          event as UserPasswordChangedEvent
+          event as unknown as UserPasswordChangedEvent
         );
       default:
         return state;
@@ -126,9 +138,9 @@ export class UserAggregate {
   }
 
   private applyUserCreated(
-    state: Partial<UserState>,
+    state: Partial<Omit<UserState, 'version'>> & { version?: number },
     event: UserCreatedEvent
-  ): Partial<UserState> {
+  ): Partial<Omit<UserState, 'version'>> & { version?: number } {
     return {
       ...state,
       id: event.data.userId,
@@ -138,8 +150,8 @@ export class UserAggregate {
       plan: event.data.plan,
       organizationId: event.data.organizationId,
       emailVerified: false,
-      createdAt: event.timestamp,
-      updatedAt: event.timestamp,
+      createdAt: (event as IEvent).timestamp,
+      updatedAt: (event as IEvent).timestamp,
     };
   }
 
@@ -150,7 +162,7 @@ export class UserAggregate {
     return {
       ...state,
       ...event.data.changes,
-      updatedAt: event.timestamp,
+      updatedAt: (event as IEvent).timestamp,
     };
   }
 
@@ -171,7 +183,7 @@ export class UserAggregate {
     return {
       ...state,
       lastLoginAt: event.data.lastLoginAt,
-      updatedAt: event.timestamp,
+      updatedAt: (event as IEvent).timestamp,
     };
   }
 
@@ -182,7 +194,7 @@ export class UserAggregate {
     return {
       ...state,
       plan: event.data.newPlan,
-      updatedAt: event.timestamp,
+      updatedAt: (event as IEvent).timestamp,
     };
   }
 
@@ -193,7 +205,7 @@ export class UserAggregate {
     return {
       ...state,
       organizationId: event.data.organizationId,
-      updatedAt: event.timestamp,
+      updatedAt: (event as IEvent).timestamp,
     };
   }
 
@@ -204,7 +216,7 @@ export class UserAggregate {
     return {
       ...state,
       organizationId: undefined,
-      updatedAt: event.timestamp,
+      updatedAt: (event as IEvent).timestamp,
     };
   }
 
@@ -215,7 +227,7 @@ export class UserAggregate {
     return {
       ...state,
       emailVerified: true,
-      updatedAt: event.timestamp,
+      updatedAt: (event as IEvent).timestamp,
     };
   }
 
@@ -225,7 +237,7 @@ export class UserAggregate {
   ): Partial<UserState> {
     return {
       ...state,
-      updatedAt: event.timestamp,
+      updatedAt: (event as IEvent).timestamp,
     };
   }
 
