@@ -7,7 +7,59 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { messages } = await request.json();
+    const { messages, useRAG = true } = await request.json();
+    const lastMessage = messages[messages.length - 1]?.content || '';
+
+    let context = '';
+    let sources: Array<{ title: string; content: string; score: number }> = [];
+
+    // Use RAG to get relevant context if enabled
+    if (useRAG && lastMessage) {
+      try {
+        const ragResponse = await fetch(
+          `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/rag`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: lastMessage,
+              collection: 'knowledge_base',
+              top_k: 3,
+            }),
+          }
+        );
+
+        if (ragResponse.ok) {
+          const ragData = await ragResponse.json();
+          if (ragData.success && ragData.results.length > 0) {
+            sources = ragData.results;
+            context = sources
+              .map((source) => `**${source.title}**\n${source.content}`)
+              .join('\n\n');
+          }
+        }
+      } catch (ragError) {
+        console.warn(
+          'RAG service unavailable, falling back to basic response:',
+          ragError
+        );
+      }
+    }
+
+    // Build system prompt with RAG context
+    const systemPrompt = `You are a helpful AI assistant for Engify.ai, a prompt engineering education platform.
+
+You help users:
+- Find the right prompts from our library of 100+ expert prompts
+- Learn about 15 proven prompt patterns (Persona, Few-Shot, Chain-of-Thought, etc.)
+- Understand best practices for AI-assisted coding
+- Navigate our learning pathways
+
+${context ? `\n**Relevant Knowledge Base Content:**\n${context}\n` : ''}
+
+Be concise, friendly, and always reference our content when relevant.
+${sources.length > 0 ? `\nWhen referencing information, mention it came from our knowledge base.` : ''}
+Suggest specific pages: /library, /patterns, /learn, /ai-coding, /mcp`;
 
     // Use OpenAI to generate response
     const completion = await openai.chat.completions.create({
@@ -15,21 +67,12 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: `You are a helpful AI assistant for Engify.ai, a prompt engineering education platform. 
-          
-You help users:
-- Find the right prompts from our library of 100+ expert prompts
-- Learn about 15 proven prompt patterns (Persona, Few-Shot, Chain-of-Thought, etc.)
-- Understand best practices for AI-assisted coding
-- Navigate our learning pathways
-
-Be concise, friendly, and always reference our content when relevant.
-Suggest specific pages: /library, /patterns, /learn, /ai-coding, /mcp`,
+          content: systemPrompt,
         },
         ...messages,
       ],
       temperature: 0.7,
-      max_tokens: 300,
+      max_tokens: 400,
     });
 
     const response =
@@ -38,6 +81,11 @@ Suggest specific pages: /library, /patterns, /learn, /ai-coding, /mcp`,
 
     return NextResponse.json({
       message: response,
+      sources:
+        sources.length > 0
+          ? sources.map((s) => ({ title: s.title, score: s.score }))
+          : [],
+      usedRAG: sources.length > 0,
     });
   } catch (error) {
     console.error('Chat API error:', error);
@@ -49,6 +97,8 @@ Suggest specific pages: /library, /patterns, /learn, /ai-coding, /mcp`,
 
     return NextResponse.json({
       message: response,
+      sources: [],
+      usedRAG: false,
     });
   }
 }
