@@ -19,6 +19,11 @@
 */
 
 import { createHash } from 'node:crypto';
+import {
+  getQualityConfig,
+  passesQuality,
+  countWords,
+} from '@/lib/content/quality';
 
 interface InputRecord {
   title?: string | null;
@@ -44,6 +49,7 @@ interface StoredRecord {
     hasTitle: boolean;
     hasDescription: boolean;
     minWordsMet: boolean;
+    checks: string[]; // additional gate failures if any
   };
   createdAt: Date;
   updatedAt: Date;
@@ -53,10 +59,7 @@ function sha256(s: string): string {
   return createHash('sha256').update(s).digest('hex');
 }
 
-function wordCount(text: string): number {
-  const t = text.trim();
-  return t.length === 0 ? 0 : t.split(/\s+/).length;
-}
+// use countWords from quality module
 
 async function readLines(): Promise<string[]> {
   const chunks: Buffer[] = [];
@@ -83,12 +86,15 @@ function toStored(input: InputRecord): StoredRecord | null {
   const title = input.title ?? null;
   const description = input.description ?? null;
 
-  const wc = wordCount(text);
+  const cfg = getQualityConfig();
+  const wc = countWords(text);
+  const gate = passesQuality(text, lang, source, cfg);
   const quality = {
     hasTitle: typeof title === 'string' && title.trim().length > 0,
     hasDescription:
       typeof description === 'string' && description.trim().length > 0,
-    minWordsMet: wc >= 100, // basic quality threshold
+    minWordsMet: wc >= cfg.minWords,
+    checks: gate.ok ? [] : gate.reasons,
   };
 
   return {
@@ -133,6 +139,18 @@ async function main(): Promise<void> {
     if (!obj || typeof obj !== 'object') continue;
     const stored = toStored(obj as InputRecord);
     if (!stored) continue;
+    // If gates failed, skip persist (soft drop) but count toward stats if needed
+    if (stored.quality.checks.length > 0) {
+      // eslint-disable-next-line no-console
+      console.error(
+        JSON.stringify({
+          skipped: true,
+          hash: stored.hash,
+          reasons: stored.quality.checks,
+        })
+      );
+      continue;
+    }
 
     const now = new Date();
     stored.updatedAt = now;
