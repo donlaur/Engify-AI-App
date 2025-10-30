@@ -1,8 +1,25 @@
 import { getDb } from '@/lib/db/client';
 import { Collections } from '@/lib/db/schema';
 
+// Ensure this page never runs at build time; always render on demand
+export const dynamic = 'force-dynamic';
+
 export default async function WorkbenchGalleryPage() {
-  const db = await getDb();
+  // Fail-safe: avoid hard-failing the build/SSR if Mongo is unreachable
+  let artifacts: Artifact[] = [];
+  try {
+    const db = await getDb();
+    artifacts = (await db
+      .collection(Collections.WEB_CONTENT)
+      .find({ source: { $in: ['agents_sandbox'] } })
+      .sort({ createdAt: -1 })
+      .limit(12)
+      .project({ title: 1, createdAt: 1, description: 1 })
+      .toArray()) as Artifact[];
+  } catch {
+    // Intentionally swallow errors here to keep preview builds green
+    artifacts = [];
+  }
   type Artifact = {
     _id: unknown;
     title?: string;
@@ -10,13 +27,6 @@ export default async function WorkbenchGalleryPage() {
     source?: string;
     createdAt?: Date;
   };
-  const artifacts = (await db
-    .collection(Collections.WEB_CONTENT)
-    .find({ source: { $in: ['agents_sandbox'] } })
-    .sort({ createdAt: -1 })
-    .limit(12)
-    .project({ title: 1, createdAt: 1, description: 1 })
-    .toArray()) as Artifact[];
 
   return (
     <div className="mx-auto max-w-6xl p-6">
