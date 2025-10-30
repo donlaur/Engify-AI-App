@@ -104,3 +104,57 @@ Acceptance:
 - Scaffold `/admin` with Users, Content, Audit sections (P1)
 - Add tests for allow/deny and admin-only routes
 - Iterate with feature flags for content indexing and image assets
+
+---
+
+## Day 4 Add‑On — Agent Sandbox (Planner Mode)
+
+Goal: provide a lightweight, feature‑flagged “Agent Sandbox” tab in the Workbench that simulates a small team of agents without heavy backend.
+
+What we already have:
+
+- UI/API base: `src/components/features/MultiAgentWorkbench.tsx`, `src/app/workbench/multi-agent/page.tsx`, `src/app/api/multi-agent/route.ts`
+
+Scope (small, shippable):
+
+- Add a new tab "Agent Sandbox" with 4 mock agents: Planner, Researcher, Critic, Writer
+- Orchestrate 6–8 steps with hard budgets (turns/tokens); deterministic mode (temperature ≤ 0.2)
+- Tools (mock first): `retrieveFromIngest(query)`, `writeNote(title,text)`, `critique(text,rules)`
+- Persist final artifact (summary, outline, draft, tags) to `web_content` or `agent_artifacts` (feature‑flagged)
+
+Feature flag:
+
+- `AGENTS_SANDBOX_ENABLED` (default off in prod)
+
+Acceptance:
+
+- Sandbox tab renders when flag enabled; runs end‑to‑end with mocked tools; artifact saved
+
+Planner‑Mode Prompts (drop into Cursor Planner):
+
+1. Orchestrator prompt
+
+```
+You are an orchestrator managing four agents: Planner, Researcher, Critic, Writer.
+Objective: produce a concise artifact (summary, outline, draft, tags) on the user topic.
+Constraints: ≤ 8 turns total, temperature 0.2, keep notes compact.
+Tools available: retrieveFromIngest(query), writeNote(title,text), critique(text,rules).
+Output JSON: { summary, outline: string[], draft, tags: string[] }.
+At each step, decide which agent acts next and which tool (if any) to call.
+```
+
+2. Agent roles
+
+```
+Planner: break down task, pick next tool/agent.
+Researcher: query retrieveFromIngest(query), return key facts.
+Critic: run critique(text,rules) and return actionable edits.
+Writer: run writeNote(title,text) and produce draft blocks.
+```
+
+3. Safety/quality guard
+
+```
+Never include secrets/PII. Prefer neutral, factual language. Enforce a word budget.
+Stop when the artifact is coherent; do not exceed 8 steps.
+```
