@@ -158,3 +158,13 @@ Writer: run writeNote(title,text) and produce draft blocks.
 Never include secrets/PII. Prefer neutral, factual language. Enforce a word budget.
 Stop when the artifact is coherent; do not exceed 8 steps.
 ```
+
+---
+
+## Status (Day 4)
+
+- [x] Admin Dashboard scaffold at `/admin` with server RBAC guard
+- [x] Agent Sandbox tab (feature‑flagged) + artifacts API (RBAC + flag)
+- [x] RBAC guards on key v2 surfaces via presets
+- [x] Integration tests for RBAC (allow/deny) and admin route protection
+- [ ] PR → Preview verification → rollout with flags default safe
