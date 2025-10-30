@@ -69,12 +69,12 @@ export interface DORAMetrics {
  * Provides methods to interact with Jira REST API
  */
 export class JiraClient {
-  private config: JiraConfig;
+  private _config: JiraConfig;
   private baseUrl: string;
   private authHeader: string;
 
   constructor(config: JiraConfig) {
-    this.config = config;
+    this._config = config;
     this.baseUrl = `https://${config.domain}/rest/api/3`;
 
     // Basic auth: email + API token
@@ -115,46 +115,82 @@ export class JiraClient {
    * Get Jira issue by key (e.g., "PROJ-123")
    */
   async getIssue(issueKey: string): Promise<JiraIssue> {
-    const data = await this.request<{ fields: Record<string, unknown> }>(
-      `/issue/${issueKey}`
-    );
+    const data = await this.request<{
+      id?: string;
+      key?: string;
+      fields: Record<string, unknown>;
+    }>(`/issue/${issueKey}`);
+
+    const fields = data.fields || {};
+    const status = fields.status as { name?: string } | undefined;
+    const description = fields.description as
+      | {
+          content?: Array<{ content?: Array<{ text?: string }> }>;
+        }
+      | undefined;
+    const assignee = fields.assignee as
+      | {
+          accountId?: string;
+          displayName?: string;
+          emailAddress?: string;
+        }
+      | undefined;
+    const creator = fields.creator as
+      | {
+          accountId?: string;
+          displayName?: string;
+        }
+      | undefined;
+    const timetracking = fields.timetracking as
+      | {
+          originalEstimate?: string;
+          remainingEstimate?: string;
+          timeSpent?: string;
+        }
+      | undefined;
+    const priority = fields.priority as { name?: string } | undefined;
+    const components = fields.components as
+      | Array<{ name?: string }>
+      | undefined;
+    const labels = fields.labels as string[] | undefined;
 
     return {
-      id: data.id,
-      key: data.key,
-      summary: data.fields.summary,
-      description:
-        data.fields.description?.content?.[0]?.content?.[0]?.text || '',
-      status: data.fields.status.name,
-      assignee: data.fields.assignee
-        ? {
-            accountId: data.fields.assignee.accountId,
-            displayName: data.fields.assignee.displayName,
-            emailAddress: data.fields.assignee.emailAddress,
-          }
+      id: data.id || '',
+      key: data.key || '',
+      summary: (fields.summary as string) || '',
+      description: description?.content?.[0]?.content?.[0]?.text || '',
+      status: status?.name || '',
+      assignee:
+        assignee && assignee.accountId && assignee.displayName
+          ? {
+              accountId: assignee.accountId,
+              displayName: assignee.displayName,
+              emailAddress: assignee.emailAddress,
+            }
+          : undefined,
+      creator:
+        creator && creator.accountId && creator.displayName
+          ? {
+              accountId: creator.accountId,
+              displayName: creator.displayName,
+            }
+          : undefined,
+      created: new Date((fields.created as string | undefined) || Date.now()),
+      updated: new Date((fields.updated as string | undefined) || Date.now()),
+      resolved: fields.resolutiondate
+        ? new Date(fields.resolutiondate as string)
         : undefined,
-      creator: data.fields.creator
-        ? {
-            accountId: data.fields.creator.accountId,
-            displayName: data.fields.creator.displayName,
-          }
-        : undefined,
-      created: new Date(data.fields.created),
-      updated: new Date(data.fields.updated),
-      resolved: data.fields.resolutiondate
-        ? new Date(data.fields.resolutiondate)
-        : undefined,
-      priority: data.fields.priority?.name,
-      labels: data.fields.labels || [],
+      priority: priority?.name,
+      labels: (labels || []) as string[],
       components:
-        data.fields.components?.map((c: { name?: string }) => ({
+        components?.map((c) => ({
           name: c.name || '',
         })) || [],
-      timeTracking: data.fields.timetracking
+      timeTracking: timetracking
         ? {
-            originalEstimate: data.fields.timetracking.originalEstimate,
-            remainingEstimate: data.fields.timetracking.remainingEstimate,
-            timeSpent: data.fields.timetracking.timeSpent,
+            originalEstimate: timetracking.originalEstimate,
+            remainingEstimate: timetracking.remainingEstimate,
+            timeSpent: timetracking.timeSpent,
           }
         : undefined,
     };
@@ -218,33 +254,41 @@ export class JiraClient {
       issues: data.issues.map((issue) => ({
         id: issue.id,
         key: issue.key,
-        summary: issue.fields.summary,
+        summary: issue.fields.summary || '',
         description: '',
-        status: issue.fields.status.name,
-        assignee: issue.fields.assignee
-          ? {
-              accountId: issue.fields.assignee.accountId,
-              displayName: issue.fields.assignee.displayName,
-              emailAddress: issue.fields.assignee.emailAddress,
-            }
-          : undefined,
-        creator: issue.fields.creator
-          ? {
-              accountId: issue.fields.creator.accountId,
-              displayName: issue.fields.creator.displayName,
-            }
-          : undefined,
-        created: new Date(issue.fields.created),
-        updated: new Date(issue.fields.updated),
+        status: issue.fields.status?.name || '',
+        assignee:
+          issue.fields.assignee &&
+          issue.fields.assignee.accountId &&
+          issue.fields.assignee.displayName
+            ? {
+                accountId: issue.fields.assignee.accountId,
+                displayName: issue.fields.assignee.displayName,
+                emailAddress: issue.fields.assignee.emailAddress,
+              }
+            : undefined,
+        creator:
+          issue.fields.creator &&
+          issue.fields.creator.accountId &&
+          issue.fields.creator.displayName
+            ? {
+                accountId: issue.fields.creator.accountId,
+                displayName: issue.fields.creator.displayName,
+              }
+            : undefined,
+        created: new Date(issue.fields.created || Date.now()),
+        updated: new Date(issue.fields.updated || Date.now()),
         resolved: issue.fields.resolutiondate
           ? new Date(issue.fields.resolutiondate)
           : undefined,
         priority: issue.fields.priority?.name,
         labels: issue.fields.labels || [],
         components:
-          issue.fields.components?.map((c: { name?: string }) => ({
-            name: c.name || '',
-          })) || [],
+          issue.fields.components
+            ?.map((c: { name?: string }) => ({
+              name: c.name || '',
+            }))
+            .filter((c) => c.name) || [],
         timeTracking: issue.fields.timetracking
           ? {
               originalEstimate: issue.fields.timetracking.originalEstimate,
@@ -280,15 +324,15 @@ export class JiraClient {
     );
 
     return data.values.map((sprint) => ({
-      id: sprint.id,
-      name: sprint.name,
-      state: sprint.state as 'future' | 'active' | 'closed',
+      id: sprint.id || 0,
+      name: sprint.name || '',
+      state: (sprint.state || 'future') as 'future' | 'active' | 'closed',
       startDate: sprint.startDate ? new Date(sprint.startDate) : undefined,
       endDate: sprint.endDate ? new Date(sprint.endDate) : undefined,
       completeDate: sprint.completeDate
         ? new Date(sprint.completeDate)
         : undefined,
-      goal: sprint.goal,
+      goal: sprint.goal || undefined,
     }));
   }
 

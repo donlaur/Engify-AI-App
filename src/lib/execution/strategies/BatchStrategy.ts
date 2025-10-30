@@ -20,7 +20,7 @@ export class BatchStrategy implements IBatchStrategy {
   private readonly batchTimeout = process.env.NODE_ENV === 'test' ? 100 : 5000; // Faster in tests
 
   constructor(
-    private factory: AIProviderFactory,
+    private _factory: AIProviderFactory,
     config?: Partial<StrategyConfig>
   ) {
     this.config = {
@@ -373,7 +373,7 @@ export class BatchStrategy implements IBatchStrategy {
     provider: string,
     items: BatchItem[]
   ): Promise<ExecutionResult[]> {
-    const aiProvider = this.factory.create(provider);
+    const aiProvider = AIProviderFactory.create(provider);
     if (!aiProvider) {
       throw new Error(`Provider not found: ${provider}`);
     }

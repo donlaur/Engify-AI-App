@@ -15,7 +15,7 @@ export class StreamingStrategy implements IStreamingStrategy {
   public readonly config: StrategyConfig;
 
   constructor(
-    private factory: AIProviderFactory,
+    private _factory: AIProviderFactory,
     config?: Partial<StrategyConfig>
   ) {
     this.config = {
@@ -34,10 +34,10 @@ export class StreamingStrategy implements IStreamingStrategy {
    */
   async execute(
     request: AIRequest,
-    context: ExecutionContext,
+    _context: ExecutionContext,
     provider: string
   ): Promise<ExecutionResult> {
-    const aiProvider = this.factory.create(provider);
+    const aiProvider = AIProviderFactory.create(provider);
     if (!aiProvider) {
       throw new Error(`Provider not found: ${provider}`);
     }
@@ -84,14 +84,14 @@ export class StreamingStrategy implements IStreamingStrategy {
    */
   async executeStream(
     request: AIRequest,
-    context: ExecutionContext,
+    _context: ExecutionContext,
     provider: string,
     onChunk: (chunk: string) => void,
     onComplete: (result: ExecutionResult) => void,
     onError: (error: Error) => void
   ): Promise<void> {
     try {
-      const aiProvider = this.factory.create(provider);
+      const aiProvider = AIProviderFactory.create(provider);
       if (!aiProvider) {
         throw new Error(`Provider not found: ${provider}`);
       }

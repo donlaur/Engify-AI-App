@@ -19,7 +19,7 @@ export class CacheStrategy implements ICacheStrategy {
   private readonly defaultTTL = 3600000; // 1 hour
 
   constructor(
-    private factory: AIProviderFactory,
+    private _factory: AIProviderFactory,
     config?: Partial<StrategyConfig>
   ) {
     this.config = {
@@ -58,7 +58,7 @@ export class CacheStrategy implements ICacheStrategy {
     }
 
     // Cache miss - execute request
-    const aiProvider = this.factory.create(provider);
+    const aiProvider = AIProviderFactory.create(provider);
     if (!aiProvider) {
       throw new Error(`Provider not found: ${provider}`);
     }

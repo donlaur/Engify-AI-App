@@ -4,10 +4,9 @@
  */
 
 import { connectDB } from './db/mongodb';
-import {
-  LearningResource,
-  ILearningResource,
-} from './db/models/LearningResource';
+// Note: LearningResource model is commented out (mongoose not installed)
+// import { LearningResource } from './db/models/LearningResource';
+import type { ILearningResource } from './db/models/LearningResource';
 import learningResourcesData from '@/data/learning-resources.json';
 
 /**
@@ -17,11 +16,16 @@ import learningResourcesData from '@/data/learning-resources.json';
 export async function getLearningResources(): Promise<ILearningResource[]> {
   try {
     await connectDB();
-    const resources = await LearningResource.find()
-      .sort({ featured: -1, order: 1 })
-      .lean<ILearningResource[]>();
+    // MongoDB disabled - mongoose not installed
+    // const resources = await LearningResource.find()
+    //   .sort({ featured: -1, order: 1 })
+    //   .lean<ILearningResource[]>();
+
+    // Always use JSON fallback until mongoose is installed
+    const resources: ILearningResource[] = [];
 
     if (resources && resources.length > 0) {
+      // eslint-disable-next-line no-console
       console.log(
         `✅ Loaded ${resources.length} learning resources from MongoDB`
       );
@@ -45,9 +49,12 @@ export async function getLearningResourcesByCategory(
 ): Promise<ILearningResource[]> {
   try {
     await connectDB();
-    const resources = await LearningResource.find({ category })
-      .sort({ order: 1 })
-      .lean<ILearningResource[]>();
+    // MongoDB disabled - mongoose not installed
+    // const resources = await LearningResource.find({ category })
+    //   .sort({ order: 1 })
+    //   .lean<ILearningResource[]>();
+
+    const resources: ILearningResource[] = [];
 
     if (resources && resources.length > 0) {
       return resources;
@@ -73,9 +80,12 @@ export async function getLearningResourcesByLevel(
 ): Promise<ILearningResource[]> {
   try {
     await connectDB();
-    const resources = await LearningResource.find({ level })
-      .sort({ order: 1 })
-      .lean<ILearningResource[]>();
+    // MongoDB disabled - mongoose not installed
+    // const resources = await LearningResource.find({ level })
+    //   .sort({ order: 1 })
+    //   .lean<ILearningResource[]>();
+
+    const resources: ILearningResource[] = [];
 
     if (resources && resources.length > 0) {
       return resources;
@@ -101,10 +111,13 @@ export async function getFeaturedLearningResources(): Promise<
 > {
   try {
     await connectDB();
-    const resources = await LearningResource.find({ featured: true })
-      .sort({ order: 1 })
-      .limit(6)
-      .lean<ILearningResource[]>();
+    // MongoDB disabled - mongoose not installed
+    // const resources = await LearningResource.find({ featured: true })
+    //   .sort({ order: 1 })
+    //   .limit(6)
+    //   .lean<ILearningResource[]>();
+
+    const resources: ILearningResource[] = [];
 
     if (resources && resources.length > 0) {
       return resources;
@@ -130,15 +143,18 @@ export async function searchLearningResources(
 ): Promise<ILearningResource[]> {
   try {
     await connectDB();
-    const resources = await LearningResource.find({
-      $or: [
-        { title: { $regex: query, $options: 'i' } },
-        { description: { $regex: query, $options: 'i' } },
-        { tags: { $in: [new RegExp(query, 'i')] } },
-      ],
-    })
-      .sort({ featured: -1, order: 1 })
-      .lean<ILearningResource[]>();
+    // MongoDB disabled - mongoose not installed
+    // const resources = await LearningResource.find({
+    //   $or: [
+    //     { title: { $regex: query, $options: 'i' } },
+    //     { description: { $regex: query, $options: 'i' } },
+    //     { tags: { $in: [new RegExp(query, 'i')] } },
+    //   ],
+    // })
+    //   .sort({ featured: -1, order: 1 })
+    //   .lean<ILearningResource[]>();
+
+    const resources: ILearningResource[] = [];
 
     if (resources) {
       return resources;
@@ -176,9 +192,11 @@ export async function getLearningResourceById(
 ): Promise<ILearningResource | null> {
   try {
     await connectDB();
-    const resource = await LearningResource.findOne({
-      id,
-    }).lean<ILearningResource>();
+    // MongoDB disabled - mongoose not installed
+    // const resource = await LearningResource.findOne({
+    //   id,
+    // }).lean<ILearningResource>();
+    const resource: ILearningResource | null = null;
 
     if (resource) {
       return resource;
