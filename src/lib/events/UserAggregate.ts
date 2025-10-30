@@ -342,7 +342,10 @@ export class UserAggregate {
           deletedAt: new Date(),
         },
         correlationId,
-      }),
+      }) as unknown as Omit<
+        IEvent,
+        'eventId' | 'aggregateId' | 'version' | 'timestamp'
+      >,
       this.state.id
     );
 
@@ -372,7 +375,10 @@ export class UserAggregate {
           lastLoginAt: new Date(),
         },
         correlationId,
-      }),
+      }) as unknown as Omit<
+        IEvent,
+        'eventId' | 'aggregateId' | 'version' | 'timestamp'
+      >,
       this.state.id
     );
 
@@ -408,7 +414,10 @@ export class UserAggregate {
           changedAt: new Date(),
         },
         correlationId,
-      }),
+      }) as unknown as Omit<
+        IEvent,
+        'eventId' | 'aggregateId' | 'version' | 'timestamp'
+      >,
       this.state.id
     );
 
@@ -443,7 +452,10 @@ export class UserAggregate {
           assignedAt: new Date(),
         },
         correlationId,
-      }),
+      }) as unknown as Omit<
+        IEvent,
+        'eventId' | 'aggregateId' | 'version' | 'timestamp'
+      >,
       this.state.id
     );
 
@@ -478,7 +490,10 @@ export class UserAggregate {
           removedAt: new Date(),
         },
         correlationId,
-      }),
+      }) as unknown as Omit<
+        IEvent,
+        'eventId' | 'aggregateId' | 'version' | 'timestamp'
+      >,
       this.state.id
     );
 
@@ -512,7 +527,10 @@ export class UserAggregate {
           verifiedAt: new Date(),
         },
         correlationId,
-      }),
+      }) as unknown as Omit<
+        IEvent,
+        'eventId' | 'aggregateId' | 'version' | 'timestamp'
+      >,
       this.state.id
     );
 
@@ -542,7 +560,10 @@ export class UserAggregate {
           changedAt: new Date(),
         },
         correlationId,
-      }),
+      }) as unknown as Omit<
+        IEvent,
+        'eventId' | 'aggregateId' | 'version' | 'timestamp'
+      >,
       this.state.id
     );
 
