@@ -165,12 +165,17 @@ export class UpstashMessageQueue implements IMessageQueue {
   async getQueueStats(): Promise<QueueStats> {
     try {
       const statsKey = this.getStatsKey();
-      const stats = await this.makeRequest('HGETALL', [statsKey]);
+      const statsUnknown = await this.makeRequest('HGETALL', [statsKey]);
 
       // Convert array to object
+      const statsArr: unknown = statsUnknown;
       const statsObj: Record<string, string> = {};
-      for (let i = 0; i < stats.length; i += 2) {
-        statsObj[stats[i]] = stats[i + 1];
+      if (Array.isArray(statsArr)) {
+        for (let i = 0; i < statsArr.length; i += 2) {
+          const key = String(statsArr[i] ?? '');
+          const val = String(statsArr[i + 1] ?? '');
+          if (key) statsObj[key] = val;
+        }
       }
 
       return {
@@ -206,12 +211,15 @@ export class UpstashMessageQueue implements IMessageQueue {
       const queueKey = this.getQueueKey();
 
       // Get all message IDs
-      const messageIds = await this.makeRequest('ZRANGE', [
+      const messageIdsUnknown = await this.makeRequest('ZRANGE', [
         queueKey,
         '0',
         '-1',
       ]);
 
+      const messageIds = Array.isArray(messageIdsUnknown)
+        ? (messageIdsUnknown as string[])
+        : [];
       if (messageIds.length > 0) {
         // Delete all message data
         const keys = messageIds.map((id: string) => this.getMessageKey(id));
@@ -255,8 +263,13 @@ export class UpstashMessageQueue implements IMessageQueue {
   async getMessage(id: string): Promise<IMessage | null> {
     try {
       const messageKey = this.getMessageKey(id);
-      const messageData = await this.makeRequest('HGETALL', [messageKey]);
+      const messageDataUnknown = await this.makeRequest('HGETALL', [
+        messageKey,
+      ]);
 
+      const messageData = Array.isArray(messageDataUnknown)
+        ? (messageDataUnknown as unknown[])
+        : [];
       if (messageData.length === 0) {
         return null;
       }
@@ -291,8 +304,9 @@ export class UpstashMessageQueue implements IMessageQueue {
 
       // Delete message data
       const deleted = await this.makeRequest('DEL', [messageKey]);
-
-      return deleted > 0;
+      const deletedNum =
+        typeof deleted === 'number' ? deleted : Number(deleted || 0);
+      return deletedNum > 0;
     } catch (error) {
       throw new MessageQueueError(
         `Failed to delete message: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -375,14 +389,17 @@ export class UpstashMessageQueue implements IMessageQueue {
   async getPendingMessages(limit: number = 10): Promise<IMessage[]> {
     try {
       const queueKey = this.getQueueKey();
-      const messageIds = await this.makeRequest('ZRANGE', [
+      const messageIdsUnknown = await this.makeRequest('ZRANGE', [
         queueKey,
         '0',
         (limit - 1).toString(),
       ]);
 
       const messages: IMessage[] = [];
-      for (const id of messageIds) {
+      const ids = Array.isArray(messageIdsUnknown)
+        ? (messageIdsUnknown as string[])
+        : [];
+      for (const id of ids) {
         const message = await this.getMessage(id);
         if (message) {
           messages.push(message);
@@ -612,15 +629,23 @@ export class UpstashMessageQueue implements IMessageQueue {
     processingTime: number
   ): Promise<void> {
     const statsKey = this.getStatsKey();
-    const currentAvg = await this.makeRequest('HGET', [
+    const currentAvgUnknown = await this.makeRequest('HGET', [
       statsKey,
       'averageProcessingTime',
     ]);
-    const currentCount = await this.makeRequest('HGET', [
+    const currentCountUnknown = await this.makeRequest('HGET', [
       statsKey,
       'completedMessages',
     ]);
 
+    const currentAvg =
+      typeof currentAvgUnknown === 'string'
+        ? currentAvgUnknown
+        : String(currentAvgUnknown || '0');
+    const currentCount =
+      typeof currentCountUnknown === 'string'
+        ? currentCountUnknown
+        : String(currentCountUnknown || '0');
     const count = parseInt(currentCount || '0');
     const avg = parseFloat(currentAvg || '0');
 
