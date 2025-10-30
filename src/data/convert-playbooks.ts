@@ -8,7 +8,8 @@
 import type {
   Prompt,
   PromptCategory,
-  // UserRole,
+  UserRole,
+  ExperienceLevel,
   PromptPattern,
 } from '@/lib/schemas/prompt';
 import { playbookCategories } from './playbooks';
@@ -29,24 +30,25 @@ const categoryMap: Record<string, string> = {
 };
 
 // Map playbook category IDs to roles and experience levels
-const categoryToRoleAndLevel: Record<string, { role: string; level: string }> = {
-  'eng-junior': { role: 'engineer', level: 'junior' },
-  'eng-mid': { role: 'engineer', level: 'mid-level' },
-  'eng-senior': { role: 'engineer', level: 'senior' },
-  'pm-associate': { role: 'product-manager', level: 'junior' },
-  'pm-mid': { role: 'product-manager', level: 'mid-level' },
-  'pm-senior': { role: 'product-manager', level: 'senior' },
-  'product-owners': { role: 'product-owner', level: 'mid-level' },
-  'scrum-masters': { role: 'scrum-master', level: 'mid-level' },
-  'designer-junior': { role: 'designer', level: 'junior' },
-  'designer-mid': { role: 'designer', level: 'mid-level' },
-  'designer-senior': { role: 'designer', level: 'senior' },
-  'leader-team': { role: 'engineering-manager', level: 'lead' },
-  'leader-director': { role: 'c-level', level: 'director' },
-  'qa-engineers': { role: 'qa', level: 'mid-level' },
-  'architects': { role: 'architect', level: 'senior' },
-  'devops-sre': { role: 'devops-sre', level: 'mid-level' },
-};
+const categoryToRoleAndLevel: Record<string, { role: string; level: string }> =
+  {
+    'eng-junior': { role: 'engineer', level: 'junior' },
+    'eng-mid': { role: 'engineer', level: 'mid-level' },
+    'eng-senior': { role: 'engineer', level: 'senior' },
+    'pm-associate': { role: 'product-manager', level: 'junior' },
+    'pm-mid': { role: 'product-manager', level: 'mid-level' },
+    'pm-senior': { role: 'product-manager', level: 'senior' },
+    'product-owners': { role: 'product-owner', level: 'mid-level' },
+    'scrum-masters': { role: 'scrum-master', level: 'mid-level' },
+    'designer-junior': { role: 'designer', level: 'junior' },
+    'designer-mid': { role: 'designer', level: 'mid-level' },
+    'designer-senior': { role: 'designer', level: 'senior' },
+    'leader-team': { role: 'engineering-manager', level: 'lead' },
+    'leader-director': { role: 'c-level', level: 'director' },
+    'qa-engineers': { role: 'qa', level: 'mid-level' },
+    architects: { role: 'architect', level: 'senior' },
+    'devops-sre': { role: 'devops-sre', level: 'mid-level' },
+  };
 
 export function convertPlaybooksToPrompts(): Omit<
   Prompt,
@@ -61,12 +63,13 @@ export function convertPlaybooksToPrompts(): Omit<
         id: recipe.id,
         title: recipe.title,
         description: recipe.description,
-        content: recipe.prompt,
+        content: recipe.description, // Use description as content since prompt doesn't exist
         category: (categoryMap[category.id] || 'general') as PromptCategory,
-        role: (roleAndLevel?.role || 'engineer') as any,
-        experienceLevel: (roleAndLevel?.level || 'mid-level') as any,
-        pattern: detectPattern(recipe.prompt) as PromptPattern,
-        tags: generateTags(recipe.title, recipe.description, category.title),
+        role: (roleAndLevel?.role || 'engineer') as UserRole,
+        experienceLevel: (roleAndLevel?.level ||
+          'mid-level') as ExperienceLevel,
+        pattern: detectPattern(recipe.description) as PromptPattern,
+        tags: generateTags(recipe.title, recipe.description, category.name),
         views: Math.floor(Math.random() * 500) + 100, // Random views for now
         rating: Number((Math.random() * 1.5 + 3.5).toFixed(1)), // 3.5-5.0 rating
         ratingCount: Math.floor(Math.random() * 20) + 5,

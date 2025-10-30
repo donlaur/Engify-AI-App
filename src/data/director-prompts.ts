@@ -3,13 +3,14 @@
  * Prompts tailored for engineering leaders
  */
 
-import { Prompt } from './seed-prompts';
+import type { Prompt } from '@/lib/schemas/prompt';
 
-export const directorPrompts: Prompt[] = [
+export const directorPrompts: Omit<Prompt, 'createdAt' | 'updatedAt'>[] = [
   {
     id: 'dir-001',
     title: 'AI Workflow Integration Planner',
-    description: 'Create a phased plan to introduce AI tools into your engineering workflow with proper guardrails and quality gates.',
+    description:
+      'Create a phased plan to introduce AI tools into your engineering workflow with proper guardrails and quality gates.',
     content: `You are an engineering director consultant specializing in AI adoption. Help me create a practical plan to introduce AI into our engineering workflow.
 
 **Our Context:**
@@ -41,7 +42,7 @@ export const directorPrompts: Prompt[] = [
 - Risk mitigation strategies
 
 Make this actionable and specific to our context.`,
-    category: 'leadership',
+    category: 'general',
     role: 'engineering-manager',
     pattern: 'template',
     tags: ['ai-adoption', 'workflow', 'planning', 'guardrails'],
@@ -54,7 +55,8 @@ Make this actionable and specific to our context.`,
   {
     id: 'dir-002',
     title: 'RAG System Architecture Designer',
-    description: 'Design a production-ready RAG system with document chunking, embeddings, vector search, and tool integration.',
+    description:
+      'Design a production-ready RAG system with document chunking, embeddings, vector search, and tool integration.',
     content: `You are a senior AI architect with expertise in RAG (Retrieval-Augmented Generation) systems. Help me design a production-ready RAG system.
 
 **Our Use Case:**
@@ -111,7 +113,8 @@ Make this actionable and specific to our context.`,
   {
     id: 'dir-003',
     title: 'Team AI Coaching Framework',
-    description: 'Create a coaching plan to help your team transition from traditional development to AI-augmented workflows.',
+    description:
+      'Create a coaching plan to help your team transition from traditional development to AI-augmented workflows.',
     content: `You are an engineering leadership coach specializing in AI transformation. Help me create a coaching framework for my team's AI transition.
 
 **Team Context:**
@@ -157,7 +160,7 @@ Make this actionable and specific to our context.`,
 - Conversation scripts for 1:1s
 - Team meeting agendas
 - Success stories to share`,
-    category: 'leadership',
+    category: 'general',
     role: 'engineering-manager',
     pattern: 'template',
     tags: ['coaching', 'team-development', 'ai-adoption', 'culture'],
@@ -170,7 +173,8 @@ Make this actionable and specific to our context.`,
   {
     id: 'dir-004',
     title: 'Legacy System Modernization with AI',
-    description: 'Create a strategy to modernize legacy systems (10+ years old) using AI for analysis, refactoring, and testing.',
+    description:
+      'Create a strategy to modernize legacy systems (10+ years old) using AI for analysis, refactoring, and testing.',
     content: `You are a software modernization expert. Help me create a strategy to modernize our legacy system using AI.
 
 **System Context:**
@@ -231,7 +235,8 @@ Make this actionable and specific to our context.`,
   {
     id: 'dir-005',
     title: 'Product-Engineering AI Collaboration Framework',
-    description: 'Design a framework for product and engineering to identify and prioritize AI opportunities together.',
+    description:
+      'Design a framework for product and engineering to identify and prioritize AI opportunities together.',
     content: `You are a product-engineering collaboration expert. Help me create a framework for product and engineering to work together on AI opportunities.
 
 **Our Context:**
@@ -277,7 +282,7 @@ Make this actionable and specific to our context.`,
 - Decision frameworks
 - Communication guidelines
 - Example AI feature specs`,
-    category: 'leadership',
+    category: 'general',
     role: 'engineering-manager',
     pattern: 'template',
     tags: ['product-collaboration', 'ai-features', 'planning'],
