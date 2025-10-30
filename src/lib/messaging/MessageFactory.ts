@@ -10,7 +10,7 @@ import {
   IMessageFactory,
   IMessage,
   MessageType,
-  MessagePriority,
+  // MessagePriority,
   MessageOptions,
   MessageMetadata,
 } from './types';
@@ -34,7 +34,7 @@ export class MessageFactory implements IMessageFactory {
   ): IMessage {
     const now = new Date();
     const id = uuidv4();
-    
+
     return {
       id,
       type,
@@ -60,13 +60,17 @@ export class MessageFactory implements IMessageFactory {
     payload: unknown,
     options: Partial<MessageOptions> = {}
   ): IMessage {
-    return this.createMessage('command', {
-      commandType,
-      ...payload,
-    }, {
-      priority: 'high',
-      ...options,
-    });
+    return this.createMessage(
+      'command',
+      {
+        commandType,
+        ...(typeof payload === 'object' && payload !== null ? payload : {}),
+      },
+      {
+        priority: 'high',
+        ...options,
+      }
+    );
   }
 
   /**
@@ -77,13 +81,17 @@ export class MessageFactory implements IMessageFactory {
     payload: unknown,
     options: Partial<MessageOptions> = {}
   ): IMessage {
-    return this.createMessage('event', {
-      eventType,
-      ...payload,
-    }, {
-      priority: 'normal',
-      ...options,
-    });
+    return this.createMessage(
+      'event',
+      {
+        eventType,
+        ...(typeof payload === 'object' && payload !== null ? payload : {}),
+      },
+      {
+        priority: 'normal',
+        ...options,
+      }
+    );
   }
 
   /**
@@ -94,13 +102,17 @@ export class MessageFactory implements IMessageFactory {
     payload: unknown,
     options: Partial<MessageOptions> = {}
   ): IMessage {
-    return this.createMessage('notification', {
-      notificationType,
-      ...payload,
-    }, {
-      priority: options.priority || 'normal',
-      ...options,
-    });
+    return this.createMessage(
+      'notification',
+      {
+        notificationType,
+        ...(typeof payload === 'object' && payload !== null ? payload : {}),
+      },
+      {
+        priority: options.priority || 'normal',
+        ...options,
+      }
+    );
   }
 
   /**
@@ -111,13 +123,17 @@ export class MessageFactory implements IMessageFactory {
     payload: unknown,
     options: Partial<MessageOptions> = {}
   ): IMessage {
-    return this.createMessage('task', {
-      taskType,
-      ...payload,
-    }, {
-      priority: options.priority || 'normal',
-      ...options,
-    });
+    return this.createMessage(
+      'task',
+      {
+        taskType,
+        ...(typeof payload === 'object' && payload !== null ? payload : {}),
+      },
+      {
+        priority: options.priority || 'normal',
+        ...options,
+      }
+    );
   }
 
   /**
@@ -128,13 +144,17 @@ export class MessageFactory implements IMessageFactory {
     payload: unknown,
     options: Partial<MessageOptions> = {}
   ): IMessage {
-    return this.createMessage('job', {
-      jobType,
-      ...payload,
-    }, {
-      priority: options.priority || 'low',
-      ...options,
-    });
+    return this.createMessage(
+      'job',
+      {
+        jobType,
+        ...(typeof payload === 'object' && payload !== null ? payload : {}),
+      },
+      {
+        priority: options.priority || 'low',
+        ...options,
+      }
+    );
   }
 
   /**
@@ -145,13 +165,17 @@ export class MessageFactory implements IMessageFactory {
     payload: unknown,
     options: Partial<MessageOptions> = {}
   ): IMessage {
-    return this.createMessage('query', {
-      queryType,
-      ...payload,
-    }, {
-      priority: 'high',
-      ...options,
-    });
+    return this.createMessage(
+      'query',
+      {
+        queryType,
+        ...(typeof payload === 'object' && payload !== null ? payload : {}),
+      },
+      {
+        priority: 'high',
+        ...options,
+      }
+    );
   }
 
   /**
@@ -267,7 +291,7 @@ export class MessageFactory implements IMessageFactory {
     payloads: unknown[],
     options: Partial<MessageOptions> = {}
   ): IMessage[] {
-    return payloads.map(payload => 
+    return payloads.map((payload) =>
       this.createMessage(type, payload, options)
     );
   }
@@ -282,7 +306,7 @@ export class MessageFactory implements IMessageFactory {
     options: Partial<MessageOptions> = {}
   ): IMessage {
     const message = this.createMessage(type, payload, options);
-    
+
     // Add scheduling metadata
     return {
       ...message,

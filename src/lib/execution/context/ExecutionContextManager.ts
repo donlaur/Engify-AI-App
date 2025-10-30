@@ -11,10 +11,8 @@ import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
  */
 export class ExecutionContextManager {
   private strategies: Map<string, IExecutionStrategy> = new Map();
-  private factory: AIProviderFactory;
-
-  constructor(factory: AIProviderFactory) {
-    this.factory = factory;
+  constructor(private _factory?: AIProviderFactory) {
+    // Factory is optional, we'll use static methods
   }
 
   /**
@@ -79,7 +77,7 @@ export class ExecutionContextManager {
     }
 
     // Get AI provider
-    const aiProvider = this.factory.create(provider);
+    const aiProvider = AIProviderFactory.create(provider);
     if (!aiProvider) {
       throw new Error(`AI provider not found: ${provider}`);
     }

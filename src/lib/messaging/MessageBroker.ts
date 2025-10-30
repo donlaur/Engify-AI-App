@@ -9,6 +9,7 @@ import Redis from 'ioredis';
 import {
   IMessageBroker,
   IMessageQueue,
+  IMessage,
   QueueConfig,
   BrokerHealth,
   BrokerMetrics,
@@ -48,7 +49,6 @@ export class MessageBroker implements IMessageBroker {
               port: parseInt(process.env.REDIS_PORT || '6379'),
               password: process.env.REDIS_PASSWORD,
               db: parseInt(process.env.REDIS_DB || '0'),
-              retryDelayOnFailover: 100,
               maxRetriesPerRequest: 3,
             });
           }
@@ -89,9 +89,10 @@ export class MessageBroker implements IMessageBroker {
       if (queue) {
         if (
           'destroy' in (queue as Partial<Destroyable>) &&
-          typeof (queue as Partial<Destroyable>).destroy === 'function'
+          typeof (queue as unknown as Partial<Destroyable>).destroy ===
+            'function'
         ) {
-          await (queue as Destroyable).destroy();
+          await (queue as unknown as Destroyable).destroy();
         }
         this.queues.delete(name);
       }
@@ -146,9 +147,10 @@ export class MessageBroker implements IMessageBroker {
       for (const queue of this.queues.values()) {
         if (
           'destroy' in (queue as Partial<Destroyable>) &&
-          typeof (queue as Partial<Destroyable>).destroy === 'function'
+          typeof (queue as unknown as Partial<Destroyable>).destroy ===
+            'function'
         ) {
-          await (queue as Destroyable).destroy();
+          await (queue as unknown as Destroyable).destroy();
         }
       }
 
