@@ -1,27 +1,55 @@
 import { describe, it, expect, vi } from 'vitest';
 
+// Mock dependencies at top level
+vi.mock('@/lib/auth', () => ({
+  auth: vi.fn(),
+}));
+
+vi.mock('next/navigation', () => ({
+  redirect: vi.fn(),
+}));
+
+vi.mock('@/lib/db/client', () => ({
+  getDb: vi.fn(),
+}));
+
 describe('RBAC: /admin page', () => {
   it('redirects non-admin users', async () => {
-    vi.doMock('@/lib/auth', () => ({
-      auth: vi.fn(async () => ({ user: { id: 'u1', role: 'user' } })),
-    }));
-    const redirectSpy = vi.fn(() => {
+    const { auth } = await import('@/lib/auth');
+    const { redirect } = await import('next/navigation');
+
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: 'u1', role: 'user' },
+    });
+    vi.mocked(redirect).mockImplementation(() => {
       throw new Error('REDIRECT');
     });
-    vi.doMock('next/navigation', () => ({ redirect: redirectSpy }));
+
     const AdminPage = (await import('../page')).default;
     await expect(AdminPage()).rejects.toThrowError('REDIRECT');
-    expect(redirectSpy).toHaveBeenCalledWith('/');
+    expect(redirect).toHaveBeenCalledWith('/');
   });
 
   it('renders for admin', async () => {
-    vi.doMock('@/lib/auth', () => ({
-      auth: vi.fn(async () => ({
-        user: { id: 'a1', role: 'super_admin', name: 'Admin' },
-      })),
-    }));
-    // Provide no-op redirect to avoid throwing
-    vi.doMock('next/navigation', () => ({ redirect: vi.fn() }));
+    const { auth } = await import('@/lib/auth');
+    const { getDb } = await import('@/lib/db/client');
+
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: 'a1', role: 'super_admin', name: 'Admin' },
+    });
+    vi.mocked(getDb).mockResolvedValue({
+      collection: vi.fn().mockReturnValue({
+        countDocuments: vi.fn().mockResolvedValue(0),
+        find: vi.fn().mockReturnValue({
+          sort: vi.fn().mockReturnValue({
+            limit: vi.fn().mockReturnValue({
+              toArray: vi.fn().mockResolvedValue([]),
+            }),
+          }),
+        }),
+      }),
+    });
+
     const AdminPage = (await import('../page')).default;
     const jsx = await AdminPage();
     // Basic smoke: the returned JSX should include title text
