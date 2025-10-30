@@ -129,7 +129,9 @@ export const PromptTemplateSchema = z.object({
   category: PromptCategory,
   role: PromptRole,
   tags: z.array(z.string()).default([]),
-  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),
+  difficulty: z
+    .enum(['beginner', 'intermediate', 'advanced'])
+    .default('beginner'),
   estimatedTime: z.number().int().positive().nullable(), // Minutes
   isPublic: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
@@ -235,6 +237,30 @@ export const AuditLogSchema = z.object({
 export type AuditLog = z.infer<typeof AuditLogSchema>;
 
 /**
+ * Web Content Schema (for ingested documents)
+ */
+export const WebContentSchema = z.object({
+  _id: ObjectIdSchema,
+  title: z.string().nullable(),
+  description: z.string().nullable(),
+  text: z.string().min(1),
+  canonicalUrl: z.string().url().nullable(),
+  source: z.string().nullable(),
+  hash: z.string().min(32),
+  lang: z.string().nullable(),
+  readingMinutes: z.number().int().positive().nullable(),
+  quality: z.object({
+    hasTitle: z.boolean(),
+    hasDescription: z.boolean(),
+    minWordsMet: z.boolean(),
+  }),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type WebContent = z.infer<typeof WebContentSchema>;
+
+/**
  * Collection Names
  * Centralized to prevent typos and ensure consistency
  */
@@ -247,6 +273,7 @@ export const Collections = {
   LEARNING_PATHWAYS: 'learning_pathways',
   USER_PROGRESS: 'user_progress',
   AUDIT_LOGS: 'audit_logs',
+  WEB_CONTENT: 'web_content',
 } as const;
 
 /**
@@ -291,5 +318,10 @@ export const Indexes = {
     { key: { organizationId: 1, createdAt: -1 }, sparse: true },
     { key: { action: 1, createdAt: -1 } },
     { key: { createdAt: -1 } }, // For cleanup/archival
+  ],
+  web_content: [
+    { key: { hash: 1 }, unique: true },
+    { key: { canonicalUrl: 1 }, sparse: true },
+    { key: { createdAt: -1 } },
   ],
 } as const;
