@@ -1,4 +1,4 @@
-# Enterprise Roadmap: RBAC Completion + Admin Dashboard
+# Day 4 — Enterprise Roadmap: RBAC Completion + Admin Dashboard
 
 ## Scope
 
