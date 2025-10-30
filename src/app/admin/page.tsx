@@ -4,6 +4,7 @@ import { getDb } from '@/lib/db/client';
 import { Collections } from '@/lib/db/schema';
 import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 import { UserManagement } from '@/components/admin/UserManagement';
+import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 
 export default async function AdminPage() {
   const session = await auth();
@@ -138,10 +139,7 @@ export default async function AdminPage() {
         </section>
 
         <section className="rounded-lg border bg-white p-4">
-          <h2 className="mb-2 text-lg font-semibold">Audit Log (latest)</h2>
-          <p className="text-sm text-slate-600">
-            Search and export planned. Showing counts only for now.
-          </p>
+          <AuditLogViewer />
         </section>
       </div>
     </div>

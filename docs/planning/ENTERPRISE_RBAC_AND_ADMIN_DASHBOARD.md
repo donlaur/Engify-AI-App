@@ -170,3 +170,10 @@ Stop when the artifact is coherent; do not exceed 8 steps.
 - [x] PR → Preview verification → rollout with flags default safe
   - Preview: green after `workbench/gallery` forced dynamic + DB fail‑safe
   - PR: #24 "feat(rbac): Enterprise RBAC Completion + Admin Dashboard"
+
+## Status (Day 4 - Continued)
+
+- [x] Content Review Queue UI with approve/reject actions
+- [x] User Management section with role/plan filtering and stats
+- [ ] Searchable Audit Log section with export (in progress)
+- [ ] Settings section for feature flags and provider keys (pending)
