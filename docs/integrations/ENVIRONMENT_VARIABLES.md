@@ -16,12 +16,17 @@ Purpose: Single source of truth for environment configuration across local, Verc
 - NEXT_PUBLIC_APP_URL: Public site URL
 - NEXT_PUBLIC_APP_VERSION: App version label (optional)
 - NEXT_PUBLIC_ALLOW_SIGNUP: 'true' | 'false' (controls Request Access gate)
+- NEXT_PUBLIC_AGENTS_SANDBOX_ENABLED: 'true' | 'false' (show Agent Sandbox UI)
+- NEXT_PUBLIC_SHOW_PLAYGROUND: 'true' | 'false' (show Playground in nav)
+- NEXT_PUBLIC_SHOW_ADMIN_LINK: 'true' | 'false' (show Admin link; route remains RBAC-guarded)
 
 ## AI Providers (BYOK and Company Keys)
 
 - OPENAI_API_KEY: Company key for internal tools (users store BYOK per-user via ApiKeyService)
 - ANTHROPIC_API_KEY: Company key (optional)
 - GOOGLE_API_KEY: Company key (optional)
+- REPLICATE_API_TOKEN: Replicate token (optional)
+- REPLICATE_MODEL: Default model id (e.g., google/gemini-2.5-flash)
 
 ## Email (SendGrid)
 
@@ -72,6 +77,7 @@ Purpose: Single source of truth for environment configuration across local, Verc
 ## RAG / Python Backend
 
 - RAG_API_URL: Python RAG service base URL (e.g., http://localhost:8000)
+- AGENTS_SANDBOX_ENABLED: 'true' | 'false' (enable Agent Sandbox server routes)
 
 ---
 

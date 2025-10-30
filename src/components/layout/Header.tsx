@@ -103,13 +103,15 @@ export function Header({ user }: HeaderProps) {
             <Icons.github className="h-3 w-3" />
             Built in Public
           </Link>
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200"
-            title="Admin"
-          >
-            Admin
-          </Link>
+          {process.env.NEXT_PUBLIC_SHOW_ADMIN_LINK === 'true' && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200"
+              title="Admin"
+            >
+              Admin
+            </Link>
+          )}
         </nav>
 
         {/* Right Side Actions */}
