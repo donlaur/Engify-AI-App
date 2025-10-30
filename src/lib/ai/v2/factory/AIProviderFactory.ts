@@ -3,6 +3,7 @@ import { OpenAIAdapter } from '../adapters/OpenAIAdapter';
 import { ClaudeAdapter } from '../adapters/ClaudeAdapter';
 import { GeminiAdapter } from '../adapters/GeminiAdapter';
 import { GroqAdapter } from '../adapters/GroqAdapter';
+import { ReplicateAdapter } from '../adapters/ReplicateAdapter';
 
 /**
  * AIProviderFactory
@@ -44,6 +45,9 @@ export class AIProviderFactory {
     ['groq-llama3-8b', () => new GroqAdapter('llama3-8b-8192')],
     ['groq-llama3-70b', () => new GroqAdapter('llama3-70b-8192')],
     ['groq-mixtral', () => new GroqAdapter('mixtral-8x7b-32768')],
+
+    // Replicate (scaffold) — fast LLM placeholder, swap model when finalized
+    ['replicate-flash', () => new ReplicateAdapter('gemini-2.5-flash')],
   ]);
 
   /**
@@ -101,6 +105,7 @@ export class AIProviderFactory {
       Anthropic: ['claude', 'claude-haiku', 'claude-sonnet', 'claude-opus'],
       Google: ['gemini', 'gemini-pro', 'gemini-flash'],
       Groq: ['groq', 'groq-llama3-8b', 'groq-llama3-70b', 'groq-mixtral'],
+      Replicate: ['replicate-flash'],
     };
   }
 }

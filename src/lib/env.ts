@@ -35,6 +35,7 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   GOOGLE_AI_API_KEY: z.string().optional(),
+  REPLICATE_API_TOKEN: z.string().optional(),
 
   // Python Services (Optional for development)
   PYTHON_API_URL: z.string().url().optional(),
@@ -94,7 +95,10 @@ export const isTest = env.NODE_ENV === 'test';
  * Check if AI providers are configured
  */
 export const hasAIProviders = Boolean(
-  env.OPENAI_API_KEY || env.ANTHROPIC_API_KEY || env.GOOGLE_AI_API_KEY
+  env.OPENAI_API_KEY ||
+    env.ANTHROPIC_API_KEY ||
+    env.GOOGLE_AI_API_KEY ||
+    env.REPLICATE_API_TOKEN
 );
 
 /**
