@@ -20,6 +20,7 @@ export class BatchStrategy implements IBatchStrategy {
   private readonly batchTimeout = process.env.NODE_ENV === 'test' ? 100 : 5000; // Faster in tests
 
   constructor(
+    // @ts-expect-error - intentionally unused, using static methods instead
     private _factory: AIProviderFactory,
     config?: Partial<StrategyConfig>
   ) {

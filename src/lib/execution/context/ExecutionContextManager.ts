@@ -11,6 +11,7 @@ import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
  */
 export class ExecutionContextManager {
   private strategies: Map<string, IExecutionStrategy> = new Map();
+  // @ts-expect-error - intentionally unused, using static methods instead
   constructor(private _factory?: AIProviderFactory) {
     // Factory is optional, we'll use static methods
   }

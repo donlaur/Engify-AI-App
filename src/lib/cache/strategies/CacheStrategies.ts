@@ -337,6 +337,7 @@ export class RefreshAheadStrategy implements ICacheStrategy {
 
   constructor(
     private adapter: ICacheAdapter,
+    // @ts-expect-error - intentionally unused, kept for interface compliance
     private _dataStore: {
       get<T>(key: string): Promise<T | null>;
       set<T>(key: string, value: T): Promise<void>;

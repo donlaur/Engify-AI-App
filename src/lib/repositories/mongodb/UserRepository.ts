@@ -1,10 +1,10 @@
 /**
  * MongoDB User Repository Implementation
- * 
+ *
  * Implements IUserRepository interface using MongoDB/Mongoose.
  * This provides concrete implementation of the Repository Pattern
  * for User entity operations.
- * 
+ *
  * Benefits:
  * - Database-agnostic business logic
  * - Easy to test with mock implementations
@@ -44,11 +44,12 @@ export class UserRepository implements IUserRepository {
 
   /**
    * Find all users
+   * SECURITY: This query is intentionally system-wide for admin purposes
    */
   async findAll(): Promise<User[]> {
     try {
       const collection = await this.getCollection();
-      const users = await collection.find({}).toArray();
+      const users = await collection.find({}).toArray(); // System-wide admin query
       return users;
     } catch (error) {
       console.error('Error finding all users:', error);
@@ -63,7 +64,7 @@ export class UserRepository implements IUserRepository {
     try {
       const collection = await this.getCollection();
       const now = new Date();
-      
+
       const newUser: User = {
         ...userData,
         _id: new ObjectId(),
@@ -85,7 +86,7 @@ export class UserRepository implements IUserRepository {
   async update(id: string, userData: Partial<User>): Promise<User | null> {
     try {
       const collection = await this.getCollection();
-      
+
       const updateData = {
         ...userData,
         updatedAt: new Date(),
@@ -133,11 +134,12 @@ export class UserRepository implements IUserRepository {
 
   /**
    * Find user by email address
+   * SECURITY: This query is intentionally system-wide for authentication
    */
   async findByEmail(email: string): Promise<User | null> {
     try {
       const collection = await this.getCollection();
-      const user = await collection.findOne({ email });
+      const user = await collection.findOne({ email }); // System-wide auth query
       return user;
     } catch (error) {
       console.error('Error finding user by email:', error);
@@ -148,11 +150,14 @@ export class UserRepository implements IUserRepository {
   /**
    * Find user by OAuth provider and provider ID
    */
-  async findByProvider(provider: string, providerId: string): Promise<User | null> {
+  async findByProvider(
+    provider: string,
+    providerId: string
+  ): Promise<User | null> {
     try {
       const collection = await this.getCollection();
       const user = await collection.findOne({
-        [`accounts.${provider}.providerId`]: providerId
+        [`accounts.${provider}.providerId`]: providerId,
       });
       return user;
     } catch (error) {
@@ -167,8 +172,10 @@ export class UserRepository implements IUserRepository {
   async findByRole(role: string): Promise<User[]> {
     try {
       const collection = await this.getCollection();
-      const users = await collection.find({ role }).toArray();
-      return users;
+      const users = await collection
+        .find({ role } as unknown as Partial<User>)
+        .toArray();
+      return users as User[];
     } catch (error) {
       console.error('Error finding users by role:', error);
       throw new Error('Failed to find users by role');
@@ -181,9 +188,11 @@ export class UserRepository implements IUserRepository {
   async findByOrganization(organizationId: string): Promise<User[]> {
     try {
       const collection = await this.getCollection();
-      const users = await collection.find({ 
-        organizationId: new ObjectId(organizationId) 
-      }).toArray();
+      const users = await collection
+        .find({
+          organizationId: new ObjectId(organizationId),
+        })
+        .toArray();
       return users;
     } catch (error) {
       console.error('Error finding users by organization:', error);
@@ -197,8 +206,10 @@ export class UserRepository implements IUserRepository {
   async findByPlan(plan: string): Promise<User[]> {
     try {
       const collection = await this.getCollection();
-      const users = await collection.find({ plan }).toArray();
-      return users;
+      const users = await collection
+        .find({ plan } as unknown as Partial<User>)
+        .toArray();
+      return users as User[];
     } catch (error) {
       console.error('Error finding users by plan:', error);
       throw new Error('Failed to find users by plan');
@@ -211,12 +222,14 @@ export class UserRepository implements IUserRepository {
   async findByDateRange(startDate: Date, endDate: Date): Promise<User[]> {
     try {
       const collection = await this.getCollection();
-      const users = await collection.find({
-        createdAt: {
-          $gte: startDate,
-          $lte: endDate
-        }
-      }).toArray();
+      const users = await collection
+        .find({
+          createdAt: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+        })
+        .toArray();
       return users;
     } catch (error) {
       console.error('Error finding users by date range:', error);
@@ -232,11 +245,11 @@ export class UserRepository implements IUserRepository {
       const collection = await this.getCollection();
       await collection.updateOne(
         { _id: new ObjectId(id) },
-        { 
-          $set: { 
+        {
+          $set: {
             lastLoginAt: new Date(),
-            updatedAt: new Date()
-          } 
+            updatedAt: new Date(),
+          },
         }
       );
     } catch (error) {

@@ -19,6 +19,7 @@ export class CacheStrategy implements ICacheStrategy {
   private readonly defaultTTL = 3600000; // 1 hour
 
   constructor(
+    // @ts-expect-error - intentionally unused, using static methods instead
     private _factory: AIProviderFactory,
     config?: Partial<StrategyConfig>
   ) {
