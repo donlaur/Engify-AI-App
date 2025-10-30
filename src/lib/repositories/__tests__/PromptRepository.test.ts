@@ -56,7 +56,7 @@ describe('PromptRepository', () => {
     } as unknown as Db;
 
     // Mock connectDB to return our mock database
-    (connectDB as unknown as vi.Mock).mockResolvedValue(mockDb);
+    vi.mocked(connectDB).mockResolvedValue(mockDb);
 
     // Create repository instance
     promptRepository = new PromptRepository();
@@ -305,12 +305,12 @@ describe('PromptRepository', () => {
       // Arrange
       const expectedPrompts: PromptTemplate[] = [
         {
-          _id: '507f1f77bcf86cd799439011',
+          _id: new ObjectId('507f1f77bcf86cd799439011'),
           title: 'Featured Prompt',
           description: 'A featured prompt',
           content: 'This is a featured prompt',
           category: 'general',
-          role: 'engineer',
+          role: 'junior_engineer',
           tags: ['featured'],
           difficulty: 'intermediate',
           estimatedTime: 10,
@@ -435,8 +435,8 @@ describe('PromptRepository', () => {
         title: 'New Prompt',
         description: 'A new prompt',
         content: 'This is new prompt content',
-        category: 'code-generation',
-        role: 'engineer',
+        category: 'engineering',
+        role: 'junior_engineer',
         tags: ['new'],
         difficulty: 'beginner',
         estimatedTime: 5,
