@@ -1,13 +1,13 @@
 /**
  * Prompt Service Layer
- * 
+ *
  * Implements business logic for prompt operations using the Repository Pattern.
  * This service layer:
  * - Depends on IPromptRepository interface (Dependency Inversion)
  * - Contains business logic and validation
  * - Is easily testable with mock repositories
  * - Follows Single Responsibility Principle
- * 
+ *
  * SOLID Principles:
  * - Single Responsibility: Handles prompt business logic only
  * - Open/Closed: Can extend functionality without modifying existing code
@@ -106,7 +106,9 @@ export class PromptService {
       updatedAt: new Date(),
     };
 
-    return await this.promptRepository.create(newPromptData);
+    return await this.promptRepository.create(
+      newPromptData as unknown as Omit<PromptTemplate, 'id'>
+    );
   }
 
   /**
@@ -123,7 +125,10 @@ export class PromptService {
   /**
    * Update prompt
    */
-  async updatePrompt(id: string, promptData: UpdatePromptData): Promise<Prompt | null> {
+  async updatePrompt(
+    id: string,
+    promptData: UpdatePromptData
+  ): Promise<Prompt | null> {
     if (!id) {
       throw new Error('Prompt ID is required');
     }
@@ -143,7 +148,10 @@ export class PromptService {
       throw new Error('Description must be 1000 characters or less');
     }
 
-    return await this.promptRepository.update(id, promptData);
+    return await this.promptRepository.update(
+      id,
+      promptData as unknown as Partial<Prompt>
+    );
   }
 
   /**
@@ -251,15 +259,17 @@ export class PromptService {
     } else if (filters.role) {
       prompts = await this.promptRepository.findByRole(filters.role);
     } else if (filters.difficulty) {
-      prompts = await this.promptRepository.findByDifficulty(filters.difficulty);
+      prompts = await this.promptRepository.findByDifficulty(
+        filters.difficulty
+      );
     } else if (filters.tags && filters.tags.length > 0) {
       // Find prompts that contain any of the specified tags
       const tagPrompts = await Promise.all(
-        filters.tags.map(tag => this.promptRepository.findByTag(tag))
+        filters.tags.map((tag) => this.promptRepository.findByTag(tag))
       );
       prompts = tagPrompts.flat();
     } else if (filters.isPublic !== undefined) {
-      prompts = filters.isPublic 
+      prompts = filters.isPublic
         ? await this.promptRepository.findPublic()
         : await this.promptRepository.findAll();
     } else if (filters.isFeatured) {
@@ -270,11 +280,15 @@ export class PromptService {
 
     // Apply additional filters
     if (filters.authorId) {
-      prompts = prompts.filter(p => p.authorId?.toString() === filters.authorId);
+      prompts = prompts.filter(
+        (p) => p.authorId?.toString() === filters.authorId
+      );
     }
 
     if (filters.organizationId) {
-      prompts = prompts.filter(p => p.organizationId?.toString() === filters.organizationId);
+      prompts = prompts.filter(
+        (p) => p.organizationId?.toString() === filters.organizationId
+      );
     }
 
     return prompts;
@@ -321,27 +335,36 @@ export class PromptService {
     const totalPrompts = allPrompts.length;
 
     // Group by category
-    const promptsByCategory = allPrompts.reduce((acc, prompt) => {
-      acc[prompt.category] = (acc[prompt.category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const promptsByCategory = allPrompts.reduce(
+      (acc, prompt) => {
+        acc[prompt.category] = (acc[prompt.category] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     // Group by role
-    const promptsByRole = allPrompts.reduce((acc, prompt) => {
-      if (prompt.role) {
-        acc[prompt.role] = (acc[prompt.role] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+    const promptsByRole = allPrompts.reduce(
+      (acc, prompt) => {
+        if (prompt.role) {
+          acc[prompt.role] = (acc[prompt.role] || 0) + 1;
+        }
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     // Group by difficulty
-    const promptsByDifficulty = allPrompts.reduce((acc, prompt) => {
-      acc[prompt.difficulty] = (acc[prompt.difficulty] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const promptsByDifficulty = allPrompts.reduce(
+      (acc, prompt) => {
+        acc[prompt.difficulty] = (acc[prompt.difficulty] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const featuredPrompts = allPrompts.filter(p => p.isFeatured).length;
-    const publicPrompts = allPrompts.filter(p => p.isPublic).length;
+    const featuredPrompts = allPrompts.filter((p) => p.isFeatured).length;
+    const publicPrompts = allPrompts.filter((p) => p.isPublic).length;
 
     return {
       totalPrompts,

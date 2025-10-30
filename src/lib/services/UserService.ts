@@ -76,7 +76,9 @@ export class UserService {
       updatedAt: new Date(),
     };
 
-    return await this.userRepository.create(newUserData);
+    return await this.userRepository.create(
+      newUserData as unknown as Omit<User, 'id'>
+    );
   }
 
   /**
@@ -131,7 +133,10 @@ export class UserService {
       }
     }
 
-    return await this.userRepository.update(id, userData);
+    return await this.userRepository.update(
+      id,
+      userData as unknown as Partial<User>
+    );
   }
 
   /**

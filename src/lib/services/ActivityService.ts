@@ -196,10 +196,13 @@ export class ActivityService extends BaseService<Activity> {
       ])
       .toArray();
 
-    return results.map((r: { _id: string; count: number }) => ({
-      itemId: r._id,
-      count: r.count,
-    }));
+    return results.map((r: unknown) => {
+      const item = r as { _id: string; count: number };
+      return {
+        itemId: item._id,
+        count: item.count,
+      };
+    });
   }
 }
 
