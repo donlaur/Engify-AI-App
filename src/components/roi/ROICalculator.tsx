@@ -176,7 +176,7 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
             max={50}
             step={1}
             value={[teamSize]}
-            onValueChange={(value) => setTeamSize(value[0])}
+            onValueChange={(value: number[]) => setTeamSize(value[0])}
             className="w-full"
           />
           <p className="text-xs text-muted-foreground">

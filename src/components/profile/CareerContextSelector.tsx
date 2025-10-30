@@ -84,7 +84,7 @@ export function CareerContextSelector({
           </Label>
           <RadioGroup
             value={level}
-            onValueChange={(value) => setLevel(value as CareerLevel)}
+            onValueChange={(value: string) => setLevel(value as CareerLevel)}
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="junior" id="junior" />
@@ -149,7 +149,9 @@ export function CareerContextSelector({
           <Label className="text-base font-semibold">Company size?</Label>
           <RadioGroup
             value={companySize}
-            onValueChange={(value) => setCompanySize(value as CompanySize)}
+            onValueChange={(value: string) =>
+              setCompanySize(value as CompanySize)
+            }
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="startup" id="startup" />
