@@ -1,13 +1,13 @@
 /**
  * Dependency Injection Container
- * 
+ *
  * Simple DI container for managing dependencies in the Repository Pattern.
  * This container:
  * - Manages singleton instances of repositories and services
  * - Provides type-safe dependency resolution
  * - Enables easy testing with mock implementations
  * - Follows Dependency Inversion Principle
- * 
+ *
  * SOLID Principles:
  * - Single Responsibility: Manages dependency resolution only
  * - Open/Closed: Can register new dependencies without modifying existing code
@@ -16,7 +16,10 @@
  * - Dependency Inversion: Depends on abstractions, not concretions
  */
 
-import { IUserRepository, IPromptRepository } from '../repositories/interfaces/IRepository';
+import {
+  IUserRepository,
+  IPromptRepository,
+} from '../repositories/interfaces/IRepository';
 import { UserRepository } from '../repositories/mongodb/UserRepository';
 import { PromptRepository } from '../repositories/mongodb/PromptRepository';
 import { UserService } from '../services/UserService';
@@ -33,7 +36,7 @@ export const SERVICE_IDS = {
   PROMPT_SERVICE: 'promptService',
 } as const;
 
-type ServiceId = typeof SERVICE_IDS[keyof typeof SERVICE_IDS];
+type ServiceId = (typeof SERVICE_IDS)[keyof typeof SERVICE_IDS];
 
 /**
  * Service registry type
@@ -49,8 +52,8 @@ type ServiceRegistry = {
  * Dependency Injection Container
  */
 export class DIContainer {
-  private services = new Map<ServiceId, any>();
-  private singletons = new Map<ServiceId, any>();
+  private services = new Map<ServiceId, unknown>();
+  private singletons = new Map<ServiceId, unknown>();
 
   /**
    * Register a service instance
@@ -63,7 +66,7 @@ export class DIContainer {
    * Register a service factory (for lazy instantiation)
    */
   registerFactory<T extends ServiceId>(
-    id: T, 
+    id: T,
     factory: () => ServiceRegistry[T]
   ): void {
     this.services.set(id, factory);
@@ -73,7 +76,7 @@ export class DIContainer {
    * Register a singleton service
    */
   registerSingleton<T extends ServiceId>(
-    id: T, 
+    id: T,
     factory: () => ServiceRegistry[T]
   ): void {
     this.singletons.set(id, factory);
@@ -86,22 +89,26 @@ export class DIContainer {
     // Check singletons first
     if (this.singletons.has(id)) {
       if (!this.services.has(id)) {
-        const factory = this.singletons.get(id);
+        const factory = this.singletons.get(id) as
+          | (() => ServiceRegistry[T])
+          | undefined;
+        if (!factory) throw new Error(`Service '${id}' not registered`);
         this.services.set(id, factory());
       }
-      return this.services.get(id);
+      return this.services.get(id) as ServiceRegistry[T];
     }
 
     // Check regular services
     if (this.services.has(id)) {
-      const service = this.services.get(id);
-      
+      const service = this.services.get(id) as
+        | ServiceRegistry[T]
+        | (() => ServiceRegistry[T]);
+
       // If it's a factory function, call it
       if (typeof service === 'function') {
-        return service();
+        return (service as () => ServiceRegistry[T])();
       }
-      
-      return service;
+      return service as ServiceRegistry[T];
     }
 
     throw new Error(`Service '${id}' not registered`);
@@ -128,7 +135,7 @@ export class DIContainer {
   getRegisteredServices(): ServiceId[] {
     return [
       ...Array.from(this.services.keys()),
-      ...Array.from(this.singletons.keys())
+      ...Array.from(this.singletons.keys()),
     ];
   }
 }
@@ -202,6 +209,8 @@ export class TestDIContainer extends DIContainer {
       findByEmail: vi.fn(),
       findByProvider: vi.fn(),
       findByRole: vi.fn(),
+      findByPlan: vi.fn(),
+      updateLastLogin: vi.fn(),
       findByOrganization: vi.fn(),
     };
 
@@ -216,6 +225,8 @@ export class TestDIContainer extends DIContainer {
       findByPattern: vi.fn(),
       findByTag: vi.fn(),
       findByCategory: vi.fn(),
+      findByRole: vi.fn(),
+      findByDifficulty: vi.fn(),
       findPublic: vi.fn(),
       findFeatured: vi.fn(),
       search: vi.fn(),

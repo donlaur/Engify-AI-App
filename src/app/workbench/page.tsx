@@ -13,7 +13,8 @@ import { ComingSoonTool } from '@/components/workbench/ComingSoonTool';
 import { WorkbenchToolId, getWorkbenchTool } from '@/types/workbench';
 
 export default function WorkbenchPage() {
-  const [selectedTool, setSelectedTool] = useState<WorkbenchToolId>('token-counter');
+  const [selectedTool, setSelectedTool] =
+    useState<WorkbenchToolId>('token-counter');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -22,14 +23,14 @@ export default function WorkbenchPage() {
 
   const renderTool = () => {
     const tool = getWorkbenchTool(selectedTool);
-    
+
     if (tool.comingSoon) {
       return <ComingSoonTool tool={tool} />;
     }
 
     switch (selectedTool) {
       case 'token-counter':
-        return <TokenCounter />;
+        return <TokenCounter text="" />;
       case 'okr-workbench':
         return <OKRWorkbench />;
       case 'retrospective-diagnostician':
@@ -45,9 +46,9 @@ export default function WorkbenchPage() {
     return (
       <MainLayout>
         <div className="container py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex min-h-[400px] items-center justify-center">
             <div className="text-center">
-              <Icons.spinner className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <Icons.spinner className="mx-auto mb-4 h-8 w-8 animate-spin" />
               <p className="text-muted-foreground">Loading workbench...</p>
             </div>
           </div>
@@ -63,7 +64,8 @@ export default function WorkbenchPage() {
         <div className="mb-8">
           <h1 className="mb-2 text-4xl font-bold">AI Workbench</h1>
           <p className="text-muted-foreground">
-            Interactive tools for prompt engineering, team management, and strategic planning
+            Interactive tools for prompt engineering, team management, and
+            strategic planning
           </p>
         </div>
 
@@ -84,19 +86,19 @@ export default function WorkbenchPage() {
         </Card>
 
         {/* Tool Content */}
-        <div className="space-y-6">
-          {renderTool()}
-        </div>
+        <div className="space-y-6">{renderTool()}</div>
 
         {/* Quick Stats */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <Icons.checkCircle className="h-5 w-5 text-green-600" />
                 <div>
                   <p className="font-medium">Available Tools</p>
-                  <p className="text-sm text-muted-foreground">4 ready to use</p>
+                  <p className="text-sm text-muted-foreground">
+                    4 ready to use
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -107,7 +109,9 @@ export default function WorkbenchPage() {
                 <Icons.clock className="h-5 w-5 text-blue-600" />
                 <div>
                   <p className="font-medium">Coming Soon</p>
-                  <p className="text-sm text-muted-foreground">4 in development</p>
+                  <p className="text-sm text-muted-foreground">
+                    4 in development
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -118,7 +122,9 @@ export default function WorkbenchPage() {
                 <Icons.sparkles className="h-5 w-5 text-purple-600" />
                 <div>
                   <p className="font-medium">AI-Powered</p>
-                  <p className="text-sm text-muted-foreground">Copy-paste prompts</p>
+                  <p className="text-sm text-muted-foreground">
+                    Copy-paste prompts
+                  </p>
                 </div>
               </div>
             </CardContent>

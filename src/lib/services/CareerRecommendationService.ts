@@ -5,8 +5,10 @@
 
 import { userService } from './UserService';
 import { skillTrackingService } from './SkillTrackingService';
-import { CareerLevel, CareerGoal } from '@/lib/types/user';
-import { getRequiredSkills, getDevelopingSkills, LEVEL_SKILL_REQUIREMENTS } from '@/lib/constants/skills';
+import { CareerLevel } from '@/lib/types/user';
+// import { CareerGoal } from '@/lib/types/user';
+import { getRequiredSkills } from '@/lib/constants/skills';
+// import { getDevelopingSkills, LEVEL_SKILL_REQUIREMENTS } from '@/lib/constants/skills';
 
 export interface CareerRecommendation {
   type: 'pattern' | 'prompt' | 'project' | 'learning';
@@ -22,33 +24,53 @@ export class CareerRecommendationService {
    * Get personalized recommendations based on career context
    */
   async getRecommendations(userId: string): Promise<CareerRecommendation[]> {
-    const user = await userService.findById(userId);
-    if (!user?.careerContext) {
+    const user = await userService.getUserById(userId);
+    const userCareerContext = (
+      user as {
+        careerContext?: {
+          level?: CareerLevel;
+          careerGoal?: string;
+          targetLevel?: string;
+        };
+      }
+    )?.careerContext;
+    if (!userCareerContext) {
       return this.getDefaultRecommendations();
     }
 
-    const { level, careerGoal, targetLevel } = user.careerContext;
+    const { level, careerGoal, targetLevel } = userCareerContext;
     const userSkills = await skillTrackingService.getUserSkills(userId);
+    const userLevel: CareerLevel = (level || 'mid') as CareerLevel;
 
     const recommendations: CareerRecommendation[] = [];
 
     // If aiming for promotion, focus on target level skills
     if (careerGoal === 'promotion' && targetLevel) {
-      recommendations.push(...this.getPromotionRecommendations(level, targetLevel, userSkills));
+      recommendations.push(
+        ...this.getPromotionRecommendations(
+          userLevel,
+          targetLevel as CareerLevel,
+          userSkills
+        )
+      );
     }
 
     // If skill-building, focus on current level mastery
     if (careerGoal === 'skill-building') {
-      recommendations.push(...this.getSkillBuildingRecommendations(level, userSkills));
+      recommendations.push(
+        ...this.getSkillBuildingRecommendations(userLevel, userSkills)
+      );
     }
 
     // If job-search, focus on marketable skills
     if (careerGoal === 'job-search') {
-      recommendations.push(...this.getJobSearchRecommendations(level, userSkills));
+      recommendations.push(
+        ...this.getJobSearchRecommendations(userLevel, userSkills)
+      );
     }
 
     // General recommendations based on level
-    recommendations.push(...this.getLevelBasedRecommendations(level));
+    recommendations.push(...this.getLevelBasedRecommendations(userLevel));
 
     // Sort by priority
     return recommendations.sort((a, b) => {
@@ -63,17 +85,20 @@ export class CareerRecommendationService {
   private getPromotionRecommendations(
     currentLevel: CareerLevel,
     targetLevel: CareerLevel,
-    userSkills: any[]
+    userSkills: unknown[] // narrowed below
   ): CareerRecommendation[] {
     const targetSkills = getRequiredSkills(targetLevel);
     const currentSkills = getRequiredSkills(currentLevel);
-    
+
     // Skills needed for next level
-    const gapSkills = targetSkills.filter(s => !currentSkills.includes(s));
-    
+    const gapSkills = targetSkills.filter((s) => !currentSkills.includes(s));
+
     // Skills user hasn't developed yet
-    const userSkillSet = new Set(userSkills.map(s => s.skill));
-    const missingSkills = gapSkills.filter(s => !userSkillSet.has(s));
+    const normalizedUserSkills = (
+      Array.isArray(userSkills) ? userSkills : []
+    ) as Array<{ skill: string }>;
+    const userSkillSet = new Set(normalizedUserSkills.map((s) => s.skill));
+    const missingSkills = gapSkills.filter((s) => !userSkillSet.has(s));
 
     const recommendations: CareerRecommendation[] = [];
 
@@ -82,7 +107,8 @@ export class CareerRecommendationService {
       recommendations.push({
         type: 'pattern',
         title: 'Master System Design Patterns',
-        description: 'Use Tree of Thoughts and RAG patterns to design scalable systems',
+        description:
+          'Use Tree of Thoughts and RAG patterns to design scalable systems',
         reason: `Required for ${targetLevel} level`,
         priority: 'high',
         skillsAddressed: ['system-design', 'architecture'],
@@ -94,7 +120,8 @@ export class CareerRecommendationService {
       recommendations.push({
         type: 'prompt',
         title: 'Lead Technical Decisions',
-        description: 'Use prompts for RFC writing, design docs, and technical proposals',
+        description:
+          'Use prompts for RFC writing, design docs, and technical proposals',
         reason: `Key skill for ${targetLevel}`,
         priority: 'high',
         skillsAddressed: ['technical-leadership', 'communication'],
@@ -106,7 +133,8 @@ export class CareerRecommendationService {
       recommendations.push({
         type: 'project',
         title: 'Mentor Junior Engineers',
-        description: 'Use code explanation and teaching prompts to mentor team members',
+        description:
+          'Use code explanation and teaching prompts to mentor team members',
         reason: `Expected at ${targetLevel} level`,
         priority: 'medium',
         skillsAddressed: ['mentoring', 'communication'],
@@ -121,13 +149,18 @@ export class CareerRecommendationService {
    */
   private getSkillBuildingRecommendations(
     level: CareerLevel,
-    userSkills: any[]
+    userSkills: unknown[] // narrowed below
   ): CareerRecommendation[] {
     const requiredSkills = getRequiredSkills(level);
-    const userSkillSet = new Set(userSkills.map(s => s.skill));
-    const weakSkills = requiredSkills.filter(s => {
-      const skill = userSkills.find(us => us.skill === s);
-      return !skill || skill.improvement < 50;
+    const normalizedUserSkills = (
+      Array.isArray(userSkills) ? userSkills : []
+    ) as Array<{ skill: string; improvement?: number }>;
+    const weakSkills = requiredSkills.filter((s) => {
+      const skill = normalizedUserSkills.find((us) => us.skill === s);
+      return (
+        !skill ||
+        (typeof skill.improvement === 'number' ? skill.improvement < 50 : true)
+      );
     });
 
     const recommendations: CareerRecommendation[] = [];
@@ -136,7 +169,8 @@ export class CareerRecommendationService {
       recommendations.push({
         type: 'pattern',
         title: 'Improve Technical Communication',
-        description: 'Practice Persona and Template patterns for clear documentation',
+        description:
+          'Practice Persona and Template patterns for clear documentation',
         reason: 'Strengthen core skill at your level',
         priority: 'high',
         skillsAddressed: ['communication'],
@@ -147,7 +181,8 @@ export class CareerRecommendationService {
       recommendations.push({
         type: 'prompt',
         title: 'Master Code Review',
-        description: 'Use code review prompts to improve code quality standards',
+        description:
+          'Use code review prompts to improve code quality standards',
         reason: 'Essential skill for your level',
         priority: 'high',
         skillsAddressed: ['code-quality', 'technical-leadership'],
@@ -161,14 +196,15 @@ export class CareerRecommendationService {
    * Get recommendations for job search
    */
   private getJobSearchRecommendations(
-    level: CareerLevel,
-    userSkills: any[]
+    _level: CareerLevel,
+    _userSkills: unknown[] // placeholder until UserSkill type is defined
   ): CareerRecommendation[] {
     return [
       {
         type: 'project',
         title: 'Build Portfolio Projects',
-        description: 'Use AI to accelerate building impressive portfolio projects',
+        description:
+          'Use AI to accelerate building impressive portfolio projects',
         reason: 'Demonstrate skills to potential employers',
         priority: 'high',
         skillsAddressed: ['code-quality', 'system-design'],
@@ -176,7 +212,8 @@ export class CareerRecommendationService {
       {
         type: 'learning',
         title: 'Prepare for Interviews',
-        description: 'Use prompts for system design practice and behavioral questions',
+        description:
+          'Use prompts for system design practice and behavioral questions',
         reason: 'Stand out in interviews',
         priority: 'high',
         skillsAddressed: ['communication', 'system-design'],
@@ -187,7 +224,9 @@ export class CareerRecommendationService {
   /**
    * Get level-based recommendations
    */
-  private getLevelBasedRecommendations(level: CareerLevel): CareerRecommendation[] {
+  private getLevelBasedRecommendations(
+    level: CareerLevel
+  ): CareerRecommendation[] {
     const recommendations: CareerRecommendation[] = [];
 
     switch (level) {
@@ -229,7 +268,8 @@ export class CareerRecommendationService {
         recommendations.push({
           type: 'pattern',
           title: 'Leverage RAG for Technical Strategy',
-          description: 'Use retrieval-augmented generation for informed decisions',
+          description:
+            'Use retrieval-augmented generation for informed decisions',
           reason: 'Strategic thinking at scale',
           priority: 'medium',
           skillsAddressed: ['architecture', 'technical-leadership'],
@@ -264,7 +304,8 @@ export class CareerRecommendationService {
       {
         type: 'learning',
         title: 'Complete Career Assessment',
-        description: 'Tell us about your career goals for personalized recommendations',
+        description:
+          'Tell us about your career goals for personalized recommendations',
         reason: 'Get tailored learning path',
         priority: 'medium',
         skillsAddressed: [],
@@ -277,12 +318,16 @@ export class CareerRecommendationService {
    */
   getPatternForSkill(skill: string): string[] {
     const skillPatternMap: Record<string, string[]> = {
-      'communication': ['Persona', 'Template', 'Output Formatting'],
-      'technical-leadership': ['Chain of Thought', 'Cognitive Verifier', 'Meta-Prompting'],
+      communication: ['Persona', 'Template', 'Output Formatting'],
+      'technical-leadership': [
+        'Chain of Thought',
+        'Cognitive Verifier',
+        'Meta-Prompting',
+      ],
       'system-design': ['Tree of Thoughts', 'RAG', 'Context Control'],
-      'architecture': ['Tree of Thoughts', 'RAG'],
-      'mentoring': ['Persona', 'Few-Shot', 'Question Refinement'],
-      'collaboration': ['Persona', 'Template'],
+      architecture: ['Tree of Thoughts', 'RAG'],
+      mentoring: ['Persona', 'Few-Shot', 'Question Refinement'],
+      collaboration: ['Persona', 'Template'],
       'project-management': ['Template', 'Constraint'],
       'code-quality': ['Self-Consistency', 'Cognitive Verifier'],
     };

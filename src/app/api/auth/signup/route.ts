@@ -11,6 +11,7 @@ import { ObjectId } from 'mongodb';
 import { logger } from '@/lib/logging/logger';
 import { userService } from '@/lib/services/UserService';
 import { success, fail, validationError } from '@/lib/api/response';
+import { getMongoDb } from '@/lib/db/mongodb';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -46,22 +47,23 @@ export async function POST(req: NextRequest) {
     // Hash password
     const hashedPassword = await hash(password, 12);
 
-    // Create user
-    const user = await userService.insertOne({
-      _id: new ObjectId(),
+    // Create user using service method
+    const user = await userService.createUser({
       email,
       name,
-      password: hashedPassword,
-      emailVerified: null,
-      image: null,
       role: 'user',
-      organizationId: null,
       plan: 'free',
-      stripeCustomerId: null,
-      stripeSubscriptionId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
+
+    // Update password separately (UserService.createUser doesn't handle password yet)
+    // TODO: Extend CreateUserData to include password or add updatePassword method
+    const db = await getMongoDb();
+    await db
+      .collection('users')
+      .updateOne(
+        { _id: new ObjectId(user._id.toString()) },
+        { $set: { password: hashedPassword } }
+      );
 
     // Return success (don't include password)
     return success({

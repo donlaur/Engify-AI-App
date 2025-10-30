@@ -304,7 +304,7 @@ export default function APIDocumentationPage() {
                           <span className="inline-flex items-center rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
                             GET
                           </span>
-                          <code className="text-sm">/api/v2/users/{id}</code>
+                          <code className="text-sm">/api/v2/users/:id</code>
                           <span className="text-xs text-gray-500">
                             Get user by ID
                           </span>

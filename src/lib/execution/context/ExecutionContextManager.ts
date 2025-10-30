@@ -11,10 +11,9 @@ import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
  */
 export class ExecutionContextManager {
   private strategies: Map<string, IExecutionStrategy> = new Map();
-  private factory: AIProviderFactory;
-
-  constructor(factory: AIProviderFactory) {
-    this.factory = factory;
+  // @ts-expect-error - intentionally unused, using static methods instead
+  constructor(private _factory?: AIProviderFactory) {
+    // Factory is optional, we'll use static methods
   }
 
   /**
@@ -79,7 +78,7 @@ export class ExecutionContextManager {
     }
 
     // Get AI provider
-    const aiProvider = this.factory.create(provider);
+    const aiProvider = AIProviderFactory.create(provider);
     if (!aiProvider) {
       throw new Error(`AI provider not found: ${provider}`);
     }
@@ -91,7 +90,7 @@ export class ExecutionContextManager {
       const result = await strategy.execute(request, context, provider);
 
       // Add execution metadata
-      result.executionTime = Date.now() - startTime;
+      result.executionTime = Math.max(1, Date.now() - startTime);
       result.strategy = strategy.name;
 
       return result;

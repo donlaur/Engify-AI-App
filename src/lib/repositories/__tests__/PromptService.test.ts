@@ -1,6 +1,6 @@
 /**
  * PromptService Tests
- * 
+ *
  * Tests the business logic layer for prompt operations.
  * These tests demonstrate:
  * - Service layer business logic validation
@@ -13,6 +13,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { PromptService } from '../../services/PromptService';
 import { IPromptRepository } from '../interfaces/IRepository';
 import type { PromptTemplate } from '@/lib/db/schema';
+import { ObjectId } from 'mongodb';
 
 // Mock repository implementation
 const createMockPromptRepository = (): IPromptRepository => ({
@@ -28,6 +29,8 @@ const createMockPromptRepository = (): IPromptRepository => ({
   findByCategory: vi.fn(),
   findPublic: vi.fn(),
   findFeatured: vi.fn(),
+  findByRole: vi.fn(),
+  findByDifficulty: vi.fn(),
   search: vi.fn(),
   incrementViews: vi.fn(),
   updateRating: vi.fn(),
@@ -53,8 +56,8 @@ describe('PromptService', () => {
         title: 'Test Prompt',
         description: 'A test prompt',
         content: 'This is test content',
-        category: 'code-generation',
-        role: 'engineer',
+        category: 'engineering',
+        role: 'junior_engineer',
         tags: ['test'],
         difficulty: 'beginner',
         estimatedTime: 5,
@@ -65,18 +68,18 @@ describe('PromptService', () => {
       };
 
       const expectedPrompt: PromptTemplate = {
-        _id: '507f1f77bcf86cd799439011',
+        _id: new ObjectId('507f1f77bcf86cd799439011'),
         title: 'Test Prompt',
         description: 'A test prompt',
         content: 'This is test content',
-        category: 'code-generation',
-        role: 'engineer',
+        category: 'engineering',
+        role: 'junior_engineer',
         tags: ['test'],
         difficulty: 'beginner',
         estimatedTime: 5,
         isPublic: true,
         isFeatured: false,
-        authorId: '507f1f77bcf86cd799439011',
+        authorId: new ObjectId('507f1f77bcf86cd799439011'),
         organizationId: null,
         stats: {
           views: 0,
@@ -89,7 +92,7 @@ describe('PromptService', () => {
         updatedAt: new Date(),
       };
 
-      mockRepository.create.mockResolvedValue(expectedPrompt);
+      vi.mocked(mockRepository.create).mockResolvedValue(expectedPrompt);
 
       // Act
       const result = await promptService.createPrompt(promptData);
@@ -101,7 +104,7 @@ describe('PromptService', () => {
           title: 'Test Prompt',
           description: 'A test prompt',
           content: 'This is test content',
-          category: 'code-generation',
+          category: 'engineering',
           stats: {
             views: 0,
             favorites: 0,
@@ -115,11 +118,13 @@ describe('PromptService', () => {
 
     it('should throw error if title is missing', async () => {
       // Arrange
-      const promptData = {
+      const promptData: Partial<
+        Parameters<typeof promptService.createPrompt>[0]
+      > = {
         description: 'A test prompt',
         content: 'This is test content',
-        category: 'code-generation',
-      } as any;
+        category: 'engineering',
+      } as Partial<Parameters<typeof promptService.createPrompt>[0]>;
 
       // Act & Assert
       await expect(promptService.createPrompt(promptData)).rejects.toThrow(
@@ -129,11 +134,13 @@ describe('PromptService', () => {
 
     it('should throw error if content is missing', async () => {
       // Arrange
-      const promptData = {
+      const promptData: Partial<
+        Parameters<typeof promptService.createPrompt>[0]
+      > = {
         title: 'Test Prompt',
         description: 'A test prompt',
-        category: 'code-generation',
-      } as any;
+        category: 'engineering',
+      } as Partial<Parameters<typeof promptService.createPrompt>[0]>;
 
       // Act & Assert
       await expect(promptService.createPrompt(promptData)).rejects.toThrow(
@@ -175,14 +182,14 @@ describe('PromptService', () => {
   describe('getPromptById', () => {
     it('should return prompt if found', async () => {
       // Arrange
-      const promptId = '507f1f77bcf86cd799439011';
+      const promptId = new ObjectId('507f1f77bcf86cd799439011');
       const expectedPrompt: PromptTemplate = {
         _id: promptId,
         title: 'Test Prompt',
         description: 'A test prompt',
         content: 'This is test content',
-        category: 'code-generation',
-        role: 'engineer',
+        category: 'engineering',
+        role: 'junior_engineer',
         tags: ['test'],
         difficulty: 'beginner',
         estimatedTime: 5,
@@ -201,23 +208,23 @@ describe('PromptService', () => {
         updatedAt: new Date(),
       };
 
-      mockRepository.findById.mockResolvedValue(expectedPrompt);
+      vi.mocked(mockRepository.findById).mockResolvedValue(expectedPrompt);
 
       // Act
-      const result = await promptService.getPromptById(promptId);
+      const result = await promptService.getPromptById(promptId.toString());
 
       // Assert
       expect(result).toEqual(expectedPrompt);
-      expect(mockRepository.findById).toHaveBeenCalledWith(promptId);
+      expect(mockRepository.findById).toHaveBeenCalledWith(promptId.toString());
     });
 
     it('should return null if prompt not found', async () => {
       // Arrange
-      const promptId = '507f1f77bcf86cd799439011';
-      mockRepository.findById.mockResolvedValue(null);
+      const promptId = new ObjectId('507f1f77bcf86cd799439011');
+      vi.mocked(mockRepository.findById).mockResolvedValue(null);
 
       // Act
-      const result = await promptService.getPromptById(promptId);
+      const result = await promptService.getPromptById(promptId.toString());
 
       // Assert
       expect(result).toBeNull();
@@ -234,7 +241,7 @@ describe('PromptService', () => {
   describe('updatePrompt', () => {
     it('should update prompt successfully', async () => {
       // Arrange
-      const promptId = '507f1f77bcf86cd799439011';
+      const promptId = new ObjectId('507f1f77bcf86cd799439011');
       const updateData = {
         title: 'Updated Prompt',
         description: 'Updated description',
@@ -245,8 +252,8 @@ describe('PromptService', () => {
         title: 'Original Prompt',
         description: 'Original description',
         content: 'Original content',
-        category: 'code-generation',
-        role: 'engineer',
+        category: 'engineering',
+        role: 'junior_engineer',
         tags: ['test'],
         difficulty: 'beginner',
         estimatedTime: 5,
@@ -272,29 +279,35 @@ describe('PromptService', () => {
         updatedAt: new Date(),
       };
 
-      mockRepository.findById.mockResolvedValue(existingPrompt);
-      mockRepository.update.mockResolvedValue(updatedPrompt);
+      vi.mocked(mockRepository.findById).mockResolvedValue(existingPrompt);
+      vi.mocked(mockRepository.update).mockResolvedValue(updatedPrompt);
 
       // Act
-      const result = await promptService.updatePrompt(promptId, updateData);
+      const result = await promptService.updatePrompt(
+        promptId.toString(),
+        updateData
+      );
 
       // Assert
       expect(result).toEqual(updatedPrompt);
-      expect(mockRepository.findById).toHaveBeenCalledWith(promptId);
-      expect(mockRepository.update).toHaveBeenCalledWith(promptId, updateData);
+      expect(mockRepository.findById).toHaveBeenCalledWith(promptId.toString());
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        promptId.toString(),
+        updateData
+      );
     });
 
     it('should throw error if prompt not found', async () => {
       // Arrange
-      const promptId = '507f1f77bcf86cd799439011';
+      const promptId = new ObjectId('507f1f77bcf86cd799439011');
       const updateData = { title: 'Updated Prompt' };
 
-      mockRepository.findById.mockResolvedValue(null);
+      vi.mocked(mockRepository.findById).mockResolvedValue(null);
 
       // Act & Assert
-      await expect(promptService.updatePrompt(promptId, updateData)).rejects.toThrow(
-        'Prompt not found'
-      );
+      await expect(
+        promptService.updatePrompt(promptId.toString(), updateData)
+      ).rejects.toThrow('Prompt not found');
     });
   });
 
@@ -304,12 +317,12 @@ describe('PromptService', () => {
       const query = 'javascript';
       const expectedPrompts: PromptTemplate[] = [
         {
-          _id: '507f1f77bcf86cd799439011',
+          _id: new ObjectId('507f1f77bcf86cd799439011'),
           title: 'JavaScript Code Generation',
           description: 'Generate JavaScript code',
           content: 'Write JavaScript functions...',
-          category: 'code-generation',
-          role: 'engineer',
+          category: 'engineering',
+          role: 'junior_engineer',
           tags: ['javascript'],
           difficulty: 'beginner',
           estimatedTime: 5,
@@ -329,7 +342,7 @@ describe('PromptService', () => {
         },
       ];
 
-      mockRepository.search.mockResolvedValue(expectedPrompts);
+      vi.mocked(mockRepository.search).mockResolvedValue(expectedPrompts);
 
       // Act
       const result = await promptService.searchPrompts(query);
@@ -363,15 +376,15 @@ describe('PromptService', () => {
   describe('getPromptsWithFilters', () => {
     it('should filter prompts by category', async () => {
       // Arrange
-      const filters = { category: 'code-generation' };
+      const filters = { category: 'engineering' };
       const expectedPrompts: PromptTemplate[] = [
         {
           _id: '507f1f77bcf86cd799439011',
           title: 'Code Generation Prompt',
           description: 'Generates code',
           content: 'Generate code for...',
-          category: 'code-generation',
-          role: 'engineer',
+          category: 'engineering',
+          role: 'junior_engineer',
           tags: ['code'],
           difficulty: 'beginner',
           estimatedTime: 5,
@@ -391,14 +404,16 @@ describe('PromptService', () => {
         },
       ];
 
-      mockRepository.findByCategory.mockResolvedValue(expectedPrompts);
+      vi.mocked(mockRepository.findByCategory).mockResolvedValue(
+        expectedPrompts
+      );
 
       // Act
       const result = await promptService.getPromptsWithFilters(filters);
 
       // Assert
       expect(result).toEqual(expectedPrompts);
-      expect(mockRepository.findByCategory).toHaveBeenCalledWith('code-generation');
+      expect(mockRepository.findByCategory).toHaveBeenCalledWith('engineering');
     });
 
     it('should filter prompts by tags', async () => {
@@ -410,8 +425,8 @@ describe('PromptService', () => {
           title: 'JavaScript Prompt',
           description: 'JavaScript related',
           content: 'Write JavaScript code...',
-          category: 'code-generation',
-          role: 'engineer',
+          category: 'engineering',
+          role: 'junior_engineer',
           tags: ['javascript'],
           difficulty: 'intermediate',
           estimatedTime: 10,
@@ -431,7 +446,7 @@ describe('PromptService', () => {
         },
       ];
 
-      mockRepository.findByTag
+      vi.mocked(mockRepository.findByTag)
         .mockResolvedValueOnce(tagPrompts) // First call for 'javascript'
         .mockResolvedValueOnce([]); // Second call for 'react' returns empty
 
@@ -448,14 +463,16 @@ describe('PromptService', () => {
   describe('incrementViews', () => {
     it('should increment views successfully', async () => {
       // Arrange
-      const promptId = '507f1f77bcf86cd799439011';
-      mockRepository.incrementViews.mockResolvedValue();
+      const promptId = new ObjectId('507f1f77bcf86cd799439011');
+      vi.mocked(mockRepository.incrementViews).mockResolvedValue();
 
       // Act
-      await promptService.incrementViews(promptId);
+      await promptService.incrementViews(promptId.toString());
 
       // Assert
-      expect(mockRepository.incrementViews).toHaveBeenCalledWith(promptId);
+      expect(mockRepository.incrementViews).toHaveBeenCalledWith(
+        promptId.toString()
+      );
     });
 
     it('should throw error if ID is missing', async () => {
@@ -469,15 +486,18 @@ describe('PromptService', () => {
   describe('updateRating', () => {
     it('should update rating successfully', async () => {
       // Arrange
-      const promptId = '507f1f77bcf86cd799439011';
+      const promptId = new ObjectId('507f1f77bcf86cd799439011');
       const rating = 4;
-      mockRepository.updateRating.mockResolvedValue();
+      vi.mocked(mockRepository.updateRating).mockResolvedValue();
 
       // Act
-      await promptService.updateRating(promptId, rating);
+      await promptService.updateRating(promptId.toString(), rating);
 
       // Assert
-      expect(mockRepository.updateRating).toHaveBeenCalledWith(promptId, rating);
+      expect(mockRepository.updateRating).toHaveBeenCalledWith(
+        promptId.toString(),
+        rating
+      );
     });
 
     it('should throw error if rating is invalid', async () => {
@@ -486,9 +506,9 @@ describe('PromptService', () => {
       const rating = 6; // Invalid rating
 
       // Act & Assert
-      await expect(promptService.updateRating(promptId, rating)).rejects.toThrow(
-        'Rating must be between 1 and 5'
-      );
+      await expect(
+        promptService.updateRating(promptId, rating)
+      ).rejects.toThrow('Rating must be between 1 and 5');
     });
 
     it('should throw error if rating is too low', async () => {
@@ -497,9 +517,9 @@ describe('PromptService', () => {
       const rating = 0; // Invalid rating
 
       // Act & Assert
-      await expect(promptService.updateRating(promptId, rating)).rejects.toThrow(
-        'Rating must be between 1 and 5'
-      );
+      await expect(
+        promptService.updateRating(promptId, rating)
+      ).rejects.toThrow('Rating must be between 1 and 5');
     });
   });
 
@@ -508,12 +528,12 @@ describe('PromptService', () => {
       // Arrange
       const prompts: PromptTemplate[] = [
         {
-          _id: '1',
+          _id: new ObjectId('507f1f77bcf86cd799439021'),
           title: 'Prompt 1',
           description: 'First prompt',
           content: 'Content 1',
-          category: 'code-generation',
-          role: 'engineer',
+          category: 'engineering',
+          role: 'junior_engineer',
           tags: ['test'],
           difficulty: 'beginner',
           estimatedTime: 5,
@@ -532,12 +552,12 @@ describe('PromptService', () => {
           updatedAt: new Date(),
         },
         {
-          _id: '2',
+          _id: new ObjectId('507f1f77bcf86cd799439022'),
           title: 'Prompt 2',
           description: 'Second prompt',
           content: 'Content 2',
-          category: 'testing',
-          role: 'qa',
+          category: 'engineering',
+          role: 'manager',
           tags: ['test'],
           difficulty: 'intermediate',
           estimatedTime: 10,
@@ -557,7 +577,7 @@ describe('PromptService', () => {
         },
       ];
 
-      mockRepository.findAll.mockResolvedValue(prompts);
+      vi.mocked(mockRepository.findAll).mockResolvedValue(prompts);
 
       // Act
       const result = await promptService.getPromptStats();

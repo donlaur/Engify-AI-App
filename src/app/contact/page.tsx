@@ -8,7 +8,7 @@ export default function ContactPage() {
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-4xl font-bold">Contact Us</h1>
           <p className="text-muted-foreground">
-            Have questions about Engify.ai? We'd love to hear from you.
+            Have questions about Engify.ai? We&apos;d love to hear from you.
           </p>
         </div>
 
@@ -29,23 +29,23 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="font-medium">Email</p>
-                    <a 
-                      href="mailto:donlaur@engify.ai" 
+                    <a
+                      href="mailto:donlaur@engify.ai"
                       className="text-primary hover:underline"
                     >
                       donlaur@engify.ai
                     </a>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                     🌐
                   </div>
                   <div>
                     <p className="font-medium">Website</p>
-                    <a 
-                      href="https://engify.ai" 
+                    <a
+                      href="https://engify.ai"
                       className="text-primary hover:underline"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -58,7 +58,9 @@ export default function ContactPage() {
             </div>
 
             <div className="rounded-lg border p-6">
-              <h3 className="mb-4 text-lg font-semibold">What We Can Help With</h3>
+              <h3 className="mb-4 text-lg font-semibold">
+                What We Can Help With
+              </h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>• Prompt engineering questions</li>
                 <li>• AI pattern recommendations</li>

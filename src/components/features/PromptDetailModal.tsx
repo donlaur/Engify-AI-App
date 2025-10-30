@@ -1,7 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
@@ -14,7 +19,11 @@ interface PromptDetailModalProps {
   onClose: () => void;
 }
 
-export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModalProps) {
+export function PromptDetailModal({
+  prompt,
+  isOpen,
+  onClose,
+}: PromptDetailModalProps) {
   const [copied, setCopied] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -31,7 +40,7 @@ export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModal
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
@@ -44,7 +53,9 @@ export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModal
               onClick={handleFavorite}
               className={isFavorite ? 'text-yellow-500' : 'text-gray-400'}
             >
-              <Icons.star className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
+              <Icons.star
+                className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`}
+              />
             </Button>
           </div>
         </DialogHeader>
@@ -69,7 +80,10 @@ export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModal
           </div>
           <div className="flex items-center gap-1">
             <Icons.star className="h-4 w-4" />
-            <span>{prompt.rating?.toFixed(1) || 0} ({prompt.ratingCount || 0} ratings)</span>
+            <span>
+              {prompt.rating?.toFixed(1) || 0} ({prompt.ratingCount || 0}{' '}
+              ratings)
+            </span>
           </div>
         </div>
 
@@ -91,8 +105,8 @@ export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModal
               )}
             </Button>
           </div>
-          
-          <div className="rounded-lg bg-gray-50 p-6 font-mono text-sm whitespace-pre-wrap">
+
+          <div className="whitespace-pre-wrap rounded-lg bg-gray-50 p-6 font-mono text-sm">
             {prompt.content}
           </div>
         </div>
@@ -100,8 +114,8 @@ export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModal
         {/* Pattern Explanation */}
         {prompt.pattern && (
           <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
-            <h4 className="font-semibold text-purple-900 mb-2">
-              <Icons.brain className="inline mr-2 h-4 w-4" />
+            <h4 className="mb-2 font-semibold text-purple-900">
+              <Icons.brain className="mr-2 inline h-4 w-4" />
               About the {prompt.pattern} Pattern
             </h4>
             <p className="text-sm text-purple-800">
@@ -113,7 +127,7 @@ export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModal
         {/* Tags */}
         {prompt.tags && prompt.tags.length > 0 && (
           <div>
-            <h4 className="text-sm font-semibold mb-2">Tags</h4>
+            <h4 className="mb-2 text-sm font-semibold">Tags</h4>
             <div className="flex flex-wrap gap-2">
               {prompt.tags.map((tag) => (
                 <Badge key={tag} variant="outline" className="text-xs">
@@ -125,7 +139,7 @@ export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModal
         )}
 
         {/* Actions */}
-        <div className="flex gap-3 pt-4 border-t">
+        <div className="flex gap-3 border-t pt-4">
           <Button className="flex-1" onClick={handleCopy}>
             <Icons.copy className="mr-2 h-4 w-4" />
             {copied ? 'Copied!' : 'Copy to Clipboard'}
@@ -139,14 +153,16 @@ export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModal
         </div>
 
         {/* Make it Mine Explanation */}
-        <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 text-sm">
-          <p className="font-semibold text-blue-900 mb-1">
-            <Icons.info className="inline mr-1 h-4 w-4" />
-            What is "Make it Mine"?
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
+          <p className="mb-1 font-semibold text-blue-900">
+            <Icons.info className="mr-1 inline h-4 w-4" />
+            What is &quot;Make it Mine&quot;?
           </p>
           <p className="text-blue-800">
-            Customize this prompt for your specific use case. Our AI will adapt the prompt to your context, 
-            add your company's terminology, and optimize it for your workflow. Save customized versions to your profile.
+            Customize this prompt for your specific use case. Our AI will adapt
+            the prompt to your context, add your company&apos;s terminology, and
+            optimize it for your workflow. Save customized versions to your
+            profile.
           </p>
         </div>
       </DialogContent>
@@ -156,11 +172,19 @@ export function PromptDetailModal({ prompt, isOpen, onClose }: PromptDetailModal
 
 function getPatternDescription(pattern: string): string {
   const descriptions: Record<string, string> = {
-    'persona': 'Assigns a specific role or expertise to the AI, improving response quality and relevance.',
-    'template': 'Provides a structured format with placeholders for easy customization and consistent results.',
-    'chain-of-thought': 'Breaks down complex problems into step-by-step reasoning for better accuracy.',
-    'few-shot': 'Includes examples to guide the AI toward the desired output format and style.',
-    'audience-persona': 'Tailors responses for specific audiences by defining their knowledge level and needs.',
+    persona:
+      'Assigns a specific role or expertise to the AI, improving response quality and relevance.',
+    template:
+      'Provides a structured format with placeholders for easy customization and consistent results.',
+    'chain-of-thought':
+      'Breaks down complex problems into step-by-step reasoning for better accuracy.',
+    'few-shot':
+      'Includes examples to guide the AI toward the desired output format and style.',
+    'audience-persona':
+      'Tailors responses for specific audiences by defining their knowledge level and needs.',
   };
-  return descriptions[pattern] || 'A proven prompt engineering pattern for better AI responses.';
+  return (
+    descriptions[pattern] ||
+    'A proven prompt engineering pattern for better AI responses.'
+  );
 }

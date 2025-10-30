@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logging/logger';
 import { apiKeyUsageService } from '@/lib/services/ApiKeyUsageService';
 import { getDb } from '@/lib/mongodb';
-import { QStashMessageQueue } from '@/lib/messaging/queues/QStashMessageQueue';
+// QStashMessageQueue import removed - not used in this route
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -19,18 +19,30 @@ export const runtime = 'nodejs';
 export async function POST(_request: NextRequest) {
   try {
     // Verify this is from QStash (optional - add signature verification)
-    const _queue = new QStashMessageQueue('scheduled-jobs', 'redis');
+    // Queue not actually used, just verifying connection available
+    // const queue = new QStashMessageQueue('scheduled-jobs', 'redis', {});
 
     // Get all users with API keys
     const db = await getDb();
     const apiKeysCollection = db.collection('api_keys');
     const users = await apiKeysCollection.distinct('userId');
 
+    // Calculate date range for daily report (today)
+    const now = new Date();
+    const startDate = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const endDate = now;
+
     // Aggregate usage for each user
     const reports = [];
     for (const userId of users) {
       const summary = await apiKeyUsageService.getUsageSummary(userId, {
         period: 'daily',
+        startDate,
+        endDate,
       });
 
       if (summary.totalRequests > 0) {

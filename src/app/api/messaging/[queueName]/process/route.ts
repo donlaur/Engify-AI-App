@@ -13,8 +13,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { QStashMessageQueue } from '@/lib/messaging/queues/QStashMessageQueue';
+import { auditLog, type AuditAction } from '@/lib/logging/audit';
 import { QueueConfig } from '@/lib/messaging/types';
-import { auditLog } from '@/lib/logging/audit';
 
 // Global queue instances (in production, use proper DI container)
 const queues = new Map<string, QStashMessageQueue>();
@@ -71,7 +71,7 @@ export async function POST(
     await auditLog({
       action: 'message_received',
       severity: 'info',
-      metadata: {
+      details: {
         queueName,
         messageId,
         messageType: messageData.type || 'unknown',
@@ -82,9 +82,9 @@ export async function POST(
     // Validate message structure
     if (!messageData.payload) {
       await auditLog({
-        action: 'message_validation_failed',
+        action: 'validation_failed',
         severity: 'warning',
-        metadata: {
+        details: {
           queueName,
           messageId,
           reason: 'missing_payload',
@@ -104,10 +104,13 @@ export async function POST(
     const processingTime = Date.now() - startTime;
 
     // Log result for audit trail
+    const auditAction: AuditAction = result.success
+      ? 'message_processed'
+      : 'message_failed';
     await auditLog({
-      action: result.success ? 'message_processed' : 'message_failed',
+      action: auditAction,
       severity: result.success ? 'info' : 'error',
-      metadata: {
+      details: {
         queueName,
         messageId,
         processingTime,
@@ -130,7 +133,7 @@ export async function POST(
     await auditLog({
       action: 'message_processing_error',
       severity: 'error',
-      metadata: {
+      details: {
         queueName,
         messageId,
         processingTime,

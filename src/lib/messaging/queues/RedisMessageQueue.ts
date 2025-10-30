@@ -10,12 +10,12 @@ import {
   IMessageQueue,
   IMessage,
   IMessageHandler,
-  MessageResult,
+  // MessageResult,
   QueueStats,
   QueueConfig,
   MessageQueueError,
-  QueueConnectionError,
-  MessageProcessingError,
+  // QueueConnectionError,
+  // MessageProcessingError,
 } from '../types';
 
 /**
@@ -33,14 +33,15 @@ export class RedisMessageQueue implements IMessageQueue {
     private config: QueueConfig,
     redisClient?: Redis
   ) {
-    this.redis = redisClient || new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0'),
-      retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 3,
-    });
+    this.redis =
+      redisClient ||
+      new Redis({
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD,
+        db: parseInt(process.env.REDIS_DB || '0'),
+        maxRetriesPerRequest: 3,
+      });
 
     this.setupErrorHandling();
   }
@@ -52,7 +53,7 @@ export class RedisMessageQueue implements IMessageQueue {
     try {
       const messageKey = this.getMessageKey(message.id);
       const queueKey = this.getQueueKey();
-      
+
       // Store message data
       await this.redis.hset(messageKey, {
         id: message.id,
@@ -96,7 +97,7 @@ export class RedisMessageQueue implements IMessageQueue {
    */
   async subscribe(handler: IMessageHandler): Promise<void> {
     this.handlers.set(handler.handlerName, handler);
-    
+
     if (!this.isProcessing) {
       await this.startProcessing();
     }
@@ -107,7 +108,7 @@ export class RedisMessageQueue implements IMessageQueue {
    */
   async unsubscribe(handlerName: string): Promise<void> {
     this.handlers.delete(handlerName);
-    
+
     if (this.handlers.size === 0) {
       await this.stopProcessing();
     }
@@ -120,7 +121,7 @@ export class RedisMessageQueue implements IMessageQueue {
     try {
       const statsKey = this.getStatsKey();
       const stats = await this.redis.hgetall(statsKey);
-      
+
       return {
         totalMessages: parseInt(stats.totalMessages || '0'),
         pendingMessages: parseInt(stats.pendingMessages || '0'),
@@ -130,7 +131,9 @@ export class RedisMessageQueue implements IMessageQueue {
         deadLetterMessages: parseInt(stats.deadLetterMessages || '0'),
         averageProcessingTime: parseFloat(stats.averageProcessingTime || '0'),
         throughput: parseFloat(stats.throughput || '0'),
-        lastProcessedAt: stats.lastProcessedAt ? new Date(stats.lastProcessedAt) : null,
+        lastProcessedAt: stats.lastProcessedAt
+          ? new Date(stats.lastProcessedAt)
+          : null,
       };
     } catch (error) {
       throw new MessageQueueError(
@@ -148,20 +151,21 @@ export class RedisMessageQueue implements IMessageQueue {
   async purge(): Promise<void> {
     try {
       const queueKey = this.getQueueKey();
-      const pattern = this.getMessageKeyPattern();
-      
+      // @ts-expect-error - intentionally unused, kept for potential future use
+      const _pattern = this.getMessageKeyPattern();
+
       // Get all message IDs
       const messageIds = await this.redis.zrange(queueKey, 0, -1);
-      
+
       if (messageIds.length > 0) {
         // Delete all message data
-        const keys = messageIds.map(id => this.getMessageKey(id));
+        const keys = messageIds.map((id) => this.getMessageKey(id));
         await this.redis.del(...keys);
-        
+
         // Clear the queue
         await this.redis.del(queueKey);
       }
-      
+
       // Reset stats
       await this.resetQueueStats();
     } catch (error) {
@@ -197,11 +201,11 @@ export class RedisMessageQueue implements IMessageQueue {
     try {
       const messageKey = this.getMessageKey(id);
       const messageData = await this.redis.hgetall(messageKey);
-      
+
       if (Object.keys(messageData).length === 0) {
         return null;
       }
-      
+
       return this.deserializeMessage(messageData);
     } catch (error) {
       throw new MessageQueueError(
@@ -220,13 +224,13 @@ export class RedisMessageQueue implements IMessageQueue {
     try {
       const messageKey = this.getMessageKey(id);
       const queueKey = this.getQueueKey();
-      
+
       // Remove from queue
       await this.redis.zrem(queueKey, id);
-      
+
       // Delete message data
       const deleted = await this.redis.del(messageKey);
-      
+
       return deleted > 0;
     } catch (error) {
       throw new MessageQueueError(
@@ -247,11 +251,11 @@ export class RedisMessageQueue implements IMessageQueue {
       if (!message) {
         throw new Error('Message not found');
       }
-      
+
       if (message.retryCount >= message.maxRetries) {
         throw new Error('Message has exceeded maximum retry count');
       }
-      
+
       // Update retry count and status
       const updatedMessage: IMessage = {
         ...message,
@@ -259,7 +263,7 @@ export class RedisMessageQueue implements IMessageQueue {
         status: 'pending',
         updatedAt: new Date(),
       };
-      
+
       // Update in Redis
       const messageKey = this.getMessageKey(id);
       await this.redis.hset(messageKey, {
@@ -267,12 +271,11 @@ export class RedisMessageQueue implements IMessageQueue {
         status: updatedMessage.status,
         updatedAt: updatedMessage.updatedAt.toISOString(),
       });
-      
+
       // Re-add to queue
       const queueKey = this.getQueueKey();
       const priorityScore = this.getPriorityScore(updatedMessage.priority);
       await this.redis.zadd(queueKey, priorityScore, id);
-      
     } catch (error) {
       throw new MessageQueueError(
         `Failed to retry message: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -289,11 +292,11 @@ export class RedisMessageQueue implements IMessageQueue {
   async publishBatch(messages: IMessage[]): Promise<void> {
     try {
       const pipeline = this.redis.pipeline();
-      
+
       for (const message of messages) {
         const messageKey = this.getMessageKey(message.id);
         const queueKey = this.getQueueKey();
-        
+
         // Store message data
         pipeline.hset(messageKey, {
           id: message.id,
@@ -310,17 +313,17 @@ export class RedisMessageQueue implements IMessageQueue {
           retryCount: message.retryCount.toString(),
           maxRetries: message.maxRetries.toString(),
         });
-        
+
         // Add to priority queue
         const priorityScore = this.getPriorityScore(message.priority);
         pipeline.zadd(queueKey, priorityScore, message.id);
-        
+
         // Set TTL if specified
         if (message.ttl) {
           pipeline.expire(messageKey, Math.ceil(message.ttl / 1000));
         }
       }
-      
+
       await pipeline.exec();
       await this.updateQueueStats('published', messages.length);
     } catch (error) {
@@ -340,7 +343,7 @@ export class RedisMessageQueue implements IMessageQueue {
     try {
       const queueKey = this.getQueueKey();
       const messageIds = await this.redis.zrange(queueKey, 0, limit - 1);
-      
+
       const messages: IMessage[] = [];
       for (const id of messageIds) {
         const message = await this.getMessage(id);
@@ -348,7 +351,7 @@ export class RedisMessageQueue implements IMessageQueue {
           messages.push(message);
         }
       }
-      
+
       return messages;
     } catch (error) {
       throw new MessageQueueError(
@@ -367,7 +370,7 @@ export class RedisMessageQueue implements IMessageQueue {
     if (this.isProcessing) {
       return;
     }
-    
+
     this.isProcessing = true;
     this.processingInterval = setInterval(
       () => this.processMessages(),
@@ -392,7 +395,7 @@ export class RedisMessageQueue implements IMessageQueue {
   private async processMessages(): Promise<void> {
     try {
       const messages = await this.getPendingMessages(this.config.batchSize);
-      
+
       for (const message of messages) {
         await this.processMessage(message);
       }
@@ -406,7 +409,7 @@ export class RedisMessageQueue implements IMessageQueue {
    */
   private async processMessage(message: IMessage): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // Find appropriate handler
       const handler = this.findHandler(message);
@@ -414,25 +417,27 @@ export class RedisMessageQueue implements IMessageQueue {
         console.warn(`No handler found for message type: ${message.type}`);
         return;
       }
-      
+
       // Update message status to processing
       await this.updateMessageStatus(message.id, 'processing');
-      
+
       // Process the message
       const result = await handler.handle(message);
-      
+
       // Update message status based on result
       if (result.success) {
         await this.updateMessageStatus(message.id, 'completed');
         await this.updateQueueStats('completed');
       } else {
-        await this.handleMessageFailure(message, result.error || 'Unknown error');
+        await this.handleMessageFailure(
+          message,
+          result.error || 'Unknown error'
+        );
       }
-      
+
       // Update processing time stats
       const processingTime = Date.now() - startTime;
       await this.updateProcessingTimeStats(processingTime);
-      
     } catch (error) {
       await this.handleMessageFailure(
         message,
@@ -456,7 +461,10 @@ export class RedisMessageQueue implements IMessageQueue {
   /**
    * Handle message processing failure
    */
-  private async handleMessageFailure(message: IMessage, error: string): Promise<void> {
+  private async handleMessageFailure(
+    message: IMessage,
+    error: string
+  ): Promise<void> {
     if (message.retryCount < message.maxRetries) {
       // Retry the message
       await this.retryMessage(message.id);
@@ -465,9 +473,11 @@ export class RedisMessageQueue implements IMessageQueue {
       // Move to dead letter queue
       await this.updateMessageStatus(message.id, 'dead_letter');
       await this.updateQueueStats('dead_letter');
-      
+
       // TODO: Implement dead letter queue
-      console.error(`Message ${message.id} moved to dead letter queue: ${error}`);
+      console.error(
+        `Message ${message.id} moved to dead letter queue: ${error}`
+      );
     }
   }
 
@@ -485,10 +495,13 @@ export class RedisMessageQueue implements IMessageQueue {
   /**
    * Update queue statistics
    */
-  private async updateQueueStats(operation: string, count: number = 1): Promise<void> {
+  private async updateQueueStats(
+    operation: string,
+    count: number = 1
+  ): Promise<void> {
     const statsKey = this.getStatsKey();
     const pipeline = this.redis.pipeline();
-    
+
     switch (operation) {
       case 'published':
         pipeline.hincrby(statsKey, 'totalMessages', count);
@@ -510,7 +523,7 @@ export class RedisMessageQueue implements IMessageQueue {
         pipeline.hincrby(statsKey, 'pendingMessages', -count);
         break;
     }
-    
+
     pipeline.hset(statsKey, 'lastProcessedAt', new Date().toISOString());
     await pipeline.exec();
   }
@@ -518,16 +531,19 @@ export class RedisMessageQueue implements IMessageQueue {
   /**
    * Update processing time statistics
    */
-  private async updateProcessingTimeStats(processingTime: number): Promise<void> {
+  private async updateProcessingTimeStats(
+    processingTime: number
+  ): Promise<void> {
     const statsKey = this.getStatsKey();
     const currentAvg = await this.redis.hget(statsKey, 'averageProcessingTime');
     const currentCount = await this.redis.hget(statsKey, 'completedMessages');
-    
+
     const count = parseInt(currentCount || '0');
     const avg = parseFloat(currentAvg || '0');
-    
-    const newAvg = count > 0 ? (avg * count + processingTime) / (count + 1) : processingTime;
-    
+
+    const newAvg =
+      count > 0 ? (avg * count + processingTime) / (count + 1) : processingTime;
+
     await this.redis.hset(statsKey, 'averageProcessingTime', newAvg.toString());
   }
 
@@ -544,11 +560,16 @@ export class RedisMessageQueue implements IMessageQueue {
    */
   private getPriorityScore(priority: string): number {
     switch (priority) {
-      case 'critical': return 4;
-      case 'high': return 3;
-      case 'normal': return 2;
-      case 'low': return 1;
-      default: return 2;
+      case 'critical':
+        return 4;
+      case 'high':
+        return 3;
+      case 'normal':
+        return 2;
+      case 'low':
+        return 1;
+      default:
+        return 2;
     }
   }
 
@@ -577,11 +598,11 @@ export class RedisMessageQueue implements IMessageQueue {
   private deserializeMessage(data: Record<string, string>): IMessage {
     return {
       id: data.id,
-      type: data.type as any,
-      priority: data.priority as any,
-      status: data.status as any,
-      payload: JSON.parse(data.payload),
-      metadata: JSON.parse(data.metadata),
+      type: data.type as import('../types').MessageType,
+      priority: data.priority as import('../types').MessagePriority,
+      status: data.status as import('../types').MessageStatus,
+      payload: JSON.parse(data.payload) as unknown,
+      metadata: JSON.parse(data.metadata) as import('../types').MessageMetadata,
       createdAt: new Date(data.createdAt),
       updatedAt: new Date(data.updatedAt),
       correlationId: data.correlationId || undefined,

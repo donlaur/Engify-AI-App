@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
     await auditLog({
       action: 'beta_access_requested',
       severity: 'info',
-      metadata: {
+      details: {
         email: data.email,
         company: data.company,
         role: data.role,
@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
     await auditLog({
       action: 'beta_access_request_failed',
       severity: 'warning',
-      metadata: {
+      details: {
         error: error instanceof Error ? error.message : 'Unknown error',
       },
     }).catch(() => {

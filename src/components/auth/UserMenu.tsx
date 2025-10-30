@@ -24,9 +24,7 @@ export function UserMenu() {
   const { data: session, status } = useSession();
 
   if (status === 'loading') {
-    return (
-      <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
-    );
+    return <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />;
   }
 
   if (!session?.user) {
@@ -50,7 +48,7 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
+            <AvatarImage src={undefined} alt={user.name || 'User'} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
@@ -59,9 +57,7 @@ export function UserMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user.name}</p>
-            <p className="text-xs leading-none text-gray-500">
-              {user.email}
-            </p>
+            <p className="text-xs leading-none text-gray-500">{user.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

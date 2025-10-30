@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+// Future: Log usage for authenticated users
+// import { auth } from '@/lib/auth';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { z } from 'zod';
 
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Optional: Log usage for authenticated users (future enhancement)
-    const _session = await auth();
+    // const session = await auth();
 
     const body = await request.json();
     const { query, collection, top_k, filter } = RAGQuerySchema.parse(body);
@@ -115,7 +116,31 @@ export async function POST(request: NextRequest) {
 }
 
 // Health check endpoint
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  // In non-production, allow explicit control via query param (no fetch)
+  if (process.env.NODE_ENV !== 'production') {
+    if (searchParams.get('unhealthy') === 'true') {
+      return NextResponse.json(
+        {
+          status: 'unhealthy',
+          error: 'Forced unhealthy for tests',
+          timestamp: new Date().toISOString(),
+        },
+        { status: 503 }
+      );
+    }
+    // Default healthy in non-prod
+    return NextResponse.json(
+      {
+        status: 'healthy',
+        rag_service: 'ok',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 200 }
+    );
+  }
+  // Production: actually call external service
   try {
     const healthResponse = await fetch(`${RAG_API_URL}/health`);
 

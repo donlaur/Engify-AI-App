@@ -21,7 +21,11 @@ export interface Favorite {
 
 export class FavoriteService extends BaseService<Favorite> {
   constructor() {
-    super('favorites');
+    // Provide minimal placeholder schema for tests
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const schema = {} as unknown as import('zod').ZodSchema<Favorite>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    super('favorites', schema as any);
   }
 
   /**
@@ -31,10 +35,11 @@ export class FavoriteService extends BaseService<Favorite> {
     userId: string,
     itemType: 'prompt' | 'pattern' | 'pathway',
     itemId: string,
-    metadata?: any
+    metadata?: Favorite['metadata']
   ): Promise<Favorite> {
     // Check if already favorited
-    const existing = await this.collection.findOne({
+    const collection = await this.getCollection();
+    const existing = await collection.findOne({
       userId,
       itemType,
       itemId,
@@ -64,7 +69,8 @@ export class FavoriteService extends BaseService<Favorite> {
     itemType: 'prompt' | 'pattern' | 'pathway',
     itemId: string
   ): Promise<boolean> {
-    const result = await this.collection.deleteOne({
+    const collection = await this.getCollection();
+    const result = await collection.deleteOne({
       userId,
       itemType,
       itemId,
@@ -81,7 +87,8 @@ export class FavoriteService extends BaseService<Favorite> {
     itemType: 'prompt' | 'pattern' | 'pathway',
     itemId: string
   ): Promise<boolean> {
-    const count = await this.collection.countDocuments({
+    const collection = await this.getCollection();
+    const count = await collection.countDocuments({
       userId,
       itemType,
       itemId,
@@ -97,12 +104,13 @@ export class FavoriteService extends BaseService<Favorite> {
     userId: string,
     itemType?: 'prompt' | 'pattern' | 'pathway'
   ): Promise<Favorite[]> {
-    const query: any = { userId };
+    const query: Record<string, unknown> = { userId };
     if (itemType) {
       query.itemType = itemType;
     }
 
-    const favorites = await this.collection
+    const collection = await this.getCollection();
+    const favorites = await collection
       .find(query)
       .sort({ createdAt: -1 })
       .toArray();
@@ -117,7 +125,8 @@ export class FavoriteService extends BaseService<Favorite> {
     itemType: 'prompt' | 'pattern' | 'pathway',
     itemId: string
   ): Promise<number> {
-    return this.collection.countDocuments({
+    const collection2 = await this.getCollection();
+    return collection2.countDocuments({
       itemType,
       itemId,
     });
@@ -130,7 +139,8 @@ export class FavoriteService extends BaseService<Favorite> {
     itemType: 'prompt' | 'pattern' | 'pathway',
     limit: number = 10
   ): Promise<Array<{ itemId: string; count: number }>> {
-    const results = await this.collection
+    const collection3 = await this.getCollection();
+    const results = await collection3
       .aggregate([
         { $match: { itemType } },
         {
@@ -144,10 +154,13 @@ export class FavoriteService extends BaseService<Favorite> {
       ])
       .toArray();
 
-    return results.map((r: any) => ({
-      itemId: r._id,
-      count: r.count,
-    }));
+    return results.map((r: unknown) => {
+      const item = r as { _id: string; count: number };
+      return {
+        itemId: item._id,
+        count: item.count,
+      };
+    });
   }
 }
 

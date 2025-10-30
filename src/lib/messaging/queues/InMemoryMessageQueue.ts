@@ -9,7 +9,7 @@ import {
   IMessageQueue,
   IMessage,
   IMessageHandler,
-  MessageResult,
+  // MessageResult,
   QueueStats,
   QueueConfig,
   MessageQueueError,
@@ -23,7 +23,17 @@ export class InMemoryMessageQueue implements IMessageQueue {
   private handlers = new Map<string, IMessageHandler>();
   private isProcessing = false;
   private processingInterval?: NodeJS.Timeout;
-  private stats: QueueStats = {
+  private stats: {
+    totalMessages: number;
+    pendingMessages: number;
+    processingMessages: number;
+    completedMessages: number;
+    failedMessages: number;
+    deadLetterMessages: number;
+    averageProcessingTime: number;
+    throughput: number;
+    lastProcessedAt: Date | null;
+  } = {
     totalMessages: 0,
     pendingMessages: 0,
     processingMessages: 0,
@@ -50,7 +60,7 @@ export class InMemoryMessageQueue implements IMessageQueue {
       this.stats.totalMessages++;
       this.stats.pendingMessages++;
       this.stats.lastProcessedAt = new Date();
-      
+
       // Start processing if not already running
       if (!this.isProcessing && this.handlers.size > 0) {
         await this.startProcessing();
@@ -70,7 +80,7 @@ export class InMemoryMessageQueue implements IMessageQueue {
    */
   async subscribe(handler: IMessageHandler): Promise<void> {
     this.handlers.set(handler.handlerName, handler);
-    
+
     if (!this.isProcessing) {
       await this.startProcessing();
     }
@@ -81,7 +91,7 @@ export class InMemoryMessageQueue implements IMessageQueue {
    */
   async unsubscribe(handlerName: string): Promise<void> {
     this.handlers.delete(handlerName);
-    
+
     if (this.handlers.size === 0) {
       await this.stopProcessing();
     }
@@ -164,11 +174,11 @@ export class InMemoryMessageQueue implements IMessageQueue {
       if (!message) {
         throw new Error('Message not found');
       }
-      
+
       if (message.retryCount >= message.maxRetries) {
         throw new Error('Message has exceeded maximum retry count');
       }
-      
+
       // Update retry count and status
       const updatedMessage: IMessage = {
         ...message,
@@ -176,7 +186,7 @@ export class InMemoryMessageQueue implements IMessageQueue {
         status: 'pending',
         updatedAt: new Date(),
       };
-      
+
       this.messages.set(id, updatedMessage);
     } catch (error) {
       throw new MessageQueueError(
@@ -196,11 +206,11 @@ export class InMemoryMessageQueue implements IMessageQueue {
       for (const message of messages) {
         this.messages.set(message.id, message);
       }
-      
+
       this.stats.totalMessages += messages.length;
       this.stats.pendingMessages += messages.length;
       this.stats.lastProcessedAt = new Date();
-      
+
       // Start processing if not already running
       if (!this.isProcessing && this.handlers.size > 0) {
         await this.startProcessing();
@@ -220,14 +230,14 @@ export class InMemoryMessageQueue implements IMessageQueue {
    */
   async getPendingMessages(limit: number = 10): Promise<IMessage[]> {
     const pendingMessages = Array.from(this.messages.values())
-      .filter(message => message.status === 'pending')
+      .filter((message) => message.status === 'pending')
       .sort((a, b) => {
         // Sort by priority (critical first)
         const priorityOrder = { critical: 4, high: 3, normal: 2, low: 1 };
         return priorityOrder[b.priority] - priorityOrder[a.priority];
       })
       .slice(0, limit);
-    
+
     return pendingMessages;
   }
 
@@ -238,7 +248,7 @@ export class InMemoryMessageQueue implements IMessageQueue {
     if (this.isProcessing) {
       return;
     }
-    
+
     this.isProcessing = true;
     this.processingInterval = setInterval(
       () => this.processMessages(),
@@ -263,7 +273,7 @@ export class InMemoryMessageQueue implements IMessageQueue {
   private async processMessages(): Promise<void> {
     try {
       const messages = await this.getPendingMessages(this.config.batchSize);
-      
+
       for (const message of messages) {
         await this.processMessage(message);
       }
@@ -277,7 +287,7 @@ export class InMemoryMessageQueue implements IMessageQueue {
    */
   private async processMessage(message: IMessage): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // Find appropriate handler
       const handler = this.findHandler(message);
@@ -285,26 +295,31 @@ export class InMemoryMessageQueue implements IMessageQueue {
         console.warn(`No handler found for message type: ${message.type}`);
         return;
       }
-      
+
       // Update message status to processing
       await this.updateMessageStatus(message.id, 'processing');
-      
+
       // Process the message
       const result = await handler.handle(message);
-      
+
       // Update message status based on result
       if (result.success) {
         await this.updateMessageStatus(message.id, 'completed');
         this.stats.completedMessages++;
-        this.stats.pendingMessages = Math.max(0, this.stats.pendingMessages - 1);
+        this.stats.pendingMessages = Math.max(
+          0,
+          this.stats.pendingMessages - 1
+        );
       } else {
-        await this.handleMessageFailure(message, result.error || 'Unknown error');
+        await this.handleMessageFailure(
+          message,
+          result.error || 'Unknown error'
+        );
       }
-      
+
       // Update processing time stats
       const processingTime = Date.now() - startTime;
       this.updateProcessingTimeStats(processingTime);
-      
     } catch (error) {
       await this.handleMessageFailure(
         message,
@@ -328,7 +343,10 @@ export class InMemoryMessageQueue implements IMessageQueue {
   /**
    * Handle message processing failure
    */
-  private async handleMessageFailure(message: IMessage, error: string): Promise<void> {
+  private async handleMessageFailure(
+    message: IMessage,
+    error: string
+  ): Promise<void> {
     if (message.retryCount < message.maxRetries) {
       // Retry the message
       await this.retryMessage(message.id);
@@ -337,8 +355,10 @@ export class InMemoryMessageQueue implements IMessageQueue {
       await this.updateMessageStatus(message.id, 'dead_letter');
       this.stats.deadLetterMessages++;
       this.stats.pendingMessages = Math.max(0, this.stats.pendingMessages - 1);
-      
-      console.error(`Message ${message.id} moved to dead letter queue: ${error}`);
+
+      console.error(
+        `Message ${message.id} moved to dead letter queue: ${error}`
+      );
     }
   }
 
@@ -350,16 +370,23 @@ export class InMemoryMessageQueue implements IMessageQueue {
     if (message) {
       const updatedMessage: IMessage = {
         ...message,
-        status: status as any,
+        status: status as IMessage['status'],
         updatedAt: new Date(),
       };
       this.messages.set(id, updatedMessage);
-      
+
       // Update processing stats
       if (status === 'processing') {
         this.stats.processingMessages++;
-      } else if (status === 'completed' || status === 'failed' || status === 'dead_letter') {
-        this.stats.processingMessages = Math.max(0, this.stats.processingMessages - 1);
+      } else if (
+        status === 'completed' ||
+        status === 'failed' ||
+        status === 'dead_letter'
+      ) {
+        this.stats.processingMessages = Math.max(
+          0,
+          this.stats.processingMessages - 1
+        );
       }
     }
   }
@@ -370,8 +397,9 @@ export class InMemoryMessageQueue implements IMessageQueue {
   private updateProcessingTimeStats(processingTime: number): void {
     const count = this.stats.completedMessages;
     const avg = this.stats.averageProcessingTime;
-    
-    this.stats.averageProcessingTime = count > 0 ? (avg * count + processingTime) / (count + 1) : processingTime;
+
+    this.stats.averageProcessingTime =
+      count > 0 ? (avg * count + processingTime) / (count + 1) : processingTime;
   }
 
   /**

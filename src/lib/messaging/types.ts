@@ -8,7 +8,7 @@
 /**
  * Message Types
  */
-export type MessageType = 
+export type MessageType =
   | 'command'
   | 'query'
   | 'event'
@@ -19,16 +19,12 @@ export type MessageType =
 /**
  * Message Priority Levels
  */
-export type MessagePriority = 
-  | 'low'
-  | 'normal'
-  | 'high'
-  | 'critical';
+export type MessagePriority = 'low' | 'normal' | 'high' | 'critical';
 
 /**
  * Message Status
  */
-export type MessageStatus = 
+export type MessageStatus =
   | 'pending'
   | 'processing'
   | 'completed'
@@ -70,10 +66,10 @@ export interface MessageMetadata {
 /**
  * Message Handler Interface
  */
-export interface IMessageHandler<T = unknown> {
+export interface IMessageHandler<_T = unknown> {
   readonly messageType: MessageType;
   readonly handlerName: string;
-  
+
   handle(message: IMessage): Promise<MessageResult>;
   canHandle(message: IMessage): boolean;
 }
@@ -95,23 +91,23 @@ export interface MessageResult {
 export interface IMessageQueue {
   readonly name: string;
   readonly type: QueueType;
-  
+
   // Basic operations
   publish(message: IMessage): Promise<void>;
   subscribe(handler: IMessageHandler): Promise<void>;
   unsubscribe(handlerName: string): Promise<void>;
-  
+
   // Queue management
   getQueueStats(): Promise<QueueStats>;
   purge(): Promise<void>;
   pause(): Promise<void>;
   resume(): Promise<void>;
-  
+
   // Message management
   getMessage(id: string): Promise<IMessage | null>;
   deleteMessage(id: string): Promise<boolean>;
   retryMessage(id: string): Promise<void>;
-  
+
   // Batch operations
   publishBatch(messages: IMessage[]): Promise<void>;
   getPendingMessages(limit?: number): Promise<IMessage[]>;
@@ -120,12 +116,7 @@ export interface IMessageQueue {
 /**
  * Queue Types
  */
-export type QueueType = 
-  | 'memory'
-  | 'redis'
-  | 'rabbitmq'
-  | 'sqs'
-  | 'kafka';
+export type QueueType = 'memory' | 'redis' | 'rabbitmq' | 'sqs' | 'kafka';
 
 /**
  * Queue Statistics
@@ -163,7 +154,7 @@ export interface QueueConfig {
  */
 export interface IDeadLetterQueue {
   readonly name: string;
-  
+
   add(message: IMessage, reason: string): Promise<void>;
   getMessages(limit?: number): Promise<DeadLetterMessage[]>;
   retryMessage(id: string): Promise<void>;
@@ -186,18 +177,18 @@ export interface DeadLetterMessage {
  */
 export interface IMessageBroker {
   readonly name: string;
-  
+
   // Queue management
   createQueue(config: QueueConfig): Promise<IMessageQueue>;
   deleteQueue(name: string): Promise<void>;
   getQueue(name: string): Promise<IMessageQueue | null>;
   listQueues(): Promise<string[]>;
-  
+
   // Connection management
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   isConnected(): boolean;
-  
+
   // Health and monitoring
   getHealth(): Promise<BrokerHealth>;
   getMetrics(): Promise<BrokerMetrics>;
@@ -280,19 +271,19 @@ export interface IMessageFactory {
     payload: unknown,
     options?: Partial<MessageOptions>
   ): IMessage;
-  
+
   createCommand(
     commandType: string,
     payload: unknown,
     options?: Partial<MessageOptions>
   ): IMessage;
-  
+
   createEvent(
     eventType: string,
     payload: unknown,
     options?: Partial<MessageOptions>
   ): IMessage;
-  
+
   createNotification(
     notificationType: string,
     payload: unknown,
@@ -318,7 +309,7 @@ export interface MessageOptions {
  */
 export interface IMessageRouter {
   readonly name: string;
-  
+
   route(message: IMessage): Promise<string[]>; // Returns queue names
   addRoute(rule: RoutingRule): void;
   removeRoute(ruleId: string): void;
@@ -342,19 +333,19 @@ export interface RoutingRule {
  */
 export interface IMessageScheduler {
   readonly name: string;
-  
+
   schedule(
     message: IMessage,
     delay: number,
     options?: ScheduleOptions
   ): Promise<string>; // Returns schedule ID
-  
+
   scheduleAt(
     message: IMessage,
     scheduledAt: Date,
     options?: ScheduleOptions
   ): Promise<string>;
-  
+
   cancel(scheduleId: string): Promise<boolean>;
   getScheduledMessages(): Promise<ScheduledMessage[]>;
 }

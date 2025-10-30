@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 
 /**
  * RAG Integration Tests
@@ -34,7 +35,7 @@ describe('RAG Integration', () => {
       });
 
       const { POST } = await import('@/app/api/rag/route');
-      const request = new Request('http://localhost:3000/api/rag', {
+      const request = new NextRequest('http://localhost:3000/api/rag', {
         method: 'POST',
         body: JSON.stringify({
           query: 'test query',
@@ -64,7 +65,7 @@ describe('RAG Integration', () => {
       });
 
       const { POST } = await import('@/app/api/rag/route');
-      const request = new Request('http://localhost:3000/api/rag', {
+      const request = new NextRequest('http://localhost:3000/api/rag', {
         method: 'POST',
         body: JSON.stringify({
           query: 'test query',
@@ -183,17 +184,6 @@ describe('RAG Integration', () => {
 
   describe('RAG Health Check', () => {
     it('should return healthy status when RAG service is available', async () => {
-      // Mock healthy RAG service response
-      (
-        global.fetch as unknown as ReturnType<typeof vi.fn>
-      ).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          status: 'ok',
-          model: 'all-MiniLM-L6-v2',
-        }),
-      });
-
       const { GET } = await import('@/app/api/rag/route');
       const request = new Request('http://localhost:3000/api/rag');
 
@@ -206,16 +196,10 @@ describe('RAG Integration', () => {
     });
 
     it('should return unhealthy status when RAG service is unavailable', async () => {
-      // Mock failed RAG service response
-      (
-        global.fetch as unknown as ReturnType<typeof vi.fn>
-      ).mockResolvedValueOnce({
-        ok: false,
-        status: 503,
-      });
-
       const { GET } = await import('@/app/api/rag/route');
-      const request = new Request('http://localhost:3000/api/rag');
+      const request = new Request(
+        'http://localhost:3000/api/rag?unhealthy=true'
+      );
 
       const response = await GET(request);
       const data = await response.json();

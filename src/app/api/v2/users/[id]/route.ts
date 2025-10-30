@@ -51,9 +51,10 @@ export async function GET(
   const rbacCheck = await RBACPresets.requireUserRead()(request);
   if (rbacCheck) return rbacCheck;
 
+  let id: string | undefined;
   try {
     const session = await auth();
-    const { id } = await params;
+    id = (await params).id;
 
     // Users can only read their own data unless they're admins
     if (
@@ -80,6 +81,7 @@ export async function GET(
       );
     }
 
+    const userService = getUserService();
     const user = await userService.getUserById(id);
 
     if (!user) {
@@ -126,9 +128,10 @@ export async function PUT(
   const rbacCheck = await RBACPresets.requireUserWrite()(request);
   if (rbacCheck) return rbacCheck;
 
+  let id: string | undefined;
   try {
     const session = await auth();
-    const { id } = await params;
+    id = (await params).id;
 
     // Users can only update their own data unless they're admins
     if (
@@ -227,16 +230,17 @@ export async function PUT(
  * Requires users:write permission (users can delete their own account or admins can delete any)
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   // RBAC: users:write permission
-  const rbacCheck = await RBACPresets.requireUserWrite()(request);
+  const rbacCheck = await RBACPresets.requireUserWrite()(_request);
   if (rbacCheck) return rbacCheck;
 
+  let id: string | undefined;
   try {
     const session = await auth();
-    const { id } = await params;
+    id = (await params).id;
 
     // Users can only delete their own account unless they're admins
     if (
@@ -303,12 +307,13 @@ export async function DELETE(
  * Update user's last login timestamp
  */
 export async function PATCH(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  let id: string | undefined;
   try {
     const userService = getUserService();
-    const { id } = await params;
+    id = (await params).id;
 
     if (!id) {
       return NextResponse.json(

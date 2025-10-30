@@ -39,9 +39,17 @@ export async function POST(_request: NextRequest) {
     for (const user of activeUsers) {
       if (!user.email) continue;
 
+      // Calculate weekly date range (last 7 days)
+      const now = new Date();
+      const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = now;
+
       // Get weekly usage summary
       const summary = await apiKeyUsageService.getUsageSummary(user.id, {
         period: 'weekly',
+        startDate: weekStart,
+        endDate: weekEnd,
       });
 
       // Get top prompts used (from prompt history if available)
@@ -60,9 +68,6 @@ export async function POST(_request: NextRequest) {
         .toArray();
       const topPrompts = topPromptsAgg || [];
 
-      const weekStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const weekEnd = new Date();
-
       // Send weekly digest email
       // Email validated above, split('@') always returns at least one element
       const emailParts = user.email.split('@');
@@ -80,18 +85,14 @@ export async function POST(_request: NextRequest) {
           uses: p.count || 0,
           url: `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/library/${p._id}`,
         })),
-        topPatterns: Object.entries(summary.providerBreakdown).map(
-          ([provider, data]) => ({
-            name: provider,
-            uses: data.requests,
-          })
-        ),
+        topPatterns: [], // providerBreakdown not available in UsageSummary - simplified for now
         libraryUrl: `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/library`,
         analyticsUrl: `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/settings/api-keys?tab=usage`,
       });
 
       const emailResult = await sendEmail({
-        to: user.email,
+        to: user.email as string,
+        subject: 'Your Weekly Engify.ai Digest', // Required by EmailData
         templateId: template.templateId,
         dynamicTemplateData: template.dynamicTemplateData,
       });

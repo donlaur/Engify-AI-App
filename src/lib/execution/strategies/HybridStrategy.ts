@@ -113,13 +113,12 @@ export class HybridStrategy implements IExecutionStrategy {
   /**
    * Check if this strategy can handle the request
    */
-  canHandle(request: AIRequest, context: ExecutionContext): boolean {
+  canHandle(_request: AIRequest, _context: ExecutionContext): boolean {
     if (!this.config.enabled) return false;
 
-    // Hybrid can handle any request if at least one sub-strategy can
-    return Array.from(this.strategies.values()).some((strategy) =>
-      strategy.canHandle(request, context)
-    );
+    // Hybrid is the ultimate fallback - can always handle when enabled
+    // It will delegate to sub-strategies or handle directly
+    return true;
   }
 
   /**

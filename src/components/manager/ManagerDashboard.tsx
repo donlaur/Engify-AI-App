@@ -8,7 +8,13 @@
 import { useState, useEffect } from 'react';
 import { Icons } from '@/lib/icons';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -49,7 +55,7 @@ export function ManagerDashboard() {
     try {
       const response = await fetch('/api/manager/dashboard');
       const data = await response.json();
-      
+
       if (data.success) {
         setOverview(data.overview);
         if (data.overview.length > 0) {
@@ -68,7 +74,7 @@ export function ManagerDashboard() {
     try {
       const response = await fetch(`/api/manager/team/${teamId}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setMembers(data.members);
       }
@@ -91,7 +97,7 @@ export function ManagerDashboard() {
         <CardHeader>
           <CardTitle>No Teams Yet</CardTitle>
           <CardDescription>
-            Create a team to start tracking your team's progress
+            Create a team to start tracking your team&apos;s progress
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -104,7 +110,7 @@ export function ManagerDashboard() {
     );
   }
 
-  const currentTeam = overview.find(t => t.teamId === selectedTeam);
+  const currentTeam = overview.find((t) => t.teamId === selectedTeam);
 
   return (
     <div className="space-y-6">
@@ -112,14 +118,14 @@ export function ManagerDashboard() {
       <div>
         <h1 className="text-3xl font-bold">Manager Dashboard</h1>
         <p className="text-muted-foreground">
-          Track your team's AI skill development and productivity
+          Track your team&apos;s AI skill development and productivity
         </p>
       </div>
 
       {/* Team Selector */}
       {overview.length > 1 && (
         <div className="flex gap-2">
-          {overview.map(team => (
+          {overview.map((team) => (
             <Button
               key={team.teamId}
               variant={selectedTeam === team.teamId ? 'default' : 'outline'}
@@ -139,11 +145,15 @@ export function ManagerDashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Team Members</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Team Members
+              </CardTitle>
               <Icons.users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{currentTeam.totalMembers}</div>
+              <div className="text-2xl font-bold">
+                {currentTeam.totalMembers}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {currentTeam.activeMembers} active this week
               </p>
@@ -152,11 +162,15 @@ export function ManagerDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Prompts Used</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Prompts Used
+              </CardTitle>
               <Icons.zap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{currentTeam.promptsUsedThisWeek}</div>
+              <div className="text-2xl font-bold">
+                {currentTeam.promptsUsedThisWeek}
+              </div>
               <p className="text-xs text-muted-foreground">This week</p>
             </CardContent>
           </Card>
@@ -167,7 +181,9 @@ export function ManagerDashboard() {
               <Icons.clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{currentTeam.timeSavedThisWeek}h</div>
+              <div className="text-2xl font-bold">
+                {currentTeam.timeSavedThisWeek}h
+              </div>
               <p className="text-xs text-muted-foreground">
                 ~${Math.round(currentTeam.timeSavedThisWeek * 100)} value
               </p>
@@ -181,10 +197,18 @@ export function ManagerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {currentTeam.topSkills[0] ? SKILL_INFO[currentTeam.topSkills[0].skill as keyof typeof SKILL_INFO]?.icon : '—'}
+                {currentTeam.topSkills[0]
+                  ? SKILL_INFO[
+                      currentTeam.topSkills[0].skill as keyof typeof SKILL_INFO
+                    ]?.icon
+                  : '—'}
               </div>
               <p className="text-xs text-muted-foreground">
-                {currentTeam.topSkills[0] ? SKILL_INFO[currentTeam.topSkills[0].skill as keyof typeof SKILL_INFO]?.name : 'None yet'}
+                {currentTeam.topSkills[0]
+                  ? SKILL_INFO[
+                      currentTeam.topSkills[0].skill as keyof typeof SKILL_INFO
+                    ]?.name
+                  : 'None yet'}
               </p>
             </CardContent>
           </Card>
@@ -210,21 +234,28 @@ export function ManagerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {members.map(member => (
+                {members.map((member) => (
                   <div
                     key={member.userId}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                    className="flex items-center justify-between rounded-lg border p-4 hover:bg-gray-50"
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <h4 className="font-medium">{member.name}</h4>
                         <Badge variant="outline">{member.level}</Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground">{member.email}</p>
-                      <div className="flex gap-2 mt-2">
-                        {member.skillsImproving.slice(0, 3).map(skill => (
-                          <Badge key={skill} variant="secondary" className="text-xs">
-                            {SKILL_INFO[skill as keyof typeof SKILL_INFO]?.icon} {SKILL_INFO[skill as keyof typeof SKILL_INFO]?.name}
+                      <p className="text-sm text-muted-foreground">
+                        {member.email}
+                      </p>
+                      <div className="mt-2 flex gap-2">
+                        {member.skillsImproving.slice(0, 3).map((skill) => (
+                          <Badge
+                            key={skill}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {SKILL_INFO[skill as keyof typeof SKILL_INFO]?.icon}{' '}
+                            {SKILL_INFO[skill as keyof typeof SKILL_INFO]?.name}
                           </Badge>
                         ))}
                       </div>
@@ -233,8 +264,10 @@ export function ManagerDashboard() {
                       <div className="text-2xl font-bold text-green-600">
                         {member.promotionReadiness}%
                       </div>
-                      <p className="text-xs text-muted-foreground">Promotion ready</p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground">
+                        Promotion ready
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
                         {member.promptsUsed} prompts used
                       </p>
                     </div>
@@ -256,7 +289,8 @@ export function ManagerDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Track your team&apos;s AI skill development and identify growth opportunities.
+                Track your team&apos;s AI skill development and identify growth
+                opportunities.
               </p>
               <div className="mt-4">
                 <Button variant="outline" asChild>
@@ -279,11 +313,11 @@ export function ManagerDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {members
-                  .filter(m => m.promotionReadiness >= 70)
-                  .map(member => (
+                  .filter((m) => m.promotionReadiness >= 70)
+                  .map((member) => (
                     <div
                       key={member.userId}
-                      className="flex items-center justify-between p-4 border border-green-200 bg-green-50 rounded-lg"
+                      className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-4"
                     >
                       <div>
                         <div className="flex items-center gap-2">
@@ -291,7 +325,7 @@ export function ManagerDashboard() {
                           <h4 className="font-medium">{member.name}</h4>
                           <Badge variant="outline">{member.level}</Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           Ready for promotion discussion
                         </p>
                       </div>
@@ -305,9 +339,10 @@ export function ManagerDashboard() {
                       </div>
                     </div>
                   ))}
-                
-                {members.filter(m => m.promotionReadiness >= 70).length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">
+
+                {members.filter((m) => m.promotionReadiness >= 70).length ===
+                  0 && (
+                  <p className="py-8 text-center text-muted-foreground">
                     No team members currently ready for promotion
                   </p>
                 )}

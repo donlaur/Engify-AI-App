@@ -1,6 +1,6 @@
 /**
  * UserService Tests
- * 
+ *
  * Demonstrates the testability benefits of the Repository Pattern.
  * These tests show:
  * - Easy mocking of dependencies
@@ -13,6 +13,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { UserService } from '../../services/UserService';
 import { IUserRepository } from '../interfaces/IRepository';
 import type { User } from '@/lib/db/schema';
+import { ObjectId } from 'mongodb';
 
 // Mock repository implementation
 const createMockUserRepository = (): IUserRepository => ({
@@ -25,6 +26,7 @@ const createMockUserRepository = (): IUserRepository => ({
   findByEmail: vi.fn(),
   findByProvider: vi.fn(),
   findByRole: vi.fn(),
+  findByPlan: vi.fn(),
   findByOrganization: vi.fn(),
   updateLastLogin: vi.fn(),
 });
@@ -53,7 +55,7 @@ describe('UserService', () => {
       };
 
       const expectedUser: User = {
-        _id: '507f1f77bcf86cd799439011',
+        _id: new ObjectId('507f1f77bcf86cd799439011'),
         email: 'test@example.com',
         name: 'Test User',
         role: 'user',
@@ -68,15 +70,21 @@ describe('UserService', () => {
         updatedAt: new Date(),
       };
 
-      (mockRepository.findByEmail as any).mockResolvedValue(null);
-      (mockRepository.create as any).mockResolvedValue(expectedUser);
+      (mockRepository.findByEmail as unknown as vi.Mock).mockResolvedValue(
+        null
+      );
+      (mockRepository.create as unknown as vi.Mock).mockResolvedValue(
+        expectedUser
+      );
 
       // Act
       const result = await userService.createUser(userData);
 
       // Assert
       expect(result).toEqual(expectedUser);
-      expect(mockRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(mockRepository.findByEmail).toHaveBeenCalledWith(
+        'test@example.com'
+      );
       expect(mockRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           email: 'test@example.com',
@@ -93,7 +101,9 @@ describe('UserService', () => {
         name: 'Test User',
         role: 'user',
         plan: 'free',
-      } as any;
+      } as Partial<Parameters<typeof userService.createUser>[0]> as Parameters<
+        typeof userService.createUser
+      >[0];
 
       // Act & Assert
       await expect(userService.createUser(userData)).rejects.toThrow(
@@ -109,7 +119,7 @@ describe('UserService', () => {
       };
 
       const existingUser: User = {
-        _id: '507f1f77bcf86cd799439011',
+        _id: new ObjectId('507f1f77bcf86cd799439011'),
         email: 'test@example.com',
         name: 'Existing User',
         role: 'user',
@@ -138,7 +148,7 @@ describe('UserService', () => {
       // Arrange
       const userId = '507f1f77bcf86cd799439011';
       const expectedUser: User = {
-        _id: userId,
+        _id: new ObjectId(userId),
         email: 'test@example.com',
         name: 'Test User',
         role: 'user',
@@ -194,7 +204,7 @@ describe('UserService', () => {
       };
 
       const existingUser: User = {
-        _id: userId,
+        _id: new ObjectId(userId),
         email: 'test@example.com',
         name: 'Test User',
         role: 'user',
@@ -247,7 +257,7 @@ describe('UserService', () => {
       // Arrange
       const users: User[] = [
         {
-          _id: '1',
+          _id: new ObjectId('507f1f77bcf86cd799439031'),
           email: 'user1@example.com',
           name: 'User 1',
           role: 'user',
@@ -262,7 +272,7 @@ describe('UserService', () => {
           updatedAt: new Date(),
         },
         {
-          _id: '2',
+          _id: new ObjectId('507f1f77bcf86cd799439032'),
           email: 'user2@example.com',
           name: 'User 2',
           role: 'admin',

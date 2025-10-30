@@ -13,26 +13,26 @@ export const dynamic = 'force-dynamic';
  * GET /api/manager/dashboard
  * Get manager dashboard data
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // TODO: Get user from session
     const managerId = 'temp-manager-id'; // Replace with actual session
 
-    const [overview, roi] = await Promise.all([
-      managerDashboardService.getTeamOverview(managerId),
-      // Get ROI for first team (if exists)
-      overview[0] 
-        ? managerDashboardService.getTeamROI(overview[0].teamId)
-        : Promise.resolve(null),
-    ]);
+    const overview = await managerDashboardService.getTeamOverview(managerId);
+    const firstTeam = overview && overview.length > 0 ? overview[0] : null;
+    const roi = firstTeam
+      ? await managerDashboardService.getTeamROI(firstTeam.teamId)
+      : null;
 
     return NextResponse.json({
       success: true,
       overview,
       roi,
     });
-  } catch (error: any) {
-    console.error('Manager dashboard error:', error);
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.error('Manager dashboard error:', errorMessage);
     return NextResponse.json(
       { error: 'Failed to load dashboard' },
       { status: 500 }
