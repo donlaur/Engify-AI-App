@@ -1,10 +1,10 @@
 /**
  * MongoDB Prompt Repository Implementation
- * 
+ *
  * Implements IPromptRepository interface using MongoDB/Mongoose.
  * This provides concrete implementation of the Repository Pattern
  * for Prompt entity operations.
- * 
+ *
  * Benefits:
  * - Database-agnostic business logic
  * - Easy to test with mock implementations
@@ -66,7 +66,7 @@ export class PromptRepository implements IPromptRepository {
     try {
       const collection = await this.getCollection();
       const now = new Date();
-      
+
       const newPrompt: Prompt = {
         ...promptData,
         _id: new ObjectId(),
@@ -85,10 +85,13 @@ export class PromptRepository implements IPromptRepository {
   /**
    * Update prompt by ID
    */
-  async update(id: string, promptData: Partial<Prompt>): Promise<Prompt | null> {
+  async update(
+    id: string,
+    promptData: Partial<Prompt>
+  ): Promise<Prompt | null> {
     try {
       const collection = await this.getCollection();
-      
+
       const updateData = {
         ...promptData,
         updatedAt: new Date(),
@@ -140,9 +143,11 @@ export class PromptRepository implements IPromptRepository {
   async findByUserId(userId: string): Promise<Prompt[]> {
     try {
       const collection = await this.getCollection();
-      const prompts = await collection.find({ 
-        authorId: new ObjectId(userId) 
-      }).toArray();
+      const prompts = await collection
+        .find({
+          authorId: new ObjectId(userId),
+        })
+        .toArray();
       return prompts;
     } catch (error) {
       console.error('Error finding prompts by user ID:', error);
@@ -156,9 +161,11 @@ export class PromptRepository implements IPromptRepository {
   async findByPattern(pattern: string): Promise<Prompt[]> {
     try {
       const collection = await this.getCollection();
-      const prompts = await collection.find({ 
-        pattern: pattern 
-      }).toArray();
+      const prompts = await collection
+        .find({
+          pattern: pattern,
+        })
+        .toArray();
       return prompts;
     } catch (error) {
       console.error('Error finding prompts by pattern:', error);
@@ -172,9 +179,11 @@ export class PromptRepository implements IPromptRepository {
   async findByTag(tag: string): Promise<Prompt[]> {
     try {
       const collection = await this.getCollection();
-      const prompts = await collection.find({ 
-        tags: { $in: [tag] } 
-      }).toArray();
+      const prompts = await collection
+        .find({
+          tags: { $in: [tag] },
+        })
+        .toArray();
       return prompts;
     } catch (error) {
       console.error('Error finding prompts by tag:', error);
@@ -188,10 +197,12 @@ export class PromptRepository implements IPromptRepository {
   async findByCategory(category: string): Promise<Prompt[]> {
     try {
       const collection = await this.getCollection();
-      const prompts = await collection.find({ 
-        category: category 
-      }).toArray();
-      return prompts;
+      const prompts = await collection
+        .find({
+          category: category,
+        } as unknown as Partial<Prompt>)
+        .toArray();
+      return prompts as Prompt[];
     } catch (error) {
       console.error('Error finding prompts by category:', error);
       throw new Error('Failed to find prompts by category');
@@ -204,9 +215,11 @@ export class PromptRepository implements IPromptRepository {
   async findPublic(): Promise<Prompt[]> {
     try {
       const collection = await this.getCollection();
-      const prompts = await collection.find({ 
-        isPublic: true 
-      }).toArray();
+      const prompts = await collection
+        .find({
+          isPublic: true,
+        })
+        .toArray();
       return prompts;
     } catch (error) {
       console.error('Error finding public prompts:', error);
@@ -220,9 +233,11 @@ export class PromptRepository implements IPromptRepository {
   async findFeatured(): Promise<Prompt[]> {
     try {
       const collection = await this.getCollection();
-      const prompts = await collection.find({ 
-        isFeatured: true 
-      }).toArray();
+      const prompts = await collection
+        .find({
+          isFeatured: true,
+        })
+        .toArray();
       return prompts;
     } catch (error) {
       console.error('Error finding featured prompts:', error);
@@ -236,14 +251,16 @@ export class PromptRepository implements IPromptRepository {
   async search(query: string): Promise<Prompt[]> {
     try {
       const collection = await this.getCollection();
-      const prompts = await collection.find({
-        $or: [
-          { title: { $regex: query, $options: 'i' } },
-          { description: { $regex: query, $options: 'i' } },
-          { content: { $regex: query, $options: 'i' } },
-          { tags: { $in: [new RegExp(query, 'i')] } }
-        ]
-      }).toArray();
+      const prompts = await collection
+        .find({
+          $or: [
+            { title: { $regex: query, $options: 'i' } },
+            { description: { $regex: query, $options: 'i' } },
+            { content: { $regex: query, $options: 'i' } },
+            { tags: { $in: [new RegExp(query, 'i')] } },
+          ],
+        })
+        .toArray();
       return prompts;
     } catch (error) {
       console.error('Error searching prompts:', error);
@@ -257,10 +274,12 @@ export class PromptRepository implements IPromptRepository {
   async findByRole(role: string): Promise<Prompt[]> {
     try {
       const collection = await this.getCollection();
-      const prompts = await collection.find({ 
-        role: role 
-      }).toArray();
-      return prompts;
+      const prompts = await collection
+        .find({
+          role: role,
+        } as unknown as Partial<Prompt>)
+        .toArray();
+      return prompts as Prompt[];
     } catch (error) {
       console.error('Error finding prompts by role:', error);
       throw new Error('Failed to find prompts by role');
@@ -273,10 +292,12 @@ export class PromptRepository implements IPromptRepository {
   async findByDifficulty(difficulty: string): Promise<Prompt[]> {
     try {
       const collection = await this.getCollection();
-      const prompts = await collection.find({ 
-        difficulty: difficulty 
-      }).toArray();
-      return prompts;
+      const prompts = await collection
+        .find({
+          difficulty: difficulty,
+        } as unknown as Partial<Prompt>)
+        .toArray();
+      return prompts as Prompt[];
     } catch (error) {
       console.error('Error finding prompts by difficulty:', error);
       throw new Error('Failed to find prompts by difficulty');
@@ -291,9 +312,9 @@ export class PromptRepository implements IPromptRepository {
       const collection = await this.getCollection();
       await collection.updateOne(
         { _id: new ObjectId(id) },
-        { 
+        {
           $inc: { 'stats.views': 1 },
-          $set: { updatedAt: new Date() }
+          $set: { updatedAt: new Date() },
         }
       );
     } catch (error) {
@@ -308,26 +329,27 @@ export class PromptRepository implements IPromptRepository {
   async updateRating(id: string, rating: number): Promise<void> {
     try {
       const collection = await this.getCollection();
-      
+
       // Get current prompt to calculate new average
       const prompt = await this.findById(id);
       if (!prompt) {
         throw new Error('Prompt not found');
       }
 
-      const currentTotal = prompt.stats.averageRating * prompt.stats.totalRatings;
+      const currentTotal =
+        prompt.stats.averageRating * prompt.stats.totalRatings;
       const newTotal = currentTotal + rating;
       const newCount = prompt.stats.totalRatings + 1;
       const newAverage = newTotal / newCount;
 
       await collection.updateOne(
         { _id: new ObjectId(id) },
-        { 
-          $set: { 
+        {
+          $set: {
             'stats.averageRating': newAverage,
             'stats.totalRatings': newCount,
-            updatedAt: new Date()
-          }
+            updatedAt: new Date(),
+          },
         }
       );
     } catch (error) {

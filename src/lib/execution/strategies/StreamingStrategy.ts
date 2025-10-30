@@ -15,6 +15,7 @@ export class StreamingStrategy implements IStreamingStrategy {
   public readonly config: StrategyConfig;
 
   constructor(
+    // @ts-expect-error - intentionally unused, using static methods instead
     private _factory: AIProviderFactory,
     config?: Partial<StrategyConfig>
   ) {

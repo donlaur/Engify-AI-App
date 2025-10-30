@@ -117,13 +117,13 @@ export function protectRoute(
   options: RBACOptions = {}
 ) {
   return async (_request: NextRequest): Promise<NextResponse> => {
-    const rbacCheck = await withRBAC(options)(request);
+    const rbacCheck = await withRBAC(options)(_request);
     if (rbacCheck) {
       return rbacCheck; // Return error response
     }
 
     // RBAC passed, execute handler
-    return handler(request);
+    return handler(_request);
   };
 }
 

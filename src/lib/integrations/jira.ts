@@ -69,6 +69,7 @@ export interface DORAMetrics {
  * Provides methods to interact with Jira REST API
  */
 export class JiraClient {
+  // @ts-expect-error - intentionally unused, kept for potential future use
   private _config: JiraConfig;
   private baseUrl: string;
   private authHeader: string;
@@ -357,7 +358,7 @@ export class JiraClient {
     const resolvedIssues = searchResults.issues.filter(
       (issue) => issue.resolved
     );
-    const _totalIssues = searchResults.issues.length;
+    // const _totalIssues = searchResults.issues.length; // Removed unused variable
 
     // Lead time: average time from created to resolved
     const leadTimes = resolvedIssues
