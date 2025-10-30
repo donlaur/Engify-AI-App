@@ -6,6 +6,8 @@ Add to `.env.local` and Vercel:
 
 ```bash
 REPLICATE_API_TOKEN=your_token
+# Optional, defaults to internal model mapping
+REPLICATE_MODEL=google/gemini-2.5-flash
 ```
 
 ## Provider (LLM scaffold)

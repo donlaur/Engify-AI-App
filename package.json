@@ -127,6 +127,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.65.0",
+    "replicate": "^0.32.1",
     "sonner": "^1.7.0",
     "superjson": "^2.2.1",
     "tailwind-merge": "^3.3.1",
