@@ -25,6 +25,9 @@ npm run content:extract tmp/ingest/html/<file>.html > tmp/ingest/extracted.jsonl
 
 # Enrich metadata (hash/lang/reading time)
 cat tmp/ingest/extracted.jsonl | npm run content:enrich > tmp/ingest/enriched.jsonl
+
+# Persist to Mongo (dedupe on hash)
+cat tmp/ingest/enriched.jsonl | npm run content:save
 ```
 
 ## Guardrails
