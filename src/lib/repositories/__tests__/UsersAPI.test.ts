@@ -13,8 +13,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../../../app/api/v2/users/route';
 import { getUserService } from '../../di/Container';
-import { UserService } from '../../services/UserService';
-import type { User } from '@/lib/db/schema';
+// ObjectId not used directly in assertions here
 
 // Mock the DI container
 vi.mock('../../di/Container', () => ({
@@ -22,7 +21,14 @@ vi.mock('../../di/Container', () => ({
 }));
 
 describe('/api/v2/users', () => {
-  let mockUserService: UserService;
+  let mockUserService: {
+    getAllUsers: ReturnType<typeof vi.fn>;
+    getUsersByRole: ReturnType<typeof vi.fn>;
+    getUsersByPlan: ReturnType<typeof vi.fn>;
+    getUsersByOrganization: ReturnType<typeof vi.fn>;
+    getUserStats: ReturnType<typeof vi.fn>;
+    createUser: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     // Reset mocks
@@ -45,7 +51,23 @@ describe('/api/v2/users', () => {
   describe('GET /api/v2/users', () => {
     it('should return all users successfully', async () => {
       // Arrange
-      const expectedUsers: User[] = [
+      type UserDTO = {
+        _id: string;
+        email: string;
+        name: string;
+        role: string;
+        plan: string;
+        organizationId: string | null;
+        emailVerified: string | null;
+        image: string | null;
+        password: string | null;
+        stripeCustomerId: string | null;
+        stripeSubscriptionId: string | null;
+        createdAt: string;
+        updatedAt: string;
+      };
+
+      const expectedUsers: UserDTO[] = [
         {
           _id: '507f1f77bcf86cd799439011',
           email: 'user1@example.com',
@@ -97,7 +119,7 @@ describe('/api/v2/users', () => {
 
     it('should filter users by role', async () => {
       // Arrange
-      const expectedUsers: User[] = [
+      const expectedUsers: UserDTO[] = [
         {
           _id: '507f1f77bcf86cd799439011',
           email: 'admin@example.com',
@@ -136,7 +158,7 @@ describe('/api/v2/users', () => {
 
     it('should filter users by plan', async () => {
       // Arrange
-      const expectedUsers: User[] = [
+      const expectedUsers: UserDTO[] = [
         {
           _id: '507f1f77bcf86cd799439011',
           email: 'pro@example.com',
@@ -229,7 +251,7 @@ describe('/api/v2/users', () => {
         plan: 'free',
       };
 
-      const createdUser: User = {
+      const createdUser = {
         _id: '507f1f77bcf86cd799439011',
         email: 'newuser@example.com',
         name: 'New User',

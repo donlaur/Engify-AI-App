@@ -1,13 +1,13 @@
 /**
  * Generic Repository Interface
- * 
+ *
  * Implements the Repository Pattern for data access abstraction.
  * This enables:
  * - Dependency Inversion (depend on abstractions, not concretions)
  * - Easy testing with mock implementations
  * - Database-agnostic business logic
  * - Clean separation of concerns
- * 
+ *
  * SOLID Principles:
  * - Single Responsibility: Each repository handles one entity type
  * - Open/Closed: Add new methods without modifying existing interface
@@ -92,6 +92,20 @@ export interface IUserRepository extends IRepository<User> {
   findByRole(role: string): Promise<User[]>;
 
   /**
+   * Find users by plan
+   * @param plan - Subscription plan
+   * @returns Promise with array of users
+   */
+  findByPlan(plan: string): Promise<User[]>;
+
+  /**
+   * Update last login timestamp
+   * @param id - User ID
+   * @returns Promise that resolves when updated
+   */
+  updateLastLogin(id: string): Promise<void>;
+
+  /**
    * Find users by organization
    * @param organizationId - Organization ID
    * @returns Promise with array of users
@@ -145,6 +159,20 @@ export interface IPromptRepository extends IRepository<Prompt> {
   findFeatured(): Promise<Prompt[]>;
 
   /**
+   * Find prompts by role
+   * @param role - User role
+   * @returns Promise with array of matching prompts
+   */
+  findByRole(role: string): Promise<Prompt[]>;
+
+  /**
+   * Find prompts by difficulty
+   * @param difficulty - Difficulty level
+   * @returns Promise with array of matching prompts
+   */
+  findByDifficulty(difficulty: string): Promise<Prompt[]>;
+
+  /**
    * Search prompts by text
    * @param query - Search query
    * @returns Promise with array of matching prompts
@@ -195,4 +223,7 @@ export interface IActivityRepository extends IRepository<Activity> {
 }
 
 // Import types (these will be defined in the schemas)
-import type { User, Prompt, Activity } from '@/lib/schemas';
+import type { User, PromptTemplate as Prompt } from '@/lib/db/schema';
+// Activity type not in schema - using placeholder
+// import type { Activity } from '@/lib/db/schema';
+type Activity = Record<string, unknown>;
