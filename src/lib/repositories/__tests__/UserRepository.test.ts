@@ -1,6 +1,6 @@
 /**
  * UserRepository Tests
- * 
+ *
  * Tests the MongoDB implementation of IUserRepository.
  * These tests demonstrate:
  * - Repository pattern implementation correctness
@@ -9,7 +9,7 @@
  * - Type safety with MongoDB operations
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Collection, Db, ObjectId } from 'mongodb';
 import { UserRepository } from '../mongodb/UserRepository';
 import { connectDB } from '@/lib/db/mongodb';
@@ -38,15 +38,15 @@ describe('UserRepository', () => {
       deleteOne: vi.fn(),
       countDocuments: vi.fn(),
       updateOne: vi.fn(),
-    };
+    } as unknown as Collection<User>;
 
     // Create mock database
     mockDb = {
       collection: vi.fn().mockReturnValue(mockCollection),
-    };
+    } as unknown as Db;
 
     // Mock connectDB to return our mock database
-    (connectDB as jest.Mock).mockResolvedValue(mockDb);
+    (connectDB as unknown as vi.Mock).mockResolvedValue(mockDb);
 
     // Create repository instance
     userRepository = new UserRepository();
@@ -57,7 +57,7 @@ describe('UserRepository', () => {
       // Arrange
       const userId = '507f1f77bcf86cd799439011';
       const expectedUser: User = {
-        _id: userId,
+        _id: new ObjectId(userId),
         email: 'test@example.com',
         name: 'Test User',
         role: 'user',
@@ -117,7 +117,7 @@ describe('UserRepository', () => {
       // Arrange
       const email = 'test@example.com';
       const expectedUser: User = {
-        _id: '507f1f77bcf86cd799439011',
+        _id: new ObjectId('507f1f77bcf86cd799439011'),
         email: 'test@example.com',
         name: 'Test User',
         role: 'user',
@@ -179,18 +179,22 @@ describe('UserRepository', () => {
         _id: '507f1f77bcf86cd799439011',
       };
 
-      mockCollection.insertOne.mockResolvedValue({ insertedId: expectedUser._id });
+      mockCollection.insertOne.mockResolvedValue({
+        insertedId: expectedUser._id,
+      });
 
       // Act
       const result = await userRepository.create(userData);
 
       // Assert
-      expect(result).toEqual(expect.objectContaining({
-        ...userData,
-        _id: expect.any(Object),
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-      }));
+      expect(result).toEqual(
+        expect.objectContaining({
+          ...userData,
+          _id: expect.any(Object),
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
+      );
       expect(mockCollection.insertOne).toHaveBeenCalledWith(
         expect.objectContaining({
           ...userData,
@@ -258,10 +262,12 @@ describe('UserRepository', () => {
       expect(result).toEqual(updatedUser);
       expect(mockCollection.findOneAndUpdate).toHaveBeenCalledWith(
         { _id: expect.any(Object) },
-        { $set: expect.objectContaining({
-          ...updateData,
-          updatedAt: expect.any(Date),
-        }) },
+        {
+          $set: expect.objectContaining({
+            ...updateData,
+            updatedAt: expect.any(Date),
+          }),
+        },
         { returnDocument: 'after' }
       );
     });
