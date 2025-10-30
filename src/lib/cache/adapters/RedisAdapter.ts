@@ -412,7 +412,6 @@ export class RedisCacheAdapter implements ICacheAdapter {
       // Redis EVAL runs Lua scripts in Redis's sandboxed environment - safe and standard practice
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const redisClient = this.redis as any;
-      // @ts-expect-error - redis.eval() exists but types may be incomplete for Cluster
       const luaMethod = 'eval'; // Redis EVAL command (Lua script execution, not JavaScript eval())
       // Security scanner exception: Redis EVAL (Lua) is safe - executes in Redis sandbox, not JavaScript
       // Note: security-check.js allows Redis EVAL in RedisAdapter files

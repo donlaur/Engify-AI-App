@@ -3,7 +3,9 @@
  * MongoDB schema for learning materials with JSON fallback
  */
 
-import mongoose from 'mongoose';
+// Note: mongoose is not installed in this project (using native MongoDB driver)
+// If this model is needed, either install mongoose or migrate to native driver
+// import mongoose from 'mongoose';
 
 export interface ILearningResource {
   id: string;
@@ -29,6 +31,7 @@ export interface ILearningResource {
   updatedAt: Date;
 }
 
+/* Commented out - mongoose not installed
 const LearningResourceSchema = new mongoose.Schema<ILearningResource>(
   {
     id: {
@@ -95,3 +98,4 @@ LearningResourceSchema.index({ tags: 1 });
 export const LearningResource =
   mongoose.models.LearningResource ||
   mongoose.model<ILearningResource>('LearningResource', LearningResourceSchema);
+*/

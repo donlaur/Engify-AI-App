@@ -116,11 +116,11 @@ export function LibraryClient({ initialPrompts }: LibraryClientProps) {
               key={prompt.id}
               {...prompt}
               role={
-                prompt.role && prompt.role in roleLabels
+                (prompt.role && prompt.role in roleLabels
                   ? roleLabels[prompt.role as UserRole]
-                  : undefined
+                  : undefined) as UserRole | undefined
               }
-              category={categoryLabels[prompt.category]}
+              category={categoryLabels[prompt.category as PromptCategory]}
             />
           ))}
         </div>

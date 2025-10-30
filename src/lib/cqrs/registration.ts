@@ -6,7 +6,7 @@
  */
 
 import { cqrsBus } from './bus';
-import { UserService } from '../../services/UserService';
+import { UserService } from '@/lib/services/UserService';
 
 // Command Handlers
 import {
