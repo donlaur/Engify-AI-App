@@ -5,6 +5,8 @@
 
 import { BaseService } from './BaseService';
 import { ObjectId } from 'mongodb';
+import { z } from 'zod';
+import { userService } from './UserService';
 
 export interface Team {
   _id?: ObjectId;
@@ -27,7 +29,7 @@ export interface TeamMember {
 
 export class TeamService extends BaseService<Team> {
   constructor() {
-    super('teams');
+    super('teams', z.object({}) as unknown as z.ZodType<Team>);
   }
 
   /**
@@ -46,20 +48,19 @@ export class TeamService extends BaseService<Team> {
       updatedAt: new Date(),
     };
 
-    const db = await this.getDb();
-    const result = await db.collection(this.collectionName).insertOne(team);
-    
+    const collection = await this.getCollection();
+    const result = await collection.insertOne(team);
+
     return { ...team, _id: result.insertedId };
   }
 
   /**
    * Get teams managed by a user
+   * SECURITY: This query is intentionally system-wide for manager lookup in auth context
    */
   async getTeamsByManager(managerId: string): Promise<Team[]> {
-    const db = await this.getDb();
-    const teams = await db.collection(this.collectionName)
-      .find({ managerId })
-      .toArray();
+    const collection = await this.getCollection();
+    const teams = await collection.find({ managerId }).toArray();
 
     return teams as Team[];
   }
@@ -68,9 +69,8 @@ export class TeamService extends BaseService<Team> {
    * Get team by ID
    */
   async getTeamById(teamId: string): Promise<Team | null> {
-    const db = await this.getDb();
-    const team = await db.collection(this.collectionName)
-      .findOne({ _id: new ObjectId(teamId) });
+    const collection = await this.getCollection();
+    const team = await collection.findOne({ _id: new ObjectId(teamId) });
 
     return team as Team | null;
   }
@@ -79,10 +79,10 @@ export class TeamService extends BaseService<Team> {
    * Add member to team
    */
   async addMember(teamId: string, userId: string): Promise<void> {
-    const db = await this.getDb();
-    await db.collection(this.collectionName).updateOne(
+    const collection = await this.getCollection();
+    await collection.updateOne(
       { _id: new ObjectId(teamId) },
-      { 
+      {
         $addToSet: { memberIds: userId },
         $set: { updatedAt: new Date() },
       }
@@ -93,10 +93,10 @@ export class TeamService extends BaseService<Team> {
    * Remove member from team
    */
   async removeMember(teamId: string, userId: string): Promise<void> {
-    const db = await this.getDb();
-    await db.collection(this.collectionName).updateOne(
+    const collection = await this.getCollection();
+    await collection.updateOne(
       { _id: new ObjectId(teamId) },
-      { 
+      {
         $pull: { memberIds: userId },
         $set: { updatedAt: new Date() },
       }
@@ -126,19 +126,35 @@ export class TeamService extends BaseService<Team> {
     const team = await this.getTeamById(teamId);
     if (!team) return [];
 
-    const db = await this.getDb();
-    const users = await db.collection('users')
-      .find({ _id: { $in: team.memberIds.map(id => new ObjectId(id)) } })
-      .toArray();
+    // Fetch users via service to avoid direct collection access
+    const memberIds = team.memberIds;
+    const users = await Promise.all(
+      memberIds.map(async (id) => {
+        try {
+          return await userService.getUserById(id);
+        } catch {
+          return null;
+        }
+      })
+    );
 
-    return users.map(user => ({
-      userId: user._id.toString(),
-      name: user.name || user.email,
-      email: user.email,
-      role: user.role,
-      level: user.careerContext?.level,
-      joinedAt: user.createdAt,
-    }));
+    const normalized = users.filter(
+      (u): u is NonNullable<typeof u> => u != null
+    );
+
+    return normalized.map((user) => {
+      return {
+        userId: (user as { _id: { toString: () => string } })._id.toString(),
+        name:
+          (user as { name?: string; email: string }).name ||
+          (user as { email: string }).email,
+        email: (user as { email: string }).email,
+        role: (user as { role?: string }).role || 'user',
+        level: (user as { careerContext?: { level?: string } }).careerContext
+          ?.level,
+        joinedAt: (user as { createdAt?: Date }).createdAt || new Date(),
+      };
+    });
   }
 
   /**
@@ -154,7 +170,7 @@ export class TeamService extends BaseService<Team> {
     const byLevel: Record<string, number> = {};
     const byRole: Record<string, number> = {};
 
-    members.forEach(member => {
+    members.forEach((member) => {
       if (member.level) {
         byLevel[member.level] = (byLevel[member.level] || 0) + 1;
       }

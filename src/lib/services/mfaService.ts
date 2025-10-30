@@ -162,7 +162,7 @@ export class MFAService {
             userId,
             action: 'MFA_CODE_VERIFIED',
             resource: 'mfa',
-            metadata: {
+            details: {
               phoneNumber: this.maskPhoneNumber(phoneNumber),
               method: 'sms',
               provider: 'twilio_verify',

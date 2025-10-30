@@ -5,7 +5,13 @@
  */
 
 export interface TemplateData {
-  [key: string]: string | number | boolean | TemplateData | TemplateData[];
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | TemplateData
+    | TemplateData[]
+    | undefined;
 }
 
 /**

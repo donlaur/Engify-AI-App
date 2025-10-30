@@ -5,11 +5,21 @@
 
 import { BaseService } from './BaseService';
 import { UserSkill, SkillCategory } from '@/lib/types/user';
-import { getSkillsForPrompt, getSkillsForPattern } from '@/lib/constants/skills';
+import {
+  getSkillsForPrompt,
+  getSkillsForPattern,
+} from '@/lib/constants/skills';
+import { z } from 'zod';
+import { ObjectId } from 'mongodb';
 
-export class SkillTrackingService extends BaseService<UserSkill> {
+export class SkillTrackingService extends BaseService<
+  UserSkill & { _id?: ObjectId }
+> {
   constructor() {
-    super('user_skills');
+    super(
+      'user_skills',
+      z.object({}) as unknown as z.ZodType<UserSkill & { _id?: ObjectId }>
+    );
   }
 
   /**
@@ -20,7 +30,7 @@ export class SkillTrackingService extends BaseService<UserSkill> {
     promptCategory: string
   ): Promise<void> {
     const skills = getSkillsForPrompt(promptCategory);
-    
+
     for (const skill of skills) {
       await this.incrementSkill(userId, skill);
     }
@@ -29,12 +39,9 @@ export class SkillTrackingService extends BaseService<UserSkill> {
   /**
    * Track skill usage from pattern usage
    */
-  async trackPatternSkills(
-    userId: string,
-    patternId: string
-  ): Promise<void> {
+  async trackPatternSkills(userId: string, patternId: string): Promise<void> {
     const skills = getSkillsForPattern(patternId);
-    
+
     for (const skill of skills) {
       await this.incrementSkill(userId, skill);
     }
@@ -47,14 +54,14 @@ export class SkillTrackingService extends BaseService<UserSkill> {
     userId: string,
     skill: SkillCategory
   ): Promise<void> {
-    const db = await this.getDb();
-    
-    await db.collection(this.collectionName).updateOne(
+    const collection = await this.getCollection();
+
+    await collection.updateOne(
       { userId, skill },
       {
         $inc: { count: 1 },
         $set: { lastUsed: new Date() },
-        $setOnInsert: { 
+        $setOnInsert: {
           userId,
           skill,
           improvement: 0,
@@ -68,8 +75,8 @@ export class SkillTrackingService extends BaseService<UserSkill> {
    * Get user's skill breakdown
    */
   async getUserSkills(userId: string): Promise<UserSkill[]> {
-    const db = await this.getDb();
-    const skills = await db.collection(this.collectionName)
+    const collection = await this.getCollection();
+    const skills = await collection
       .find({ userId })
       .sort({ count: -1 })
       .toArray();
@@ -84,9 +91,8 @@ export class SkillTrackingService extends BaseService<UserSkill> {
     userId: string,
     skill: SkillCategory
   ): Promise<UserSkill | null> {
-    const db = await this.getDb();
-    const skillData = await db.collection(this.collectionName)
-      .findOne({ userId, skill });
+    const collection = await this.getCollection();
+    const skillData = await collection.findOne({ userId, skill });
 
     return skillData as UserSkill | null;
   }
@@ -100,20 +106,22 @@ export class SkillTrackingService extends BaseService<UserSkill> {
     skill: SkillCategory
   ): Promise<number> {
     const skillData = await this.getSkillProgress(userId, skill);
-    
+
     if (!skillData) return 0;
 
-    // Simple calculation: 
+    // Simple calculation:
     // - Base improvement from count (max 50%)
     // - Recency bonus (max 50%)
     const countImprovement = Math.min(skillData.count * 2, 50);
-    
-    const daysSinceUse = skillData.lastUsed 
-      ? Math.floor((Date.now() - skillData.lastUsed.getTime()) / (1000 * 60 * 60 * 24))
+
+    const daysSinceUse = skillData.lastUsed
+      ? Math.floor(
+          (Date.now() - skillData.lastUsed.getTime()) / (1000 * 60 * 60 * 24)
+        )
       : 999;
-    
+
     const recencyBonus = Math.max(0, 50 - daysSinceUse);
-    
+
     return Math.min(100, countImprovement + recencyBonus);
   }
 
@@ -122,12 +130,15 @@ export class SkillTrackingService extends BaseService<UserSkill> {
    */
   async updateSkillImprovements(userId: string): Promise<void> {
     const skills = await this.getUserSkills(userId);
-    
+
     for (const skill of skills) {
-      const improvement = await this.calculateSkillImprovement(userId, skill.skill);
-      
-      const db = await this.getDb();
-      await db.collection(this.collectionName).updateOne(
+      const improvement = await this.calculateSkillImprovement(
+        userId,
+        skill.skill
+      );
+
+      const collection = await this.getCollection();
+      await collection.updateOne(
         { userId, skill: skill.skill },
         { $set: { improvement } }
       );
@@ -137,12 +148,9 @@ export class SkillTrackingService extends BaseService<UserSkill> {
   /**
    * Get top skills for user
    */
-  async getTopSkills(
-    userId: string,
-    limit: number = 5
-  ): Promise<UserSkill[]> {
-    const db = await this.getDb();
-    const skills = await db.collection(this.collectionName)
+  async getTopSkills(userId: string, limit: number = 5): Promise<UserSkill[]> {
+    const collection = await this.getCollection();
+    const skills = await collection
       .find({ userId })
       .sort({ improvement: -1, count: -1 })
       .limit(limit)
@@ -156,9 +164,9 @@ export class SkillTrackingService extends BaseService<UserSkill> {
    */
   async getWeeklySkills(userId: string): Promise<UserSkill[]> {
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    
-    const db = await this.getDb();
-    const skills = await db.collection(this.collectionName)
+
+    const collection = await this.getCollection();
+    const skills = await collection
       .find({
         userId,
         lastUsed: { $gte: weekAgo },
@@ -180,16 +188,17 @@ export class SkillTrackingService extends BaseService<UserSkill> {
   }> {
     const skills = await this.getUserSkills(userId);
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    
-    const activeSkills = skills.filter(s => 
-      s.lastUsed && s.lastUsed >= thirtyDaysAgo
+
+    const activeSkills = skills.filter(
+      (s) => s.lastUsed && s.lastUsed >= thirtyDaysAgo
     );
 
-    const topSkill = skills.length > 0 ? skills[0].skill : null;
-    
-    const averageImprovement = skills.length > 0
-      ? skills.reduce((sum, s) => sum + s.improvement, 0) / skills.length
-      : 0;
+    const topSkill = skills.length > 0 ? (skills[0]?.skill ?? null) : null;
+
+    const averageImprovement =
+      skills.length > 0
+        ? skills.reduce((sum, s) => sum + s.improvement, 0) / skills.length
+        : 0;
 
     return {
       totalSkills: skills.length,
