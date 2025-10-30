@@ -167,4 +167,6 @@ Stop when the artifact is coherent; do not exceed 8 steps.
 - [x] Agent Sandbox tab (feature‑flagged) + artifacts API (RBAC + flag)
 - [x] RBAC guards on key v2 surfaces via presets
 - [x] Integration tests for RBAC (allow/deny) and admin route protection
-- [ ] PR → Preview verification → rollout with flags default safe
+- [x] PR → Preview verification → rollout with flags default safe
+  - Preview: green after `workbench/gallery` forced dynamic + DB fail‑safe
+  - PR: #24 "feat(rbac): Enterprise RBAC Completion + Admin Dashboard"
