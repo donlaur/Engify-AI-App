@@ -120,7 +120,7 @@ export function LibraryClient({ initialPrompts }: LibraryClientProps) {
                   ? roleLabels[prompt.role as UserRole]
                   : undefined) as UserRole | undefined
               }
-              category={categoryLabels[prompt.category as PromptCategory]}
+              category={prompt.category as PromptCategory}
             />
           ))}
         </div>
