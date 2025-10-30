@@ -36,6 +36,7 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().optional(),
   GOOGLE_AI_API_KEY: z.string().optional(),
   REPLICATE_API_TOKEN: z.string().optional(),
+  REPLICATE_MODEL: z.string().optional(),
 
   // Python Services (Optional for development)
   PYTHON_API_URL: z.string().url().optional(),

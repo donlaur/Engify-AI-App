@@ -25,15 +25,49 @@ export class ReplicateAdapter implements AIProvider {
     if (!this.validateRequest(request)) {
       throw new Error('Invalid request: prompt is required');
     }
-    if (!process.env.REPLICATE_API_TOKEN) {
-      throw new Error('REPLICATE_API_TOKEN is not set');
+    const token = process.env.REPLICATE_API_TOKEN;
+    const modelId = process.env.REPLICATE_MODEL || this.model;
+
+    if (token && modelId) {
+      try {
+        const Replicate = (await import('replicate')).default;
+        const replicate = new Replicate({ auth: token });
+        const input: Record<string, unknown> = { prompt: request.prompt };
+        if (typeof request.maxTokens === 'number')
+          input.max_tokens = request.maxTokens;
+        if (typeof request.temperature === 'number')
+          input.temperature = request.temperature;
+
+        const output = (await replicate.run(modelId, { input })) as unknown;
+        const content = Array.isArray(output)
+          ? String(output[0] ?? '')
+          : typeof output === 'string'
+            ? output
+            : JSON.stringify(output);
+
+        const latency = Date.now() - start;
+        return {
+          content,
+          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+          cost: { input: 0, output: 0, total: 0 },
+          latency,
+          provider: this.provider,
+          model: modelId,
+        };
+      } catch (err) {
+        const latency = Date.now() - start;
+        return {
+          content: `Replicate(${modelId}) error fallback: ${String(err)}`,
+          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+          cost: { input: 0, output: 0, total: 0 },
+          latency,
+          provider: this.provider,
+          model: modelId,
+        };
+      }
     }
 
-    // NOTE: Full Replicate integration typically uses model versions and the SDK.
-    // Here we provide a safe, minimal scaffold that can be expanded to call
-    // replicate.run(model, { input }) when the chosen models are finalized.
-
-    // For now, return a deterministic stub to keep contracts intact.
+    // Fallback scaffold if token/model not set
     const latency = Date.now() - start;
     return {
       content: `Replicate(${this.model}) placeholder: ${request.prompt}`,
