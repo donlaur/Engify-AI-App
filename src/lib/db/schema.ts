@@ -241,6 +241,7 @@ export type AuditLog = z.infer<typeof AuditLogSchema>;
  */
 export const WebContentSchema = z.object({
   _id: ObjectIdSchema,
+  organizationId: ObjectIdSchema.nullable().default(null),
   title: z.string().nullable(),
   description: z.string().nullable(),
   text: z.string().min(1),
@@ -253,7 +254,9 @@ export const WebContentSchema = z.object({
     hasTitle: z.boolean(),
     hasDescription: z.boolean(),
     minWordsMet: z.boolean(),
+    checks: z.array(z.string()).default([]),
   }),
+  reviewStatus: z.enum(['pending', 'approved', 'rejected']).default('pending'),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
