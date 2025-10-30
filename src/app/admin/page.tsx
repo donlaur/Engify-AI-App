@@ -21,6 +21,31 @@ export default async function AdminPage() {
     .collection(Collections.AUDIT_LOGS)
     .countDocuments();
 
+  const recentUsers = (await db
+    .collection(Collections.USERS)
+    .find({}, { projection: { email: 1, name: 1, role: 1, createdAt: 1 } })
+    .sort({ createdAt: -1 })
+    .limit(8)
+    .toArray()) as Array<{
+    _id: unknown;
+    email?: string;
+    name?: string;
+    role?: string;
+    createdAt?: Date;
+  }>;
+
+  const recentContent = (await db
+    .collection(Collections.WEB_CONTENT)
+    .find({}, { projection: { title: 1, source: 1, createdAt: 1 } })
+    .sort({ createdAt: -1 })
+    .limit(8)
+    .toArray()) as Array<{
+    _id: unknown;
+    title?: string;
+    source?: string;
+    createdAt?: Date;
+  }>;
+
   return (
     <div className="mx-auto max-w-5xl p-6">
       <h1 className="mb-4 text-3xl font-semibold">Admin Dashboard</h1>
@@ -45,17 +70,61 @@ export default async function AdminPage() {
 
       <div className="mt-8 grid gap-6">
         <section className="rounded-lg border bg-white p-4">
-          <h2 className="mb-2 text-lg font-semibold">Users (read-only)</h2>
-          <p className="text-sm text-slate-600">
-            Basic overview; actions to be added later.
-          </p>
+          <h2 className="mb-3 text-lg font-semibold">Recent Users</h2>
+          <div className="divide-y text-sm">
+            {recentUsers.map(
+              (u: {
+                _id: unknown;
+                email?: string;
+                name?: string;
+                role?: string;
+              }) => (
+                <div
+                  key={String(u._id)}
+                  className="flex items-center justify-between py-2"
+                >
+                  <div>
+                    <div className="font-medium">{u.name || 'Unknown'}</div>
+                    <div className="text-slate-600">{u.email}</div>
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
+                    {u.role || 'user'}
+                  </span>
+                </div>
+              )
+            )}
+          </div>
         </section>
 
         <section className="rounded-lg border bg-white p-4">
-          <h2 className="mb-2 text-lg font-semibold">Content Ingestion</h2>
-          <p className="text-sm text-slate-600">
-            Monitor pending/approved content. Review workflow coming soon.
-          </p>
+          <h2 className="mb-3 text-lg font-semibold">Recent Content</h2>
+          <div className="divide-y text-sm">
+            {recentContent.map(
+              (c: {
+                _id: unknown;
+                title?: string;
+                source?: string;
+                createdAt?: Date;
+              }) => (
+                <div
+                  key={String(c._id)}
+                  className="flex items-center justify-between py-2"
+                >
+                  <div>
+                    <div className="font-medium">{c.title || 'Untitled'}</div>
+                    <div className="text-slate-600">
+                      {c.source || 'unknown'}
+                    </div>
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    {c.createdAt
+                      ? new Date(c.createdAt).toLocaleDateString()
+                      : ''}
+                  </div>
+                </div>
+              )
+            )}
+          </div>
         </section>
 
         <section className="rounded-lg border bg-white p-4">
