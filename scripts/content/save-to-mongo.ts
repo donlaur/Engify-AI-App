@@ -37,6 +37,7 @@ interface InputRecord {
 }
 
 interface StoredRecord {
+  organizationId: unknown | null;
   title: string | null;
   description: string | null;
   text: string;
@@ -98,6 +99,7 @@ function toStored(input: InputRecord): StoredRecord | null {
   };
 
   return {
+    organizationId: null,
     title: typeof title === 'string' ? title : null,
     description: typeof description === 'string' ? description : null,
     text,
