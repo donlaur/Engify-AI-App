@@ -150,8 +150,8 @@ export class UserAggregate {
       plan: event.data.plan,
       organizationId: event.data.organizationId,
       emailVerified: false,
-      createdAt: (event as IEvent).timestamp,
-      updatedAt: (event as IEvent).timestamp,
+      createdAt: (event as unknown as IEvent).timestamp,
+      updatedAt: (event as unknown as IEvent).timestamp,
     };
   }
 
@@ -162,7 +162,7 @@ export class UserAggregate {
     return {
       ...state,
       ...event.data.changes,
-      updatedAt: (event as IEvent).timestamp,
+      updatedAt: (event as unknown as IEvent).timestamp,
     };
   }
 
@@ -183,7 +183,7 @@ export class UserAggregate {
     return {
       ...state,
       lastLoginAt: event.data.lastLoginAt,
-      updatedAt: (event as IEvent).timestamp,
+      updatedAt: (event as unknown as IEvent).timestamp,
     };
   }
 
@@ -194,7 +194,7 @@ export class UserAggregate {
     return {
       ...state,
       plan: event.data.newPlan,
-      updatedAt: (event as IEvent).timestamp,
+      updatedAt: (event as unknown as IEvent).timestamp,
     };
   }
 
@@ -205,7 +205,7 @@ export class UserAggregate {
     return {
       ...state,
       organizationId: event.data.organizationId,
-      updatedAt: (event as IEvent).timestamp,
+      updatedAt: (event as unknown as IEvent).timestamp,
     };
   }
 
@@ -216,7 +216,7 @@ export class UserAggregate {
     return {
       ...state,
       organizationId: undefined,
-      updatedAt: (event as IEvent).timestamp,
+      updatedAt: (event as unknown as IEvent).timestamp,
     };
   }
 
@@ -227,7 +227,7 @@ export class UserAggregate {
     return {
       ...state,
       emailVerified: true,
-      updatedAt: (event as IEvent).timestamp,
+      updatedAt: (event as unknown as IEvent).timestamp,
     };
   }
 
@@ -237,7 +237,7 @@ export class UserAggregate {
   ): Partial<UserState> {
     return {
       ...state,
-      updatedAt: (event as IEvent).timestamp,
+      updatedAt: (event as unknown as IEvent).timestamp,
     };
   }
 
@@ -268,7 +268,10 @@ export class UserAggregate {
           organizationId,
         },
         correlationId,
-      }),
+      }) as unknown as Omit<
+        IEvent,
+        'eventId' | 'aggregateId' | 'version' | 'timestamp'
+      >,
       userId
     );
 
@@ -306,7 +309,10 @@ export class UserAggregate {
           changes,
         },
         correlationId,
-      }),
+      }) as unknown as Omit<
+        IEvent,
+        'eventId' | 'aggregateId' | 'version' | 'timestamp'
+      >,
       this.state.id
     );
 

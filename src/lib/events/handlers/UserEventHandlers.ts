@@ -198,7 +198,7 @@ export class UserNotificationHandler implements IEventHandler<IEvent> {
     event: UserPlanChangedEvent
   ): Promise<void> {
     // Access IEvent properties via type assertion since UserEvent interfaces extend IEvent
-    const baseEvent = event as IEvent;
+    const baseEvent = event as unknown as IEvent;
     // eslint-disable-next-line no-console
     console.log(
       `[NOTIFICATION] Plan change notification sent to user ${baseEvent.aggregateId}`,
@@ -211,7 +211,7 @@ export class UserNotificationHandler implements IEventHandler<IEvent> {
     event: UserAssignedToOrganizationEvent
   ): Promise<void> {
     // Access IEvent properties via type assertion since UserEvent interfaces extend IEvent
-    const baseEvent = event as IEvent;
+    const baseEvent = event as unknown as IEvent;
     // eslint-disable-next-line no-console
     console.log(
       `[NOTIFICATION] Organization assignment notification sent to user ${baseEvent.aggregateId}`,
@@ -251,7 +251,7 @@ export class UserIntegrationHandler implements IEventHandler<IEvent> {
 
   private async handleUserCreated(event: UserCreatedEvent): Promise<void> {
     // Access IEvent properties via type assertion since UserEvent interfaces extend IEvent
-    const baseEvent = event as IEvent;
+    const baseEvent = event as unknown as IEvent;
     // eslint-disable-next-line no-console
     console.log(
       `[INTEGRATION] Creating Stripe customer for user ${baseEvent.aggregateId}`
@@ -263,7 +263,7 @@ export class UserIntegrationHandler implements IEventHandler<IEvent> {
     event: UserPlanChangedEvent
   ): Promise<void> {
     // Access IEvent properties via type assertion since UserEvent interfaces extend IEvent
-    const baseEvent = event as IEvent;
+    const baseEvent = event as unknown as IEvent;
     // eslint-disable-next-line no-console
     console.log(
       `[INTEGRATION] Updating Stripe subscription for user ${baseEvent.aggregateId}`
@@ -273,7 +273,7 @@ export class UserIntegrationHandler implements IEventHandler<IEvent> {
 
   private async handleUserDeleted(event: UserDeletedEvent): Promise<void> {
     // Access IEvent properties via type assertion since UserEvent interfaces extend IEvent
-    const baseEvent = event as IEvent;
+    const baseEvent = event as unknown as IEvent;
     // eslint-disable-next-line no-console
     console.log(
       `[INTEGRATION] Cancelling Stripe subscription for user ${baseEvent.aggregateId}`

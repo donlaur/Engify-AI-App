@@ -281,7 +281,7 @@ export class SearchUsersQueryHandler
       }
       if (filters?.organizationId) {
         filteredUsers = filteredUsers.filter(
-          (user) => user.organizationId === filters.organizationId
+          (user) => user.organizationId?.toString() === filters.organizationId
         );
       }
 
