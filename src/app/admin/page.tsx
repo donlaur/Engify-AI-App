@@ -2,6 +2,8 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/db/client';
 import { Collections } from '@/lib/db/schema';
+import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
+import { UserManagement } from '@/components/admin/UserManagement';
 
 export default async function AdminPage() {
   const session = await auth();
@@ -70,6 +72,10 @@ export default async function AdminPage() {
 
       <div className="mt-8 grid gap-6">
         <section className="rounded-lg border bg-white p-4">
+          <UserManagement />
+        </section>
+
+        <section className="rounded-lg border bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold">Recent Users</h2>
           <div className="divide-y text-sm">
             {recentUsers.map(
@@ -125,6 +131,10 @@ export default async function AdminPage() {
               )
             )}
           </div>
+        </section>
+
+        <section className="rounded-lg border bg-white p-4">
+          <ContentReviewQueue />
         </section>
 
         <section className="rounded-lg border bg-white p-4">
