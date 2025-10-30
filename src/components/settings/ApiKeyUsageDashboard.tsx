@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
@@ -33,23 +33,18 @@ interface ApiKeyUsageDashboardProps {
   keyId?: string;
 }
 
-export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProps) {
+export function ApiKeyUsageDashboard({
+  userId: _userId,
+  keyId,
+}: ApiKeyUsageDashboardProps) {
   const [summary, setSummary] = useState<UsageSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
+  const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>(
+    'monthly'
+  );
   const [_provider, _setProvider] = useState<string>('');
 
-  const loadUsageRef = useRef(loadUsage);
-  
-  useEffect(() => {
-    loadUsageRef.current = loadUsage;
-  });
-
-  useEffect(() => {
-    loadUsageRef.current();
-  }, [userId, keyId, period]);
-
-  const loadUsage = async () => {
+  const loadUsage = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -68,7 +63,11 @@ export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProp
     } finally {
       setLoading(false);
     }
-  };
+  }, [period, keyId, _provider]);
+
+  useEffect(() => {
+    loadUsage();
+  }, [loadUsage]);
 
   if (loading) {
     return (
@@ -82,7 +81,7 @@ export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProp
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <Icons.barChart className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <Icons.barChart className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
           <p className="text-muted-foreground">No usage data available</p>
         </CardContent>
       </Card>
@@ -99,7 +98,10 @@ export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProp
           </p>
         </div>
         <div className="flex gap-2">
-          <Select value={period} onValueChange={(val) => setPeriod(val as typeof period)}>
+          <Select
+            value={period}
+            onValueChange={(val) => setPeriod(val as typeof period)}
+          >
             <SelectTrigger className="w-[140px]">
               <SelectValue />
             </SelectTrigger>
@@ -115,11 +117,15 @@ export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProp
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Requests
+            </CardTitle>
             <Icons.messageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.totalRequests.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {summary.totalRequests.toLocaleString()}
+            </div>
           </CardContent>
         </Card>
 
@@ -129,7 +135,9 @@ export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProp
             <Icons.hash className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.totalTokens.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {summary.totalTokens.toLocaleString()}
+            </div>
           </CardContent>
         </Card>
 
@@ -139,7 +147,9 @@ export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProp
             <Icons.dollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${summary.totalCost.toFixed(4)}</div>
+            <div className="text-2xl font-bold">
+              ${summary.totalCost.toFixed(4)}
+            </div>
           </CardContent>
         </Card>
 
@@ -149,7 +159,9 @@ export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProp
             <Icons.checkCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{(summary.successRate * 100).toFixed(1)}%</div>
+            <div className="text-2xl font-bold">
+              {(summary.successRate * 100).toFixed(1)}%
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -162,7 +174,9 @@ export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProp
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Avg Response Time</span>
+                <span className="text-sm text-muted-foreground">
+                  Avg Response Time
+                </span>
                 <span className="text-sm font-medium">
                   {summary.averageResponseTime.toFixed(0)}ms
                 </span>
@@ -178,14 +192,24 @@ export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProp
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Error Count</span>
-                <Badge variant={summary.errorCount > 0 ? 'destructive' : 'secondary'}>
+                <span className="text-sm text-muted-foreground">
+                  Error Count
+                </span>
+                <Badge
+                  variant={summary.errorCount > 0 ? 'destructive' : 'secondary'}
+                >
                   {summary.errorCount}
                 </Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Rate Limit Hits</span>
-                <Badge variant={summary.rateLimitHits > 0 ? 'warning' : 'secondary'}>
+                <span className="text-sm text-muted-foreground">
+                  Rate Limit Hits
+                </span>
+                <Badge
+                  variant={
+                    summary.rateLimitHits > 0 ? 'destructive' : 'secondary'
+                  }
+                >
                   {summary.rateLimitHits}
                 </Badge>
               </div>
@@ -218,4 +242,3 @@ export function ApiKeyUsageDashboard({ userId, keyId }: ApiKeyUsageDashboardProp
     </div>
   );
 }
-

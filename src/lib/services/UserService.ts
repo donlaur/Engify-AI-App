@@ -34,6 +34,7 @@ export interface UpdateUserData {
   role?: string;
   plan?: string;
   organizationId?: string;
+  emailVerified?: Date | null;
   preferences?: {
     theme?: 'light' | 'dark';
     notifications?: boolean;

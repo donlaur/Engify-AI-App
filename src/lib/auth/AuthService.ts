@@ -194,7 +194,7 @@ export class AuthService {
    * Login with OAuth provider
    */
   async loginWithOAuth(
-    provider: string,
+    _provider: string,
     providerData: {
       id: string;
       email: string;

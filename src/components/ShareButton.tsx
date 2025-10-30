@@ -142,12 +142,13 @@ export function ShareButton({
           Share via Email
         </DropdownMenuItem>
 
-        {typeof navigator !== 'undefined' && navigator.share && (
-          <DropdownMenuItem onClick={handleNativeShare}>
-            <Icons.share className="mr-2 h-4 w-4" />
-            More Options
-          </DropdownMenuItem>
-        )}
+        {typeof navigator !== 'undefined' &&
+          typeof navigator.share === 'function' && (
+            <DropdownMenuItem onClick={handleNativeShare}>
+              <Icons.share className="mr-2 h-4 w-4" />
+              More Options
+            </DropdownMenuItem>
+          )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
