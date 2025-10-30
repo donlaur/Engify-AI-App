@@ -12,7 +12,11 @@
 
 import winston from 'winston';
 
-// Create application logger (separate from audit logger)
+// Determine if file system logging is allowed (avoid in Vercel serverless)
+const canWriteFiles =
+  process.env.VERCEL !== '1' && process.env.ENABLE_FILE_LOGS !== '0';
+
+// Base logger (separate from audit logger)
 const appLogger = winston.createLogger({
   level:
     process.env.LOG_LEVEL ||
@@ -26,21 +30,27 @@ const appLogger = winston.createLogger({
     service: 'engify-api',
     environment: process.env.NODE_ENV || 'development',
   },
-  transports: [
-    // File transport for application logs
+  transports: [],
+});
+
+// File transports only when allowed (local/dev or when explicitly enabled)
+if (canWriteFiles) {
+  appLogger.add(
     new winston.transports.File({
       filename: 'logs/app-error.log',
       level: 'error',
       maxsize: 5242880, // 5MB
       maxFiles: 5,
-    }),
+    })
+  );
+  appLogger.add(
     new winston.transports.File({
       filename: 'logs/app.log',
       maxsize: 5242880, // 5MB
       maxFiles: 5,
-    }),
-  ],
-});
+    })
+  );
+}
 
 // Console transport for development
 if (process.env.NODE_ENV !== 'production') {
