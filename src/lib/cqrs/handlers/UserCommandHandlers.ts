@@ -264,7 +264,7 @@ export class RemoveUserFromOrganizationCommandHandler
   ): Promise<ICommandResult<User>> {
     try {
       const user = await this.userService.updateUser(command.userId, {
-        organizationId: null,
+        organizationId: undefined, // Use undefined instead of null to match UpdateUserData
       });
 
       if (!user) {

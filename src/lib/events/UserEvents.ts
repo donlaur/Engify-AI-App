@@ -5,7 +5,7 @@
  * These events represent state changes in the user aggregate.
  */
 
-import { IEvent } from '../types';
+import type { IEvent } from './types';
 
 /**
  * User Created Event
@@ -150,11 +150,15 @@ export const UserEvents = {
   ): Omit<
     UserCreatedEvent,
     'eventId' | 'aggregateId' | 'version' | 'timestamp'
-  > => ({
-    eventType: 'UserCreated',
-    aggregateType: 'User',
-    ...data,
-  }),
+  > =>
+    ({
+      ...data,
+      eventType: 'UserCreated',
+      aggregateType: 'User',
+    }) as Omit<
+      UserCreatedEvent,
+      'eventId' | 'aggregateId' | 'version' | 'timestamp'
+    >,
 
   updated: (
     data: Omit<
@@ -169,11 +173,15 @@ export const UserEvents = {
   ): Omit<
     UserUpdatedEvent,
     'eventId' | 'aggregateId' | 'version' | 'timestamp'
-  > => ({
-    eventType: 'UserUpdated',
-    aggregateType: 'User',
-    ...data,
-  }),
+  > =>
+    ({
+      ...data,
+      eventType: 'UserUpdated',
+      aggregateType: 'User',
+    }) as Omit<
+      UserUpdatedEvent,
+      'eventId' | 'aggregateId' | 'version' | 'timestamp'
+    >,
 
   deleted: (
     data: Omit<
@@ -188,11 +196,15 @@ export const UserEvents = {
   ): Omit<
     UserDeletedEvent,
     'eventId' | 'aggregateId' | 'version' | 'timestamp'
-  > => ({
-    eventType: 'UserDeleted',
-    aggregateType: 'User',
-    ...data,
-  }),
+  > =>
+    ({
+      ...data,
+      eventType: 'UserDeleted',
+      aggregateType: 'User',
+    }) as Omit<
+      UserDeletedEvent,
+      'eventId' | 'aggregateId' | 'version' | 'timestamp'
+    >,
 
   lastLoginUpdated: (
     data: Omit<
@@ -207,11 +219,15 @@ export const UserEvents = {
   ): Omit<
     UserLastLoginUpdatedEvent,
     'eventId' | 'aggregateId' | 'version' | 'timestamp'
-  > => ({
-    eventType: 'UserLastLoginUpdated',
-    aggregateType: 'User',
-    ...data,
-  }),
+  > =>
+    ({
+      ...data,
+      eventType: 'UserLastLoginUpdated',
+      aggregateType: 'User',
+    }) as Omit<
+      UserLastLoginUpdatedEvent,
+      'eventId' | 'aggregateId' | 'version' | 'timestamp'
+    >,
 
   planChanged: (
     data: Omit<
@@ -226,11 +242,15 @@ export const UserEvents = {
   ): Omit<
     UserPlanChangedEvent,
     'eventId' | 'aggregateId' | 'version' | 'timestamp'
-  > => ({
-    eventType: 'UserPlanChanged',
-    aggregateType: 'User',
-    ...data,
-  }),
+  > =>
+    ({
+      ...data,
+      eventType: 'UserPlanChanged',
+      aggregateType: 'User',
+    }) as Omit<
+      UserPlanChangedEvent,
+      'eventId' | 'aggregateId' | 'version' | 'timestamp'
+    >,
 
   assignedToOrganization: (
     data: Omit<
@@ -245,11 +265,15 @@ export const UserEvents = {
   ): Omit<
     UserAssignedToOrganizationEvent,
     'eventId' | 'aggregateId' | 'version' | 'timestamp'
-  > => ({
-    eventType: 'UserAssignedToOrganization',
-    aggregateType: 'User',
-    ...data,
-  }),
+  > =>
+    ({
+      ...data,
+      eventType: 'UserAssignedToOrganization',
+      aggregateType: 'User',
+    }) as Omit<
+      UserAssignedToOrganizationEvent,
+      'eventId' | 'aggregateId' | 'version' | 'timestamp'
+    >,
 
   removedFromOrganization: (
     data: Omit<
@@ -264,11 +288,15 @@ export const UserEvents = {
   ): Omit<
     UserRemovedFromOrganizationEvent,
     'eventId' | 'aggregateId' | 'version' | 'timestamp'
-  > => ({
-    eventType: 'UserRemovedFromOrganization',
-    aggregateType: 'User',
-    ...data,
-  }),
+  > =>
+    ({
+      ...data,
+      eventType: 'UserRemovedFromOrganization',
+      aggregateType: 'User',
+    }) as Omit<
+      UserRemovedFromOrganizationEvent,
+      'eventId' | 'aggregateId' | 'version' | 'timestamp'
+    >,
 
   emailVerified: (
     data: Omit<
@@ -283,11 +311,15 @@ export const UserEvents = {
   ): Omit<
     UserEmailVerifiedEvent,
     'eventId' | 'aggregateId' | 'version' | 'timestamp'
-  > => ({
-    eventType: 'UserEmailVerified',
-    aggregateType: 'User',
-    ...data,
-  }),
+  > =>
+    ({
+      ...data,
+      eventType: 'UserEmailVerified',
+      aggregateType: 'User',
+    }) as Omit<
+      UserEmailVerifiedEvent,
+      'eventId' | 'aggregateId' | 'version' | 'timestamp'
+    >,
 
   passwordChanged: (
     data: Omit<
@@ -302,9 +334,13 @@ export const UserEvents = {
   ): Omit<
     UserPasswordChangedEvent,
     'eventId' | 'aggregateId' | 'version' | 'timestamp'
-  > => ({
-    eventType: 'UserPasswordChanged',
-    aggregateType: 'User',
-    ...data,
-  }),
+  > =>
+    ({
+      ...data,
+      eventType: 'UserPasswordChanged',
+      aggregateType: 'User',
+    }) as Omit<
+      UserPasswordChangedEvent,
+      'eventId' | 'aggregateId' | 'version' | 'timestamp'
+    >,
 };

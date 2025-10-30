@@ -428,8 +428,8 @@ export default function PatternsPage() {
       {selectedPatternId && (
         <PatternDetailDrawer
           pattern={getPatternById(selectedPatternId.toString()) || null}
-          open={isDrawerOpen}
-          onOpenChange={setIsDrawerOpen}
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
         />
       )}
     </MainLayout>

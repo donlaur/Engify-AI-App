@@ -1,5 +1,8 @@
 import { AIRequest, AIResponse } from '@/lib/ai/v2/interfaces/AIProvider';
 
+// Re-export AIRequest for convenience (Phase 2: Export missing types)
+export type { AIRequest, AIResponse };
+
 /**
  * Execution context for strategy decisions
  */

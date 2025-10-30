@@ -9,7 +9,7 @@ import {
   IMessageQueue,
   IMessage,
   IMessageHandler,
-  MessageResult,
+  // MessageResult,
   QueueStats,
   QueueConfig,
   MessageQueueError,
@@ -45,7 +45,10 @@ export class UpstashMessageQueue implements IMessageQueue {
   /**
    * Make HTTP request to Upstash Redis
    */
-  private async makeRequest(command: string, args: string[] = []): Promise<any> {
+  private async makeRequest(
+    command: string,
+    args: string[] = []
+  ): Promise<unknown> {
     const url = `${this.baseUrl}/${command}`;
     const body = args.length > 0 ? args : [];
 
@@ -53,7 +56,7 @@ export class UpstashMessageQueue implements IMessageQueue {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.authToken}`,
+          Authorization: `Bearer ${this.authToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
@@ -63,7 +66,7 @@ export class UpstashMessageQueue implements IMessageQueue {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      return await response.json();
+      return (await response.json()) as unknown;
     } catch (error) {
       throw new MessageQueueError(
         `Upstash request failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -81,7 +84,7 @@ export class UpstashMessageQueue implements IMessageQueue {
     try {
       const messageKey = this.getMessageKey(message.id);
       const queueKey = this.getQueueKey();
-      
+
       // Store message data using HSET
       const messageData = {
         id: message.id,
@@ -108,11 +111,18 @@ export class UpstashMessageQueue implements IMessageQueue {
 
       // Add to priority queue using ZADD
       const priorityScore = this.getPriorityScore(message.priority);
-      await this.makeRequest('ZADD', [queueKey, priorityScore.toString(), message.id]);
+      await this.makeRequest('ZADD', [
+        queueKey,
+        priorityScore.toString(),
+        message.id,
+      ]);
 
       // Set TTL if specified
       if (message.ttl) {
-        await this.makeRequest('EXPIRE', [messageKey, Math.ceil(message.ttl / 1000).toString()]);
+        await this.makeRequest('EXPIRE', [
+          messageKey,
+          Math.ceil(message.ttl / 1000).toString(),
+        ]);
       }
 
       // Update queue stats
@@ -132,7 +142,7 @@ export class UpstashMessageQueue implements IMessageQueue {
    */
   async subscribe(handler: IMessageHandler): Promise<void> {
     this.handlers.set(handler.handlerName, handler);
-    
+
     if (!this.isProcessing) {
       await this.startProcessing();
     }
@@ -143,7 +153,7 @@ export class UpstashMessageQueue implements IMessageQueue {
    */
   async unsubscribe(handlerName: string): Promise<void> {
     this.handlers.delete(handlerName);
-    
+
     if (this.handlers.size === 0) {
       await this.stopProcessing();
     }
@@ -156,13 +166,13 @@ export class UpstashMessageQueue implements IMessageQueue {
     try {
       const statsKey = this.getStatsKey();
       const stats = await this.makeRequest('HGETALL', [statsKey]);
-      
+
       // Convert array to object
       const statsObj: Record<string, string> = {};
       for (let i = 0; i < stats.length; i += 2) {
         statsObj[stats[i]] = stats[i + 1];
       }
-      
+
       return {
         totalMessages: parseInt(statsObj.totalMessages || '0'),
         pendingMessages: parseInt(statsObj.pendingMessages || '0'),
@@ -170,9 +180,13 @@ export class UpstashMessageQueue implements IMessageQueue {
         completedMessages: parseInt(statsObj.completedMessages || '0'),
         failedMessages: parseInt(statsObj.failedMessages || '0'),
         deadLetterMessages: parseInt(statsObj.deadLetterMessages || '0'),
-        averageProcessingTime: parseFloat(statsObj.averageProcessingTime || '0'),
+        averageProcessingTime: parseFloat(
+          statsObj.averageProcessingTime || '0'
+        ),
         throughput: parseFloat(statsObj.throughput || '0'),
-        lastProcessedAt: statsObj.lastProcessedAt ? new Date(statsObj.lastProcessedAt) : null,
+        lastProcessedAt: statsObj.lastProcessedAt
+          ? new Date(statsObj.lastProcessedAt)
+          : null,
       };
     } catch (error) {
       throw new MessageQueueError(
@@ -190,19 +204,23 @@ export class UpstashMessageQueue implements IMessageQueue {
   async purge(): Promise<void> {
     try {
       const queueKey = this.getQueueKey();
-      
+
       // Get all message IDs
-      const messageIds = await this.makeRequest('ZRANGE', [queueKey, '0', '-1']);
-      
+      const messageIds = await this.makeRequest('ZRANGE', [
+        queueKey,
+        '0',
+        '-1',
+      ]);
+
       if (messageIds.length > 0) {
         // Delete all message data
         const keys = messageIds.map((id: string) => this.getMessageKey(id));
         await this.makeRequest('DEL', keys);
-        
+
         // Clear the queue
         await this.makeRequest('DEL', [queueKey]);
       }
-      
+
       // Reset stats
       await this.resetQueueStats();
     } catch (error) {
@@ -238,17 +256,17 @@ export class UpstashMessageQueue implements IMessageQueue {
     try {
       const messageKey = this.getMessageKey(id);
       const messageData = await this.makeRequest('HGETALL', [messageKey]);
-      
+
       if (messageData.length === 0) {
         return null;
       }
-      
+
       // Convert array to object
       const messageObj: Record<string, string> = {};
       for (let i = 0; i < messageData.length; i += 2) {
         messageObj[messageData[i]] = messageData[i + 1];
       }
-      
+
       return this.deserializeMessage(messageObj);
     } catch (error) {
       throw new MessageQueueError(
@@ -267,13 +285,13 @@ export class UpstashMessageQueue implements IMessageQueue {
     try {
       const messageKey = this.getMessageKey(id);
       const queueKey = this.getQueueKey();
-      
+
       // Remove from queue
       await this.makeRequest('ZREM', [queueKey, id]);
-      
+
       // Delete message data
       const deleted = await this.makeRequest('DEL', [messageKey]);
-      
+
       return deleted > 0;
     } catch (error) {
       throw new MessageQueueError(
@@ -294,11 +312,11 @@ export class UpstashMessageQueue implements IMessageQueue {
       if (!message) {
         throw new Error('Message not found');
       }
-      
+
       if (message.retryCount >= message.maxRetries) {
         throw new Error('Message has exceeded maximum retry count');
       }
-      
+
       // Update retry count and status
       const updatedMessage: IMessage = {
         ...message,
@@ -306,7 +324,7 @@ export class UpstashMessageQueue implements IMessageQueue {
         status: 'pending',
         updatedAt: new Date(),
       };
-      
+
       // Update in Upstash
       const messageKey = this.getMessageKey(id);
       await this.makeRequest('HMSET', [
@@ -318,12 +336,11 @@ export class UpstashMessageQueue implements IMessageQueue {
         'updatedAt',
         updatedMessage.updatedAt.toISOString(),
       ]);
-      
+
       // Re-add to queue
       const queueKey = this.getQueueKey();
       const priorityScore = this.getPriorityScore(updatedMessage.priority);
       await this.makeRequest('ZADD', [queueKey, priorityScore.toString(), id]);
-      
     } catch (error) {
       throw new MessageQueueError(
         `Failed to retry message: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -358,8 +375,12 @@ export class UpstashMessageQueue implements IMessageQueue {
   async getPendingMessages(limit: number = 10): Promise<IMessage[]> {
     try {
       const queueKey = this.getQueueKey();
-      const messageIds = await this.makeRequest('ZRANGE', [queueKey, '0', (limit - 1).toString()]);
-      
+      const messageIds = await this.makeRequest('ZRANGE', [
+        queueKey,
+        '0',
+        (limit - 1).toString(),
+      ]);
+
       const messages: IMessage[] = [];
       for (const id of messageIds) {
         const message = await this.getMessage(id);
@@ -367,7 +388,7 @@ export class UpstashMessageQueue implements IMessageQueue {
           messages.push(message);
         }
       }
-      
+
       return messages;
     } catch (error) {
       throw new MessageQueueError(
@@ -386,7 +407,7 @@ export class UpstashMessageQueue implements IMessageQueue {
     if (this.isProcessing) {
       return;
     }
-    
+
     this.isProcessing = true;
     this.processingInterval = setInterval(
       () => this.processMessages(),
@@ -411,7 +432,7 @@ export class UpstashMessageQueue implements IMessageQueue {
   private async processMessages(): Promise<void> {
     try {
       const messages = await this.getPendingMessages(this.config.batchSize);
-      
+
       for (const message of messages) {
         await this.processMessage(message);
       }
@@ -425,7 +446,7 @@ export class UpstashMessageQueue implements IMessageQueue {
    */
   private async processMessage(message: IMessage): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
       // Find appropriate handler
       const handler = this.findHandler(message);
@@ -433,25 +454,27 @@ export class UpstashMessageQueue implements IMessageQueue {
         console.warn(`No handler found for message type: ${message.type}`);
         return;
       }
-      
+
       // Update message status to processing
       await this.updateMessageStatus(message.id, 'processing');
-      
+
       // Process the message
       const result = await handler.handle(message);
-      
+
       // Update message status based on result
       if (result.success) {
         await this.updateMessageStatus(message.id, 'completed');
         await this.updateQueueStats('completed');
       } else {
-        await this.handleMessageFailure(message, result.error || 'Unknown error');
+        await this.handleMessageFailure(
+          message,
+          result.error || 'Unknown error'
+        );
       }
-      
+
       // Update processing time stats
       const processingTime = Date.now() - startTime;
       await this.updateProcessingTimeStats(processingTime);
-      
     } catch (error) {
       await this.handleMessageFailure(
         message,
@@ -475,7 +498,10 @@ export class UpstashMessageQueue implements IMessageQueue {
   /**
    * Handle message processing failure
    */
-  private async handleMessageFailure(message: IMessage, error: string): Promise<void> {
+  private async handleMessageFailure(
+    message: IMessage,
+    error: string
+  ): Promise<void> {
     if (message.retryCount < message.maxRetries) {
       // Retry the message
       await this.retryMessage(message.id);
@@ -484,8 +510,10 @@ export class UpstashMessageQueue implements IMessageQueue {
       // Move to dead letter queue
       await this.updateMessageStatus(message.id, 'dead_letter');
       await this.updateQueueStats('dead_letter');
-      
-      console.error(`Message ${message.id} moved to dead letter queue: ${error}`);
+
+      console.error(
+        `Message ${message.id} moved to dead letter queue: ${error}`
+      );
     }
   }
 
@@ -506,31 +534,70 @@ export class UpstashMessageQueue implements IMessageQueue {
   /**
    * Update queue statistics
    */
-  private async updateQueueStats(operation: string, count: number = 1): Promise<void> {
+  private async updateQueueStats(
+    operation: string,
+    count: number = 1
+  ): Promise<void> {
     const statsKey = this.getStatsKey();
-    
+
     switch (operation) {
       case 'published':
-        await this.makeRequest('HINCRBY', [statsKey, 'totalMessages', count.toString()]);
-        await this.makeRequest('HINCRBY', [statsKey, 'pendingMessages', count.toString()]);
+        await this.makeRequest('HINCRBY', [
+          statsKey,
+          'totalMessages',
+          count.toString(),
+        ]);
+        await this.makeRequest('HINCRBY', [
+          statsKey,
+          'pendingMessages',
+          count.toString(),
+        ]);
         break;
       case 'completed':
-        await this.makeRequest('HINCRBY', [statsKey, 'completedMessages', count.toString()]);
-        await this.makeRequest('HINCRBY', [statsKey, 'pendingMessages', (-count).toString()]);
+        await this.makeRequest('HINCRBY', [
+          statsKey,
+          'completedMessages',
+          count.toString(),
+        ]);
+        await this.makeRequest('HINCRBY', [
+          statsKey,
+          'pendingMessages',
+          (-count).toString(),
+        ]);
         break;
       case 'failed':
-        await this.makeRequest('HINCRBY', [statsKey, 'failedMessages', count.toString()]);
-        await this.makeRequest('HINCRBY', [statsKey, 'pendingMessages', (-count).toString()]);
+        await this.makeRequest('HINCRBY', [
+          statsKey,
+          'failedMessages',
+          count.toString(),
+        ]);
+        await this.makeRequest('HINCRBY', [
+          statsKey,
+          'pendingMessages',
+          (-count).toString(),
+        ]);
         break;
       case 'retrying':
-        await this.makeRequest('HINCRBY', [statsKey, 'pendingMessages', count.toString()]);
+        await this.makeRequest('HINCRBY', [
+          statsKey,
+          'pendingMessages',
+          count.toString(),
+        ]);
         break;
       case 'dead_letter':
-        await this.makeRequest('HINCRBY', [statsKey, 'deadLetterMessages', count.toString()]);
-        await this.makeRequest('HINCRBY', [statsKey, 'pendingMessages', (-count).toString()]);
+        await this.makeRequest('HINCRBY', [
+          statsKey,
+          'deadLetterMessages',
+          count.toString(),
+        ]);
+        await this.makeRequest('HINCRBY', [
+          statsKey,
+          'pendingMessages',
+          (-count).toString(),
+        ]);
         break;
     }
-    
+
     await this.makeRequest('HMSET', [
       statsKey,
       'lastProcessedAt',
@@ -541,16 +608,25 @@ export class UpstashMessageQueue implements IMessageQueue {
   /**
    * Update processing time statistics
    */
-  private async updateProcessingTimeStats(processingTime: number): Promise<void> {
+  private async updateProcessingTimeStats(
+    processingTime: number
+  ): Promise<void> {
     const statsKey = this.getStatsKey();
-    const currentAvg = await this.makeRequest('HGET', [statsKey, 'averageProcessingTime']);
-    const currentCount = await this.makeRequest('HGET', [statsKey, 'completedMessages']);
-    
+    const currentAvg = await this.makeRequest('HGET', [
+      statsKey,
+      'averageProcessingTime',
+    ]);
+    const currentCount = await this.makeRequest('HGET', [
+      statsKey,
+      'completedMessages',
+    ]);
+
     const count = parseInt(currentCount || '0');
     const avg = parseFloat(currentAvg || '0');
-    
-    const newAvg = count > 0 ? (avg * count + processingTime) / (count + 1) : processingTime;
-    
+
+    const newAvg =
+      count > 0 ? (avg * count + processingTime) / (count + 1) : processingTime;
+
     await this.makeRequest('HMSET', [
       statsKey,
       'averageProcessingTime',
@@ -571,11 +647,16 @@ export class UpstashMessageQueue implements IMessageQueue {
    */
   private getPriorityScore(priority: string): number {
     switch (priority) {
-      case 'critical': return 4;
-      case 'high': return 3;
-      case 'normal': return 2;
-      case 'low': return 1;
-      default: return 2;
+      case 'critical':
+        return 4;
+      case 'high':
+        return 3;
+      case 'normal':
+        return 2;
+      case 'low':
+        return 1;
+      default:
+        return 2;
     }
   }
 
@@ -600,11 +681,11 @@ export class UpstashMessageQueue implements IMessageQueue {
   private deserializeMessage(data: Record<string, string>): IMessage {
     return {
       id: data.id,
-      type: data.type as any,
-      priority: data.priority as any,
-      status: data.status as any,
-      payload: JSON.parse(data.payload),
-      metadata: JSON.parse(data.metadata),
+      type: data.type as import('../types').MessageType,
+      priority: data.priority as import('../types').MessagePriority,
+      status: data.status as import('../types').MessageStatus,
+      payload: JSON.parse(data.payload) as unknown,
+      metadata: JSON.parse(data.metadata) as import('../types').MessageMetadata,
       createdAt: new Date(data.createdAt),
       updatedAt: new Date(data.updatedAt),
       correlationId: data.correlationId || undefined,

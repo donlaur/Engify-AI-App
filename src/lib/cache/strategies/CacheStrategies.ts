@@ -5,18 +5,12 @@
  * cache-aside, and refresh-ahead patterns.
  */
 
-import { 
-  ICacheStrategy, 
-  CacheEntry, 
-  CacheStats, 
-  CacheOptions,
-  CacheError
-} from '../types';
+import { ICacheStrategy, CacheEntry, CacheStats, CacheError } from '../types';
 import { ICacheAdapter } from '../types';
 
 /**
  * Write-Through Cache Strategy
- * 
+ *
  * Writes to cache and underlying data store simultaneously.
  * Ensures data consistency but may have higher latency.
  */
@@ -35,7 +29,7 @@ export class WriteThroughStrategy implements ICacheStrategy {
   async get<T>(key: string): Promise<CacheEntry<T> | null> {
     try {
       const value = await this.adapter.get<T>(key);
-      
+
       if (value === null) {
         return null;
       }
@@ -46,7 +40,9 @@ export class WriteThroughStrategy implements ICacheStrategy {
         value,
         ttl: await this.adapter.getTtl(key),
         createdAt: new Date(), // Would need to be stored
-        expiresAt: new Date(Date.now() + (await this.adapter.getTtl(key)) * 1000),
+        expiresAt: new Date(
+          Date.now() + (await this.adapter.getTtl(key)) * 1000
+        ),
         accessCount: 1, // Would need to be tracked
         lastAccessedAt: new Date(),
       };
@@ -60,7 +56,12 @@ export class WriteThroughStrategy implements ICacheStrategy {
     }
   }
 
-  async set<T>(key: string, value: T, ttl?: number, tags?: string[]): Promise<void> {
+  async set<T>(
+    key: string,
+    value: T,
+    ttl?: number,
+    _tags?: string[]
+  ): Promise<void> {
     try {
       // Write to both cache and data store
       await Promise.all([
@@ -83,7 +84,7 @@ export class WriteThroughStrategy implements ICacheStrategy {
         this.adapter.delete(key),
         this.dataStore.delete(key),
       ]);
-      
+
       return cacheResult && storeResult;
     } catch (error) {
       throw new CacheError(
@@ -129,10 +130,14 @@ export class WriteThroughStrategy implements ICacheStrategy {
 
   async invalidateByPattern(pattern: string): Promise<void> {
     const keys = await this.getKeys(pattern);
-    await Promise.all(keys.map(key => this.delete(key)));
+    await Promise.all(keys.map((key) => this.delete(key)));
   }
 
-  async refresh<T>(key: string, fetcher: () => Promise<T>, ttl?: number): Promise<T> {
+  async refresh<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    ttl?: number
+  ): Promise<T> {
     try {
       const value = await fetcher();
       await this.set(key, value, ttl);
@@ -150,7 +155,7 @@ export class WriteThroughStrategy implements ICacheStrategy {
 
 /**
  * Cache-Aside Strategy
- * 
+ *
  * Application manages cache explicitly. Cache is checked first,
  * and if miss, data is fetched from store and cached.
  */
@@ -169,7 +174,7 @@ export class CacheAsideStrategy implements ICacheStrategy {
   async get<T>(key: string): Promise<CacheEntry<T> | null> {
     try {
       const value = await this.adapter.get<T>(key);
-      
+
       if (value === null) {
         return null;
       }
@@ -179,7 +184,9 @@ export class CacheAsideStrategy implements ICacheStrategy {
         value,
         ttl: await this.adapter.getTtl(key),
         createdAt: new Date(),
-        expiresAt: new Date(Date.now() + (await this.adapter.getTtl(key)) * 1000),
+        expiresAt: new Date(
+          Date.now() + (await this.adapter.getTtl(key)) * 1000
+        ),
         accessCount: 1,
         lastAccessedAt: new Date(),
       };
@@ -193,7 +200,12 @@ export class CacheAsideStrategy implements ICacheStrategy {
     }
   }
 
-  async set<T>(key: string, value: T, ttl?: number, tags?: string[]): Promise<void> {
+  async set<T>(
+    key: string,
+    value: T,
+    ttl?: number,
+    _tags?: string[]
+  ): Promise<void> {
     try {
       // Only write to cache in cache-aside
       await this.adapter.set(key, value, ttl);
@@ -214,7 +226,7 @@ export class CacheAsideStrategy implements ICacheStrategy {
         this.adapter.delete(key),
         this.dataStore.delete(key),
       ]);
-      
+
       return cacheResult || storeResult;
     } catch (error) {
       throw new CacheError(
@@ -258,10 +270,14 @@ export class CacheAsideStrategy implements ICacheStrategy {
 
   async invalidateByPattern(pattern: string): Promise<void> {
     const keys = await this.getKeys(pattern);
-    await Promise.all(keys.map(key => this.delete(key)));
+    await Promise.all(keys.map((key) => this.delete(key)));
   }
 
-  async refresh<T>(key: string, fetcher: () => Promise<T>, ttl?: number): Promise<T> {
+  async refresh<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    ttl?: number
+  ): Promise<T> {
     try {
       const value = await fetcher();
       await this.set(key, value, ttl);
@@ -280,8 +296,8 @@ export class CacheAsideStrategy implements ICacheStrategy {
    * Get or fetch pattern - core of cache-aside
    */
   async getOrFetch<T>(
-    key: string, 
-    fetcher: () => Promise<T>, 
+    key: string,
+    fetcher: () => Promise<T>,
     ttl?: number
   ): Promise<T> {
     try {
@@ -293,10 +309,10 @@ export class CacheAsideStrategy implements ICacheStrategy {
 
       // Cache miss - fetch from store
       const value = await fetcher();
-      
+
       // Cache the result
       await this.set(key, value, ttl);
-      
+
       return value;
     } catch (error) {
       throw new CacheError(
@@ -311,7 +327,7 @@ export class CacheAsideStrategy implements ICacheStrategy {
 
 /**
  * Refresh-Ahead Strategy
- * 
+ *
  * Proactively refreshes cache entries before they expire.
  * Reduces cache misses but requires background processing.
  */
@@ -321,7 +337,8 @@ export class RefreshAheadStrategy implements ICacheStrategy {
 
   constructor(
     private adapter: ICacheAdapter,
-    private dataStore: {
+    // @ts-expect-error - intentionally unused, kept for interface compliance
+    private _dataStore: {
       get<T>(key: string): Promise<T | null>;
       set<T>(key: string, value: T): Promise<void>;
       delete(key: string): Promise<boolean>;
@@ -333,15 +350,16 @@ export class RefreshAheadStrategy implements ICacheStrategy {
   async get<T>(key: string): Promise<CacheEntry<T> | null> {
     try {
       const value = await this.adapter.get<T>(key);
-      
+
       if (value === null) {
         return null;
       }
 
       const ttl = await this.adapter.getTtl(key);
-      
+
       // Check if we should refresh
-      if (ttl > 0 && ttl < this.refreshThreshold * 3600) { // Assuming 1 hour default TTL
+      if (ttl > 0 && ttl < this.refreshThreshold * 3600) {
+        // Assuming 1 hour default TTL
         this.scheduleRefresh(key);
       }
 
@@ -364,7 +382,12 @@ export class RefreshAheadStrategy implements ICacheStrategy {
     }
   }
 
-  async set<T>(key: string, value: T, ttl?: number, tags?: string[]): Promise<void> {
+  async set<T>(
+    key: string,
+    value: T,
+    ttl?: number,
+    _tags?: string[]
+  ): Promise<void> {
     try {
       await this.adapter.set(key, value, ttl);
     } catch (error) {
@@ -422,10 +445,14 @@ export class RefreshAheadStrategy implements ICacheStrategy {
 
   async invalidateByPattern(pattern: string): Promise<void> {
     const keys = await this.getKeys(pattern);
-    await Promise.all(keys.map(key => this.delete(key)));
+    await Promise.all(keys.map((key) => this.delete(key)));
   }
 
-  async refresh<T>(key: string, fetcher: () => Promise<T>, ttl?: number): Promise<T> {
+  async refresh<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    ttl?: number
+  ): Promise<T> {
     try {
       const value = await fetcher();
       await this.set(key, value, ttl);

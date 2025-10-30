@@ -74,7 +74,7 @@ export class GetUserByEmailQueryHandler
 
   async handle(query: GetUserByEmailQuery): Promise<IQueryResult<User>> {
     try {
-      const user = await this.userService.findUserByEmail(query.email);
+      const user = await this.userService.findByEmail(query.email);
 
       if (!user) {
         return {
@@ -268,19 +268,20 @@ export class SearchUsersQueryHandler
       );
 
       // Apply additional filters
-      if (query.filters?.role) {
+      const filters = query.filters;
+      if (filters?.role) {
         filteredUsers = filteredUsers.filter(
-          (user) => user.role === query.filters.role
+          (user) => user.role === filters.role
         );
       }
-      if (query.filters?.plan) {
+      if (filters?.plan) {
         filteredUsers = filteredUsers.filter(
-          (user) => user.plan === query.filters.plan
+          (user) => user.plan === filters.plan
         );
       }
-      if (query.filters?.organizationId) {
+      if (filters?.organizationId) {
         filteredUsers = filteredUsers.filter(
-          (user) => user.organizationId === query.filters.organizationId
+          (user) => user.organizationId?.toString() === filters.organizationId
         );
       }
 

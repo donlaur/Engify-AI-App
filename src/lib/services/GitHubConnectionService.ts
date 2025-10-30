@@ -5,6 +5,7 @@
 
 import { BaseService } from './BaseService';
 import { ObjectId } from 'mongodb';
+import { z } from 'zod';
 
 export interface GitHubConnection {
   _id?: ObjectId;
@@ -22,7 +23,10 @@ export interface GitHubConnection {
 
 export class GitHubConnectionService extends BaseService<GitHubConnection> {
   constructor() {
-    super('github_connections');
+    super(
+      'github_connections',
+      z.object({}) as unknown as z.ZodType<GitHubConnection>
+    );
   }
 
   /**
@@ -52,10 +56,13 @@ export class GitHubConnectionService extends BaseService<GitHubConnection> {
       lastUsedAt: new Date(),
     };
 
-    if (existing) {
+    if (existing && existing._id) {
       // Update existing connection
-      await this.update(existing._id!.toString(), connection);
+      await this.updateOne(existing._id.toString(), connection);
       return { ...connection, _id: existing._id };
+    } else if (existing) {
+      // Fallback: recreate if id missing
+      return this.create(connection);
     } else {
       // Create new connection
       return this.create(connection);
@@ -66,9 +73,8 @@ export class GitHubConnectionService extends BaseService<GitHubConnection> {
    * Get user's GitHub connection
    */
   async getConnection(userId: string): Promise<GitHubConnection | null> {
-    const db = await this.getDb();
-    const connection = await db.collection(this.collectionName)
-      .findOne({ userId });
+    const collection = await this.getCollection();
+    const connection = await collection.findOne({ userId });
 
     return connection as GitHubConnection | null;
   }
@@ -86,7 +92,7 @@ export class GitHubConnectionService extends BaseService<GitHubConnection> {
    */
   async getAccessToken(userId: string): Promise<string | null> {
     const connection = await this.getConnection(userId);
-    
+
     if (connection) {
       // Update last used timestamp
       await this.updateLastUsed(userId);
@@ -100,8 +106,8 @@ export class GitHubConnectionService extends BaseService<GitHubConnection> {
    * Update last used timestamp
    */
   async updateLastUsed(userId: string): Promise<void> {
-    const db = await this.getDb();
-    await db.collection(this.collectionName).updateOne(
+    const collection = await this.getCollection();
+    await collection.updateOne(
       { userId },
       { $set: { lastUsedAt: new Date() } }
     );
@@ -111,8 +117,8 @@ export class GitHubConnectionService extends BaseService<GitHubConnection> {
    * Disconnect GitHub
    */
   async disconnect(userId: string): Promise<boolean> {
-    const db = await this.getDb();
-    const result = await db.collection(this.collectionName).deleteOne({ userId });
+    const collection = await this.getCollection();
+    const result = await collection.deleteOne({ userId });
     return result.deletedCount > 0;
   }
 
@@ -120,8 +126,8 @@ export class GitHubConnectionService extends BaseService<GitHubConnection> {
    * Get all connections (admin)
    */
   async getAllConnections(): Promise<GitHubConnection[]> {
-    const db = await this.getDb();
-    const connections = await db.collection(this.collectionName)
+    const collection = await this.getCollection();
+    const connections = await collection
       .find({})
       .sort({ connectedAt: -1 })
       .toArray();
@@ -137,18 +143,18 @@ export class GitHubConnectionService extends BaseService<GitHubConnection> {
     activeLastWeek: number;
     activeLastMonth: number;
   }> {
-    const db = await this.getDb();
-    
+    const collection = await this.getCollection();
+
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     const [total, lastWeek, lastMonth] = await Promise.all([
-      db.collection(this.collectionName).countDocuments({}),
-      db.collection(this.collectionName).countDocuments({
+      collection.countDocuments({}),
+      collection.countDocuments({
         lastUsedAt: { $gte: weekAgo },
       }),
-      db.collection(this.collectionName).countDocuments({
+      collection.countDocuments({
         lastUsedAt: { $gte: monthAgo },
       }),
     ]);

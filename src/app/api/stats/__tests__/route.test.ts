@@ -19,23 +19,23 @@ describe('GET /api/stats', () => {
 
   it('should return stats from MongoDB when connection succeeds', async () => {
     const { getMongoDb } = await import('@/lib/db/mongodb');
-    
+
     const mockDb = {
       collection: vi.fn().mockReturnValue({
         countDocuments: vi.fn().mockResolvedValue(100),
         find: vi.fn().mockReturnValue({
           sort: vi.fn().mockReturnValue({
             limit: vi.fn().mockReturnValue({
-              toArray: vi.fn().mockResolvedValue([
-                { _id: '1', title: 'Test', views: 100, rating: 5 },
-              ]),
+              toArray: vi
+                .fn()
+                .mockResolvedValue([
+                  { _id: '1', title: 'Test', views: 100, rating: 5 },
+                ]),
             }),
           }),
         }),
         aggregate: vi.fn().mockReturnValue({
-          toArray: vi.fn().mockResolvedValue([
-            { _id: 'category1', count: 50 },
-          ]),
+          toArray: vi.fn().mockResolvedValue([{ _id: 'category1', count: 50 }]),
         }),
       }),
     };
@@ -51,23 +51,23 @@ describe('GET /api/stats', () => {
 
   it('should timeout and return fallback when MongoDB is slow', async () => {
     const { getMongoDb } = await import('@/lib/db/mongodb');
-    
-    // Simulate slow connection (never resolves)
-    (getMongoDb as any).mockImplementation(() => 
-      new Promise((resolve) => setTimeout(resolve, 10000))
+
+    // Simulate slow connection (never resolves - hang indefinitely)
+    (getMongoDb as any).mockImplementation(
+      () => new Promise(() => {}) // Never resolves
     );
 
     const response = await GET();
     const data = await response.json();
 
-    // Should return static fallback
+    // Should return static fallback after route's 5s timeout
     expect(data.stats.prompts).toBeGreaterThan(0);
     expect(data.source).toBe('static');
-  });
+  }, 10000); // Increase test timeout to 10s to allow route's 5s timeout
 
   it('should return fallback when MongoDB connection fails', async () => {
     const { getMongoDb } = await import('@/lib/db/mongodb');
-    
+
     (getMongoDb as any).mockRejectedValue(new Error('Connection failed'));
 
     const response = await GET();
@@ -79,7 +79,7 @@ describe('GET /api/stats', () => {
 
   it('should include category stats in response', async () => {
     const { getMongoDb } = await import('@/lib/db/mongodb');
-    
+
     const mockDb = {
       collection: vi.fn().mockReturnValue({
         countDocuments: vi.fn().mockResolvedValue(100),

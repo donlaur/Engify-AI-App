@@ -61,7 +61,7 @@ class TwilioService {
         this.client = twilio.default(
           this.config.accountSid,
           this.config.authToken
-        );
+        ) as unknown as TwilioClient;
       } catch (error) {
         const { logger } = await import('@/lib/logging/logger');
         logger.warn('Twilio not available', {

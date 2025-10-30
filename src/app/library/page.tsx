@@ -50,7 +50,9 @@ export default async function LibraryPage() {
                   <span className="font-medium capitalize">
                     {category.replace('-', ' ')}
                   </span>
-                  <span className="ml-1 text-muted-foreground">({count})</span>
+                  <span className="ml-1 text-muted-foreground">
+                    ({String(count)})
+                  </span>
                 </div>
               ))}
             </div>

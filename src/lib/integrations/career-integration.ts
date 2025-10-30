@@ -41,8 +41,9 @@ export async function trackCareerProgress(
  * Check for career milestones and send notifications
  */
 async function checkCareerMilestones(userId: string): Promise<void> {
-  const user = await userService.findById(userId);
-  if (!user?.careerContext) return;
+  const user = await userService.getUserById(userId);
+  const careerContext = (user as { careerContext?: unknown })?.careerContext;
+  if (!careerContext) return;
 
   const skills = await skillTrackingService.getUserSkills(userId);
   const stats = await skillTrackingService.getSkillStats(userId);
@@ -59,30 +60,36 @@ async function checkCareerMilestones(userId: string): Promise<void> {
 
   // Milestone: 10 prompts used
   const activities = await activityService.getUserActivity(userId, 100, 0);
-  const promptsUsed = activities.filter(a => a.type === 'use').length;
-  
+  const promptsUsed = activities.filter((a) => a.type === 'use').length;
+
   if (promptsUsed === 10) {
     await notificationService.sendAchievement(
       userId,
       '10 Prompts Milestone! 🚀',
-      'You\'re building momentum in your AI journey',
+      "You're building momentum in your AI journey",
       '🚀'
     );
   }
 
   // Milestone: Promotion readiness threshold
-  if (user.careerContext.careerGoal === 'promotion' && stats.averageImprovement >= 70) {
+  const userCareerContext = (
+    user as { careerContext?: { careerGoal?: string; targetLevel?: string } }
+  )?.careerContext;
+  if (
+    userCareerContext?.careerGoal === 'promotion' &&
+    stats.averageImprovement >= 70
+  ) {
     await notificationService.createNotification(
       userId,
       'success',
       'Ready for Promotion Discussion! 🎉',
-      `You're ${stats.averageImprovement}% ready for ${user.careerContext.targetLevel}. Time to talk to your manager!`,
+      `You're ${stats.averageImprovement}% ready for ${userCareerContext.targetLevel}. Time to talk to your manager!`,
       '/dashboard/career'
     );
   }
 
   // Milestone: Skill mastery (80%+)
-  const masteredSkills = skills.filter(s => s.improvement >= 80);
+  const masteredSkills = skills.filter((s) => s.improvement >= 80);
   if (masteredSkills.length > 0 && masteredSkills[0].count % 10 === 0) {
     await notificationService.sendAchievement(
       userId,
@@ -98,19 +105,24 @@ async function checkCareerMilestones(userId: string): Promise<void> {
  */
 export async function getCareerDashboardData(userId: string) {
   const [user, skills, recommendations, activities, stats] = await Promise.all([
-    userService.findById(userId),
+    userService.getUserById(userId),
     skillTrackingService.getUserSkills(userId),
     careerRecommendationService.getRecommendations(userId),
     activityService.getUserActivity(userId, 50, 0),
     skillTrackingService.getSkillStats(userId),
   ]);
 
-  const promptsUsed = activities.filter(a => a.type === 'use').length;
+  const promptsUsed = activities.filter(
+    (a: { type: string }) => a.type === 'use'
+  ).length;
   const timeSaved = (promptsUsed * 2) / 60; // 2 min per prompt, convert to hours
 
   // Calculate promotion readiness
   let promotionReadiness = 0;
-  if (user?.careerContext?.careerGoal === 'promotion') {
+  const userCareerContext = (
+    user as { careerContext?: { careerGoal?: string; targetLevel?: string } }
+  )?.careerContext;
+  if (userCareerContext?.careerGoal === 'promotion') {
     promotionReadiness = Math.min(100, stats.averageImprovement);
   }
 
@@ -123,10 +135,9 @@ export async function getCareerDashboardData(userId: string) {
   } else if (stats.totalSkills < 5) {
     nextMilestone = `Develop ${5 - stats.totalSkills} more skills`;
   }
-
   return {
     user,
-    careerContext: user?.careerContext,
+    careerContext: userCareerContext,
     skills: skills.slice(0, 5), // Top 5 skills
     recommendations: recommendations.slice(0, 3), // Top 3 recommendations
     stats: {
@@ -162,16 +173,33 @@ Here's your career progress this week:
 - Skills active: ${data.stats.skillsActive}
 
 🎯 SKILLS DEVELOPED
-${weeklySkills.slice(0, 3).map(s => `- ${s.skill.replace('-', ' ')}: ${s.count} uses (+${s.improvement}%)`).join('\n')}
+${weeklySkills
+  .slice(0, 3)
+  .map(
+    (s: { skill: string; count: number; improvement: number }) =>
+      `- ${s.skill.replace('-', ' ')}: ${s.count} uses (+${s.improvement}%)`
+  )
+  .join('\n')}
 
-${data.careerContext?.careerGoal === 'promotion' ? `
+${
+  (data.careerContext as { careerGoal?: string; targetLevel?: string })
+    ?.careerGoal === 'promotion'
+    ? `
 🚀 PROMOTION READINESS
-You're ${data.stats.promotionReadiness}% ready for ${data.careerContext.targetLevel}!
+You're ${data.stats.promotionReadiness}% ready for ${(data.careerContext as { targetLevel?: string })?.targetLevel || 'your target level'}!
 ${data.stats.promotionReadiness >= 70 ? '✅ Ready to discuss with your manager!' : `Keep developing these skills to reach 70%`}
-` : ''}
+`
+    : ''
+}
 
 💡 RECOMMENDED FOR YOU
-${data.recommendations.slice(0, 2).map(r => `- ${r.title}: ${r.description}`).join('\n')}
+${data.recommendations
+  .slice(0, 2)
+  .map(
+    (r: { title: string; description: string }) =>
+      `- ${r.title}: ${r.description}`
+  )
+  .join('\n')}
 
 ${data.nextMilestone ? `🎯 NEXT MILESTONE\n${data.nextMilestone}\n` : ''}
 
@@ -221,16 +249,22 @@ export async function calculateCareerROI(userId: string): Promise<{
 }> {
   const activities = await activityService.getUserActivity(userId, 1000, 0);
   const stats = await skillTrackingService.getSkillStats(userId);
-  const user = await userService.findById(userId);
+  const user = await userService.getUserById(userId);
 
-  const promptsUsed = activities.filter(a => a.type === 'use').length;
+  const promptsUsed = activities.filter(
+    (a: { type: string }) => a.type === 'use'
+  ).length;
   const timeSaved = (promptsUsed * 2) / 60; // hours
   const costSavings = timeSaved * 100; // $100/hour
 
   // Career impact
-  const promotionReadiness = user?.careerContext?.careerGoal === 'promotion' 
-    ? Math.min(100, stats.averageImprovement)
-    : 0;
+  const userCareerContext = (
+    user as { careerContext?: { careerGoal?: string } }
+  )?.careerContext;
+  const promotionReadiness =
+    userCareerContext?.careerGoal === 'promotion'
+      ? Math.min(100, stats.averageImprovement)
+      : 0;
 
   // Estimate salary impact based on promotion readiness
   // Assume average promotion = $15K salary increase
@@ -261,7 +295,13 @@ export async function onPromptExecuted(
   }
 ): Promise<void> {
   // Track activity
-  await activityService.trackActivity(userId, 'use', 'prompt', promptCategory, metadata);
+  await activityService.trackActivity(
+    userId,
+    'use',
+    'prompt',
+    promptCategory,
+    metadata
+  );
 
   // Track career progress
   await trackCareerProgress(userId, promptCategory, patternId);

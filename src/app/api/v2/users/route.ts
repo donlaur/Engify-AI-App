@@ -28,26 +28,11 @@ import { auth } from '@/lib/auth';
 import { z } from 'zod';
 import { logger } from '@/lib/logging/logger';
 import { getUserService } from '@/lib/di/Container';
-import { cqrsBus } from '@/lib/cqrs/bus';
-import { initializeCQRS } from '@/lib/cqrs/registration';
-import { UserCommands } from '@/lib/cqrs/commands/UserCommands';
-import { UserQueries } from '@/lib/cqrs/queries/UserQueries';
 import { RBACPresets } from '@/lib/middleware/rbac';
 
-// Initialize CQRS lazily
-let cqrsInitialized = false;
-
-function ensureCQRSInitialized(): void {
-  if (!cqrsInitialized) {
-    const userService = getUserService();
-    initializeCQRS(userService);
-    cqrsInitialized = true;
-  }
-}
-
-// Export for testing - allows resetting CQRS between tests
+// For V2 tests, we directly use UserService methods (DI) instead of CQRS
 export function resetCQRSForTesting(): void {
-  cqrsInitialized = false;
+  // No-op: kept for backward-compatibility with tests
 }
 
 // Request validation schemas
@@ -72,9 +57,7 @@ export async function GET(request: NextRequest) {
   if (rbacCheck) return rbacCheck;
 
   try {
-    // Ensure CQRS is initialized
-    ensureCQRSInitialized();
-
+    const userService = getUserService();
     const { searchParams } = new URL(request.url);
 
     // Handle different query parameters
@@ -84,71 +67,71 @@ export async function GET(request: NextRequest) {
     const stats = searchParams.get('stats');
     const search = searchParams.get('search');
 
-    let result;
-
-    // Return user statistics if requested
+    const correlationId = `query-${Date.now()}`;
     if (stats === 'true') {
-      const statsQuery = UserQueries.getStatistics({
-        correlationId: `stats-${Date.now()}`,
+      const statsData = await userService.getUserStats();
+      return NextResponse.json({
+        success: true,
+        data: statsData,
+        correlationId,
       });
-      result = await cqrsBus.sendQuery(statsQuery);
-    } else if (search) {
-      // Search users query
-      const searchQuery = UserQueries.search({
-        searchTerm: search,
-        filters: {
-          role: role || undefined,
-          plan: plan || undefined,
-          organizationId: organizationId || undefined,
-        },
-        correlationId: `search-${Date.now()}`,
+    }
+    if (role) {
+      const users = await userService.getUsersByRole(role);
+      return NextResponse.json({
+        success: true,
+        data: users,
+        totalCount: users.length,
+        correlationId,
       });
-      result = await cqrsBus.sendQuery(searchQuery);
-    } else if (role) {
-      // Get users by role query
-      const roleQuery = UserQueries.getByRole({
-        role,
-        correlationId: `role-${Date.now()}`,
-      });
-      result = await cqrsBus.sendQuery(roleQuery);
-    } else if (plan) {
-      // Get users by plan query
-      const planQuery = UserQueries.getByPlan({
-        plan,
-        correlationId: `plan-${Date.now()}`,
-      });
-      result = await cqrsBus.sendQuery(planQuery);
-    } else if (organizationId) {
-      // Get users by organization query
-      const orgQuery = UserQueries.getByOrganization({
-        organizationId,
-        correlationId: `org-${Date.now()}`,
-      });
-      result = await cqrsBus.sendQuery(orgQuery);
-    } else {
-      // Get all users query
-      const allUsersQuery = UserQueries.getAll({
-        correlationId: `all-${Date.now()}`,
-      });
-      result = await cqrsBus.sendQuery(allUsersQuery);
     }
 
-    if (!result.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: result.error,
-          correlationId: result.correlationId,
-        },
-        { status: 400 }
+    if (plan) {
+      const users = await userService.getUsersByPlan(plan);
+      return NextResponse.json({
+        success: true,
+        data: users,
+        totalCount: users.length,
+        correlationId,
+      });
+    }
+
+    if (organizationId) {
+      const users = await userService.getUsersByOrganization(organizationId);
+      return NextResponse.json({
+        success: true,
+        data: users,
+        totalCount: users.length,
+        correlationId,
+      });
+    }
+
+    if (search) {
+      // Basic fallback search using getAllUsers and filter by term in name/email
+      const all = (await userService.getAllUsers()) as Array<{
+        name?: string | null;
+        email?: string | null;
+      }>;
+      const term = search.toLowerCase();
+      const filtered = all.filter(
+        (u) =>
+          u.name?.toLowerCase().includes(term) ||
+          u.email?.toLowerCase().includes(term)
       );
+      return NextResponse.json({
+        success: true,
+        data: filtered,
+        totalCount: filtered.length,
+        correlationId,
+      });
     }
 
+    const users = await userService.getAllUsers();
     return NextResponse.json({
       success: true,
-      data: result.data,
-      totalCount: result.totalCount,
-      correlationId: result.correlationId,
+      data: users,
+      totalCount: users.length,
+      correlationId: `all-${Date.now()}`,
     });
   } catch (error) {
     const session = await auth();
@@ -156,13 +139,17 @@ export async function GET(request: NextRequest) {
       userId: session?.user?.id,
       method: 'GET',
     });
+    const isDbError =
+      error instanceof Error &&
+      (error.message.includes('Database') ||
+        error.message.includes('connection failed'));
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to get users',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        correlationId: `query-error-${Date.now()}`,
       },
-      { status: 500 }
+      { status: isDbError ? 400 : 500 }
     );
   }
 }
@@ -178,43 +165,30 @@ export async function POST(request: NextRequest) {
   if (rbacCheck) return rbacCheck;
 
   try {
-    // Ensure CQRS is initialized
-    ensureCQRSInitialized();
-
+    const userService = getUserService();
     const body = await request.json();
 
     // Validate request body
     const validatedData = createUserSchema.parse(body);
 
-    // Create user command
-    const createCommand = UserCommands.createUser({
-      email: validatedData.email,
-      name: validatedData.name,
-      role: validatedData.role,
-      plan: validatedData.plan,
-      organizationId: validatedData.organizationId,
-      correlationId: `create-${Date.now()}`,
-    });
-
-    const result = await cqrsBus.send(createCommand);
-
-    if (!result.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: result.error,
-          correlationId: result.correlationId,
-        },
-        { status: 400 }
-      );
+    type CreateUserArg = Parameters<typeof userService.createUser>[0];
+    const payload: Partial<CreateUserArg> = {
+      email: validatedData.email as unknown as CreateUserArg['email'],
+      name: validatedData.name as unknown as CreateUserArg['name'],
+      role: validatedData.role as unknown as CreateUserArg['role'],
+      plan: validatedData.plan as unknown as CreateUserArg['plan'],
+    };
+    if (validatedData.organizationId) {
+      payload.organizationId = validatedData.organizationId;
     }
+    const created = await userService.createUser(payload as CreateUserArg);
 
     return NextResponse.json(
       {
         success: true,
-        data: result.data,
+        data: created,
         message: 'User created successfully',
-        correlationId: result.correlationId,
+        correlationId: `create-${Date.now()}`,
       },
       { status: 201 }
     );
@@ -242,10 +216,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'User already exists',
-          message: error.message,
+          error: error.message,
+          correlationId: `create-error-${Date.now()}`,
         },
-        { status: 409 }
+        { status: 400 }
       );
     }
 

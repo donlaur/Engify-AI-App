@@ -10,7 +10,7 @@ import { auth } from '@/lib/auth';
  * Fetch a single prompt by ID
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -79,6 +79,11 @@ export async function PATCH(
   try {
     const { id } = params;
     const body = await request.json();
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const db = await getMongoDb();
     const collection = db.collection('prompts');

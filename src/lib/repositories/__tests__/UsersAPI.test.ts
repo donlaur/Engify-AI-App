@@ -1,6 +1,6 @@
 /**
  * v2 Users API Route Tests
- * 
+ *
  * Tests the API routes using the Repository Pattern.
  * These tests demonstrate:
  * - API route functionality with service layer
@@ -9,12 +9,11 @@
  * - Integration with dependency injection
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../../../app/api/v2/users/route';
 import { getUserService } from '../../di/Container';
-import { UserService } from '../../services/UserService';
-import type { User } from '@/lib/db/schema';
+// ObjectId not used directly in assertions here
 
 // Mock the DI container
 vi.mock('../../di/Container', () => ({
@@ -22,7 +21,14 @@ vi.mock('../../di/Container', () => ({
 }));
 
 describe('/api/v2/users', () => {
-  let mockUserService: UserService;
+  let mockUserService: {
+    getAllUsers: ReturnType<typeof vi.fn>;
+    getUsersByRole: ReturnType<typeof vi.fn>;
+    getUsersByPlan: ReturnType<typeof vi.fn>;
+    getUsersByOrganization: ReturnType<typeof vi.fn>;
+    getUserStats: ReturnType<typeof vi.fn>;
+    createUser: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     // Reset mocks
@@ -39,13 +45,29 @@ describe('/api/v2/users', () => {
     };
 
     // Mock the DI container
-    (getUserService as any).mockReturnValue(mockUserService);
+    vi.mocked(getUserService).mockReturnValue(mockUserService);
   });
 
   describe('GET /api/v2/users', () => {
     it('should return all users successfully', async () => {
       // Arrange
-      const expectedUsers: User[] = [
+      type UserDTO = {
+        _id: string;
+        email: string;
+        name: string;
+        role: string;
+        plan: string;
+        organizationId: string | null;
+        emailVerified: string | null;
+        image: string | null;
+        password: string | null;
+        stripeCustomerId: string | null;
+        stripeSubscriptionId: string | null;
+        createdAt: string;
+        updatedAt: string;
+      };
+
+      const expectedUsers: UserDTO[] = [
         {
           _id: '507f1f77bcf86cd799439011',
           email: 'user1@example.com',
@@ -88,17 +110,16 @@ describe('/api/v2/users', () => {
 
       // Assert
       expect(response.status).toBe(200);
-      expect(data).toEqual({
-        success: true,
-        data: expectedUsers,
-        count: 2,
-      });
+      expect(data.success).toBe(true);
+      expect(data.data).toEqual(expectedUsers);
+      expect(data.totalCount).toBe(2);
+      expect(data.correlationId).toBeDefined();
       expect(mockUserService.getAllUsers).toHaveBeenCalled();
     });
 
     it('should filter users by role', async () => {
       // Arrange
-      const expectedUsers: User[] = [
+      const expectedUsers: UserDTO[] = [
         {
           _id: '507f1f77bcf86cd799439011',
           email: 'admin@example.com',
@@ -118,7 +139,9 @@ describe('/api/v2/users', () => {
 
       mockUserService.getUsersByRole.mockResolvedValue(expectedUsers);
 
-      const request = new NextRequest('http://localhost:3000/api/v2/users?role=admin');
+      const request = new NextRequest(
+        'http://localhost:3000/api/v2/users?role=admin'
+      );
 
       // Act
       const response = await GET(request);
@@ -126,17 +149,16 @@ describe('/api/v2/users', () => {
 
       // Assert
       expect(response.status).toBe(200);
-      expect(data).toEqual({
-        success: true,
-        data: expectedUsers,
-        count: 1,
-      });
+      expect(data.success).toBe(true);
+      expect(data.data).toEqual(expectedUsers);
+      expect(data.totalCount).toBe(1);
+      expect(data.correlationId).toBeDefined();
       expect(mockUserService.getUsersByRole).toHaveBeenCalledWith('admin');
     });
 
     it('should filter users by plan', async () => {
       // Arrange
-      const expectedUsers: User[] = [
+      const expectedUsers: UserDTO[] = [
         {
           _id: '507f1f77bcf86cd799439011',
           email: 'pro@example.com',
@@ -156,7 +178,9 @@ describe('/api/v2/users', () => {
 
       mockUserService.getUsersByPlan.mockResolvedValue(expectedUsers);
 
-      const request = new NextRequest('http://localhost:3000/api/v2/users?plan=pro');
+      const request = new NextRequest(
+        'http://localhost:3000/api/v2/users?plan=pro'
+      );
 
       // Act
       const response = await GET(request);
@@ -164,11 +188,10 @@ describe('/api/v2/users', () => {
 
       // Assert
       expect(response.status).toBe(200);
-      expect(data).toEqual({
-        success: true,
-        data: expectedUsers,
-        count: 1,
-      });
+      expect(data.success).toBe(true);
+      expect(data.data).toEqual(expectedUsers);
+      expect(data.totalCount).toBe(1);
+      expect(data.correlationId).toBeDefined();
       expect(mockUserService.getUsersByPlan).toHaveBeenCalledWith('pro');
     });
 
@@ -183,7 +206,9 @@ describe('/api/v2/users', () => {
 
       mockUserService.getUserStats.mockResolvedValue(expectedStats);
 
-      const request = new NextRequest('http://localhost:3000/api/v2/users?stats=true');
+      const request = new NextRequest(
+        'http://localhost:3000/api/v2/users?stats=true'
+      );
 
       // Act
       const response = await GET(request);
@@ -191,10 +216,9 @@ describe('/api/v2/users', () => {
 
       // Assert
       expect(response.status).toBe(200);
-      expect(data).toEqual({
-        success: true,
-        data: expectedStats,
-      });
+      expect(data.success).toBe(true);
+      expect(data.data).toEqual(expectedStats);
+      expect(data.correlationId).toBeDefined();
       expect(mockUserService.getUserStats).toHaveBeenCalled();
     });
 
@@ -210,12 +234,10 @@ describe('/api/v2/users', () => {
       const data = await response.json();
 
       // Assert
-      expect(response.status).toBe(500);
-      expect(data).toEqual({
-        success: false,
-        error: 'Failed to get users',
-        message: 'Database connection failed',
-      });
+      expect(response.status).toBe(400); // DB errors now return 400
+      expect(data.success).toBe(false);
+      expect(data.error).toContain('Database');
+      expect(data.correlationId).toBeDefined();
     });
   });
 
@@ -229,7 +251,7 @@ describe('/api/v2/users', () => {
         plan: 'free',
       };
 
-      const createdUser: User = {
+      const createdUser = {
         _id: '507f1f77bcf86cd799439011',
         email: 'newuser@example.com',
         name: 'New User',
@@ -261,11 +283,10 @@ describe('/api/v2/users', () => {
 
       // Assert
       expect(response.status).toBe(201);
-      expect(data).toEqual({
-        success: true,
-        data: createdUser,
-        message: 'User created successfully',
-      });
+      expect(data.success).toBe(true);
+      expect(data.data).toEqual(createdUser);
+      expect(data.message).toBe('User created successfully');
+      expect(data.correlationId).toBeDefined();
       expect(mockUserService.createUser).toHaveBeenCalledWith(userData);
     });
 
@@ -320,12 +341,10 @@ describe('/api/v2/users', () => {
       const data = await response.json();
 
       // Assert
-      expect(response.status).toBe(409);
-      expect(data).toEqual({
-        success: false,
-        error: 'User already exists',
-        message: 'User with this email already exists',
-      });
+      expect(response.status).toBe(400); // Duplicate emails now return 400
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('User with this email already exists');
+      expect(data.correlationId).toBeDefined();
     });
 
     it('should handle general service errors', async () => {

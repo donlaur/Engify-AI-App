@@ -5,7 +5,7 @@
  * These handlers update read models and trigger side effects.
  */
 
-import { IEventHandler } from '../types';
+import { IEventHandler, IEvent } from '../types';
 import {
   UserEvent,
   UserCreatedEvent,
@@ -21,10 +21,15 @@ import {
  *
  * Records all user events for audit purposes.
  */
-export class UserAuditTrailHandler implements IEventHandler<UserEvent> {
+export class UserAuditTrailHandler implements IEventHandler<IEvent> {
   readonly eventType = 'UserEvent';
 
-  async handle(event: UserEvent): Promise<void> {
+  async handle(event: IEvent): Promise<void> {
+    // Type guard to ensure it's a UserEvent
+    if (!('data' in event) || !('eventType' in event)) {
+      return;
+    }
+
     // eslint-disable-next-line no-console
     console.log(`[AUDIT] User Event: ${event.eventType}`, {
       aggregateId: event.aggregateId,
@@ -43,7 +48,7 @@ export class UserAuditTrailHandler implements IEventHandler<UserEvent> {
  *
  * Updates user statistics based on events.
  */
-export class UserStatisticsHandler implements IEventHandler<UserEvent> {
+export class UserStatisticsHandler implements IEventHandler<IEvent> {
   readonly eventType = 'UserEvent';
   private statistics = {
     totalUsers: 0,
@@ -52,24 +57,30 @@ export class UserStatisticsHandler implements IEventHandler<UserEvent> {
     activeUsers: 0,
   };
 
-  async handle(event: UserEvent): Promise<void> {
-    switch (event.eventType) {
+  async handle(event: IEvent): Promise<void> {
+    // Type guard: ensure it's a UserEvent
+    if (!('eventType' in event) || !event.eventType.startsWith('User')) {
+      return;
+    }
+
+    const userEvent = event as unknown as UserEvent;
+    switch (userEvent.eventType) {
       case 'UserCreated':
-        await this.handleUserCreated(event as UserCreatedEvent);
+        await this.handleUserCreated(userEvent as UserCreatedEvent);
         break;
       case 'UserUpdated':
-        await this.handleUserUpdated(event as UserUpdatedEvent);
+        await this.handleUserUpdated(userEvent as UserUpdatedEvent);
         break;
       case 'UserDeleted':
-        await this.handleUserDeleted(event as UserDeletedEvent);
+        await this.handleUserDeleted(userEvent as UserDeletedEvent);
         break;
       case 'UserLastLoginUpdated':
         await this.handleUserLastLoginUpdated(
-          event as UserLastLoginUpdatedEvent
+          userEvent as UserLastLoginUpdatedEvent
         );
         break;
       case 'UserPlanChanged':
-        await this.handleUserPlanChanged(event as UserPlanChangedEvent);
+        await this.handleUserPlanChanged(userEvent as UserPlanChangedEvent);
         break;
     }
   }
@@ -152,20 +163,26 @@ export class UserStatisticsHandler implements IEventHandler<UserEvent> {
  *
  * Sends notifications based on user events.
  */
-export class UserNotificationHandler implements IEventHandler<UserEvent> {
+export class UserNotificationHandler implements IEventHandler<IEvent> {
   readonly eventType = 'UserEvent';
 
-  async handle(event: UserEvent): Promise<void> {
-    switch (event.eventType) {
+  async handle(event: IEvent): Promise<void> {
+    // Type guard: ensure it's a UserEvent
+    if (!('eventType' in event) || !event.eventType.startsWith('User')) {
+      return;
+    }
+
+    const userEvent = event as unknown as UserEvent;
+    switch (userEvent.eventType) {
       case 'UserCreated':
-        await this.handleUserCreated(event as UserCreatedEvent);
+        await this.handleUserCreated(userEvent as UserCreatedEvent);
         break;
       case 'UserPlanChanged':
-        await this.handleUserPlanChanged(event as UserPlanChangedEvent);
+        await this.handleUserPlanChanged(userEvent as UserPlanChangedEvent);
         break;
       case 'UserAssignedToOrganization':
         await this.handleUserAssignedToOrganization(
-          event as UserAssignedToOrganizationEvent
+          userEvent as UserAssignedToOrganizationEvent
         );
         break;
     }
@@ -180,9 +197,12 @@ export class UserNotificationHandler implements IEventHandler<UserEvent> {
   private async handleUserPlanChanged(
     event: UserPlanChangedEvent
   ): Promise<void> {
+    // Access IEvent properties via type assertion since UserEvent interfaces extend IEvent
+    const baseEvent = event as unknown as IEvent;
     // eslint-disable-next-line no-console
     console.log(
-      `[NOTIFICATION] Plan change notification sent to user ${event.aggregateId}`
+      `[NOTIFICATION] Plan change notification sent to user ${baseEvent.aggregateId}`,
+      `Plan: ${event.data.oldPlan} → ${event.data.newPlan}`
     );
     // In a real implementation, this would send a plan change notification
   }
@@ -190,9 +210,12 @@ export class UserNotificationHandler implements IEventHandler<UserEvent> {
   private async handleUserAssignedToOrganization(
     event: UserAssignedToOrganizationEvent
   ): Promise<void> {
+    // Access IEvent properties via type assertion since UserEvent interfaces extend IEvent
+    const baseEvent = event as unknown as IEvent;
     // eslint-disable-next-line no-console
     console.log(
-      `[NOTIFICATION] Organization assignment notification sent to user ${event.aggregateId}`
+      `[NOTIFICATION] Organization assignment notification sent to user ${baseEvent.aggregateId}`,
+      `Organization: ${event.data.organizationId}`
     );
     // In a real implementation, this would notify the user and organization
   }
@@ -203,27 +226,35 @@ export class UserNotificationHandler implements IEventHandler<UserEvent> {
  *
  * Handles external system integrations based on user events.
  */
-export class UserIntegrationHandler implements IEventHandler<UserEvent> {
+export class UserIntegrationHandler implements IEventHandler<IEvent> {
   readonly eventType = 'UserEvent';
 
-  async handle(event: UserEvent): Promise<void> {
-    switch (event.eventType) {
+  async handle(event: IEvent): Promise<void> {
+    // Type guard: ensure it's a UserEvent
+    if (!('eventType' in event) || !event.eventType.startsWith('User')) {
+      return;
+    }
+
+    const userEvent = event as unknown as UserEvent;
+    switch (userEvent.eventType) {
       case 'UserCreated':
-        await this.handleUserCreated(event as UserCreatedEvent);
+        await this.handleUserCreated(userEvent as UserCreatedEvent);
         break;
       case 'UserPlanChanged':
-        await this.handleUserPlanChanged(event as UserPlanChangedEvent);
+        await this.handleUserPlanChanged(userEvent as UserPlanChangedEvent);
         break;
       case 'UserDeleted':
-        await this.handleUserDeleted(event as UserDeletedEvent);
+        await this.handleUserDeleted(userEvent as UserDeletedEvent);
         break;
     }
   }
 
   private async handleUserCreated(event: UserCreatedEvent): Promise<void> {
+    // Access IEvent properties via type assertion since UserEvent interfaces extend IEvent
+    const baseEvent = event as unknown as IEvent;
     // eslint-disable-next-line no-console
     console.log(
-      `[INTEGRATION] Creating Stripe customer for user ${event.aggregateId}`
+      `[INTEGRATION] Creating Stripe customer for user ${baseEvent.aggregateId}`
     );
     // In a real implementation, this would create a Stripe customer
   }
@@ -231,17 +262,21 @@ export class UserIntegrationHandler implements IEventHandler<UserEvent> {
   private async handleUserPlanChanged(
     event: UserPlanChangedEvent
   ): Promise<void> {
+    // Access IEvent properties via type assertion since UserEvent interfaces extend IEvent
+    const baseEvent = event as unknown as IEvent;
     // eslint-disable-next-line no-console
     console.log(
-      `[INTEGRATION] Updating Stripe subscription for user ${event.aggregateId}`
+      `[INTEGRATION] Updating Stripe subscription for user ${baseEvent.aggregateId}`
     );
     // In a real implementation, this would update the Stripe subscription
   }
 
   private async handleUserDeleted(event: UserDeletedEvent): Promise<void> {
+    // Access IEvent properties via type assertion since UserEvent interfaces extend IEvent
+    const baseEvent = event as unknown as IEvent;
     // eslint-disable-next-line no-console
     console.log(
-      `[INTEGRATION] Cancelling Stripe subscription for user ${event.aggregateId}`
+      `[INTEGRATION] Cancelling Stripe subscription for user ${baseEvent.aggregateId}`
     );
     // In a real implementation, this would cancel the Stripe subscription
   }

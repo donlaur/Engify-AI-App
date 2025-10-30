@@ -629,8 +629,8 @@ Output a balanced, achievable sprint plan.`,
 - Key Priorities: {priorities}
 
 Provide a structured agenda and facilitation tips for each section.`,
-    category: 'management',
-    role: 'manager',
+    category: 'general',
+    role: 'engineering-manager',
     pattern: 'persona',
     tags: ['sprint-planning', 'agile', 'facilitation', 'team-management'],
     views: 0,
@@ -642,7 +642,8 @@ Provide a structured agenda and facilitation tips for each section.`,
   {
     id: 'em-002',
     title: 'Performance Review Builder',
-    description: 'Create comprehensive performance reviews for engineering team members',
+    description:
+      'Create comprehensive performance reviews for engineering team members',
     content: `You are an engineering manager conducting annual performance reviews. Create a comprehensive review covering:
 
 **Performance Review Structure:**
@@ -679,10 +680,15 @@ Provide a structured agenda and facilitation tips for each section.`,
 - Team Impact: {team_impact}
 
 Provide specific, actionable feedback and development recommendations.`,
-    category: 'management',
-    role: 'manager',
-    pattern: 'structured',
-    tags: ['performance-review', 'feedback', 'career-development', 'management'],
+    category: 'general',
+    role: 'engineering-manager',
+    pattern: 'template',
+    tags: [
+      'performance-review',
+      'feedback',
+      'career-development',
+      'management',
+    ],
     views: 0,
     rating: 0,
     ratingCount: 0,
@@ -734,9 +740,9 @@ Provide specific, actionable feedback and development recommendations.`,
 - Recent Issues: {recent_issues}
 
 Provide a prioritized action plan with business justification for each item.`,
-    category: 'management',
-    role: 'manager',
-    pattern: 'structured',
+    category: 'general',
+    role: 'engineering-manager',
+    pattern: 'template',
     tags: ['technical-debt', 'architecture', 'code-quality', 'prioritization'],
     views: 0,
     rating: 0,
@@ -770,9 +776,7 @@ export function getSeedPromptsWithTimestamps(): Prompt[] {
  * Prompts tailored for engineering leaders
  */
 
-import { Prompt } from './seed-prompts';
-
-export const directorPrompts: Prompt[] = [
+export const directorPrompts: Omit<Prompt, 'createdAt' | 'updatedAt'>[] = [
   {
     id: 'dir-001',
     title: 'AI Workflow Integration Planner',
@@ -809,7 +813,7 @@ export const directorPrompts: Prompt[] = [
 - Risk mitigation strategies
 
 Make this actionable and specific to our context.`,
-    category: 'leadership',
+    category: 'general',
     role: 'engineering-manager',
     pattern: 'template',
     tags: ['ai-adoption', 'workflow', 'planning', 'guardrails'],
@@ -927,7 +931,7 @@ Make this actionable and specific to our context.`,
 - Conversation scripts for 1:1s
 - Team meeting agendas
 - Success stories to share`,
-    category: 'leadership',
+    category: 'general',
     role: 'engineering-manager',
     pattern: 'template',
     tags: ['coaching', 'team-development', 'ai-adoption', 'culture'],
@@ -1049,7 +1053,7 @@ Make this actionable and specific to our context.`,
 - Decision frameworks
 - Communication guidelines
 - Example AI feature specs`,
-    category: 'leadership',
+    category: 'general',
     role: 'engineering-manager',
     pattern: 'template',
     tags: ['product-collaboration', 'ai-features', 'planning'],
@@ -1103,7 +1107,7 @@ Make stories specific, testable, and valuable.`,
 5. Sequencing rationale: Why this order?
 
 Provide clear recommendations with data-driven reasoning.`,
-    category: 'leadership',
+    category: 'general',
     role: 'product-manager',
     pattern: 'chain-of-thought',
     tags: ['prioritization', 'strategy', 'roadmap'],
@@ -1131,7 +1135,7 @@ Provide clear recommendations with data-driven reasoning.`,
 5. Differentiation strategy recommendations
 
 Focus on actionable insights for product strategy.`,
-    category: 'leadership',
+    category: 'general',
     role: 'product-manager',
     pattern: 'few-shot',
     tags: ['competitive-analysis', 'strategy', 'market-research'],
@@ -1244,8 +1248,8 @@ Make it actionable and focused on insights.`,
 5. Leading vs lagging indicators
 
 Provide specific formulas and targets for each metric.`,
-    category: 'leadership',
-    role: 'director',
+    category: 'general',
+    role: 'c-level',
     pattern: 'template',
     tags: ['metrics', 'kpis', 'reporting'],
     views: 0,
@@ -1271,8 +1275,8 @@ Provide specific formulas and targets for each metric.`,
 6. Ask: Budget, headcount, executive support
 
 Make it concise, data-driven, and business-focused.`,
-    category: 'leadership',
-    role: 'director',
+    category: 'general',
+    role: 'c-level',
     pattern: 'template',
     tags: ['strategy', 'presentation', 'executive'],
     views: 0,
@@ -1300,8 +1304,8 @@ Make it concise, data-driven, and business-focused.`,
 6. Success metrics: Productivity, retention, quality
 
 Balance speed with quality and culture.`,
-    category: 'leadership',
-    role: 'director',
+    category: 'general',
+    role: 'c-level',
     pattern: 'chain-of-thought',
     tags: ['hiring', 'scaling', 'organization'],
     views: 0,

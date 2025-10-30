@@ -23,7 +23,8 @@ export interface ScheduledJob {
 
 export class ScheduledJobsService {
   private queue: QStashMessageQueue;
-  private baseUrl: string;
+  // @ts-expect-error - intentionally unused, kept for potential future use
+  private _baseUrl: string;
 
   constructor() {
     const config: QueueConfig = {
@@ -38,7 +39,7 @@ export class ScheduledJobsService {
       enableMetrics: false,
     };
     this.queue = new QStashMessageQueue('scheduled-jobs', 'redis', config);
-    this.baseUrl =
+    this._baseUrl =
       process.env.QSTASH_WEBHOOK_URL ||
       process.env.NEXTAUTH_URL ||
       'http://localhost:3000';
@@ -61,15 +62,27 @@ export class ScheduledJobsService {
       // Using QStash publish with delay for now
       // Full cron support requires QStash API v2 scheduling
 
+      const now = new Date();
       await this.queue.publish({
         id: `job-${jobName}-${Date.now()}`,
         type: 'job',
         payload: {
           jobName,
           schedule,
-          ...(typeof payload === 'object' ? payload : { data: payload }),
+          ...(typeof payload === 'object' && payload !== null
+            ? payload
+            : { data: payload }),
         },
         priority: 'normal',
+        status: 'pending',
+        metadata: {
+          source: 'scheduled-jobs',
+          version: '1.0',
+        },
+        createdAt: now,
+        updatedAt: now,
+        retryCount: 0,
+        maxRetries: 3,
       });
 
       return {

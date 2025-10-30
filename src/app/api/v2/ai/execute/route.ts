@@ -27,6 +27,7 @@ const executeSchema = z.object({
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
+  let session: { user?: { id?: string } } | null = null;
 
   // Check RBAC permission
   const rbacCheck = await RBACPresets.requireAIExecution()(req);
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const session = await auth();
+    session = await auth();
     // Parse and validate request body
     const body = await req.json();
     const request = executeSchema.parse(body);
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
-          error: 'Validation failed',
+          error: 'Invalid request',
           details: error.errors,
         },
         { status: 400 }

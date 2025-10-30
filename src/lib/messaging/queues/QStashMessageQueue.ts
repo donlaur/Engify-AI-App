@@ -31,7 +31,8 @@ export class QStashMessageQueue implements IMessageQueue {
   constructor(
     public readonly name: string,
     public readonly type: 'redis' = 'redis',
-    private config: QueueConfig
+    // @ts-expect-error - intentionally unused, kept for potential future use
+    private _config: QueueConfig
   ) {
     this.baseUrl = process.env.QSTASH_URL || 'https://qstash.upstash.io/v2';
     this.authToken = process.env.QSTASH_TOKEN || '';
@@ -59,7 +60,7 @@ export class QStashMessageQueue implements IMessageQueue {
       const response = await fetch(url, {
         method,
         headers: {
-          'Authorization': `Bearer ${this.authToken}`,
+          Authorization: `Bearer ${this.authToken}`,
           'Content-Type': 'application/json',
         },
         body: body ? JSON.stringify(body) : undefined,
@@ -91,7 +92,7 @@ export class QStashMessageQueue implements IMessageQueue {
   async publish(message: IMessage): Promise<void> {
     try {
       const queueUrl = `${this.webhookUrl}/api/messaging/${this.name}/process`;
-      
+
       const qstashMessage = {
         url: queueUrl,
         body: {
@@ -118,7 +119,7 @@ export class QStashMessageQueue implements IMessageQueue {
       };
 
       await this.makeRequest('/publish', 'POST', qstashMessage);
-      
+
       // Update local stats (skip in test mode)
       if (process.env.NODE_ENV !== 'test') {
         await this.updateQueueStats('published');
@@ -128,7 +129,7 @@ export class QStashMessageQueue implements IMessageQueue {
       if (error instanceof MessageQueueError) {
         throw error;
       }
-      
+
       throw new MessageQueueError(
         `Failed to publish message: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'publish',
@@ -143,7 +144,7 @@ export class QStashMessageQueue implements IMessageQueue {
    */
   async subscribe(handler: IMessageHandler): Promise<void> {
     this.handlers.set(handler.handlerName, handler);
-    
+
     if (!this.isProcessing) {
       await this.startProcessing();
     }
@@ -154,7 +155,7 @@ export class QStashMessageQueue implements IMessageQueue {
    */
   async unsubscribe(handlerName: string): Promise<void> {
     this.handlers.delete(handlerName);
-    
+
     if (this.handlers.size === 0) {
       await this.stopProcessing();
     }
@@ -168,13 +169,19 @@ export class QStashMessageQueue implements IMessageQueue {
       // QStash doesn't provide direct queue stats, so we'll maintain our own
       const statsKey = this.getStatsKey();
       const stats = await this.makeRequest(`/redis/hgetall/${statsKey}`);
-      
+
       // Convert array to object
+      const statsArray = Array.isArray(stats) ? stats : [];
       const statsObj: Record<string, string> = {};
-      for (let i = 0; i < stats.length; i += 2) {
-        statsObj[stats[i]] = stats[i + 1];
+      for (let i = 0; i < statsArray.length; i += 2) {
+        if (
+          typeof statsArray[i] === 'string' &&
+          typeof statsArray[i + 1] === 'string'
+        ) {
+          statsObj[statsArray[i]] = statsArray[i + 1];
+        }
       }
-      
+
       return {
         totalMessages: parseInt(statsObj.totalMessages || '0'),
         pendingMessages: parseInt(statsObj.pendingMessages || '0'),
@@ -182,9 +189,13 @@ export class QStashMessageQueue implements IMessageQueue {
         completedMessages: parseInt(statsObj.completedMessages || '0'),
         failedMessages: parseInt(statsObj.failedMessages || '0'),
         deadLetterMessages: parseInt(statsObj.deadLetterMessages || '0'),
-        averageProcessingTime: parseFloat(statsObj.averageProcessingTime || '0'),
+        averageProcessingTime: parseFloat(
+          statsObj.averageProcessingTime || '0'
+        ),
         throughput: parseFloat(statsObj.throughput || '0'),
-        lastProcessedAt: statsObj.lastProcessedAt ? new Date(statsObj.lastProcessedAt) : null,
+        lastProcessedAt: statsObj.lastProcessedAt
+          ? new Date(statsObj.lastProcessedAt)
+          : null,
       };
     } catch (error) {
       // Return default stats if Redis stats are not available
@@ -209,7 +220,7 @@ export class QStashMessageQueue implements IMessageQueue {
     try {
       // QStash doesn't support purging all messages, but we can clear our stats
       await this.resetQueueStats();
-      
+
       // Note: In production, you might want to implement a custom purge endpoint
       // that cancels all pending messages for this queue
     } catch (error) {
@@ -246,18 +257,26 @@ export class QStashMessageQueue implements IMessageQueue {
       // QStash doesn't provide direct message retrieval
       // In a real implementation, you'd store message data in Redis or database
       const messageKey = this.getMessageKey(id);
-      const messageData = await this.makeRequest(`/redis/hgetall/${messageKey}`);
-      
-      if (messageData.length === 0) {
+      const messageData = await this.makeRequest(
+        `/redis/hgetall/${messageKey}`
+      );
+
+      const messageArray = Array.isArray(messageData) ? messageData : [];
+      if (messageArray.length === 0) {
         return null;
       }
-      
+
       // Convert array to object
       const messageObj: Record<string, string> = {};
-      for (let i = 0; i < messageData.length; i += 2) {
-        messageObj[messageData[i]] = messageData[i + 1];
+      for (let i = 0; i < messageArray.length; i += 2) {
+        if (
+          typeof messageArray[i] === 'string' &&
+          typeof messageArray[i + 1] === 'string'
+        ) {
+          messageObj[messageArray[i]] = messageArray[i + 1];
+        }
       }
-      
+
       return this.deserializeMessage(messageObj);
     } catch (error) {
       return null;
@@ -288,11 +307,11 @@ export class QStashMessageQueue implements IMessageQueue {
       if (!message) {
         throw new Error('Message not found');
       }
-      
+
       if (message.retryCount >= message.maxRetries) {
         throw new Error('Message has exceeded maximum retry count');
       }
-      
+
       // Create a new message with incremented retry count
       const retryMessage: IMessage = {
         ...message,
@@ -301,7 +320,7 @@ export class QStashMessageQueue implements IMessageQueue {
         status: 'pending',
         updatedAt: new Date(),
       };
-      
+
       await this.publish(retryMessage);
     } catch (error) {
       throw new MessageQueueError(
@@ -319,7 +338,7 @@ export class QStashMessageQueue implements IMessageQueue {
   async publishBatch(messages: IMessage[]): Promise<void> {
     try {
       // QStash supports batch publishing
-      const batchMessages = messages.map(message => ({
+      const batchMessages = messages.map((message) => ({
         url: `${this.webhookUrl}/api/messaging/${this.name}/process`,
         body: {
           messageId: message.id,
@@ -342,8 +361,10 @@ export class QStashMessageQueue implements IMessageQueue {
         retries: message.maxRetries,
       }));
 
-      await this.makeRequest('/publish/batch', 'POST', { messages: batchMessages });
-      
+      await this.makeRequest('/publish/batch', 'POST', {
+        messages: batchMessages,
+      });
+
       // Update local stats
       await this.updateQueueStats('published', messages.length);
     } catch (error) {
@@ -364,16 +385,20 @@ export class QStashMessageQueue implements IMessageQueue {
       // QStash doesn't provide direct pending message retrieval
       // In a real implementation, you'd query your message storage
       const pendingKey = this.getPendingKey();
-      const messageIds = await this.makeRequest(`/redis/lrange/${pendingKey}/0/${limit - 1}`);
-      
+      const messageIds = await this.makeRequest(
+        `/redis/lrange/${pendingKey}/0/${limit - 1}`
+      );
+
       const messages: IMessage[] = [];
-      for (const id of messageIds) {
+      const idsArray = Array.isArray(messageIds) ? messageIds : [];
+      for (const id of idsArray) {
+        if (typeof id !== 'string') continue;
         const message = await this.getMessage(id);
         if (message) {
           messages.push(message);
         }
       }
-      
+
       return messages;
     } catch (error) {
       return [];
@@ -385,22 +410,39 @@ export class QStashMessageQueue implements IMessageQueue {
    */
   async processMessage(messageData: unknown): Promise<MessageResult> {
     const startTime = Date.now();
-    
+
     try {
+      // Type guard for messageData
+      if (!messageData || typeof messageData !== 'object') {
+        throw new Error('Invalid message data');
+      }
+
+      const data = messageData as {
+        messageId?: string;
+        type?: string;
+        priority?: string;
+        payload?: unknown;
+        metadata?: unknown;
+        correlationId?: string;
+        replyTo?: string;
+        retryCount?: number;
+        maxRetries?: number;
+      };
+
       // Convert QStash message to our IMessage format
       const message: IMessage = {
-        id: messageData.messageId,
-        type: messageData.type,
-        priority: messageData.priority,
+        id: data.messageId || '',
+        type: (data.type || 'task') as IMessage['type'],
+        priority: (data.priority || 'normal') as IMessage['priority'],
         status: 'processing',
-        payload: messageData.payload,
-        metadata: messageData.metadata,
+        payload: data.payload,
+        metadata: data.metadata as IMessage['metadata'],
         createdAt: new Date(),
         updatedAt: new Date(),
-        correlationId: messageData.correlationId,
-        replyTo: messageData.replyTo,
-        retryCount: messageData.retryCount,
-        maxRetries: messageData.maxRetries,
+        correlationId: data.correlationId,
+        replyTo: data.replyTo,
+        retryCount: data.retryCount || 0,
+        maxRetries: data.maxRetries || 3,
       };
 
       // Find appropriate handler
@@ -416,22 +458,22 @@ export class QStashMessageQueue implements IMessageQueue {
 
       // Process the message
       const result = await handler.handle(message);
-      
+
       // Update stats
       if (result.success) {
         await this.updateQueueStats('completed');
       } else {
         await this.updateQueueStats('failed');
       }
-      
+
       // Update processing time stats
       const processingTime = Date.now() - startTime;
       await this.updateProcessingTimeStats(processingTime);
-      
+
       return result;
     } catch (error) {
       await this.updateQueueStats('failed');
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -448,7 +490,7 @@ export class QStashMessageQueue implements IMessageQueue {
     if (this.isProcessing) {
       return;
     }
-    
+
     this.isProcessing = true;
     // QStash handles processing via webhooks, so we don't need polling
   }
@@ -481,46 +523,72 @@ export class QStashMessageQueue implements IMessageQueue {
    */
   private getDelayFromPriority(priority: string): string {
     switch (priority) {
-      case 'critical': return '0s';
-      case 'high': return '1s';
-      case 'normal': return '5s';
-      case 'low': return '30s';
-      default: return '5s';
+      case 'critical':
+        return '0s';
+      case 'high':
+        return '1s';
+      case 'normal':
+        return '5s';
+      case 'low':
+        return '30s';
+      default:
+        return '5s';
     }
   }
 
   /**
    * Update queue statistics
    */
-  private async updateQueueStats(operation: string, count: number = 1): Promise<void> {
+  private async updateQueueStats(
+    operation: string,
+    count: number = 1
+  ): Promise<void> {
     // Skip stats update in test environment or if Redis is not available
     if (process.env.NODE_ENV === 'test' || !this.baseUrl.includes('upstash')) {
       return;
     }
-    
+
     const statsKey = this.getStatsKey();
-    
+
     try {
       switch (operation) {
         case 'published':
-          await this.makeRequest(`/redis/hincrby/${statsKey}/totalMessages/${count}`);
-          await this.makeRequest(`/redis/hincrby/${statsKey}/pendingMessages/${count}`);
+          await this.makeRequest(
+            `/redis/hincrby/${statsKey}/totalMessages/${count}`
+          );
+          await this.makeRequest(
+            `/redis/hincrby/${statsKey}/pendingMessages/${count}`
+          );
           break;
         case 'completed':
-          await this.makeRequest(`/redis/hincrby/${statsKey}/completedMessages/${count}`);
-          await this.makeRequest(`/redis/hincrby/${statsKey}/pendingMessages/${-count}`);
+          await this.makeRequest(
+            `/redis/hincrby/${statsKey}/completedMessages/${count}`
+          );
+          await this.makeRequest(
+            `/redis/hincrby/${statsKey}/pendingMessages/${-count}`
+          );
           break;
         case 'failed':
-          await this.makeRequest(`/redis/hincrby/${statsKey}/failedMessages/${count}`);
-          await this.makeRequest(`/redis/hincrby/${statsKey}/pendingMessages/${-count}`);
+          await this.makeRequest(
+            `/redis/hincrby/${statsKey}/failedMessages/${count}`
+          );
+          await this.makeRequest(
+            `/redis/hincrby/${statsKey}/pendingMessages/${-count}`
+          );
           break;
         case 'dead_letter':
-          await this.makeRequest(`/redis/hincrby/${statsKey}/deadLetterMessages/${count}`);
-          await this.makeRequest(`/redis/hincrby/${statsKey}/pendingMessages/${-count}`);
+          await this.makeRequest(
+            `/redis/hincrby/${statsKey}/deadLetterMessages/${count}`
+          );
+          await this.makeRequest(
+            `/redis/hincrby/${statsKey}/pendingMessages/${-count}`
+          );
           break;
       }
-      
-      await this.makeRequest(`/redis/hset/${statsKey}/lastProcessedAt/${new Date().toISOString()}`);
+
+      await this.makeRequest(
+        `/redis/hset/${statsKey}/lastProcessedAt/${encodeURIComponent(new Date().toISOString())}`
+      );
     } catch (error) {
       // Stats update failure shouldn't break message processing
       console.warn('Failed to update queue stats:', error);
@@ -530,24 +598,35 @@ export class QStashMessageQueue implements IMessageQueue {
   /**
    * Update processing time statistics
    */
-  private async updateProcessingTimeStats(processingTime: number): Promise<void> {
+  private async updateProcessingTimeStats(
+    processingTime: number
+  ): Promise<void> {
     // Skip stats update in test environment or if Redis is not available
     if (process.env.NODE_ENV === 'test' || !this.baseUrl.includes('upstash')) {
       return;
     }
-    
+
     const statsKey = this.getStatsKey();
-    
+
     try {
-      const currentAvg = await this.makeRequest(`/redis/hget/${statsKey}/averageProcessingTime`);
-      const currentCount = await this.makeRequest(`/redis/hget/${statsKey}/completedMessages`);
-      
-      const count = parseInt(currentCount || '0');
-      const avg = parseFloat(currentAvg || '0');
-      
-      const newAvg = count > 0 ? (avg * count + processingTime) / (count + 1) : processingTime;
-      
-      await this.makeRequest(`/redis/hset/${statsKey}/averageProcessingTime/${newAvg}`);
+      const currentAvg = await this.makeRequest(
+        `/redis/hget/${statsKey}/averageProcessingTime`
+      );
+      const currentCount = await this.makeRequest(
+        `/redis/hget/${statsKey}/completedMessages`
+      );
+
+      const count = parseInt(String(currentCount || '0'));
+      const avg = parseFloat(String(currentAvg || '0'));
+
+      const newAvg =
+        count > 0
+          ? (avg * count + processingTime) / (count + 1)
+          : processingTime;
+
+      await this.makeRequest(
+        `/redis/hset/${statsKey}/averageProcessingTime/${newAvg}`
+      );
     } catch (error) {
       console.warn('Failed to update processing time stats:', error);
     }
@@ -563,8 +642,11 @@ export class QStashMessageQueue implements IMessageQueue {
 
   /**
    * Generate Redis keys
+   * @deprecated Unused - kept for potential future use
    */
-  private getQueueKey(): string {
+  // @ts-expect-error - intentionally unused, kept for potential future use
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private _getQueueKey(): string {
     return `qstash:queue:${this.name}`;
   }
 
@@ -586,11 +668,11 @@ export class QStashMessageQueue implements IMessageQueue {
   private deserializeMessage(data: Record<string, string>): IMessage {
     return {
       id: data.id,
-      type: data.type as any,
-      priority: data.priority as any,
-      status: data.status as any,
-      payload: JSON.parse(data.payload),
-      metadata: JSON.parse(data.metadata),
+      type: data.type as import('../types').MessageType,
+      priority: data.priority as import('../types').MessagePriority,
+      status: data.status as import('../types').MessageStatus,
+      payload: JSON.parse(data.payload) as unknown,
+      metadata: JSON.parse(data.metadata) as import('../types').MessageMetadata,
       createdAt: new Date(data.createdAt),
       updatedAt: new Date(data.updatedAt),
       correlationId: data.correlationId || undefined,

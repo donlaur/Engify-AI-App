@@ -12,7 +12,7 @@ import {
   CircuitBreakerState,
   CircuitBreakerMetrics,
   CircuitBreakerResult,
-  CircuitBreakerError,
+  // CircuitBreakerError,
   CircuitOpenError,
   CircuitTimeoutError,
   ICircuitBreakerEventHandler,
@@ -40,28 +40,33 @@ export class CircuitBreaker implements ICircuitBreaker {
   /**
    * Execute an operation through the circuit breaker
    */
-  async execute<T>(operation: () => Promise<T>): Promise<CircuitBreakerResult<T>> {
+  async execute<T>(
+    operation: () => Promise<T>
+  ): Promise<CircuitBreakerResult<T>> {
     const startTime = Date.now();
-    
+
     try {
       // Check if circuit is open
       if (this.state === 'open') {
-        if (this.nextAttemptTime && Date.now() < this.nextAttemptTime.getTime()) {
+        if (
+          this.nextAttemptTime &&
+          Date.now() < this.nextAttemptTime.getTime()
+        ) {
           throw new CircuitOpenError(this.name, this.nextAttemptTime);
         }
-        
+
         // Try to transition to half-open
         this.transitionToState('half-open');
       }
 
       // Execute the operation with timeout
       const result = await this.executeWithTimeout(operation);
-      
+
       // Record success
       this.recordSuccess();
-      
+
       const executionTime = Date.now() - startTime;
-      
+
       return {
         success: true,
         data: result,
@@ -69,13 +74,14 @@ export class CircuitBreaker implements ICircuitBreaker {
         executionTime,
         timestamp: new Date(),
       };
-      
     } catch (error) {
       // Record failure
-      this.recordFailure(error instanceof Error ? error : new Error('Unknown error'));
-      
+      this.recordFailure(
+        error instanceof Error ? error : new Error('Unknown error')
+      );
+
       const executionTime = Date.now() - startTime;
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -94,15 +100,15 @@ export class CircuitBreaker implements ICircuitBreaker {
     fallback: () => Promise<T>
   ): Promise<CircuitBreakerResult<T>> {
     const result = await this.execute(operation);
-    
+
     if (result.success) {
       return result;
     }
-    
+
     // If circuit breaker fails, try fallback
     try {
       const fallbackResult = await fallback();
-      
+
       return {
         success: true,
         data: fallbackResult,
@@ -133,8 +139,11 @@ export class CircuitBreaker implements ICircuitBreaker {
    * Get circuit breaker metrics
    */
   getMetrics(): CircuitBreakerMetrics {
-    const failureRate = this.totalRequests > 0 ? (this.failureCount / this.totalRequests) * 100 : 0;
-    
+    const failureRate =
+      this.totalRequests > 0
+        ? (this.failureCount / this.totalRequests) * 100
+        : 0;
+
     return {
       state: this.state,
       failureCount: this.failureCount,
@@ -182,7 +191,7 @@ export class CircuitBreaker implements ICircuitBreaker {
    */
   onStateChange(callback: (state: CircuitBreakerState) => void): void {
     this.eventHandlers.push({
-      onStateChange: (state, circuitName) => callback(state),
+      onStateChange: (state, _circuitName) => callback(state),
       onFailure: () => {},
       onSuccess: () => {},
       onTimeout: () => {},
@@ -195,7 +204,7 @@ export class CircuitBreaker implements ICircuitBreaker {
   onFailure(callback: (error: Error) => void): void {
     this.eventHandlers.push({
       onStateChange: () => {},
-      onFailure: callback,
+      onFailure: (error, _circuitName) => callback(error),
       onSuccess: () => {},
       onTimeout: () => {},
     });
@@ -208,7 +217,7 @@ export class CircuitBreaker implements ICircuitBreaker {
     this.eventHandlers.push({
       onStateChange: () => {},
       onFailure: () => {},
-      onSuccess: callback,
+      onSuccess: (result, _circuitName) => callback(result),
       onTimeout: () => {},
     });
   }
@@ -223,11 +232,11 @@ export class CircuitBreaker implements ICircuitBreaker {
       }, this.config.requestTimeout);
 
       operation()
-        .then(result => {
+        .then((result) => {
           clearTimeout(timeout);
           resolve(result);
         })
-        .catch(error => {
+        .catch((error) => {
           clearTimeout(timeout);
           reject(error);
         });
@@ -243,16 +252,19 @@ export class CircuitBreaker implements ICircuitBreaker {
     this.lastSuccessTime = new Date();
 
     // Notify event handlers
-    this.eventHandlers.forEach(handler => {
+    this.eventHandlers.forEach((handler) => {
       try {
-        handler.onSuccess({ timestamp: new Date() });
+        handler.onSuccess({ timestamp: new Date() }, this.config.name);
       } catch (error) {
         console.warn('Error in success event handler:', error);
       }
     });
 
     // Check if we should transition from half-open to closed
-    if (this.state === 'half-open' && this.successCount >= this.config.successThreshold) {
+    if (
+      this.state === 'half-open' &&
+      this.successCount >= this.config.successThreshold
+    ) {
       this.transitionToState('closed');
     }
   }
@@ -266,9 +278,9 @@ export class CircuitBreaker implements ICircuitBreaker {
     this.lastFailureTime = new Date();
 
     // Notify event handlers
-    this.eventHandlers.forEach(handler => {
+    this.eventHandlers.forEach((handler) => {
       try {
-        handler.onFailure(error);
+        handler.onFailure(error, this.config.name);
       } catch (handlerError) {
         console.warn('Error in failure event handler:', handlerError);
       }
@@ -311,7 +323,7 @@ export class CircuitBreaker implements ICircuitBreaker {
       this.stateChangedAt = new Date();
 
       // Notify event handlers
-      this.eventHandlers.forEach(handler => {
+      this.eventHandlers.forEach((handler) => {
         try {
           handler.onStateChange(newState, this.name);
         } catch (error) {
@@ -319,7 +331,9 @@ export class CircuitBreaker implements ICircuitBreaker {
         }
       });
 
-      console.log(`Circuit breaker '${this.name}' transitioned from ${oldState} to ${newState}`);
+      console.log(
+        `Circuit breaker '${this.name}' transitioned from ${oldState} to ${newState}`
+      );
     }
   }
 }

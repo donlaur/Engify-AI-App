@@ -7,9 +7,21 @@
 
 import { useState } from 'react';
 import { Icons } from '@/lib/icons';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 
@@ -26,7 +38,7 @@ interface ROIResults {
 }
 
 const ROLE_DATA = {
-  'engineer': {
+  engineer: {
     name: 'Software Engineer',
     avgHourlyRate: 75,
     commonTasks: [
@@ -46,7 +58,7 @@ const ROLE_DATA = {
       { task: '1:1 preparation', hoursPerWeek: 3, savingsPercent: 45 },
     ],
   },
-  'pm': {
+  pm: {
     name: 'Product Manager',
     avgHourlyRate: 85,
     commonTasks: [
@@ -56,17 +68,21 @@ const ROLE_DATA = {
       { task: 'Roadmap planning', hoursPerWeek: 3, savingsPercent: 35 },
     ],
   },
-  'designer': {
+  designer: {
     name: 'Designer',
     avgHourlyRate: 70,
     commonTasks: [
       { task: 'Design documentation', hoursPerWeek: 4, savingsPercent: 55 },
       { task: 'User research', hoursPerWeek: 3, savingsPercent: 40 },
       { task: 'Design critiques', hoursPerWeek: 2, savingsPercent: 35 },
-      { task: 'Stakeholder presentations', hoursPerWeek: 3, savingsPercent: 45 },
+      {
+        task: 'Stakeholder presentations',
+        hoursPerWeek: 3,
+        savingsPercent: 45,
+      },
     ],
   },
-  'qa': {
+  qa: {
     name: 'QA Engineer',
     avgHourlyRate: 65,
     commonTasks: [
@@ -86,9 +102,12 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
   const roleData = ROLE_DATA[role];
 
   // Calculate savings
-  const totalHoursPerWeek = roleData.commonTasks.reduce((sum, task) => sum + task.hoursPerWeek, 0);
+  const _totalHoursPerWeek = roleData.commonTasks.reduce(
+    (sum, task) => sum + task.hoursPerWeek,
+    0
+  );
   const hoursSaved = roleData.commonTasks.reduce(
-    (sum, task) => sum + (task.hoursPerWeek * task.savingsPercent / 100),
+    (sum, task) => sum + (task.hoursPerWeek * task.savingsPercent) / 100,
     0
   );
   const hoursSavedPerYear = hoursSaved * 52;
@@ -101,9 +120,10 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
     hoursSaved: hoursSavedPerYear,
     dollarsPerYear,
     promptsPerWeek,
-    careerImpact: role === 'engineering-manager' || role === 'pm' 
-      ? 'Leadership & communication skills'
-      : 'Technical & communication skills',
+    careerImpact:
+      role === 'engineering-manager' || role === 'pm'
+        ? 'Leadership & communication skills'
+        : 'Technical & communication skills',
   };
 
   const handleCalculate = () => {
@@ -121,14 +141,17 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
           Calculate Your ROI
         </CardTitle>
         <CardDescription>
-          See how much time and money you'll save with AI-powered prompts
+          See how much time and money you&apos;ll save with AI-powered prompts
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Role Selection */}
         <div className="space-y-2">
           <Label htmlFor="role">Your Role</Label>
-          <Select value={role} onValueChange={(value) => setRole(value as keyof typeof ROLE_DATA)}>
+          <Select
+            value={role}
+            onValueChange={(value) => setRole(value as keyof typeof ROLE_DATA)}
+          >
             <SelectTrigger id="role">
               <SelectValue />
             </SelectTrigger>
@@ -153,7 +176,7 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
             max={50}
             step={1}
             value={[teamSize]}
-            onValueChange={(value) => setTeamSize(value[0])}
+            onValueChange={(value: number[]) => setTeamSize(value[0])}
             className="w-full"
           />
           <p className="text-xs text-muted-foreground">
@@ -166,7 +189,10 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
           <Label>Time Spent on Common Tasks</Label>
           <div className="space-y-2">
             {roleData.commonTasks.map((task, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+              <div
+                key={index}
+                className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-900"
+              >
                 <div>
                   <p className="font-medium">{task.task}</p>
                   <p className="text-sm text-muted-foreground">
@@ -175,7 +201,10 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-green-600">
-                    {(task.hoursPerWeek * task.savingsPercent / 100).toFixed(1)}h saved
+                    {((task.hoursPerWeek * task.savingsPercent) / 100).toFixed(
+                      1
+                    )}
+                    h saved
                   </p>
                 </div>
               </div>
@@ -191,33 +220,37 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
 
         {/* Results */}
         {showResults && (
-          <div className="space-y-4 pt-6 border-t">
+          <div className="space-y-4 border-t pt-6">
             <h3 className="text-lg font-semibold">Your Potential Savings</h3>
-            
+
             {/* Individual Savings */}
             <div className="grid gap-4 md:grid-cols-2">
-              <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200">
+              <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950">
                 <CardContent className="pt-6">
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground">Time Saved Per Week</p>
+                    <p className="text-sm text-muted-foreground">
+                      Time Saved Per Week
+                    </p>
                     <p className="text-4xl font-bold text-blue-600">
                       {hoursSaved.toFixed(1)}h
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {promptsPerWeek} prompts/week
                     </p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-green-50 dark:bg-green-950 border-green-200">
+              <Card className="border-green-200 bg-green-50 dark:bg-green-950">
                 <CardContent className="pt-6">
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground">Value Per Year</p>
+                    <p className="text-sm text-muted-foreground">
+                      Value Per Year
+                    </p>
                     <p className="text-4xl font-bold text-green-600">
                       ${dollarsPerYear.toLocaleString()}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       At ${roleData.avgHourlyRate}/hour
                     </p>
                   </div>
@@ -227,15 +260,18 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
 
             {/* Team Savings */}
             {teamSize > 1 && (
-              <Card className="bg-purple-50 dark:bg-purple-950 border-purple-200">
+              <Card className="border-purple-200 bg-purple-50 dark:bg-purple-950">
                 <CardContent className="pt-6">
                   <div className="text-center">
-                    <p className="text-sm text-muted-foreground">Team Savings ({teamSize} people)</p>
+                    <p className="text-sm text-muted-foreground">
+                      Team Savings ({teamSize} people)
+                    </p>
                     <p className="text-5xl font-bold text-purple-600">
                       ${teamDollarsPerYear.toLocaleString()}
                     </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {(hoursSaved * teamSize).toFixed(1)} hours/week = {(hoursSaved * teamSize * 52).toFixed(0)} hours/year
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {(hoursSaved * teamSize).toFixed(1)} hours/week ={' '}
+                      {(hoursSaved * teamSize * 52).toFixed(0)} hours/year
                     </p>
                   </div>
                 </CardContent>
@@ -243,15 +279,16 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
             )}
 
             {/* Career Impact */}
-            <div className="p-4 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200">
+            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:bg-yellow-950">
               <div className="flex items-start gap-2">
-                <Icons.trendingUp className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <Icons.trendingUp className="mt-0.5 h-5 w-5 text-yellow-600" />
                 <div>
                   <p className="font-medium text-yellow-900 dark:text-yellow-100">
                     Career Impact
                   </p>
-                  <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
-                    Develop {results.careerImpact} while saving time. Show your manager this ROI to justify training budget.
+                  <p className="mt-1 text-sm text-yellow-800 dark:text-yellow-200">
+                    Develop {results.careerImpact} while saving time. Show your
+                    manager this ROI to justify training budget.
                   </p>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 /**
  * DIContainer Tests
- * 
+ *
  * Tests the dependency injection container functionality.
  * These tests demonstrate:
  * - Service registration and resolution
@@ -26,6 +26,7 @@ const createMockUserRepository = (): IUserRepository => ({
   findByEmail: vi.fn(),
   findByProvider: vi.fn(),
   findByRole: vi.fn(),
+  findByPlan: vi.fn(),
   findByOrganization: vi.fn(),
   updateLastLogin: vi.fn(),
 });
@@ -43,6 +44,8 @@ const createMockPromptRepository = (): IPromptRepository => ({
   findByCategory: vi.fn(),
   findPublic: vi.fn(),
   findFeatured: vi.fn(),
+  findByRole: vi.fn(),
+  findByDifficulty: vi.fn(),
   search: vi.fn(),
   incrementViews: vi.fn(),
   updateRating: vi.fn(),
@@ -187,7 +190,7 @@ describe('DIContainer', () => {
       // Arrange
       const mockUserRepository = createMockUserRepository();
       const mockPromptRepository = createMockPromptRepository();
-      
+
       container.register(SERVICE_IDS.USER_REPOSITORY, mockUserRepository);
       container.register(SERVICE_IDS.PROMPT_REPOSITORY, mockPromptRepository);
 
@@ -217,7 +220,9 @@ describe('DIContainer', () => {
       });
 
       container.registerFactory(SERVICE_IDS.PROMPT_SERVICE, () => {
-        const promptRepository = container.resolve(SERVICE_IDS.PROMPT_REPOSITORY);
+        const promptRepository = container.resolve(
+          SERVICE_IDS.PROMPT_REPOSITORY
+        );
         return new PromptService(promptRepository);
       });
 

@@ -8,7 +8,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { QStashMessageQueue } from '@/lib/messaging/queues/QStashMessageQueue';
-import { auditLog } from '@/lib/logging/audit';
+import { auditLog, type AuditAction } from '@/lib/logging/audit';
+import type { MessagePriority, IMessage } from '@/lib/messaging/types';
 import {
   createEmailProcessingJob,
   type ParsedEmail,
@@ -62,9 +63,9 @@ async function processEmailEvent(event: SendGridEvent) {
   // Log email event for analytics
   await auditLog({
     userId: 'system',
-    action: `EMAIL_${event.event.toUpperCase()}`,
+    action: `EMAIL_${event.event.toUpperCase()}` as AuditAction,
     resource: 'email',
-    metadata: {
+    details: {
       email: event.email,
       event: event.event,
       timestamp: new Date(event.timestamp * 1000),
@@ -128,31 +129,55 @@ async function processInboundEmail(email: SendGridInboundEmail) {
   const processingJob = createEmailProcessingJob(parsedEmail, emailId);
 
   // Queue email for async processing using QStash
-  const queue = new QStashMessageQueue('inbound-emails', 'redis');
+  const queue = new QStashMessageQueue('inbound-emails', 'redis', {
+    name: 'inbound-emails',
+    type: 'redis',
+    maxRetries: 3,
+    retryDelay: 1000,
+    visibilityTimeout: 30000,
+    batchSize: 10,
+    concurrency: 5,
+    enableDeadLetter: true,
+    enableMetrics: true,
+  });
 
-  await queue.publish({
+  // Map email priority ('high'|'medium'|'low') to MessagePriority ('high'|'normal'|'low'|'critical')
+  const messagePriority: MessagePriority =
+    processingJob.priority === 'high'
+      ? 'high'
+      : processingJob.priority === 'medium'
+        ? 'normal'
+        : 'low';
+
+  // Create full IMessage object with all required fields
+  const message: IMessage = {
     id: emailId,
-    type: 'inbound-email',
+    type: 'event', // Use 'event' instead of 'inbound-email' (not in MessageType union)
     payload: {
       email: parsedEmail,
       contentType: processingJob.contentType,
       priority: processingJob.priority,
     },
-    timestamp: Date.now(),
-    priority:
-      processingJob.priority === 'high'
-        ? 10
-        : processingJob.priority === 'medium'
-          ? 5
-          : 1,
-  });
+    priority: messagePriority,
+    status: 'pending',
+    metadata: {
+      source: 'sendgrid-webhook',
+      version: '1.0.0',
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    retryCount: 0,
+    maxRetries: 3,
+  };
+
+  await queue.publish(message);
 
   // Log for audit trail
   await auditLog({
     userId: 'system',
     action: 'INBOUND_EMAIL_RECEIVED',
     resource: 'email',
-    metadata: {
+    details: {
       from: email.from,
       to: email.to,
       subject: email.subject,
@@ -182,8 +207,6 @@ function verifyWebhookSignature(
   // In production, verify SendGrid signature
   // For now, we'll rely on the webhook URL being secret
   if (process.env.NODE_ENV === 'production') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const _crypto = require('crypto');
     const publicKey = process.env.SENDGRID_WEBHOOK_PUBLIC_KEY;
 
     if (!publicKey) {
@@ -261,7 +284,7 @@ export async function POST(request: NextRequest) {
       userId: 'system',
       action: 'WEBHOOK_ERROR',
       resource: 'sendgrid',
-      metadata: {
+      details: {
         error: error instanceof Error ? error.message : String(error),
       },
     });

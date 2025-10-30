@@ -6,7 +6,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Icons } from '@/lib/icons';
 import { formatNumber } from '@/lib/utils/string';
@@ -27,11 +33,14 @@ interface UsageData {
     limit: number;
     percentage: number;
   };
-  byProvider: Record<string, {
-    requests: number;
-    tokens: number;
-    cost: number;
-  }>;
+  byProvider: Record<
+    string,
+    {
+      requests: number;
+      tokens: number;
+      cost: number;
+    }
+  >;
 }
 
 export function UsageDashboard() {
@@ -109,7 +118,7 @@ export function UsageDashboard() {
         <CardHeader>
           <CardTitle>Usage by Provider</CardTitle>
           <CardDescription>
-            See which AI providers you're using most
+            See which AI providers you&apos;re using most
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -119,11 +128,12 @@ export function UsageDashboard() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-medium capitalize">{provider}</span>
                   <span className="text-gray-500">
-                    {stats.requests} requests • {formatNumber(stats.tokens)} tokens • ${stats.cost.toFixed(4)}
+                    {stats.requests} requests • {formatNumber(stats.tokens)}{' '}
+                    tokens • ${stats.cost.toFixed(4)}
                   </span>
                 </div>
-                <Progress 
-                  value={(stats.requests / usage.requests.used) * 100} 
+                <Progress
+                  value={(stats.requests / usage.requests.used) * 100}
                   className="h-2"
                 />
               </div>
@@ -137,14 +147,14 @@ export function UsageDashboard() {
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
-              <Icons.alertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+              <Icons.alertTriangle className="mt-0.5 h-5 w-5 text-yellow-600" />
               <div className="flex-1">
                 <h3 className="font-semibold text-yellow-900">
                   Approaching Usage Limit
                 </h3>
-                <p className="text-sm text-yellow-700 mt-1">
-                  You've used {usage.requests.percentage.toFixed(0)}% of your daily limit. 
-                  Upgrade to Pro for higher limits.
+                <p className="mt-1 text-sm text-yellow-700">
+                  You&apos;ve used {usage.requests.percentage.toFixed(0)}% of
+                  your daily limit. Upgrade to Pro for higher limits.
                 </p>
                 <button className="mt-3 text-sm font-medium text-yellow-900 hover:underline">
                   Upgrade Now →
@@ -168,7 +178,15 @@ interface UsageCardProps {
   format?: 'number' | 'tokens' | 'currency';
 }
 
-function UsageCard({ title, used, limit, percentage, icon, color, format = 'number' }: UsageCardProps) {
+function UsageCard({
+  title,
+  used,
+  limit,
+  percentage,
+  icon,
+  color,
+  format = 'number',
+}: UsageCardProps) {
   const colorClasses = {
     blue: 'bg-blue-50 text-blue-600',
     purple: 'bg-purple-50 text-purple-600',
@@ -184,25 +202,17 @@ function UsageCard({ title, used, limit, percentage, icon, color, format = 'numb
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
-            {icon}
-          </div>
-          <span className="text-2xl font-bold">
-            {formatValue(used)}
-          </span>
+        <div className="mb-4 flex items-center justify-between">
+          <div className={`rounded-lg p-2 ${colorClasses[color]}`}>{icon}</div>
+          <span className="text-2xl font-bold">{formatValue(used)}</span>
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600">{title}</span>
-            <span className="text-gray-500">
-              of {formatValue(limit)}
-            </span>
+            <span className="text-gray-500">of {formatValue(limit)}</span>
           </div>
           <Progress value={percentage} className="h-2" />
-          <p className="text-xs text-gray-500">
-            {percentage.toFixed(1)}% used
-          </p>
+          <p className="text-xs text-gray-500">{percentage.toFixed(1)}% used</p>
         </div>
       </CardContent>
     </Card>

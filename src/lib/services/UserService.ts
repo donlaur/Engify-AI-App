@@ -34,6 +34,7 @@ export interface UpdateUserData {
   role?: string;
   plan?: string;
   organizationId?: string;
+  emailVerified?: Date | null;
   preferences?: {
     theme?: 'light' | 'dark';
     notifications?: boolean;
@@ -75,7 +76,9 @@ export class UserService {
       updatedAt: new Date(),
     };
 
-    return await this.userRepository.create(newUserData);
+    return await this.userRepository.create(
+      newUserData as unknown as Omit<User, 'id'>
+    );
   }
 
   /**
@@ -130,7 +133,10 @@ export class UserService {
       }
     }
 
-    return await this.userRepository.update(id, userData);
+    return await this.userRepository.update(
+      id,
+      userData as unknown as Partial<User>
+    );
   }
 
   /**
@@ -199,6 +205,16 @@ export class UserService {
     }
 
     await this.userRepository.updateLastLogin(id);
+  }
+
+  /**
+   * Set user password (service-level helper; repository doesn't expose password)
+   */
+  async setPassword(userId: string, hashedPassword: string): Promise<void> {
+    await this.userRepository.update(userId, {
+      password: hashedPassword as unknown as User['password'],
+      updatedAt: new Date(),
+    } as Partial<User>);
   }
 
   /**

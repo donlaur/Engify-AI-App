@@ -5,7 +5,12 @@
 
 import { BaseService } from './BaseService';
 import { ObjectId } from 'mongodb';
-import { XP_REWARDS, getLevelFromXP, getXPForNextLevel } from '@/lib/gamification/levels';
+import { z } from 'zod';
+import {
+  XP_REWARDS,
+  getLevelFromXP,
+  getXPForNextLevel,
+} from '@/lib/gamification/levels';
 import { ACHIEVEMENTS, Achievement } from '@/lib/gamification/achievements';
 import { notificationService } from './NotificationService';
 
@@ -32,16 +37,20 @@ export interface UserGamification {
 
 export class GamificationService extends BaseService<UserGamification> {
   constructor() {
-    super('user_gamification');
+    super(
+      'user_gamification',
+      z.object({}) as unknown as z.ZodType<UserGamification>
+    );
   }
 
   /**
    * Get or create user gamification data
    */
   async getUserGamification(userId: string): Promise<UserGamification> {
-    const db = await this.getDb();
-    let gamification = await db.collection(this.collectionName)
-      .findOne({ userId }) as UserGamification | null;
+    const collection = await this.getCollection();
+    let gamification = (await collection.findOne({
+      userId,
+    })) as UserGamification | null;
 
     if (!gamification) {
       gamification = {
@@ -64,7 +73,7 @@ export class GamificationService extends BaseService<UserGamification> {
         updatedAt: new Date(),
       };
 
-      await db.collection(this.collectionName).insertOne(gamification);
+      await collection.insertOne(gamification);
     }
 
     return gamification;
@@ -76,7 +85,7 @@ export class GamificationService extends BaseService<UserGamification> {
   async awardXP(
     userId: string,
     amount: number,
-    reason: string
+    _reason: string
   ): Promise<{
     newXP: number;
     leveledUp: boolean;
@@ -90,8 +99,8 @@ export class GamificationService extends BaseService<UserGamification> {
     const leveledUp = newLevel.level > oldLevel.level;
 
     // Update XP
-    const db = await this.getDb();
-    await db.collection(this.collectionName).updateOne(
+    const collection = await this.getCollection();
+    await collection.updateOne(
       { userId },
       {
         $set: {
@@ -128,11 +137,11 @@ export class GamificationService extends BaseService<UserGamification> {
    */
   async trackPromptUsage(userId: string): Promise<void> {
     const gamification = await this.getUserGamification(userId);
-    const db = await this.getDb();
+    const collection = await this.getCollection();
 
     // Update stats
     const newPromptsUsed = gamification.stats.promptsUsed + 1;
-    await db.collection(this.collectionName).updateOne(
+    await collection.updateOne(
       { userId },
       {
         $inc: {
@@ -167,9 +176,12 @@ export class GamificationService extends BaseService<UserGamification> {
   /**
    * Track pattern completion
    */
-  async trackPatternCompletion(userId: string, patternId: string): Promise<void> {
-    const db = await this.getDb();
-    await db.collection(this.collectionName).updateOne(
+  async trackPatternCompletion(
+    userId: string,
+    patternId: string
+  ): Promise<void> {
+    const collection = await this.getCollection();
+    await collection.updateOne(
       { userId },
       {
         $inc: { 'stats.patternsCompleted': 1 },
@@ -177,27 +189,41 @@ export class GamificationService extends BaseService<UserGamification> {
       }
     );
 
-    await this.awardXP(userId, XP_REWARDS.PATTERN_COMPLETED, `Completed ${patternId} pattern`);
+    await this.awardXP(
+      userId,
+      XP_REWARDS.PATTERN_COMPLETED,
+      `Completed ${patternId} pattern`
+    );
   }
 
   /**
    * Track skill development
    */
-  async trackSkillDevelopment(userId: string, skillMastered: boolean = false): Promise<void> {
-    const db = await this.getDb();
-    const update: any = {
-      $inc: { 'stats.skillsTracked': 1 },
-      $set: { updatedAt: new Date() },
-    };
+  async trackSkillDevelopment(
+    userId: string,
+    skillMastered: boolean = false
+  ): Promise<void> {
+    const collection = await this.getCollection();
+    const update: { $inc: Record<string, number>; $set: { updatedAt: Date } } =
+      {
+        $inc: { 'stats.skillsTracked': 1 },
+        $set: { updatedAt: new Date() },
+      };
 
     if (skillMastered) {
       update.$inc['stats.skillsMastered'] = 1;
     }
 
-    await db.collection(this.collectionName).updateOne({ userId }, update);
+    await collection.updateOne({ userId }, update);
 
-    const xp = skillMastered ? XP_REWARDS.FIRST_SKILL_MASTERED : XP_REWARDS.SKILL_IMPROVED;
-    await this.awardXP(userId, xp, skillMastered ? 'Skill mastered' : 'Skill improved');
+    const xp = skillMastered
+      ? XP_REWARDS.FIRST_SKILL_MASTERED
+      : XP_REWARDS.SKILL_IMPROVED;
+    await this.awardXP(
+      userId,
+      xp,
+      skillMastered ? 'Skill mastered' : 'Skill improved'
+    );
   }
 
   /**
@@ -207,11 +233,13 @@ export class GamificationService extends BaseService<UserGamification> {
     const gamification = await this.getUserGamification(userId);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const lastActive = new Date(gamification.lastActiveDate);
     lastActive.setHours(0, 0, 0, 0);
 
-    const daysDiff = Math.floor((today.getTime() - lastActive.getTime()) / (1000 * 60 * 60 * 24));
+    const daysDiff = Math.floor(
+      (today.getTime() - lastActive.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     let newStreak = gamification.dailyStreak;
     let xpBonus = 0;
@@ -235,8 +263,8 @@ export class GamificationService extends BaseService<UserGamification> {
       newStreak = 1;
     }
 
-    const db = await this.getDb();
-    await db.collection(this.collectionName).updateOne(
+    const collection = await this.getCollection();
+    await collection.updateOne(
       { userId },
       {
         $set: {
@@ -261,7 +289,7 @@ export class GamificationService extends BaseService<UserGamification> {
     const gamification = await this.getUserGamification(userId);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const lastActive = new Date(gamification.lastActiveDate);
     lastActive.setHours(0, 0, 0, 0);
 
@@ -285,23 +313,29 @@ export class GamificationService extends BaseService<UserGamification> {
       let unlocked = false;
       switch (achievement.requirement.type) {
         case 'prompts_used':
-          unlocked = gamification.stats.promptsUsed >= achievement.requirement.target;
+          unlocked =
+            gamification.stats.promptsUsed >= achievement.requirement.target;
           break;
         case 'patterns_tried':
         case 'patterns_mastered':
-          unlocked = gamification.stats.patternsCompleted >= achievement.requirement.target;
+          unlocked =
+            gamification.stats.patternsCompleted >=
+            achievement.requirement.target;
           break;
         case 'skills_tracked':
-          unlocked = gamification.stats.skillsTracked >= achievement.requirement.target;
+          unlocked =
+            gamification.stats.skillsTracked >= achievement.requirement.target;
           break;
         case 'skills_mastered':
-          unlocked = gamification.stats.skillsMastered >= achievement.requirement.target;
+          unlocked =
+            gamification.stats.skillsMastered >= achievement.requirement.target;
           break;
         case 'daily_streak':
           unlocked = gamification.dailyStreak >= achievement.requirement.target;
           break;
         case 'time_saved':
-          unlocked = gamification.stats.timeSaved >= achievement.requirement.target;
+          unlocked =
+            gamification.stats.timeSaved >= achievement.requirement.target;
           break;
         case 'level':
           unlocked = gamification.level >= achievement.requirement.target;
@@ -310,8 +344,8 @@ export class GamificationService extends BaseService<UserGamification> {
 
       if (unlocked) {
         // Unlock achievement
-        const db = await this.getDb();
-        await db.collection(this.collectionName).updateOne(
+        const collection = await this.getCollection();
+        await collection.updateOne(
           { userId },
           {
             $push: { achievements: achievement.id },
@@ -320,7 +354,11 @@ export class GamificationService extends BaseService<UserGamification> {
         );
 
         // Award XP
-        await this.awardXP(userId, achievement.xpReward, `Achievement: ${achievement.name}`);
+        await this.awardXP(
+          userId,
+          achievement.xpReward,
+          `Achievement: ${achievement.name}`
+        );
 
         // Send notification
         await notificationService.sendAchievement(

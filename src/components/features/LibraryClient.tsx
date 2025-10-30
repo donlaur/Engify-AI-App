@@ -1,6 +1,6 @@
 /**
  * Library Client Component
- * 
+ *
  * Client-side filtering and search for the library page
  * Separated from server component for performance
  */
@@ -22,7 +22,9 @@ interface LibraryClientProps {
 
 export function LibraryClient({ initialPrompts }: LibraryClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<PromptCategory | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<
+    PromptCategory | 'all'
+  >('all');
   const [selectedRole, setSelectedRole] = useState<UserRole | 'all'>('all');
 
   // Filter prompts
@@ -45,7 +47,7 @@ export function LibraryClient({ initialPrompts }: LibraryClientProps) {
     'testing',
     'architecture',
   ];
-  
+
   const roles: Array<UserRole | 'all'> = [
     'all',
     'c-level',
@@ -113,8 +115,12 @@ export function LibraryClient({ initialPrompts }: LibraryClientProps) {
             <PromptCard
               key={prompt.id}
               {...prompt}
-              role={prompt.role ? roleLabels[prompt.role as UserRole] : undefined}
-              category={categoryLabels[prompt.category as PromptCategory]}
+              role={
+                (prompt.role && prompt.role in roleLabels
+                  ? roleLabels[prompt.role as UserRole]
+                  : undefined) as UserRole | undefined
+              }
+              category={prompt.category as PromptCategory}
             />
           ))}
         </div>
