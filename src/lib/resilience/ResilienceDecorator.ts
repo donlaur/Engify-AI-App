@@ -9,21 +9,21 @@ import {
   IResilienceDecorator,
   ResilienceConfig,
   ResilienceResult,
-  RetryConfig,
-  BulkheadConfig,
-  TimeoutConfig,
-  CircuitBreakerConfig,
+  // RetryConfig,
+  // BulkheadConfig,
+  // TimeoutConfig,
+  // CircuitBreakerConfig,
 } from './types';
 import { CircuitBreakerManager } from './CircuitBreakerManager';
-import { CircuitBreaker } from './CircuitBreaker';
+// import { CircuitBreaker } from './CircuitBreaker';
 
 /**
  * Resilience Decorator Implementation
  */
 export class ResilienceDecorator implements IResilienceDecorator {
   private circuitBreakerManager: CircuitBreakerManager;
-  private activeOperations = new Map<string, Promise<any>>();
-  private operationQueue: Array<() => Promise<any>> = [];
+  private activeOperations = new Map<string, Promise<unknown>>();
+  private operationQueue: Array<() => Promise<unknown>> = [];
   private maxConcurrency: number;
   private maxQueueSize: number;
   private queueTimeout: number;
@@ -73,7 +73,6 @@ export class ResilienceDecorator implements IResilienceDecorator {
         circuitState: 'closed', // Will be updated by circuit breaker
         timestamp: new Date(),
       };
-
     } catch (error) {
       const totalExecutionTime = Date.now() - startTime;
       lastError = error instanceof Error ? error : new Error('Unknown error');
@@ -98,15 +97,15 @@ export class ResilienceDecorator implements IResilienceDecorator {
     config: ResilienceConfig
   ): Promise<ResilienceResult<T>> {
     const result = await this.decorate(operation, config);
-    
+
     if (result.success) {
       return result;
     }
-    
+
     // Try fallback operation
     try {
       const fallbackResult = await fallback();
-      
+
       return {
         success: true,
         data: fallbackResult,
@@ -133,7 +132,7 @@ export class ResilienceDecorator implements IResilienceDecorator {
    */
   updateConfig(config: ResilienceConfig): void {
     this.config = { ...this.config, ...config };
-    
+
     // Update bulkhead settings
     if (config.bulkhead) {
       this.maxConcurrency = config.bulkhead.maxConcurrency;
@@ -152,20 +151,24 @@ export class ResilienceDecorator implements IResilienceDecorator {
   /**
    * Execute operation with circuit breaker
    */
-  private async executeWithCircuitBreaker<T>(operation: () => Promise<T>): Promise<T> {
+  private async executeWithCircuitBreaker<T>(
+    operation: () => Promise<T>
+  ): Promise<T> {
     if (!this.config.circuitBreaker) {
       return await operation();
     }
 
     const circuitName = this.config.circuitBreaker.name;
     let circuit = this.circuitBreakerManager.getCircuit(circuitName);
-    
+
     if (!circuit) {
-      circuit = this.circuitBreakerManager.createCircuit(this.config.circuitBreaker);
+      circuit = this.circuitBreakerManager.createCircuit(
+        this.config.circuitBreaker
+      );
     }
 
     const result = await circuit.execute(operation);
-    
+
     if (!result.success) {
       throw new Error(result.error || 'Circuit breaker operation failed');
     }
@@ -181,8 +184,9 @@ export class ResilienceDecorator implements IResilienceDecorator {
       return await operation();
     }
 
-    const { maxAttempts, baseDelay, maxDelay, backoffMultiplier, jitter } = this.config.retry;
-    let lastError: Error;
+    const { maxAttempts, baseDelay, maxDelay, backoffMultiplier, jitter } =
+      this.config.retry;
+    let lastError: Error = new Error('Unknown error');
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
@@ -190,7 +194,7 @@ export class ResilienceDecorator implements IResilienceDecorator {
         return result;
       } catch (error) {
         lastError = error instanceof Error ? error : new Error('Unknown error');
-        
+
         // Don't retry on the last attempt
         if (attempt === maxAttempts - 1) {
           throw lastError;
@@ -209,13 +213,15 @@ export class ResilienceDecorator implements IResilienceDecorator {
       }
     }
 
-    throw lastError!;
+    throw lastError;
   }
 
   /**
    * Execute operation with bulkhead pattern
    */
-  private async executeWithBulkhead<T>(operation: () => Promise<T>): Promise<T> {
+  private async executeWithBulkhead<T>(
+    operation: () => Promise<T>
+  ): Promise<T> {
     if (!this.config.bulkhead) {
       return await operation();
     }
@@ -272,11 +278,11 @@ export class ResilienceDecorator implements IResilienceDecorator {
       }, this.config.timeout?.timeout || 5000);
 
       operation()
-        .then(result => {
+        .then((result) => {
           clearTimeout(timeout);
           resolve(result);
         })
-        .catch(error => {
+        .catch((error) => {
           clearTimeout(timeout);
           reject(error);
         });
@@ -288,11 +294,11 @@ export class ResilienceDecorator implements IResilienceDecorator {
    */
   private async executeOperation<T>(operation: () => Promise<T>): Promise<T> {
     const operationId = `op-${Date.now()}-${Math.random()}`;
-    
+
     try {
       const promise = this.executeWithTimeout(operation);
       this.activeOperations.set(operationId, promise);
-      
+
       const result = await promise;
       return result;
     } finally {
@@ -306,7 +312,10 @@ export class ResilienceDecorator implements IResilienceDecorator {
    * Process queued operations
    */
   private processQueue(): void {
-    while (this.operationQueue.length > 0 && this.activeOperations.size < this.maxConcurrency) {
+    while (
+      this.operationQueue.length > 0 &&
+      this.activeOperations.size < this.maxConcurrency
+    ) {
       const operation = this.operationQueue.shift();
       if (operation) {
         operation();
@@ -318,7 +327,7 @@ export class ResilienceDecorator implements IResilienceDecorator {
    * Sleep utility
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -327,7 +336,7 @@ export class ResilienceDecorator implements IResilienceDecorator {
   getMetrics(): {
     activeOperations: number;
     queuedOperations: number;
-    circuitBreakerMetrics: Record<string, any>;
+    circuitBreakerMetrics: Record<string, unknown>;
   } {
     return {
       activeOperations: this.activeOperations.size,
@@ -349,7 +358,7 @@ export class ResilienceDecorator implements IResilienceDecorator {
   async destroy(): Promise<void> {
     // Wait for active operations to complete
     await Promise.allSettled(Array.from(this.activeOperations.values()));
-    
+
     // Clear queue
     this.operationQueue = [];
     this.activeOperations.clear();
