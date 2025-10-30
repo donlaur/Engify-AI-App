@@ -72,7 +72,11 @@
     "dev:test": "PORT=3005 next dev",
     "prepare": "husky install",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "content:rss": "tsx scripts/content/rss-fetch.ts",
+    "content:sitemap": "tsx scripts/content/sitemap-crawl.ts",
+    "content:extract": "tsx scripts/content/html-extract.ts",
+    "content:enrich": "tsx scripts/content/metadata-enrich.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",
@@ -166,7 +170,8 @@
     "tailwindcss": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.3.0",
-    "vitest": "^4.0.4"
+    "vitest": "^4.0.4",
+    "tsx": "^4.19.2"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
