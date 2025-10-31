@@ -1,8 +1,23 @@
 /**
  * AI Model Configuration
  * 
- * Centralized list of valid AI models and providers
- * Used for validation and API key management
+ * ⚠️ IMPORTANT: Model names change frequently!
+ * Last updated: October 31, 2025
+ * 
+ * Centralized list of valid AI models and providers.
+ * Used for validation and API key management.
+ * 
+ * UPDATE PROCESS:
+ * 1. Check provider docs monthly
+ * 2. Update model IDs with correct suffixes (-002, date versions, etc.)
+ * 3. Update pricing (check provider pricing pages)
+ * 4. Mark old models as deprecated
+ * 5. Test with scripts/content/test-prompts-multi-model.ts
+ * 
+ * PROVIDER DOCS (Check for latest models):
+ * - OpenAI: https://platform.openai.com/docs/models
+ * - Anthropic: https://docs.anthropic.com/en/docs/models-overview
+ * - Google: https://ai.google.dev/gemini-api/docs/models/gemini
  */
 
 export interface AIModel {
@@ -11,34 +26,40 @@ export interface AIModel {
   provider: 'openai' | 'anthropic' | 'google' | 'groq';
   contextWindow: number;
   maxOutputTokens: number;
-  costPer1kInputTokens: number;
-  costPer1kOutputTokens: number;
+  costPer1kInputTokens: number;     // USD per 1K input tokens
+  costPer1kOutputTokens: number;    // USD per 1K output tokens
   capabilities: string[];
   deprecated?: boolean;
   replacementModel?: string;
+  notes?: string;                    // Important notes about this model
+  lastVerified?: string;             // Date we last verified this works (YYYY-MM-DD)
 }
 
 export const AI_MODELS: AIModel[] = [
-  // OpenAI Models
+  // OpenAI Models (Updated Oct 31, 2025)
   {
-    id: 'gpt-4-turbo',
-    name: 'GPT-4 Turbo',
+    id: 'gpt-4o',
+    name: 'GPT-4o',
     provider: 'openai',
     contextWindow: 128000,
-    maxOutputTokens: 4096,
-    costPer1kInputTokens: 0.01,
-    costPer1kOutputTokens: 0.03,
-    capabilities: ['text', 'code', 'analysis', 'vision'],
+    maxOutputTokens: 16384,
+    costPer1kInputTokens: 0.0025,     // $2.50 per 1M tokens
+    costPer1kOutputTokens: 0.01,      // $10 per 1M tokens
+    capabilities: ['text', 'code', 'analysis', 'vision', 'tools', 'json'],
+    notes: 'Best balance cost/performance. Recommended for most tasks.',
+    lastVerified: '2025-10-31',
   },
   {
-    id: 'gpt-4',
-    name: 'GPT-4',
+    id: 'gpt-4o-mini',
+    name: 'GPT-4o Mini',
     provider: 'openai',
-    contextWindow: 8192,
-    maxOutputTokens: 4096,
-    costPer1kInputTokens: 0.03,
-    costPer1kOutputTokens: 0.06,
-    capabilities: ['text', 'code', 'analysis'],
+    contextWindow: 128000,
+    maxOutputTokens: 16384,
+    costPer1kInputTokens: 0.00015,    // $0.15 per 1M tokens
+    costPer1kOutputTokens: 0.0006,    // $0.60 per 1M tokens
+    capabilities: ['text', 'code', 'vision', 'tools', 'json'],
+    notes: 'Extremely cheap. Use for simple tasks, high-volume processing.',
+    lastVerified: '2025-10-31',
   },
   {
     id: 'gpt-3.5-turbo',
@@ -49,6 +70,22 @@ export const AI_MODELS: AIModel[] = [
     costPer1kInputTokens: 0.0005,
     costPer1kOutputTokens: 0.0015,
     capabilities: ['text', 'code'],
+    deprecated: true,
+    replacementModel: 'gpt-4o-mini',
+    notes: 'DEPRECATED: Use gpt-4o-mini instead (better quality, similar cost)',
+    lastVerified: '2025-10-31',
+  },
+  {
+    id: 'o1-preview',
+    name: 'O1 Preview',
+    provider: 'openai',
+    contextWindow: 128000,
+    maxOutputTokens: 32768,
+    costPer1kInputTokens: 0.015,      // $15 per 1M tokens!
+    costPer1kOutputTokens: 0.06,      // $60 per 1M tokens!
+    capabilities: ['text', 'code', 'reasoning'],
+    notes: '⚠️ EXPENSIVE! Use only for complex reasoning, critical bugs. Most tasks don\'t need this.',
+    lastVerified: '2025-10-31',
   },
   
   // Anthropic Models
@@ -95,9 +132,34 @@ export const AI_MODELS: AIModel[] = [
     capabilities: ['text', 'code', 'vision'],
   },
   
-  // Google Models
+  // Google Models (VERIFIED Oct 31, 2025 via list-gemini-models.ts)
+  // ⚠️ CRITICAL: Gemini 1.5 models are SUNSET! Only 2.0 models work now.
   {
-    id: 'gemini-1.5-pro',
+    id: 'gemini-2.0-flash-exp',
+    name: 'Gemini 2.0 Flash (Experimental)',
+    provider: 'google',
+    contextWindow: 1000000,
+    maxOutputTokens: 8192,
+    costPer1kInputTokens: 0,         // FREE during experimental phase!
+    costPer1kOutputTokens: 0,
+    capabilities: ['text', 'code', 'vision'],
+    notes: '✅ VERIFIED WORKING: Free experimental model. Best option for Google AI as of Oct 31, 2025.',
+    lastVerified: '2025-10-31',
+  },
+  {
+    id: 'gemini-exp-1206',
+    name: 'Gemini Experimental (Dec 6 version)',
+    provider: 'google',
+    contextWindow: 1000000,
+    maxOutputTokens: 8192,
+    costPer1kInputTokens: 0,         // FREE
+    costPer1kOutputTokens: 0,
+    capabilities: ['text', 'code', 'vision'],
+    notes: '✅ VERIFIED WORKING: Experimental model, may change. Free during testing.',
+    lastVerified: '2025-10-31',
+  },
+  {
+    id: 'gemini-1.5-pro-002',
     name: 'Gemini 1.5 Pro',
     provider: 'google',
     contextWindow: 2000000,
@@ -105,9 +167,13 @@ export const AI_MODELS: AIModel[] = [
     costPer1kInputTokens: 0.00125,
     costPer1kOutputTokens: 0.005,
     capabilities: ['text', 'code', 'analysis', 'vision', 'audio'],
+    deprecated: true,
+    replacementModel: 'gemini-2.0-flash-exp',
+    notes: '❌ SUNSET: Model no longer available. Use gemini-2.0-flash-exp instead.',
+    lastVerified: '2025-10-31',
   },
   {
-    id: 'gemini-1.5-flash',
+    id: 'gemini-1.5-flash-002',
     name: 'Gemini 1.5 Flash',
     provider: 'google',
     contextWindow: 1000000,
@@ -115,6 +181,24 @@ export const AI_MODELS: AIModel[] = [
     costPer1kInputTokens: 0.000075,
     costPer1kOutputTokens: 0.0003,
     capabilities: ['text', 'code', 'vision'],
+    deprecated: true,
+    replacementModel: 'gemini-2.0-flash-exp',
+    notes: '❌ SUNSET: Model no longer available. Use gemini-2.0-flash-exp instead.',
+    lastVerified: '2025-10-31',
+  },
+  {
+    id: 'gemini-1.5-flash',
+    name: 'Gemini 1.5 Flash (OLD)',
+    provider: 'google',
+    contextWindow: 1000000,
+    maxOutputTokens: 8192,
+    costPer1kInputTokens: 0.000075,
+    costPer1kOutputTokens: 0.0003,
+    capabilities: ['text', 'code', 'vision'],
+    deprecated: true,
+    replacementModel: 'gemini-2.0-flash-exp',
+    notes: '❌ SUNSET: All 1.5 models removed. Use gemini-2.0-flash-exp.',
+    lastVerified: '2025-10-31',
   },
   
   // Groq Models (Fast inference)

@@ -1,18 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Multi-Model Prompt Testing Script
- * Tests prompts with multiple AI providers and saves results to MongoDB
+ * Uses existing AIProvider adapters for consistent testing across providers
  * 
  * Usage:
- *   npx tsx scripts/content/test-prompts-multi-model.ts --dry-run  // Test 3 prompts only
+ *   npx tsx scripts/content/test-prompts-multi-model.ts --dry-run  // Test 3 prompts
  *   npx tsx scripts/content/test-prompts-multi-model.ts --limit=10 // Test 10 prompts
  *   npx tsx scripts/content/test-prompts-multi-model.ts --all      // Test all prompts
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { config } from 'dotenv';
 config({ path: '.env.local' });
+
+// Use existing provider infrastructure
+import { AIProviderFactory } from '../../src/lib/ai/v2/factory/AIProviderFactory';
+import { getModelById } from '../../src/lib/config/ai-models';
 
 interface TestResult {
   promptId: string;
@@ -27,97 +30,54 @@ interface TestResult {
   testedAt: Date;
 }
 
+// Models to test - using VERIFIED working models from ai-models.ts
 const MODELS_TO_TEST = [
-  { provider: 'openai', model: 'gpt-3.5-turbo', apiKey: process.env.OPENAI_API_KEY },
-  // Google API temporarily disabled - model name or API key issue
-  // { provider: 'google', model: 'gemini-1.5-flash-latest', apiKey: process.env.GOOGLE_API_KEY },
+  { providerKey: 'openai', modelId: 'gpt-4o-mini' },               // Cheap, fast, good quality
+  { providerKey: 'gemini-exp', modelId: 'gemini-2.0-flash-exp' },  // FREE, experimental, verified working!
 ];
 
 async function testPromptWithModel(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   prompt: any,
   modelConfig: typeof MODELS_TO_TEST[0]
 ): Promise<TestResult | null> {
-  if (!modelConfig.apiKey) {
-    console.log(`  ⚠️  Skipping ${modelConfig.model} - no API key`);
-    return null;
-  }
-
   const startTime = Date.now();
 
   try {
-    if (modelConfig.provider === 'openai') {
-      const OpenAI = (await import('openai')).default;
-      const openai = new OpenAI({ apiKey: modelConfig.apiKey });
-
-      const response = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a helpful assistant. Respond concisely and professionally.',
-          },
-          {
-            role: 'user',
-            content: prompt.content || prompt.prompt || '',
-          },
-        ],
-        max_tokens: 300,
-        temperature: 0.7,
-      });
-
-      const latency = Date.now() - startTime;
-      const content = response.choices[0]?.message?.content ?? '';
-      const tokens = response.usage?.total_tokens ?? 0;
-      const cost = (tokens / 1000) * 0.002; // GPT-3.5 pricing: $0.002/1K tokens
-
-      // Simple quality score based on response length and structure
-      const qualityScore = content.length > 100 && content.length < 1000 ? 4 : 3;
-
-      return {
-        promptId: prompt._id.toString(),
-        promptTitle: prompt.title,
-        model: 'gpt-3.5-turbo',
-        provider: 'openai',
-        response: content,
-        qualityScore,
-        tokensUsed: tokens,
-        costUSD: cost,
-        latencyMs: latency,
-        testedAt: new Date(),
-      };
-    } else if (modelConfig.provider === 'google') {
-      const { GoogleGenerativeAI } = await import('@google/generative-ai');
-      const genAI = new GoogleGenerativeAI(modelConfig.apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
-
-      const result = await model.generateContent(prompt.content || prompt.prompt || '');
-      const latency = Date.now() - startTime;
-      const content = result.response.text();
-
-      // Gemini Flash pricing: ~$0.00015/1K tokens (estimate)
-      const tokens = content.length / 4; // Rough estimate
-      const cost = (tokens / 1000) * 0.00015;
-
-      const qualityScore = content.length > 100 && content.length < 1000 ? 4 : 3;
-
-      return {
-        promptId: prompt._id.toString(),
-        promptTitle: prompt.title,
-        model: 'gemini-1.5-flash',
-        provider: 'google',
-        response: content,
-        qualityScore,
-        tokensUsed: Math.round(tokens),
-        costUSD: cost,
-        latencyMs: latency,
-        testedAt: new Date(),
-      };
+    // Use existing AIProvider infrastructure (DRY!)
+    const provider = AIProviderFactory.create(modelConfig.providerKey);
+    const modelInfo = getModelById(modelConfig.modelId);
+    
+    if (!modelInfo) {
+      console.log(`  ⚠️  Model ${modelConfig.modelId} not found in config`);
+      return null;
     }
 
-    return null;
+    // Execute using provider adapter
+    const response = await provider.execute({
+      prompt: prompt.content || prompt.prompt || '',
+      systemPrompt: 'You are a helpful assistant. Respond concisely and professionally.',
+      temperature: 0.7,
+      maxTokens: 300,
+    });
+
+    // Simple quality score based on response length and structure
+    const qualityScore = response.content.length > 100 && response.content.length < 1000 ? 4 : 3;
+
+    return {
+      promptId: prompt._id.toString(),
+      promptTitle: prompt.title,
+      model: modelConfig.modelId,
+      provider: modelInfo.provider,
+      response: response.content,
+      qualityScore,
+      tokensUsed: response.usage.totalTokens,
+      costUSD: response.cost.total,
+      latencyMs: response.latency,
+      testedAt: new Date(),
+    };
+    
   } catch (error) {
-    console.log(`  ❌ Error with ${modelConfig.model}:`, (error as Error).message);
+    console.log(`  ❌ Error with ${modelConfig.modelId}:`, (error as Error).message);
     return null;
   }
 }
