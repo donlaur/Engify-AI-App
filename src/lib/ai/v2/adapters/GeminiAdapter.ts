@@ -14,9 +14,16 @@ export class GeminiAdapter implements AIProvider {
 
   /**
    * Create a new Gemini adapter
-   * @param model - The Gemini model to use (default: gemini-pro)
+   * @param model - The Gemini model to use (default: gemini-2.0-flash-exp)
+   * 
+   * ⚠️ VERIFIED OCT 31, 2025: Gemini 1.5 models are SUNSET!
+   * Working models as of today:
+   * - gemini-2.0-flash-exp (FREE, experimental, verified working)
+   * - gemini-exp-1206 (FREE, experimental, verified working)
+   * 
+   * To update: Run scripts/content/list-gemini-models.ts monthly
    */
-  constructor(model: string = 'gemini-pro') {
+  constructor(model: string = 'gemini-2.0-flash-exp') {
     const apiKey =
       process.env.GOOGLE_API_KEY || process.env.GOOGLE_AI_API_KEY || 'test-key';
     this.client = new GoogleGenerativeAI(apiKey);

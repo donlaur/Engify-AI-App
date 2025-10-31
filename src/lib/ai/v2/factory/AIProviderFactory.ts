@@ -35,10 +35,12 @@ export class AIProviderFactory {
     ['claude-sonnet', () => new ClaudeAdapter('claude-3-5-sonnet-20241022')],
     ['claude-opus', () => new ClaudeAdapter('claude-3-opus-20240229')],
 
-    // Gemini models
-    ['gemini', () => new GeminiAdapter('gemini-pro')],
-    ['gemini-pro', () => new GeminiAdapter('gemini-pro')],
-    ['gemini-flash', () => new GeminiAdapter('gemini-1.5-flash')],
+    // Gemini models (VERIFIED Oct 31, 2025 - 1.5 models SUNSET!)
+    // Only 2.0 experimental models work now
+    ['gemini', () => new GeminiAdapter('gemini-2.0-flash-exp')],          // Default to 2.0 exp
+    ['gemini-pro', () => new GeminiAdapter('gemini-2.0-flash-exp')],      // 1.5 pro is gone, use 2.0
+    ['gemini-flash', () => new GeminiAdapter('gemini-2.0-flash-exp')],    // 1.5 flash is gone, use 2.0
+    ['gemini-exp', () => new GeminiAdapter('gemini-2.0-flash-exp')],      // Experimental (free, verified working)
 
     // Groq models (ultra-fast inference)
     ['groq', () => new GroqAdapter('llama3-8b-8192')],
