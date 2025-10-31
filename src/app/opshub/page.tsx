@@ -6,6 +6,7 @@ import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 import { SettingsPanel } from '@/components/admin/SettingsPanel';
+import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
 import { isAdminMFAEnforced } from '@/lib/env';
 
 export default async function OpsHubPage() {
@@ -141,6 +142,10 @@ export default async function OpsHubPage() {
               )
             )}
           </div>
+        </section>
+
+        <section className="rounded-lg border bg-white p-4">
+          <ContentQualityPanel />
         </section>
 
         <section className="rounded-lg border bg-white p-4">
