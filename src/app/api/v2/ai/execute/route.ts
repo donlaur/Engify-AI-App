@@ -133,7 +133,11 @@ export async function POST(req: NextRequest) {
 /**
  * GET endpoint to list available providers
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // RBAC: workbench:ai_execution permission (same as POST for consistency)
+  const rbacCheck = await RBACPresets.requireAIExecution()(req);
+  if (rbacCheck) return rbacCheck;
+
   return NextResponse.json({
     providers: AIProviderFactory.getAvailableProviders(),
     categories: AIProviderFactory.getProvidersByCategory(),
