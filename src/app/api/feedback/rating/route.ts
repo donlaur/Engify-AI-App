@@ -12,20 +12,55 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { DetailedRatingSchema, FEEDBACK_COLLECTIONS, calculateOverallScore, calculateConfidenceScore, calculateRAGReadiness } from '@/lib/db/schemas/user-feedback';
 import { auth } from '@/lib/auth';
+import { checkFeedbackRateLimit } from '@/lib/security/feedback-rate-limit';
+import { sanitizeText } from '@/lib/security/sanitize';
+import { logAuditEvent } from '@/server/middleware/audit';
+
+// Helper to get IP from NextRequest
+function getClientIP(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const parts = forwarded.split(',');
+    return parts.length > 0 ? parts[0].trim() : 'unknown';
+  }
+  return request.headers.get('x-real-ip') || 'unknown';
+}
+
+// Helper to get user agent from NextRequest
+function getUserAgent(request: NextRequest): string | null {
+  return request.headers.get('user-agent');
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit
+    const rateLimitResult = await checkFeedbackRateLimit(request);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: rateLimitResult.reason || 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      );
+    }
+    
     const session = await auth();
     const body = await request.json();
+    
+    // Sanitize user input before validation
+    const sanitizedComment = body.comment ? sanitizeText(body.comment) : undefined;
+    const sanitizedAiModel = body.usageContext?.aiModel ? sanitizeText(body.usageContext.aiModel) : undefined;
     
     // Validate input
     const validatedData = DetailedRatingSchema.parse({
       userId: session?.user?.id,
+      organizationId: session?.user?.organizationId, // Capture organizationId for multi-tenant
       promptId: body.promptId,
       rating: body.rating,
       dimensions: body.dimensions,
-      usageContext: body.usageContext,
-      comment: body.comment,
+      usageContext: body.usageContext ? {
+        ...body.usageContext,
+        aiModel: sanitizedAiModel,
+      } : undefined,
+      comment: sanitizedComment,
       tags: body.tags,
       suggestedImprovements: body.suggestedImprovements,
       timestamp: new Date(),
@@ -58,6 +93,27 @@ export async function POST(request: NextRequest) {
     
     // Update aggregates asynchronously
     updateAggregatesAsync(validatedData.promptId, db).catch(console.error);
+    
+    // Audit log: Detailed ratings are significant events (enterprise requirement)
+    await logAuditEvent({
+      eventType: 'prompt.viewed', // Using existing event type - detailed ratings are viewed/rated
+      userId: session?.user?.id || null,
+      userEmail: session?.user?.email || null,
+      userRole: session?.user?.role || null,
+      organizationId: session?.user?.organizationId || null,
+      resourceType: 'prompt',
+      resourceId: validatedData.promptId,
+      ipAddress: getClientIP(request),
+      userAgent: getUserAgent(request),
+      action: `Submitted detailed rating for prompt ${validatedData.promptId} (${validatedData.rating}/5 stars)`,
+      metadata: {
+        rating: validatedData.rating,
+        hasDimensions: !!validatedData.dimensions,
+        hasComment: !!validatedData.comment,
+        hasImprovements: validatedData.suggestedImprovements?.length || 0,
+      },
+      success: true,
+    }).catch(console.error); // Don't fail request if audit logging fails
     
     return NextResponse.json({ 
       success: true,

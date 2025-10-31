@@ -12,15 +12,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { QuickFeedbackSchema, FEEDBACK_COLLECTIONS } from '@/lib/db/schemas/user-feedback';
 import { auth } from '@/lib/auth';
+import { checkFeedbackRateLimit } from '@/lib/security/feedback-rate-limit';
+import { sanitizeText } from '@/lib/security/sanitize';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit
+    const rateLimitResult = await checkFeedbackRateLimit(request);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: rateLimitResult.reason || 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      );
+    }
+    
     const session = await auth();
     const body = await request.json();
     
     // Validate input
     const validatedData = QuickFeedbackSchema.parse({
       userId: session?.user?.id,
+      organizationId: session?.user?.organizationId, // Capture organizationId for multi-tenant
       promptId: body.promptId,
       action: body.action,
       timestamp: new Date(),

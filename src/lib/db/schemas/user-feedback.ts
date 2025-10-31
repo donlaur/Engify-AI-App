@@ -20,6 +20,7 @@ import { z } from 'zod';
 
 export const QuickFeedbackSchema = z.object({
   userId: z.string().optional(), // Optional for anonymous users
+  organizationId: z.string().optional(), // Multi-tenant support (Day 4 requirement)
   promptId: z.string().describe('Prompt being rated'),
   
   // Quick action types
@@ -52,6 +53,7 @@ export type QuickFeedback = z.infer<typeof QuickFeedbackSchema>;
 
 export const DetailedRatingSchema = z.object({
   userId: z.string().optional(),
+  organizationId: z.string().optional(), // Multi-tenant support (Day 4 requirement)
   promptId: z.string(),
   
   // Star rating (1-5)
