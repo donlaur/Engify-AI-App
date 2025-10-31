@@ -4,6 +4,7 @@ import {
   ExecutionResult,
   AIRequest,
   StrategyConfig,
+  ProviderFactory,
 } from '../interfaces/IExecutionStrategy';
 import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 
@@ -19,8 +20,7 @@ export class CacheStrategy implements ICacheStrategy {
   private readonly defaultTTL = 3600000; // 1 hour
 
   constructor(
-    // @ts-expect-error - intentionally unused, using static methods instead
-    private _factory: AIProviderFactory,
+    private readonly providerFactory: ProviderFactory = AIProviderFactory,
     config?: Partial<StrategyConfig>
   ) {
     this.config = {
@@ -59,7 +59,7 @@ export class CacheStrategy implements ICacheStrategy {
     }
 
     // Cache miss - execute request
-    const aiProvider = AIProviderFactory.create(provider);
+    const aiProvider = this.providerFactory.create(provider);
     if (!aiProvider) {
       throw new Error(`Provider not found: ${provider}`);
     }

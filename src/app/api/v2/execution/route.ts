@@ -29,7 +29,7 @@ const ExecuteRequestSchema = z.object({
 // type ExecuteRequest = z.infer<typeof ExecuteRequestSchema>;
 
 // Initialize execution system
-const aiProviderFactory = new AIProviderFactory();
+const aiProviderFactory = AIProviderFactory;
 const strategyFactory = new ExecutionStrategyFactory(aiProviderFactory);
 const contextManager = new ExecutionContextManager(aiProviderFactory);
 
