@@ -415,7 +415,7 @@ describe('User Command Handlers', () => {
       expect(mockUserService.updateUser).toHaveBeenCalledWith(
         '507f1f77bcf86cd799439011',
         {
-          organizationId: null,
+          organizationId: undefined,
         }
       );
     });

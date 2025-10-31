@@ -7,6 +7,7 @@
 
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
+import { sanitizeMeta, sanitizeValue } from '@/lib/logging/sanitizer';
 
 // ============================================================================
 // AUDIT EVENT TYPES
@@ -60,7 +61,10 @@ export type AuditAction =
   | 'TWILIO_WEBHOOK_SIGNATURE_FAILED'
   | 'TWILIO_WEBHOOK_ERROR'
   | 'SMS_STATUS_UPDATE'
-  | 'CALL_STATUS_UPDATE';
+  | 'CALL_STATUS_UPDATE'
+  | 'content_review_decision'
+  | 'prompt_media_regenerated'
+  | 'prompt_media_viewed';
 
 export type AuditSeverity = 'info' | 'warning' | 'error' | 'critical';
 
@@ -129,6 +133,11 @@ export async function auditLog(entry: AuditLogEntry): Promise<void> {
     ...entry,
     timestamp: entry.timestamp || new Date(),
     severity: entry.severity || 'info',
+    details: entry.details ? sanitizeMeta(entry.details) : undefined,
+    userId: sanitizeValue(entry.userId) as string | undefined,
+    resource: sanitizeValue(entry.resource) as string | undefined,
+    ipAddress: sanitizeValue(entry.ipAddress) as string | undefined,
+    userAgent: sanitizeValue(entry.userAgent) as string | undefined,
   };
 
   // Determine log level

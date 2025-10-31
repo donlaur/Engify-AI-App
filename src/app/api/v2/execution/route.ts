@@ -29,7 +29,7 @@ const ExecuteRequestSchema = z.object({
 // type ExecuteRequest = z.infer<typeof ExecuteRequestSchema>;
 
 // Initialize execution system
-const aiProviderFactory = new AIProviderFactory();
+const aiProviderFactory = AIProviderFactory;
 const strategyFactory = new ExecutionStrategyFactory(aiProviderFactory);
 const contextManager = new ExecutionContextManager(aiProviderFactory);
 
@@ -161,6 +161,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  // RBAC: workbench:ai_execution permission (same as POST for consistency)
+  const rbacCheck = await RBACPresets.requireAIExecution()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const url = new URL(request.url);
     const action = url.searchParams.get('action');

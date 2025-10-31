@@ -46,7 +46,7 @@ describe('UserRepository', () => {
     } as unknown as Db;
 
     // Mock connectDB to return our mock database
-    (connectDB as unknown as vi.Mock).mockResolvedValue(mockDb);
+    vi.mocked(connectDB).mockResolvedValue(mockDb);
 
     // Create repository instance
     userRepository = new UserRepository();
@@ -176,12 +176,12 @@ describe('UserRepository', () => {
 
       const expectedUser: User = {
         ...userData,
-        _id: '507f1f77bcf86cd799439011',
+        _id: new ObjectId('507f1f77bcf86cd799439011'),
       };
 
       mockCollection.insertOne.mockResolvedValue({
-        insertedId: expectedUser._id,
-      });
+        insertedId: expectedUser._id as unknown as ObjectId,
+      } as unknown as { insertedId: ObjectId });
 
       // Act
       const result = await userRepository.create(userData);
@@ -238,7 +238,7 @@ describe('UserRepository', () => {
       const userId = '507f1f77bcf86cd799439011';
       const updateData = { name: 'Updated Name' };
       const updatedUser: User = {
-        _id: userId,
+        _id: new ObjectId(userId),
         email: 'test@example.com',
         name: 'Updated Name',
         role: 'user',
@@ -321,7 +321,7 @@ describe('UserRepository', () => {
       const role = 'admin';
       const expectedUsers: User[] = [
         {
-          _id: '507f1f77bcf86cd799439011',
+          _id: new ObjectId('507f1f77bcf86cd799439011'),
           email: 'admin1@example.com',
           name: 'Admin User 1',
           role: 'admin',

@@ -1,7 +1,15 @@
-import { AIRequest, AIResponse } from '@/lib/ai/v2/interfaces/AIProvider';
+import {
+  AIRequest,
+  AIResponse,
+  AIProvider,
+} from '@/lib/ai/v2/interfaces/AIProvider';
 
 // Re-export AIRequest for convenience (Phase 2: Export missing types)
 export type { AIRequest, AIResponse };
+
+export interface ProviderFactory {
+  create(providerName: string): AIProvider;
+}
 
 /**
  * Execution context for strategy decisions

@@ -13,6 +13,7 @@ import { z } from 'zod';
 import type { Session, User } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import { userService } from '@/lib/services/UserService';
+import { adminSessionMaxAgeSeconds } from '@/lib/env';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -78,7 +79,8 @@ export const authOptions: NextAuthConfig = {
 
   session: {
     strategy: 'jwt' as const,
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: adminSessionMaxAgeSeconds,
+    updateAge: Math.min(adminSessionMaxAgeSeconds / 2, 15 * 60),
   },
 
   pages: {
@@ -94,6 +96,9 @@ export const authOptions: NextAuthConfig = {
         token.id = user.id;
         token.role = user.role || 'free';
         token.organizationId = user.organizationId;
+        token.mfaVerified = (
+          user as unknown as { mfaVerified?: boolean }
+        ).mfaVerified;
       }
       return token;
     },
@@ -101,9 +106,12 @@ export const authOptions: NextAuthConfig = {
     async session({ session, token }: { session: Session; token: JWT }) {
       // Add user info to session
       if (session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.organizationId = token.organizationId;
+        Object.assign(session.user, {
+          id: token.id,
+          role: token.role,
+          organizationId: token.organizationId,
+          mfaVerified: Boolean(token.mfaVerified),
+        });
       }
       return session;
     },

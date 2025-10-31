@@ -60,7 +60,7 @@ export function Header({ user }: HeaderProps) {
             href="/library"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
-            Library
+            Prompt Playbooks
           </Link>
           <Link
             href="/patterns"
@@ -74,17 +74,26 @@ export function Header({ user }: HeaderProps) {
           >
             Learn
           </Link>
+          {process.env.NEXT_PUBLIC_SHOW_PLAYGROUND === 'true' && (
+            <Link
+              href="/pattern-playground"
+              className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+            >
+              Playground
+            </Link>
+          )}
           <Link
-            href="/pattern-playground"
+            href="/workbench/multi-agent"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
-            Playground
+            Workbench
           </Link>
           <Link
-            href="/demo"
+            href="/workbench/gallery"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+            title="Work in progress"
           >
-            AI Workbench
+            Gallery (WIP)
           </Link>
           {/* Removed RAG Chat (mock) and Contact (email not ready) from header */}
           <Link
@@ -94,6 +103,15 @@ export function Header({ user }: HeaderProps) {
             <Icons.github className="h-3 w-3" />
             Built in Public
           </Link>
+          {process.env.NEXT_PUBLIC_SHOW_ADMIN_LINK === 'true' && (
+            <Link
+              href="/opshub"
+              className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200"
+              title="Admin"
+            >
+              Admin
+            </Link>
+          )}
         </nav>
 
         {/* Right Side Actions */}

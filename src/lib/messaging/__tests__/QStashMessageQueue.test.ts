@@ -8,7 +8,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { QStashMessageQueue } from '../queues/QStashMessageQueue';
 import { MessageFactory } from '../MessageFactory';
-import { QueueConfig, IMessageHandler, MessageResult } from '../types';
+import { QueueConfig, IMessageHandler } from '../types';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -47,8 +47,8 @@ describe('QStash Message Queue', () => {
   describe('Publishing Messages', () => {
     it('should publish a message successfully', async () => {
       const message = factory.createMessage('event', { data: 'test' });
-      
-      (global.fetch as any).mockResolvedValueOnce({
+
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: () => Promise.resolve({ messageId: message.id }),
@@ -61,7 +61,7 @@ describe('QStash Message Queue', () => {
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Authorization': 'Bearer test-token',
+            Authorization: 'Bearer test-token',
             'Content-Type': 'application/json',
           }),
           body: expect.stringContaining(message.id),
@@ -75,7 +75,7 @@ describe('QStash Message Queue', () => {
         factory.createMessage('event', { data: 'test2' }),
       ];
 
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: () => Promise.resolve({ success: true }),
@@ -94,15 +94,17 @@ describe('QStash Message Queue', () => {
 
     it('should handle publish errors', async () => {
       const message = factory.createMessage('event', { data: 'test' });
-      
-      (global.fetch as any).mockResolvedValueOnce({
+
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: false,
         status: 400,
         statusText: 'Bad Request',
         text: () => Promise.resolve('Invalid request'),
       });
 
-      await expect(queue.publish(message)).rejects.toThrow('QStash request failed');
+      await expect(queue.publish(message)).rejects.toThrow(
+        'QStash request failed'
+      );
     });
   });
 
@@ -130,7 +132,7 @@ describe('QStash Message Queue', () => {
       const handler: IMessageHandler = {
         messageType: 'event',
         handlerName: 'test-handler',
-        handle: async (message) => ({
+        handle: async (_message) => ({
           success: true,
           data: 'processed',
           processingTime: 10,
@@ -193,10 +195,11 @@ describe('QStash Message Queue', () => {
   describe('Queue Management', () => {
     it('should get queue statistics', async () => {
       // Mock Redis stats response
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve(['totalMessages', '5', 'pendingMessages', '2']),
+        json: () =>
+          Promise.resolve(['totalMessages', '5', 'pendingMessages', '2']),
       });
 
       const stats = await queue.getQueueStats();
@@ -206,7 +209,9 @@ describe('QStash Message Queue', () => {
     });
 
     it('should handle missing statistics gracefully', async () => {
-      (global.fetch as any).mockRejectedValueOnce(new Error('Redis unavailable'));
+      (global.fetch as vi.Mock).mockRejectedValueOnce(
+        new Error('Redis unavailable')
+      );
 
       const stats = await queue.getQueueStats();
 
@@ -216,7 +221,7 @@ describe('QStash Message Queue', () => {
 
     it('should purge queue', async () => {
       // QStash doesn't support purging all messages, only resetting stats
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: () => Promise.resolve({ success: true }),
@@ -230,7 +235,7 @@ describe('QStash Message Queue', () => {
     it('should pause and resume processing', async () => {
       await queue.pause();
       await queue.resume();
-      
+
       // Should not throw errors
       expect(true).toBe(true);
     });
@@ -238,24 +243,38 @@ describe('QStash Message Queue', () => {
 
   describe('Message Operations', () => {
     it('should get message by ID', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve([
-          'id', 'test-id',
-          'type', 'event',
-          'priority', 'normal',
-          'status', 'pending',
-          'payload', '{"data":"test"}',
-          'metadata', '{"source":"test"}',
-          'createdAt', '2023-01-01T00:00:00.000Z',
-          'updatedAt', '2023-01-01T00:00:00.000Z',
-          'correlationId', '',
-          'replyTo', '',
-          'ttl', '',
-          'retryCount', '0',
-          'maxRetries', '3',
-        ]),
+        json: () =>
+          Promise.resolve([
+            'id',
+            'test-id',
+            'type',
+            'event',
+            'priority',
+            'normal',
+            'status',
+            'pending',
+            'payload',
+            '{"data":"test"}',
+            'metadata',
+            '{"source":"test"}',
+            'createdAt',
+            '2023-01-01T00:00:00.000Z',
+            'updatedAt',
+            '2023-01-01T00:00:00.000Z',
+            'correlationId',
+            '',
+            'replyTo',
+            '',
+            'ttl',
+            '',
+            'retryCount',
+            '0',
+            'maxRetries',
+            '3',
+          ]),
       });
 
       const message = await queue.getMessage('test-id');
@@ -266,7 +285,7 @@ describe('QStash Message Queue', () => {
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
-            'Authorization': 'Bearer test-token',
+            Authorization: 'Bearer test-token',
           }),
         })
       );
@@ -277,7 +296,7 @@ describe('QStash Message Queue', () => {
     });
 
     it('should return null for non-existent message', async () => {
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: () => Promise.resolve([]),
@@ -289,7 +308,7 @@ describe('QStash Message Queue', () => {
     });
 
     it('should delete message', async () => {
-      (global.fetch as any)
+      (global.fetch as vi.Mock)
         .mockResolvedValueOnce({
           ok: true,
           status: 200,
@@ -307,37 +326,53 @@ describe('QStash Message Queue', () => {
     });
 
     it('should retry failed message', async () => {
-      const message = factory.createMessage('event', { data: 'test' });
-      message.retryCount = 1;
-      message.maxRetries = 3;
+      const message = factory.createMessage(
+        'event',
+        { data: 'test' },
+        { maxRetries: 3 }
+      );
 
       // Clear any previous mocks and re-establish fetch mock
       vi.clearAllMocks();
       global.fetch = vi.fn();
 
       // Mock getMessage to return the message
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve([
-          'id', message.id,
-          'type', message.type,
-          'priority', message.priority,
-          'status', message.status,
-          'payload', JSON.stringify(message.payload),
-          'metadata', JSON.stringify(message.metadata),
-          'createdAt', message.createdAt.toISOString(),
-          'updatedAt', message.updatedAt.toISOString(),
-          'correlationId', message.correlationId || '',
-          'replyTo', message.replyTo || '',
-          'ttl', message.ttl?.toString() || '',
-          'retryCount', message.retryCount.toString(),
-          'maxRetries', message.maxRetries.toString(),
-        ]),
+        json: () =>
+          Promise.resolve([
+            'id',
+            message.id,
+            'type',
+            message.type,
+            'priority',
+            message.priority,
+            'status',
+            message.status,
+            'payload',
+            JSON.stringify(message.payload),
+            'metadata',
+            JSON.stringify(message.metadata),
+            'createdAt',
+            message.createdAt.toISOString(),
+            'updatedAt',
+            message.updatedAt.toISOString(),
+            'correlationId',
+            message.correlationId || '',
+            'replyTo',
+            message.replyTo || '',
+            'ttl',
+            message.ttl?.toString() || '',
+            'retryCount',
+            message.retryCount.toString(),
+            'maxRetries',
+            message.maxRetries.toString(),
+          ]),
       });
 
       // Mock the publish call for retry
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: () => Promise.resolve({ success: true }),
@@ -352,33 +387,39 @@ describe('QStash Message Queue', () => {
   describe('Error Handling', () => {
     it('should handle network errors', async () => {
       const message = factory.createMessage('event', { data: 'test' });
-      
+
       // Clear any previous mocks and re-establish fetch mock
       vi.clearAllMocks();
       global.fetch = vi.fn();
-      
-      // Mock the main publish request to fail
-      (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
 
-      await expect(queue.publish(message)).rejects.toThrow('QStash request failed');
+      // Mock the main publish request to fail
+      (global.fetch as vi.Mock).mockRejectedValueOnce(
+        new Error('Network error')
+      );
+
+      await expect(queue.publish(message)).rejects.toThrow(
+        'QStash request failed'
+      );
     });
 
     it('should handle invalid responses', async () => {
       const message = factory.createMessage('event', { data: 'test' });
-      
+
       // Clear any previous mocks and re-establish fetch mock
       vi.clearAllMocks();
       global.fetch = vi.fn();
-      
+
       // Mock the main publish request to return invalid response
-      (global.fetch as any).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
         text: () => Promise.resolve('Server error'),
       });
 
-      await expect(queue.publish(message)).rejects.toThrow('QStash request failed');
+      await expect(queue.publish(message)).rejects.toThrow(
+        'QStash request failed'
+      );
     });
 
     it('should handle missing credentials', () => {
@@ -392,15 +433,23 @@ describe('QStash Message Queue', () => {
 
   describe('Priority Handling', () => {
     it('should set correct delays based on priority', async () => {
-      const criticalMessage = factory.createMessage('event', { data: 'critical' }, {
-        priority: 'critical',
-      });
-      
-      const lowMessage = factory.createMessage('event', { data: 'low' }, {
-        priority: 'low',
-      });
+      const criticalMessage = factory.createMessage(
+        'event',
+        { data: 'critical' },
+        {
+          priority: 'critical',
+        }
+      );
 
-      (global.fetch as any).mockResolvedValue({
+      const lowMessage = factory.createMessage(
+        'event',
+        { data: 'low' },
+        {
+          priority: 'low',
+        }
+      );
+
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         status: 200,
         json: () => Promise.resolve({ success: true }),
@@ -410,7 +459,7 @@ describe('QStash Message Queue', () => {
       await queue.publish(lowMessage);
 
       // Check that critical message has 0s delay and low message has 30s delay
-      const calls = (global.fetch as unknown).mock.calls;
+      const calls = (global.fetch as vi.Mock).mock.calls;
       expect(calls[0]?.[1]?.body).toContain('"delay":"0s"');
       expect(calls[1]?.[1]?.body).toContain('"delay":"30s"');
     });

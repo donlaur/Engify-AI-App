@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logging/logger';
 import { apiKeyUsageService } from '@/lib/services/ApiKeyUsageService';
+import { RBACPresets } from '@/lib/middleware/rbac';
 import { z } from 'zod';
 
 const usageQuerySchema = z.object({
@@ -23,6 +24,10 @@ const usageQuerySchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  // RBAC: users:read permission (for API key usage data)
+  const rbacCheck = await RBACPresets.requireUserRead()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
 
@@ -31,17 +36,17 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const providerParam = searchParams.get('provider');
+    const periodParam = searchParams.get('period');
     const query = {
       keyId: searchParams.get('keyId') || undefined,
-      provider: searchParams.get('provider') as
+      provider: (providerParam ?? undefined) as
         | 'openai'
         | 'anthropic'
         | 'google'
         | 'groq'
         | undefined,
-      period:
-        (searchParams.get('period') as 'daily' | 'weekly' | 'monthly') ||
-        'monthly',
+      period: (periodParam ?? 'monthly') as 'daily' | 'weekly' | 'monthly',
       days: searchParams.get('days') || undefined,
     };
 

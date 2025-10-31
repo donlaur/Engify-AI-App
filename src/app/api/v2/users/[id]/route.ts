@@ -307,25 +307,54 @@ export async function DELETE(
  * Update user's last login timestamp
  */
 export async function PATCH(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  let id: string | undefined;
-  try {
-    const userService = getUserService();
-    id = (await params).id;
+  const { id } = await params;
 
-    if (!id) {
+  if (!id) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'User ID is required',
+      },
+      { status: 400 }
+    );
+  }
+
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  try {
+    // Users can only update their own last login unless elevated
+    const role = (session?.user as { role?: string } | null)?.role;
+    const sessionUserId = session?.user?.id;
+    const isElevated = role === 'admin' || role === 'super_admin';
+
+    if (!isElevated && sessionUserId !== id) {
       return NextResponse.json(
         {
           success: false,
-          error: 'User ID is required',
+          error: 'Forbidden - You can only update your own last login',
         },
-        { status: 400 }
+        { status: 403 }
       );
     }
 
-    // Update last login
+    if (isElevated === false) {
+      // Self-update path already cleared; no additional RBAC check needed
+    } else {
+      const rbacCheck = await RBACPresets.requireUserWrite()(request);
+      if (rbacCheck) return rbacCheck;
+    }
+
+    const userService = getUserService();
     await userService.updateLastLogin(id);
 
     return NextResponse.json({
@@ -333,10 +362,9 @@ export async function PATCH(
       message: 'Last login updated successfully',
     });
   } catch (error) {
-    const session = await auth();
     logger.apiError(`/api/v2/users/${id}/update-last-login`, error, {
       userId: session?.user?.id,
-      method: 'POST',
+      method: 'PATCH',
     });
     return NextResponse.json(
       {

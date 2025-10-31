@@ -7,6 +7,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from '../route';
+import { ObjectId } from 'mongodb';
 
 // Mock dependencies
 vi.mock('@/lib/services/UserService', () => ({
@@ -20,6 +21,16 @@ vi.mock('bcryptjs', () => ({
   hash: vi.fn().mockResolvedValue('$2b$12$hashedpassword'),
 }));
 
+vi.mock('@/lib/db/mongodb', () => ({
+  getMongoDb: vi.fn().mockResolvedValue({
+    collection: vi.fn().mockReturnValue({
+      updateOne: vi
+        .fn()
+        .mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
+    }),
+  }),
+}));
+
 describe('POST /api/auth/signup', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -31,7 +42,7 @@ describe('POST /api/auth/signup', () => {
 
     vi.mocked(userService.findByEmail).mockResolvedValue(null);
     vi.mocked(userService.createUser).mockResolvedValue({
-      _id: '507f1f77bcf86cd799439011',
+      _id: new ObjectId('507f1f77bcf86cd799439011'),
       email: 'test@example.com',
       name: 'Test User',
       password: '$2b$12$hashedpassword',
@@ -44,7 +55,7 @@ describe('POST /api/auth/signup', () => {
       stripeSubscriptionId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-    } as any);
+    });
 
     const request = new NextRequest('http://localhost:3000/api/auth/signup', {
       method: 'POST',

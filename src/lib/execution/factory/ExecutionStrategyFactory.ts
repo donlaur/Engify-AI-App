@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   AIRequest,
   StrategyConfig,
+  ProviderFactory,
 } from '../interfaces/IExecutionStrategy';
 import { StreamingStrategy } from '../strategies/StreamingStrategy';
 import { BatchStrategy } from '../strategies/BatchStrategy';
@@ -15,9 +16,9 @@ import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
  */
 export class ExecutionStrategyFactory {
   private strategies: Map<string, IExecutionStrategy> = new Map();
-  private factory: AIProviderFactory;
+  private factory: ProviderFactory;
 
-  constructor(factory: AIProviderFactory) {
+  constructor(factory: ProviderFactory = AIProviderFactory) {
     this.factory = factory;
     this.initializeDefaultStrategies();
   }

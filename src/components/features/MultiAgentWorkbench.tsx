@@ -130,6 +130,9 @@ export function MultiAgentWorkbench() {
   const [simulation, setSimulation] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [sandboxLog, setSandboxLog] = useState<string>('');
+  const sandboxEnabled =
+    process.env.NEXT_PUBLIC_AGENTS_SANDBOX_ENABLED === 'true';
 
   const loadExample = (example: (typeof EXAMPLE_SCENARIOS)[0]) => {
     setIdea(example.idea);
@@ -199,6 +202,49 @@ export function MultiAgentWorkbench() {
     setSimulation('');
     setError('');
     setSelectedRoles(['engineer', 'architect', 'pm', 'tech_lead']);
+    setSandboxLog('');
+  };
+
+  // --- Agent Sandbox (feature-flagged, mocked tools) ---
+  const runSandbox = async () => {
+    if (!sandboxEnabled) return;
+    if (!idea.trim()) {
+      setError('Enter a topic for the sandbox');
+      return;
+    }
+    setError('');
+    setSandboxLog('');
+    const steps: string[] = [];
+
+    const log = (line: string) => steps.push(line);
+    log(
+      'Orchestrator: starting 6-step plan with Planner, Researcher, Critic, Writer'
+    );
+    log('Planner: define outline and next actions');
+    log('Researcher: retrieveFromIngest(query) → mocked facts');
+    log('Writer: writeNote(title,text) → draft section');
+    log('Critic: critique(text,rules) → edits proposed');
+    log('Writer: apply edits → final draft');
+
+    // save artifact (best-effort; ignore errors)
+    try {
+      const artifact = {
+        summary: `Sandbox summary on: ${idea}`,
+        outline: ['Intro', 'Findings', 'Recommendations'],
+        draft:
+          'This is a mocked draft from the Agent Sandbox. Replace with real tools later.',
+        tags: ['sandbox', 'agents', 'workbench'],
+      };
+      await fetch('/api/agents/artifacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(artifact),
+      });
+    } catch {
+      // ignore in sandbox
+    }
+
+    setSandboxLog(steps.map((s, i) => `${i + 1}. ${s}`).join('\n'));
   };
 
   return (
@@ -350,6 +396,35 @@ export function MultiAgentWorkbench() {
                 {error && (
                   <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
                     <strong className="font-semibold">Error:</strong> {error}
+                  </div>
+                )}
+
+                {sandboxEnabled && (
+                  <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                      <Users2 className="h-4 w-4 text-indigo-600" /> Agent
+                      Sandbox
+                      <span className="ml-2 rounded-full bg-indigo-600 px-2 py-0.5 text-xs text-white">
+                        beta
+                      </span>
+                    </div>
+                    <p className="mb-3 text-xs text-slate-700">
+                      Runs a mocked 6-step agent loop (Planner, Researcher,
+                      Critic, Writer) and saves a placeholder artifact.
+                    </p>
+                    <Button
+                      onClick={runSandbox}
+                      variant="outline"
+                      className="border-gray-300"
+                      disabled={!idea.trim()}
+                    >
+                      Run Agent Sandbox
+                    </Button>
+                    {sandboxLog && (
+                      <pre className="mt-3 max-h-60 overflow-y-auto rounded-md border bg-white p-3 text-xs text-slate-800">
+                        {sandboxLog}
+                      </pre>
+                    )}
                   </div>
                 )}
               </CardContent>

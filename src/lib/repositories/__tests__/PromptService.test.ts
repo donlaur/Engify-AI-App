@@ -585,8 +585,8 @@ describe('PromptService', () => {
       // Assert
       expect(result).toEqual({
         totalPrompts: 2,
-        promptsByCategory: { 'code-generation': 1, testing: 1 },
-        promptsByRole: { engineer: 1, qa: 1 },
+        promptsByCategory: { engineering: 2 },
+        promptsByRole: { junior_engineer: 1, manager: 1 },
         promptsByDifficulty: { beginner: 1, intermediate: 1 },
         featuredPrompts: 1,
         publicPrompts: 2,

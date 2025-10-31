@@ -16,12 +16,28 @@ Purpose: Single source of truth for environment configuration across local, Verc
 - NEXT_PUBLIC_APP_URL: Public site URL
 - NEXT_PUBLIC_APP_VERSION: App version label (optional)
 - NEXT_PUBLIC_ALLOW_SIGNUP: 'true' | 'false' (controls Request Access gate)
+- NEXT_PUBLIC_AGENTS_SANDBOX_ENABLED: 'true' | 'false' (show Agent Sandbox UI)
+- NEXT_PUBLIC_SHOW_PLAYGROUND: 'true' | 'false' (show Playground in nav)
+- NEXT_PUBLIC_SHOW_ADMIN_LINK: 'true' | 'false' (show Admin link; route remains RBAC-guarded)
 
 ## AI Providers (BYOK and Company Keys)
 
 - OPENAI_API_KEY: Company key for internal tools (users store BYOK per-user via ApiKeyService)
 - ANTHROPIC_API_KEY: Company key (optional)
 - GOOGLE_API_KEY: Company key (optional)
+- REPLICATE_API_TOKEN: Replicate token (optional)
+- REPLICATE_MODEL: Default model id (e.g., google/gemini-2.5-flash)
+- REPLICATE_ALLOWED_MODELS: Comma-separated allowlist for Replicate models (default safe set when unset)
+- REPLICATE_MAX_RETRIES: Max retry attempts for Replicate calls (default 2)
+- REPLICATE_RETRY_DELAY_MS: Base backoff delay between Replicate retries (default 500)
+- REPLICATE_TIMEOUT_MS: Execution timeout for Replicate calls in milliseconds (default 45000)
+- AI_PROVIDER_TIMEOUT_MS: Default timeout applied to AI provider calls (milliseconds, default 45000)
+- AI_PROVIDER_MAX_RETRIES: Default retry attempts for AI provider calls (default 1)
+- AI_PROVIDER_RETRY_DELAY_MS: Base backoff delay between retries for AI providers (default 300)
+- IMAGE_GENERATION_ENABLED: 'true' | 'false' (toggle prompt cover/icon generation, default true)
+- REPLICATE_IMAGE_MODEL: Replicate model id used for image generation (default stability-ai/sdxl)
+- ADMIN_SESSION_MAX_AGE_MINUTES: Admin session TTL in minutes (default 60)
+- ADMIN_MFA_REQUIRED: 'true' | 'false' (enforce MFA for super_admin by default)
 
 ## Email (SendGrid)
 
@@ -61,6 +77,7 @@ Purpose: Single source of truth for environment configuration across local, Verc
 ## AWS (Secrets/Infra)
 
 - AWS_REGION: AWS region (e.g., us-east-1)
+- AWS_ACCOUNT_ID: AWS account identifier (used by deployment scripts)
 - AWS_ACCESS_KEY_ID: Access key (local/dev only; prefer IAM roles in AWS)
 - AWS_SECRET_ACCESS_KEY: Secret key (local/dev only)
 
@@ -72,6 +89,9 @@ Purpose: Single source of truth for environment configuration across local, Verc
 ## RAG / Python Backend
 
 - RAG_API_URL: Python RAG service base URL (e.g., http://localhost:8000)
+- AGENTS_SANDBOX_ENABLED: 'true' | 'false' (enable Agent Sandbox server routes)
+- RAG_INDEX_ENABLED: 'true' | 'false' (enable admin content indexing stub)
+- CONTENT_PROVENANCE_ENABLED: 'true' | 'false' (persist ingestion scheduler provenance to MongoDB)
 
 ---
 
