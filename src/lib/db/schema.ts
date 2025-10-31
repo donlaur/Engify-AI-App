@@ -286,6 +286,7 @@ export const WebContentSchema = z.object({
   reviewStatus: z.enum(['pending', 'approved', 'rejected']).default('pending'),
   createdAt: z.date(),
   updatedAt: z.date(),
+  metadata: z.record(z.unknown()).default({}),
 });
 
 export type WebContent = z.infer<typeof WebContentSchema>;
