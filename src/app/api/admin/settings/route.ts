@@ -6,10 +6,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { auditLog } from '@/lib/logging/audit';
+import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
 
 export async function GET(request: NextRequest) {
   const r = await RBACPresets.requireSuperAdmin()(request);
   if (r) return r;
+
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     // Feature flags status
@@ -92,7 +99,7 @@ export async function GET(request: NextRequest) {
       databaseConfigured: Boolean(process.env.MONGODB_URI),
     };
 
-    return NextResponse.json({
+    const response = {
       success: true,
       data: {
         featureFlags,
@@ -100,25 +107,42 @@ export async function GET(request: NextRequest) {
         messagingStatus,
         systemInfo,
       },
+    } as const;
+
+    await auditLog({
+      action: 'admin_settings_viewed',
+      userId: session.user.id,
+      resource: 'admin_settings',
+      details: {
+        environment: systemInfo.environment,
+        version: systemInfo.version,
+        redisConfigured: systemInfo.redisConfigured,
+        databaseConfigured: systemInfo.databaseConfigured,
+      },
     });
+
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('Error fetching admin settings:', error);
+    logger.apiError('/api/admin/settings', error, { method: 'GET' });
 
     // Audit log the error
     try {
-      const session = await import('@/lib/auth/config').then((m) => m.auth());
       if (session?.user?.id) {
         await auditLog({
           action: 'admin_settings_access_error',
           userId: session.user.id,
-          resourceType: 'admin_settings',
-          metadata: {
+          resource: 'admin_settings',
+          details: {
             error: error instanceof Error ? error.message : 'Unknown error',
           },
+          severity: 'error',
         });
       }
     } catch (auditError) {
-      console.error('Failed to audit log settings error:', auditError);
+      logger.error('admin-settings.audit.failure', {
+        error:
+          auditError instanceof Error ? auditError.message : String(auditError),
+      });
     }
 
     return NextResponse.json(

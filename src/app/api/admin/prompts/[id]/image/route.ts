@@ -23,6 +23,9 @@ export async function GET(
   }
 
   const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
 
   const db = await getDb();
   const prompt = await db
@@ -37,8 +40,8 @@ export async function GET(
   }
 
   await auditLog({
-    action: 'admin_settings_viewed',
-    userId: session?.user?.id,
+    action: 'prompt_media_viewed',
+    userId: session.user.id,
     resource: `/api/admin/prompts/${id}/image`,
     details: {
       promptId: id,
@@ -65,6 +68,9 @@ export async function POST(
   }
 
   const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
 
   const db = await getDb();
   const prompt = await db
@@ -95,7 +101,7 @@ export async function POST(
 
   await auditLog({
     action: 'prompt_media_regenerated',
-    userId: session?.user?.id,
+    userId: session.user.id,
     resource: `/api/admin/prompts/${id}/image`,
     details: {
       promptId: id,
