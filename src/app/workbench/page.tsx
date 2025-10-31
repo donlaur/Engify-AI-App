@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { ToolSelector } from '@/components/workbench/ToolSelector';
 import { TokenCounter } from '@/components/workbench/TokenCounter';
+import { PromptOptimizer } from '@/components/workbench/PromptOptimizer';
 import { OKRWorkbench } from '@/components/workbench/OKRWorkbench';
 import { RetrospectiveDiagnostician } from '@/components/workbench/RetrospectiveDiagnostician';
 import { TechDebtStrategist } from '@/components/workbench/TechDebtStrategist';
@@ -31,6 +32,8 @@ export default function WorkbenchPage() {
     switch (selectedTool) {
       case 'token-counter':
         return <TokenCounter text="" />;
+      case 'prompt-optimizer':
+        return <PromptOptimizer />;
       case 'okr-workbench':
         return <OKRWorkbench />;
       case 'retrospective-diagnostician':
