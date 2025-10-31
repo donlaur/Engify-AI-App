@@ -24,9 +24,17 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status') ?? 'pending';
+  const source = searchParams.get('source');
   const limit = Number(searchParams.get('limit') ?? '20');
   const db = await getDb();
+
   const baseQuery: Record<string, unknown> = { reviewStatus: status };
+
+  // Add source filter if specified
+  if (source && source !== 'all') {
+    baseQuery.source = source;
+  }
+
   const query =
     role === 'super_admin' || !orgId
       ? baseQuery
