@@ -17,6 +17,7 @@ import { MongoClient } from 'mongodb';
 import { performanceImprovementPlans } from '../../src/data/prompts/management/performance-improvement-plans';
 import { conflictResolutionPrompts } from '../../src/data/prompts/management/conflict-resolution';
 import { facilitatorGuides } from '../../src/data/prompts/management/facilitator-guides';
+import { decisionFrameworkPrompts } from '../../src/data/prompts/management/decision-frameworks';
 
 interface ManagementPrompt {
   title: string;
@@ -114,6 +115,13 @@ async function seedManagementPrompts() {
       allPrompts.push(convertToPromptFormat(prompt as ManagementPrompt, id));
     });
 
+    // Decision framework prompts
+    console.log(`📝 Processing ${decisionFrameworkPrompts.length} decision framework prompts...`);
+    decisionFrameworkPrompts.forEach((prompt, index) => {
+      const id = generateId('decision', index);
+      allPrompts.push(convertToPromptFormat(prompt as ManagementPrompt, id));
+    });
+
     console.log(`\n📊 Total management prompts: ${allPrompts.length}`);
 
     // Check for duplicates (by title)
@@ -140,7 +148,7 @@ async function seedManagementPrompts() {
 
     // Show summary
     const summary = await promptsCollection.aggregate([
-      { $match: { id: { $regex: /^(pip|conflict|facilitator)-/ } } },
+      { $match: { id: { $regex: /^(pip|conflict|facilitator|decision)-/ } } },
       { $group: { _id: '$category', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
     ]).toArray();
@@ -151,7 +159,7 @@ async function seedManagementPrompts() {
     });
 
     const roleSummary = await promptsCollection.aggregate([
-      { $match: { id: { $regex: /^(pip|conflict|facilitator)-/ } } },
+      { $match: { id: { $regex: /^(pip|conflict|facilitator|decision)-/ } } },
       { $group: { _id: '$role', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
     ]).toArray();
