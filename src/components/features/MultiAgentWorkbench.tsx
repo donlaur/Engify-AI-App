@@ -248,7 +248,7 @@ export function MultiAgentWorkbench() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="mx-auto max-w-7xl p-6">
         {/* Header */}
         <div className="mb-8">
@@ -256,14 +256,14 @@ export function MultiAgentWorkbench() {
             <Sparkles className="h-4 w-4" />
             Decision-Making Gym
           </div>
-          <h1 className="mb-2 text-4xl font-bold tracking-tight text-slate-900">
+          <h1 className="mb-2 text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Multi-Agent Team Simulation
           </h1>
-          <p className="text-lg text-slate-700">
+          <p className="text-lg text-slate-700 dark:text-slate-300">
             Practice thinking from multiple perspectives • Train your
             collaborative decision-making skills
           </p>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
             This is a training tool to help you understand how different roles
             think. Use it to practice, not to replace real team discussions.
           </p>
@@ -274,31 +274,31 @@ export function MultiAgentWorkbench() {
           {/* Left: Input & Controls */}
           <div className="space-y-6 lg:col-span-2">
             {/* Quick Examples */}
-            <Card className="border-slate-200 bg-white shadow-sm">
-              <CardHeader className="border-b border-slate-200 pb-4">
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+            <Card className="border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 shadow-sm">
+              <CardHeader className="border-b border-slate-200 dark:border-slate-700 pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-slate-100">
                   <Sparkles className="h-5 w-5 text-yellow-600" />
                   Try an Example
                 </CardTitle>
-                <CardDescription className="text-gray-600">
+                <CardDescription className="text-gray-600 dark:text-slate-400">
                   Click to load a pre-built scenario
                 </CardDescription>
               </CardHeader>
-              <CardContent className="bg-white pt-4">
+              <CardContent className="bg-white dark:bg-slate-800 pt-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {EXAMPLE_SCENARIOS.map((example, index) => (
                     <button
                       key={index}
                       onClick={() => loadExample(example)}
-                      className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 text-left transition-all hover:border-blue-500 hover:bg-white hover:shadow-md"
+                      className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 p-4 text-left transition-all hover:border-blue-500 dark:hover:border-blue-400 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md"
                     >
-                      <div className="mb-1 text-base font-semibold text-gray-900 group-hover:text-blue-600">
+                      <div className="mb-1 text-base font-semibold text-gray-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                         {example.title}
                       </div>
-                      <div className="mb-2 text-xs text-gray-500">
+                      <div className="mb-2 text-xs text-gray-500 dark:text-slate-400">
                         {example.description}
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                      <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-slate-400">
                         <span className="font-medium">
                           {example.roles.length} roles
                         </span>
@@ -312,22 +312,22 @@ export function MultiAgentWorkbench() {
             </Card>
 
             {/* Input */}
-            <Card className="border-slate-200 bg-white shadow-sm">
-              <CardHeader className="border-b border-slate-200 pb-4">
-                <CardTitle className="text-lg font-semibold text-gray-900">
+            <Card className="border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 shadow-sm">
+              <CardHeader className="border-b border-slate-200 dark:border-slate-700 pb-4">
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-slate-100">
                   Your Idea
                 </CardTitle>
-                <CardDescription className="text-gray-600">
+                <CardDescription className="text-gray-600 dark:text-slate-400">
                   What do you want the team to evaluate?
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 bg-white pt-4">
+              <CardContent className="space-y-4 bg-white dark:bg-slate-800 pt-4">
                 <Textarea
                   placeholder="Example: Add real-time collaboration to our document editor..."
                   value={idea}
                   onChange={(e) => setIdea(e.target.value)}
                   rows={4}
-                  className="resize-none border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                  className="resize-none border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
                 />
 
                 {/* Mode Selection */}
@@ -400,28 +400,28 @@ export function MultiAgentWorkbench() {
                 )}
 
                 {sandboxEnabled && (
-                  <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                    <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  <div className="mt-6 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 p-4">
+                    <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
                       <Users2 className="h-4 w-4 text-indigo-600" /> Agent
                       Sandbox
                       <span className="ml-2 rounded-full bg-indigo-600 px-2 py-0.5 text-xs text-white">
                         beta
                       </span>
                     </div>
-                    <p className="mb-3 text-xs text-slate-700">
+                    <p className="mb-3 text-xs text-slate-700 dark:text-slate-300">
                       Runs a mocked 6-step agent loop (Planner, Researcher,
                       Critic, Writer) and saves a placeholder artifact.
                     </p>
                     <Button
                       onClick={runSandbox}
                       variant="outline"
-                      className="border-gray-300"
+                      className="border-gray-300 dark:border-slate-600"
                       disabled={!idea.trim()}
                     >
                       Run Agent Sandbox
                     </Button>
                     {sandboxLog && (
-                      <pre className="mt-3 max-h-60 overflow-y-auto rounded-md border bg-white p-3 text-xs text-slate-800">
+                      <pre className="mt-3 max-h-60 overflow-y-auto rounded-md border bg-white dark:bg-slate-800 p-3 text-xs text-slate-800 dark:text-slate-200">
                         {sandboxLog}
                       </pre>
                     )}
@@ -432,60 +432,60 @@ export function MultiAgentWorkbench() {
 
             {/* Simulation Output */}
             {simulation && (
-              <Card className="border-slate-200 bg-white shadow-sm">
-                <CardHeader className="border-b border-slate-200 pb-4">
-                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+              <Card className="border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 shadow-sm">
+                <CardHeader className="border-b border-slate-200 dark:border-slate-700 pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-slate-100">
                     <CheckCircle className="h-5 w-5 text-green-600" />
                     Team Simulation Results
                   </CardTitle>
-                  <CardDescription className="text-gray-600">
+                  <CardDescription className="text-gray-600 dark:text-slate-400">
                     {mode === 'sequential'
                       ? 'Sequential Review'
                       : 'Team Debate'}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="bg-white pt-4">
-                  <div className="max-h-[600px] overflow-y-auto rounded-lg border-2 border-gray-200 bg-white p-6">
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800">
+                <CardContent className="bg-white dark:bg-slate-800 pt-4">
+                  <div className="max-h-[600px] overflow-y-auto rounded-lg border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-700/50 p-6">
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800 dark:text-slate-200">
                       {simulation}
                     </div>
                   </div>
 
                   {/* Reflection Questions */}
-                  <div className="mt-6 space-y-4 border-t pt-6">
-                    <h3 className="font-semibold text-gray-900">
+                  <div className="mt-6 space-y-4 border-t dark:border-slate-700 pt-6">
+                    <h3 className="font-semibold text-gray-900 dark:text-slate-100">
                       💡 Reflection & Learning
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-slate-400">
                       Take a moment to consolidate your learning:
                     </p>
 
                     <div className="space-y-3">
-                      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                        <p className="mb-2 text-sm font-medium text-blue-900">
+                        <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 p-4">
+                        <p className="mb-2 text-sm font-medium text-blue-900 dark:text-blue-100">
                           1. What was the core disagreement in this discussion?
                         </p>
-                        <p className="text-xs text-blue-700">
+                        <p className="text-xs text-blue-700 dark:text-blue-300">
                           Identify the main tension or trade-off that different
                           roles prioritized differently.
                         </p>
                       </div>
 
-                      <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
-                        <p className="mb-2 text-sm font-medium text-purple-900">
+                      <div className="rounded-lg border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/30 p-4">
+                        <p className="mb-2 text-sm font-medium text-purple-900 dark:text-purple-100">
                           2. Which perspective surprised you most?
                         </p>
-                        <p className="text-xs text-purple-700">
+                        <p className="text-xs text-purple-700 dark:text-purple-300">
                           Which role&apos;s concerns or priorities did you
                           initially underestimate?
                         </p>
                       </div>
 
-                      <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-                        <p className="mb-2 text-sm font-medium text-green-900">
+                      <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 p-4">
+                        <p className="mb-2 text-sm font-medium text-green-900 dark:text-green-100">
                           3. How would you apply this to your real team?
                         </p>
-                        <p className="text-xs text-green-700">
+                        <p className="text-xs text-green-700 dark:text-green-300">
                           What specific question or concern from this simulation
                           should you raise in your next project discussion?
                         </p>
@@ -494,8 +494,8 @@ export function MultiAgentWorkbench() {
                   </div>
 
                   {/* Feedback */}
-                  <div className="mt-6 flex items-center gap-3 border-t pt-4">
-                    <span className="text-sm font-medium text-gray-700">
+                  <div className="mt-6 flex items-center gap-3 border-t dark:border-slate-700 pt-4">
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
                       Was this helpful?
                     </span>
                     <Button
@@ -527,17 +527,17 @@ export function MultiAgentWorkbench() {
 
           {/* Right: Role Selection */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-6 border-slate-200 bg-white shadow-sm">
-              <CardHeader className="border-b border-slate-200 pb-4">
-                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+            <Card className="sticky top-6 border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 shadow-sm">
+              <CardHeader className="border-b border-slate-200 dark:border-slate-700 pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-slate-100">
                   <Users2 className="h-5 w-5 text-purple-600" />
                   Select Roles ({selectedRoles.length}/7)
                 </CardTitle>
-                <CardDescription className="text-gray-600">
+                <CardDescription className="text-gray-600 dark:text-slate-400">
                   Who should review this idea?
                 </CardDescription>
               </CardHeader>
-              <CardContent className="bg-white pt-4">
+              <CardContent className="bg-white dark:bg-slate-800 pt-4">
                 <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
                   {AVAILABLE_ROLES.map((role) => {
                     const isSelected = selectedRoles.includes(role.id);
@@ -548,7 +548,7 @@ export function MultiAgentWorkbench() {
                         className={`relative flex flex-col items-center gap-1.5 rounded-lg border-2 p-2.5 transition-all ${
                           isSelected
                             ? 'border-blue-500 bg-blue-50 shadow-sm'
-                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                            : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-700/50 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700'
                         }`}
                       >
                         {isSelected && (
@@ -564,7 +564,7 @@ export function MultiAgentWorkbench() {
                           {role.icon}
                         </div>
                         <div
-                          className={`text-center text-xs font-medium ${isSelected ? 'text-blue-900' : 'text-gray-700'}`}
+                          className={`text-center text-xs font-medium ${isSelected ? 'text-blue-900 dark:text-blue-100' : 'text-gray-700 dark:text-slate-300'}`}
                         >
                           {role.name}
                         </div>

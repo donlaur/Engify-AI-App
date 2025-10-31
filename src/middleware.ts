@@ -15,7 +15,7 @@ export function middleware(request: NextRequest) {
     '/api/v2/execution', // Execution strategy route
     '/api/prompts/history',
     '/api/user/',
-    '/workbench',
+    // '/workbench', // Removed for beta - keep open
     '/dashboard',
     '/settings',
   ];
@@ -41,5 +41,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/:path*', '/workbench', '/dashboard', '/settings'],
+  matcher: ['/api/:path*', '/dashboard', '/settings'],
 };

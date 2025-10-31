@@ -15,7 +15,33 @@ Create immediately useful, production-ready templates for common management scen
 
 ### 1. Performance Improvement Plans (PIPs)
 
-**For Engineering Managers - Writing a Fair PIP (Start at 85%)**
+**3 Templates Created:**
+- PIP for Individual Contributor
+- PIP for Engineering Manager  
+- PIP Progress Review Template
+
+### 2. Conflict Resolution Guides
+
+**3 Templates Created:**
+- Engineer-to-Engineer Conflict Resolution
+- Product-Engineering Conflict Resolution
+- Manager-Report Conflict Resolution
+
+### 3. Facilitator Guides
+
+**2 Templates Created:**
+- 1-on-1 Meeting Facilitator Guide
+- Sprint Retrospective Facilitator Guide
+
+### 4. Decision Framework Templates (NEW)
+
+**4 Templates Created:**
+- DARCI Decision Framework - Define decision roles (Driver, Approver, Recommender, Consulted, Informed)
+- RACI Responsibility Matrix - Clarify project roles (Responsible, Accountable, Consulted, Informed)
+- Value vs. Effort Matrix - Prioritize initiatives (Quick Wins, Big Bets, Fill-ins, Time Sinks)
+- Build vs. Buy Decision Framework - Evaluate build vs. buy with TCO analysis
+
+**Total: 12 management prompt templates** (ready to seed to MongoDB)
 
 ```
 Category: leadership
