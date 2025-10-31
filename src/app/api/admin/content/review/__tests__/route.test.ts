@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { ObjectId } from 'mongodb';
 
@@ -7,6 +7,17 @@ const ORIGINAL_ENV = { ...process.env };
 describe('Admin content review API', () => {
   beforeEach(() => {
     vi.resetModules();
+    process.env = {
+      ...ORIGINAL_ENV,
+      MONGODB_URI: 'test-mongodb-uri',
+      NEXTAUTH_SECRET: '12345678901234567890123456789012',
+    };
+    vi.doMock('@/lib/logging/audit', () => ({
+      auditLog: vi.fn(),
+    }));
+  });
+
+  afterEach(() => {
     process.env = { ...ORIGINAL_ENV };
   });
 
@@ -39,7 +50,9 @@ describe('Admin content review API', () => {
     });
 
     vi.doMock('@/lib/auth', () => ({
-      auth: vi.fn(async () => ({ user: { id: 'a1', role: 'super_admin' } })),
+      auth: vi.fn(async () => ({
+        user: { id: 'a1', role: 'super_admin', mfaVerified: true },
+      })),
     }));
     vi.doMock('@/lib/db/client', () => ({
       getDb: vi.fn(async () => ({
@@ -69,7 +82,12 @@ describe('Admin content review API', () => {
 
     vi.doMock('@/lib/auth', () => ({
       auth: vi.fn(async () => ({
-        user: { id: 'orgAdmin', role: 'org_admin', organizationId: orgId },
+        user: {
+          id: 'orgAdmin',
+          role: 'org_admin',
+          organizationId: orgId,
+          mfaVerified: true,
+        },
       })),
     }));
     vi.doMock('@/lib/db/client', () => ({
@@ -93,7 +111,11 @@ describe('Admin content review API', () => {
 
     const res = await PATCH(req);
     expect(res.status).toBe(200);
-    const filterArg = updateOne.mock.calls[0][0] as Record<string, unknown>;
+    expect(updateOne).toHaveBeenCalled();
+    const firstCall = updateOne.mock.calls[0];
+    expect(Array.isArray(firstCall)).toBe(true);
+    const [filterArg] = firstCall as [Record<string, unknown>];
+
     expect(filterArg.hash).toBe(
       'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
     );
