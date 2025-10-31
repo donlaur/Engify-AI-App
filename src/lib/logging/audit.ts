@@ -60,11 +60,19 @@ export type AuditAction =
   | 'WEBHOOK_ERROR'
   | 'TWILIO_WEBHOOK_SIGNATURE_FAILED'
   | 'TWILIO_WEBHOOK_ERROR'
+  | 'TWILIO_WEBHOOK_RECEIVED'
+  | 'sendgrid_event_received'
+  | 'sendgrid_event_failed'
   | 'SMS_STATUS_UPDATE'
   | 'CALL_STATUS_UPDATE'
   | 'content_review_decision'
   | 'prompt_media_regenerated'
-  | 'prompt_media_viewed';
+  | 'prompt_media_viewed'
+  | 'content_creation_triggered'
+  | 'content_creation_failed'
+  | 'content_creation_error'
+  | 'admin_settings_viewed'
+  | 'admin_settings_access_error';
 
 export type AuditSeverity = 'info' | 'warning' | 'error' | 'critical';
 

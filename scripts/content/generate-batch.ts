@@ -7,8 +7,8 @@
 
 /* eslint-disable no-console */
 
+import { join } from 'node:path';
 import { CreatorAgent } from '../../src/lib/agents/CreatorAgent';
-import { AIProviderFactory } from '../../src/lib/execution/factory/AIProviderFactory';
 import { getEnabledTopics } from '../../src/lib/content/topics';
 
 interface BatchTopic {
@@ -24,8 +24,7 @@ class ContentBatchGenerator {
   private topics: BatchTopic[];
 
   constructor(topics: BatchTopic[]) {
-    const providerFactory = new AIProviderFactory();
-    this.creatorAgent = new CreatorAgent(providerFactory);
+    this.creatorAgent = new CreatorAgent();
     this.topics = topics.sort((a, b) => (b.priority || 0) - (a.priority || 0)); // High priority first
   }
 
@@ -66,9 +65,9 @@ class ContentBatchGenerator {
 
         if (result.success) {
           successful++;
-          totalCost += result.cost || 0;
+          totalCost += result.costUSD || 0;
           totalWords += result.wordCount || 0;
-          console.log(`✅ Success: ${result.wordCount} words, $${result.cost?.toFixed(4)}, ID: ${result.contentId}`);
+          console.log(`✅ Success: ${result.wordCount} words, $${result.costUSD?.toFixed(4)}, ID: ${result.contentId}`);
         } else {
           failed++;
           console.log(`❌ Failed: ${result.error}`);
@@ -80,7 +79,7 @@ class ContentBatchGenerator {
           contentId: result.contentId,
           error: result.error,
           wordCount: result.wordCount,
-          cost: result.cost,
+          costUSD: result.costUSD,
         });
 
         // Small delay between requests to avoid rate limiting

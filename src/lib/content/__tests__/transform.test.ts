@@ -37,6 +37,18 @@ describe('buildStoredContent', () => {
     expect(stored?.hash).toHaveLength(64);
     expect(stored?.reviewStatus).toBe('pending');
     expect(stored?.quality.checks).toHaveLength(0);
+    expect(stored?.metadata).toEqual({});
+  });
+
+  it('preserves metadata when provided', () => {
+    const record: RawContentRecord = {
+      text: 'This is a valid piece of content with enough words to pass metadata test.',
+      metadata: { topic: 'metadata-check', author: 'agent' },
+    };
+
+    const stored = buildStoredContent(record);
+    expect(stored).not.toBeNull();
+    expect(stored?.metadata).toEqual({ topic: 'metadata-check', author: 'agent' });
   });
 
   it('flags content that fails language whitelist', () => {

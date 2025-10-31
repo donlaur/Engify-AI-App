@@ -3,12 +3,15 @@
  * and provenance tracking. Uses allowlisted models and carrier-based execution. Part of Day 5 Phase 2.5.
  */
 
-import { AIProviderFactory } from '../execution/factory/AIProviderFactory';
-import { executeWithProviderHarness } from '../ai/v2/utils/provider-harness';
-import { buildStoredContent } from '../content/transform';
-import { recordProvenance } from '../content/provenance';
-import { Collections, WebContentSchema } from '../db/schema';
-import { connectDB } from '../db/connection';
+import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
+import type { AIRequest } from '@/lib/ai/v2/interfaces/AIProvider';
+import type { OptionalUnlessRequiredId } from 'mongodb';
+import { buildStoredContent } from '@/lib/content/transform';
+import { recordProvenance } from '@/lib/content/provenance';
+import { Collections, type WebContent } from '@/lib/db/schema';
+import { getDb } from '@/lib/db/client';
+import { countWords } from '@/lib/content/quality';
+import { logger } from '@/lib/logging/logger';
 
 export interface ContentCreationRequest {
   topic: string;
@@ -23,168 +26,280 @@ export interface ContentCreationResult {
   contentId?: string;
   wordCount?: number;
   tokensUsed?: number;
-  cost?: number;
+  costUSD?: number;
   error?: string;
 }
 
-export class CreatorAgent {
-  private providerFactory: AIProviderFactory;
-  private budgetLimit: number;
-  private allowedModels: string[];
+type ProviderFactory = Pick<
+  typeof AIProviderFactory,
+  'create' | 'getAvailableProviders'
+>;
 
-  constructor(
-    providerFactory: AIProviderFactory,
-    budgetLimit: number = 0.50, // $0.50 max per creation
-    allowedModels: string[] = ['google/gemini-2.5-flash', 'meta/llama-3-70b-instruct']
-  ) {
-    this.providerFactory = providerFactory;
-    this.budgetLimit = budgetLimit;
-    this.allowedModels = allowedModels;
+const DEFAULT_BUDGET_LIMIT = Number(
+  process.env.CONTENT_CREATION_BUDGET_LIMIT ?? '0.5'
+);
+const DEFAULT_ALLOWED = ['openai-gpt4-turbo', 'openai', 'gemini-flash', 'claude-sonnet'];
+const MIN_WORD_THRESHOLD = Number(process.env.CONTENT_CREATION_MIN_WORDS ?? '100');
+
+function sanitizeAllowedProviders(
+  rawList: string | undefined,
+  available: string[]
+): string[] {
+  const parsed = (rawList || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+
+  const allowlist = parsed.length > 0 ? parsed : DEFAULT_ALLOWED;
+  const set = new Set(available);
+  const filtered = allowlist.filter((provider) => set.has(provider));
+
+  if (filtered.length > 0) {
+    return filtered;
   }
 
-  async createContent(request: ContentCreationRequest): Promise<ContentCreationResult> {
-    const startTime = Date.now();
+  // Fallback to any available provider if env configuration is invalid
+  return available.slice(0, 1);
+}
+
+export class CreatorAgent {
+  private readonly budgetLimit: number;
+  private readonly allowedProviders: string[];
+
+  constructor(
+    private readonly providerFactory: ProviderFactory = AIProviderFactory,
+    budgetLimit?: number,
+    allowedProviders?: string[]
+  ) {
+    const availableProviders = providerFactory.getAvailableProviders();
+
+    this.budgetLimit =
+      budgetLimit ?? (Number.isFinite(DEFAULT_BUDGET_LIMIT) ? DEFAULT_BUDGET_LIMIT : 0.5);
+
+    const configuredAllowed = allowedProviders ?? sanitizeAllowedProviders(
+      process.env.CONTENT_CREATION_ALLOWED_MODELS,
+      availableProviders
+    );
+
+    this.allowedProviders = configuredAllowed.length
+      ? configuredAllowed
+      : sanitizeAllowedProviders(undefined, availableProviders);
+  }
+
+  async createContent(
+    request: ContentCreationRequest
+  ): Promise<ContentCreationResult> {
+    const startedAt = Date.now();
 
     try {
-      // Validate request
-      if (!request.topic?.trim()) {
-        throw new Error('Topic is required');
+      this.validateRequest(request);
+
+      const providerKey = this.selectProviderForCategory(request.category);
+      const provider = this.providerFactory.create(providerKey);
+      const aiRequest = this.buildAIRequest(request);
+
+      if (!provider.validateRequest(aiRequest)) {
+        throw new Error('Content request failed provider validation');
       }
 
-      if (!request.category) {
-        throw new Error('Category is required');
+      const response = await provider.execute(aiRequest);
+      const generated = response.content?.trim() ?? '';
+      const wordCount = countWords(generated);
+
+      if (wordCount < MIN_WORD_THRESHOLD) {
+        throw new Error(
+          `Generated content too short (${wordCount} words). Minimum is ${MIN_WORD_THRESHOLD}.`
+        );
       }
 
-      // Select model (prefer faster/cheaper for content creation)
-      const modelId = this.selectModelForContent(request.category);
-
-      // Generate content prompt
-      const prompt = this.buildContentPrompt(request);
-
-      // Execute with provider harness (includes retries, timeouts, cost tracking)
-      const executionResult = await executeWithProviderHarness(
-        {
-          provider: 'openai', // Use OpenAI as primary for content creation
-          model: modelId,
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.7, // Slightly creative but deterministic
-          maxTokens: Math.min(request.targetWordCount ? request.targetWordCount * 4 : 2000, 4000),
-        },
-        {
-          maxRetries: 2,
-          timeoutMs: 60000, // 1 minute timeout
-          budgetLimit: this.budgetLimit,
-        }
-      );
-
-      if (!executionResult.success || !executionResult.data) {
-        throw new Error(executionResult.error || 'Content generation failed');
+      const totalCost = response.cost?.total ?? 0;
+      if (totalCost > this.budgetLimit) {
+        throw new Error(
+          `Content generation cost ${totalCost.toFixed(4)} exceeds budget limit ${this.budgetLimit.toFixed(4)}.`
+        );
       }
 
-      const generatedContent = executionResult.data.content;
-      const wordCount = generatedContent.split(/\s+/).length;
-
-      // Validate content quality
-      if (wordCount < 100) {
-        throw new Error('Generated content too short, minimum 100 words required');
-      }
-
-      // Build stored content record
       const storedContent = buildStoredContent({
-        url: request.sourceUrl || `agent-generated://${request.topic.replace(/\s+/g, '-').toLowerCase()}`,
-        title: this.generateTitle(request.topic, generatedContent),
-        content: generatedContent,
-        category: request.category,
-        tags: request.tags || [],
-        publishedAt: new Date(),
+        text: generated,
+        title: this.generateTitle(request.topic, generated),
+        description: this.buildDescription(generated),
+        url:
+          request.sourceUrl ??
+          `agent-generated://${request.topic.replace(/\s+/g, '-').toLowerCase()}`,
         source: 'agent-generated',
-        qualityScore: 0.8, // Default quality score for AI-generated content
-        metadata: {
-          topic: request.topic,
-          wordCount,
-          tokensUsed: executionResult.data.usage?.totalTokens,
-          cost: executionResult.cost,
-          model: modelId,
-          generationTimeMs: Date.now() - startTime,
-        }
-      });
-
-      // Persist to database
-      const db = await connectDB();
-      const result = await db.collection<WebContentSchema>(Collections.WEB_CONTENT).insertOne(storedContent);
-
-      // Record provenance
-      await recordProvenance({
-        operation: 'content_created',
-        collection: Collections.WEB_CONTENT,
-        documentId: result.insertedId.toString(),
-        source: 'CreatorAgent',
         metadata: {
           topic: request.topic,
           category: request.category,
+          tags: request.tags ?? [],
+          provider: response.provider,
+          model: response.model,
           wordCount,
-          tokensUsed: executionResult.data.usage?.totalTokens,
-          cost: executionResult.cost,
-          model: modelId,
-          qualityScore: storedContent.qualityScore,
+          tokensUsed: response.usage?.totalTokens ?? 0,
+          costUSD: totalCost,
+          latencyMs: response.latency,
+          targetWordCount: request.targetWordCount ?? null,
+          qualityScore: this.computeQualityScore(
+            wordCount,
+            request.targetWordCount
+          ),
         },
+      });
+
+      if (!storedContent) {
+        throw new Error('Generated content failed persistence quality checks');
+      }
+
+      const db = await getDb();
+      const collection = db.collection<OptionalUnlessRequiredId<WebContent>>(
+        Collections.WEB_CONTENT
+      );
+      const insertResult = await collection.insertOne(
+        storedContent as OptionalUnlessRequiredId<WebContent>
+      );
+
+      await recordProvenance({
+        stage: 'creator_agent.create',
+        source: 'CreatorAgent',
         status: 'success',
-        durationMs: Date.now() - startTime,
+        metadata: {
+          contentId: insertResult.insertedId.toString(),
+          topic: request.topic,
+          category: request.category,
+          provider: response.provider,
+          model: response.model,
+          costUSD: totalCost,
+          wordCount,
+          latencyMs: response.latency,
+          durationMs: Date.now() - startedAt,
+        },
       });
 
       return {
         success: true,
-        contentId: result.insertedId.toString(),
+        contentId: insertResult.insertedId.toString(),
         wordCount,
-        tokensUsed: executionResult.data.usage?.totalTokens,
-        cost: executionResult.cost,
+        tokensUsed: response.usage?.totalTokens ?? 0,
+        costUSD: totalCost,
       };
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const message = error instanceof Error ? error.message : 'Unknown error';
 
-      // Record failed provenance
-      try {
-        await recordProvenance({
-          operation: 'content_creation_failed',
-          collection: Collections.WEB_CONTENT,
-          source: 'CreatorAgent',
-          metadata: {
-            topic: request.topic,
-            category: request.category,
-            error: errorMessage,
-          },
-          status: 'error',
-          durationMs: Date.now() - startTime,
-        });
-      } catch (provenanceError) {
-        // Don't let provenance errors mask the original error
-        console.error('Failed to record provenance for failed creation:', provenanceError);
-      }
+      logger.error('creator-agent.create.error', {
+        error: message,
+        topic: request.topic,
+        category: request.category,
+      });
+
+      await this.safeRecordFailureProvenance(request, message, startedAt);
 
       return {
         success: false,
-        error: errorMessage,
+        error: message,
       };
     }
   }
 
-  private selectModelForContent(category: string): string {
-    // Select model based on content category
-    // Prefer Gemini for technical content, Claude for creative/marketing
-    if (category === 'engineering' || category === 'product') {
-      return 'google/gemini-2.5-flash';
+  async getStats(): Promise<{
+    totalCreated: number;
+    totalWords: number;
+    totalCost: number;
+    averageQuality: number;
+  }> {
+    const db = await getDb();
+    const collection = db.collection<WebContent>(Collections.WEB_CONTENT);
+
+    const documents = await collection
+      .find({ source: 'agent-generated', reviewStatus: { $ne: 'rejected' } })
+      .project({ metadata: 1 })
+      .toArray();
+
+    if (documents.length === 0) {
+      return {
+        totalCreated: 0,
+        totalWords: 0,
+        totalCost: 0,
+        averageQuality: 0,
+      };
     }
-    return this.allowedModels[0]; // Default to first allowed model
+
+    const totals = documents.reduce(
+      (acc, doc) => {
+        const metadata = (doc as WebContent).metadata as Record<string, unknown> | undefined;
+        const wordCount = Number(metadata?.wordCount ?? 0);
+        const costUSD = Number(metadata?.costUSD ?? 0);
+        const qualityScore = Number(metadata?.qualityScore ?? 0);
+
+        acc.totalWords += Number.isFinite(wordCount) ? wordCount : 0;
+        acc.totalCost += Number.isFinite(costUSD) ? costUSD : 0;
+        acc.qualitySum += Number.isFinite(qualityScore) ? qualityScore : 0;
+        return acc;
+      },
+      { totalWords: 0, totalCost: 0, qualitySum: 0 }
+    );
+
+    return {
+      totalCreated: documents.length,
+      totalWords: totals.totalWords,
+      totalCost: totals.totalCost,
+      averageQuality:
+        documents.length > 0 ? totals.qualitySum / documents.length : 0,
+    };
   }
 
-  private buildContentPrompt(request: ContentCreationRequest): string {
-    const targetWords = request.targetWordCount || 500;
-    const category = request.category;
+  private validateRequest(request: ContentCreationRequest): void {
+    if (!request.topic || request.topic.trim().length < 3) {
+      throw new Error('Topic is required and must be at least 3 characters');
+    }
 
+    if (!request.category) {
+      throw new Error('Category is required');
+    }
+
+    if (request.targetWordCount && request.targetWordCount < MIN_WORD_THRESHOLD) {
+      throw new Error(
+        `Target word count must be at least ${MIN_WORD_THRESHOLD} when specified`
+      );
+    }
+  }
+
+  private selectProviderForCategory(category: string): string {
+    const preferenceMap: Record<string, string[]> = {
+      engineering: ['openai-gpt4-turbo', 'openai', 'gemini-flash', 'claude-sonnet'],
+      product: ['claude-sonnet', 'openai', 'gemini-flash'],
+      marketing: ['gemini-flash', 'claude-haiku', 'openai'],
+      sales: ['openai', 'claude-sonnet'],
+      support: ['openai', 'gemini-flash'],
+      design: ['claude-haiku', 'openai'],
+    };
+
+    const preferences = preferenceMap[category] ?? this.allowedProviders;
+    for (const candidate of preferences) {
+      if (this.allowedProviders.includes(candidate)) {
+        return candidate;
+      }
+    }
+
+    return this.allowedProviders[0];
+  }
+
+  private buildAIRequest(request: ContentCreationRequest): AIRequest {
+    const targetWordCount = request.targetWordCount ?? 600;
+    const prompt = this.buildContentPrompt(request, targetWordCount);
+
+    return {
+      prompt,
+      temperature: 0.7,
+      maxTokens: Math.min(targetWordCount * 4, 4000),
+    };
+  }
+
+  private buildContentPrompt(
+    request: ContentCreationRequest,
+    targetWords: number
+  ): string {
     return `Write a comprehensive, well-structured article about: ${request.topic}
 
-Category: ${category}
+Category: ${request.category}
 Target word count: ${targetWords} words
 Style: Professional, informative, and engaging
 
@@ -202,50 +317,72 @@ Please write the complete article below:`;
   }
 
   private generateTitle(topic: string, content: string): string {
-    // Extract a potential title from the first line or generate one
-    const firstLine = content.split('\n')[0].trim();
+    const firstLine = content.split('\n')[0]?.trim() ?? '';
 
-    // If first line looks like a title (short and no punctuation), use it
-    if (firstLine.length < 80 && !firstLine.includes('.') && !firstLine.includes('?')) {
+    if (
+      firstLine.length > 0 &&
+      firstLine.length < 80 &&
+      !firstLine.includes('.') &&
+      !firstLine.includes('?')
+    ) {
       return firstLine;
     }
 
-    // Otherwise, create a title from the topic
     return `Understanding ${topic}`;
   }
 
-  // Utility method to get creation statistics
-  async getStats(): Promise<{
-    totalCreated: number;
-    totalWords: number;
-    totalCost: number;
-    averageQuality: number;
-  }> {
-    const db = await connectDB();
-    const pipeline = [
-      {
-        $match: {
-          source: 'agent-generated',
-          reviewStatus: { $ne: 'rejected' }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalCreated: { $sum: 1 },
-          totalWords: { $sum: '$metadata.wordCount' },
-          totalCost: { $sum: '$metadata.cost' },
-          averageQuality: { $avg: '$qualityScore' }
-        }
-      }
-    ];
+  private buildDescription(content: string): string | null {
+    const sentences = content
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
 
-    const result = await db.collection(Collections.WEB_CONTENT).aggregate(pipeline).toArray();
-
-    if (result.length === 0) {
-      return { totalCreated: 0, totalWords: 0, totalCost: 0, averageQuality: 0 };
+    if (sentences.length === 0) {
+      return null;
     }
 
-    return result[0];
+    const preview = sentences.slice(0, 2).join(' ');
+    return preview.slice(0, 240);
+  }
+
+  private computeQualityScore(
+    wordCount: number,
+    targetWordCount?: number
+  ): number {
+    const target = targetWordCount ?? 600;
+    if (target <= 0) {
+      return 0.8;
+    }
+
+    const ratio = wordCount / target;
+    const score = Math.min(1, Math.max(0.6, ratio));
+    return Number(score.toFixed(2));
+  }
+
+  private async safeRecordFailureProvenance(
+    request: ContentCreationRequest,
+    errorMessage: string,
+    startedAt: number
+  ): Promise<void> {
+    try {
+      await recordProvenance({
+        stage: 'creator_agent.create',
+        source: 'CreatorAgent',
+        status: 'error',
+        metadata: {
+          topic: request.topic,
+          category: request.category,
+          error: errorMessage,
+          durationMs: Date.now() - startedAt,
+        },
+      });
+    } catch (provenanceError) {
+      logger.error('creator-agent.provenance.error', {
+        error:
+          provenanceError instanceof Error
+            ? provenanceError.message
+            : String(provenanceError),
+      });
+    }
   }
 }

@@ -14,6 +14,7 @@ export interface RawContentRecord {
   hash?: string;
   lang?: string;
   readingMinutes?: number;
+  metadata?: Record<string, unknown>;
 }
 
 export interface StoredContentRecord {
@@ -35,6 +36,7 @@ export interface StoredContentRecord {
   reviewStatus: 'pending' | 'approved' | 'rejected';
   createdAt: Date;
   updatedAt: Date;
+  metadata: Record<string, unknown>;
 }
 
 function sha256(input: string): string {
@@ -84,5 +86,6 @@ export function buildStoredContent(
     reviewStatus: 'pending',
     createdAt: now,
     updatedAt: now,
+    metadata: input.metadata ?? {},
   };
 }

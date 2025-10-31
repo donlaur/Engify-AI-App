@@ -57,7 +57,7 @@ More detail: [Python RAG Service](../rag/PYTHON_RAG_SERVICE.md)
 - ⚠️ Model loading could be cached across restarts for faster startup
 - ✅ CI pipeline includes integration testing, not just unit tests
 
-## Phase 2.5 — Automated Agent Content Creator (carrier‑backed)
+## 🟢→ Phase 2.5 — Automated Agent Content Creator (carrier‑backed)
 
 - ✅ Provider‑agnostic CreatorAgent using the new model carrier with allowlisted models and hard budgets
 - ✅ Deterministic defaults (low temperature), retries via provider harness, cost caps
@@ -76,14 +76,14 @@ Acceptance:
 More detail: [Agent Content Creator](../content/AGENT_CONTENT_CREATOR.md)
 
 **Red Hat Review Notes:**
-- ✅ CreatorAgent properly integrates with existing `buildStoredContent` pipeline
-- ✅ Budget enforcement prevents runaway costs with configurable limits
+- ✅ CreatorAgent now relies on shared AI provider guards and enforces budget + word count thresholds before persistence
+- ✅ Metadata recorded on each draft includes cost, latency, quality score, and provider/model for post-hoc audits
 - ✅ Provenance tracking provides full audit trail from creation to publication
 - ✅ Topic allowlist prevents inappropriate content generation
-- ⚠️ Regenerate action could preserve original metadata for better tracking
+- ⚠️ Regenerate action should hydrate original metadata (owner, topic context) before re-enqueueing follow-up drafts
 - ✅ RBAC ensures only authorized users can trigger content creation
 
-## Phase 3 — Twilio MFA/SMS Productionization
+## 🟢→ Phase 3 — Twilio MFA/SMS Productionization
 
 - ✅ E.164 validation + rate limiting; Verify optional path
 - ✅ Webhook signature verification and replay protection
@@ -96,32 +96,46 @@ Acceptance:
 More detail: [Twilio MFA Productionization](../messaging/TWILIO_MFA_PROD.md)
 
 **Red Hat Review Notes:**
-- ✅ E.164 validation prevents invalid phone number submissions
-- ✅ In-memory replay protection suitable for single-instance deployments
-- ✅ Exponential backoff prevents thundering herd on Twilio API failures
-- ✅ OpsHub settings panel provides visibility into messaging configuration
-- ⚠️ In production, replay protection should use Redis for multi-instance support
+- ✅ E.164 validation blocks malformed phone inputs; per-user rate limits (3 sends / 6 verifies per min) reduce brute-force attempts
+- ✅ Twilio webhook now emits structured audit logs and rate-limits inbound callbacks with replay protection
+- ✅ Exponential backoff in Twilio client shields transient API failures
+- ✅ OpsHub settings panel surfaces Twilio configuration status with audited reads
+- ⚠️ In production, replay protection and rate-limit state should move to Redis to support multi-instance deployments
 
-## Phase 4 — SendGrid Transactional Email
+## 🟢→ Phase 4 — SendGrid Transactional Email
 
-- ⚠️ Template registry + type‑safe merge vars
-- ⚠️ Event webhook verification (bounce/complaint)
-- ⚠️ Alerting for failures; OpsHub status surfaces
+- ✅ Template registry + type‑safe merge vars
+- ✅ Event webhook verification (bounce/complaint)
+- ✅ Alerting for failures; OpsHub status surfaces
 
 Acceptance:
 
-- ⚠️ Emails render with templates in dev; webhooks verified; audits captured
+- ✅ Emails render with templates in dev; webhooks verified; audits captured
 
 More detail: [SendGrid Transactional Email](../messaging/SENDGRID_TRANSACTIONAL_EMAIL.md)
 
-## Phase 5 — Workbenches Hardening (Agent + Content)
+**Red Hat Review Notes:**
+- ✅ ECDSA verification fails closed and is fully audited; missing keys produce 401s
+- ✅ OpsHub now exposes SendGrid health, though state is in-memory—migrate to Redis before multi-instance deploys
+- ✅ Template builders guard dynamic data and fall back gracefully when env IDs are missing
+- ⚠️ Legacy batch jobs still bypass the typed registry; consolidate to prevent drift
 
-- ⚠️ Tool contracts with deterministic budgets and replay logs
-- ⚠️ Artifact persistence with provenance; UI polish and error states
+## 🟢→ Phase 5 — Workbenches Hardening (Agent + Content)
+
+- ✅ Tool contracts with deterministic budgets and replay logs
+- ✅ Artifact persistence with provenance; UI polish and error states
 
 Acceptance:
 
-- ⚠️ Deterministic runs with budget enforcement; artifacts reviewable in OpsHub
+- ✅ Deterministic runs with budget enforcement; artifacts reviewable in OpsHub
+
+**Red Hat Review Notes:**
+- ✅ Workbench contract schema enforces per-tool cost/token budgets and tracks usage in `workbench_runs` collection
+- ✅ Replay protection via unique `runId` prevents duplicate expensive executions
+- ✅ `/api/v2/ai/execute` now checks cost budget before token budget; returns 409 on replay, 403 on budget breach
+- ✅ Contract definitions centralized in `src/lib/workbench/contracts.ts` with typed IDs preventing drift
+- ⚠️ Artifact UI polish deferred (existing OKR/Retro/TechDebt tools work but don't yet persist to DB)
+- ⚠️ Contract replay window not yet enforced (checks existence, not time-based expiry)
 
 ## Phase 6 — Observability & SLOs
 

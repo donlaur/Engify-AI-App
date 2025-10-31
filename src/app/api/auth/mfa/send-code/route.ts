@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logging/logger';
 import { mfaService } from '@/lib/services/mfaService';
+import { rateLimit } from '@/lib/middleware/rateLimit';
 import { z } from 'zod';
 
 const sendCodeSchema = z.object({
@@ -27,6 +28,15 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = sendCodeSchema.parse(body);
+
+    const rateKey = `mfa:send:${session.user.id}`;
+    const allowed = rateLimit(rateKey, { windowMs: 60_000, max: 3 });
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please wait before requesting another code.' },
+        { status: 429 }
+      );
+    }
 
     // Send code
     const result = await mfaService.sendMFACode(
