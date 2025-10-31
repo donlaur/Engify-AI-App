@@ -57,7 +57,7 @@ More detail: [Python RAG Service](../rag/PYTHON_RAG_SERVICE.md)
 - ⚠️ Model loading could be cached across restarts for faster startup
 - ✅ CI pipeline includes integration testing, not just unit tests
 
-## Phase 2.5 — Automated Agent Content Creator (carrier‑backed)
+## 🟢→ Phase 2.5 — Automated Agent Content Creator (carrier‑backed)
 
 - ✅ Provider‑agnostic CreatorAgent using the new model carrier with allowlisted models and hard budgets
 - ✅ Deterministic defaults (low temperature), retries via provider harness, cost caps
@@ -76,11 +76,11 @@ Acceptance:
 More detail: [Agent Content Creator](../content/AGENT_CONTENT_CREATOR.md)
 
 **Red Hat Review Notes:**
-- ✅ CreatorAgent properly integrates with existing `buildStoredContent` pipeline
-- ✅ Budget enforcement prevents runaway costs with configurable limits
+- ✅ CreatorAgent now relies on shared AI provider guards and enforces budget + word count thresholds before persistence
+- ✅ Metadata recorded on each draft includes cost, latency, quality score, and provider/model for post-hoc audits
 - ✅ Provenance tracking provides full audit trail from creation to publication
 - ✅ Topic allowlist prevents inappropriate content generation
-- ⚠️ Regenerate action could preserve original metadata for better tracking
+- ⚠️ Regenerate action should hydrate original metadata (owner, topic context) before re-enqueueing follow-up drafts
 - ✅ RBAC ensures only authorized users can trigger content creation
 
 ## Phase 3 — Twilio MFA/SMS Productionization
