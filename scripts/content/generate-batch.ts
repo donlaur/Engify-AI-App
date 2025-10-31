@@ -5,6 +5,8 @@
  * Reads topics from curated list and creates multiple content pieces. Part of Day 5 Phase 2.5.
  */
 
+/* eslint-disable no-console */
+
 import { CreatorAgent } from '../../src/lib/agents/CreatorAgent';
 import { AIProviderFactory } from '../../src/lib/execution/factory/AIProviderFactory';
 import { getEnabledTopics } from '../../src/lib/content/topics';

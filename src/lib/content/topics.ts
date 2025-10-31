@@ -148,3 +148,4 @@ export function isValidTopic(topic: string): boolean {
 export function getTopicByName(topicName: string): ContentTopic | undefined {
   return getEnabledTopics().find(t => t.topic === topicName);
 }
+

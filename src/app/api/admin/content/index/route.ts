@@ -52,3 +52,4 @@ export async function POST(request: NextRequest) {
   // Stub: pretend to enqueue indexing jobs; just echo count for now
   return NextResponse.json({ success: true, enqueued: hashes.length });
 }
+

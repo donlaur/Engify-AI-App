@@ -9,7 +9,6 @@ import { buildStoredContent } from '../content/transform';
 import { recordProvenance } from '../content/provenance';
 import { Collections, WebContentSchema } from '../db/schema';
 import { connectDB } from '../db/connection';
-import { ObjectId } from 'mongodb';
 
 export interface ContentCreationRequest {
   topic: string;

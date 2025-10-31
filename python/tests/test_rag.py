@@ -100,3 +100,4 @@ def test_missing_collection_field(client):
         "query": "test query"
     })
     assert response.status_code == 422  # Validation error
+
