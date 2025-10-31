@@ -36,6 +36,8 @@ Purpose: Single source of truth for environment configuration across local, Verc
 - AI_PROVIDER_RETRY_DELAY_MS: Base backoff delay between retries for AI providers (default 300)
 - IMAGE_GENERATION_ENABLED: 'true' | 'false' (toggle prompt cover/icon generation, default true)
 - REPLICATE_IMAGE_MODEL: Replicate model id used for image generation (default stability-ai/sdxl)
+- ADMIN_SESSION_MAX_AGE_MINUTES: Admin session TTL in minutes (default 60)
+- ADMIN_MFA_REQUIRED: 'true' | 'false' (enforce MFA for super_admin by default)
 
 ## Email (SendGrid)
 

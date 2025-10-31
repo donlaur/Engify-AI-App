@@ -14,6 +14,7 @@ import {
   type Action,
 } from '@/lib/auth/rbac';
 import { type UserRole } from '@/lib/auth/rbac';
+import { isAdminMFAEnforced } from '@/lib/env';
 
 export interface RBACOptions {
   permission?: Permission;
@@ -21,6 +22,7 @@ export interface RBACOptions {
   action?: Action;
   roles?: UserRole[];
   requireAny?: boolean; // If true, user needs ANY of the specified roles/permissions
+  requireMFA?: boolean;
 }
 
 /**
@@ -39,7 +41,22 @@ export function withRBAC(options: RBACOptions = {}) {
         );
       }
 
-      const userRole = (session.user.role as UserRole) || 'user';
+      const user = session.user as
+        | (typeof session.user & { role?: UserRole; mfaVerified?: boolean })
+        | undefined;
+      const userRole = (user?.role as UserRole) || 'user';
+
+      if (
+        options.requireMFA &&
+        isAdminMFAEnforced &&
+        userRole === 'super_admin' &&
+        user?.mfaVerified !== true
+      ) {
+        return NextResponse.json(
+          { error: 'MFA required for admin access' },
+          { status: 403 }
+        );
+      }
 
       // Check role-based access
       if (options.roles && options.roles.length > 0) {
@@ -162,5 +179,6 @@ export const RBACPresets = {
   requireBillingManage: () => withRBAC({ permission: 'billing:manage' }),
 
   // System admin
-  requireSuperAdmin: () => withRBAC({ roles: ['super_admin'] }),
+  requireSuperAdmin: () =>
+    withRBAC({ roles: ['super_admin'], requireMFA: true }),
 };

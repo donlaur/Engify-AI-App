@@ -1,10 +1,20 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 vi.mock('@/lib/middleware/rbac', () => ({
   RBACPresets: {
     requireSuperAdmin: vi.fn(() => vi.fn(async () => null)),
   },
+}));
+
+vi.mock('@/lib/auth', () => ({
+  auth: vi.fn(async () => ({
+    user: { id: 'admin', role: 'super_admin', mfaVerified: true },
+  })),
+}));
+
+vi.mock('@/lib/logging/audit', () => ({
+  auditLog: vi.fn(),
 }));
 
 const mockFindOne = vi.fn();
@@ -28,6 +38,13 @@ vi.mock('@/lib/services/ImageAssetService', () => ({
 describe('Admin prompt image route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.MONGODB_URI = 'test-mongodb-uri';
+    process.env.NEXTAUTH_SECRET = '12345678901234567890123456789012';
+  });
+
+  afterEach(() => {
+    delete process.env.MONGODB_URI;
+    delete process.env.NEXTAUTH_SECRET;
   });
 
   it('returns prompt media on GET', async () => {

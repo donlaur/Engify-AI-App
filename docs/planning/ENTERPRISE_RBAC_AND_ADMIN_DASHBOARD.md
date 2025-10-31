@@ -12,7 +12,7 @@
 - ✅ Priority 0 complete: RBAC presets and org-scoped tests cover all v2 routes.
 - ✅ Priority 2 is production-ready: scheduling, quality gates, review queue, and index flag complete.
 - ✅ Priority 3 hardened: shared guardrails, prompt assets, and secret validation in place.
-- ⚠️ Priority 4 is incomplete: admin actions still need audit hooks, PII scrubbing, and hardened sessions.
+- ✅ Priority 4 reinforced: admin actions audited, PII scrubbing live, MFA enforced on sessions.
 - ⚠️ Priority 5 lacks RBAC matrix enforcement in CI and secrets-policy guards.
 
 ## ✅ Priority 0 — RBAC Completion (Edge and Core)
@@ -65,15 +65,15 @@ Acceptance:
 
 - ✅ Provider calls respect budgets and timeouts; cost/latency recorded
 
-## ⚠️ Priority 4 — Security & Audit
+## ✅ Priority 4 — Security & Audit
 
-- ⚠️ Audit everywhere: admin actions include who/what/when, safe deltas
-- ⚠️ PII minimization: scrub logs; retention config
-- ⚠️ Admin sessions: short TTL and MFA enforced
+- ✅ Audit everywhere: admin actions include who/what/when, safe deltas
+- ✅ PII minimization: scrub logs; retention config
+- ✅ Admin sessions: short TTL and MFA enforced
 
 Acceptance:
 
-- ⚠️ Audit log searchable; key actions captured with sufficient context
+- ✅ Audit log searchable; key actions captured with sufficient context
 
 ## ⚠️ Priority 5 — CI/CD & Policy Gates
 

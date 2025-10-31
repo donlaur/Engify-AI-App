@@ -6,14 +6,22 @@ import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 import { SettingsPanel } from '@/components/admin/SettingsPanel';
+import { isAdminMFAEnforced } from '@/lib/env';
 
-export default async function AdminPage() {
+export default async function OpsHubPage() {
   const session = await auth();
   const role = (session?.user as { role?: string } | null)?.role || 'user';
   const isAdmin =
     role === 'admin' || role === 'super_admin' || role === 'org_admin';
   if (!isAdmin) {
     redirect('/');
+  }
+
+  const mfaVerified = Boolean(
+    (session?.user as { mfaVerified?: boolean } | null)?.mfaVerified
+  );
+  if (isAdminMFAEnforced && role === 'super_admin' && !mfaVerified) {
+    redirect('/login?error=MFA_REQUIRED');
   }
 
   const db = await getDb();
