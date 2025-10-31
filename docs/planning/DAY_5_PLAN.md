@@ -29,48 +29,78 @@ Acceptance:
 
 - ✅ `aws sts get-caller-identity` succeeds across envs; policy docs stored in `docs/aws/`
 
+**Red Hat Review Notes:**
+- ✅ Bootstrap script properly validates prerequisites (AWS CLI, Vercel CLI)
+- ✅ IAM policies follow least privilege (Secrets Manager access only for needed secrets)
+- ✅ .env.example contains all documented vars without real secrets
+- ⚠️ Smoke test could validate actual policy permissions, not just credential existence
+- ✅ Bootstrap avoids hardcoded account IDs (parameterized via env vars)
+
 ## Phase 2 — Python RAG Packaging and Service Integration
 
-- ⚠️ Pyproject/virtualenv automation and Dockerfile for `python/`
-- ⚠️ Health endpoint + structured logging + timeouts/retries
-- ⚠️ Typed TS client and adapters in `src/lib/`
-- ⚠️ CI job for unit tests and type checks; docs and quickstart
+- ✅ Pyproject/virtualenv automation and Dockerfile for `python/`
+- ✅ Health endpoint + structured logging + timeouts/retries
+- ✅ Typed TS client and adapters in `src/lib/`
+- ✅ CI job for unit tests and type checks; docs and quickstart
 
 Acceptance:
 
-- ⚠️ `pnpm test:unit` runs client stubs; service health passes locally and in CI
+- ✅ `pnpm test:unit` runs client stubs; service health passes locally and in CI
 
 More detail: [Python RAG Service](../rag/PYTHON_RAG_SERVICE.md)
 
+**Red Hat Review Notes:**
+- ✅ Lifespan management prevents race conditions during startup
+- ✅ Comprehensive health checks catch configuration issues early
+- ✅ Async embedding generation prevents blocking the event loop
+- ✅ MongoDB timeouts prevent hanging queries in production
+- ⚠️ Model loading could be cached across restarts for faster startup
+- ✅ CI pipeline includes integration testing, not just unit tests
+
 ## Phase 2.5 — Automated Agent Content Creator (carrier‑backed)
 
-- ⚠️ Provider‑agnostic CreatorAgent using the new model carrier with allowlisted models and hard budgets
-- ⚠️ Deterministic defaults (low temperature), retries via provider harness, cost caps
-- ⚠️ Draft persistence via existing `buildStoredContent` → `web_content` with `reviewStatus='pending'` and `source='agent-generated'`
-- ⚠️ Provenance events recorded (`src/lib/content/provenance.ts`)
-- ⚠️ API route to trigger single creation: `src/app/api/agents/creator/route.ts` (RBAC: org_admin/super_admin)
-- ⚠️ Batch script: `scripts/content/generate-batch.ts` to create N drafts from curated topics
-- ⚠️ Topic allowlist: `src/lib/content/topics.ts` (per‑env gating)
-- ⚠️ OpsHub: add filter "Source: generated" and Regenerate action in `src/components/admin/ContentReviewQueue.tsx`
+- ✅ Provider‑agnostic CreatorAgent using the new model carrier with allowlisted models and hard budgets
+- ✅ Deterministic defaults (low temperature), retries via provider harness, cost caps
+- ✅ Draft persistence via existing `buildStoredContent` → `web_content` with `reviewStatus='pending'` and `source='agent-generated'`
+- ✅ Provenance events recorded (`src/lib/content/provenance.ts`)
+- ✅ API route to trigger single creation: `src/app/api/agents/creator/route.ts` (RBAC: org_admin/super_admin)
+- ✅ Batch script: `scripts/content/generate-batch.ts` to create N drafts from curated topics
+- ✅ Topic allowlist: `src/lib/content/topics.ts` (per‑env gating)
+- ✅ OpsHub: add filter "Source: generated" and Regenerate action in `src/components/admin/ContentReviewQueue.tsx`
 
 Acceptance:
 
-- ⚠️ Drafts appear in OpsHub Review Queue with quality checks, pending status, cost/latency metadata
-- ⚠️ Regenerate action works; budgets enforced; models restricted by allowlist
+- ✅ Drafts appear in OpsHub Review Queue with quality checks, pending status, cost/latency metadata
+- ✅ Regenerate action works; budgets enforced; models restricted by allowlist
 
 More detail: [Agent Content Creator](../content/AGENT_CONTENT_CREATOR.md)
 
+**Red Hat Review Notes:**
+- ✅ CreatorAgent properly integrates with existing `buildStoredContent` pipeline
+- ✅ Budget enforcement prevents runaway costs with configurable limits
+- ✅ Provenance tracking provides full audit trail from creation to publication
+- ✅ Topic allowlist prevents inappropriate content generation
+- ⚠️ Regenerate action could preserve original metadata for better tracking
+- ✅ RBAC ensures only authorized users can trigger content creation
+
 ## Phase 3 — Twilio MFA/SMS Productionization
 
-- ⚠️ E.164 validation + rate limiting; Verify optional path
-- ⚠️ Webhook signature verification and replay protection
-- ⚠️ Retry/backoff strategy; OpsHub toggles and audit logs
+- ✅ E.164 validation + rate limiting; Verify optional path
+- ✅ Webhook signature verification and replay protection
+- ✅ Retry/backoff strategy; OpsHub toggles and audit logs
 
 Acceptance:
 
-- ⚠️ End‑to‑end MFA flows pass with and without Verify; webhooks verified
+- ✅ End‑to‑end MFA flows pass with and without Verify; webhooks verified
 
 More detail: [Twilio MFA Productionization](../messaging/TWILIO_MFA_PROD.md)
+
+**Red Hat Review Notes:**
+- ✅ E.164 validation prevents invalid phone number submissions
+- ✅ In-memory replay protection suitable for single-instance deployments
+- ✅ Exponential backoff prevents thundering herd on Twilio API failures
+- ✅ OpsHub settings panel provides visibility into messaging configuration
+- ⚠️ In production, replay protection should use Redis for multi-instance support
 
 ## Phase 4 — SendGrid Transactional Email
 
