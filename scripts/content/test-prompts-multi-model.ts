@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-#!/usr/bin/env tsx
 /**
  * Multi-Model Prompt Testing Script
  * Tests prompts with multiple AI providers and saves results to MongoDB
  * 
  * Usage:
  *   npx tsx scripts/content/test-prompts-multi-model.ts --dry-run  // Test 3 prompts only
- *   npx tsx scripts/content/test-prompts-multi-model.ts --limit 10 // Test 10 prompts
+ *   npx tsx scripts/content/test-prompts-multi-model.ts --limit=10 // Test 10 prompts
  *   npx tsx scripts/content/test-prompts-multi-model.ts --all      // Test all prompts
  */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { config } from 'dotenv';
 config({ path: '.env.local' });
@@ -28,10 +29,12 @@ interface TestResult {
 
 const MODELS_TO_TEST = [
   { provider: 'openai', model: 'gpt-3.5-turbo', apiKey: process.env.OPENAI_API_KEY },
-  { provider: 'google', model: 'gemini-flash', apiKey: process.env.GOOGLE_API_KEY },
+  // Google API temporarily disabled - model name or API key issue
+  // { provider: 'google', model: 'gemini-1.5-flash-latest', apiKey: process.env.GOOGLE_API_KEY },
 ];
 
 async function testPromptWithModel(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   prompt: any,
   modelConfig: typeof MODELS_TO_TEST[0]
 ): Promise<TestResult | null> {
@@ -64,8 +67,8 @@ async function testPromptWithModel(
       });
 
       const latency = Date.now() - startTime;
-      const content = response.choices[0]?.message?.content || '';
-      const tokens = response.usage?.total_tokens || 0;
+      const content = response.choices[0]?.message?.content ?? '';
+      const tokens = response.usage?.total_tokens ?? 0;
       const cost = (tokens / 1000) * 0.002; // GPT-3.5 pricing: $0.002/1K tokens
 
       // Simple quality score based on response length and structure
@@ -86,7 +89,7 @@ async function testPromptWithModel(
     } else if (modelConfig.provider === 'google') {
       const { GoogleGenerativeAI } = await import('@google/generative-ai');
       const genAI = new GoogleGenerativeAI(modelConfig.apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
 
       const result = await model.generateContent(prompt.content || prompt.prompt || '');
       const latency = Date.now() - startTime;
@@ -145,8 +148,9 @@ async function main() {
   await client.connect();
   const db = client.db('engify');
 
-  // Get prompts to test
-  const promptsQuery = db.collection('prompts').find({});
+  // Get prompts to test (using collection name directly - script context)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const promptsQuery = db.collection('prompts').find({}) as any;
   const allPrompts = await (limit || dryRun ? promptsQuery.limit(limit) : promptsQuery).toArray();
 
   console.log(`Testing ${allPrompts.length} prompts with ${MODELS_TO_TEST.length} models...\n`);
@@ -183,10 +187,11 @@ async function main() {
     console.log('🔬 DRY RUN COMPLETE - Results NOT saved to database');
     console.log('   Run without --dry-run to save results\n');
   } else {
-    // Save results to MongoDB
+    // Save results to MongoDB (using collection name directly - script context)
     if (results.length > 0) {
-      const resultsCollection = db.collection('prompt_test_results');
-      await resultsCollection.insertMany(results as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const resultsCollection = db.collection('prompt_test_results') as any;
+      await resultsCollection.insertMany(results);
       console.log(`✅ Saved ${results.length} test results to MongoDB\n`);
     }
   }
