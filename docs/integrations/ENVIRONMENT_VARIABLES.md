@@ -34,6 +34,8 @@ Purpose: Single source of truth for environment configuration across local, Verc
 - AI_PROVIDER_TIMEOUT_MS: Default timeout applied to AI provider calls (milliseconds, default 45000)
 - AI_PROVIDER_MAX_RETRIES: Default retry attempts for AI provider calls (default 1)
 - AI_PROVIDER_RETRY_DELAY_MS: Base backoff delay between retries for AI providers (default 300)
+- IMAGE_GENERATION_ENABLED: 'true' | 'false' (toggle prompt cover/icon generation, default true)
+- REPLICATE_IMAGE_MODEL: Replicate model id used for image generation (default stability-ai/sdxl)
 
 ## Email (SendGrid)
 
