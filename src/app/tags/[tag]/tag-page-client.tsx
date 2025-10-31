@@ -1,32 +1,21 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import type { Prompt } from '@/data/seed-prompts';
 
-export default function TagPage() {
-  const params = useParams();
+interface TagPageClientProps {
+  tag: string;
+  displayTag: string;
+  taggedPrompts: Prompt[];
+}
+
+export default function TagPageClient({ tag, displayTag, taggedPrompts }: TagPageClientProps) {
   const router = useRouter();
-  const tag = params.tag as string;
-  
-  // Decode URL-encoded tag
-  const decodedTag = decodeURIComponent(tag);
-
-  // Get all prompts with this tag
-  const allPrompts = getSeedPromptsWithTimestamps();
-  const taggedPrompts = allPrompts.filter((p) => 
-    p.tags && p.tags.some((t) => t.toLowerCase() === decodedTag.toLowerCase())
-  );
-
-  // Format tag for display (convert kebab-case to Title Case)
-  const displayTag = decodedTag
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
 
   return (
     <MainLayout>
@@ -104,7 +93,7 @@ export default function TagPage() {
                           {prompt.tags.slice(0, 3).map((t) => (
                             <Badge 
                               key={t} 
-                              variant={t.toLowerCase() === decodedTag.toLowerCase() ? "default" : "outline"} 
+                              variant={t.toLowerCase() === tag.toLowerCase() ? "default" : "outline"} 
                               className="text-xs"
                             >
                               {t}
@@ -138,7 +127,7 @@ export default function TagPage() {
                   new Set(
                     taggedPrompts
                       .flatMap((p) => p.tags || [])
-                      .filter((t) => t.toLowerCase() !== decodedTag.toLowerCase())
+                      .filter((t) => t.toLowerCase() !== tag.toLowerCase())
                   )
                 )
                   .slice(0, 15)
@@ -161,4 +150,3 @@ export default function TagPage() {
     </MainLayout>
   );
 }
-
