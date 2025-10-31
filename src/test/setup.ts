@@ -31,6 +31,10 @@ vi.mock('next/navigation', () => ({
 // Mock environment variables for testing
 // Note: These are test-only values, not real secrets
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
+process.env.MONGODB_URI = process.env.MONGODB_URI || 'test-mongodb-uri';
+process.env.NEXTAUTH_SECRET =
+  process.env.NEXTAUTH_SECRET ||
+  'test-nextauth-secret-1234567890123456789012345';
 // Avoid hardcoded DB URIs in repo; tests should mock DB access
 // Do not set MONGODB_URI in repo; mock DB modules instead in tests
 // Avoid setting secrets in repo; tests should inject via env if required
