@@ -56,9 +56,9 @@ Acceptance:
 
 ## ⚠️ Priority 3 — Provider Hardening
 
-- ⚠️ Replicate: allowlist models, timeouts/retries, cost logging
+- ✅ Replicate: allowlist models, timeouts/retries, cost logging
 - ⚠️ Image utility: generate covers/icons; store URLs + metadata on prompts/modules
-- ⚠️ Existing providers: unify timeouts/circuit breakers, usage accounting, masked errors
+- ✅ Existing providers: unify timeouts/circuit breakers, usage accounting, masked errors
 - ⚠️ Secrets: env-only; startup validator checks required prod keys
 
 Acceptance:
