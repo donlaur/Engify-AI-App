@@ -66,6 +66,7 @@ Purpose: Single source of truth for environment configuration across local, Verc
 ## AWS (Secrets/Infra)
 
 - AWS_REGION: AWS region (e.g., us-east-1)
+- AWS_ACCOUNT_ID: AWS account identifier (used by deployment scripts)
 - AWS_ACCESS_KEY_ID: Access key (local/dev only; prefer IAM roles in AWS)
 - AWS_SECRET_ACCESS_KEY: Secret key (local/dev only)
 
@@ -78,6 +79,8 @@ Purpose: Single source of truth for environment configuration across local, Verc
 
 - RAG_API_URL: Python RAG service base URL (e.g., http://localhost:8000)
 - AGENTS_SANDBOX_ENABLED: 'true' | 'false' (enable Agent Sandbox server routes)
+- RAG_INDEX_ENABLED: 'true' | 'false' (enable admin content indexing stub)
+- CONTENT_PROVENANCE_ENABLED: 'true' | 'false' (persist ingestion scheduler provenance to MongoDB)
 
 ---
 
