@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-#!/usr/bin/env tsx
 /**
  * Multi-Model Prompt Testing Script
  * Tests prompts with multiple AI providers and saves results to MongoDB
  * 
  * Usage:
  *   npx tsx scripts/content/test-prompts-multi-model.ts --dry-run  // Test 3 prompts only
- *   npx tsx scripts/content/test-prompts-multi-model.ts --limit 10 // Test 10 prompts
+ *   npx tsx scripts/content/test-prompts-multi-model.ts --limit=10 // Test 10 prompts
  *   npx tsx scripts/content/test-prompts-multi-model.ts --all      // Test all prompts
  */
 
