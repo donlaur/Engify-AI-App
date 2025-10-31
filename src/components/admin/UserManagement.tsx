@@ -69,12 +69,14 @@ export function UserManagement({ initialUsers = [] }: UserManagementProps) {
 
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roleFilter, planFilter]);
 
   useEffect(() => {
     if (showStats) {
       fetchStats();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showStats]);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
