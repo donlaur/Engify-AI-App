@@ -10,7 +10,7 @@
 
 - ✅ Priority 1 is production-ready: `/opshub` shipped with Users, Content, Audit, and Settings panels plus RBAC tests.
 - ✅ Priority 0 complete: RBAC presets and org-scoped tests cover all v2 routes.
-- ⚠️ Priority 2 is partially implemented: quality gates exist, but indexing and full review flow need polish.
+- ✅ Priority 2 is production-ready: scheduling, quality gates, review queue, and index flag complete.
 - ⚠️ Priority 3 requires provider allowlists, shared resilience, and image utility work.
 - ⚠️ Priority 4 is incomplete: admin actions still need audit hooks, PII scrubbing, and hardened sessions.
 - ⚠️ Priority 5 lacks RBAC matrix enforcement in CI and secrets-policy guards.
@@ -43,16 +43,16 @@ Acceptance:
 
 - ✅ Admin-only access verified by tests; all actions logged to audit
 
-## ⚠️ Priority 2 — Content Pipeline Productionization
+## ✅ Priority 2 — Content Pipeline Productionization
 
-- ⚠️ Scheduling: rate-limited jobs for RSS/sitemap; provenance retained
-- ⚠️ Quality gates: min-words, dedupe by hash, language and source whitelists
-- ⚠️ Admin review queue: approve/reject before publish/index
-- ⚠️ RAG readiness: index job stub behind feature flag; keep UI hidden until production-ready
+- ✅ Scheduling: rate-limited jobs for RSS/sitemap; provenance retained
+- ✅ Quality gates: min-words, dedupe by hash, language and source whitelists
+- ✅ Admin review queue: approve/reject before publish/index
+- ✅ RAG readiness: index job stub behind feature flag; keep UI hidden until production-ready
 
 Acceptance:
 
-- ⚠️ Content moves from pending → approved with admin action; unsafe content blocked by gates
+- ✅ Content moves from pending → approved with admin action; unsafe content blocked by gates
 
 ## ⚠️ Priority 3 — Provider Hardening
 
