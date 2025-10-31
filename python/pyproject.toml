@@ -1,0 +1,16 @@
+# AI Summary: Packaging metadata for Python RAG service (local dev/testing). Uses requirements.txt for deps.
+
+[project]
+name = "engify-rag"
+version = "0.1.0"
+description = "Engify RAG service"
+requires-python = ">=3.10"
+readme = "README.md"
+
+[tool.setuptools]
+py-modules = []
+
+[tool.black]
+line-length = 100
+
+
