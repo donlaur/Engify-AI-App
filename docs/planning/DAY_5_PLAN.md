@@ -176,16 +176,24 @@ More detail: [CI Policy Gates](../ci/CI_POLICY_GATES.md)
 - ⚠️ Matrix testing across multiple Node versions not yet implemented (currently single version)
 - ⚠️ Bundle size check requires build step; consider adding to pre-deploy workflow
 
-## Phase 8 — Security Tightening
+## 🟢→ Phase 8 — Security Tightening
 
-- ⚠️ Key rotation scripts and envelope encryption helpers
-- ⚠️ Stricter Zod schemas + PII redaction rules
+- ✅ Key rotation scripts and envelope encryption helpers
+- ✅ Stricter Zod schemas + PII redaction rules
 
 Acceptance:
 
-- ⚠️ Rotation runbook validated; logs contain no sensitive data
+- ✅ Rotation runbook validated; logs contain no sensitive data
 
 More detail: [Key Rotation & Envelope Encryption](../security/KEY_ROTATION_AND_ENVELOPE_ENCRYPTION.md)
+
+**Red Hat Review Notes:**
+- ✅ Key rotation (`src/lib/security/keyRotation.ts`) creates new keys and revokes old with full audit trail
+- ✅ PII redaction utilities (`src/lib/security/piiRedaction.ts`) automatically mask emails, phones, SSNs, credit cards, API keys before logging
+- ✅ All redaction functions tested with edge cases (short emails, arrays, nested objects)
+- ✅ Rotation functions require `userId` for proper isolation and audit
+- ⚠️ Key rotation doesn't yet re-encrypt with new master key (preserves existing encrypted value)
+- ⚠️ Envelope encryption helpers deferred; current encryption uses single-layer AES-256-GCM
 
 ## Phase 9 — Content Pipeline Tuning
 

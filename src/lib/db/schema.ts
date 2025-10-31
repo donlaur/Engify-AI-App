@@ -355,6 +355,7 @@ export const Collections = {
   WEB_CONTENT: 'web_content',
   CONTENT_PROVENANCE: 'content_provenance',
   WORKBENCH_RUNS: 'workbench_runs',
+  API_KEYS: 'api_keys',
 } as const;
 
 /**
