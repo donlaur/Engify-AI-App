@@ -267,6 +267,21 @@ export type WebContent = z.infer<typeof WebContentSchema>;
  * Collection Names
  * Centralized to prevent typos and ensure consistency
  */
+
+/**
+ * Content Provenance Schema (ingestion scheduler logs)
+ */
+export const ContentProvenanceSchema = z.object({
+  _id: ObjectIdSchema,
+  stage: z.string(),
+  source: z.string(),
+  status: z.enum(['queued', 'success', 'error']),
+  metadata: z.record(z.unknown()).default({}),
+  createdAt: z.date(),
+});
+
+export type ContentProvenance = z.infer<typeof ContentProvenanceSchema>;
+
 export const Collections = {
   USERS: 'users',
   ORGANIZATIONS: 'organizations',
@@ -277,6 +292,7 @@ export const Collections = {
   USER_PROGRESS: 'user_progress',
   AUDIT_LOGS: 'audit_logs',
   WEB_CONTENT: 'web_content',
+  CONTENT_PROVENANCE: 'content_provenance',
 } as const;
 
 /**
@@ -325,6 +341,11 @@ export const Indexes = {
   web_content: [
     { key: { hash: 1 }, unique: true },
     { key: { canonicalUrl: 1 }, sparse: true },
+    { key: { createdAt: -1 } },
+  ],
+  content_provenance: [
+    { key: { stage: 1, createdAt: -1 } },
+    { key: { source: 1, createdAt: -1 } },
     { key: { createdAt: -1 } },
   ],
 } as const;

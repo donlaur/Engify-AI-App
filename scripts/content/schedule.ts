@@ -1,5 +1,7 @@
 #!/usr/bin/env tsx
 
+/* eslint-disable no-console */
+
 /*
   Content Scheduler
   - Rate-limited orchestration for RSS and Sitemap jobs
@@ -12,12 +14,36 @@
 import { readFileSync } from 'node:fs';
 import { setTimeout as delay } from 'node:timers/promises';
 import { spawn } from 'node:child_process';
+import {
+  recordProvenance,
+  type ProvenanceStatus,
+} from '@/lib/content/provenance';
 
 interface Args {
   feeds: string[];
   sitemaps: string[];
   delayMs: number;
   concurrency: number;
+}
+
+const provenanceEnabled = (
+  process.env.CONTENT_PROVENANCE_ENABLED ?? ''
+).toLowerCase();
+
+const provenanceActive = ['1', 'true', 'yes'].includes(provenanceEnabled);
+
+async function emitProvenance(
+  stage: string,
+  source: string,
+  status: ProvenanceStatus,
+  metadata: Record<string, unknown> = {}
+) {
+  if (!provenanceActive) return;
+  try {
+    await recordProvenance({ stage, source, status, metadata });
+  } catch (error) {
+    console.error('Failed to record content provenance', error);
+  }
 }
 
 function parseArgs(): Args {
@@ -78,33 +104,70 @@ async function main() {
   await withRateLimit(
     args.feeds,
     async (feed, idx) => {
+      const meta = { idx };
       process.stdout.write(
         JSON.stringify({
           stage: 'rss',
+          status: 'queued',
           idx,
           feed,
           ts: new Date().toISOString(),
         }) + '\n'
       );
-      await run('pnpm', ['run', 'content:rss', feed], env);
+      await emitProvenance('rss', feed, 'queued', meta);
+      const exitCode = await run('pnpm', ['run', 'content:rss', feed], env);
+      const status: ProvenanceStatus = exitCode === 0 ? 'success' : 'error';
+      await emitProvenance('rss', feed, status, { ...meta, exitCode });
+      if (exitCode !== 0) {
+        console.error(
+          JSON.stringify({
+            stage: 'rss',
+            status: 'error',
+            idx,
+            feed,
+            exitCode,
+            ts: new Date().toISOString(),
+          })
+        );
+      }
     },
     args.delayMs,
     args.concurrency
   );
 
-  // Process sitemaps
   await withRateLimit(
     args.sitemaps,
     async (sitemap, idx) => {
+      const meta = { idx };
       process.stdout.write(
         JSON.stringify({
           stage: 'sitemap',
+          status: 'queued',
           idx,
           sitemap,
           ts: new Date().toISOString(),
         }) + '\n'
       );
-      await run('pnpm', ['run', 'content:sitemap', sitemap], env);
+      await emitProvenance('sitemap', sitemap, 'queued', meta);
+      const exitCode = await run(
+        'pnpm',
+        ['run', 'content:sitemap', sitemap],
+        env
+      );
+      const status: ProvenanceStatus = exitCode === 0 ? 'success' : 'error';
+      await emitProvenance('sitemap', sitemap, status, { ...meta, exitCode });
+      if (exitCode !== 0) {
+        console.error(
+          JSON.stringify({
+            stage: 'sitemap',
+            status: 'error',
+            idx,
+            sitemap,
+            exitCode,
+            ts: new Date().toISOString(),
+          })
+        );
+      }
     },
     args.delayMs,
     args.concurrency
