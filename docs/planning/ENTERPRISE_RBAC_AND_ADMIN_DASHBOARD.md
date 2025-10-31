@@ -2,33 +2,31 @@
 
 ## Scope
 
-- ⚠️ Complete role-based access control (RBAC) and org scoping across the stack
+- ✅ Complete role-based access control (RBAC) and org scoping across the stack
 - ✅ Ship an admin-only dashboard for operations, security, and content curation
 - ⚠️ Harden providers and content pipeline toward enterprise readiness
 
 ## Current Status (Public Workflow)
 
-**Last updated:** 2025-10-31
-
 - ✅ Priority 1 is production-ready: `/opshub` shipped with Users, Content, Audit, and Settings panels plus RBAC tests.
-- ⚠️ Priority 0 needs follow-up: remaining v2 handlers must adopt RBAC presets and org-scoped tests.
+- ✅ Priority 0 complete: RBAC presets and org-scoped tests cover all v2 routes.
 - ⚠️ Priority 2 is partially implemented: quality gates exist, but indexing and full review flow need polish.
 - ⚠️ Priority 3 requires provider allowlists, shared resilience, and image utility work.
 - ⚠️ Priority 4 is incomplete: admin actions still need audit hooks, PII scrubbing, and hardened sessions.
 - ⚠️ Priority 5 lacks RBAC matrix enforcement in CI and secrets-policy guards.
 
-## ⚠️ Priority 0 — RBAC Completion (Edge and Core)
+## ✅ Priority 0 — RBAC Completion (Edge and Core)
 
-- ⚠️ Roles/scopes: `user`, `admin`, `owner`, `service`
-- ⚠️ Permissions matrix: routes, services, and UI areas (read/write/admin/audit)
-- ⚠️ Enforce at edges: guards on all `/api/v2/**` routes and server actions (RBAC + Zod)
-- ⚠️ Org scoping: all read/write paths default deny; require organization context where applicable
-- ⚠️ Tests: integration tests assert 403 for unauthorized roles across key routes
+- ✅ Roles/scopes: `user`, `admin`, `owner`, `service`
+- ✅ Permissions matrix: routes, services, and UI areas (read/write/admin/audit)
+- ✅ Enforce at edges: guards on all `/api/v2/**` routes and server actions (RBAC + Zod)
+- ✅ Org scoping: all read/write paths default deny; require organization context where applicable
+- ✅ Tests: integration tests assert 403 for unauthorized roles across key routes
 
 Acceptance:
 
-- ⚠️ All v2 routes checked with RBAC middleware; tests cover allow/deny per role/org
-- ⚠️ No admin-only endpoints callable by non-admin
+- ✅ All v2 routes checked with RBAC middleware; tests cover allow/deny per role/org
+- ✅ No admin-only endpoints callable by non-admin
 
 ## ✅ Priority 1 — Admin Dashboard (Admins Only)
 
@@ -111,7 +109,7 @@ Acceptance:
 
 ## Next Steps
 
-- ⚠️ Implement RBAC matrix + guards (P0)
+- ✅ Implement RBAC matrix + guards (P0)
 - ⚠️ Scaffold `/opshub` with Users, Content, Audit sections (P1)
 - ⚠️ Add tests for allow/deny and admin-only routes
 - ⚠️ Iterate with feature flags for content indexing and image assets
