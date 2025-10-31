@@ -1,5 +1,16 @@
+import { randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logging/logger';
+import {
+  getWorkbenchToolContract,
+  type ContractToolId,
+} from '@/lib/workbench/contracts';
+import {
+  startWorkbenchRun,
+  completeWorkbenchRun,
+} from '@/lib/services/workbenchRuns';
 
 // Use Groq (free tier) if OpenAI key not available
 const apiKey = process.env.OPENAI_API_KEY || process.env.GROQ_API_KEY;
@@ -12,6 +23,8 @@ const openai = new OpenAI({
   apiKey,
   baseURL,
 });
+
+const MULTI_AGENT_TOOL_ID: ContractToolId = 'multi-agent';
 
 interface MultiAgentRequest {
   idea: string;
@@ -174,10 +187,21 @@ Make it feel like a real, high-stakes team debate where smart people disagree re
 }
 
 export async function POST(request: NextRequest) {
+  const contract = getWorkbenchToolContract(MULTI_AGENT_TOOL_ID);
+  if (!contract) {
+    logger.error('multi-agent.contract.missing');
+    return NextResponse.json(
+      { error: 'Workbench contract not configured for multi-agent tool' },
+      { status: 500 }
+    );
+  }
+
+  let runId: string | null = null;
+
   try {
     // Check if API key is configured
     if (!apiKey) {
-      console.error('No API key found in environment variables');
+      logger.error('multi-agent.api-key.missing');
       return NextResponse.json(
         {
           error:
@@ -187,14 +211,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const session = await auth();
+    const userId = session?.user?.id ?? null;
+
     const body: MultiAgentRequest = await request.json();
     const { idea, roles, mode = 'sequential' } = body;
-
-    console.log('Multi-agent request:', {
-      idea: idea.substring(0, 50) + '...',
-      roles,
-      mode,
-    });
 
     // Validation
     if (!idea || idea.trim().length === 0) {
@@ -217,6 +238,35 @@ export async function POST(request: NextRequest) {
     // Build the multi-agent prompt
     const prompt = buildMultiAgentPrompt(idea, roles, mode);
 
+    const startResult = await startWorkbenchRun({
+      toolId: MULTI_AGENT_TOOL_ID,
+      userId,
+      budgetCents: contract.maxCostCents,
+      contractVersion: contract.version,
+      runId: randomUUID(),
+      prompt,
+      metadata: {
+        roles,
+        mode,
+        userId,
+      },
+    });
+
+    if (startResult.status === 'replay') {
+      await completeWorkbenchRun({
+        runId: startResult.runId,
+        status: 'replay',
+        error: 'Replay detected for multi-agent workbench run',
+      });
+
+      return NextResponse.json(
+        { error: 'Replay detected', runId: startResult.runId },
+        { status: 409 }
+      );
+    }
+
+    runId = startResult.runId;
+
     // Call OpenAI or Groq
     const model = baseURL ? 'llama-3.1-70b-versatile' : 'gpt-4';
 
@@ -234,17 +284,104 @@ export async function POST(request: NextRequest) {
         },
       ],
       temperature: 0.8, // Higher for more creative/varied responses
-      max_tokens: 2000,
+      max_tokens: Math.min(contract.maxTotalTokens, 2000),
     });
 
     const simulation =
       completion.choices[0]?.message?.content ||
       'Unable to generate simulation.';
 
-    console.log(
-      'Simulation generated successfully. Length:',
-      simulation.length
-    );
+    const usage = completion.usage ?? {
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0,
+    };
+
+    const totalTokens =
+      usage.total_tokens ??
+      ((usage.prompt_tokens ?? 0) + (usage.completion_tokens ?? 0));
+
+    let costCents = 0;
+    if (typeof completion.usage?.total_tokens === 'number') {
+      costCents = Math.round(
+        completion.usage.total_tokens * contract.costPerTokenCents
+      );
+    } else {
+      costCents = Math.round(totalTokens * contract.costPerTokenCents);
+    }
+
+    if (totalTokens > contract.maxTotalTokens && runId) {
+      await completeWorkbenchRun({
+        runId,
+        status: 'budget_exceeded',
+        totalTokens,
+        inputTokens: usage.prompt_tokens ?? null,
+        outputTokens: usage.completion_tokens ?? null,
+        provider: baseURL ? 'groq' : 'openai',
+        model,
+        costCents,
+        error: `Token usage ${totalTokens} exceeds contract maximum ${contract.maxTotalTokens}`,
+      });
+
+      return NextResponse.json(
+        {
+          error: 'Workbench execution exceeded token budget',
+          runId,
+          maxTokens: contract.maxTotalTokens,
+          actualTokens: totalTokens,
+        },
+        { status: 403 }
+      );
+    }
+
+    if (costCents > contract.maxCostCents && runId) {
+      await completeWorkbenchRun({
+        runId,
+        status: 'budget_exceeded',
+        totalTokens,
+        inputTokens: usage.prompt_tokens ?? null,
+        outputTokens: usage.completion_tokens ?? null,
+        provider: baseURL ? 'groq' : 'openai',
+        model,
+        costCents,
+        error: `Cost ${costCents} exceeds contract budget ${contract.maxCostCents}`,
+      });
+
+      return NextResponse.json(
+        {
+          error: 'Workbench execution exceeded cost budget',
+          runId,
+          maxCostCents: contract.maxCostCents,
+          actualCostCents: costCents,
+        },
+        { status: 403 }
+      );
+    }
+
+    if (runId) {
+      await completeWorkbenchRun({
+        runId,
+        status: 'success',
+        costCents,
+        provider: baseURL ? 'groq' : 'openai',
+        model,
+        inputTokens: usage.prompt_tokens ?? null,
+        outputTokens: usage.completion_tokens ?? null,
+        totalTokens,
+        metadata: {
+          roles,
+          mode,
+          latency: completion.created ? Date.now() - completion.created * 1000 : null,
+        },
+      });
+    }
+
+    logger.info('multi-agent.simulation.success', {
+      runId,
+      model,
+      totalTokens,
+      costCents,
+    });
 
     return NextResponse.json({
       success: true,
@@ -255,20 +392,26 @@ export async function POST(request: NextRequest) {
         mode,
         model,
         timestamp: new Date().toISOString(),
+        runId,
+        totalTokens,
       },
     });
   } catch (error) {
-    console.error('Multi-agent simulation error:', error);
-    console.error(
-      'Error details:',
-      error instanceof Error ? error.message : 'Unknown error'
-    );
+    logger.apiError('/api/multi-agent', error, { method: 'POST' });
 
     if (error instanceof Error && error.message.includes('API key')) {
       return NextResponse.json(
         { error: 'OpenAI API key not configured' },
         { status: 500 }
       );
+    }
+
+    if (runId) {
+      await completeWorkbenchRun({
+        runId,
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
 
     return NextResponse.json(

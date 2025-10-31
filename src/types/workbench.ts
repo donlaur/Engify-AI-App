@@ -22,6 +22,7 @@ export interface WorkbenchTool {
   requiresBackend: boolean;
   comingSoon?: boolean;
   features: string[];
+  contractId?: string;
 }
 
 export const WORKBENCH_TOOLS: Record<WorkbenchToolId, WorkbenchTool> = {
@@ -48,6 +49,7 @@ export const WORKBENCH_TOOLS: Record<WorkbenchToolId, WorkbenchTool> = {
     category: 'optimization',
     requiresBackend: true,
     comingSoon: true,
+    contractId: 'contract/prompt-optimizer@1',
     features: [
       'AI-powered optimization',
       'Pattern application',
@@ -64,6 +66,7 @@ export const WORKBENCH_TOOLS: Record<WorkbenchToolId, WorkbenchTool> = {
     category: 'execution',
     requiresBackend: true,
     comingSoon: true,
+    contractId: 'contract/model-comparison@1',
     features: [
       'Parallel execution',
       'Side-by-side comparison',
@@ -80,6 +83,7 @@ export const WORKBENCH_TOOLS: Record<WorkbenchToolId, WorkbenchTool> = {
     category: 'execution',
     requiresBackend: true,
     comingSoon: true,
+    contractId: 'contract/knowledge-navigator@1',
     features: [
       'Document upload (PDF, TXT, MD)',
       'Semantic search',
@@ -96,6 +100,7 @@ export const WORKBENCH_TOOLS: Record<WorkbenchToolId, WorkbenchTool> = {
     category: 'testing',
     requiresBackend: true,
     comingSoon: true,
+    contractId: 'contract/prompt-tester@1',
     features: [
       'Batch testing',
       'A-F grading system',

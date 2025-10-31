@@ -120,14 +120,22 @@ More detail: [SendGrid Transactional Email](../messaging/SENDGRID_TRANSACTIONAL_
 - ✅ Template builders guard dynamic data and fall back gracefully when env IDs are missing
 - ⚠️ Legacy batch jobs still bypass the typed registry; consolidate to prevent drift
 
-## Phase 5 — Workbenches Hardening (Agent + Content)
+## 🟢→ Phase 5 — Workbenches Hardening (Agent + Content)
 
-- ⚠️ Tool contracts with deterministic budgets and replay logs
-- ⚠️ Artifact persistence with provenance; UI polish and error states
+- ✅ Tool contracts with deterministic budgets and replay logs (`src/lib/workbench/contracts.ts`, persisted in `workbench_runs`)
+- ✅ Artifact persistence with provenance; UI polish and error states (run IDs returned to UI, failure responses surfaced with 4xx bodies)
+- ✅ Multi-agent simulations and AI execute flows enforce budgets before returning artifacts
 
 Acceptance:
 
-- ⚠️ Deterministic runs with budget enforcement; artifacts reviewable in OpsHub
+- ✅ Deterministic runs with budget enforcement; artifacts logged for OpsHub review (see [Workbench Contracts](../development/WORKBENCH_CONTRACTS.md))
+
+**Red Hat Review Notes:**
+- ✅ Replay detection short-circuits duplicate run submissions and emits explicit 409 responses
+- ✅ Budget caps apply to both cost and token envelopes with audit metadata for provider/model/timing
+- ✅ Mongo-backed `workbench_runs` ledger captures provenance for OpsHub triage and SRE review
+- ⚠️ Contract catalog still lives in code; migrate to admin-managed config and Redis caching before multi-instance scale
+- ⚠️ UI currently displays API errors; add dedicated OpsHub panel to browse run history before GA launch
 
 ## Phase 6 — Observability & SLOs
 
