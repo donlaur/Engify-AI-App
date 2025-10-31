@@ -5,6 +5,7 @@ import { Collections } from '@/lib/db/schema';
 import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
+import { SettingsPanel } from '@/components/admin/SettingsPanel';
 
 export default async function AdminPage() {
   const session = await auth();
@@ -140,6 +141,10 @@ export default async function AdminPage() {
 
         <section className="rounded-lg border bg-white p-4">
           <AuditLogViewer />
+        </section>
+
+        <section className="rounded-lg border bg-white p-4">
+          <SettingsPanel />
         </section>
       </div>
     </div>

@@ -64,19 +64,21 @@ export function AuditLogViewer({ initialLogs = [] }: AuditLogViewerProps) {
       }
       const data = await res.json();
       if (data.success) {
-        let filteredLogs = data.data || [];
-        // Client-side search filter
+        const fetchedLogs = data.data || [];
+        // Only apply client-side search if search is active, otherwise show all fetched logs
         if (filters.search) {
           const searchLower = filters.search.toLowerCase();
-          filteredLogs = filteredLogs.filter(
+          const filteredLogs = fetchedLogs.filter(
             (log: AuditLog) =>
               log.action.toLowerCase().includes(searchLower) ||
               log.eventType.toLowerCase().includes(searchLower) ||
               log.userEmail?.toLowerCase().includes(searchLower) ||
               log.userId?.toLowerCase().includes(searchLower)
           );
+          setLogs(filteredLogs);
+        } else {
+          setLogs(fetchedLogs);
         }
-        setLogs(filteredLogs);
         setPagination(data.pagination || pagination);
       }
     } catch (err) {
@@ -89,13 +91,38 @@ export function AuditLogViewer({ initialLogs = [] }: AuditLogViewerProps) {
   };
 
   useEffect(() => {
-    fetchLogs(pagination.page);
+    // Reset to page 1 when filters change
+    setPagination((prev) => ({ ...prev, page: 1 }));
+    fetchLogs(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     filters.eventCategory,
     filters.success,
     filters.startDate,
     filters.endDate,
   ]);
+
+  // Handle search separately - debounce client-side filtering
+  useEffect(() => {
+    if (filters.search) {
+      // Client-side search on already fetched logs
+      // This is fine for paginated results
+      const searchLower = filters.search.toLowerCase();
+      setLogs((currentLogs) =>
+        currentLogs.filter(
+          (log) =>
+            log.action.toLowerCase().includes(searchLower) ||
+            log.eventType.toLowerCase().includes(searchLower) ||
+            log.userEmail?.toLowerCase().includes(searchLower) ||
+            log.userId?.toLowerCase().includes(searchLower)
+        )
+      );
+    } else {
+      // If search is cleared, refetch
+      fetchLogs(pagination.page);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.search]);
 
   const handleExport = () => {
     const csv = [
