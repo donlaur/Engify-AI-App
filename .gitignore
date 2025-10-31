@@ -74,3 +74,6 @@ next-env.d.ts
 *.pkg
 *.dmg
 *.app
+
+# Never commit password reset scripts
+**/reset-password*
