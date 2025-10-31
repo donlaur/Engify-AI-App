@@ -92,26 +92,91 @@ async function handleRecategorize(userId: string, limit?: number) {
 }
 
 async function handleTestPrompts(userId: string, limit?: number) {
-  // This would trigger async job - for now return status
   const db = await getDb();
-  const count = await db.collection('prompts').countDocuments();
-  const toTest = Math.min(limit || 10, count);
+  const prompts = await db.collection('prompts').find({}).limit(limit || 3).toArray();
+  
+  const results = [];
+  let totalCost = 0;
+
+  // Test with GPT-3.5-turbo
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: 'OPENAI_API_KEY not configured' },
+      { status: 500 }
+    );
+  }
+
+  const OpenAI = (await import('openai')).default;
+  const openai = new OpenAI({ apiKey });
+
+  for (const prompt of prompts) {
+    try {
+      const startTime = Date.now();
+      const response = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful assistant. Respond concisely and professionally.',
+          },
+          {
+            role: 'user',
+            content: (prompt as any).content || (prompt as any).prompt || '',
+          },
+        ],
+        max_tokens: 300,
+        temperature: 0.7,
+      });
+
+      const latency = Date.now() - startTime;
+      const content = response.choices[0]?.message?.content || '';
+      const tokens = response.usage?.total_tokens || 0;
+      const cost = (tokens / 1000) * 0.002;
+
+      const result = {
+        promptId: (prompt as any)._id.toString(),
+        promptTitle: (prompt as any).title,
+        model: 'gpt-3.5-turbo',
+        provider: 'openai',
+        response: content.substring(0, 200), // Truncate for API response
+        qualityScore: content.length > 100 && content.length < 1000 ? 4 : 3,
+        tokensUsed: tokens,
+        costUSD: cost,
+        latencyMs: latency,
+        testedAt: new Date(),
+      };
+
+      results.push(result);
+      totalCost += cost;
+
+      // Save to database
+      await db.collection('prompt_test_results').insertOne(result);
+    } catch (error) {
+      logger.error('prompt-test-error', {
+        promptId: (prompt as any)._id,
+        error: error instanceof Error ? error.message : 'Unknown',
+      });
+    }
+  }
 
   await auditLog({
     action: 'admin_action',
     userId,
     resource: 'prompts',
     details: {
-      action: 'test-prompts-triggered',
-      promptCount: toTest,
+      action: 'test-prompts-completed',
+      promptsTested: results.length,
+      totalCost,
     },
   });
 
   return NextResponse.json({
     success: true,
-    message: `Prompt testing job queued for ${toTest} prompts`,
-    estimatedCost: `$${(toTest * 0.002).toFixed(2)}`,
-    note: 'Results will be saved to prompt_test_results collection',
+    promptsTested: results.length,
+    results,
+    totalCost: totalCost.toFixed(4),
+    message: `Tested ${results.length} prompts, saved to database`,
   });
 }
 
