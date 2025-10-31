@@ -8,7 +8,7 @@ set -e
 
 FUNCTION_NAME="engify-rag"
 REGION="us-east-2"
-ACCOUNT_ID="825765419928"
+ACCOUNT_ID="${AWS_ACCOUNT_ID}"
 ROLE_NAME="engify-lambda-execution-role"
 
 echo "🚀 Deploying Engify RAG service to AWS Lambda..."
