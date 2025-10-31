@@ -4,6 +4,8 @@ import { RBACPresets } from '@/lib/middleware/rbac';
 import { getDb } from '@/lib/db/client';
 import { Collections } from '@/lib/db/schema';
 import { ImageAssetService } from '@/lib/services/ImageAssetService';
+import { auditLog } from '@/lib/logging/audit';
+import { auth } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
@@ -20,6 +22,8 @@ export async function GET(
     );
   }
 
+  const session = await auth();
+
   const db = await getDb();
   const prompt = await db
     .collection(Collections.PROMPT_TEMPLATES as string)
@@ -31,6 +35,16 @@ export async function GET(
       { status: 404 }
     );
   }
+
+  await auditLog({
+    action: 'admin_settings_viewed',
+    userId: session?.user?.id,
+    resource: `/api/admin/prompts/${id}/image`,
+    details: {
+      promptId: id,
+      method: 'GET',
+    },
+  });
 
   return NextResponse.json({ success: true, media: prompt.media ?? null });
 }
@@ -49,6 +63,8 @@ export async function POST(
       { status: 400 }
     );
   }
+
+  const session = await auth();
 
   const db = await getDb();
   const prompt = await db
@@ -75,6 +91,18 @@ export async function POST(
     promptId: id,
     title,
     description: descriptionCandidate,
+  });
+
+  await auditLog({
+    action: 'prompt_media_regenerated',
+    userId: session?.user?.id,
+    resource: `/api/admin/prompts/${id}/image`,
+    details: {
+      promptId: id,
+      title,
+      descriptionProvided: Boolean(descriptionCandidate),
+      source: media.source,
+    },
   });
 
   return NextResponse.json({ success: true, media });

@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db/client';
 import { Collections } from '@/lib/db/schema';
 import { auth } from '@/lib/auth';
 import { ObjectId } from 'mongodb';
+import { auditLog } from '@/lib/logging/audit';
 
 const UpdateSchema = z.object({
   hash: z.string().min(32),
@@ -72,6 +73,20 @@ export async function PATCH(request: NextRequest) {
   const res = await db
     .collection(Collections.WEB_CONTENT)
     .updateOne(filter, { $set: { reviewStatus } });
+
+  await auditLog({
+    action: 'content_review_decision',
+    userId: session?.user?.id,
+    resource: `/api/admin/content/review/${hash}`,
+    details: {
+      hash,
+      action,
+      reviewStatus,
+      matched: res.matchedCount,
+      modified: res.modifiedCount,
+    },
+  });
+
   return NextResponse.json({
     success: true,
     matched: res.matchedCount,

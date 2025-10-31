@@ -44,6 +44,8 @@ const envSchema = z.object({
   AI_PROVIDER_MAX_RETRIES: z.string().optional(),
   AI_PROVIDER_RETRY_DELAY_MS: z.string().optional(),
   IMAGE_GENERATION_ENABLED: z.string().optional(),
+  ADMIN_SESSION_MAX_AGE_MINUTES: z.string().optional(),
+  ADMIN_MFA_REQUIRED: z.string().optional(),
 
   // Python Services (Optional for development)
   PYTHON_API_URL: z.string().url().optional(),
@@ -165,6 +167,17 @@ export const hasAIProviders = Boolean(
     env.GROQ_API_KEY ||
     env.REPLICATE_API_TOKEN
 );
+
+export const adminSessionMaxAgeSeconds = (() => {
+  const minutes = Number(env.ADMIN_SESSION_MAX_AGE_MINUTES ?? '60');
+  if (Number.isNaN(minutes) || minutes <= 0) {
+    return 60 * 60;
+  }
+  return minutes * 60;
+})();
+
+export const isAdminMFAEnforced =
+  (env.ADMIN_MFA_REQUIRED ?? 'true').toLowerCase() !== 'false';
 
 /**
  * Check if OAuth is configured

@@ -11,6 +11,7 @@
  */
 
 import winston from 'winston';
+import { sanitizeMeta } from '@/lib/logging/sanitizer';
 
 // Determine if file system logging is allowed (avoid in Vercel serverless)
 const canWriteFiles =
@@ -74,21 +75,21 @@ export const logger = {
    * Log error with context
    */
   error: (message: string, meta?: Record<string, unknown>) => {
-    appLogger.error(message, meta || {});
+    appLogger.error(message, sanitizeMeta(meta));
   },
 
   /**
    * Log warning with context
    */
   warn: (message: string, meta?: Record<string, unknown>) => {
-    appLogger.warn(message, meta || {});
+    appLogger.warn(message, sanitizeMeta(meta));
   },
 
   /**
    * Log info with context
    */
   info: (message: string, meta?: Record<string, unknown>) => {
-    appLogger.info(message, meta || {});
+    appLogger.info(message, sanitizeMeta(meta));
   },
 
   /**
@@ -96,7 +97,7 @@ export const logger = {
    */
   debug: (message: string, meta?: Record<string, unknown>) => {
     if (process.env.NODE_ENV !== 'production') {
-      appLogger.debug(message, meta || {});
+      appLogger.debug(message, sanitizeMeta(meta));
     }
   },
 
@@ -116,12 +117,15 @@ export const logger = {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
 
-    appLogger.error('API route error', {
-      route,
-      error: errorMessage,
-      stack: errorStack,
-      ...context,
-    });
+    appLogger.error(
+      'API route error',
+      sanitizeMeta({
+        route,
+        error: errorMessage,
+        stack: errorStack,
+        ...context,
+      })
+    );
   },
 
   /**
@@ -137,10 +141,13 @@ export const logger = {
       [key: string]: unknown;
     }
   ) => {
-    appLogger.info('API request', {
-      route,
-      ...context,
-    });
+    appLogger.info(
+      'API request',
+      sanitizeMeta({
+        route,
+        ...context,
+      })
+    );
   },
 };
 
