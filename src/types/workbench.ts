@@ -11,7 +11,23 @@ export type WorkbenchToolId =
   | 'prompt-tester'
   | 'okr-workbench'
   | 'retrospective-diagnostician'
-  | 'tech-debt-strategist';
+  | 'tech-debt-strategist'
+  | 'rice-calculator'
+  | 'pr-description-generator'
+  | 'strategic-alignment-quadrant'
+  | 'incident-response-planner'
+  | 'hiring-decision-framework'
+  | 'architecture-decision-records'
+  | 'performance-review-assistant'
+  | 'team-health-check'
+  | 'sprint-planning-assistant'
+  | 'cost-benefit-analyzer'
+  | 'risk-assessment-framework'
+  | 'stakeholder-communication-planner'
+  | 'darci-decision-framework'
+  | 'raci-responsibility-matrix'
+  | 'value-effort-matrix'
+  | 'build-buy-decision';
 
 export interface WorkbenchTool {
   id: WorkbenchToolId;
@@ -152,6 +168,262 @@ export const WORKBENCH_TOOLS: Record<WorkbenchToolId, WorkbenchTool> = {
       'Risk assessment',
       'Stakeholder communication',
       'Implementation planning',
+    ],
+  },
+  'rice-calculator': {
+    id: 'rice-calculator',
+    name: 'RICE Scoring Calculator',
+    description: 'Calculate RICE scores (Reach, Impact, Confidence, Effort) for prioritization',
+    icon: 'calculator',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'RICE formula calculator',
+      'Priority scoring',
+      'Comparison matrix',
+      'Export results',
+      'Historical tracking',
+    ],
+  },
+  'pr-description-generator': {
+    id: 'pr-description-generator',
+    name: 'PR Description Generator',
+    description: 'Create comprehensive PR descriptions with context and testing notes',
+    icon: 'gitCompare',
+    category: 'optimization',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'PR template generation',
+      'Change description',
+      'Testing checklist',
+      'Review guidance',
+      'Copy-ready format',
+    ],
+  },
+  'strategic-alignment-quadrant': {
+    id: 'strategic-alignment-quadrant',
+    name: 'Strategic Alignment Quadrant',
+    description: 'Categorize initiatives into quadrants for strategic decision-making',
+    icon: 'compass',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Initiative categorization',
+      'Quadrant visualization',
+      'Strategic recommendations',
+      'Priority matrix',
+      'Export summary',
+    ],
+  },
+  'incident-response-planner': {
+    id: 'incident-response-planner',
+    name: 'Incident Response Planner',
+    description: 'Create structured incident response plans and runbooks',
+    icon: 'alertTriangle',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Incident template generation',
+      'Response procedures',
+      'Stakeholder communication',
+      'Post-mortem structure',
+      'Prevention planning',
+    ],
+  },
+  'hiring-decision-framework': {
+    id: 'hiring-decision-framework',
+    name: 'Hiring Decision Framework',
+    description: 'Structured framework for hiring decisions (juniors vs seniors, team fit)',
+    icon: 'users',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Decision matrix',
+      'Cost-benefit analysis',
+      'Team impact assessment',
+      'ROI calculations',
+      'Recommendation summary',
+    ],
+  },
+  'architecture-decision-records': {
+    id: 'architecture-decision-records',
+    name: 'ADR Generator',
+    description: 'Generate Architecture Decision Records with context and alternatives',
+    icon: 'file',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'ADR template generation',
+      'Context documentation',
+      'Alternatives analysis',
+      'Decision rationale',
+      'Markdown export',
+    ],
+  },
+  'performance-review-assistant': {
+    id: 'performance-review-assistant',
+    name: 'Performance Review Assistant',
+    description: 'Create comprehensive performance reviews with examples and feedback',
+    icon: 'star',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Review template generation',
+      'Example collection',
+      'Feedback structuring',
+      'Growth plan creation',
+      'Export formats',
+    ],
+  },
+  'team-health-check': {
+    id: 'team-health-check',
+    name: 'Team Health Check',
+    description: 'Assess team health and identify improvement areas',
+    icon: 'heart',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Health assessment questionnaire',
+      'Score calculation',
+      'Improvement recommendations',
+      'Tracking over time',
+      'Action plan generation',
+    ],
+  },
+  'sprint-planning-assistant': {
+    id: 'sprint-planning-assistant',
+    name: 'Sprint Planning Assistant',
+    description: 'Facilitate sprint planning with capacity and priority guidance',
+    icon: 'calendar',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Capacity planning',
+      'Story point estimation',
+      'Priority recommendations',
+      'Sprint goal formulation',
+      'Risk identification',
+    ],
+  },
+  'cost-benefit-analyzer': {
+    id: 'cost-benefit-analyzer',
+    name: 'Cost-Benefit Analyzer',
+    description: 'Analyze costs and benefits of technical decisions',
+    icon: 'dollarSign',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Cost calculation',
+      'Benefit quantification',
+      'ROI analysis',
+      'Risk assessment',
+      'Decision framework',
+    ],
+  },
+  'risk-assessment-framework': {
+    id: 'risk-assessment-framework',
+    name: 'Risk Assessment Framework',
+    description: 'Identify and assess risks for projects and initiatives',
+    icon: 'shield',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Risk identification',
+      'Impact assessment',
+      'Probability analysis',
+      'Mitigation planning',
+      'Risk register export',
+    ],
+  },
+  'stakeholder-communication-planner': {
+    id: 'stakeholder-communication-planner',
+    name: 'Stakeholder Communication Planner',
+    description: 'Plan effective communication strategies for stakeholders',
+    icon: 'messageSquare',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Stakeholder mapping',
+      'Message templates',
+      'Communication timing',
+      'Channel selection',
+      'Feedback collection',
+    ],
+  },
+  'darci-decision-framework': {
+    id: 'darci-decision-framework',
+    name: 'DARCI Decision Framework',
+    description: 'Define decision roles: Driver, Approver, Recommender, Consulted, Informed',
+    icon: 'users',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Role assignment matrix',
+      'Decision ownership clarity',
+      'Stakeholder mapping',
+      'Communication plan',
+      'Template export',
+    ],
+  },
+  'raci-responsibility-matrix': {
+    id: 'raci-responsibility-matrix',
+    name: 'RACI Responsibility Matrix',
+    description: 'Clarify roles: Responsible, Accountable, Consulted, Informed',
+    icon: 'layers',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Responsibility assignment',
+      'Accountability clarity',
+      'Role conflict detection',
+      'Matrix visualization',
+      'Export to spreadsheet',
+    ],
+  },
+  'value-effort-matrix': {
+    id: 'value-effort-matrix',
+    name: 'Value vs. Effort Matrix',
+    description: 'Categorize initiatives into Quick Wins, Big Bets, Fill-ins, Time Sinks',
+    icon: 'target',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Quadrant categorization',
+      'Visual matrix',
+      'Priority recommendations',
+      'Comparison view',
+      'Export summary',
+    ],
+  },
+  'build-buy-decision': {
+    id: 'build-buy-decision',
+    name: 'Build vs. Buy Decision Framework',
+    description: 'Decide whether to build custom or buy/integrate existing solutions',
+    icon: 'gitCompare',
+    category: 'strategy',
+    requiresBackend: false,
+    comingSoon: true,
+    features: [
+      'Requirements assessment',
+      'TCO calculation',
+      'Risk analysis',
+      'Recommendation engine',
+      'Decision rationale',
     ],
   },
 };
