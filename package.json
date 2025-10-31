@@ -74,6 +74,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "policy:routes": "tsx scripts/policy/check-route-guards.ts",
+    "ci:flaky": "tsx scripts/testing/flaky-test-detector.ts",
+    "ci:bundle": "tsx scripts/ci/check-bundle-size.ts",
     "content:rss": "tsx scripts/content/rss-fetch.ts",
     "content:sitemap": "tsx scripts/content/sitemap-crawl.ts",
     "content:extract": "tsx scripts/content/html-extract.ts",

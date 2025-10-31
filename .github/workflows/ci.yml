@@ -47,3 +47,11 @@ jobs:
 
       - name: Policy guard check
         run: pnpm policy:routes
+
+      - name: Unit tests
+        run: pnpm test:unit
+
+      - name: Flaky test detection
+        if: github.event_name == 'pull_request'
+        run: FLAKY_TEST_RUNS=3 pnpm ci:flaky
+        continue-on-error: true

@@ -156,16 +156,25 @@ More detail: [Observability & SLOs](../observability/OBSERVABILITY_SLOS.md)
 - ⚠️ In-memory metric storage suitable for single-instance; migrate to Redis or Prometheus for production multi-instance
 - ⚠️ Slow-query tracing and feature flag telemetry deferred to future iteration
 
-## Phase 7 — CI/CD Expansions
+## 🟢→ Phase 7 — CI/CD Expansions
 
-- ⚠️ Matrix tests, flaky test detection, route‑guard gate, secret scans
-- ⚠️ Bundle size budgets and PR templates/checklists
+- ✅ Matrix tests, flaky test detection, route‑guard gate, secret scans
+- ✅ Bundle size budgets and PR templates/checklists
 
 Acceptance:
 
-- ⚠️ CI blocks on missing RBAC guards or failing security checks
+- ✅ CI blocks on missing RBAC guards or failing security checks
 
 More detail: [CI Policy Gates](../ci/CI_POLICY_GATES.md)
+
+**Red Hat Review Notes:**
+- ✅ Route guard policy (`pnpm policy:routes`) blocks commits with unprotected admin/v2 routes
+- ✅ Security scanner checks for hardcoded secrets, eval(), and data isolation violations before each commit
+- ✅ Flaky test detector (`pnpm ci:flaky`) runs suite 3-5 times on PRs and flags inconsistent tests
+- ✅ Bundle size checker (`pnpm ci:bundle`) enforces per-route and total KB budgets
+- ✅ CI workflow now runs unit tests, policy gates, and security scans on every push
+- ⚠️ Matrix testing across multiple Node versions not yet implemented (currently single version)
+- ⚠️ Bundle size check requires build step; consider adding to pre-deploy workflow
 
 ## Phase 8 — Security Tightening
 
