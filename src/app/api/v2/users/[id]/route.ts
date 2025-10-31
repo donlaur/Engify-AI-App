@@ -307,12 +307,18 @@ export async function DELETE(
  * Update user's last login timestamp
  */
 export async function PATCH(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // RBAC: users:write permission (restricted to self or admin)
+  const rbacCheck = await RBACPresets.requireUserWrite()(request);
+  if (rbacCheck) return rbacCheck;
+
   let id: string | undefined;
+  let session: Awaited<ReturnType<typeof auth>> | null = null;
+
   try {
-    const userService = getUserService();
+    session = await auth();
     id = (await params).id;
 
     if (!id) {
@@ -325,7 +331,22 @@ export async function PATCH(
       );
     }
 
-    // Update last login
+    // Users can only update their own last login unless elevated
+    const role = (session?.user as { role?: string } | null)?.role;
+    const sessionUserId = session?.user?.id;
+    const isElevated = role === 'admin' || role === 'super_admin';
+
+    if (!isElevated && sessionUserId !== id) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Forbidden - You can only update your own last login',
+        },
+        { status: 403 }
+      );
+    }
+
+    const userService = getUserService();
     await userService.updateLastLogin(id);
 
     return NextResponse.json({
@@ -333,10 +354,9 @@ export async function PATCH(
       message: 'Last login updated successfully',
     });
   } catch (error) {
-    const session = await auth();
     logger.apiError(`/api/v2/users/${id}/update-last-login`, error, {
       userId: session?.user?.id,
-      method: 'POST',
+      method: 'PATCH',
     });
     return NextResponse.json(
       {
