@@ -83,17 +83,10 @@ export function Header({ user }: HeaderProps) {
             </Link>
           )}
           <Link
-            href="/workbench/multi-agent"
+            href="/workbench"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
             Workbench
-          </Link>
-          <Link
-            href="/workbench/gallery"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
-            title="Work in progress"
-          >
-            Gallery (WIP)
           </Link>
           {/* Removed RAG Chat (mock) and Contact (email not ready) from header */}
           <Link

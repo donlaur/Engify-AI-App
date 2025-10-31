@@ -67,6 +67,9 @@ export default function WorkbenchPage() {
             Interactive tools for prompt engineering, team management, and
             strategic planning
           </p>
+          <p className="mt-2 text-sm text-muted-foreground/70">
+            Some tools are in active development and may be partially functional
+          </p>
         </div>
 
         {/* Tool Selector */}
