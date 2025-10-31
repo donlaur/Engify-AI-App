@@ -74,7 +74,7 @@ export class GetUserByEmailQueryHandler
 
   async handle(query: GetUserByEmailQuery): Promise<IQueryResult<User>> {
     try {
-      const user = await this.userService.findByEmail(query.email);
+      const user = await this.userService.findUserByEmail(query.email);
 
       if (!user) {
         return {
