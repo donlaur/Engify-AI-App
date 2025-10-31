@@ -17,17 +17,17 @@ Status Legend: ✅ done · ⚠️ not yet finished
 
 ## Phase 1 — AWS CLI, IAM, and Environment
 
-- ⚠️ AWS CLI profiles for dev/stage/prod with SSO or keys (least privilege)
-- ⚠️ IAM roles/policies for Lambda, SendGrid/Twilio webhooks, and RDS/Atlas access
-- ⚠️ `.env.example` and docs for per‑env variables (no secrets committed)
-- ⚠️ Deployment runbooks and bootstrap scripts (Vercel + AWS)
-- ⚠️ Smoke tests for credentials and network egress
+- ✅ AWS CLI profiles for dev/stage/prod with SSO or keys (least privilege)
+- ✅ IAM roles/policies for Lambda, SendGrid/Twilio webhooks, and RDS/Atlas access
+- ✅ `.env.example` and docs for per‑env variables (no secrets committed)
+- ✅ Deployment runbooks and bootstrap scripts (Vercel + AWS)
+- ✅ Smoke tests for credentials and network egress
 
 More detail: [AWS IAM & CLI Setup](../infra/AWS_IAM_SETUP.md)
 
 Acceptance:
 
-- ⚠️ `aws sts get-caller-identity` succeeds across envs; policy docs stored in `docs/aws/`
+- ✅ `aws sts get-caller-identity` succeeds across envs; policy docs stored in `docs/aws/`
 
 ## Phase 2 — Python RAG Packaging and Service Integration
 
