@@ -105,7 +105,7 @@ export function Header({ user }: HeaderProps) {
           </Link>
           {process.env.NEXT_PUBLIC_SHOW_ADMIN_LINK === 'true' && (
             <Link
-              href="/admin"
+              href="/opshub"
               className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200"
               title="Admin"
             >
