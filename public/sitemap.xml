@@ -3,7 +3,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://engify.ai/</loc>
-    <lastmod>2025-10-27</lastmod>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -87,5 +87,20 @@
     <lastmod>2025-10-27</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  </url>
+  
+  <!-- New Pages from Day 5 -->
+  <url>
+    <loc>https://engify.ai/opshub</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  
+  <url>
+    <loc>https://engify.ai/workbench/multi-agent</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>
