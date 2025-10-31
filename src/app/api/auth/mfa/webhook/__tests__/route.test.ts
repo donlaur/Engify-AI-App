@@ -22,13 +22,18 @@ vi.mock('@/lib/logging/logger', () => ({
   },
 }));
 
+vi.mock('@/lib/services/twilioWebhookState', () => ({
+  hasProcessedMessage: vi.fn(() => false),
+  resetTwilioWebhookState: vi.fn(() => undefined),
+}));
+
 describe('Twilio webhook', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     const { rateLimit } = await import('@/lib/middleware/rateLimit');
     vi.mocked(rateLimit).mockReturnValue(true);
-    const { __test__ } = await import('../route');
-    __test__.clearProcessedMessages();
+    const { resetTwilioWebhookState } = await import('@/lib/services/twilioWebhookState');
+    resetTwilioWebhookState();
   });
 
   it('returns 200 when signature verifies and processes valid webhook', async () => {
@@ -66,6 +71,7 @@ describe('Twilio webhook', () => {
   it('returns 429 when rate limited', async () => {
     const { rateLimit } = await import('@/lib/middleware/rateLimit');
     vi.mocked(rateLimit).mockReturnValueOnce(false);
+    const { hasProcessedMessage } = await import('@/lib/services/twilioWebhookState');
     const { POST } = await import('../route');
     const req = new NextRequest('http://localhost:3000/api/auth/mfa/webhook', {
       method: 'POST',
@@ -74,9 +80,15 @@ describe('Twilio webhook', () => {
     });
     const res = await POST(req);
     expect(res.status).toBe(429);
+    expect(hasProcessedMessage).not.toHaveBeenCalled();
   });
 
   it('prevents replay attacks', async () => {
+    const { hasProcessedMessage } = await import('@/lib/services/twilioWebhookState');
+    vi.mocked(hasProcessedMessage)
+      .mockImplementationOnce(() => false)
+      .mockImplementationOnce(() => true);
+
     const { POST } = await import('../route');
 
     // First request should succeed

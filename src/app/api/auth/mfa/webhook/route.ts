@@ -6,28 +6,7 @@ import { verifyTwilioSignature } from '@/lib/messaging/twilio';
 import { rateLimit } from '@/lib/middleware/rateLimit';
 import { auditLog } from '@/lib/logging/audit';
 import { logger } from '@/lib/logging/logger';
-
-// In-memory store for processed message IDs (use Redis in production)
-// This prevents replay attacks by tracking recently processed messages
-const processedMessages = new Set<string>();
-const MAX_PROCESSED_CACHE = 1000; // Keep last 1000 messages
-
-function isReplay(messageId: string): boolean {
-  if (processedMessages.has(messageId)) {
-    return true;
-  }
-
-  // Add to processed set
-  processedMessages.add(messageId);
-
-  // Maintain cache size
-  if (processedMessages.size > MAX_PROCESSED_CACHE) {
-    const first = processedMessages.values().next().value;
-    processedMessages.delete(first);
-  }
-
-  return false;
-}
+import { hasProcessedMessage } from '@/lib/services/twilioWebhookState';
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') ?? 'local';
@@ -59,7 +38,7 @@ export async function POST(request: NextRequest) {
     const messageId = params.get('MessageSid');
 
     // Replay protection
-    if (messageId && isReplay(messageId)) {
+    if (messageId && hasProcessedMessage(messageId)) {
       return NextResponse.json(
         { error: 'Message already processed' },
         { status: 200 }
@@ -104,6 +83,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export const __test__ = {
-  clearProcessedMessages: () => processedMessages.clear(),
-};

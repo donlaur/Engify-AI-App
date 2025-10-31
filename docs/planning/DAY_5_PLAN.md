@@ -102,17 +102,23 @@ More detail: [Twilio MFA Productionization](../messaging/TWILIO_MFA_PROD.md)
 - ✅ OpsHub settings panel surfaces Twilio configuration status with audited reads
 - ⚠️ In production, replay protection and rate-limit state should move to Redis to support multi-instance deployments
 
-## Phase 4 — SendGrid Transactional Email
+## 🟢→ Phase 4 — SendGrid Transactional Email
 
-- ⚠️ Template registry + type‑safe merge vars
-- ⚠️ Event webhook verification (bounce/complaint)
-- ⚠️ Alerting for failures; OpsHub status surfaces
+- ✅ Template registry + type‑safe merge vars
+- ✅ Event webhook verification (bounce/complaint)
+- ✅ Alerting for failures; OpsHub status surfaces
 
 Acceptance:
 
-- ⚠️ Emails render with templates in dev; webhooks verified; audits captured
+- ✅ Emails render with templates in dev; webhooks verified; audits captured
 
 More detail: [SendGrid Transactional Email](../messaging/SENDGRID_TRANSACTIONAL_EMAIL.md)
+
+**Red Hat Review Notes:**
+- ✅ ECDSA verification fails closed and is fully audited; missing keys produce 401s
+- ✅ OpsHub now exposes SendGrid health, though state is in-memory—migrate to Redis before multi-instance deploys
+- ✅ Template builders guard dynamic data and fall back gracefully when env IDs are missing
+- ⚠️ Legacy batch jobs still bypass the typed registry; consolidate to prevent drift
 
 ## Phase 5 — Workbenches Hardening (Agent + Content)
 

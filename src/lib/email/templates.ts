@@ -11,19 +11,24 @@ export const TemplateId = {
 } as const;
 
 const WelcomeSchema = z.object({
-  name: z.string().min(1),
-  product: z.string().default('Engify AI'),
+  userName: z.string().min(1),
+  userEmail: z.string().email(),
+  loginUrl: z.string().url(),
+  libraryUrl: z.string().url(),
+  workbenchUrl: z.string().url(),
+  supportUrl: z.string().url(),
 });
 
 const PasswordResetSchema = z.object({
-  resetUrl: z.string().url(),
   userName: z.string().min(1),
+  resetUrl: z.string().url(),
   expirationMinutes: z.number().int().positive(),
+  supportUrl: z.string().url(),
 });
 
 const EmailVerificationSchema = z.object({
-  verificationUrl: z.string().url(),
   userName: z.string().min(1),
+  verificationUrl: z.string().url(),
   expirationMinutes: z.number().int().positive(),
 });
 
@@ -42,6 +47,10 @@ export type WelcomeVars = z.infer<typeof WelcomeSchema>;
 export type PasswordResetVars = z.infer<typeof PasswordResetSchema>;
 export type EmailVerificationVars = z.infer<typeof EmailVerificationSchema>;
 export type ApiKeyAlertVars = z.infer<typeof ApiKeyAlertSchema>;
+export type WelcomeTemplateData = WelcomeVars;
+export type PasswordResetTemplateData = PasswordResetVars;
+export type EmailVerificationTemplateData = EmailVerificationVars;
+export type ApiKeyAlertTemplateData = ApiKeyAlertVars;
 
 export const TemplateRegistry = {
   welcome: {

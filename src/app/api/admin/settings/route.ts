@@ -8,6 +8,7 @@ import { RBACPresets } from '@/lib/middleware/rbac';
 import { auditLog } from '@/lib/logging/audit';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logging/logger';
+import { getSendGridEventStatus } from '@/lib/services/sendgridHealth';
 
 export async function GET(request: NextRequest) {
   const r = await RBACPresets.requireSuperAdmin()(request);
@@ -68,6 +69,8 @@ export async function GET(request: NextRequest) {
     ];
 
     // Messaging services status
+    const sendgridHealth = getSendGridEventStatus();
+
     const messagingStatus = {
       twilio: {
         smsConfigured: Boolean(
@@ -84,6 +87,18 @@ export async function GET(request: NextRequest) {
             process.env.SENDGRID_WEBHOOK_PUBLIC_KEY
         ),
         webhookConfigured: Boolean(process.env.SENDGRID_WEBHOOK_PUBLIC_KEY),
+        lastEvent: sendgridHealth.lastEvent
+          ? {
+              ...sendgridHealth.lastEvent,
+              occurredAt: sendgridHealth.lastEvent.occurredAt.toISOString(),
+            }
+          : null,
+        lastError: sendgridHealth.lastError
+          ? {
+              ...sendgridHealth.lastError,
+              occurredAt: sendgridHealth.lastError.occurredAt.toISOString(),
+            }
+          : null,
       },
     };
 
