@@ -14,25 +14,35 @@ interface ContentItem {
 
 interface ContentReviewQueueProps {
   initialItems?: ContentItem[];
+  showSourceFilter?: boolean;
 }
 
 export function ContentReviewQueue({
   initialItems = [],
+  showSourceFilter = true,
 }: ContentReviewQueueProps) {
   const [items, setItems] = useState<ContentItem[]>(initialItems);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<
     'pending' | 'approved' | 'rejected'
   >('pending');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'generated'>('all');
   const [error, setError] = useState<string | null>(null);
 
-  const fetchItems = async (status: string) => {
+  const fetchItems = async (status: string, source?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(
-        `/api/admin/content/review?status=${status}&limit=20`
-      );
+      const params = new URLSearchParams({
+        status,
+        limit: '20',
+      });
+
+      if (source && source !== 'all') {
+        params.append('source', source);
+      }
+
+      const res = await fetch(`/api/admin/content/review?${params}`);
       if (!res.ok) {
         throw new Error('Failed to fetch content');
       }
@@ -48,8 +58,8 @@ export function ContentReviewQueue({
   };
 
   useEffect(() => {
-    fetchItems(statusFilter);
-  }, [statusFilter]);
+    fetchItems(statusFilter, sourceFilter);
+  }, [statusFilter, sourceFilter]);
 
   const handleAction = async (hash: string, action: 'approve' | 'reject') => {
     setLoading(true);
@@ -66,10 +76,51 @@ export function ContentReviewQueue({
       const data = await res.json();
       if (data.success) {
         // Refresh the list
-        await fetchItems(statusFilter);
+        await fetchItems(statusFilter, sourceFilter);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update content');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegenerate = async (contentId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Find the original content item to get topic info
+      const item = items.find(i => i._id === contentId);
+      if (!item) {
+        throw new Error('Content item not found');
+      }
+
+      // Extract topic from metadata or title
+      const topic = item.title || 'Unknown Topic';
+
+      const res = await fetch('/api/agents/creator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic,
+          category: 'general', // Default category, could be enhanced to detect from content
+          targetWordCount: 500,
+          tags: ['regenerated']
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to regenerate content');
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        // Refresh the list to show the new item
+        await fetchItems(statusFilter, sourceFilter);
+        setError(`Content regenerated successfully! New ID: ${data.contentId}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to regenerate content');
     } finally {
       setLoading(false);
     }
@@ -80,6 +131,25 @@ export function ContentReviewQueue({
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Content Review Queue</h3>
         <div className="flex gap-2">
+          {showSourceFilter && (
+            <>
+              <Button
+                variant={sourceFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSourceFilter('all')}
+              >
+                All Sources
+              </Button>
+              <Button
+                variant={sourceFilter === 'generated' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSourceFilter('generated')}
+              >
+                Generated
+              </Button>
+              <div className="w-px bg-gray-300 mx-1" />
+            </>
+          )}
           <Button
             variant={statusFilter === 'pending' ? 'default' : 'outline'}
             size="sm"
@@ -156,6 +226,16 @@ export function ContentReviewQueue({
                     Reject
                   </Button>
                 </div>
+              )}
+              {item.source === 'agent-generated' && statusFilter !== 'pending' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleRegenerate(item._id)}
+                  disabled={loading}
+                >
+                  Regenerate
+                </Button>
               )}
               {statusFilter !== 'pending' && (
                 <span
