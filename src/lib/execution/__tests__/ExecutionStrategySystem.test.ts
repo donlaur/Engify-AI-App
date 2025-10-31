@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ExecutionContextManager } from '../context/ExecutionContextManager';
 import { ExecutionStrategyFactory } from '../factory/ExecutionStrategyFactory';
-// import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
-import { AIRequest, ExecutionContext } from '../interfaces/IExecutionStrategy';
+import {
+  AIRequest,
+  ExecutionContext,
+  ProviderFactory,
+} from '../interfaces/IExecutionStrategy';
 
 // Mock AI Provider Factory
 vi.mock('@/lib/ai/v2/factory/AIProviderFactory');
@@ -10,7 +13,13 @@ vi.mock('@/lib/ai/v2/factory/AIProviderFactory');
 describe('Execution Strategy System', () => {
   let contextManager: ExecutionContextManager;
   let strategyFactory: ExecutionStrategyFactory;
-  let mockAIProviderFactory: Record<string, unknown>;
+  type MockProviderFactory = ProviderFactory & {
+    getAvailableProviders: ReturnType<typeof vi.fn>;
+    registerProvider: ReturnType<typeof vi.fn>;
+    unregisterProvider: ReturnType<typeof vi.fn>;
+  };
+
+  let mockAIProviderFactory: MockProviderFactory;
 
   beforeEach(() => {
     // Reset mocks

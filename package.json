@@ -73,12 +73,15 @@
     "prepare": "husky install",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "policy:routes": "tsx scripts/policy/check-route-guards.ts",
     "content:rss": "tsx scripts/content/rss-fetch.ts",
     "content:sitemap": "tsx scripts/content/sitemap-crawl.ts",
     "content:extract": "tsx scripts/content/html-extract.ts",
     "content:enrich": "tsx scripts/content/metadata-enrich.ts",
     "content:save": "tsx scripts/content/save-to-mongo.ts",
-    "replicate:smoke": "tsx scripts/ai/replicate-smoke.ts"
+    "content:schedule": "tsx scripts/content/schedule.ts",
+    "replicate:smoke": "tsx scripts/ai/replicate-smoke.ts",
+    "test:security": "vitest run src/app/opshub/__tests__/rbac.test.tsx src/app/api/admin/content/review/__tests__/route.test.ts src/app/api/admin/prompts/[id]/__tests__/image-route.test.ts src/lib/__tests__/env-secrets.test.ts src/lib/logging/__tests__/sanitizer.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",

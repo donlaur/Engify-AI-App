@@ -12,9 +12,9 @@ describe('Header', () => {
   it('renders navigation links on desktop', () => {
     render(<Header />);
 
-    expect(screen.getByText('AI Workbench')).toBeInTheDocument();
+    expect(screen.getByText('Workbench')).toBeInTheDocument();
     expect(screen.getByText('Patterns')).toBeInTheDocument();
-    expect(screen.getByText('Library')).toBeInTheDocument();
+    expect(screen.getByText('Prompt Playbooks')).toBeInTheDocument();
     expect(screen.getByText('Learn')).toBeInTheDocument();
   });
 

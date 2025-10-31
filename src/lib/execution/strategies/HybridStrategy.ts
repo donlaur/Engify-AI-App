@@ -4,6 +4,7 @@ import {
   ExecutionResult,
   AIRequest,
   StrategyConfig,
+  ProviderFactory,
 } from '../interfaces/IExecutionStrategy';
 import { StreamingStrategy } from './StreamingStrategy';
 import { BatchStrategy } from './BatchStrategy';
@@ -21,7 +22,7 @@ export class HybridStrategy implements IExecutionStrategy {
   private executionHistory: Map<string, ExecutionMetrics> = new Map();
 
   constructor(
-    private factory: AIProviderFactory,
+    private readonly factory: ProviderFactory = AIProviderFactory,
     config?: Partial<StrategyConfig>
   ) {
     this.config = {

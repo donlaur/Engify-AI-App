@@ -118,6 +118,31 @@ export const PromptRole = z.enum([
 ]);
 export type PromptRole = z.infer<typeof PromptRole>;
 
+const PromptMediaBase = z.object({
+  coverImageUrl: z.string().url().nullable().default(null),
+  coverAlt: z.string().max(200).nullable().default(null),
+  iconUrl: z.string().url().nullable().default(null),
+  iconAlt: z.string().max(100).nullable().default(null),
+  palette: z.array(z.string()).default([]),
+  generatedAt: z.date().nullable().default(null),
+  source: z.enum(['placeholder', 'replicate', 'manual']).default('placeholder'),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const PromptMediaSchema = PromptMediaBase;
+export type PromptMedia = z.infer<typeof PromptMediaSchema>;
+
+export const DEFAULT_PROMPT_MEDIA: PromptMedia = {
+  coverImageUrl: null,
+  coverAlt: null,
+  iconUrl: null,
+  iconAlt: null,
+  palette: [],
+  generatedAt: null,
+  source: 'placeholder',
+  metadata: {},
+};
+
 /**
  * Prompt Template Schema
  */
@@ -137,6 +162,7 @@ export const PromptTemplateSchema = z.object({
   isFeatured: z.boolean().default(false),
   authorId: ObjectIdSchema.nullable(), // null for system prompts
   organizationId: ObjectIdSchema.nullable(), // For team/enterprise prompts
+  media: PromptMediaSchema.default(DEFAULT_PROMPT_MEDIA).optional(),
   stats: z.object({
     views: z.number().int().nonnegative().default(0),
     favorites: z.number().int().nonnegative().default(0),
@@ -193,6 +219,7 @@ export const LearningPathwaySchema = z.object({
       description: z.string().max(500),
       prompts: z.array(ObjectIdSchema),
       order: z.number().int().nonnegative(),
+      media: PromptMediaSchema.default(DEFAULT_PROMPT_MEDIA).optional(),
     })
   ),
   isPublic: z.boolean().default(true),
@@ -241,6 +268,7 @@ export type AuditLog = z.infer<typeof AuditLogSchema>;
  */
 export const WebContentSchema = z.object({
   _id: ObjectIdSchema,
+  organizationId: ObjectIdSchema.nullable().default(null),
   title: z.string().nullable(),
   description: z.string().nullable(),
   text: z.string().min(1),
@@ -253,7 +281,9 @@ export const WebContentSchema = z.object({
     hasTitle: z.boolean(),
     hasDescription: z.boolean(),
     minWordsMet: z.boolean(),
+    checks: z.array(z.string()).default([]),
   }),
+  reviewStatus: z.enum(['pending', 'approved', 'rejected']).default('pending'),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -264,6 +294,21 @@ export type WebContent = z.infer<typeof WebContentSchema>;
  * Collection Names
  * Centralized to prevent typos and ensure consistency
  */
+
+/**
+ * Content Provenance Schema (ingestion scheduler logs)
+ */
+export const ContentProvenanceSchema = z.object({
+  _id: ObjectIdSchema,
+  stage: z.string(),
+  source: z.string(),
+  status: z.enum(['queued', 'success', 'error']),
+  metadata: z.record(z.unknown()).default({}),
+  createdAt: z.date(),
+});
+
+export type ContentProvenance = z.infer<typeof ContentProvenanceSchema>;
+
 export const Collections = {
   USERS: 'users',
   ORGANIZATIONS: 'organizations',
@@ -274,6 +319,7 @@ export const Collections = {
   USER_PROGRESS: 'user_progress',
   AUDIT_LOGS: 'audit_logs',
   WEB_CONTENT: 'web_content',
+  CONTENT_PROVENANCE: 'content_provenance',
 } as const;
 
 /**
@@ -322,6 +368,11 @@ export const Indexes = {
   web_content: [
     { key: { hash: 1 }, unique: true },
     { key: { canonicalUrl: 1 }, sparse: true },
+    { key: { createdAt: -1 } },
+  ],
+  content_provenance: [
+    { key: { stage: 1, createdAt: -1 } },
+    { key: { source: 1, createdAt: -1 } },
     { key: { createdAt: -1 } },
   ],
 } as const;

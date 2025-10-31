@@ -13,23 +13,38 @@ vi.mock('@/lib/ai/v2/factory/AIProviderFactory', () => ({
   AIProviderFactory: {
     hasProvider: vi.fn(),
     create: vi.fn(),
-    getAvailableProviders: vi.fn(() => ['openai', 'anthropic', 'google', 'groq']),
+    getAvailableProviders: vi.fn(() => [
+      'openai',
+      'anthropic',
+      'google',
+      'groq',
+    ]),
     getProvidersByCategory: vi.fn(() => ({
       'Text Generation': ['openai', 'anthropic'],
       'Fast Inference': ['groq'],
-      'Multimodal': ['google'],
+      Multimodal: ['google'],
     })),
   },
 }));
 
+vi.mock('@/lib/auth', () => ({
+  auth: vi.fn(),
+}));
+
 describe('POST /api/v2/ai/execute', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    const { auth } = await import('@/lib/auth');
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: 'admin', role: 'super_admin' },
+    });
   });
 
   it('should execute request with OpenAI provider', async () => {
-    const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
-    
+    const { AIProviderFactory } = await import(
+      '@/lib/ai/v2/factory/AIProviderFactory'
+    );
+
     (AIProviderFactory.hasProvider as any).mockReturnValue(true);
     (AIProviderFactory.create as any).mockReturnValue({
       validateRequest: vi.fn().mockReturnValue(true),
@@ -60,8 +75,10 @@ describe('POST /api/v2/ai/execute', () => {
   });
 
   it('should execute request with Claude provider', async () => {
-    const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
-    
+    const { AIProviderFactory } = await import(
+      '@/lib/ai/v2/factory/AIProviderFactory'
+    );
+
     (AIProviderFactory.hasProvider as any).mockReturnValue(true);
     (AIProviderFactory.create as any).mockReturnValue({
       validateRequest: vi.fn().mockReturnValue(true),
@@ -91,8 +108,10 @@ describe('POST /api/v2/ai/execute', () => {
   });
 
   it('should execute request with Gemini provider', async () => {
-    const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
-    
+    const { AIProviderFactory } = await import(
+      '@/lib/ai/v2/factory/AIProviderFactory'
+    );
+
     (AIProviderFactory.hasProvider as any).mockReturnValue(true);
     (AIProviderFactory.create as any).mockReturnValue({
       validateRequest: vi.fn().mockReturnValue(true),
@@ -122,8 +141,10 @@ describe('POST /api/v2/ai/execute', () => {
   });
 
   it('should execute request with Groq provider', async () => {
-    const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
-    
+    const { AIProviderFactory } = await import(
+      '@/lib/ai/v2/factory/AIProviderFactory'
+    );
+
     (AIProviderFactory.hasProvider as any).mockReturnValue(true);
     (AIProviderFactory.create as any).mockReturnValue({
       validateRequest: vi.fn().mockReturnValue(true),
@@ -153,8 +174,10 @@ describe('POST /api/v2/ai/execute', () => {
   });
 
   it('should return error for invalid provider', async () => {
-    const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
-    
+    const { AIProviderFactory } = await import(
+      '@/lib/ai/v2/factory/AIProviderFactory'
+    );
+
     (AIProviderFactory.hasProvider as any).mockReturnValue(false);
 
     const request = new NextRequest('http://localhost:3000/api/v2/ai/execute', {
@@ -173,8 +196,10 @@ describe('POST /api/v2/ai/execute', () => {
   });
 
   it('should validate request before execution', async () => {
-    const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
-    
+    const { AIProviderFactory } = await import(
+      '@/lib/ai/v2/factory/AIProviderFactory'
+    );
+
     (AIProviderFactory.hasProvider as any).mockReturnValue(true);
     (AIProviderFactory.create as any).mockReturnValue({
       validateRequest: vi.fn().mockReturnValue(false),
@@ -198,8 +223,18 @@ describe('POST /api/v2/ai/execute', () => {
 });
 
 describe('GET /api/v2/ai/execute', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const { auth } = await import('@/lib/auth');
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: 'admin', role: 'super_admin' },
+    });
+  });
+
   it('should return available providers', async () => {
-    const response = await GET();
+    const response = await GET(
+      new NextRequest('http://localhost:3000/api/v2/ai/execute')
+    );
     const data = await response.json();
 
     expect(data.providers).toContain('openai');
@@ -209,10 +244,36 @@ describe('GET /api/v2/ai/execute', () => {
   });
 
   it('should return providers by category', async () => {
-    const response = await GET();
+    const response = await GET(
+      new NextRequest('http://localhost:3000/api/v2/ai/execute')
+    );
     const data = await response.json();
 
     expect(data.categories).toBeDefined();
     expect(data.categories['Text Generation']).toBeDefined();
+  });
+});
+
+describe('RBAC /api/v2/ai/execute', () => {
+  it('denies POST when role lacks workbench:ai_execution', async () => {
+    const { auth } = await import('@/lib/auth');
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } });
+
+    const request = new NextRequest('http://localhost:3000/api/v2/ai/execute', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: 'Test', provider: 'openai' }),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(403);
+  });
+
+  it('denies GET when role lacks workbench:ai_execution', async () => {
+    const { auth } = await import('@/lib/auth');
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } });
+
+    const request = new NextRequest('http://localhost:3000/api/v2/ai/execute');
+    const response = await GET(request);
+    expect(response.status).toBe(403);
   });
 });

@@ -1,12 +1,10 @@
+/**
+ * AI Summary: Wraps Google Gemini completions with shared timeout/retry guardrails.
+ */
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AIProvider, AIRequest, AIResponse } from '../interfaces/AIProvider';
-
-/**
- * Gemini Adapter
- *
- * Implements the AIProvider interface for Google's Gemini API.
- * Wraps the Google Generative AI SDK and provides standardized request/response format.
- */
+import { executeWithProviderHarness } from '../utils/provider-harness';
 export class GeminiAdapter implements AIProvider {
   readonly name = 'Gemini';
   readonly provider = 'google';
@@ -19,7 +17,8 @@ export class GeminiAdapter implements AIProvider {
    * @param model - The Gemini model to use (default: gemini-pro)
    */
   constructor(model: string = 'gemini-pro') {
-    const apiKey = process.env.GOOGLE_API_KEY || 'test-key';
+    const apiKey =
+      process.env.GOOGLE_API_KEY || process.env.GOOGLE_AI_API_KEY || 'test-key';
     this.client = new GoogleGenerativeAI(apiKey);
     this.model = model;
   }
@@ -48,8 +47,6 @@ export class GeminiAdapter implements AIProvider {
    * Execute an AI request using Gemini
    */
   async execute(request: AIRequest): Promise<AIResponse> {
-    const startTime = Date.now();
-
     // Get the model
     const model = this.client.getGenerativeModel({ model: this.model });
 
@@ -60,15 +57,21 @@ export class GeminiAdapter implements AIProvider {
     }
 
     // Call Gemini API
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
-      generationConfig: {
-        temperature: request.temperature ?? 0.7,
-        maxOutputTokens: request.maxTokens ?? 2000,
-      },
-    });
-
-    const latency = Date.now() - startTime;
+    const { value: result, latencyMs } = await executeWithProviderHarness(
+      () =>
+        model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
+          generationConfig: {
+            temperature: request.temperature ?? 0.7,
+            maxOutputTokens: request.maxTokens ?? 2000,
+          },
+        }),
+      {
+        provider: this.provider,
+        model: this.model,
+        operation: 'chat-completion',
+      }
+    );
 
     // Extract response
     const response = result.response;
@@ -91,7 +94,7 @@ export class GeminiAdapter implements AIProvider {
       content: text,
       usage,
       cost,
-      latency,
+      latency: latencyMs,
       provider: this.provider,
       model: this.model,
     };

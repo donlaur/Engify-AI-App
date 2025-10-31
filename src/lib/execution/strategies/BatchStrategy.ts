@@ -4,6 +4,7 @@ import {
   ExecutionResult,
   AIRequest,
   StrategyConfig,
+  ProviderFactory,
 } from '../interfaces/IExecutionStrategy';
 import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 
@@ -20,8 +21,7 @@ export class BatchStrategy implements IBatchStrategy {
   private readonly batchTimeout = process.env.NODE_ENV === 'test' ? 100 : 5000; // Faster in tests
 
   constructor(
-    // @ts-expect-error - intentionally unused, using static methods instead
-    private _factory: AIProviderFactory,
+    private readonly providerFactory: ProviderFactory = AIProviderFactory,
     config?: Partial<StrategyConfig>
   ) {
     this.config = {
@@ -374,7 +374,7 @@ export class BatchStrategy implements IBatchStrategy {
     provider: string,
     items: BatchItem[]
   ): Promise<ExecutionResult[]> {
-    const aiProvider = AIProviderFactory.create(provider);
+    const aiProvider = this.providerFactory.create(provider);
     if (!aiProvider) {
       throw new Error(`Provider not found: ${provider}`);
     }
