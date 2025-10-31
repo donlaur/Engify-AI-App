@@ -4,6 +4,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyTwilioSignature } from '@/lib/messaging/twilio';
 import { rateLimit } from '@/lib/middleware/rateLimit';
+import { auditLog } from '@/lib/logging/audit';
+import { logger } from '@/lib/logging/logger';
 
 // In-memory store for processed message IDs (use Redis in production)
 // This prevents replay attacks by tracking recently processed messages
@@ -70,21 +72,38 @@ export async function POST(request: NextRequest) {
     const to = params.get('To');
     const body = params.get('Body');
 
-    // Log the webhook event for audit
-    console.log(`Twilio webhook: ${eventType} from ${from} to ${to}`, {
-      messageId,
-      body: body?.substring(0, 100), // Truncate for logging
+    await auditLog({
+      action: 'TWILIO_WEBHOOK_RECEIVED',
+      resource: 'twilio_webhook',
+      details: {
+        messageId,
+        eventType,
+        from,
+        to,
+        bodyPreview: body?.substring(0, 100) ?? null,
+      },
     });
 
-    // Here you would implement actual MFA verification logic
-    // For now, just acknowledge receipt
     return NextResponse.json({
       success: true,
       messageId,
       processed: true,
     });
   } catch (error) {
-    console.error('Error processing Twilio webhook:', error);
+    logger.apiError('/api/auth/mfa/webhook', error, { method: 'POST' });
+    await auditLog({
+      action: 'TWILIO_WEBHOOK_ERROR',
+      resource: 'twilio_webhook',
+      details: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        message: raw?.substring(0, 200) ?? null,
+      },
+      severity: 'error',
+    });
     return NextResponse.json({ error: 'Processing failed' }, { status: 500 });
   }
 }
+
+export const __test__ = {
+  clearProcessedMessages: () => processedMessages.clear(),
+};

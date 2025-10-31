@@ -20,6 +20,7 @@ Secure SMS flows, Verify optional path, and OpsHub controls. RBAC enforced on ro
 ## Validation & Security
 
 - Zod E.164 phone regex
+- Per-user sliding rate limits (3 sends/min, 6 verifies/min) with 429 responses
 - Verify signature header validation; replay window check
 - Rate limiting middleware for send endpoints
 - Audit entries via `src/lib/logging/audit.ts`
@@ -27,4 +28,5 @@ Secure SMS flows, Verify optional path, and OpsHub controls. RBAC enforced on ro
 ## Tests & Acceptance
 
 - Unit tests for validation & signature verify
+- Unit tests cover rate-limit branches for send + verify endpoints
 - E2E happy & failure paths; OpsHub toggles reflect state

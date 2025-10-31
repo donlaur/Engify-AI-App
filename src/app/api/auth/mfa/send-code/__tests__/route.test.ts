@@ -19,14 +19,21 @@ vi.mock('@/lib/services/mfaService', () => ({
   },
 }));
 
+vi.mock('@/lib/middleware/rateLimit', () => ({
+  rateLimit: vi.fn(() => true),
+}));
+
 describe('POST /api/auth/mfa/send-code', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    const { rateLimit } = await import('@/lib/middleware/rateLimit');
+    vi.mocked(rateLimit).mockReturnValue(true);
   });
 
   it('should send MFA code successfully', async () => {
     const { auth } = await import('@/lib/auth');
     const { mfaService } = await import('@/lib/services/mfaService');
+    const { rateLimit } = await import('@/lib/middleware/rateLimit');
 
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user123' },
@@ -60,6 +67,10 @@ describe('POST /api/auth/mfa/send-code', () => {
       'user123',
       '+1234567890'
     );
+    expect(rateLimit).toHaveBeenCalledWith('mfa:send:user123', {
+      windowMs: 60_000,
+      max: 3,
+    });
   });
 
   it('should return 401 when user is not authenticated', async () => {
@@ -140,5 +151,32 @@ describe('POST /api/auth/mfa/send-code', () => {
 
     expect(response.status).toBe(400);
     expect(data.error).toBe('Rate limit exceeded');
+  });
+
+  it('should return 429 when rate limit exceeded', async () => {
+    const { auth } = await import('@/lib/auth');
+    const { rateLimit } = await import('@/lib/middleware/rateLimit');
+
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: 'user123' },
+    } as any);
+    vi.mocked(rateLimit).mockReturnValueOnce(false);
+
+    const request = new NextRequest(
+      'http://localhost:3000/api/auth/mfa/send-code',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          phoneNumber: '+1234567890',
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(429);
+    expect(data.error).toContain('Rate limit exceeded');
   });
 });

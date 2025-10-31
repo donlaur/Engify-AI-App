@@ -83,7 +83,7 @@ More detail: [Agent Content Creator](../content/AGENT_CONTENT_CREATOR.md)
 - ⚠️ Regenerate action should hydrate original metadata (owner, topic context) before re-enqueueing follow-up drafts
 - ✅ RBAC ensures only authorized users can trigger content creation
 
-## Phase 3 — Twilio MFA/SMS Productionization
+## 🟢→ Phase 3 — Twilio MFA/SMS Productionization
 
 - ✅ E.164 validation + rate limiting; Verify optional path
 - ✅ Webhook signature verification and replay protection
@@ -96,11 +96,11 @@ Acceptance:
 More detail: [Twilio MFA Productionization](../messaging/TWILIO_MFA_PROD.md)
 
 **Red Hat Review Notes:**
-- ✅ E.164 validation prevents invalid phone number submissions
-- ✅ In-memory replay protection suitable for single-instance deployments
-- ✅ Exponential backoff prevents thundering herd on Twilio API failures
-- ✅ OpsHub settings panel provides visibility into messaging configuration
-- ⚠️ In production, replay protection should use Redis for multi-instance support
+- ✅ E.164 validation blocks malformed phone inputs; per-user rate limits (3 sends / 6 verifies per min) reduce brute-force attempts
+- ✅ Twilio webhook now emits structured audit logs and rate-limits inbound callbacks with replay protection
+- ✅ Exponential backoff in Twilio client shields transient API failures
+- ✅ OpsHub settings panel surfaces Twilio configuration status with audited reads
+- ⚠️ In production, replay protection and rate-limit state should move to Redis to support multi-instance deployments
 
 ## Phase 4 — SendGrid Transactional Email
 

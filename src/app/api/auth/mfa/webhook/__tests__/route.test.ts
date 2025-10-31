@@ -12,17 +12,23 @@ vi.mock('@/lib/middleware/rateLimit', () => ({
   rateLimit: vi.fn(() => true),
 }));
 
+vi.mock('@/lib/logging/audit', () => ({
+  auditLog: vi.fn(async () => undefined),
+}));
+
+vi.mock('@/lib/logging/logger', () => ({
+  logger: {
+    apiError: vi.fn(),
+  },
+}));
+
 describe('Twilio webhook', () => {
-  beforeEach(() => {
-    vi.resetModules();
-    // Clear the processed messages cache between tests
-    vi.doMock('../route', () => {
-      const actual = vi.importActual('../route');
-      return {
-        ...actual,
-        processedMessages: new Set(),
-      };
-    });
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const { rateLimit } = await import('@/lib/middleware/rateLimit');
+    vi.mocked(rateLimit).mockReturnValue(true);
+    const { __test__ } = await import('../route');
+    __test__.clearProcessedMessages();
   });
 
   it('returns 200 when signature verifies and processes valid webhook', async () => {
@@ -45,9 +51,8 @@ describe('Twilio webhook', () => {
   });
 
   it('returns 401 when signature invalid', async () => {
-    vi.doMock('@/lib/messaging/twilio', () => ({
-      verifyTwilioSignature: vi.fn(async () => false),
-    }));
+    const { verifyTwilioSignature } = await import('@/lib/messaging/twilio');
+    vi.mocked(verifyTwilioSignature).mockResolvedValueOnce(false);
     const { POST } = await import('../route');
     const req = new NextRequest('http://localhost:3000/api/auth/mfa/webhook', {
       method: 'POST',
@@ -59,9 +64,8 @@ describe('Twilio webhook', () => {
   });
 
   it('returns 429 when rate limited', async () => {
-    vi.doMock('@/lib/middleware/rateLimit', () => ({
-      rateLimit: vi.fn(() => false),
-    }));
+    const { rateLimit } = await import('@/lib/middleware/rateLimit');
+    vi.mocked(rateLimit).mockReturnValueOnce(false);
     const { POST } = await import('../route');
     const req = new NextRequest('http://localhost:3000/api/auth/mfa/webhook', {
       method: 'POST',
