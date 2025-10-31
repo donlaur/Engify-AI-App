@@ -61,6 +61,8 @@ export type AuditAction =
   | 'TWILIO_WEBHOOK_SIGNATURE_FAILED'
   | 'TWILIO_WEBHOOK_ERROR'
   | 'TWILIO_WEBHOOK_RECEIVED'
+  | 'sendgrid_event_received'
+  | 'sendgrid_event_failed'
   | 'SMS_STATUS_UPDATE'
   | 'CALL_STATUS_UPDATE'
   | 'content_review_decision'

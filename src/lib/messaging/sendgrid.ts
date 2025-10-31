@@ -1,14 +1,26 @@
 /**
- * AI Summary: SendGrid webhook verification placeholder; use ECDSA public key verification when configured.
+ * AI Summary: SendGrid webhook signature verification using Twilio Event Webhook ECDSA checks.
  */
 
+import { EventWebhook } from '@sendgrid/eventwebhook';
+
+const eventWebhook = new EventWebhook();
+
 export async function verifySendGridWebhook(
-  _timestamp: string | null,
-  _signature: string | null,
-  _payload: string | null,
+  timestamp: string | null,
+  signature: string | null,
+  payload: string | null,
   publicKey: string | null
 ): Promise<boolean> {
-  // Proper verification requires ECDSA with the provided public key.
-  // Intentionally return false if key missing; tests may mock this function for success path.
-  return Boolean(publicKey);
+  if (!timestamp || !signature || !payload || !publicKey) {
+    return false;
+  }
+
+  try {
+    const ecKey = eventWebhook.convertPublicKeyToECDSA(publicKey);
+    return eventWebhook.verifySignature(ecKey, payload, signature, timestamp);
+  } catch (error) {
+    // Fail closed on verification errors
+    return false;
+  }
 }
