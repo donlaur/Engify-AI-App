@@ -21,6 +21,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
+import { FeedbackErrorBoundary } from '@/components/ErrorBoundary';
 
 interface DetailedRatingModalProps {
   open: boolean;
@@ -161,8 +162,9 @@ export function DetailedRatingModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <FeedbackErrorBoundary>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Rate This Prompt</DialogTitle>
           <DialogDescription>
@@ -345,6 +347,7 @@ export function DetailedRatingModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </FeedbackErrorBoundary>
   );
 }
 

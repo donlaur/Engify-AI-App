@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { FeedbackErrorBoundary } from '@/components/ErrorBoundary';
 
 interface QuickFeedbackProps {
   promptId: string;
@@ -96,9 +97,10 @@ export function QuickFeedback({ promptId, className, showLabels = false }: Quick
   };
 
   return (
-    <div className={cn('space-y-4', className)}>
-      {/* Like & Save Actions */}
-      <div className="flex items-center gap-2">
+    <FeedbackErrorBoundary>
+      <div className={cn('space-y-4', className)}>
+        {/* Like & Save Actions */}
+        <div className="flex items-center gap-2">
         <Button
           variant={liked ? 'default' : 'outline'}
           size="sm"
@@ -165,6 +167,7 @@ export function QuickFeedback({ promptId, className, showLabels = false }: Quick
         </a>
       </p>
     </div>
+    </FeedbackErrorBoundary>
   );
 }
 
