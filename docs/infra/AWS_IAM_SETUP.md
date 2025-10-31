@@ -15,6 +15,8 @@ This work is part of Day 5: [Day 5 Plan](../planning/DAY_5_PLAN.md).
 ## File Map
 
 - `scripts/aws/login.sh` — SSO/key login helper
+- `scripts/aws/assume-role.sh` — assume role and emit temp creds (eval usage)
+- `scripts/aws/whoami.sh` — show current caller identity for a profile
 - `docs/aws/IAM_POLICIES.md` — policy JSON examples and role descriptions
 - `docs/deployment/VERCEL_ENV_SETUP.md` — Vercel env linkage guidance
 
