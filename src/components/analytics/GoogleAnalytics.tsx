@@ -7,7 +7,7 @@
 
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-1X4BJ3EEKD';
 
@@ -22,7 +22,7 @@ declare global {
   }
 }
 
-export function GoogleAnalytics() {
+function GoogleAnalyticsTracking() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -36,6 +36,10 @@ export function GoogleAnalytics() {
     }
   }, [pathname, searchParams]);
 
+  return null;
+}
+
+export function GoogleAnalytics() {
   // Only load in production
   if (process.env.NODE_ENV !== 'production') {
     return null;
@@ -61,6 +65,9 @@ export function GoogleAnalytics() {
           `,
         }}
       />
+      <Suspense fallback={null}>
+        <GoogleAnalyticsTracking />
+      </Suspense>
     </>
   );
 }
