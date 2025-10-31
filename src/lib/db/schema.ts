@@ -118,6 +118,31 @@ export const PromptRole = z.enum([
 ]);
 export type PromptRole = z.infer<typeof PromptRole>;
 
+const PromptMediaBase = z.object({
+  coverImageUrl: z.string().url().nullable().default(null),
+  coverAlt: z.string().max(200).nullable().default(null),
+  iconUrl: z.string().url().nullable().default(null),
+  iconAlt: z.string().max(100).nullable().default(null),
+  palette: z.array(z.string()).default([]),
+  generatedAt: z.date().nullable().default(null),
+  source: z.enum(['placeholder', 'replicate', 'manual']).default('placeholder'),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export const PromptMediaSchema = PromptMediaBase;
+export type PromptMedia = z.infer<typeof PromptMediaSchema>;
+
+export const DEFAULT_PROMPT_MEDIA: PromptMedia = {
+  coverImageUrl: null,
+  coverAlt: null,
+  iconUrl: null,
+  iconAlt: null,
+  palette: [],
+  generatedAt: null,
+  source: 'placeholder',
+  metadata: {},
+};
+
 /**
  * Prompt Template Schema
  */
@@ -137,6 +162,7 @@ export const PromptTemplateSchema = z.object({
   isFeatured: z.boolean().default(false),
   authorId: ObjectIdSchema.nullable(), // null for system prompts
   organizationId: ObjectIdSchema.nullable(), // For team/enterprise prompts
+  media: PromptMediaSchema.default(DEFAULT_PROMPT_MEDIA).optional(),
   stats: z.object({
     views: z.number().int().nonnegative().default(0),
     favorites: z.number().int().nonnegative().default(0),
@@ -193,6 +219,7 @@ export const LearningPathwaySchema = z.object({
       description: z.string().max(500),
       prompts: z.array(ObjectIdSchema),
       order: z.number().int().nonnegative(),
+      media: PromptMediaSchema.default(DEFAULT_PROMPT_MEDIA).optional(),
     })
   ),
   isPublic: z.boolean().default(true),
