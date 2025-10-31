@@ -98,13 +98,14 @@ Acceptance:
 - ✅ Create Performance Improvement Plan templates (for EMs and ICs, start at 80-90%)
 - ✅ Create Conflict Resolution guides (per role: engineer, manager, director)
 - ✅ Create Facilitator Guides (1-on-1s, retros, planning, incidents - start at 90%)
+- ✅ Create Decision Framework templates (DARCI, RACI, Value/Effort, Build/Buy - start at 90%)
 - ✅ Templates include pre-meeting prep, agendas, scripts, follow-up actions
 
 More detail: [Management Content Templates](../content/MANAGEMENT_TEMPLATES.md)
 
 Acceptance:
 
-- ✅ 8 new management-focused prompt templates created
+- ✅ 12 new management-focused prompt templates created
 - ✅ Each template provides 80-90% complete starting point
 - ✅ Professional, actionable content for real management scenarios
 
@@ -113,10 +114,12 @@ Acceptance:
 - ✅ Created 3 PIP templates (IC, Manager, Progress Review)
 - ✅ Created 3 conflict resolution guides (Eng-Eng, Product-Eng, Manager-Report)
 - ✅ Created 2 facilitator guides (1-on-1s, Sprint Retros)
+- ✅ Created 4 decision framework templates (DARCI, RACI, Value/Effort, Build/Buy)
 - ✅ Each template 85-90% complete with prep, scripts, follow-up
 - ✅ Professional tone: empathetic, specific, action-oriented
 - ✅ Real-world scenarios and sample phrases included
 - ✅ Safe for public repo: no company-specific details
+- ✅ Decision frameworks complement strategic patterns documentation
 - 📋 Ready to use: Managers can copy-paste and customize 10%
 
 ## Phase 5 — Teaching Framework & PMI Integration
@@ -214,7 +217,7 @@ Acceptance:
 
 **Red Hat Review Notes:**
 
-- ✅ Audited current state: 90 core prompts in DB, 8 management prompts static-only
+- ✅ Audited current state: 90 core prompts in DB, 12 management prompts static-only (ready to seed)
 - ✅ Defined single source of truth: MongoDB for prompts, static for reference data
 - ✅ Created 4-week migration plan (seed → refactor → archive → process docs)
 - ✅ ISR strategy documented (revalidate every 60s, on-demand via webhook)
@@ -247,7 +250,7 @@ Acceptance:
 
 **AI Testing Actual**: $0.06 (100 tests with GPT-3.5-turbo)  
 **Time Spent**: ~6 hours (testing, content creation, documentation)  
-**Files Created**: 14 documentation files, 3 scripts, 8 prompt templates, 3 route pages  
+**Files Created**: 14 documentation files, 3 scripts, 12 prompt templates (8 management + 4 decision frameworks), 3 route pages  
 **Commits**: 5 atomic commits (Oct 31, 2025)
 
 ---
@@ -353,9 +356,14 @@ Acceptance:
 - ⚠️ Add quality score badges to library cards
 
 ### Management Content (After Compliance)
-- ✅ Seed 8 management prompts to MongoDB (7 new prompts added, 1 duplicate skipped)
+- ✅ Seed 12 management prompts to MongoDB (11 new prompts added, 1 duplicate skipped)
+  - ✅ 3 PIP templates (pip-001, pip-002, pip-003)
+  - ✅ 3 conflict resolution guides (conflict-001, conflict-002, conflict-003)
+  - ✅ 2 facilitator guides (facilitator-001, facilitator-002)
+  - ✅ 4 decision framework templates (decision-001 through decision-004: DARCI, RACI, Value/Effort, Build/Buy)
 - ⚠️ Test prompts with AI models
 - ✅ Add to library UI (automatic - prompts now in MongoDB)
+- ✅ Seed script updated to include decision frameworks
 
 ### Expansion System (After Compliance)
 - ✅ **System Built** - AI-driven prompt generation with red-hat review
