@@ -310,27 +310,28 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // RBAC: users:write permission (restricted to self or admin)
-  const rbacCheck = await RBACPresets.requireUserWrite()(request);
-  if (rbacCheck) return rbacCheck;
+  const { id } = await params;
 
-  let id: string | undefined;
-  let session: Awaited<ReturnType<typeof auth>> | null = null;
+  if (!id) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'User ID is required',
+      },
+      { status: 400 }
+    );
+  }
+
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
 
   try {
-    session = await auth();
-    id = (await params).id;
-
-    if (!id) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'User ID is required',
-        },
-        { status: 400 }
-      );
-    }
-
     // Users can only update their own last login unless elevated
     const role = (session?.user as { role?: string } | null)?.role;
     const sessionUserId = session?.user?.id;
@@ -344,6 +345,13 @@ export async function PATCH(
         },
         { status: 403 }
       );
+    }
+
+    if (isElevated === false) {
+      // Self-update path already cleared; no additional RBAC check needed
+    } else {
+      const rbacCheck = await RBACPresets.requireUserWrite()(request);
+      if (rbacCheck) return rbacCheck;
     }
 
     const userService = getUserService();
