@@ -32,7 +32,13 @@ export async function POST(request: NextRequest) {
       hash: `${now.getTime()}-${Math.random().toString(36).slice(2)}`,
       lang: 'en',
       readingMinutes: 1,
-      quality: { hasTitle: true, hasDescription: true, minWordsMet: true },
+      quality: {
+        hasTitle: true,
+        hasDescription: true,
+        minWordsMet: true,
+        checks: [],
+      },
+      reviewStatus: 'pending' as const,
       createdAt: now,
       updatedAt: now,
     };
