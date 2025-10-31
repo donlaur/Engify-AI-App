@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logging/logger';
 import { mfaService } from '@/lib/services/mfaService';
+import { rateLimit } from '@/lib/middleware/rateLimit';
 import { z } from 'zod';
 
 const verifyMFASchema = z.object({
@@ -28,6 +29,15 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validated = verifyMFASchema.parse(body);
+
+    const rateKey = `mfa:verify:${session.user.id}`;
+    const allowed = rateLimit(rateKey, { windowMs: 60_000, max: 6 });
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please wait before trying again.' },
+        { status: 429 }
+      );
+    }
 
     // Verify code
     const result = await mfaService.verifyMFACode(

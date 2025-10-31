@@ -12,6 +12,7 @@
 
 import { NextResponse } from 'next/server';
 import { checkDbHealth } from '@/lib/db/health';
+import { getREDSummary } from '@/lib/observability/metrics';
 
 async function checkQStashHealth(): Promise<{
   status: 'healthy' | 'unhealthy';
@@ -99,6 +100,8 @@ export async function GET() {
       overallStatus = 'degraded';
     }
 
+    const redSummary = getREDSummary();
+
     const health = {
       status: overallStatus,
       timestamp: new Date().toISOString(),
@@ -118,6 +121,10 @@ export async function GET() {
           latency: `${redisHealth.latency}ms`,
           ...(redisHealth.error && { error: redisHealth.error }),
         },
+      },
+      metrics: {
+        routes: redSummary.routes.slice(0, 5), // Top 5 routes
+        providers: redSummary.providers,
       },
       version: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
       environment: process.env.NODE_ENV || 'development',

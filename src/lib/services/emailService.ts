@@ -2,7 +2,7 @@ import sgMail from '@sendgrid/mail';
 import {
   SendGridTemplateBuilders,
   type ApiKeyAlertTemplateData,
-} from './sendgridTemplates';
+} from '@/lib/email/templates';
 
 // Initialize SendGrid
 // Support both SENDGRID_API and SENDGRID_API_KEY for flexibility
@@ -101,12 +101,14 @@ export async function sendWelcomeEmail(
       supportUrl: `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/contact`,
     });
 
-    return sendEmail({
-      to: userEmail,
-      subject: 'Welcome to Engify.ai! 🚀',
-      templateId: template.templateId,
-      dynamicTemplateData: template.dynamicTemplateData,
-    });
+    if (template) {
+      return sendEmail({
+        to: userEmail,
+        subject: 'Welcome to Engify.ai! 🚀',
+        templateId: template.templateId,
+        dynamicTemplateData: template.dynamicTemplateData,
+      });
+    }
   }
 
   // Fallback to HTML email if template not configured
@@ -226,12 +228,14 @@ export async function sendPasswordResetEmail(
       supportUrl: `${process.env.NEXTAUTH_URL || 'https://engify.ai'}/contact`,
     });
 
-    return sendEmail({
-      to: userEmail,
-      subject: 'Reset your Engify.ai password',
-      templateId: template.templateId,
-      dynamicTemplateData: template.dynamicTemplateData,
-    });
+    if (template) {
+      return sendEmail({
+        to: userEmail,
+        subject: 'Reset your Engify.ai password',
+        templateId: template.templateId,
+        dynamicTemplateData: template.dynamicTemplateData,
+      });
+    }
   }
 
   // Fallback to HTML email
@@ -271,12 +275,14 @@ export async function sendApiKeyAlertEmail(
 ): Promise<EmailResponse> {
   if (useTemplate && process.env.SENDGRID_API_KEY_ALERT_TEMPLATE_ID) {
     const template = SendGridTemplateBuilders.apiKeyAlert(alertData);
-    return sendEmail({
-      to: userEmail,
-      subject: `API Key Alert: ${alertData.metric} threshold exceeded`,
-      templateId: template.templateId,
-      dynamicTemplateData: template.dynamicTemplateData,
-    });
+    if (template) {
+      return sendEmail({
+        to: userEmail,
+        subject: `API Key Alert: ${alertData.metric} threshold exceeded`,
+        templateId: template.templateId,
+        dynamicTemplateData: template.dynamicTemplateData,
+      });
+    }
   }
 
   // Fallback to HTML email
