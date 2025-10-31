@@ -4,6 +4,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
+vi.mock('@sendgrid/eventwebhook', () => ({
+  EventWebhook: vi.fn(() => ({
+    convertPublicKeyToECDSA: vi.fn(() => ({})),
+    verifySignature: vi.fn(() => true),
+  })),
+}));
+
 vi.mock('@/lib/messaging/sendgrid', () => ({
   verifySendGridWebhook: vi.fn(async () => true),
 }));
