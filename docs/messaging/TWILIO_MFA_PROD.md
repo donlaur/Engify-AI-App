@@ -4,6 +4,8 @@ AI Summary: Productionizing Twilio MFA/SMS with Zod E.164 validation, webhook si
 
 # Twilio MFA Productionization
 
+This work is part of Day 5: [Day 5 Plan](../planning/DAY_5_PLAN.md).
+
 ## Overview
 
 Secure SMS flows, Verify optional path, and OpsHub controls. RBAC enforced on routes.

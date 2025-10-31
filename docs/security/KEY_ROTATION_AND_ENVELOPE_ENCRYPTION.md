@@ -4,6 +4,8 @@ AI Summary: Key rotation procedures and envelope encryption helpers; guarantees 
 
 # Key Rotation & Envelope Encryption
 
+This work is part of Day 5: [Day 5 Plan](../planning/DAY_5_PLAN.md).
+
 ## Overview
 
 Rotate keys safely and encrypt sensitive data with an envelope scheme.

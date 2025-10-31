@@ -4,6 +4,8 @@ AI Summary: Guidance to configure AWS CLI profiles, IAM roles/policies, and envi
 
 # AWS IAM & CLI Setup
 
+This work is part of Day 5: [Day 5 Plan](../planning/DAY_5_PLAN.md).
+
 ## Overview
 
 - Profiles for dev/stage/prod using SSO or static keys (dev only).

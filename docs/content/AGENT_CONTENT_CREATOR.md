@@ -4,6 +4,8 @@ AI Summary: Automated agent that generates draft content via model carrier, enfo
 
 # Agent Content Creator
 
+This work is part of Day 5: [Day 5 Plan](../planning/DAY_5_PLAN.md).
+
 ## Overview
 
 Provider-agnostic creator that uses the carrier to select an allowlisted model with deterministic settings and strict cost caps.

@@ -4,6 +4,8 @@ AI Summary: Packaging and integration of the Python RAG service with health/logg
 
 # Python RAG Service
 
+This work is part of Day 5: [Day 5 Plan](../planning/DAY_5_PLAN.md).
+
 ## Overview
 
 Containerized service with a health endpoint and structured logs. TS client uses Zod schemas and provider harness patterns.

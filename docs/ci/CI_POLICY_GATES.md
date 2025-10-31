@@ -4,6 +4,8 @@ AI Summary: CI policy gates for RBAC route protection, secrets, bundle size, and
 
 # CI Policy Gates
 
+This work is part of Day 5: [Day 5 Plan](../planning/DAY_5_PLAN.md).
+
 ## Gates
 
 - Route-guard: block `/api/**` without `RBACPresets`
