@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
     await db.collection(FEEDBACK_COLLECTIONS.QUICK_FEEDBACK).insertOne(validatedData);
     
     // Update aggregates asynchronously (don't wait)
-    updateAggregatesAsync(validatedData.promptId, db).catch(console.error);
+    // Note: Aggregates are global (prompts are public content)
+    updateAggregatesAsync(validatedData.promptId, db, validatedData.organizationId).catch(console.error);
     
     return NextResponse.json({ 
       success: true,
@@ -61,8 +62,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function updateAggregatesAsync(promptId: string, db: any) {
+async function updateAggregatesAsync(promptId: string, db: any, organizationId?: string) {
   // Recalculate aggregate scores for this prompt
+  // Note: Prompts are public content, so aggregates are global (not org-scoped)
+  // If org-specific analytics needed, use separate aggregation structure
   const quickFeedback = await db.collection(FEEDBACK_COLLECTIONS.QUICK_FEEDBACK)
     .find({ promptId })
     .toArray();
