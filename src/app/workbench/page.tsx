@@ -95,7 +95,7 @@ export default function WorkbenchPage() {
         <div className="space-y-6">{renderTool()}</div>
 
         {/* Quick Stats */}
-        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
@@ -103,7 +103,7 @@ export default function WorkbenchPage() {
                 <div>
                   <p className="font-medium">Available Tools</p>
                   <p className="text-sm text-muted-foreground">
-                    4 ready to use
+                    {Object.values(WORKBENCH_TOOLS).filter((t) => !t.comingSoon).length} ready to use
                   </p>
                 </div>
               </div>
@@ -114,9 +114,9 @@ export default function WorkbenchPage() {
               <div className="flex items-center gap-2">
                 <Icons.clock className="h-5 w-5 text-blue-600" />
                 <div>
-                  <p className="font-medium">Coming Soon</p>
+                  <p className="font-medium">In Development</p>
                   <p className="text-sm text-muted-foreground">
-                    4 in development
+                    {Object.values(WORKBENCH_TOOLS).filter((t) => t.comingSoon).length} coming soon
                   </p>
                 </div>
               </div>
@@ -127,9 +127,22 @@ export default function WorkbenchPage() {
               <div className="flex items-center gap-2">
                 <Icons.sparkles className="h-5 w-5 text-purple-600" />
                 <div>
-                  <p className="font-medium">AI-Powered</p>
+                  <p className="font-medium">Total Tools</p>
                   <p className="text-sm text-muted-foreground">
-                    Copy-paste prompts
+                    {Object.values(WORKBENCH_TOOLS).length} tools available
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Icons.copy className="h-5 w-5 text-orange-600" />
+                <div>
+                  <p className="font-medium">Copy-Paste Ready</p>
+                  <p className="text-sm text-muted-foreground">
+                    Prompt templates
                   </p>
                 </div>
               </div>
