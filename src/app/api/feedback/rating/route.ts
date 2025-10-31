@@ -92,7 +92,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Update aggregates asynchronously
-    updateAggregatesAsync(validatedData.promptId, db).catch(console.error);
+    // Note: Aggregates are global (prompts are public content)
+    updateAggregatesAsync(validatedData.promptId, db, validatedData.organizationId).catch(console.error);
     
     // Audit log: Detailed ratings are significant events (enterprise requirement)
     await logAuditEvent({
@@ -129,8 +130,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function updateAggregatesAsync(promptId: string, db: any) {
+async function updateAggregatesAsync(promptId: string, db: any, organizationId?: string) {
   // Get all ratings for this prompt
+  // Note: Prompts are public content, so aggregates are global (not org-scoped)
+  // If org-specific analytics needed, use separate aggregation structure
   const ratings = await db.collection(FEEDBACK_COLLECTIONS.DETAILED_RATINGS)
     .find({ promptId })
     .toArray();
