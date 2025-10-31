@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
             ${data.useCase ? `<p><strong>Use Case:</strong> ${data.useCase}</p>` : ''}
             ${trackingInfo ? `<hr /><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px;">${trackingInfo}</pre>` : ''}
             <p style="margin-top: 20px;">
-              <a href="${process.env.NEXTAUTH_URL || 'https://engify.ai'}/admin/access-requests" 
+              <a href="${process.env.NEXTAUTH_URL || 'https://engify.ai'}/opshub/access-requests" 
                  style="background: #0070f3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
                 Review Request
               </a>
