@@ -4,14 +4,14 @@
 
 - ✅ Complete role-based access control (RBAC) and org scoping across the stack
 - ✅ Ship an admin-only dashboard for operations, security, and content curation
-- ⚠️ Harden providers and content pipeline toward enterprise readiness
+- ✅ Harden providers and content pipeline toward enterprise readiness
 
 ## Current Status (Public Workflow)
 
 - ✅ Priority 1 is production-ready: `/opshub` shipped with Users, Content, Audit, and Settings panels plus RBAC tests.
 - ✅ Priority 0 complete: RBAC presets and org-scoped tests cover all v2 routes.
 - ✅ Priority 2 is production-ready: scheduling, quality gates, review queue, and index flag complete.
-- ⚠️ Priority 3 requires provider allowlists, shared resilience, and image utility work.
+- ✅ Priority 3 hardened: shared guardrails, prompt assets, and secret validation in place.
 - ⚠️ Priority 4 is incomplete: admin actions still need audit hooks, PII scrubbing, and hardened sessions.
 - ⚠️ Priority 5 lacks RBAC matrix enforcement in CI and secrets-policy guards.
 
@@ -54,16 +54,16 @@ Acceptance:
 
 - ✅ Content moves from pending → approved with admin action; unsafe content blocked by gates
 
-## ⚠️ Priority 3 — Provider Hardening
+## ✅ Priority 3 — Provider Hardening
 
 - ✅ Replicate: allowlist models, timeouts/retries, cost logging
 - ✅ Image utility: generate covers/icons; store URLs + metadata on prompts/modules
 - ✅ Existing providers: unify timeouts/circuit breakers, usage accounting, masked errors
-- ⚠️ Secrets: env-only; startup validator checks required prod keys
+- ✅ Secrets: env-only; startup validator checks required prod keys
 
 Acceptance:
 
-- ⚠️ Provider calls respect budgets and timeouts; cost/latency recorded
+- ✅ Provider calls respect budgets and timeouts; cost/latency recorded
 
 ## ⚠️ Priority 4 — Security & Audit
 
@@ -95,9 +95,9 @@ Acceptance:
 - ✅ Scaffold `/opshub` layout and guards
   - ✅ Users table + actions; Content queue + actions; Audit search; basic metrics
   - ✅ Add tests for route protection and actions
-- ⚠️ Providers & Content
-  - ⚠️ Replicate allowlist + utility; image covers/icons for prompts (admin action)
-  - ⚠️ Content gates + review queue; indexing stub behind flag
+- ✅ Providers & Content
+  - ✅ Replicate allowlist + utility; image covers/icons for prompts (admin action)
+  - ✅ Content gates + review queue; indexing stub behind flag
 - ⚠️ CI/Gates
   - ⚠️ Add RBAC route matrix tests to CI; env validation for prod
 
@@ -110,9 +110,9 @@ Acceptance:
 ## Next Steps
 
 - ✅ Implement RBAC matrix + guards (P0)
-- ⚠️ Scaffold `/opshub` with Users, Content, Audit sections (P1)
-- ⚠️ Add tests for allow/deny and admin-only routes
-- ⚠️ Iterate with feature flags for content indexing and image assets
+- ✅ Scaffold `/opshub` with Users, Content, Audit sections (P1)
+- ✅ Add tests for allow/deny and admin-only routes
+- ✅ Iterate with feature flags for content indexing and image assets
 
 ---
 
