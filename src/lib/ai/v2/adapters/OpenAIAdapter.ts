@@ -1,12 +1,10 @@
+/**
+ * AI Summary: Standardizes OpenAI chat completions with shared timeout/retry guardrails.
+ */
+
 import OpenAI from 'openai';
 import { AIProvider, AIRequest, AIResponse } from '../interfaces/AIProvider';
-
-/**
- * OpenAI Adapter
- *
- * Implements the AIProvider interface for OpenAI's API.
- * Wraps the OpenAI SDK and provides standardized request/response format.
- */
+import { executeWithProviderHarness } from '../utils/provider-harness';
 export class OpenAIAdapter implements AIProvider {
   readonly name = 'OpenAI';
   readonly provider = 'openai';
@@ -54,8 +52,6 @@ export class OpenAIAdapter implements AIProvider {
    * Execute an AI request using OpenAI
    */
   async execute(request: AIRequest): Promise<AIResponse> {
-    const startTime = Date.now();
-
     // Build messages array
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
 
@@ -72,14 +68,20 @@ export class OpenAIAdapter implements AIProvider {
     });
 
     // Call OpenAI API
-    const response = await this.client.chat.completions.create({
-      model: this.model,
-      messages,
-      temperature: request.temperature ?? 0.7,
-      max_tokens: request.maxTokens ?? 2000,
-    });
-
-    const latency = Date.now() - startTime;
+    const { value: response, latencyMs } = await executeWithProviderHarness(
+      () =>
+        this.client.chat.completions.create({
+          model: this.model,
+          messages,
+          temperature: request.temperature ?? 0.7,
+          max_tokens: request.maxTokens ?? 2000,
+        }),
+      {
+        provider: this.provider,
+        model: this.model,
+        operation: 'chat-completion',
+      }
+    );
 
     // Extract usage data
     const usage = {
@@ -95,7 +97,7 @@ export class OpenAIAdapter implements AIProvider {
       content: response.choices[0]?.message?.content || '',
       usage,
       cost,
-      latency,
+      latency: latencyMs,
       provider: this.provider,
       model: this.model,
     };

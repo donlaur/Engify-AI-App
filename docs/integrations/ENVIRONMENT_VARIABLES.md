@@ -27,6 +27,13 @@ Purpose: Single source of truth for environment configuration across local, Verc
 - GOOGLE_API_KEY: Company key (optional)
 - REPLICATE_API_TOKEN: Replicate token (optional)
 - REPLICATE_MODEL: Default model id (e.g., google/gemini-2.5-flash)
+- REPLICATE_ALLOWED_MODELS: Comma-separated allowlist for Replicate models (default safe set when unset)
+- REPLICATE_MAX_RETRIES: Max retry attempts for Replicate calls (default 2)
+- REPLICATE_RETRY_DELAY_MS: Base backoff delay between Replicate retries (default 500)
+- REPLICATE_TIMEOUT_MS: Execution timeout for Replicate calls in milliseconds (default 45000)
+- AI_PROVIDER_TIMEOUT_MS: Default timeout applied to AI provider calls (milliseconds, default 45000)
+- AI_PROVIDER_MAX_RETRIES: Default retry attempts for AI provider calls (default 1)
+- AI_PROVIDER_RETRY_DELAY_MS: Base backoff delay between retries for AI providers (default 300)
 
 ## Email (SendGrid)
 
