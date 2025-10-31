@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { Analytics } from '@vercel/analytics/next';
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 
 // Validate environment variables at startup (Red Hat Review - Critical Fix #1)
 import '@/lib/env';
@@ -114,6 +115,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
       </head>
       <body className={inter.className} suppressHydrationWarning>
+        <GoogleAnalytics />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

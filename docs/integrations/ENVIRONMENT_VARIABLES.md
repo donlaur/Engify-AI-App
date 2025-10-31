@@ -80,6 +80,9 @@ Purpose: Single source of truth for environment configuration across local, Verc
 - AWS_ACCOUNT_ID: AWS account identifier (used by deployment scripts)
 - AWS_ACCESS_KEY_ID: Access key (local/dev only; prefer IAM roles in AWS)
 - AWS_SECRET_ACCESS_KEY: Secret key (local/dev only)
+- AWS_PROFILE: Optional named AWS CLI profile (used by helper scripts)
+
+Helper scripts: `scripts/aws/login.sh`, `scripts/aws/assume-role.sh`, `scripts/aws/whoami.sh`
 
 ## Encryption / Security
 

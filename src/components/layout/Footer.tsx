@@ -20,21 +20,20 @@ const footerLinks = {
     { href: '/pricing', label: 'Pricing' },
   ],
   company: [
-    { href: '/built-in-public#about', label: 'About' },
-    { href: '/built-in-public#careers', label: 'Careers' },
-    { href: 'mailto:hello@engify.ai', label: 'Contact' },
+    { href: '/built-in-public', label: 'About' },
+    { href: '/built-in-public', label: 'Built in Public' },
+    { href: '/contact', label: 'Contact' },
   ],
   resources: [
-    { href: '/learn#docs', label: 'Documentation' },
-    { href: '/learn#guides', label: 'Guides' },
+    { href: '/learn', label: 'Documentation' },
     { href: '/patterns', label: 'Patterns' },
-    { href: '/built-in-public#api', label: 'API' },
+    { href: '/library', label: 'Prompt Library' },
+    { href: '/api-docs', label: 'API Reference' },
   ],
   legal: [
     { href: '/privacy', label: 'Privacy' },
     { href: '/terms', label: 'Terms' },
-    { href: '/built-in-public#security', label: 'Security' },
-    { href: '/privacy#cookies', label: 'Cookies' },
+    { href: 'https://github.com/donlaur/Engify-AI-App', label: 'GitHub', external: true },
   ],
 };
 
@@ -133,9 +132,9 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             {currentYear} Engify.ai. All rights reserved.
           </p>
-          <div className="flex space-x-6">
+          <div className="flex flex-wrap gap-4 md:gap-6">
             <a
-              href="mailto:hello@engify.ai"
+              href="mailto:donlaur@engify.ai"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               Contact
@@ -153,15 +152,7 @@ export function Footer() {
               Terms
             </Link>
             <Link
-              href="https://twitter.com/engify"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Twitter
-            </Link>
-            <Link
-              href="https://github.com/engify"
+              href="https://github.com/donlaur/Engify-AI-App"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               target="_blank"
               rel="noopener noreferrer"
@@ -169,7 +160,7 @@ export function Footer() {
               GitHub
             </Link>
             <Link
-              href="https://linkedin.com/company/engify"
+              href="https://linkedin.com/in/donlaur"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               target="_blank"
               rel="noopener noreferrer"

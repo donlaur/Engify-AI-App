@@ -286,6 +286,7 @@ export const WebContentSchema = z.object({
   reviewStatus: z.enum(['pending', 'approved', 'rejected']).default('pending'),
   createdAt: z.date(),
   updatedAt: z.date(),
+  metadata: z.record(z.unknown()).default({}),
 });
 
 export type WebContent = z.infer<typeof WebContentSchema>;
@@ -309,6 +310,39 @@ export const ContentProvenanceSchema = z.object({
 
 export type ContentProvenance = z.infer<typeof ContentProvenanceSchema>;
 
+export const WorkbenchRunStatus = z.enum([
+  'pending',
+  'success',
+  'error',
+  'budget_exceeded',
+  'replay',
+]);
+
+export type WorkbenchRunStatus = z.infer<typeof WorkbenchRunStatus>;
+
+export const WorkbenchRunSchema = z.object({
+  _id: ObjectIdSchema,
+  runId: z.string().min(8),
+  toolId: z.string().min(1),
+  userId: z.string().nullable(),
+  status: WorkbenchRunStatus,
+  budgetCents: z.number().int().nonnegative(),
+  costCents: z.number().int().nonnegative().nullable(),
+  provider: z.string().nullable(),
+  model: z.string().nullable(),
+  inputTokens: z.number().int().nonnegative().nullable(),
+  outputTokens: z.number().int().nonnegative().nullable(),
+  totalTokens: z.number().int().nonnegative().nullable(),
+  promptHash: z.string().nullable(),
+  contractVersion: z.number().int().positive(),
+  metadata: z.record(z.unknown()).default({}),
+  error: z.string().nullable().default(null),
+  createdAt: z.date(),
+  completedAt: z.date().nullable(),
+});
+
+export type WorkbenchRun = z.infer<typeof WorkbenchRunSchema>;
+
 export const Collections = {
   USERS: 'users',
   ORGANIZATIONS: 'organizations',
@@ -320,6 +354,8 @@ export const Collections = {
   AUDIT_LOGS: 'audit_logs',
   WEB_CONTENT: 'web_content',
   CONTENT_PROVENANCE: 'content_provenance',
+  WORKBENCH_RUNS: 'workbench_runs',
+  API_KEYS: 'api_keys',
 } as const;
 
 /**
@@ -374,5 +410,10 @@ export const Indexes = {
     { key: { stage: 1, createdAt: -1 } },
     { key: { source: 1, createdAt: -1 } },
     { key: { createdAt: -1 } },
+  ],
+  workbench_runs: [
+    { key: { runId: 1 }, unique: true },
+    { key: { toolId: 1, createdAt: -1 } },
+    { key: { status: 1, createdAt: -1 } },
   ],
 } as const;
