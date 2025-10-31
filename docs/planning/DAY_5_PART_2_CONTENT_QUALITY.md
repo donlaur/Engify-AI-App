@@ -235,7 +235,7 @@ Acceptance:
 | **1. Prompt Testing** | ✅ COMPLETE | 🟡 B+ (needs tests) | 100 tests executed, $0.06 spent, both models working |
 | **2. Tag Taxonomy** | ✅ COMPLETE | ✅ A | Zod schemas, 5 categories, validation rules |
 | **3. SEO Expansion** | 🟡 PARTIAL | ✅ A | Sitemap + routes done, metadata pending |
-| **4. Management Templates** | ✅ COMPLETE | ✅ A | 8 prompts (PIPs, conflict resolution, facilitators) |
+| **4. Management Templates** | ✅ COMPLETE | ✅ A | 12 prompts (PIPs, conflict resolution, facilitators, decision frameworks) |
 | **5. Teaching Integration** | ✅ COMPLETE | ✅ A | PMI patterns mapped, integration plan documented |
 | **6. CTO Content** | ✅ COMPLETE | ✅ A | /for-ctos page with 5 production guardrails |
 | **7. Performance Report** | ✅ COMPLETE | ✅ A | Audit strategy documented, ready to execute |
