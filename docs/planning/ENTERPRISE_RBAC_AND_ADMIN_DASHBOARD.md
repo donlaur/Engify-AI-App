@@ -13,7 +13,7 @@
 - ✅ Priority 2 is production-ready: scheduling, quality gates, review queue, and index flag complete.
 - ✅ Priority 3 hardened: shared guardrails, prompt assets, and secret validation in place.
 - ✅ Priority 4 reinforced: admin actions audited, PII scrubbing live, MFA enforced on sessions.
-- ⚠️ Priority 5 lacks RBAC matrix enforcement in CI and secrets-policy guards.
+- ✅ Priority 5 automated: CI enforces lint/type/test, RBAC matrix, and route guard policies.
 
 ## ✅ Priority 0 — RBAC Completion (Edge and Core)
 
@@ -75,15 +75,15 @@ Acceptance:
 
 - ✅ Audit log searchable; key actions captured with sufficient context
 
-## ⚠️ Priority 5 — CI/CD & Policy Gates
+## ✅ Priority 5 — CI/CD & Policy Gates
 
-- ⚠️ CI gates: typecheck/lint/test; RBAC matrix tests; forbid new public routes without guards
-- ⚠️ Secrets policy: disallow file logging in serverless; env checks per environment
-- ⚠️ Preview deploys: require green RBAC/route tests
+- ✅ CI gates: typecheck/lint/test; RBAC matrix tests; forbid new public routes without guards
+- ✅ Secrets policy: disallow file logging in serverless; env checks per environment
+- ✅ Preview deploys: require green RBAC/route tests
 
 Acceptance:
 
-- ⚠️ PRs adding routes must pass RBAC tests; build blocks on missing envs or unsafe logging
+- ✅ PRs adding routes must pass RBAC tests; build blocks on missing envs or unsafe logging
 
 ## Initial Task Breakdown
 
@@ -98,8 +98,8 @@ Acceptance:
 - ✅ Providers & Content
   - ✅ Replicate allowlist + utility; image covers/icons for prompts (admin action)
   - ✅ Content gates + review queue; indexing stub behind flag
-- ⚠️ CI/Gates
-  - ⚠️ Add RBAC route matrix tests to CI; env validation for prod
+- ✅ CI/Gates
+  - ✅ Add RBAC route matrix tests to CI; env validation for prod
 
 ## Risks & Mitigations
 
