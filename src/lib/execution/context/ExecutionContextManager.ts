@@ -3,18 +3,15 @@ import {
   ExecutionContext,
   ExecutionResult,
   AIRequest,
+  ProviderFactory,
 } from '../interfaces/IExecutionStrategy';
 import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 
-/**
- * Execution context that manages strategy selection and execution
- */
 export class ExecutionContextManager {
   private strategies: Map<string, IExecutionStrategy> = new Map();
-  // @ts-expect-error - intentionally unused, using static methods instead
-  constructor(private _factory?: AIProviderFactory) {
-    // Factory is optional, we'll use static methods
-  }
+  constructor(
+    private readonly providerFactory: ProviderFactory = AIProviderFactory
+  ) {}
 
   /**
    * Register an execution strategy
@@ -78,7 +75,7 @@ export class ExecutionContextManager {
     }
 
     // Get AI provider
-    const aiProvider = AIProviderFactory.create(provider);
+    const aiProvider = this.providerFactory.create(provider);
     if (!aiProvider) {
       throw new Error(`AI provider not found: ${provider}`);
     }

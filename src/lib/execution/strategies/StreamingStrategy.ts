@@ -4,6 +4,7 @@ import {
   ExecutionResult,
   AIRequest,
   StrategyConfig,
+  ProviderFactory,
 } from '../interfaces/IExecutionStrategy';
 import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 
@@ -15,8 +16,7 @@ export class StreamingStrategy implements IStreamingStrategy {
   public readonly config: StrategyConfig;
 
   constructor(
-    // @ts-expect-error - intentionally unused, using static methods instead
-    private _factory: AIProviderFactory,
+    private readonly providerFactory: ProviderFactory = AIProviderFactory,
     config?: Partial<StrategyConfig>
   ) {
     this.config = {
@@ -38,7 +38,7 @@ export class StreamingStrategy implements IStreamingStrategy {
     _context: ExecutionContext,
     provider: string
   ): Promise<ExecutionResult> {
-    const aiProvider = AIProviderFactory.create(provider);
+    const aiProvider = this.providerFactory.create(provider);
     if (!aiProvider) {
       throw new Error(`Provider not found: ${provider}`);
     }
@@ -92,7 +92,7 @@ export class StreamingStrategy implements IStreamingStrategy {
     onError: (error: Error) => void
   ): Promise<void> {
     try {
-      const aiProvider = AIProviderFactory.create(provider);
+      const aiProvider = this.providerFactory.create(provider);
       if (!aiProvider) {
         throw new Error(`Provider not found: ${provider}`);
       }

@@ -17,7 +17,9 @@ describe('Admin Content Indexer (stub)', () => {
 
   it('returns 404 when disabled', async () => {
     vi.doMock('@/lib/auth', () => ({
-      auth: vi.fn(async () => ({ user: { id: 'a1', role: 'super_admin' } })),
+      auth: vi.fn(async () => ({
+        user: { id: 'a1', role: 'super_admin', mfaVerified: true },
+      })),
     }));
     // Ensure flag off
     process.env.RAG_INDEX_ENABLED = 'false';
@@ -30,7 +32,9 @@ describe('Admin Content Indexer (stub)', () => {
 
   it('enqueues (stub) when enabled', async () => {
     vi.doMock('@/lib/auth', () => ({
-      auth: vi.fn(async () => ({ user: { id: 'a1', role: 'super_admin' } })),
+      auth: vi.fn(async () => ({
+        user: { id: 'a1', role: 'super_admin', mfaVerified: true },
+      })),
     }));
     process.env.RAG_INDEX_ENABLED = 'true';
     const { POST } = await import('../route');
