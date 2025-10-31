@@ -12,25 +12,38 @@ Containerized service with a health endpoint and structured logs. TS client uses
 
 ## File Map
 
-- `python/pyproject.toml`, `python/Dockerfile`
-- `python/api/health.py` (or FastAPI route)
-- `src/lib/rag/client.ts` (Zod schemas + fetch)
-- `scripts/start-rag-service.py` (local dev helper)
+- `python/pyproject.toml` - Complete packaging with deps, scripts, mypy/pytest config
+- `python/Dockerfile` - Multi-stage build for production deployment
+- `python/api/rag.py` - FastAPI service with lifespan management, structured logging
+- `src/lib/rag/client.ts` - TypeScript client with Zod schemas and retry logic
+- `python/tests/test_rag.py` - Unit tests for health and search endpoints
+- `.github/workflows/python-rag-ci.yml` - CI pipeline for type checking, testing, coverage
+- `scripts/start-rag-service.py` - Local development helper script
 
 ## Health & Logging
 
-- Health: `GET /health` returns `{ status: 'ok' }`
-- Logs: JSON with requestId, latency, error fields
+- **Health**: `GET /health` returns comprehensive status with model/database checks
+- **Logging**: Structured JSON logs with timestamps, request details, and performance metrics
+- **Lifespan**: FastAPI lifespan management for clean startup/shutdown with retries
 
 ## Timeouts/Retry
 
-- Client wraps requests with provider harness-like helper for timeout/backoff
+- **Client**: 30s timeout, exponential backoff retry (up to 3 attempts)
+- **Service**: 10s MongoDB query timeout, async embedding generation
+- **MongoDB**: Connection retry with 5s timeouts and exponential backoff
 
-## CI
+## CI Pipeline
 
-- Add a job to build image or run a lightweight health stub; unit tests pass
+- **Type Checking**: MyPy with strict settings
+- **Linting**: Black and isort code formatting
+- **Testing**: Pytest with async support and coverage reporting (80% minimum)
+- **Health Validation**: Integration test that starts service and validates `/health` endpoint
+- **Build**: Package building and installation verification
 
 ## Tests & Acceptance
 
-- Unit tests for client parsing and error paths
-- Local `pnpm test:unit` green; service health OK in dev
+- **Unit Tests**: Health endpoint structure, validation errors, service status checks
+- **Integration**: Full service startup and health endpoint validation
+- **Coverage**: 80%+ code coverage requirement
+- **Local Development**: `pip install -e .` for editable installs
+- **CI Status**: All checks pass in GitHub Actions
