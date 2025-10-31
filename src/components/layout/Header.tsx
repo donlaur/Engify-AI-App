@@ -39,7 +39,7 @@ const navigationLinks = [
   { href: '/patterns', label: 'Patterns' },
   { href: '/library', label: 'Library' },
   { href: '/learn', label: 'Learn' },
-  { href: '/workbench/multi-agent', label: 'Multi-Agent' },
+  { href: '/workbench', label: 'Workbench' },
 ];
 
 export function Header({ user }: HeaderProps) {
