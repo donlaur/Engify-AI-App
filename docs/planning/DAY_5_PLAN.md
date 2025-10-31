@@ -137,16 +137,24 @@ Acceptance:
 - ⚠️ Artifact UI polish deferred (existing OKR/Retro/TechDebt tools work but don't yet persist to DB)
 - ⚠️ Contract replay window not yet enforced (checks existence, not time-based expiry)
 
-## Phase 6 — Observability & SLOs
+## 🟢→ Phase 6 — Observability & SLOs
 
-- ⚠️ RED metrics (rate/errors/duration) + healthz endpoints
+- ✅ RED metrics (rate/errors/duration) + healthz endpoints
 - ⚠️ Slow‑query tracing and feature flag telemetry
 
 Acceptance:
 
-- ⚠️ Dashboards show p50/p95 latencies per route/provider; alert rules defined
+- ✅ Dashboards show p50/p95 latencies per route/provider; alert rules defined
 
 More detail: [Observability & SLOs](../observability/OBSERVABILITY_SLOS.md)
+
+**Red Hat Review Notes:**
+- ✅ RED metrics track per-route and per-provider request counts, error rates, and latency percentiles (p50/p95/p99)
+- ✅ `/api/health` now surfaces top-5 routes and all provider metrics alongside service health checks
+- ✅ `/api/observability/metrics` provides detailed RED summaries with RBAC protection (super_admin only)
+- ✅ `/api/v2/ai/execute` records metrics on every success and error for full coverage
+- ⚠️ In-memory metric storage suitable for single-instance; migrate to Redis or Prometheus for production multi-instance
+- ⚠️ Slow-query tracing and feature flag telemetry deferred to future iteration
 
 ## Phase 7 — CI/CD Expansions
 
