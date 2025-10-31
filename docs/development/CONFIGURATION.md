@@ -7,6 +7,7 @@
 ### Core Application Configs
 
 #### `package.json`
+
 - **Purpose**: Node.js project configuration and dependencies
 - **Required**: Yes
 - **Location**: Root directory
@@ -17,6 +18,7 @@
   - `engines`: Node.js and pnpm version requirements
 
 #### `next.config.js`
+
 - **Purpose**: Next.js framework configuration
 - **Required**: Yes
 - **Location**: Root directory
@@ -27,6 +29,7 @@
   - Redirects and rewrites
 
 #### `tsconfig.json`
+
 - **Purpose**: TypeScript compiler configuration
 - **Required**: Yes
 - **Location**: Root directory
@@ -37,6 +40,7 @@
   - Module resolution
 
 #### `tailwind.config.ts`
+
 - **Purpose**: Tailwind CSS configuration
 - **Required**: Yes
 - **Location**: Root directory
@@ -49,6 +53,7 @@
 ### Development & Testing Configs
 
 #### `.eslintrc.json`
+
 - **Purpose**: ESLint code quality rules
 - **Required**: Yes
 - **Location**: Root directory
@@ -59,6 +64,7 @@
   - Prefer const over let
 
 #### `playwright.config.ts`
+
 - **Purpose**: Playwright E2E testing configuration
 - **Required**: Yes
 - **Location**: Root directory
@@ -69,6 +75,7 @@
   - Screenshot options
 
 #### `vitest.config.ts`
+
 - **Purpose**: Vitest unit testing configuration
 - **Required**: Yes
 - **Location**: Root directory
@@ -81,6 +88,7 @@
 ### UI & Component Configs
 
 #### `components.json`
+
 - **Purpose**: shadcn/ui component configuration
 - **Required**: Yes
 - **Location**: Root directory
@@ -90,6 +98,7 @@
   - Import aliases
 
 #### `postcss.config.js`
+
 - **Purpose**: PostCSS configuration for Tailwind
 - **Required**: Yes
 - **Location**: Root directory
@@ -100,6 +109,7 @@
 ### Monitoring & Analytics Configs
 
 #### `sentry.server.config.ts`
+
 - **Purpose**: Sentry error tracking for server-side
 - **Required**: Yes
 - **Location**: Root directory
@@ -110,6 +120,7 @@
   - Performance monitoring
 
 #### `sentry.edge.config.ts`
+
 - **Purpose**: Sentry error tracking for Edge Runtime
 - **Required**: Yes
 - **Location**: Root directory
@@ -119,6 +130,7 @@
   - Performance monitoring
 
 #### `.lighthouserc.json`
+
 - **Purpose**: Lighthouse CI configuration
 - **Required**: Optional
 - **Location**: Root directory
@@ -131,6 +143,7 @@
 ### Python Workbench Configs
 
 #### `python/requirements.txt`
+
 - **Purpose**: Python dependencies for AI workbench
 - **Required**: Yes
 - **Location**: `python/` directory
@@ -184,6 +197,14 @@ NEXT_PUBLIC_POSTHOG_KEY=phc-your-posthog-key
 NEXT_PUBLIC_ENABLE_ANALYTICS=true
 NEXT_PUBLIC_ENABLE_DEBUG=false
 
+# Security Controls
+ADMIN_MFA_REQUIRED=true
+ADMIN_SESSION_MAX_AGE_MINUTES=60
+
+# Content Pipeline
+IMAGE_GENERATION_ENABLED=true
+REPLICATE_IMAGE_MODEL=stability-ai/sdxl
+
 # Performance
 NEXT_PUBLIC_CACHE_TTL=3600
 NEXT_PUBLIC_MAX_RETRIES=3
@@ -215,6 +236,14 @@ The following configurations are validated on every commit:
    - API schema compliance
    - Type safety
 
+5. **Route Guard Policy** (`scripts/policy/check-route-guards.ts` via `pnpm policy:routes`)
+   - Ensures `/api/admin/**` and `/api/v2/**` routes include `RBACPresets`
+   - Blocks commits that introduce unsecured endpoints
+
+6. **Security Test Suite** (`pnpm test:security`)
+   - Exercises RBAC/MFA gating on admin surfaces
+   - Verifies env-secret enforcement and log sanitization
+
 ### Build-time Validation
 
 ```bash
@@ -244,15 +273,15 @@ module.exports = {
   // Development-only features
   ...(isDev && {
     experimental: {
-      serverComponentsExternalPackages: ['mongodb']
-    }
+      serverComponentsExternalPackages: ['mongodb'],
+    },
   }),
-  
+
   // Production optimizations
   ...(isProd && {
     compress: true,
-    poweredByHeader: false
-  })
+    poweredByHeader: false,
+  }),
 };
 ```
 
@@ -266,7 +295,7 @@ const envSchema = z.object({
   MONGODB_URI: z.string().url(),
   NEXTAUTH_SECRET: z.string().min(32),
   OPENAI_API_KEY: z.string().startsWith('sk-'),
-  NODE_ENV: z.enum(['development', 'production', 'test'])
+  NODE_ENV: z.enum(['development', 'production', 'test']),
 });
 
 export const env = envSchema.parse(process.env);
@@ -282,12 +311,12 @@ import { z } from 'zod';
 const requiredEnvSchema = z.object({
   MONGODB_URI: z.string(),
   NEXTAUTH_SECRET: z.string(),
-  OPENAI_API_KEY: z.string()
+  OPENAI_API_KEY: z.string(),
 });
 
 function validateConfig() {
   config({ path: '.env.local' });
-  
+
   try {
     requiredEnvSchema.parse(process.env);
     console.log('✅ Configuration valid');
@@ -305,6 +334,7 @@ validateConfig();
 ### Common Issues
 
 #### 1. TypeScript Errors
+
 ```bash
 # Clear TypeScript cache
 rm -rf .next tsconfig.tsbuildinfo
@@ -314,6 +344,7 @@ npm run build
 ```
 
 #### 2. Environment Variables Not Loading
+
 ```bash
 # Check .env.local exists
 ls -la .env.local
@@ -323,6 +354,7 @@ grep -E "^[A-Z_]+=" .env.local
 ```
 
 #### 3. Build Failures
+
 ```bash
 # Clear all caches
 rm -rf .next node_modules/.cache
@@ -336,6 +368,7 @@ npm run build
 ```
 
 #### 4. Python Environment Issues
+
 ```bash
 # Recreate Python virtual environment
 cd python
@@ -348,6 +381,7 @@ pip install -r requirements.txt
 ### Configuration Debugging
 
 #### Environment Variable Debugging
+
 ```typescript
 // Add to any component for debugging
 console.log('Environment:', {
@@ -358,6 +392,7 @@ console.log('Environment:', {
 ```
 
 #### Build Configuration Debugging
+
 ```bash
 # Verbose Next.js build
 DEBUG=* npm run build
@@ -372,6 +407,7 @@ DEBUG=eslint:* npm run lint
 ## Security Considerations
 
 ### 1. Never Commit Secrets
+
 ```bash
 # .gitignore should include
 .env
@@ -382,12 +418,14 @@ DEBUG=eslint:* npm run lint
 ```
 
 ### 2. Environment Variable Security
+
 - Use different secrets for each environment
 - Rotate secrets regularly
 - Use secret management services in production
 - Never log sensitive environment variables
 
 ### 3. Configuration Security
+
 ```typescript
 // Validate all environment variables
 const secureEnvSchema = z.object({
@@ -400,20 +438,22 @@ const secureEnvSchema = z.object({
 ## Performance Optimization
 
 ### 1. Build Optimization
+
 ```javascript
 // next.config.js
 module.exports = {
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['lucide-react']
+    optimizePackageImports: ['lucide-react'],
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production'
-  }
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
 };
 ```
 
 ### 2. Bundle Analysis
+
 ```bash
 # Analyze bundle size
 npm install -g @next/bundle-analyzer
@@ -421,6 +461,7 @@ ANALYZE=true npm run build
 ```
 
 ### 3. Configuration Caching
+
 ```typescript
 // Cache configuration objects
 const configCache = new Map();
@@ -429,12 +470,23 @@ export function getConfig(key: string) {
   if (configCache.has(key)) {
     return configCache.get(key);
   }
-  
+
   const config = loadConfig(key);
   configCache.set(key, config);
   return config;
 }
 ```
+
+## Continuous Integration
+
+The GitHub Actions workflow `.github/workflows/ci.yml` runs on every push and pull request:
+
+1. `pnpm lint`
+2. `pnpm typecheck`
+3. `pnpm test:security`
+4. `pnpm policy:routes`
+
+All steps must pass before merging to guarded branches (`main`, `day4-enterprise-rbac-doc`).
 
 ---
 
