@@ -89,10 +89,10 @@ Acceptance:
 
 ## Initial Task Breakdown
 
-- ⚠️ RBAC
-  - ⚠️ Define permission map (file + types) and apply to all v2 routes
-  - ⚠️ Add org context to services; default deny on missing org when required
-  - ⚠️ Write allow/deny tests for Users, Prompts, API Keys, Jobs
+- ✅ RBAC
+  - ✅ Define permission map (file + types) and apply to all v2 routes
+  - ✅ Add org context to services; default deny on missing org when required
+  - ✅ Write allow/deny tests for Users, Prompts, API Keys, Jobs
 - ✅ Admin Dashboard
 - ✅ Scaffold `/opshub` layout and guards
   - ✅ Users table + actions; Content queue + actions; Audit search; basic metrics
@@ -105,9 +105,9 @@ Acceptance:
 
 ## Risks & Mitigations
 
-- ⚠️ Scope creep: lock scope per priority and feature flag unfinished areas
-- ⚠️ Secrets leakage: mask keys, avoid file logs on serverless (only console/json)
-- ⚠️ Cost overruns: add rate limits, caching by input hash, and cost logging
+- ✅ Scope creep: lock scope per priority and feature flag unfinished areas
+- ✅ Secrets leakage: mask keys, avoid file logs on serverless (only console/json)
+- ✅ Cost overruns: add rate limits, caching by input hash, and cost logging
 
 ## Next Steps
 
