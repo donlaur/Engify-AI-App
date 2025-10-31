@@ -13,6 +13,7 @@ import {
   startWorkbenchRun,
   completeWorkbenchRun,
 } from '@/lib/services/workbenchRuns';
+import { recordRouteMetric, recordProviderMetric } from '@/lib/observability/metrics';
 
 /**
  * AI Execution API Route (v2)
@@ -201,6 +202,16 @@ export async function POST(req: NextRequest) {
      }
 
     const duration = Date.now() - startTime;
+    
+    // Record RED metrics
+    recordRouteMetric('/api/v2/ai/execute', duration, true);
+    recordProviderMetric(
+      response.provider,
+      response.latency,
+      response.cost?.total ?? 0,
+      true
+    );
+
     logger.apiRequest('/api/v2/ai/execute', {
       userId: session?.user?.id,
       method: 'POST',
@@ -240,6 +251,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(responseBody);
   } catch (error) {
     const duration = Date.now() - startTime;
+    
+    // Record error metrics
+    recordRouteMetric('/api/v2/ai/execute', duration, false);
+    
     logger.apiError('/api/v2/ai/execute', error, {
       userId: session?.user?.id,
       method: 'POST',
