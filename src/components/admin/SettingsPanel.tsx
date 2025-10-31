@@ -14,9 +14,32 @@ interface ProviderKey {
   masked: string;
 }
 
+interface MessagingStatus {
+  twilio: {
+    smsConfigured: boolean;
+    phoneNumber: string;
+    verifyEnabled: boolean;
+  };
+  sendgrid: {
+    emailConfigured: boolean;
+    webhookConfigured: boolean;
+  };
+}
+
+interface SystemInfo {
+  environment: string;
+  version: string;
+  region: string;
+  redisConfigured: boolean;
+  databaseConfigured: boolean;
+}
+
 export function SettingsPanel() {
   const [featureFlags, setFeatureFlags] = useState<FeatureFlag[]>([]);
   const [providerKeys, setProviderKeys] = useState<ProviderKey[]>([]);
+  const [messagingStatus, setMessagingStatus] =
+    useState<MessagingStatus | null>(null);
+  const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -31,6 +54,8 @@ export function SettingsPanel() {
         if (data.success) {
           setFeatureFlags(data.data.featureFlags || []);
           setProviderKeys(data.data.providerKeys || []);
+          setMessagingStatus(data.data.messagingStatus || null);
+          setSystemInfo(data.data.systemInfo || null);
         }
       } catch (err) {
         console.error('Failed to load settings:', err);
@@ -116,6 +141,59 @@ export function SettingsPanel() {
         </p>
       </section>
 
+      {messagingStatus && (
+        <section className="rounded-lg border bg-white p-4">
+          <h4 className="mb-3 font-medium">Messaging Services</h4>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 p-3">
+              <div className="flex-1">
+                <div className="text-sm font-medium">Twilio SMS</div>
+                <div className="mt-1 text-xs text-slate-600">
+                  Phone: {messagingStatus.twilio.phoneNumber}
+                  {messagingStatus.twilio.verifyEnabled && ' • Verify enabled'}
+                </div>
+              </div>
+              <span
+                className={`rounded-full px-2 py-1 text-xs ${
+                  messagingStatus.twilio.smsConfigured
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                }`}
+              >
+                {messagingStatus.twilio.smsConfigured
+                  ? 'Configured'
+                  : 'Not Configured'}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 p-3">
+              <div className="flex-1">
+                <div className="text-sm font-medium">SendGrid Email</div>
+                <div className="mt-1 text-xs text-slate-600">
+                  {messagingStatus.sendgrid.webhookConfigured
+                    ? 'Webhook configured'
+                    : 'Webhook not configured'}
+                </div>
+              </div>
+              <span
+                className={`rounded-full px-2 py-1 text-xs ${
+                  messagingStatus.sendgrid.emailConfigured
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                }`}
+              >
+                {messagingStatus.sendgrid.emailConfigured
+                  ? 'Configured'
+                  : 'Not Configured'}
+              </span>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-slate-500">
+            Messaging services are configured via environment variables.
+          </p>
+        </section>
+      )}
+
       <section className="rounded-lg border bg-white p-4">
         <h4 className="mb-3 font-medium">System Information</h4>
         {loading ? (
@@ -127,9 +205,45 @@ export function SettingsPanel() {
             <div className="flex justify-between">
               <span className="text-slate-600">Environment:</span>
               <span className="font-medium">
-                {process.env.NODE_ENV === 'production'
+                {systemInfo?.environment === 'production'
                   ? 'Production'
                   : 'Development'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-600">Version:</span>
+              <span className="font-medium">
+                {systemInfo?.version || 'Unknown'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-600">Region:</span>
+              <span className="font-medium">
+                {systemInfo?.region || 'Unknown'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-600">Database:</span>
+              <span
+                className={`font-medium ${
+                  systemInfo?.databaseConfigured
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                }`}
+              >
+                {systemInfo?.databaseConfigured ? 'Connected' : 'Not Connected'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-600">Redis:</span>
+              <span
+                className={`font-medium ${
+                  systemInfo?.redisConfigured
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                }`}
+              >
+                {systemInfo?.redisConfigured ? 'Connected' : 'Not Connected'}
               </span>
             </div>
           </div>
