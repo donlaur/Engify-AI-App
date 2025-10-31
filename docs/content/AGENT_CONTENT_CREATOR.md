@@ -70,8 +70,10 @@ All generated content includes:
     category: string,
     wordCount: number,
     tokensUsed: number,
-    cost: number,
+    costUSD: number,
+    qualityScore: number,
     model: string,
+    provider: string,
     generationTimeMs: number
   }
 }

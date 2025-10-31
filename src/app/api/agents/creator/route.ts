@@ -4,11 +4,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth/config';
+import { auth } from '@/lib/auth';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { CreatorAgent } from '@/lib/agents/CreatorAgent';
-import { AIProviderFactory } from '@/lib/execution/factory/AIProviderFactory';
 import { auditLog } from '@/lib/logging/audit';
+import { logger } from '@/lib/logging/logger';
 import { z } from 'zod';
 
 const createContentSchema = z.object({
@@ -20,20 +20,19 @@ const createContentSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  let session: Awaited<ReturnType<typeof auth>> | null = null;
+
   try {
-    // Authenticate user
-    const session = await auth();
+    const guard = await RBACPresets.requireSuperAdmin()(request);
+    if (guard) {
+      return guard;
+    }
+
+    session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check RBAC permissions
-    const rbacCheck = await RBACPresets.requireSuperAdmin(request, session);
-    if (rbacCheck) {
-      return rbacCheck; // Returns 403 if not authorized
-    }
-
-    // Parse and validate request
     const body = await request.json();
     const validation = createContentSchema.safeParse(body);
 
@@ -46,11 +45,7 @@ export async function POST(request: NextRequest) {
 
     const { topic, category, targetWordCount, tags, sourceUrl } = validation.data;
 
-    // Initialize CreatorAgent
-    const providerFactory = new AIProviderFactory();
-    const creatorAgent = new CreatorAgent(providerFactory);
-
-    // Create content
+    const creatorAgent = new CreatorAgent();
     const result = await creatorAgent.createContent({
       topic,
       category,
@@ -59,21 +54,22 @@ export async function POST(request: NextRequest) {
       sourceUrl,
     });
 
-    // Audit log the action
     await auditLog({
-      action: result.success ? 'content_creation_triggered' : 'content_creation_failed',
+      action: result.success
+        ? 'content_creation_triggered'
+        : 'content_creation_failed',
       userId: session.user.id,
-      resourceType: 'content',
-      resourceId: result.contentId || 'failed',
-      metadata: {
+      resource: 'content',
+      details: {
         topic,
         category,
         targetWordCount,
         tags,
         success: result.success,
         wordCount: result.wordCount,
-        cost: result.cost,
+        costUSD: result.costUSD,
         error: result.error,
+        contentId: result.contentId,
       },
     });
 
@@ -83,38 +79,41 @@ export async function POST(request: NextRequest) {
         contentId: result.contentId,
         wordCount: result.wordCount,
         tokensUsed: result.tokensUsed,
-        cost: result.cost,
+        costUSD: result.costUSD,
         message: 'Content created successfully and queued for review',
       });
-    } else {
-      return NextResponse.json(
-        {
-          success: false,
-          error: result.error,
-          message: 'Content creation failed',
-        },
-        { status: 500 }
-      );
     }
 
+    return NextResponse.json(
+      {
+        success: false,
+        error: result.error,
+        message: 'Content creation failed',
+      },
+      { status: 500 }
+    );
   } catch (error) {
-    console.error('Error in content creation API:', error);
+    logger.apiError('/api/agents/creator', error, { method: 'POST' });
 
-    // Audit log the error
-    try {
-      const session = await auth();
-      if (session?.user?.id) {
+    if (session?.user?.id) {
+      try {
         await auditLog({
           action: 'content_creation_error',
           userId: session.user.id,
-          resourceType: 'content',
-          metadata: {
+          resource: 'content',
+          details: {
             error: error instanceof Error ? error.message : 'Unknown error',
           },
+          severity: 'error',
+        });
+      } catch (auditError) {
+        logger.error('creator-agent.audit.failure', {
+          error:
+            auditError instanceof Error
+              ? auditError.message
+              : String(auditError),
         });
       }
-    } catch (auditError) {
-      console.error('Failed to audit log error:', auditError);
     }
 
     return NextResponse.json(
@@ -127,30 +126,25 @@ export async function POST(request: NextRequest) {
 // GET endpoint to retrieve creation statistics
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate user
+    const guard = await RBACPresets.requireSuperAdmin()(request);
+    if (guard) {
+      return guard;
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check RBAC permissions
-    const rbacCheck = await RBACPresets.requireSuperAdmin(request, session);
-    if (rbacCheck) {
-      return rbacCheck;
-    }
-
-    // Get statistics
-    const providerFactory = new AIProviderFactory();
-    const creatorAgent = new CreatorAgent(providerFactory);
+    const creatorAgent = new CreatorAgent();
     const stats = await creatorAgent.getStats();
 
     return NextResponse.json({
       stats,
       message: 'Content creation statistics retrieved successfully',
     });
-
   } catch (error) {
-    console.error('Error retrieving content creation stats:', error);
+    logger.apiError('/api/agents/creator', error, { method: 'GET' });
     return NextResponse.json(
       { error: 'Failed to retrieve statistics' },
       { status: 500 }
