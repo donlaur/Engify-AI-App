@@ -13,7 +13,7 @@ vi.mock('@/lib/db/client', () => ({
   getDb: vi.fn(),
 }));
 
-describe('RBAC: /admin page', () => {
+describe('RBAC: /opshub page', () => {
   it('redirects non-admin users', async () => {
     const { auth } = await import('@/lib/auth');
     const { redirect } = await import('next/navigation');
@@ -25,8 +25,8 @@ describe('RBAC: /admin page', () => {
       throw new Error('REDIRECT');
     });
 
-    const AdminPage = (await import('../page')).default;
-    await expect(AdminPage()).rejects.toThrowError('REDIRECT');
+    const OpsHubPage = (await import('../page')).default;
+    await expect(OpsHubPage()).rejects.toThrowError('REDIRECT');
     expect(redirect).toHaveBeenCalledWith('/');
   });
 
@@ -50,8 +50,8 @@ describe('RBAC: /admin page', () => {
       }),
     });
 
-    const AdminPage = (await import('../page')).default;
-    const jsx = await AdminPage();
+    const OpsHubPage = (await import('../page')).default;
+    const jsx = await OpsHubPage();
     // Basic smoke: the returned JSX should include title text
     expect(JSON.stringify(jsx)).toContain('Admin Dashboard');
   });
