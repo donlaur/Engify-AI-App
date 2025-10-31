@@ -1,12 +1,10 @@
+/**
+ * AI Summary: Executes Anthropic Claude messages with shared timeout/retry guardrails.
+ */
+
 import Anthropic from '@anthropic-ai/sdk';
 import { AIProvider, AIRequest, AIResponse } from '../interfaces/AIProvider';
-
-/**
- * Claude Adapter
- *
- * Implements the AIProvider interface for Anthropic's Claude API.
- * Wraps the Anthropic SDK and provides standardized request/response format.
- */
+import { executeWithProviderHarness } from '../utils/provider-harness';
 export class ClaudeAdapter implements AIProvider {
   readonly name = 'Claude';
   readonly provider = 'anthropic';
@@ -49,23 +47,27 @@ export class ClaudeAdapter implements AIProvider {
    * Execute an AI request using Claude
    */
   async execute(request: AIRequest): Promise<AIResponse> {
-    const startTime = Date.now();
-
     // Call Anthropic API
-    const response = await this.client.messages.create({
-      model: this.model,
-      max_tokens: request.maxTokens ?? 2000,
-      temperature: request.temperature ?? 0.7,
-      system: request.systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: request.prompt,
-        },
-      ],
-    });
-
-    const latency = Date.now() - startTime;
+    const { value: response, latencyMs } = await executeWithProviderHarness(
+      () =>
+        this.client.messages.create({
+          model: this.model,
+          max_tokens: request.maxTokens ?? 2000,
+          temperature: request.temperature ?? 0.7,
+          system: request.systemPrompt,
+          messages: [
+            {
+              role: 'user',
+              content: request.prompt,
+            },
+          ],
+        }),
+      {
+        provider: this.provider,
+        model: this.model,
+        operation: 'chat-completion',
+      }
+    );
 
     // Extract content
     const content = response.content[0];
@@ -85,7 +87,7 @@ export class ClaudeAdapter implements AIProvider {
       content: text,
       usage,
       cost,
-      latency,
+      latency: latencyMs,
       provider: this.provider,
       model: this.model,
     };

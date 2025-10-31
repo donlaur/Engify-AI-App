@@ -1,13 +1,10 @@
+/**
+ * AI Summary: Executes Groq chat completions with shared timeout/retry guardrails.
+ */
+
 import Groq from 'groq-sdk';
 import { AIProvider, AIRequest, AIResponse } from '../interfaces/AIProvider';
-
-/**
- * Groq Adapter
- *
- * Implements the AIProvider interface for Groq's API.
- * Wraps the Groq SDK and provides standardized request/response format.
- * Groq provides ultra-fast inference for various open-source models.
- */
+import { executeWithProviderHarness } from '../utils/provider-harness';
 export class GroqAdapter implements AIProvider {
   readonly name = 'Groq';
   readonly provider = 'groq';
@@ -50,8 +47,6 @@ export class GroqAdapter implements AIProvider {
    * Execute an AI request using Groq
    */
   async execute(request: AIRequest): Promise<AIResponse> {
-    const startTime = Date.now();
-
     // Build messages array
     const messages: Groq.Chat.ChatCompletionMessageParam[] = [];
 
@@ -68,14 +63,20 @@ export class GroqAdapter implements AIProvider {
     });
 
     // Call Groq API
-    const response = await this.client.chat.completions.create({
-      model: this.model,
-      messages,
-      temperature: request.temperature ?? 0.7,
-      max_tokens: request.maxTokens ?? 2000,
-    });
-
-    const latency = Date.now() - startTime;
+    const { value: response, latencyMs } = await executeWithProviderHarness(
+      () =>
+        this.client.chat.completions.create({
+          model: this.model,
+          messages,
+          temperature: request.temperature ?? 0.7,
+          max_tokens: request.maxTokens ?? 2000,
+        }),
+      {
+        provider: this.provider,
+        model: this.model,
+        operation: 'chat-completion',
+      }
+    );
 
     // Extract usage data
     const usage = {
@@ -91,7 +92,7 @@ export class GroqAdapter implements AIProvider {
       content: response.choices[0]?.message?.content || '',
       usage,
       cost,
-      latency,
+      latency: latencyMs,
       provider: this.provider,
       model: this.model,
     };
