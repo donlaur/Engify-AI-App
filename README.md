@@ -1,17 +1,20 @@
-# Engify.ai - Enterprise AI Engineering Platform
+# Engify.ai - Production SaaS for AI-Powered Engineering Teams
 
-**Professional AI education and development platform for engineering teams**
+**Enterprise B2B platform that transforms teams into AI power users through structured learning, interactive workbenches, and automated quality guardrails**
 
 <div align="center">
 
 [![Live Site](https://img.shields.io/badge/🚀_Live-engify.ai-blue?style=for-the-badge)](https://engify.ai)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black.svg)](https://nextjs.org/)
+[![Tests](https://img.shields.io/badge/Tests-620_passing-success.svg)](https://github.com/donlaur/Engify-AI-App)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Production-ready AI engineering platform with enterprise-grade architecture**
+**Live SaaS Product + Engineering Leadership Portfolio**
 
-[View Live Site](https://engify.ai) • [Documentation](docs/) • [API Reference](docs/api/)
+[View Live Site](https://engify.ai) • [Built in Public](https://engify.ai/built-in-public) • [1,350+ Commits](https://github.com/donlaur/Engify-AI-App/commits)
+
+**Real Stats**: 85K+ lines of TypeScript • 620 tests • 115 docs • 38 test suites • 1,357 commits
 
 </div>
 
@@ -21,24 +24,29 @@
 
 Engify.ai is a **production-ready B2B SaaS platform** that transforms engineering teams into AI power users. This repository showcases **enterprise-grade software engineering** through iterative development sprints, each delivering production-quality features with full testing, documentation, and operational runbooks.
 
-**Built By**: Donnie Laur - Engineering Leader & AI/SaaS Architect  
-**Purpose**: Live SaaS product + Portfolio showcase for engineering leadership roles
+**Built By**: [Donnie Laur](https://linkedin.com/in/donlaur) - Engineering Leader & AI/SaaS Architect  
+**Available For**: Engineering Manager, Director of Engineering, AI Integration Consulting  
+**Contact**: donlaur@engify.ai | [View Resume](hireme/Donnie-Laur_Manager-Software-Engineering_AI-Enabled.pdf)
 
-### 🎯 Value Propositions
+**Purpose**: Live B2B SaaS product + Engineering leadership portfolio showcasing production-ready AI development practices
 
-**For Engineering Teams (B2B SaaS)**:
-- 📚 **100+ Expert Prompts**: Curated library for engineering, product, design teams
-- 🎯 **15 Battle-Tested Patterns**: Research-backed frameworks (CRAFT, KERNEL, etc.)
-- 🔧 **Interactive Workbenches**: OKRs, retrospectives, tech debt analysis with AI
-- 💰 **Cost Controls**: Per-tool budgets prevent runaway AI costs ($0.75-$2.50 limits)
-- 🔒 **Enterprise Security**: RBAC, MFA, audit logging, PII redaction (GDPR/SOC2)
+### 🎯 Dual Purpose Platform
 
-**For Hiring Managers (Portfolio Showcase)**:
-- ⚡ **Shipping Velocity**: 5-day sprints with 620+ tests and zero bugs
-- 🏗️ **System Design**: Multi-tenant architecture, provider abstraction, observability
-- 📊 **Quality Standards**: 100% test coverage, flaky test detection, security gates
-- 📖 **Documentation**: ADRs, incident playbooks, architectural diagrams
-- 🔄 **Operational Excellence**: Health checks, RED metrics, cost attribution
+**B2B SaaS Product** (Live at [engify.ai](https://engify.ai)):
+- 📚 **Prompt Library**: 100+ curated prompts for engineering, product, design, sales teams
+- 🎯 **Pattern Framework**: 15 research-backed patterns (CRAFT, KERNEL, Chain-of-Thought)
+- 🔧 **AI Workbenches**: Interactive tools for OKRs, retrospectives, tech debt analysis
+- 💰 **Cost Protection**: Automated budget guardrails prevent AI spending overruns
+- 🔒 **Enterprise Ready**: SSO, RBAC, audit logs, PII redaction, incident playbooks
+- 🎓 **Team Learning**: Role-based pathways from junior engineer to CTO
+
+**Engineering Leadership Portfolio** (Hiring Showcase):
+- ⚡ **Velocity + Quality**: 5-day sprints shipping 620+ tests with zero production bugs
+- 🏗️ **System Design**: Multi-tenant SaaS, provider abstraction, budget enforcement, observability
+- 📊 **Engineering Standards**: TypeScript strict mode, 100% test coverage, flaky detection, security gates
+- 📖 **Process Discipline**: ADRs for major decisions, incident playbooks, operational runbooks
+- 🔄 **Operational Maturity**: RED metrics, health checks, cost attribution, automated quality gates
+- 🎯 **Shipping Evidence**: 1,357 commits, 85K+ lines, 38 test suites, 115 documentation pages
 
 ---
 
@@ -399,6 +407,65 @@ See [Contributing Guide](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
+## 📈 Development Philosophy: Rapid → Refined → Production
+
+This project demonstrates **AI-augmented development** done right: fast iteration with engineering rigor, not "vibe coding."
+
+### Phase 1: Rapid Prototyping (Days 1-2)
+**Goal**: Validate concept and ship MVP fast
+
+- ✅ **500+ commits** in first 48 hours (small, atomic, revertable)
+- ✅ TypeScript files for prompts (5 min to add 10 prompts vs 2hr for DB schema)
+- ✅ Real auth from day 1 (NextAuth v5 + MongoDB, not toy login)
+- ✅ Live AI integration (OpenAI/Gemini APIs, not mocks)
+- 🎯 **Philosophy**: Ship to validate, refactor when patterns emerge
+
+### Phase 2: Business Patterns (Days 3-4)
+**Goal**: Add structure and scalability patterns
+
+- ✅ Repository Pattern for data layer (91 tests, 100% passing)
+- ✅ Provider Factory for AI abstraction (5 providers, unified interface)
+- ✅ RBAC with 6 roles + 13 permissions (multi-tenant ready)
+- ✅ Admin dashboard (OpsHub) with content review, user management
+- 🎯 **Philosophy**: Emerge patterns from real usage, don't over-engineer upfront
+
+### Phase 3: Production Hardening (Day 5)
+**Goal**: Make it bulletproof for enterprise customers
+
+- ✅ **Budget Enforcement**: Per-tool cost contracts ($0.75-$2.50 limits)
+- ✅ **Observability**: RED metrics with p50/p95/p99 latencies
+- ✅ **Security**: PII redaction, key rotation, comprehensive audit logs
+- ✅ **Reliability**: Rate limiting, replay protection, health checks
+- ✅ **Ops Maturity**: 3 incident playbooks, 4 ADRs, automated quality gates
+- 🎯 **Philosophy**: Ship features fast, harden for production systematically
+
+### The Guardrails (Not Vibe Coding)
+
+**Pre-Commit Hooks**:
+```bash
+✅ Route guard check     - RBAC on all admin/v2 routes
+✅ Security scanner      - No hardcoded secrets, PII exposure
+✅ Schema validation     - No data drift between code and DB
+✅ Lint + format         - Consistent code style
+```
+
+**CI/CD Pipeline**:
+```bash
+✅ 620 unit tests        - Vitest with comprehensive mocking
+✅ TypeScript strict     - Zero 'any' types, full type safety
+✅ ESLint rules          - Enforced conventions
+✅ Flaky test detection  - Runs suite 3-5x to catch race conditions
+✅ Bundle size limits    - Per-route KB budgets
+```
+
+**Architecture Decision Records**:
+- ADR 003: Workbench budget enforcement approach
+- ADR 004: In-memory vs Redis state (with migration plan)
+- ADR 005: RED metrics over expensive APM tools
+- ADR 006: PII redaction strategy for GDPR compliance
+
+---
+
 ## 💼 Engineering Leadership Showcase
 
 This repository demonstrates skills relevant to **Staff Engineer, Engineering Manager, and Director of Engineering** roles:
@@ -426,7 +493,26 @@ This repository demonstrates skills relevant to **Staff Engineer, Engineering Ma
 - **Commit Discipline**: Atomic commits, conventional messages, full test coverage
 - **Code Reviews**: Self-review via red-hat analysis after each phase
 
-**Contact**: [LinkedIn](https://www.linkedin.com/in/donlaur/) | donlaur@gmail.com
+### 📧 Available for Hire
+
+**Donnie Laur** is available for:
+- 🎯 **Engineering Manager** roles at growth-stage startups or enterprises
+- 🎯 **Director of Engineering** positions focusing on AI/ML product development
+- 🎯 **Technical Consulting** on AI integration into developer workflows and tooling
+- 🎯 **Fractional CTO** for early-stage SaaS companies
+
+**Contact**:
+- 📧 Email: [donlaur@engify.ai](mailto:donlaur@engify.ai)
+- 💼 LinkedIn: [linkedin.com/in/donlaur](https://linkedin.com/in/donlaur)
+- 📄 Resume: [View PDF](hireme/Donnie-Laur_Manager-Software-Engineering_AI-Enabled.pdf)
+- 🐙 GitHub: This repository showcases production-ready engineering practices
+
+**What You Get**:
+- Proven ability to ship production features with zero bugs (620 tests, 100% pass rate)
+- Experience building multi-tenant SaaS with enterprise security (RBAC, audit logs, compliance)
+- Deep expertise in AI integration (5 providers, budget enforcement, cost optimization)
+- Strong process discipline (ADRs, incident playbooks, quality gates, observability)
+- AI-augmented workflow expertise (10x productivity with guardrails)
 
 ---
 
