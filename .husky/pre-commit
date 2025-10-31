@@ -4,7 +4,15 @@
 echo "🔒 Running pre-commit checks..."
 echo ""
 
-# 1. Schema and code quality validation
+# 1. Enterprise compliance check (NEW - CRITICAL)
+echo "🏢 Checking enterprise compliance..."
+node scripts/maintenance/check-enterprise-compliance.js
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+echo ""
+
+# 2. Schema and code quality validation
 echo "📊 Validating schema and code quality..."
 node scripts/maintenance/validate-schema.js
 if [ $? -ne 0 ]; then
@@ -12,7 +20,7 @@ if [ $? -ne 0 ]; then
 fi
 echo ""
 
-# 2. Security checks
+# 3. Security checks
 echo "🛡️  Checking for security issues..."
 node scripts/security/security-check.js
 if [ $? -ne 0 ]; then
@@ -20,7 +28,7 @@ if [ $? -ne 0 ]; then
 fi
 echo ""
 
-# 3. Check for secrets
+# 4. Check for secrets
 echo "🔍 Scanning for secrets..."
 if command -v git-secrets &> /dev/null; then
     git secrets --scan
@@ -32,7 +40,7 @@ else
 fi
 echo ""
 
-# 4. Lint-staged (formatting, linting)
+# 5. Lint-staged (formatting, linting)
 echo "✨ Running linters and formatters..."
 pnpm lint-staged
 if [ $? -ne 0 ]; then
