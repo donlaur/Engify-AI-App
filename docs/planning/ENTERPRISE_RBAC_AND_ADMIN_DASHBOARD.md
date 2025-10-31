@@ -6,14 +6,16 @@
 - ✅ Ship an admin-only dashboard for operations, security, and content curation
 - ✅ Harden providers and content pipeline toward enterprise readiness
 
-## Current Status (Public Workflow)
+## Current Status (2025-10-31)
 
-- ✅ Priority 1 is production-ready: `/opshub` shipped with Users, Content, Audit, and Settings panels plus RBAC tests.
-- ✅ Priority 0 complete: RBAC presets and org-scoped tests cover all v2 routes.
-- ✅ Priority 2 is production-ready: scheduling, quality gates, review queue, and index flag complete.
-- ✅ Priority 3 hardened: shared guardrails, prompt assets, and secret validation in place.
-- ✅ Priority 4 reinforced: admin actions audited, PII scrubbing live, MFA enforced on sessions.
-- ✅ Priority 5 automated: CI enforces lint/type/test, RBAC matrix, and route guard policies.
+- ✅ **Priority 1: OpsHub** - Fully implemented and tested.
+- ✅ **Day 4 Add-On: Agent Sandbox** - Fully implemented and tested.
+- ✅ **Priority 0: RBAC Completion** - Fully implemented and tested.
+- ✅ **Priority 2: Content Pipeline Productionization** - Fully implemented and tested.
+- ✅ **Priority 3: Provider Hardening** - Fully implemented and tested.
+- ✅ **Priority 4: Security & Audit** - Fully implemented and tested.
+- ✅ **Priority 5: CI/CD & Policy Gates** - Fully implemented and tested.
+- ✅ **Regression Suite** - Execution strategies now inject the provider factory for RBAC-aware tests; prompt stats and OpsHub index stubs are green again.
 
 ## ✅ Priority 0 — RBAC Completion (Edge and Core)
 
