@@ -1,5 +1,5 @@
 /**
- * AI Summary: Tests Twilio webhook route signature handling.
+ * AI Summary: Tests Twilio webhook route with signature verification, rate limiting, and replay protection.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
@@ -8,18 +8,40 @@ vi.mock('@/lib/messaging/twilio', () => ({
   verifyTwilioSignature: vi.fn(async () => true),
 }));
 
-describe('Twilio webhook', () => {
-  beforeEach(() => vi.resetModules());
+vi.mock('@/lib/middleware/rateLimit', () => ({
+  rateLimit: vi.fn(() => true),
+}));
 
-  it('returns 200 when signature verifies', async () => {
+describe('Twilio webhook', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    // Clear the processed messages cache between tests
+    vi.doMock('../route', () => {
+      const actual = vi.importActual('../route');
+      return {
+        ...actual,
+        processedMessages: new Set(),
+      };
+    });
+  });
+
+  it('returns 200 when signature verifies and processes valid webhook', async () => {
     const { POST } = await import('../route');
     const req = new NextRequest('http://localhost:3000/api/auth/mfa/webhook', {
       method: 'POST',
-      body: JSON.stringify({ event: 'sms.status', status: 'delivered' }),
-      headers: { 'x-twilio-signature': 'sig' },
+      body: 'MessageSid=SM123&From=%2B1234567890&To=%2B0987654321&Body=Test+message',
+      headers: {
+        'x-twilio-signature': 'valid-sig',
+        'content-type': 'application/x-www-form-urlencoded',
+      },
     });
     const res = await POST(req);
     expect(res.status).toBe(200);
+
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.messageId).toBe('SM123');
+    expect(data.processed).toBe(true);
   });
 
   it('returns 401 when signature invalid', async () => {
@@ -29,9 +51,49 @@ describe('Twilio webhook', () => {
     const { POST } = await import('../route');
     const req = new NextRequest('http://localhost:3000/api/auth/mfa/webhook', {
       method: 'POST',
-      body: JSON.stringify({}),
+      body: 'MessageSid=SM123&Body=test',
+      headers: { 'x-twilio-signature': 'invalid-sig' },
     });
     const res = await POST(req);
     expect(res.status).toBe(401);
+  });
+
+  it('returns 429 when rate limited', async () => {
+    vi.doMock('@/lib/middleware/rateLimit', () => ({
+      rateLimit: vi.fn(() => false),
+    }));
+    const { POST } = await import('../route');
+    const req = new NextRequest('http://localhost:3000/api/auth/mfa/webhook', {
+      method: 'POST',
+      body: 'MessageSid=SM123&Body=test',
+      headers: { 'x-twilio-signature': 'sig' },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(429);
+  });
+
+  it('prevents replay attacks', async () => {
+    const { POST } = await import('../route');
+
+    // First request should succeed
+    const req1 = new NextRequest('http://localhost:3000/api/auth/mfa/webhook', {
+      method: 'POST',
+      body: 'MessageSid=SM123&From=%2B1234567890&To=%2B0987654321&Body=First+message',
+      headers: { 'x-twilio-signature': 'valid-sig' },
+    });
+    const res1 = await POST(req1);
+    expect(res1.status).toBe(200);
+
+    // Second request with same MessageSid should be rejected as replay
+    const req2 = new NextRequest('http://localhost:3000/api/auth/mfa/webhook', {
+      method: 'POST',
+      body: 'MessageSid=SM123&From=%2B1234567890&To=%2B0987654321&Body=Replay+message',
+      headers: { 'x-twilio-signature': 'valid-sig' },
+    });
+    const res2 = await POST(req2);
+    expect(res2.status).toBe(200); // 200 to prevent retries, but error message
+
+    const data2 = await res2.json();
+    expect(data2.error).toBe('Message already processed');
   });
 });
