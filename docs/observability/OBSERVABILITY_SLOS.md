@@ -4,6 +4,8 @@ AI Summary: RED metrics, health checks, tracing, and alerting guidelines for API
 
 # Observability & SLOs
 
+This work is part of Day 5: [Day 5 Plan](../planning/DAY_5_PLAN.md).
+
 ## Metrics
 
 - RED (Rate, Errors, Duration) per route/provider

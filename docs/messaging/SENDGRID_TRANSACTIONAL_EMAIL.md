@@ -4,6 +4,8 @@ AI Summary: Typed template registry, SendGrid webhook verification, error handli
 
 # SendGrid Transactional Email
 
+This work is part of Day 5: [Day 5 Plan](../planning/DAY_5_PLAN.md).
+
 ## Overview
 
 Centralized template registry with Zod-typed merge variables, webhook verify route, and admin observability.
