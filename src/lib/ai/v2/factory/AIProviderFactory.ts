@@ -26,6 +26,7 @@ export class AIProviderFactory {
   >([
     // OpenAI models
     ['openai', () => new OpenAIAdapter('gpt-3.5-turbo')],
+    ['openai-mini', () => new OpenAIAdapter('gpt-4o-mini')],
     ['openai-gpt4', () => new OpenAIAdapter('gpt-4')],
     ['openai-gpt4-turbo', () => new OpenAIAdapter('gpt-4-turbo-preview')],
 
@@ -37,10 +38,10 @@ export class AIProviderFactory {
 
     // Gemini models (VERIFIED Oct 31, 2025 - 1.5 models SUNSET!)
     // Only 2.0 experimental models work now
-    ['gemini', () => new GeminiAdapter('gemini-2.0-flash-exp')],          // Default to 2.0 exp
-    ['gemini-pro', () => new GeminiAdapter('gemini-2.0-flash-exp')],      // 1.5 pro is gone, use 2.0
-    ['gemini-flash', () => new GeminiAdapter('gemini-2.0-flash-exp')],    // 1.5 flash is gone, use 2.0
-    ['gemini-exp', () => new GeminiAdapter('gemini-2.0-flash-exp')],      // Experimental (free, verified working)
+    ['gemini', () => new GeminiAdapter('gemini-2.0-flash-exp')], // Default to 2.0 exp
+    ['gemini-pro', () => new GeminiAdapter('gemini-2.0-flash-exp')], // 1.5 pro is gone, use 2.0
+    ['gemini-flash', () => new GeminiAdapter('gemini-2.0-flash-exp')], // 1.5 flash is gone, use 2.0
+    ['gemini-exp', () => new GeminiAdapter('gemini-2.0-flash-exp')], // Experimental (free, verified working)
 
     // Groq models (ultra-fast inference)
     ['groq', () => new GroqAdapter('llama3-8b-8192')],
