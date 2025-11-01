@@ -159,16 +159,16 @@ export function PatternSwitcher({
             </div>
 
             {/* Impact Analysis */}
-            <Card className="bg-blue-50">
+            <Card className="bg-blue-50 dark:bg-blue-950/50">
               <CardContent className="pt-4">
                 <div className="flex items-start gap-3">
-                  <Icons.lightbulb className="h-5 w-5 text-blue-600" />
+                  <Icons.lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <div className="space-y-2 text-sm">
-                    <p className="font-semibold text-blue-900">
+                    <p className="font-semibold text-blue-900 dark:text-blue-100">
                       Pattern Impact:
                     </p>
                     {selectedPattern === 'chain-of-thought' && (
-                      <p className="text-blue-800">
+                      <p className="text-blue-800 dark:text-blue-200">
                         ✅ Better for complex reasoning tasks
                         <br />
                         ✅ Makes AI logic transparent
@@ -186,7 +186,7 @@ export function PatternSwitcher({
                       </p>
                     )}
                     {selectedPattern === 'kernel' && (
-                      <p className="text-blue-800">
+                      <p className="text-blue-800 dark:text-blue-200">
                         ✅ Enterprise-grade quality
                         <br />
                         ✅ 94% success rate
@@ -194,7 +194,7 @@ export function PatternSwitcher({
                       </p>
                     )}
                     {selectedPattern === 'template' && (
-                      <p className="text-blue-800">
+                      <p className="text-blue-800 dark:text-blue-200">
                         ✅ Structured output
                         <br />
                         ✅ Easy to verify
