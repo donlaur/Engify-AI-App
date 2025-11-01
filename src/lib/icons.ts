@@ -70,6 +70,7 @@ import {
   Settings,
   LogOut,
   LogIn,
+  Lock,
 
   // Features
   Sparkles,
@@ -137,7 +138,8 @@ import {
   DollarSign,
   Hash,
   Play,
-  Wifi
+  Wifi,
+  Globe,
 } from 'lucide-react';
 
 // Export all icons with descriptive names
@@ -210,6 +212,7 @@ export const Icons = {
   logout: LogOut,
   logOut: LogOut,
   login: LogIn,
+  lock: Lock,
 
   // Features
   sparkles: Sparkles,
@@ -274,6 +277,7 @@ export const Icons = {
   hash: Hash,
   play: Play,
   wifi: Wifi,
+  globe: Globe,
   
   // Social
   twitter: Twitter,
