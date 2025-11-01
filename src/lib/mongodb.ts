@@ -22,15 +22,15 @@ const uri = process.env.MONGODB_URI;
 const isSrvUri = uri.startsWith('mongodb+srv://');
 
 const options = {
-  maxPoolSize: 10,
-  minPoolSize: 2,
-  serverSelectionTimeoutMS: 10000, // Reduced from 30s for faster failure detection
-  socketTimeoutMS: 30000, // Reduced from 45s
-  connectTimeoutMS: 10000, // Reduced from 30s
+  maxPoolSize: 1, // FREE TIER: Limit to 1 connection per serverless function
+  minPoolSize: 0, // FREE TIER: Don't maintain minimum connections
+  serverSelectionTimeoutMS: 10000,
+  socketTimeoutMS: 30000,
+  connectTimeoutMS: 10000,
   retryWrites: true,
   retryReads: true,
   w: 'majority' as const,
-  maxIdleTimeMS: 30000,
+  maxIdleTimeMS: 60000, // FREE TIER: Keep connections alive longer
   family: 4, // Force IPv4 to avoid DNS issues
   // SSL/TLS options for MongoDB Atlas
   // Note: mongodb+srv:// automatically handles TLS, but explicit options help with some environments
