@@ -101,3 +101,4 @@ lambda/*.dist-info/
 !lambda/rag-lambda.py
 !lambda/package.json
 .env.local.backup
+.env*.local

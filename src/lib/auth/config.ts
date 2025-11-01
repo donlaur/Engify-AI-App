@@ -167,6 +167,34 @@ export const authOptions: NextAuthConfig = {
   },
 
   callbacks: {
+    async signIn() {
+      // Allow all sign-ins (we already validated in authorize())
+      return true;
+    },
+
+    async redirect({ url, baseUrl }) {
+      // Log redirect attempts for debugging
+      console.log('🔀 [REDIRECT] url:', url, 'baseUrl:', baseUrl);
+      
+      // If url is relative, make it absolute with baseUrl
+      if (url.startsWith('/')) {
+        const redirectUrl = `${baseUrl}${url}`;
+        console.log('🔀 [REDIRECT] Redirecting to:', redirectUrl);
+        return redirectUrl;
+      }
+      
+      // If url is on the same origin, allow it
+      if (url.startsWith(baseUrl)) {
+        console.log('🔀 [REDIRECT] Same origin redirect to:', url);
+        return url;
+      }
+      
+      // Otherwise redirect to dashboard
+      const dashboardUrl = `${baseUrl}/dashboard`;
+      console.log('🔀 [REDIRECT] Default redirect to:', dashboardUrl);
+      return dashboardUrl;
+    },
+
     async jwt({ token, user }: { token: JWT; user: User }) {
       // Add user info to token on login
       if (user) {
