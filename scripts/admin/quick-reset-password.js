@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Quick password reset for admin user
- * Usage: MONGODB_URI="..." ADMIN_EMAIL="..." ADMIN_PASSWORD="..." node scripts/admin/quick-reset-password.js
+ * Usage: ADMIN_PASSWORD="..." node scripts/admin/quick-reset-password.js
  */
-
+require('dotenv').config({ path: '.env.local' });
 const bcrypt = require('bcryptjs');
 const { MongoClient, ObjectId } = require('mongodb');
 
