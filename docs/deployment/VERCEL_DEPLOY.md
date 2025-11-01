@@ -8,7 +8,7 @@
 
 1. Go to https://vercel.com/new
 2. Import Git Repository
-3. Select: `donlaur/Engify-AI-App` (now public!)
+3. Select: Your GitHub repository
 4. Framework: **Next.js** (auto-detected)
 5. Root Directory: `./`
 6. Build Command: `npm run build`

@@ -17,7 +17,7 @@ SENDGRID_API_KEY=SG.your_api_key_here
 # OR
 SENDGRID_API=SG.your_api_key_here
 
-# From Email Address (Optional, defaults to donlaur@engify.ai)
+# From Email Address (Optional, defaults to noreply@engify.ai)
 SENDGRID_FROM_EMAIL=noreply@engify.ai
 
 # From Name (Optional)

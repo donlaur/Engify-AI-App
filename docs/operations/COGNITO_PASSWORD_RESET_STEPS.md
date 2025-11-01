@@ -8,7 +8,7 @@
 2. Click on your user pool: **"User pool - dz9-no"**
 3. Click **"User management"** in the left sidebar
 4. Click **"Users"** (under User management)
-5. **Click on your email** (`donlaur@engify.ai`) - this opens the user details page
+5. **Click on your email** ([your-email@example.com]) - this opens the user details page
 
 ### Step 2: Reset Password via Actions Menu
 
@@ -30,7 +30,7 @@
 ### Step 4: Login with Temporary Password
 
 1. Go to `https://engify.ai/login`
-2. Email: `donlaur@engify.ai`
+2. Email: [your-email@example.com]
 3. Password: (paste the temporary password from Step 3)
 4. Click "Login"
 
@@ -75,7 +75,7 @@ If you can't find "Reset password" in Actions:
 1. Check that your account status is **"Enabled"** (green checkmark)
 2. Check that email is **"Verified"** (green badge)
 3. Try logging in with the exact temporary password (no spaces)
-4. Make sure you're using the correct email: `donlaur@engify.ai`
+4. Make sure you're using the correct email: [your-email@example.com]
 
 ### Need to Set Password Directly (Admin Only)
 
@@ -97,7 +97,7 @@ AWS Console
           └─ "User pool - dz9-no"
               └─ User management
                   └─ Users
-                      └─ [Click: donlaur@engify.ai]
+                      └─ [Click: [your-email@example.com]]
                           └─ Actions (top right)
                               └─ Reset password
                                   └─ Generate password

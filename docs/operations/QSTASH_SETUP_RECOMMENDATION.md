@@ -8,7 +8,7 @@
 - Environment variables already configured
 - No issues reported
 
-✅ **Redis is set up** on new account (`donlaur@engify.ai`):
+✅ **Redis is set up** on new account:
 
 - Free tier
 - Auth cache configured
@@ -32,7 +32,7 @@ Existing Account:
 ├── QStash (SendGrid webhooks, scheduled jobs)
 └── Cost: $0/month (free tier)
 
-New Account (donlaur@engify.ai):
+New Account:
 ├── Redis (auth cache)
 └── Cost: $0/month (free tier)
 ```
