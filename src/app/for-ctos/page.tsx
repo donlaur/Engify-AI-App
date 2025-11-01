@@ -197,7 +197,7 @@ export default function ForCTOsPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Icons.eye className="h-5 w-5 text-primary" />
+                    <Icons.view className="h-5 w-5 text-primary" />
                     3. Output Scanning & Security Checks
                   </CardTitle>
                   <CardDescription>

@@ -38,7 +38,7 @@ export default function AIModelsAdminPage() {
               </p>
             </div>
             <Button variant="outline">
-              <Icons.refreshCw className="mr-2 h-4 w-4" />
+              <Icons.refresh className="mr-2 h-4 w-4" />
               Check for Updates
             </Button>
           </div>
