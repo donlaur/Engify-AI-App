@@ -19,26 +19,24 @@ const loginSchema = z.object({
   password: z.string().min(8),
 });
 
-// Initialize Cognito client
-const cognitoClient = new CognitoIdentityProviderClient({
-  region: COGNITO_REGION,
-});
-
+// Define Cognito configuration constants FIRST
+const COGNITO_REGION = process.env.COGNITO_REGION || 'us-east-1';
 const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID;
 const COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID;
 const COGNITO_CLIENT_SECRET = process.env.COGNITO_CLIENT_SECRET; // Optional, only if using client secret
-const COGNITO_REGION = process.env.COGNITO_REGION || 'us-east-1';
 
-if (!COGNITO_CLIENT_ID) {
-  throw new Error('COGNITO_CLIENT_ID environment variable is required');
-}
+// Initialize Cognito client AFTER constants are defined (only if env vars are set)
+const cognitoClient =
+  COGNITO_CLIENT_ID && COGNITO_USER_POOL_ID
+    ? new CognitoIdentityProviderClient({
+        region: COGNITO_REGION,
+      })
+    : null;
 
-if (!COGNITO_USER_POOL_ID) {
-  throw new Error('COGNITO_USER_POOL_ID environment variable is required');
-}
-
-// Construct Cognito issuer URL
-const COGNITO_ISSUER = `https://cognito-idp.${COGNITO_REGION}.amazonaws.com/${COGNITO_USER_POOL_ID}`;
+// Construct Cognito issuer URL (only if configured)
+const COGNITO_ISSUER = COGNITO_USER_POOL_ID
+  ? `https://cognito-idp.${COGNITO_REGION}.amazonaws.com/${COGNITO_USER_POOL_ID}`
+  : '';
 
 /**
  * AWS Cognito Credentials Provider
@@ -52,6 +50,13 @@ export function CognitoProvider() {
     },
     async authorize(credentials) {
       try {
+        // Validate Cognito is configured
+        if (!COGNITO_CLIENT_ID || !COGNITO_USER_POOL_ID || !cognitoClient) {
+          throw new Error(
+            'Cognito is not configured. Set COGNITO_CLIENT_ID and COGNITO_USER_POOL_ID environment variables.'
+          );
+        }
+
         // Validate input
         const { email, password } = loginSchema.parse(credentials);
 
@@ -128,6 +133,10 @@ export function CognitoProvider() {
  */
 export async function getCognitoUserByEmail(email: string) {
   try {
+    if (!COGNITO_USER_POOL_ID || !cognitoClient) {
+      throw new Error('Cognito is not configured');
+    }
+
     const command = new AdminGetUserCommand({
       UserPoolId: COGNITO_USER_POOL_ID,
       Username: email,
