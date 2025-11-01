@@ -35,7 +35,14 @@ const options = {
   // SSL/TLS options for MongoDB Atlas
   // Note: mongodb+srv:// automatically handles TLS, but explicit options help with some environments
   ...(isSrvUri
-    ? {}
+    ? {
+        // For SRV connections, MongoDB handles TLS automatically
+        // But we can add explicit TLS options for better compatibility
+        tls: true,
+        tlsAllowInvalidCertificates: false,
+        tlsAllowInvalidHostnames: false,
+        tlsInsecure: false,
+      }
     : {
         tls: true,
         tlsAllowInvalidCertificates: false,
@@ -43,6 +50,9 @@ const options = {
       }),
   // Connection pool options
   heartbeatFrequencyMS: 10000,
+  // Additional options for serverless environments
+  directConnection: false, // Use replica set connection
+  compressors: ['zlib'], // Enable compression
 };
 
 // Use global variable to cache connection across invocations (important for serverless)
