@@ -8,6 +8,7 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { sanitizeMeta, sanitizeValue } from '@/lib/logging/sanitizer';
+import { getDb } from '@/lib/mongodb';
 
 // ============================================================================
 // AUDIT EVENT TYPES
@@ -166,8 +167,13 @@ export async function auditLog(entry: AuditLogEntry): Promise<void> {
 
 async function logCriticalEvent(entry: AuditLogEntry): Promise<void> {
   try {
-    // TODO: Implement MongoDB logging for critical events
-    // This allows real-time monitoring and alerting
+    // MongoDB logging for critical events (allows real-time monitoring and alerting)
+    const db = await getDb();
+    await db.collection('critical_audit_logs').insertOne({
+      ...entry,
+      timestamp: entry.timestamp || new Date(),
+      loggedAt: new Date(),
+    });
     console.error('CRITICAL SECURITY EVENT:', entry);
   } catch (error) {
     console.error('Failed to log critical event:', error);
@@ -249,17 +255,107 @@ export interface AuditQuery {
   severity?: AuditSeverity;
 }
 
-export async function queryAuditLogs(_query: AuditQuery): Promise<unknown[]> {
-  // TODO: Implement audit log querying
-  // This is required for compliance reporting and investigations
-  return [];
+export async function queryAuditLogs(query: AuditQuery): Promise<unknown[]> {
+  try {
+    const db = await getDb();
+
+    // Build MongoDB query from filters
+    const mongoQuery: Record<string, unknown> = {};
+    if (query.startDate || query.endDate) {
+      mongoQuery.timestamp = {};
+      if (query.startDate) {
+        mongoQuery.timestamp = {
+          ...(mongoQuery.timestamp as Record<string, unknown>),
+          $gte: query.startDate,
+        };
+      }
+      if (query.endDate) {
+        mongoQuery.timestamp = {
+          ...(mongoQuery.timestamp as Record<string, unknown>),
+          $lte: query.endDate,
+        };
+      }
+    }
+    if (query.userId) {
+      mongoQuery.userId = query.userId;
+    }
+    if (query.action) {
+      mongoQuery.action = query.action;
+    }
+    if (query.severity) {
+      mongoQuery.severity = query.severity;
+    }
+
+    // Query critical audit logs
+    const logs = await db
+      .collection('critical_audit_logs')
+      .find(mongoQuery)
+      .toArray();
+    return logs;
+  } catch (error) {
+    console.error('Failed to query audit logs:', error);
+    return [];
+  }
 }
 
 export async function generateComplianceReport(
-  _startDate: Date,
-  _endDate: Date
+  startDate: Date,
+  endDate: Date
 ): Promise<unknown> {
-  // TODO: Implement compliance reporting
-  // Required for SOC 2 / FedRAMP audits
-  return {};
+  try {
+    const db = await getDb();
+
+    // Aggregate compliance metrics
+    const report = await db
+      .collection('critical_audit_logs')
+      .aggregate([
+        {
+          $match: {
+            timestamp: { $gte: startDate, $lte: endDate },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalEvents: { $sum: 1 },
+            criticalEvents: {
+              $sum: { $cond: [{ $eq: ['$severity', 'critical'] }, 1, 0] },
+            },
+            errorEvents: {
+              $sum: { $cond: [{ $eq: ['$severity', 'error'] }, 1, 0] },
+            },
+            warningEvents: {
+              $sum: { $cond: [{ $eq: ['$severity', 'warning'] }, 1, 0] },
+            },
+            uniqueUsers: { $addToSet: '$userId' },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            totalEvents: 1,
+            criticalEvents: 1,
+            errorEvents: 1,
+            warningEvents: 1,
+            uniqueUsersCount: { $size: '$uniqueUsers' },
+          },
+        },
+      ])
+      .toArray();
+
+    if (report && report.length > 0) {
+      return report[0];
+    }
+
+    return {
+      totalEvents: 0,
+      criticalEvents: 0,
+      errorEvents: 0,
+      warningEvents: 0,
+      uniqueUsersCount: 0,
+    };
+  } catch (error) {
+    console.error('Failed to generate compliance report:', error);
+    return {};
+  }
 }
