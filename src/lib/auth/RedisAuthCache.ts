@@ -132,7 +132,7 @@ export class RedisAuthCache {
         const value = JSON.stringify(userWithoutPassword);
 
         if (isUpstash) {
-          await (this.redis as UpstashRedisClient).setex(
+          await (this.redis as UpstashRedis).setex(
             key,
             CACHE_TTL.userData,
             value
@@ -204,7 +204,7 @@ export class RedisAuthCache {
       const value = JSON.stringify(userWithoutPassword);
 
       if (isUpstash) {
-        await (this.redis as UpstashRedisClient).setex(
+        await (this.redis as UpstashRedis).setex(
           key,
           CACHE_TTL.userData,
           value
@@ -252,7 +252,7 @@ export class RedisAuthCache {
 
       if (isUpstash) {
         await Promise.all(
-          keys.map((key) => (this.redis as UpstashRedisClient).del(key))
+          keys.map((key) => (this.redis as UpstashRedis).del(key))
         );
       } else {
         await Promise.all(keys.map((key) => (this.redis as Redis).del(key)));
@@ -273,10 +273,10 @@ export class RedisAuthCache {
       let attempts: number;
 
       if (isUpstash) {
-        attempts = await (this.redis as UpstashRedisClient).incr(key);
+        attempts = await (this.redis as UpstashRedis).incr(key);
         // Set TTL on first attempt
         if (attempts === 1) {
-          await (this.redis as UpstashRedisClient).expire(
+          await (this.redis as UpstashRedis).expire(
             key,
             CACHE_TTL.loginAttempts
           );
@@ -323,7 +323,7 @@ export class RedisAuthCache {
 
       const key = CACHE_KEYS.loginAttempts(email);
       const attempts = isUpstash
-        ? await (this.redis as UpstashRedisClient).get(key)
+        ? await (this.redis as UpstashRedis).get(key)
         : await (this.redis as Redis).get(key);
       return attempts ? parseInt(attempts, 10) : 0;
     } catch (error) {
@@ -343,11 +343,7 @@ export class RedisAuthCache {
       const value = JSON.stringify(sessionData);
 
       if (isUpstash) {
-        await (this.redis as UpstashRedisClient).setex(
-          key,
-          CACHE_TTL.session,
-          value
-        );
+        await (this.redis as UpstashRedis).setex(key, CACHE_TTL.session, value);
       } else {
         await (this.redis as Redis).setex(key, CACHE_TTL.session, value);
       }
