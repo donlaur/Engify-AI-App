@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { APP_URL } from '@/lib/constants';
 import CategoryPageClient from './category-page-client';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import { getMongoDb } from '@/lib/db/mongodb';
 
 const CATEGORY_INFO: Record<string, { title: string; description: string }> = {
   'code-generation': {
@@ -38,6 +38,46 @@ const CATEGORY_INFO: Record<string, { title: string; description: string }> = {
   },
 };
 
+async function getPromptsByCategory(category: string) {
+  try {
+    const db = await getMongoDb();
+    const collection = db.collection('prompts');
+    
+    // Use MongoDB index for efficient category filtering
+    const prompts = await collection
+      .find({
+        category: category.toLowerCase(),
+        isPublic: true,
+      })
+      .sort({ isFeatured: -1, views: -1 })
+      .limit(100)
+      .toArray();
+
+    return prompts.map((p) => ({
+      id: p.id || p._id.toString(),
+      slug: p.slug,
+      title: p.title,
+      description: p.description,
+      content: p.content,
+      category: p.category,
+      role: p.role,
+      pattern: p.pattern,
+      tags: p.tags || [],
+      isFeatured: p.isFeatured || false,
+      views: p.views || 0,
+      rating: p.rating || p.stats?.averageRating || 0,
+      ratingCount: p.ratingCount || p.stats?.totalRatings || 0,
+      createdAt: p.createdAt || new Date(),
+    }));
+  } catch (error) {
+    console.error('Error fetching prompts by category:', error);
+    // Fallback to static data
+    const { getSeedPromptsWithTimestamps } = await import('@/data/seed-prompts');
+    const allPrompts = getSeedPromptsWithTimestamps();
+    return allPrompts.filter((p) => p.category === category);
+  }
+}
+
 export async function generateMetadata({ params }: { params: { category: string } }): Promise<Metadata> {
   const category = decodeURIComponent(params.category);
   const categoryInfo = CATEGORY_INFO[category] || {
@@ -45,9 +85,8 @@ export async function generateMetadata({ params }: { params: { category: string 
     description: `Explore prompt engineering prompts in the ${category} category.`,
   };
 
-  // Get prompts in this category
-  const allPrompts = getSeedPromptsWithTimestamps();
-  const categoryPrompts = allPrompts.filter((p) => p.category === category);
+  // Get prompts in this category from MongoDB
+  const categoryPrompts = await getPromptsByCategory(category);
 
   const title = `${categoryInfo.title} Prompts - Prompt Engineering Library | Engify.ai`;
   const description = `${categoryInfo.description} Browse ${categoryPrompts.length} prompt${categoryPrompts.length !== 1 ? 's' : ''} in this category.`;
@@ -89,9 +128,8 @@ export default async function CategoryPage({ params }: { params: { category: str
     description: `Explore prompts in the ${category} category.`,
   };
 
-  // Get prompts in this category
-  const allPrompts = getSeedPromptsWithTimestamps();
-  const categoryPrompts = allPrompts.filter((p) => p.category === category);
+  // Get prompts in this category from MongoDB
+  const categoryPrompts = await getPromptsByCategory(category);
 
   // Generate JSON-LD structured data
   const jsonLd = {
