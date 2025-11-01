@@ -178,25 +178,25 @@ More detail: [Phase 4: Career Recommendations](../features/CAREER_RECOMMENDATION
 
 ## Phase 5 — Site Stats (MongoDB Only)
 
-**Status:** ⚠️ Not started  
+**Status:** ✅ Complete  
 **Priority:** Medium - stale hardcoded numbers
 
 **Problem:** `siteStats` constant with hardcoded numbers (gets stale as content grows)
 
 ### Tasks
 
-- ⚠️ Deprecate `siteStats` constant (mark but don't remove)
-- ⚠️ Create `/api/stats` endpoint for real-time counts
-- ⚠️ Update `ChatWidget` to fetch from API
-- ⚠️ Find and replace other `siteStats` usage
+- ✅ Deprecate `siteStats` constant (marked deprecated, kept for backwards compatibility)
+- ✅ `/api/stats` endpoint already exists for real-time counts
+- ✅ Update `ChatWidget` to fetch from API
+- ✅ Find and replace other `siteStats` usage (patterns-client.tsx)
 
 More detail: [Phase 5: Site Stats Migration](../operations/SITE_STATS_MIGRATION.md)
 
 **Acceptance:**
 
-- ✅ Real-time stats from MongoDB
+- ✅ Real-time stats from MongoDB via /api/stats endpoint
 - ✅ Numbers update automatically as content grows
-- ✅ No manual updates needed
+- ✅ No manual updates needed, deprecated but functional
 
 **Red Hat Review Notes:**
 
