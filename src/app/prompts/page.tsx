@@ -11,7 +11,7 @@ import type { Metadata } from 'next';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { LibraryClient } from '@/components/features/LibraryClient';
 import { generateMetaTags, pageSEO } from '@/lib/seo';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import { getAllPrompts } from '@/lib/prompts/mongodb-prompts';
 import { getStats } from '@/lib/stats-cache';
 
 // SEO Metadata
@@ -19,8 +19,8 @@ export const metadata: Metadata = generateMetaTags(pageSEO.library) as Metadata;
 
 // Server Component
 export default async function LibraryPage() {
-  // Use seed prompts for now (MongoDB prompts will come in Phase 2)
-  const prompts = getSeedPromptsWithTimestamps();
+  // Fetch prompts from MongoDB (production content)
+  const prompts = await getAllPrompts();
 
   // Get stats from cache
   const data = await getStats();

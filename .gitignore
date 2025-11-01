@@ -78,6 +78,9 @@ next-env.d.ts
 # Never commit password reset scripts
 **/reset-password*
 
+# Private scripts (migration, content management)
+scripts/private/
+
 # Lambda deployment artifacts
 lambda/**/*.zip
 lambda/bson/
