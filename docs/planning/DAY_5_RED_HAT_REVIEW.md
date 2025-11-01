@@ -471,16 +471,17 @@ const validatedIds = promptIdsSchema.parse(promptIdsParam);
 - ✅ **DRY:** Using existing AIProvider infrastructure
 - ✅ **Security:** No secrets, env vars only
 - ✅ **Validation:** Zod schemas throughout
-- ❌ **Testing:** 0% coverage on new routes/components
-- ❌ **Rate Limiting:** Missing on new routes
+- ❌ **Testing:** 0% coverage on new routes/components (CRITICAL - still needs tests)
+- ✅ **Rate Limiting:** Added to new routes (FIXED)
 - ⚠️ **RBAC:** Not needed for public read routes (OK)
-- ❌ **Audit Logging:** Missing on new routes
-- ⚠️ **Error Boundaries:** Missing on new components
+- ✅ **Audit Logging:** Added to new routes (FIXED)
+- ✅ **Error Boundaries:** Added to new components (FIXED)
 - ✅ **Error Handling:** Good try/catch patterns
 - ✅ **Documentation:** Comprehensive docs created
+- ✅ **Input Validation:** Added Zod validation for route params (FIXED)
 
-**Overall Compliance:** 6/10 (60%)  
-**Target:** 10/10 (100%)
+**Overall Compliance:** 9/10 (90%) - **UPGRADED from 6/10**  
+**Target:** 10/10 (100%) - **Only missing tests now**
 
 ---
 
