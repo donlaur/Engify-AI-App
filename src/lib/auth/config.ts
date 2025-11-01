@@ -43,16 +43,21 @@ export const authOptions: NextAuthConfig = {
             },
             async authorize(credentials) {
               try {
+                console.log('🔐 [AUTH] Starting login attempt...');
+                
                 // Validate input
                 const { email, password } = loginSchema.parse(credentials);
+                console.log(`🔐 [AUTH] Email validated: ${email}`);
 
                 const authCache = getAuthCache();
 
                 // Rate limiting: Check login attempts
                 const loginAttempts = await authCache.getLoginAttempts(email);
                 const MAX_LOGIN_ATTEMPTS = 5;
+                console.log(`🔐 [AUTH] Login attempts: ${loginAttempts}/${MAX_LOGIN_ATTEMPTS}`);
+                
                 if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-                  console.warn(`Too many login attempts for ${email}`);
+                  console.warn(`🔐 [AUTH] ❌ Too many login attempts for ${email}`);
                   return null; // Don't reveal if user exists
                 }
 
@@ -62,9 +67,12 @@ export const authOptions: NextAuthConfig = {
                   | Awaited<ReturnType<typeof userService.findByEmail>>
                   | null
                   | undefined = await authCache.getUserByEmail(email);
+                
+                console.log(`🔐 [AUTH] Redis cache result: ${user === undefined ? 'not cached' : user === null ? 'cached as null' : 'cached user found'}`);
 
                 // If not in cache (undefined), fall back to MongoDB (with timeout)
                 if (user === undefined) {
+                  console.log('🔐 [AUTH] Querying MongoDB...');
                   const timeoutPromise = new Promise((_, reject) => {
                     setTimeout(
                       () => reject(new Error('Authentication timeout')),
@@ -79,23 +87,35 @@ export const authOptions: NextAuthConfig = {
                   ])) as Awaited<
                     ReturnType<typeof userService.findByEmail>
                   > | null;
+                  
+                  console.log(`🔐 [AUTH] MongoDB result: ${user ? 'user found' : 'user not found'}`);
                 }
 
-                if (!user || !user.password) {
-                  // Increment failed login attempts
+                if (!user) {
+                  console.log('🔐 [AUTH] ❌ User not found');
+                  await authCache.incrementLoginAttempts(email);
+                  return null;
+                }
+                
+                if (!user.password) {
+                  console.log('🔐 [AUTH] ❌ User has no password set');
                   await authCache.incrementLoginAttempts(email);
                   return null;
                 }
 
                 // Verify password with bcrypt
+                console.log('🔐 [AUTH] Verifying password...');
                 const isValid = await bcrypt.compare(password, user.password);
+                console.log(`🔐 [AUTH] Password valid: ${isValid}`);
+                
                 if (!isValid) {
-                  // Increment failed login attempts
+                  console.log('🔐 [AUTH] ❌ Invalid password');
                   await authCache.incrementLoginAttempts(email);
                   return null;
                 }
 
                 // Success! Reset login attempts
+                console.log('🔐 [AUTH] ✅ Login successful!');
                 await authCache.resetLoginAttempts(email);
 
                 // Return user object
@@ -107,13 +127,13 @@ export const authOptions: NextAuthConfig = {
                   organizationId: user.organizationId?.toString() || null,
                 };
               } catch (error) {
-                console.error('Auth error:', error);
+                console.error('🔐 [AUTH] ❌ Auth error:', error);
                 // Return more specific error for debugging
                 if (
                   error instanceof Error &&
                   error.message === 'Authentication timeout'
                 ) {
-                  console.error('MongoDB connection timeout during login');
+                  console.error('🔐 [AUTH] ❌ MongoDB connection timeout during login');
                 }
                 return null;
               }
