@@ -8,6 +8,7 @@ import { auth } from '@/lib/auth';
 /**
  * GET /api/prompts/[id]
  * Fetch a single prompt by ID
+ * Public access - no authentication required for public prompts
  */
 export async function GET(
   _request: NextRequest,
@@ -15,46 +16,57 @@ export async function GET(
 ) {
   try {
     const { id } = params;
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     // Try MongoDB first
     try {
       const db = await getMongoDb();
       const collection = db.collection('prompts');
 
-      const prompt = await collection.findOne({ _id: new ObjectId(id) });
+      // Try finding by id, slug, or _id
+      let prompt = await collection.findOne({
+        $or: [
+          { id },
+          { slug: id },
+        ],
+      });
 
+      // If not found, try MongoDB ObjectId
       if (!prompt) {
-        return NextResponse.json(
-          { error: 'Prompt not found' },
-          { status: 404 }
-        );
+        try {
+          prompt = await collection.findOne({ _id: new ObjectId(id) });
+        } catch {
+          // Invalid ObjectId format, continue to fallback
+        }
       }
 
-      // Increment view count
-      await collection.updateOne(
-        { _id: new ObjectId(id) },
-        { $inc: { views: 1 } }
-      );
+      if (prompt) {
+        // Increment view count
+        await collection.updateOne(
+          { _id: prompt._id },
+          { $inc: { views: 1 } }
+        );
 
-      return NextResponse.json({ prompt, source: 'mongodb' });
+        return NextResponse.json({ prompt, source: 'mongodb' });
+      }
     } catch (dbError) {
-      // Fallback to static data
-      const { seedPrompts } = await import('@/data/seed-prompts');
-      const prompt = seedPrompts.find((p) => p.id === id);
-
-      if (!prompt) {
-        return NextResponse.json(
-          { error: 'Prompt not found' },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json({ prompt, source: 'static' });
+      // Continue to fallback
+      logger.warn('MongoDB lookup failed, trying fallback', {
+        error: dbError instanceof Error ? dbError.message : 'Unknown error',
+      });
     }
+
+    // Fallback to static data
+    const { seedPrompts } = await import('@/data/seed-prompts');
+    const prompt = seedPrompts.find((p) => p.id === id);
+
+    if (!prompt) {
+      return NextResponse.json(
+        { error: 'Prompt not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ prompt, source: 'static' });
   } catch (error) {
     logger.apiError('/api/prompts/[id]', error, { method: 'GET' });
     return NextResponse.json(

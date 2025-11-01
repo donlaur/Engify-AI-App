@@ -22,11 +22,39 @@ export default function PromptDetailPage() {
   const [copied, setCopied] = useState(false);
   const [viewCount, setViewCount] = useState(0);
   const [userRating, setUserRating] = useState(0);
+  const [prompt, setPrompt] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Get all prompts and find the one with matching ID
-  const prompts = getSeedPromptsWithTimestamps();
-  const prompt = prompts.find((p) => p.id === id);
+  // Fetch prompt from API (supports MongoDB with metadata)
+  useEffect(() => {
+    async function fetchPrompt() {
+      try {
+        const response = await fetch(`/api/prompts/${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setPrompt(data.prompt);
+          setViewCount(data.prompt?.views || data.prompt?.stats?.views || 0);
+        } else {
+          // Fallback to static data
+          const prompts = getSeedPromptsWithTimestamps();
+          const staticPrompt = prompts.find((p) => p.id === id);
+          setPrompt(staticPrompt || null);
+        }
+      } catch (error) {
+        // Fallback to static data on error
+        const prompts = getSeedPromptsWithTimestamps();
+        const staticPrompt = prompts.find((p) => p.id === id);
+        setPrompt(staticPrompt || null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) {
+      fetchPrompt();
+    }
+  }, [id]);
 
   // Track view count
   useEffect(() => {
