@@ -271,46 +271,47 @@ export default function PromptDetailPage() {
                       <Icons.star className="mr-2 h-4 w-4" />
                       <span className="text-sm">Avg Rating</span>
                     </div>
-                    <span className="font-semibold">
-                      {prompt.rating || prompt.stats?.averageRating || 0}
-                    </span>
-                    <span className="text-sm text-muted-foreground">/ 5</span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-semibold">
+                        {prompt.rating || prompt.stats?.averageRating || 0}
+                      </span>
+                      <span className="text-sm text-muted-foreground">/ 5</span>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-3">
+                    <p className="mb-2 text-sm text-muted-foreground">
+                      Your Rating:
+                    </p>
+                    <RatingStars
+                      rating={userRating}
+                      onRate={handleRate}
+                      size="lg"
+                    />
                   </div>
                 </div>
 
-                <div className="border-t pt-3">
-                  <p className="mb-2 text-sm text-muted-foreground">
-                    Your Rating:
-                  </p>
-                  <RatingStars
-                    rating={userRating}
-                    onRate={handleRate}
-                    size="lg"
-                  />
-                </div>
-              </div>
+                {(prompt.ratingCount !== undefined || prompt.stats?.totalRatings) && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center text-muted-foreground">
+                      <Icons.users className="mr-2 h-4 w-4" />
+                      <span className="text-sm">Ratings</span>
+                    </div>
+                    <span className="font-semibold">
+                      {(prompt.ratingCount || prompt.stats?.totalRatings || 0).toLocaleString()}
+                    </span>
+                  </div>
+                )}
 
-              {(prompt.ratingCount !== undefined || prompt.stats?.totalRatings) && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center text-muted-foreground">
-                    <Icons.users className="mr-2 h-4 w-4" />
-                    <span className="text-sm">Ratings</span>
+                    <Icons.calendar className="mr-2 h-4 w-4" />
+                    <span className="text-sm">Created</span>
                   </div>
-                  <span className="font-semibold">
-                    {(prompt.ratingCount || prompt.stats?.totalRatings || 0).toLocaleString()}
+                  <span className="text-sm">
+                    {new Date(prompt.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-              )}
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center text-muted-foreground">
-                  <Icons.calendar className="mr-2 h-4 w-4" />
-                  <span className="text-sm">Created</span>
-                </div>
-                <span className="text-sm">
-                  {new Date(prompt.createdAt).toLocaleDateString()}
-                </span>
-              </div>
               </CardContent>
             </Card>
 
