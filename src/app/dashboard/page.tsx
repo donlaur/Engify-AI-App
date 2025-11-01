@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -13,27 +14,32 @@ import { Icons } from '@/lib/icons';
 import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 
 export default function DashboardPage() {
-  // Real user data from session
-  const user = {
-    name: 'User', // Will come from session
-    email: 'user@example.com',
-    level: 1,
-    xp: 0,
-    xpToNextLevel: 500,
-    joinedDate: new Date(),
-  };
+  const { data: session } = useSession();
+  const user = session?.user;
+
+  // If not logged in, show loading or redirect
+  if (!session) {
+    return (
+      <MainLayout>
+        <div className="container py-20 text-center">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </MainLayout>
+    );
+  }
 
   // Get prompts for stats
   const allPrompts = getSeedPromptsWithTimestamps();
 
   // Real user stats - starts at zero
+  // TODO: Fetch these from user's actual activity in MongoDB
   const stats = {
     promptsUsed: 0,
     totalPrompts: allPrompts.length,
     favoritePrompts: 0,
     patternsLearned: 0,
     totalPatterns: 15,
-    streak: 0,
+    streak: 0, // TODO: Calculate from user's login history
     totalViews: 0,
   };
 
