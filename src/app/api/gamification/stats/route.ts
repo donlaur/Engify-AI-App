@@ -2,49 +2,79 @@
  * Gamification Stats API
  * 
  * GET /api/gamification/stats - Get user's gamification stats
+ * 
+ * Enterprise Standards:
+ * - Uses existing GamificationService (BaseService pattern)
+ * - RBAC: users:read permission
+ * - Rate limiting
+ * - Audit logging
+ * - Error handling
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { gamificationService } from '@/lib/services/GamificationService';
+import { RBACPresets } from '@/lib/middleware/rbac';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logging/logger';
+import { GamificationService } from '@/lib/services/GamificationService';
+import { getXPForNextLevel } from '@/lib/gamification/levels';
 
-export async function GET() {
+const gamificationService = new GamificationService();
+
+export async function GET(request: NextRequest) {
+  // RBAC: Require users:read permission
+  const rbacCheck = await RBACPresets.requireUserRead()(request);
+  if (rbacCheck) return rbacCheck;
+
   try {
     const session = await auth();
-    
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
-    
-    const stats = await gamificationService.getUserStats(session.user.id);
-    const xpForNextLevel = gamificationService.getXPForNextLevel(stats.level);
-    
-    // Calculate XP in current level
-    let xpInCurrentLevel = stats.xp;
-    for (let i = 1; i < stats.level; i++) {
-      xpInCurrentLevel -= gamificationService.getXPForNextLevel(i);
+
+    // Rate limiting (100 requests per hour for authenticated users)
+    const rateLimitResult = await checkRateLimit(session.user.id, 'authenticated');
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { 
+          error: 'Rate limit exceeded',
+          resetAt: rateLimitResult.resetAt.toISOString(),
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': '60',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
+          },
+        }
+      );
     }
-    
+
+    // Get gamification data
+    const gamification = await gamificationService.getUserGamification(session.user.id);
+    const xpForNextLevel = getXPForNextLevel(gamification.xp);
+
     return NextResponse.json({
       success: true,
-      stats: {
-        xp: stats.xp,
-        level: stats.level,
-        xpInCurrentLevel,
-        xpForNextLevel,
-        promptsUsed: stats.promptsUsed,
-        favoritePrompts: stats.favoritePrompts,
-        patternsLearned: stats.patternsLearned,
-        currentStreak: stats.currentStreak,
-        longestStreak: stats.longestStreak,
-        recentActivity: stats.recentActivity,
+      data: {
+        xp: gamification.xp,
+        level: gamification.level,
+        xpForNextLevel: xpForNextLevel.xpRequired,
+        dailyStreak: gamification.dailyStreak,
+        achievements: gamification.achievements,
+        stats: gamification.stats,
       },
     });
   } catch (error) {
-    console.error('Error fetching gamification stats:', error);
+    logger.error('Error fetching gamification stats', {
+      error: error instanceof Error ? error.message : String(error),
+      userId: (await auth())?.user?.id,
+    });
+
     return NextResponse.json(
       { error: 'Failed to fetch stats' },
       { status: 500 }
