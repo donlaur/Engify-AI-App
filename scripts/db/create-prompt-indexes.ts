@@ -38,7 +38,7 @@ async function createIndexes() {
     console.log('📊 Creating indexes for prompts collection...\n');
 
     // Single field indexes
-    const singleIndexes = [
+    const singleIndexes: Array<{ key: Record<string, number>; name: string; unique?: boolean }> = [
       { key: { tags: 1 }, name: 'tags_1' },
       { key: { category: 1 }, name: 'category_1' },
       { key: { role: 1 }, name: 'role_1' },
@@ -53,7 +53,7 @@ async function createIndexes() {
     ];
 
     // Compound indexes for common queries
-    const compoundIndexes = [
+    const compoundIndexes: Array<{ key: Record<string, number>; name: string }> = [
       { key: { tags: 1, category: 1 }, name: 'tags_1_category_1' },
       { key: { tags: 1, role: 1 }, name: 'tags_1_role_1' },
       { key: { category: 1, role: 1 }, name: 'category_1_role_1' },
@@ -63,7 +63,7 @@ async function createIndexes() {
     ];
 
     // Text search index
-    const textIndex = {
+    const textIndex: { key: Record<string, string | number>; name: string; weights: Record<string, number> } = {
       key: { title: 'text', description: 'text', content: 'text' },
       name: 'title_text_description_text_content_text',
       weights: { title: 10, description: 5, content: 1 },
