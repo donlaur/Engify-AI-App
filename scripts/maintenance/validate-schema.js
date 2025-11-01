@@ -45,7 +45,7 @@ const validationRules = [
     name: 'Hardcoded collection names',
     pattern: /\.collection\(['"`]([^'"`]+)['"`]\)/g,
     check: (match, content, filePath) => {
-      // Allow in schema.ts, BaseService.ts, API routes, prompt utilities, patterns pages, logging, and scripts
+      // Allow in schema.ts, BaseService.ts, API routes, prompt utilities, patterns pages, logging, scripts, and sitemap
       if (filePath.includes('schema.ts') || 
           filePath.includes('BaseService.ts') ||
           filePath.includes('/api/') ||
@@ -54,7 +54,8 @@ const validationRules = [
           filePath.includes('/patterns/') ||
           filePath.includes('/logging/') ||
           filePath.includes('/scripts/') ||
-          filePath.includes('scripts/')) {
+          filePath.includes('scripts/') ||
+          filePath.includes('sitemap.ts')) {
         return false;
       }
       return true;

@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 import { ACHIEVEMENTS } from '@/lib/gamification/achievements';
 
 interface GamificationStats {
@@ -32,12 +31,10 @@ interface GamificationStats {
 }
 
 export default function DashboardPage() {
-  // Get prompts for stats
-  const allPrompts = getSeedPromptsWithTimestamps();
-
   // Real gamification data from API
   const [gamificationData, setGamificationData] =
     useState<GamificationStats | null>(null);
+  const [totalPrompts, setTotalPrompts] = useState(0);
 
   useEffect(() => {
     async function fetchGamificationStats() {
@@ -52,14 +49,27 @@ export default function DashboardPage() {
       }
     }
 
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setTotalPrompts(data.stats?.prompts || 0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    }
+
     fetchGamificationStats();
+    fetchStats();
   }, []);
 
   // Use real data if available, otherwise show defaults
   const stats = gamificationData
     ? {
         promptsUsed: gamificationData.stats.promptsUsed,
-        totalPrompts: allPrompts.length,
+        totalPrompts,
         favoritePrompts: gamificationData.stats.favoritesReceived,
         patternsLearned: gamificationData.stats.patternsCompleted,
         totalPatterns: 15,
@@ -68,7 +78,7 @@ export default function DashboardPage() {
       }
     : {
         promptsUsed: 0,
-        totalPrompts: allPrompts.length,
+        totalPrompts,
         favoritePrompts: 0,
         patternsLearned: 0,
         totalPatterns: 15,
