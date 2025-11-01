@@ -240,6 +240,10 @@ Acceptance:
 - ✅ Identify prompts that should migrate to DB vs stay static
 - ✅ Document orphaned/duplicate content
 - ✅ Create prioritized migration roadmap
+- ✅ **NEW:** Generated 10 prompts using expansion system (Nov 1, 2025)
+  - ✅ Added prompts for missing roles: QA engineer, data engineer, ML engineer, technical writer, developer advocate, solutions architect
+  - ✅ All prompts include framework/model recommendations and red-hat scores
+  - ✅ Total prompts now: 132 (was 122)
 
 More detail: [Content Migration Plan](../content/PHASE_8_CONTENT_SYNC.md)
 
@@ -247,6 +251,7 @@ Acceptance:
 
 - ✅ Clear migration priorities documented
 - ✅ Timeline for moving user-facing content to DB
+- ✅ **NEW:** Expansion system actively generating new content
 - ✅ Static content policy defined (what stays in code vs DB)
 
 **Red Hat Review Notes:**
