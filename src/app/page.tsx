@@ -85,16 +85,15 @@ export default async function Home() {
             </Badge>
 
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
-              Amplify Engineers with{' '}
+              Amplify Your Team with{' '}
               <span className="bg-gradient-to-r from-green-300 to-cyan-300 bg-clip-text text-transparent">
                 AI Power
               </span>
             </h1>
 
             <p className="mx-auto max-w-2xl text-xl text-white">
-              {siteStats.totalPrompts}+ expert prompts,{' '}
-              {siteStats.totalPatterns} battle-tested patterns, and gamified
-              learning. Transform your team&apos;s capabilities with Engify.ai
+              Expert prompts, battle-tested patterns, and gamified learning.
+              Transform your team&apos;s capabilities with Engify.ai
             </p>
 
             {/* MCP Section */}
@@ -159,8 +158,8 @@ export default async function Home() {
                     className="bg-gradient-to-r from-green-500 to-cyan-500 font-bold text-black hover:from-green-600 hover:to-cyan-600"
                     asChild
                   >
-                    <Link href="/library">
-                      Browse {siteStats.totalPrompts} Prompts
+                    <Link href="/prompts">
+                      Browse Prompt Playbook
                       <Icons.arrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
