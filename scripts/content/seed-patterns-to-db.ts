@@ -56,6 +56,16 @@ function createUnifiedPatterns(): any[] {
       unified.relatedPatterns = details.relatedPatterns;
     }
 
+    // Add detail fields from patternDetails
+    if (details?.shortDescription)
+      unified.shortDescription = details.shortDescription;
+    if (details?.fullDescription)
+      unified.fullDescription = details.fullDescription;
+    if (details?.howItWorks) unified.howItWorks = details.howItWorks;
+    if (details?.bestPractices) unified.bestPractices = details.bestPractices;
+    if (details?.commonMistakes)
+      unified.commonMistakes = details.commonMistakes;
+
     patterns.push(unified);
     processedIds.add(pattern.id);
   });
@@ -90,6 +100,15 @@ function createUnifiedPatterns(): any[] {
       unified.relatedPatterns = details.relatedPatterns;
     }
 
+    if (details?.shortDescription)
+      unified.shortDescription = details.shortDescription;
+    if (details?.fullDescription)
+      unified.fullDescription = details.fullDescription;
+    if (details?.howItWorks) unified.howItWorks = details.howItWorks;
+    if (details?.bestPractices) unified.bestPractices = details.bestPractices;
+    if (details?.commonMistakes)
+      unified.commonMistakes = details.commonMistakes;
+
     patterns.push(unified);
     processedIds.add(promptPattern.id);
   });
@@ -117,6 +136,14 @@ function createUnifiedPatterns(): any[] {
     if (detail.relatedPatterns) {
       unified.relatedPatterns = detail.relatedPatterns;
     }
+
+    if (detail.shortDescription)
+      unified.shortDescription = detail.shortDescription;
+    if (detail.fullDescription)
+      unified.fullDescription = detail.fullDescription;
+    if (detail.howItWorks) unified.howItWorks = detail.howItWorks;
+    if (detail.bestPractices) unified.bestPractices = detail.bestPractices;
+    if (detail.commonMistakes) unified.commonMistakes = detail.commonMistakes;
 
     patterns.push(unified);
   });

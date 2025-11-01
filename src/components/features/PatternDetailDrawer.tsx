@@ -12,7 +12,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import { Icons } from '@/lib/icons';
-import { PatternDetail } from '@/data/pattern-details';
+import { PatternDetail } from '@/lib/db/schemas/pattern';
 
 interface PatternDetailDrawerProps {
   pattern: PatternDetail | null;

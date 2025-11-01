@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { PatternDetailDrawer } from '@/components/features/PatternDetailDrawer';
-import { getPatternById } from '@/data/pattern-details';
+import { PatternDetail } from '@/lib/db/schemas/pattern';
 
 // Icon mapping for patterns
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,6 +63,33 @@ const levels = [
 interface PatternsClientProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   patterns: any[];
+}
+
+// Helper function to convert MongoDB pattern to PatternDetail
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertToPatternDetail(pattern: any): PatternDetail | null {
+  if (!pattern.shortDescription || !pattern.fullDescription) {
+    // Pattern doesn't have all required fields
+    return null;
+  }
+
+  return {
+    id: pattern.id,
+    name: pattern.name,
+    category: pattern.category,
+    level: pattern.level,
+    shortDescription: pattern.shortDescription,
+    fullDescription: pattern.fullDescription,
+    howItWorks: pattern.howItWorks || pattern.fullDescription,
+    whenToUse: pattern.useCases || [],
+    example:
+      typeof pattern.example === 'string'
+        ? { before: '', after: pattern.example, explanation: '' }
+        : pattern.example || { before: '', after: '', explanation: '' },
+    bestPractices: pattern.bestPractices || [],
+    commonMistakes: pattern.commonMistakes || [],
+    relatedPatterns: pattern.relatedPatterns || [],
+  };
 }
 
 export function PatternsClient({ patterns }: PatternsClientProps) {
@@ -290,7 +317,9 @@ export function PatternsClient({ patterns }: PatternsClientProps) {
       {/* Pattern Detail Drawer */}
       {selectedPatternId && (
         <PatternDetailDrawer
-          pattern={getPatternById(selectedPatternId) || null}
+          pattern={convertToPatternDetail(
+            patterns.find((p) => p.id === selectedPatternId) || {}
+          )}
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
         />
