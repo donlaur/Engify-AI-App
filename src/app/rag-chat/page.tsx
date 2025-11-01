@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Icons } from '@/lib/icons';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,7 @@ export default function RAGChatPage() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -110,46 +112,129 @@ export default function RAGChatPage() {
     'What is Chain of Thought prompting?',
   ];
 
+  const SidebarContent = () => (
+    <div className="space-y-4">
+      {/* Quick Questions */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Quick Questions</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {quickQuestions.map((question, index) => (
+            <Button
+              key={index}
+              variant="outline"
+              size="sm"
+              className="h-auto w-full justify-start p-3 text-left text-sm hover:bg-muted"
+              onClick={() => {
+                setInput(question);
+                setTimeout(() => {
+                  textareaRef.current?.focus();
+                }, 100);
+                setSidebarOpen(false);
+              }}
+            >
+              <Icons.messageSquare className="mr-2 h-4 w-4 shrink-0" />
+              <span className="break-words">{question}</span>
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* RAG Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">RAG Status</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Icons.search className="h-4 w-4 shrink-0 text-green-600" />
+            <span className="text-sm">Vector Search: Active</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Icons.database className="h-4 w-4 shrink-0 text-blue-600" />
+            <span className="text-sm">Knowledge Base: Connected</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Icons.brain className="h-4 w-4 shrink-0 text-purple-600" />
+            <span className="text-sm">AI Model: GPT-3.5-turbo</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Features */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Features</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <div className="text-sm text-muted-foreground">
+            • Semantic search through knowledge base
+          </div>
+          <div className="text-sm text-muted-foreground">
+            • Source citations with relevance scores
+          </div>
+          <div className="text-sm text-muted-foreground">
+            • Context-aware responses
+          </div>
+          <div className="text-sm text-muted-foreground">
+            • Fallback to general knowledge
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   return (
     <MainLayout>
       <div className="flex h-[calc(100vh-4rem)] flex-col">
-        {/* Chat Header */}
+        {/* Chat Header - Compact */}
         <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <div className="container mx-auto flex h-14 items-center justify-between px-4">
             <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
+              <Avatar className="h-9 w-9">
                 <AvatarFallback className="bg-primary text-primary-foreground">
-                  <Icons.bot className="h-4 w-4" />
+                  <Icons.bot className="h-5 w-5" />
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h1 className="text-lg font-semibold">Engify Assistant</h1>
-                <p className="text-xs text-muted-foreground">
-                  <Badge variant="outline" className="mr-2 text-xs">
+                <h1 className="text-base font-semibold">Engify Assistant</h1>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">
                     RAG-Powered
                   </Badge>
-                  Ask questions about prompt engineering, AI patterns, and best
-                  practices
-                </p>
+                  <Badge variant="secondary" className="text-xs">
+                    Beta
+                  </Badge>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" className="lg:hidden">
+                    <Icons.menu className="h-4 w-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80">
+                  <SidebarContent />
+                </SheetContent>
+              </Sheet>
               <Button variant="ghost" size="sm" onClick={clearChat}>
                 <Icons.delete className="mr-2 h-4 w-4" />
-                Clear
+                <span className="hidden sm:inline">Clear</span>
               </Button>
-              <Badge variant="secondary">Beta</Badge>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Chat Area */}
+          {/* Chat Area - Full Width */}
           <div className="flex flex-1 flex-col overflow-hidden">
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4">
-              <div className="mx-auto max-w-3xl space-y-6 py-6">
+            {/* Messages - More Space */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
                 {messages.map((message, index) => (
                   <div
                     key={index}
@@ -159,73 +244,83 @@ export default function RAGChatPage() {
                     )}
                   >
                     {message.role === 'assistant' && (
-                      <Avatar className="h-8 w-8 shrink-0">
+                      <Avatar className="h-10 w-10 shrink-0">
                         <AvatarFallback className="bg-primary/10 text-primary">
-                          <Icons.bot className="h-4 w-4" />
+                          <Icons.bot className="h-5 w-5" />
                         </AvatarFallback>
                       </Avatar>
                     )}
                     <div
                       className={cn(
-                        'flex max-w-[85%] flex-col gap-2',
+                        'flex max-w-[80%] flex-col gap-2',
                         message.role === 'user' ? 'items-end' : 'items-start'
                       )}
                     >
                       <div
                         className={cn(
-                          'group relative rounded-2xl px-4 py-3 shadow-sm',
+                          'group relative rounded-2xl px-5 py-4 shadow-sm',
                           message.role === 'user'
                             ? 'bg-primary text-primary-foreground'
                             : 'bg-muted text-foreground'
                         )}
                       >
-                        <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                        <p className="whitespace-pre-wrap leading-relaxed">
                           {message.content}
                         </p>
                         {/* Copy button */}
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute right-1 top-1 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
+                          className={cn(
+                            'absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100',
+                            message.role === 'user'
+                              ? 'text-primary-foreground hover:bg-primary-foreground/20'
+                              : ''
+                          )}
                           onClick={() => copyMessage(message.content)}
                         >
-                          <Icons.copy className="h-3 w-3" />
+                          <Icons.copy className="h-3.5 w-3.5" />
                         </Button>
                       </div>
 
                       {/* Show sources if available */}
                       {message.sources && message.sources.length > 0 && (
-                        <div className="w-full space-y-2">
+                        <div className="w-full space-y-2 pt-2">
                           <Separator />
                           <div className="space-y-2">
                             <p className="text-xs font-medium text-muted-foreground">
                               Sources ({message.sources.length}):
                             </p>
-                            {message.sources.map((source, idx) => (
-                              <Card key={idx} className="p-3">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="min-w-0 flex-1">
-                                    <div className="mb-1 flex items-center gap-2">
-                                      <Icons.fileText className="h-3 w-3 shrink-0 text-muted-foreground" />
-                                      <span className="truncate text-xs font-medium">
-                                        {source.title}
-                                      </span>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              {message.sources.map((source, idx) => (
+                                <Card
+                                  key={idx}
+                                  className="p-3 transition-colors hover:bg-muted/50"
+                                >
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                      <div className="mb-1 flex items-center gap-2">
+                                        <Icons.fileText className="h-3 w-3 shrink-0 text-muted-foreground" />
+                                        <span className="truncate text-xs font-medium">
+                                          {source.title}
+                                        </span>
+                                      </div>
+                                      {source.content && (
+                                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                                          {source.content}
+                                        </p>
+                                      )}
                                     </div>
-                                    {source.content && (
-                                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                                        {source.content}
-                                      </p>
-                                    )}
+                                    <Badge
+                                      variant="outline"
+                                      className="shrink-0 text-xs"
+                                    >
+                                      {Math.round(source.score * 100)}%
+                                    </Badge>
                                   </div>
-                                  <Badge
-                                    variant="outline"
-                                    className="shrink-0 text-xs"
-                                  >
-                                    {Math.round(source.score * 100)}%
-                                  </Badge>
-                                </div>
-                              </Card>
-                            ))}
+                                </Card>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -239,9 +334,9 @@ export default function RAGChatPage() {
                       )}
                     </div>
                     {message.role === 'user' && (
-                      <Avatar className="h-8 w-8 shrink-0">
+                      <Avatar className="h-10 w-10 shrink-0">
                         <AvatarFallback className="bg-primary/10 text-primary">
-                          <Icons.user className="h-4 w-4" />
+                          <Icons.user className="h-5 w-5" />
                         </AvatarFallback>
                       </Avatar>
                     )}
@@ -249,12 +344,12 @@ export default function RAGChatPage() {
                 ))}
                 {isLoading && (
                   <div className="flex gap-4">
-                    <Avatar className="h-8 w-8 shrink-0">
+                    <Avatar className="h-10 w-10 shrink-0">
                       <AvatarFallback className="bg-primary/10 text-primary">
-                        <Icons.bot className="h-4 w-4" />
+                        <Icons.bot className="h-5 w-5" />
                       </AvatarFallback>
                     </Avatar>
-                    <div className="rounded-2xl bg-muted px-4 py-3">
+                    <div className="rounded-2xl bg-muted px-5 py-4">
                       <div className="flex items-center gap-2">
                         <Icons.spinner className="h-4 w-4 animate-spin" />
                         <span className="text-sm text-muted-foreground">
@@ -268,10 +363,10 @@ export default function RAGChatPage() {
               </div>
             </div>
 
-            {/* Input Area */}
-            <div className="border-t bg-background">
-              <div className="mx-auto max-w-3xl px-4 py-4">
-                <div className="flex items-end gap-2">
+            {/* Input Area - More Prominent */}
+            <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <div className="mx-auto max-w-4xl px-4 py-4">
+                <div className="flex items-end gap-3">
                   <div className="relative flex-1">
                     <Textarea
                       ref={textareaRef}
@@ -285,15 +380,15 @@ export default function RAGChatPage() {
                         }
                       }}
                       disabled={isLoading}
-                      className="max-h-[200px] min-h-[44px] resize-none pr-12"
+                      className="max-h-[200px] min-h-[56px] resize-none pr-14 text-base"
                       rows={1}
                     />
-                    <div className="absolute bottom-2 right-2">
+                    <div className="absolute bottom-3 right-3">
                       <Button
                         onClick={sendMessage}
                         disabled={isLoading || !input.trim()}
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-9 w-9"
                       >
                         {isLoading ? (
                           <Icons.spinner className="h-4 w-4 animate-spin" />
@@ -311,76 +406,10 @@ export default function RAGChatPage() {
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar - Desktop Only */}
           <div className="hidden w-80 border-l bg-muted/30 lg:block">
             <div className="h-full space-y-4 overflow-y-auto p-4">
-              {/* Quick Questions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Quick Questions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {quickQuestions.map((question, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      size="sm"
-                      className="h-auto w-full justify-start p-3 text-left text-sm hover:bg-muted"
-                      onClick={() => {
-                        setInput(question);
-                        setTimeout(() => {
-                          textareaRef.current?.focus();
-                        }, 100);
-                      }}
-                    >
-                      <Icons.messageSquare className="mr-2 h-4 w-4 shrink-0" />
-                      <span className="break-words">{question}</span>
-                    </Button>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* RAG Status */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">RAG Status</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Icons.search className="h-4 w-4 shrink-0 text-green-600" />
-                    <span className="text-sm">Vector Search: Active</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Icons.database className="h-4 w-4 shrink-0 text-blue-600" />
-                    <span className="text-sm">Knowledge Base: Connected</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Icons.brain className="h-4 w-4 shrink-0 text-purple-600" />
-                    <span className="text-sm">AI Model: GPT-3.5-turbo</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Features */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Features</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="text-sm text-muted-foreground">
-                    • Semantic search through knowledge base
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    • Source citations with relevance scores
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    • Context-aware responses
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    • Fallback to general knowledge
-                  </div>
-                </CardContent>
-              </Card>
+              <SidebarContent />
             </div>
           </div>
         </div>
