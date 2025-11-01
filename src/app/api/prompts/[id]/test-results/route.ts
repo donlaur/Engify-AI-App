@@ -6,13 +6,48 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { PromptTestResultSchema } from '@/lib/db/schemas/prompt-test-results';
+import { checkFeedbackRateLimit } from '@/lib/security/feedback-rate-limit';
+import { auth } from '@/lib/auth';
+import { logAuditEvent } from '@/server/middleware/audit';
+import { z } from 'zod';
+
+// Validate prompt ID parameter
+const promptIdSchema = z.string().min(1).max(100);
+
+function getClientIP(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const parts = forwarded.split(',');
+    return parts.length > 0 ? parts[0].trim() : 'unknown';
+  }
+  return request.headers.get('x-real-ip') || 'unknown';
+}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Rate limiting
+    const rateLimitResult = await checkFeedbackRateLimit(request);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: rateLimitResult.reason || 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      );
+    }
+
+    // Validate input
+    const idValidation = promptIdSchema.safeParse(params.id);
+    if (!idValidation.success) {
+      return NextResponse.json(
+        { error: 'Invalid prompt ID format' },
+        { status: 400 }
+      );
+    }
+
     const { id } = params;
+    const session = await auth();
     const db = await getDb();
     
     // Find prompt by id, slug, or MongoDB _id
@@ -33,6 +68,16 @@ export async function GET(
 
     // Use MongoDB _id for looking up test results
     const promptId = prompt._id.toString();
+
+    // Audit logging
+    await logAuditEvent({
+      action: 'prompt.test_results.viewed',
+      userId: session?.user?.id,
+      organizationId: session?.user?.organizationId,
+      resourceId: prompt.id || prompt.slug || promptId,
+      ipAddress: getClientIP(request),
+      userAgent: request.headers.get('user-agent') || 'unknown',
+    });
     
     // Get test results for this prompt
     const testResults = await db
