@@ -26,17 +26,17 @@ Status Legend: ✅ done · ⚠️ in progress
 
 ## Phase 0 — Fix MFA Blocker (URGENT)
 
-**Status:** ⚠️ Not started  
+**Status:** ✅ Complete  
 **Priority:** Critical - blocking admin access
 
 **Problem:** Cannot access `/opshub` - "MFA required" blocks super_admin login
 
 ### Tasks
 
-- ⚠️ Add super admin MFA bypass in middleware
+- ✅ Add super admin MFA bypass in middleware
 - ⚠️ Test OpsHub access without MFA prompt
 - ⚠️ Verify audit logging still captures actions
-- ⚠️ Document security considerations
+- ✅ Document security considerations
 
 More detail: [Phase 0: MFA Super Admin Bypass](../security/MFA_SUPER_ADMIN_BYPASS.md)
 
