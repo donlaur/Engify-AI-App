@@ -63,10 +63,6 @@ export function GoogleAnalytics() {
 
   return (
     <>
-      {/* Preconnect to Google Tag Manager for faster load */}
-      <link rel="preconnect" href="https://www.googletagmanager.com" />
-      <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-      
       {/* Load Google Analytics script */}
       <Script
         strategy="afterInteractive"
