@@ -15,6 +15,10 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
 import { logAuditEvent } from '@/server/middleware/audit';
 import { AuditEventType } from '@/lib/db/schemas/auditLog';
+import { cognitoForgotPassword } from '@/lib/auth/providers/cognito-password-reset';
+
+// Check if Cognito is enabled
+const USE_COGNITO = !!process.env.COGNITO_USER_POOL_ID;
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -70,7 +74,32 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email } = forgotPasswordSchema.parse(body);
 
-    // Find user by email
+    // If Cognito is enabled, use Cognito password reset
+    if (USE_COGNITO) {
+      const cognitoResult = await cognitoForgotPassword(email);
+
+      // Audit log
+      await logAuditEvent({
+        eventType: AuditEventType.enum['auth.password_reset.requested'],
+        ipAddress,
+        userAgent,
+        action: 'password_reset.request',
+        metadata: {
+          provider: 'cognito',
+          emailRequested: email,
+        },
+        success: cognitoResult.success,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message:
+          cognitoResult.message ||
+          'If an account exists, a password reset code has been sent to your email.',
+      });
+    }
+
+    // MongoDB-based password reset (fallback)
     const user = await userService.findByEmail(email);
 
     // Don't reveal if user exists or not (security best practice)
