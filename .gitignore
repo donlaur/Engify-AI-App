@@ -84,6 +84,12 @@ scripts/private/
 # Git history cleanup replacements (contains actual secrets)
 scripts/security/.git-history-replacements.local.txt
 
+# Security-sensitive documentation (contains AWS IDs, passwords, etc.)
+**/*URGENT_LOGIN_FIX*.md
+**/*QUICK_LOGIN_FIX*.md
+**/*IMMEDIATE_LOGIN_FIX*.md
+**/*SECURITY_FIX*.md
+
 # Lambda deployment artifacts
 lambda/**/*.zip
 lambda/bson/

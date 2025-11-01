@@ -70,9 +70,9 @@ export function convertPlaybooksToPrompts(): Omit<
           'mid-level') as ExperienceLevel,
         pattern: detectPattern(recipe.description) as PromptPattern,
         tags: generateTags(recipe.title, recipe.description, category.name),
-        views: Math.floor(Math.random() * 500) + 100, // Random views for now
-        rating: Number((Math.random() * 1.5 + 3.5).toFixed(1)), // 3.5-5.0 rating
-        ratingCount: Math.floor(Math.random() * 20) + 5,
+        views: 0,
+        rating: 0,
+        ratingCount: 0,
         isPublic: true,
         isFeatured: index === 0, // First in each category is featured
       };
