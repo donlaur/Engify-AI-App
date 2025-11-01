@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,21 +11,61 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Icons } from '@/lib/icons';
 
 export default function SettingsPage() {
+  const { data: session } = useSession();
   const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
-    name: 'User',
-    email: 'user@example.com',
+    name: '',
+    email: '',
     role: 'engineer',
     yearsExperience: '3-5',
     aiExperienceLevel: 'intermediate',
     preferredProvider: 'openai',
   });
 
+  // Load real user data from session
+  useEffect(() => {
+    if (session?.user) {
+      setProfile(prev => ({
+        ...prev,
+        name: session.user.name || '',
+        email: session.user.email || '',
+      }));
+      setLoading(false);
+    }
+  }, [session]);
+
   const handleSave = async () => {
     setIsSaving(true);
-    // TODO: Save to API
-    setTimeout(() => setIsSaving(false), 1000);
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile),
+      });
+
+      if (response.ok) {
+        // Success feedback (could add a toast here)
+        console.log('Profile updated successfully');
+      } else {
+        console.error('Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="container flex min-h-[60vh] items-center justify-center py-8">
+          <Icons.spinner className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -32,7 +73,7 @@ export default function SettingsPage() {
         <div className="mx-auto max-w-4xl space-y-8">
           <div>
             <h1 className="text-4xl font-bold">Settings</h1>
-            <p className="text-gray-600">Manage your account and preferences</p>
+            <p className="text-muted-foreground">Manage your account and preferences</p>
           </div>
 
           {/* Profile Settings */}
