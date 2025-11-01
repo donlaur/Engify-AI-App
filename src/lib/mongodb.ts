@@ -1,6 +1,6 @@
 /**
  * MongoDB Connection Utility
- * 
+ *
  * Singleton pattern for MongoDB client
  * Handles connection pooling and reuse
  */
@@ -12,7 +12,24 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI;
-const options = {};
+const options = {
+  maxPoolSize: 10,
+  minPoolSize: 2,
+  serverSelectionTimeoutMS: 30000,
+  socketTimeoutMS: 45000,
+  connectTimeoutMS: 30000,
+  retryWrites: true,
+  retryReads: true,
+  w: 'majority' as const,
+  maxIdleTimeMS: 30000,
+  family: 4, // Force IPv4 to avoid DNS issues
+  // SSL/TLS options for MongoDB Atlas
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  tlsAllowInvalidHostnames: false,
+  // Connection pool options
+  heartbeatFrequencyMS: 10000,
+};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
