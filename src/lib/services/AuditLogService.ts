@@ -189,7 +189,8 @@ export class AuditLogService extends BaseService<AuditLog> {
   /**
    * Get event category from event type
    */
-  private getEventCategory(eventType: AuditEventTypeEnum): 'auth' | 'data' | 'security' | 'admin' {
+  private getEventCategory(eventType: AuditEventTypeEnum | undefined): 'auth' | 'data' | 'security' | 'admin' {
+    if (!eventType) return 'data';
     if (eventType.startsWith('auth.')) return 'auth';
     if (eventType.startsWith('security.')) return 'security';
     if (eventType.startsWith('admin.')) return 'admin';
