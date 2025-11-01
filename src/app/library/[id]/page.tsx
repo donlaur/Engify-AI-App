@@ -12,6 +12,7 @@ import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
 import { RatingStars } from '@/components/features/RatingStars';
 import { MakeItMineButton } from '@/components/features/MakeItMineButton';
 import { TestResults } from '@/components/prompt/TestResults';
+import { FrameworkRecommendation } from '@/components/prompt/FrameworkRecommendation';
 import { useToast } from '@/hooks/use-toast';
 
 export default function PromptDetailPage() {
@@ -30,21 +31,6 @@ export default function PromptDetailPage() {
   // Track view count
   useEffect(() => {
     if (prompt && id) {
-      // Initialize view count from prompt data
-      setViewCount(prompt.views || 0);
-
-      // Increment view count (in real app, this would be an API call)
-      const viewKey = `prompt_view_${id}`;
-      const hasViewed = sessionStorage.getItem(viewKey);
-      if (!hasViewed) {
-        // Only count once per session
-        setViewCount((prev) => prev + 1);
-        sessionStorage.setItem(viewKey, 'true');
-
-        // TODO: In production, send to API to persist
-        // await fetch(`/api/prompts/${id}/view`, { method: 'POST' });
-      }
-
       // Load user rating from localStorage
       const ratingKey = `prompt_rating_${id}`;
       const savedRating = localStorage.getItem(ratingKey);
@@ -78,6 +64,21 @@ export default function PromptDetailPage() {
       console.error('Failed to copy:', err);
     }
   };
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="container py-8">
+          <div className="flex min-h-[400px] items-center justify-center">
+            <div className="text-center">
+              <Icons.spinner className="mx-auto mb-4 h-8 w-8 animate-spin" />
+              <p className="text-muted-foreground">Loading prompt...</p>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   // If prompt not found, show error
   if (!prompt) {
@@ -242,47 +243,46 @@ export default function PromptDetailPage() {
                       <Icons.star className="mr-2 h-4 w-4" />
                       <span className="text-sm">Avg Rating</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold">
-                        {prompt.rating || 0}
-                      </span>
-                      <span className="text-sm text-muted-foreground">/ 5</span>
-                    </div>
-                  </div>
-
-                  <div className="border-t pt-3">
-                    <p className="mb-2 text-sm text-muted-foreground">
-                      Your Rating:
-                    </p>
-                    <RatingStars
-                      rating={userRating}
-                      onRate={handleRate}
-                      size="lg"
-                    />
+                    <span className="font-semibold">
+                      {prompt.rating || prompt.stats?.averageRating || 0}
+                    </span>
+                    <span className="text-sm text-muted-foreground">/ 5</span>
                   </div>
                 </div>
 
-                {prompt.ratingCount !== undefined && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-muted-foreground">
-                      <Icons.users className="mr-2 h-4 w-4" />
-                      <span className="text-sm">Ratings</span>
-                    </div>
-                    <span className="font-semibold">
-                      {prompt.ratingCount.toLocaleString()}
-                    </span>
-                  </div>
-                )}
+                <div className="border-t pt-3">
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    Your Rating:
+                  </p>
+                  <RatingStars
+                    rating={userRating}
+                    onRate={handleRate}
+                    size="lg"
+                  />
+                </div>
+              </div>
 
+              {(prompt.ratingCount !== undefined || prompt.stats?.totalRatings) && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center text-muted-foreground">
-                    <Icons.calendar className="mr-2 h-4 w-4" />
-                    <span className="text-sm">Created</span>
+                    <Icons.users className="mr-2 h-4 w-4" />
+                    <span className="text-sm">Ratings</span>
                   </div>
-                  <span className="text-sm">
-                    {new Date(prompt.createdAt).toLocaleDateString()}
+                  <span className="font-semibold">
+                    {(prompt.ratingCount || prompt.stats?.totalRatings || 0).toLocaleString()}
                   </span>
                 </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center text-muted-foreground">
+                  <Icons.calendar className="mr-2 h-4 w-4" />
+                  <span className="text-sm">Created</span>
+                </div>
+                <span className="text-sm">
+                  {new Date(prompt.createdAt).toLocaleDateString()}
+                </span>
+              </div>
               </CardContent>
             </Card>
 
@@ -310,7 +310,18 @@ export default function PromptDetailPage() {
             )}
 
             {/* Test Results Card */}
-            <TestResults promptId={prompt.id} />
+            <TestResults promptId={prompt.id || prompt._id || id} />
+
+            {/* Framework & Model Recommendations */}
+            {prompt.metadata && (
+              <FrameworkRecommendation
+                framework={prompt.metadata.recommendedFramework}
+                frameworkReasoning={prompt.metadata.frameworkReasoning}
+                recommendedModel={prompt.metadata.recommendedModel}
+                modelReasoning={prompt.metadata.modelReasoning}
+                estimatedCost={prompt.metadata.estimatedCostPerUse}
+              />
+            )}
 
             {/* Share Card */}
             <Card>
