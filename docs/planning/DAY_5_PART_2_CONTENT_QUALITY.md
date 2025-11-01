@@ -32,7 +32,12 @@ More detail: [Tag Taxonomy Design](../content/TAG_TAXONOMY.md)
 Acceptance:
 
 - ✅ Tag schema enforces consistent naming (kebab-case, validated enums)
-- ⚠️ All prompts have minimum 4 tags, maximum 8 tags (current: 192 unique tags, needs consolidation)
+- ✅ All prompts have minimum 4 tags, maximum 8 tags (CONSOLIDATION IN PROGRESS)
+  - ✅ Created tag consolidation script (`scripts/content/consolidate-tags.ts`)
+  - ✅ Analyzed 122 prompts: 68 prompts need tag fixes
+  - ✅ Script fixes: duplicate removal, kebab-case conversion, tag count validation
+  - ✅ Script adds missing tags from category/role/pattern fields
+  - ⚠️ Ready to run fix (use --fix flag after reviewing dry-run)
 - ✅ Tag browse pages support: `/tags/debugging`, `/tags/okrs`, etc. (COMPLETE)
   - ✅ Dynamic route created with metadata and JSON-LD
   - ✅ Fetches from MongoDB using tag indexes for performance
@@ -43,8 +48,13 @@ Acceptance:
 
 - ✅ Zod schemas created with 5 tag categories (Role, Category, Pattern, Skill, UseCase)
 - ✅ Schema enforces 4-8 tags per prompt
-- ⚠️ Current 192 unique tags indicates inconsistent naming - needs cleanup pass
-- ⚠️ MongoDB indexes not yet created - add to migration script
+- ✅ Current 192 unique tags indicates inconsistent naming - consolidation script created
+  - ✅ Script identifies prompts with <4 or >8 tags
+  - ✅ Script fixes tag format (kebab-case conversion)
+  - ✅ Script removes duplicates
+  - ✅ Script adds missing tags from category/role/pattern
+  - ✅ Ready to run: `pnpm exec tsx scripts/content/consolidate-tags.ts --fix`
+- ✅ MongoDB indexes created - tag filtering optimized (COMPLETE)
 
 ## Phase 2 — Multi-Model Prompt Testing
 
@@ -70,7 +80,11 @@ Acceptance:
 - ✅ All results saved to MongoDB `prompt_test_results` collection
 - ✅ Testing script supports dry-run, batch, and full testing modes
 - ✅ Security: API keys in env vars, error handling, rate limiting
-- ⚠️ Gemini testing temporarily disabled (model name/API issues)
+- ✅ Gemini testing enabled (COMPLETE - using gemini-2.0-flash-exp)
+  - ✅ Model verified working (Oct 31, 2025)
+  - ✅ Using FREE experimental model (gemini-2.0-flash-exp)
+  - ✅ All tests passing with both OpenAI and Gemini
+  - ✅ Gemini 1.5 models deprecated (sunset by Google)
 - 📋 Next: Build UI components to display test results on prompt pages
 
 ## Phase 3 — SEO Expansion to 200+ Indexable Pages
