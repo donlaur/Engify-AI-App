@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+// Removed: No longer using seed-prompts.ts - fetch from MongoDB API only
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
 import { RatingStars } from '@/components/features/RatingStars';
 import { MakeItMineButton } from '@/components/features/MakeItMineButton';
@@ -23,7 +23,7 @@ export default function PromptDetailPage() {
   const [copied, setCopied] = useState(false);
   const [viewCount, setViewCount] = useState(0);
   const [userRating, setUserRating] = useState(0);
-  const [prompt, setPrompt] = useState<any>(null);
+  const [prompt, setPrompt] = useState<Prompt | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -37,16 +37,12 @@ export default function PromptDetailPage() {
           setPrompt(data.prompt);
           setViewCount(data.prompt?.views || data.prompt?.stats?.views || 0);
         } else {
-          // Fallback to static data
-          const prompts = getSeedPromptsWithTimestamps();
-          const staticPrompt = prompts.find((p) => p.id === id);
-          setPrompt(staticPrompt || null);
+          // Prompt not found
+          setPrompt(null);
         }
       } catch (error) {
-        // Fallback to static data on error
-        const prompts = getSeedPromptsWithTimestamps();
-        const staticPrompt = prompts.find((p) => p.id === id);
-        setPrompt(staticPrompt || null);
+        console.error('Error fetching prompt:', error);
+        setPrompt(null);
       } finally {
         setLoading(false);
       }
@@ -292,14 +288,19 @@ export default function PromptDetailPage() {
                   </div>
                 </div>
 
-                {(prompt.ratingCount !== undefined || prompt.stats?.totalRatings) && (
+                {(prompt.ratingCount !== undefined ||
+                  prompt.stats?.totalRatings) && (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-muted-foreground">
                       <Icons.users className="mr-2 h-4 w-4" />
                       <span className="text-sm">Ratings</span>
                     </div>
                     <span className="font-semibold">
-                      {(prompt.ratingCount || prompt.stats?.totalRatings || 0).toLocaleString()}
+                      {(
+                        prompt.ratingCount ||
+                        prompt.stats?.totalRatings ||
+                        0
+                      ).toLocaleString()}
                     </span>
                   </div>
                 )}

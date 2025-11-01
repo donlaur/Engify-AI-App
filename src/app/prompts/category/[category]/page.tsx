@@ -6,43 +6,52 @@ import { getMongoDb } from '@/lib/db/mongodb';
 const CATEGORY_INFO: Record<string, { title: string; description: string }> = {
   'code-generation': {
     title: 'Code Generation',
-    description: 'Prompts for generating, reviewing, and improving code across multiple languages and frameworks.',
+    description:
+      'Prompts for generating, reviewing, and improving code across multiple languages and frameworks.',
   },
-  'debugging': {
+  debugging: {
     title: 'Debugging',
-    description: 'Expert debugging assistance, error analysis, and troubleshooting prompts.',
+    description:
+      'Expert debugging assistance, error analysis, and troubleshooting prompts.',
   },
-  'documentation': {
+  documentation: {
     title: 'Documentation',
-    description: 'Create comprehensive documentation, API docs, technical writing, and knowledge base content.',
+    description:
+      'Create comprehensive documentation, API docs, technical writing, and knowledge base content.',
   },
-  'testing': {
+  testing: {
     title: 'Testing',
-    description: 'Test generation, test strategy, quality assurance, and testing automation prompts.',
+    description:
+      'Test generation, test strategy, quality assurance, and testing automation prompts.',
   },
-  'refactoring': {
+  refactoring: {
     title: 'Refactoring',
-    description: 'Code refactoring, optimization, and modernization prompts for improving code quality.',
+    description:
+      'Code refactoring, optimization, and modernization prompts for improving code quality.',
   },
-  'architecture': {
+  architecture: {
     title: 'Architecture',
-    description: 'System design, architecture decisions, technical strategy, and system planning prompts.',
+    description:
+      'System design, architecture decisions, technical strategy, and system planning prompts.',
   },
-  'learning': {
+  learning: {
     title: 'Learning',
-    description: 'Educational prompts for learning new technologies, concepts, and best practices.',
+    description:
+      'Educational prompts for learning new technologies, concepts, and best practices.',
   },
-  'general': {
+  general: {
     title: 'General',
-    description: 'General-purpose prompts for various engineering and product management tasks.',
+    description:
+      'General-purpose prompts for various engineering and product management tasks.',
   },
 };
 
 async function getPromptsByCategory(category: string) {
   try {
     const db = await getMongoDb();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const collection = db.collection('prompts');
-    
+
     // Use MongoDB index for efficient category filtering
     const prompts = await collection
       .find({
@@ -71,17 +80,22 @@ async function getPromptsByCategory(category: string) {
     }));
   } catch (error) {
     console.error('Error fetching prompts by category:', error);
-    // Fallback to static data
-    const { getSeedPromptsWithTimestamps } = await import('@/data/seed-prompts');
-    const allPrompts = getSeedPromptsWithTimestamps();
-    return allPrompts.filter((p) => p.category === category);
+    // Return empty array if MongoDB fails (app handles empty state)
+    return [];
   }
 }
 
-export async function generateMetadata({ params }: { params: { category: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: { category: string };
+}): Promise<Metadata> {
   const category = decodeURIComponent(params.category);
   const categoryInfo = CATEGORY_INFO[category] || {
-    title: category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    title: category
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' '),
     description: `Explore prompt engineering prompts in the ${category} category.`,
   };
 
@@ -121,10 +135,17 @@ export async function generateMetadata({ params }: { params: { category: string 
   };
 }
 
-export default async function CategoryPage({ params }: { params: { category: string } }) {
+export default async function CategoryPage({
+  params,
+}: {
+  params: { category: string };
+}) {
   const category = decodeURIComponent(params.category);
   const categoryInfo = CATEGORY_INFO[category] || {
-    title: category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    title: category
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' '),
     description: `Explore prompts in the ${category} category.`,
   };
 
@@ -162,14 +183,15 @@ export default async function CategoryPage({ params }: { params: { category: str
     <>
       <script
         type="application/ld+json"
+        // SECURITY: JSON-LD is safe - it's JSON.stringify of our own data, no user input
+        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <CategoryPageClient 
-        category={category} 
-        categoryInfo={categoryInfo} 
+      <CategoryPageClient
+        category={category}
+        categoryInfo={categoryInfo}
         categoryPrompts={categoryPrompts}
       />
     </>
   );
 }
-

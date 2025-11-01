@@ -6,51 +6,62 @@ import { getMongoDb } from '@/lib/db/mongodb';
 const ROLE_INFO: Record<string, { title: string; description: string }> = {
   'c-level': {
     title: 'C-Level Executives',
-    description: 'Strategic prompts for CTOs, VPs, and executives making high-level technology and organizational decisions.',
+    description:
+      'Strategic prompts for CTOs, VPs, and executives making high-level technology and organizational decisions.',
   },
   'engineering-manager': {
     title: 'Engineering Managers',
-    description: 'Leadership prompts for engineering managers focusing on team management, technical strategy, and process improvement.',
+    description:
+      'Leadership prompts for engineering managers focusing on team management, technical strategy, and process improvement.',
   },
-  'engineer': {
+  engineer: {
     title: 'Engineers',
-    description: 'Technical prompts for engineers at all levels - code generation, debugging, architecture, and best practices.',
+    description:
+      'Technical prompts for engineers at all levels - code generation, debugging, architecture, and best practices.',
   },
   'product-manager': {
     title: 'Product Managers',
-    description: 'Product strategy, roadmap planning, and feature definition prompts for product managers.',
+    description:
+      'Product strategy, roadmap planning, and feature definition prompts for product managers.',
   },
-  'designer': {
+  designer: {
     title: 'Designers',
-    description: 'Design prompts for UI/UX designers, design systems, user research, and creative workflows.',
+    description:
+      'Design prompts for UI/UX designers, design systems, user research, and creative workflows.',
   },
-  'qa': {
+  qa: {
     title: 'QA Engineers',
-    description: 'Testing, quality assurance, test automation, and quality strategy prompts for QA engineers.',
+    description:
+      'Testing, quality assurance, test automation, and quality strategy prompts for QA engineers.',
   },
-  'architect': {
+  architect: {
     title: 'Software Architects',
-    description: 'System design, architecture decisions, and technical strategy prompts for software architects.',
+    description:
+      'System design, architecture decisions, and technical strategy prompts for software architects.',
   },
   'devops-sre': {
     title: 'DevOps & SRE',
-    description: 'Infrastructure, deployment, monitoring, and reliability prompts for DevOps and Site Reliability Engineers.',
+    description:
+      'Infrastructure, deployment, monitoring, and reliability prompts for DevOps and Site Reliability Engineers.',
   },
   'scrum-master': {
     title: 'Scrum Masters',
-    description: 'Agile facilitation, sprint planning, and process improvement prompts for Scrum Masters.',
+    description:
+      'Agile facilitation, sprint planning, and process improvement prompts for Scrum Masters.',
   },
   'product-owner': {
     title: 'Product Owners',
-    description: 'Backlog management, user story creation, and product definition prompts for Product Owners.',
+    description:
+      'Backlog management, user story creation, and product definition prompts for Product Owners.',
   },
 };
 
 async function getPromptsByRole(role: string) {
   try {
     const db = await getMongoDb();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const collection = db.collection('prompts');
-    
+
     // Use MongoDB index for efficient role filtering
     const prompts = await collection
       .find({
@@ -79,17 +90,22 @@ async function getPromptsByRole(role: string) {
     }));
   } catch (error) {
     console.error('Error fetching prompts by role:', error);
-    // Fallback to static data
-    const { getSeedPromptsWithTimestamps } = await import('@/data/seed-prompts');
-    const allPrompts = getSeedPromptsWithTimestamps();
-    return allPrompts.filter((p) => p.role === role);
+    // Return empty array if MongoDB fails (app handles empty state)
+    return [];
   }
 }
 
-export async function generateMetadata({ params }: { params: { role: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: { role: string };
+}): Promise<Metadata> {
   const role = decodeURIComponent(params.role);
   const roleInfo = ROLE_INFO[role] || {
-    title: role.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    title: role
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' '),
     description: `Explore prompt engineering prompts for ${role} professionals.`,
   };
 
@@ -130,10 +146,17 @@ export async function generateMetadata({ params }: { params: { role: string } })
   };
 }
 
-export default async function RolePage({ params }: { params: { role: string } }) {
+export default async function RolePage({
+  params,
+}: {
+  params: { role: string };
+}) {
   const role = decodeURIComponent(params.role);
   const roleInfo = ROLE_INFO[role] || {
-    title: role.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    title: role
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' '),
     description: `Explore prompts for ${role} professionals.`,
   };
 
@@ -172,10 +195,15 @@ export default async function RolePage({ params }: { params: { role: string } })
     <>
       <script
         type="application/ld+json"
+        // SECURITY: JSON-LD is safe - it's JSON.stringify of our own data, no user input
+        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <RolePageClient role={role} roleInfo={roleInfo} rolePrompts={rolePrompts} />
+      <RolePageClient
+        role={role}
+        roleInfo={roleInfo}
+        rolePrompts={rolePrompts}
+      />
     </>
   );
 }
-
