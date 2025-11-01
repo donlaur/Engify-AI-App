@@ -38,13 +38,19 @@ const CACHE_TTL = {
 } as const;
 
 /**
- * Get Redis client instance (Upstash or standard)
+ * Get Redis client instance (Upstash only - no local Redis in production)
  * Uses singleton pattern to reuse connection across requests
  */
 let redisClient: Redis | UpstashRedis | null = null;
 let isUpstash = false;
+let redisDisabled = false;
 
-function getRedisClient(): Redis | UpstashRedis {
+function getRedisClient(): Redis | UpstashRedis | null {
+  // If Redis was already determined to be unavailable, skip
+  if (redisDisabled) {
+    return null;
+  }
+
   if (!redisClient) {
     // Check if using Upstash (serverless Redis)
     const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
@@ -57,35 +63,16 @@ function getRedisClient(): Redis | UpstashRedis {
         url: upstashUrl,
         token: upstashToken,
       });
-      console.log('Using Upstash Redis (REST API) for auth cache');
+      console.log('✅ Redis enabled: Using Upstash (REST API)');
       return redisClient;
     }
 
-    // Fall back to standard Redis (local development)
-    isUpstash = false;
-    redisClient = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0'),
-      maxRetriesPerRequest: 3,
-      retryStrategy: (times) => {
-        const delay = Math.min(times * 50, 2000);
-        return delay;
-      },
-      enableReadyCheck: true,
-      lazyConnect: true, // Don't connect immediately
-    });
-
-    // Handle connection errors gracefully
-    redisClient.on('error', (error) => {
-      console.error('Redis connection error:', error);
-      // Don't throw - fall back to MongoDB if Redis fails
-    });
-
-    redisClient.on('connect', () => {
-      console.log('Redis connected');
-    });
+    // In production/serverless: NO local Redis fallback
+    // Redis is optional - auth will work fine without it (just slower)
+    console.log('⚠️  Redis disabled: No Upstash credentials configured');
+    console.log('    Auth will use MongoDB directly (no caching)');
+    redisDisabled = true;
+    return null;
   }
 
   return redisClient;
@@ -95,7 +82,7 @@ function getRedisClient(): Redis | UpstashRedis {
  * Redis Auth Cache Service
  */
 export class RedisAuthCache {
-  private redis: Redis | UpstashRedis;
+  private redis: Redis | UpstashRedis | null;
 
   constructor() {
     this.redis = getRedisClient();
@@ -105,6 +92,11 @@ export class RedisAuthCache {
    * Check if Redis is available
    */
   async isAvailable(): Promise<boolean> {
+    // If no Redis client configured, immediately return false
+    if (!this.redis) {
+      return false;
+    }
+
     try {
       if (isUpstash) {
         await (this.redis as UpstashRedis).ping();
