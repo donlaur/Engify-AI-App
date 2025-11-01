@@ -6,9 +6,9 @@ Since AWS CLI requires permissions you don't have, use the AWS Console:
 
 ### Step 1: Reset Password via Console
 
-1. **AWS Console** → Cognito → User Pools → User pool - dz9-no
+1. **AWS Console** → Cognito → User Pools → [Your User Pool]
 2. **User management** → **Users**
-3. **Click on your user** (`donlaur@engify.ai`)
+3. **Click on your user** ([your-email@example.com])
 4. **Click "Actions"** dropdown (top right)
 5. **Select "Reset password"**
 6. **Choose "Generate password"** (this generates a temporary password you can copy)
@@ -18,7 +18,7 @@ Since AWS CLI requires permissions you don't have, use the AWS Console:
 ### Step 2: Login & Change Password
 
 1. Go to `https://engify.ai/login`
-2. Email: `donlaur@engify.ai`
+2. Email: [your-email@example.com]
 3. Password: (paste the generated password from Step 1)
 4. Cognito will require you to change it on first login
 5. Set your new permanent password
