@@ -18,6 +18,7 @@
  */
 
 import Redis from 'ioredis';
+import { Redis as UpstashRedis } from '@upstash/redis';
 import type { User } from '@/lib/db/schema';
 
 // Cache keys
@@ -37,99 +38,25 @@ const CACHE_TTL = {
 } as const;
 
 /**
- * Upstash Redis REST API client
- */
-class UpstashRedisClient {
-  private baseUrl: string;
-  private authToken: string;
-
-  constructor(baseUrl: string, authToken: string) {
-    this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
-    this.authToken = authToken;
-  }
-
-  /**
-   * Make HTTP request to Upstash Redis REST API
-   */
-  private async makeRequest(
-    command: string,
-    args: (string | number)[] = []
-  ): Promise<unknown> {
-    const url = `${this.baseUrl}/${command}`;
-    const body = args.map(String); // Convert all args to strings
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.authToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
-      const result = await response.json();
-      // Upstash returns { result: <value> } format
-      return (result as { result?: unknown }).result ?? result;
-    } catch (error) {
-      throw new Error(
-        `Upstash Redis request failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
-    }
-  }
-
-  async get(key: string): Promise<string | null> {
-    const result = await this.makeRequest('GET', [key]);
-    return result === null ? null : String(result);
-  }
-
-  async setex(key: string, seconds: number, value: string): Promise<void> {
-    await this.makeRequest('SETEX', [key, seconds, value]);
-  }
-
-  async del(key: string): Promise<number> {
-    const result = await this.makeRequest('DEL', [key]);
-    return typeof result === 'number' ? result : 0;
-  }
-
-  async incr(key: string): Promise<number> {
-    const result = await this.makeRequest('INCR', [key]);
-    return typeof result === 'number' ? result : 0;
-  }
-
-  async expire(key: string, seconds: number): Promise<number> {
-    const result = await this.makeRequest('EXPIRE', [key, seconds]);
-    return typeof result === 'number' ? result : 0;
-  }
-
-  async ping(): Promise<string> {
-    const result = await this.makeRequest('PING');
-    return String(result);
-  }
-}
-
-/**
  * Get Redis client instance (Upstash or standard)
  * Uses singleton pattern to reuse connection across requests
  */
-let redisClient: Redis | UpstashRedisClient | null = null;
+let redisClient: Redis | UpstashRedis | null = null;
 let isUpstash = false;
 
-function getRedisClient(): Redis | UpstashRedisClient {
+function getRedisClient(): Redis | UpstashRedis {
   if (!redisClient) {
     // Check if using Upstash (serverless Redis)
     const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
     const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
     if (upstashUrl && upstashToken) {
-      // Use Upstash REST API
+      // Use official Upstash Redis SDK
       isUpstash = true;
-      redisClient = new UpstashRedisClient(upstashUrl, upstashToken);
+      redisClient = new UpstashRedis({
+        url: upstashUrl,
+        token: upstashToken,
+      });
       console.log('Using Upstash Redis (REST API) for auth cache');
       return redisClient;
     }
@@ -168,7 +95,7 @@ function getRedisClient(): Redis | UpstashRedisClient {
  * Redis Auth Cache Service
  */
 export class RedisAuthCache {
-  private redis: Redis | UpstashRedisClient;
+  private redis: Redis | UpstashRedis;
 
   constructor() {
     this.redis = getRedisClient();
@@ -180,7 +107,7 @@ export class RedisAuthCache {
   async isAvailable(): Promise<boolean> {
     try {
       if (isUpstash) {
-        await (this.redis as UpstashRedisClient).ping();
+        await (this.redis as UpstashRedis).ping();
       } else {
         await (this.redis as Redis).ping();
       }
@@ -221,7 +148,7 @@ export class RedisAuthCache {
         // Shorter TTL for negative cache (1 minute)
         const value = JSON.stringify(null);
         if (isUpstash) {
-          await (this.redis as UpstashRedisClient).setex(key, 60, value);
+          await (this.redis as UpstashRedis).setex(key, 60, value);
         } else {
           await (this.redis as Redis).setex(key, 60, value);
         }
@@ -245,7 +172,7 @@ export class RedisAuthCache {
 
       const key = CACHE_KEYS.userByEmail(email);
       const cached = isUpstash
-        ? await (this.redis as UpstashRedisClient).get(key)
+        ? await (this.redis as UpstashRedis).get(key)
         : await (this.redis as Redis).get(key);
 
       if (cached === null) return undefined; // Not cached
@@ -299,7 +226,7 @@ export class RedisAuthCache {
 
       const key = CACHE_KEYS.userById(id);
       const cached = isUpstash
-        ? await (this.redis as UpstashRedisClient).get(key)
+        ? await (this.redis as UpstashRedis).get(key)
         : await (this.redis as Redis).get(key);
 
       if (cached === null) return null;
@@ -378,7 +305,7 @@ export class RedisAuthCache {
 
       const key = CACHE_KEYS.loginAttempts(email);
       if (isUpstash) {
-        await (this.redis as UpstashRedisClient).del(key);
+        await (this.redis as UpstashRedis).del(key);
       } else {
         await (this.redis as Redis).del(key);
       }
@@ -438,7 +365,7 @@ export class RedisAuthCache {
 
       const key = CACHE_KEYS.session(sessionId);
       const cached = isUpstash
-        ? await (this.redis as UpstashRedisClient).get(key)
+        ? await (this.redis as UpstashRedis).get(key)
         : await (this.redis as Redis).get(key);
 
       if (cached === null) return null;
@@ -459,7 +386,7 @@ export class RedisAuthCache {
 
       const key = CACHE_KEYS.session(sessionId);
       if (isUpstash) {
-        await (this.redis as UpstashRedisClient).del(key);
+        await (this.redis as UpstashRedis).del(key);
       } else {
         await (this.redis as Redis).del(key);
       }
