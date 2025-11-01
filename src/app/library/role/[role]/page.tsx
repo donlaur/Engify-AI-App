@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { APP_URL } from '@/lib/constants';
 import RolePageClient from './role-page-client';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import { getMongoDb } from '@/lib/db/mongodb';
 
 const ROLE_INFO: Record<string, { title: string; description: string }> = {
   'c-level': {
@@ -46,6 +46,46 @@ const ROLE_INFO: Record<string, { title: string; description: string }> = {
   },
 };
 
+async function getPromptsByRole(role: string) {
+  try {
+    const db = await getMongoDb();
+    const collection = db.collection('prompts');
+    
+    // Use MongoDB index for efficient role filtering
+    const prompts = await collection
+      .find({
+        role: role.toLowerCase(),
+        isPublic: true,
+      })
+      .sort({ isFeatured: -1, views: -1 })
+      .limit(100)
+      .toArray();
+
+    return prompts.map((p) => ({
+      id: p.id || p._id.toString(),
+      slug: p.slug,
+      title: p.title,
+      description: p.description,
+      content: p.content,
+      category: p.category,
+      role: p.role,
+      pattern: p.pattern,
+      tags: p.tags || [],
+      isFeatured: p.isFeatured || false,
+      views: p.views || 0,
+      rating: p.rating || p.stats?.averageRating || 0,
+      ratingCount: p.ratingCount || p.stats?.totalRatings || 0,
+      createdAt: p.createdAt || new Date(),
+    }));
+  } catch (error) {
+    console.error('Error fetching prompts by role:', error);
+    // Fallback to static data
+    const { getSeedPromptsWithTimestamps } = await import('@/data/seed-prompts');
+    const allPrompts = getSeedPromptsWithTimestamps();
+    return allPrompts.filter((p) => p.role === role);
+  }
+}
+
 export async function generateMetadata({ params }: { params: { role: string } }): Promise<Metadata> {
   const role = decodeURIComponent(params.role);
   const roleInfo = ROLE_INFO[role] || {
@@ -53,9 +93,8 @@ export async function generateMetadata({ params }: { params: { role: string } })
     description: `Explore prompt engineering prompts for ${role} professionals.`,
   };
 
-  // Get prompts for this role
-  const allPrompts = getSeedPromptsWithTimestamps();
-  const rolePrompts = allPrompts.filter((p) => p.role === role);
+  // Get prompts for this role from MongoDB
+  const rolePrompts = await getPromptsByRole(role);
 
   const title = `${roleInfo.title} Prompts - Prompt Engineering Library | Engify.ai`;
   const description = `${roleInfo.description} Browse ${rolePrompts.length} prompt${rolePrompts.length !== 1 ? 's' : ''} designed for ${roleInfo.title.toLowerCase()}.`;
@@ -98,9 +137,8 @@ export default async function RolePage({ params }: { params: { role: string } })
     description: `Explore prompts for ${role} professionals.`,
   };
 
-  // Get prompts for this role
-  const allPrompts = getSeedPromptsWithTimestamps();
-  const rolePrompts = allPrompts.filter((p) => p.role === role);
+  // Get prompts for this role from MongoDB
+  const rolePrompts = await getPromptsByRole(role);
 
   // Generate JSON-LD structured data
   const jsonLd = {
