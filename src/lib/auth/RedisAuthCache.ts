@@ -5,6 +5,10 @@
  * and improve login performance. Critical for serverless environments where
  * MongoDB connections can be slow or unreliable.
  *
+ * Supports both:
+ * - Upstash Redis (REST API) - Recommended for serverless/production
+ * - Standard Redis (TCP) - For local development
+ *
  * Benefits:
  * - Faster user lookups (Redis ~1ms vs MongoDB ~50-100ms)
  * - Reduces MongoDB connection load
@@ -33,23 +37,105 @@ const CACHE_TTL = {
 } as const;
 
 /**
- * Get Redis client instance
+ * Upstash Redis REST API client
+ */
+class UpstashRedisClient {
+  private baseUrl: string;
+  private authToken: string;
+
+  constructor(baseUrl: string, authToken: string) {
+    this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
+    this.authToken = authToken;
+  }
+
+  /**
+   * Make HTTP request to Upstash Redis REST API
+   */
+  private async makeRequest(
+    command: string,
+    args: (string | number)[] = []
+  ): Promise<unknown> {
+    const url = `${this.baseUrl}/${command}`;
+    const body = args.map(String); // Convert all args to strings
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      // Upstash returns { result: <value> } format
+      return (result as { result?: unknown }).result ?? result;
+    } catch (error) {
+      throw new Error(
+        `Upstash Redis request failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  async get(key: string): Promise<string | null> {
+    const result = await this.makeRequest('GET', [key]);
+    return result === null ? null : String(result);
+  }
+
+  async setex(key: string, seconds: number, value: string): Promise<void> {
+    await this.makeRequest('SETEX', [key, seconds, value]);
+  }
+
+  async del(key: string): Promise<number> {
+    const result = await this.makeRequest('DEL', [key]);
+    return typeof result === 'number' ? result : 0;
+  }
+
+  async incr(key: string): Promise<number> {
+    const result = await this.makeRequest('INCR', [key]);
+    return typeof result === 'number' ? result : 0;
+  }
+
+  async expire(key: string, seconds: number): Promise<number> {
+    const result = await this.makeRequest('EXPIRE', [key, seconds]);
+    return typeof result === 'number' ? result : 0;
+  }
+
+  async ping(): Promise<string> {
+    const result = await this.makeRequest('PING');
+    return String(result);
+  }
+}
+
+/**
+ * Get Redis client instance (Upstash or standard)
  * Uses singleton pattern to reuse connection across requests
  */
-let redisClient: Redis | null = null;
+let redisClient: Redis | UpstashRedisClient | null = null;
+let isUpstash = false;
 
-function getRedisClient(): Redis {
+function getRedisClient(): Redis | UpstashRedisClient {
   if (!redisClient) {
     // Check if using Upstash (serverless Redis)
     const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
     const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
     if (upstashUrl && upstashToken) {
-      // Upstash uses REST API, not direct Redis connection
-      // For now, fall back to standard Redis config
-      // TODO: Implement Upstash REST client if needed
+      // Use Upstash REST API
+      isUpstash = true;
+      redisClient = new UpstashRedisClient(upstashUrl, upstashToken);
+      console.log('Using Upstash Redis (REST API) for auth cache');
+      return redisClient;
     }
 
+    // Fall back to standard Redis (local development)
+    isUpstash = false;
     redisClient = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
@@ -82,7 +168,7 @@ function getRedisClient(): Redis {
  * Redis Auth Cache Service
  */
 export class RedisAuthCache {
-  private redis: Redis;
+  private redis: Redis | UpstashRedisClient;
 
   constructor() {
     this.redis = getRedisClient();
@@ -93,7 +179,11 @@ export class RedisAuthCache {
    */
   async isAvailable(): Promise<boolean> {
     try {
-      await this.redis.ping();
+      if (isUpstash) {
+        await (this.redis as UpstashRedisClient).ping();
+      } else {
+        await (this.redis as Redis).ping();
+      }
       return true;
     } catch {
       return false;
@@ -112,18 +202,29 @@ export class RedisAuthCache {
       if (user) {
         // Cache user data (exclude password hash from cache)
         const { password: _, ...userWithoutPassword } = user;
-        await this.redis.setex(
-          key,
-          CACHE_TTL.userData,
-          JSON.stringify(userWithoutPassword)
-        );
+        const value = JSON.stringify(userWithoutPassword);
+
+        if (isUpstash) {
+          await (this.redis as UpstashRedisClient).setex(
+            key,
+            CACHE_TTL.userData,
+            value
+          );
+        } else {
+          await (this.redis as Redis).setex(key, CACHE_TTL.userData, value);
+        }
 
         // Also cache by ID for fast lookups
         await this.cacheUserById(user._id.toString(), user);
       } else {
         // Cache null result to prevent repeated MongoDB lookups for non-existent users
         // Shorter TTL for negative cache (1 minute)
-        await this.redis.setex(key, 60, JSON.stringify(null));
+        const value = JSON.stringify(null);
+        if (isUpstash) {
+          await (this.redis as UpstashRedisClient).setex(key, 60, value);
+        } else {
+          await (this.redis as Redis).setex(key, 60, value);
+        }
       }
     } catch (error) {
       // Silently fail - MongoDB is fallback
@@ -143,7 +244,9 @@ export class RedisAuthCache {
       if (!(await this.isAvailable())) return undefined;
 
       const key = CACHE_KEYS.userByEmail(email);
-      const cached = await this.redis.get(key);
+      const cached = isUpstash
+        ? await (this.redis as UpstashRedisClient).get(key)
+        : await (this.redis as Redis).get(key);
 
       if (cached === null) return undefined; // Not cached
 
@@ -171,12 +274,17 @@ export class RedisAuthCache {
 
       const key = CACHE_KEYS.userById(id);
       const { password: _, ...userWithoutPassword } = user;
+      const value = JSON.stringify(userWithoutPassword);
 
-      await this.redis.setex(
-        key,
-        CACHE_TTL.userData,
-        JSON.stringify(userWithoutPassword)
-      );
+      if (isUpstash) {
+        await (this.redis as UpstashRedisClient).setex(
+          key,
+          CACHE_TTL.userData,
+          value
+        );
+      } else {
+        await (this.redis as Redis).setex(key, CACHE_TTL.userData, value);
+      }
     } catch (error) {
       console.warn('Redis cache error (user by id):', error);
     }
@@ -190,7 +298,9 @@ export class RedisAuthCache {
       if (!(await this.isAvailable())) return null;
 
       const key = CACHE_KEYS.userById(id);
-      const cached = await this.redis.get(key);
+      const cached = isUpstash
+        ? await (this.redis as UpstashRedisClient).get(key)
+        : await (this.redis as Redis).get(key);
 
       if (cached === null) return null;
 
@@ -213,7 +323,13 @@ export class RedisAuthCache {
         keys.push(CACHE_KEYS.userById(userId));
       }
 
-      await Promise.all(keys.map((key) => this.redis.del(key)));
+      if (isUpstash) {
+        await Promise.all(
+          keys.map((key) => (this.redis as UpstashRedisClient).del(key))
+        );
+      } else {
+        await Promise.all(keys.map((key) => (this.redis as Redis).del(key)));
+      }
     } catch (error) {
       console.warn('Redis cache invalidation error:', error);
     }
@@ -227,11 +343,23 @@ export class RedisAuthCache {
       if (!(await this.isAvailable())) return 0;
 
       const key = CACHE_KEYS.loginAttempts(email);
-      const attempts = await this.redis.incr(key);
+      let attempts: number;
 
-      // Set TTL on first attempt
-      if (attempts === 1) {
-        await this.redis.expire(key, CACHE_TTL.loginAttempts);
+      if (isUpstash) {
+        attempts = await (this.redis as UpstashRedisClient).incr(key);
+        // Set TTL on first attempt
+        if (attempts === 1) {
+          await (this.redis as UpstashRedisClient).expire(
+            key,
+            CACHE_TTL.loginAttempts
+          );
+        }
+      } else {
+        attempts = await (this.redis as Redis).incr(key);
+        // Set TTL on first attempt
+        if (attempts === 1) {
+          await (this.redis as Redis).expire(key, CACHE_TTL.loginAttempts);
+        }
       }
 
       return attempts;
@@ -249,7 +377,11 @@ export class RedisAuthCache {
       if (!(await this.isAvailable())) return;
 
       const key = CACHE_KEYS.loginAttempts(email);
-      await this.redis.del(key);
+      if (isUpstash) {
+        await (this.redis as UpstashRedisClient).del(key);
+      } else {
+        await (this.redis as Redis).del(key);
+      }
     } catch (error) {
       console.warn('Redis reset attempts error:', error);
     }
@@ -263,7 +395,9 @@ export class RedisAuthCache {
       if (!(await this.isAvailable())) return 0;
 
       const key = CACHE_KEYS.loginAttempts(email);
-      const attempts = await this.redis.get(key);
+      const attempts = isUpstash
+        ? await (this.redis as UpstashRedisClient).get(key)
+        : await (this.redis as Redis).get(key);
       return attempts ? parseInt(attempts, 10) : 0;
     } catch (error) {
       console.warn('Redis get attempts error:', error);
@@ -279,11 +413,17 @@ export class RedisAuthCache {
       if (!(await this.isAvailable())) return;
 
       const key = CACHE_KEYS.session(sessionId);
-      await this.redis.setex(
-        key,
-        CACHE_TTL.session,
-        JSON.stringify(sessionData)
-      );
+      const value = JSON.stringify(sessionData);
+
+      if (isUpstash) {
+        await (this.redis as UpstashRedisClient).setex(
+          key,
+          CACHE_TTL.session,
+          value
+        );
+      } else {
+        await (this.redis as Redis).setex(key, CACHE_TTL.session, value);
+      }
     } catch (error) {
       console.warn('Redis session cache error:', error);
     }
@@ -297,7 +437,9 @@ export class RedisAuthCache {
       if (!(await this.isAvailable())) return null;
 
       const key = CACHE_KEYS.session(sessionId);
-      const cached = await this.redis.get(key);
+      const cached = isUpstash
+        ? await (this.redis as UpstashRedisClient).get(key)
+        : await (this.redis as Redis).get(key);
 
       if (cached === null) return null;
 
@@ -316,7 +458,11 @@ export class RedisAuthCache {
       if (!(await this.isAvailable())) return;
 
       const key = CACHE_KEYS.session(sessionId);
-      await this.redis.del(key);
+      if (isUpstash) {
+        await (this.redis as UpstashRedisClient).del(key);
+      } else {
+        await (this.redis as Redis).del(key);
+      }
     } catch (error) {
       console.warn('Redis session invalidation error:', error);
     }
