@@ -81,6 +81,9 @@ next-env.d.ts
 # Private scripts (migration, content management)
 scripts/private/
 
+# Git history cleanup replacements (contains actual secrets)
+scripts/security/.git-history-replacements.local.txt
+
 # Lambda deployment artifacts
 lambda/**/*.zip
 lambda/bson/

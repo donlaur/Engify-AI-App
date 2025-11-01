@@ -30,24 +30,33 @@ fi
 
 echo ""
 echo "📋 Secrets to remove from history:"
-echo "  - Cognito Client ID: 64haaujuedgbhsu9p01avf4d10"
-echo "  - Cognito User Pool ID: us-east-1_tsIIjaxYi"
-echo "  - AWS Account ID: 8257-6541-9928"
+echo "  - Cognito Client ID: [REDACTED]"
+echo "  - Cognito User Pool ID: [REDACTED]"
+echo "  - AWS Account ID: [REDACTED]"
+echo ""
+echo "⚠️  Note: Actual values are read from gitignored file"
 echo ""
 
-# Create temporary file with replacements
-cat > /tmp/git-replacements.txt <<EOF
-64haaujuedgbhsu9p01avf4d10==>[YOUR_CLIENT_ID]
-us-east-1_tsIIjaxYi==>[YOUR_USER_POOL_ID]
-8257-6541-9928==>[YOUR_AWS_ACCOUNT_ID]
+# Create temporary file with replacements (read from gitignored file if exists)
+if [ -f "scripts/security/.git-history-replacements.local.txt" ]; then
+  echo "✅ Using local replacements file"
+  REPLACEMENTS_FILE="scripts/security/.git-history-replacements.local.txt"
+else
+  echo "⚠️  Creating temporary replacements file..."
+  echo "⚠️  For production, create scripts/security/.git-history-replacements.local.txt"
+  cat > /tmp/git-replacements.txt <<EOF
+# Add actual values here (this file is temporary and will be deleted)
+# Format: old_value==>new_value
 EOF
+  REPLACEMENTS_FILE="/tmp/git-replacements.txt"
+fi
 
 # Check if BFG is installed
 if command -v bfg &> /dev/null; then
   echo "✅ Using BFG Repo-Cleaner (recommended)"
   echo ""
   echo "Running BFG..."
-  bfg --replace-text /tmp/git-replacements.txt
+  bfg --replace-text "$REPLACEMENTS_FILE"
   
   echo ""
   echo "🧹 Cleaning up..."
