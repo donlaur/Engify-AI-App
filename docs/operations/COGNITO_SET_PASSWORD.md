@@ -6,9 +6,9 @@ Since you forgot the password and didn't receive the email, you can set a perman
 
 ### Option 1: Set Password in AWS Console (Easiest)
 
-1. **AWS Console** → Cognito → User Pools → User pool - dz9-no
+1. **AWS Console** → Cognito → User Pools → [Your User Pool]
 2. **User management** → **Users**
-3. Click on your user (`donlaur@engify.ai`)
+3. Click on your user ([your-email@example.com])
 4. Click **"Actions"** → **"Set password"** (or look for password options)
 5. **Set password:** Enter your desired password
 6. **Mark as permanent:** ✅ (not temporary)
@@ -16,9 +16,9 @@ Since you forgot the password and didn't receive the email, you can set a perman
 
 ### Option 2: Reset Password via AWS Console
 
-1. **AWS Console** → Cognito → User Pools → User pool - dz9-no
+1. **AWS Console** → Cognito → User Pools → [Your User Pool]
 2. **User management** → **Users**
-3. Click on your user (`donlaur@engify.ai`)
+3. Click on your user ([your-email@example.com])
 4. Click **"Actions"** → **"Reset password"**
 5. Choose **"Send email"** or **"Generate password"**
 6. If email doesn't work, choose **"Generate password"** and copy it
@@ -27,11 +27,13 @@ Since you forgot the password and didn't receive the email, you can set a perman
 
 ```bash
 aws cognito-idp admin-set-user-password \
-  --user-pool-id us-east-1_tsIIjaxYi \
-  --username donlaur@engify.ai \
+  --user-pool-id [YOUR_USER_POOL_ID] \
+  --username [your-email@example.com] \
   --password YOUR_NEW_PASSWORD \
   --permanent
 ```
+
+**Note:** Replace placeholders with your actual values. This requires AWS CLI permissions.
 
 ## After Setting Password
 
@@ -43,7 +45,7 @@ aws cognito-idp admin-set-user-password \
 ## Test Login
 
 1. Go to `https://engify.ai/login`
-2. Email: `donlaur@engify.ai`
+2. Email: [your-email@example.com]
 3. Password: (the password you just set)
 4. Should login successfully!
 
