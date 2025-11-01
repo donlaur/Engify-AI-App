@@ -97,35 +97,27 @@ export default async function Home() {
             </p>
 
             <div className="flex flex-col justify-center gap-4 pt-8">
-              <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900/80 to-black/80 p-8 backdrop-blur-sm">
-                <h3 className="mb-2 text-2xl font-bold text-white">
-                  Get the Latest{' '}
-                  <span className="text-green-400">Prompt Engineering</span>{' '}
-                  Tips
-                </h3>
-                <p className="mb-4 text-white/80">Right in Your Inbox</p>
-                <div className="flex justify-center gap-2">
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-green-500 to-cyan-500 font-bold text-black hover:from-green-600 hover:to-cyan-600"
-                    asChild
-                  >
-                    <Link href="/prompts">
-                      Browse Prompt Playbook
-                      <Icons.arrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white/30 text-white hover:bg-white/10"
-                    asChild
-                  >
-                    <Link href="/signup">
-                      {allowSignup ? 'Start Free' : 'Request Beta Access'}
-                    </Link>
-                  </Button>
-                </div>
+              <div className="flex justify-center gap-4">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-green-500 to-cyan-500 font-bold text-black hover:from-green-600 hover:to-cyan-600"
+                  asChild
+                >
+                  <Link href="/prompts">
+                    Browse Prompt Playbook
+                    <Icons.arrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10"
+                  asChild
+                >
+                  <Link href="/signup">
+                    {allowSignup ? 'Start Free' : 'Request Beta Access'}
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
