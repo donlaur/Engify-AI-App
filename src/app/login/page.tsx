@@ -39,15 +39,24 @@ export default function LoginPage() {
         email,
         password,
         redirect: false,
+        callbackUrl: '/dashboard',
       });
 
+      console.log('🔐 [LOGIN] SignIn result:', result);
+
       if (result?.error) {
+        console.error('🔐 [LOGIN] Error:', result.error);
         setError('Invalid email or password');
+      } else if (result?.ok) {
+        console.log('🔐 [LOGIN] Success! Redirecting to dashboard...');
+        // Force a hard redirect to ensure session is loaded
+        window.location.href = '/dashboard';
       } else {
-        router.push('/dashboard');
-        router.refresh();
+        console.warn('🔐 [LOGIN] Unexpected result:', result);
+        setError('Login failed. Please try again.');
       }
     } catch (err) {
+      console.error('🔐 [LOGIN] Exception:', err);
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
