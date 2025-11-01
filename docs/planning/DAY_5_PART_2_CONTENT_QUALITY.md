@@ -244,6 +244,16 @@ Acceptance:
   - ✅ Added prompts for missing roles: QA engineer, data engineer, ML engineer, technical writer, developer advocate, solutions architect
   - ✅ All prompts include framework/model recommendations and red-hat scores
   - ✅ Total prompts now: 132 (was 122)
+- ✅ **NEW:** Created comprehensive Augmented Engineer Framework (Nov 1, 2025)
+  - ✅ Strategic framework for human-AI collaboration documented
+  - ✅ SDLC phases with AI integration (6 phases)
+  - ✅ Role-specific workflow blueprints (Developer, PM, QA, DevOps)
+  - ✅ Human-AI collaboration taxonomy (11 interaction types)
+  - ✅ Multi-layered guardrails framework
+  - ✅ IP protection strategies and trade-offs table
+  - ✅ Ethical framework
+  - ✅ Implementation roadmap
+  - 📋 Next: Integrate into site (learning pathway, prompt tags, workflow builders)
 
 More detail: [Content Migration Plan](../content/PHASE_8_CONTENT_SYNC.md)
 
