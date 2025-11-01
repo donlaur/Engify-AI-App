@@ -352,8 +352,16 @@ Acceptance:
 
 ### Phase 2 Enhancements (After Compliance)
 - ✅ Gemini integration fixed (using 2.0, FREE!)
-- ⚠️ Build UI to display test results on prompt pages
-- ⚠️ Add quality score badges to library cards
+- ✅ Build UI to display test results on prompt pages (COMPLETE)
+  - ✅ Created TestResults component with model performance breakdown
+  - ✅ Added to prompt detail page sidebar
+  - ✅ Shows quality scores, latency, cost per model
+  - ✅ Color-coded badges (green=excellent, blue=good, yellow=acceptable)
+- ✅ Add quality score badges to library cards (COMPLETE)
+  - ✅ Created QualityBadge component (reusable, 3 sizes)
+  - ✅ Updated PromptCard to fetch and display quality scores
+  - ✅ Batch API endpoint for efficient loading
+  - ✅ Only shows badges when test results exist
 
 ### Management Content (After Compliance)
 - ✅ Seed 12 management prompts to MongoDB (11 new prompts added, 1 duplicate skipped)
