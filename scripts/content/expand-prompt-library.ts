@@ -547,33 +547,47 @@ async function saveNewPromptsToDatabase(prompts: GeneratedPrompt[], db: any, dry
 
   console.log(`\n💾 SAVING ${prompts.length} NEW PROMPTS TO DATABASE\n`);
   
-  const promptsToSave = prompts.map(p => ({
-    id: `generated-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-    title: p.title,
-    description: p.description,
-    content: p.content,
-    category: p.category,
-    role: p.role,
-    pattern: p.pattern,
-    tags: p.tags,
-    difficulty: p.difficulty,
-    isFeatured: p.redHatScore.overall >= 8,
-    views: 0,
-    rating: 0,
-    ratingCount: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    metadata: {
-      recommendedFramework: p.framework.name,
-      frameworkReasoning: p.framework.description,
-      recommendedModel: p.recommendedModel.model,
-      modelReasoning: p.recommendedModel.reasoning,
-      estimatedCostPerUse: p.recommendedModel.costPerCall,
-      redHatScores: p.redHatScore,
-      generatedBy: 'ai-expansion-system',
-      generatedAt: new Date(),
-    },
-  }));
+  // Generate slugs helper
+  function generateSlug(title: string, id: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .substring(0, 100) + `-${id}`;
+  }
+  
+  const promptsToSave = prompts.map(p => {
+    const id = `generated-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    return {
+      id,
+      slug: generateSlug(p.title, id),
+      title: p.title,
+      description: p.description,
+      content: p.content,
+      category: p.category,
+      role: p.role,
+      pattern: p.pattern,
+      tags: p.tags,
+      difficulty: p.difficulty,
+      isFeatured: p.redHatScore.overall >= 8,
+      isPublic: true,
+      views: 0,
+      rating: 0,
+      ratingCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      metadata: {
+        recommendedFramework: p.framework.name,
+        frameworkReasoning: p.framework.description,
+        recommendedModel: p.recommendedModel.model,
+        modelReasoning: p.recommendedModel.reasoning,
+        estimatedCostPerUse: p.recommendedModel.costPerCall,
+        redHatScores: p.redHatScore,
+        generatedBy: 'ai-expansion-system',
+        generatedAt: new Date(),
+      },
+    };
+  });
 
   // Script context: Direct DB access needed for content migration
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
