@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -12,7 +12,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
-import { siteStats } from '@/lib/constants';
 import { PatternDetailDrawer } from '@/components/features/PatternDetailDrawer';
 import { getPatternById } from '@/data/pattern-details';
 
@@ -73,6 +72,23 @@ export function PatternsClient({ patterns }: PatternsClientProps) {
     null
   );
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [totalPrompts, setTotalPrompts] = useState(0);
+
+  // Fetch real-time stats from API
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setTotalPrompts(data.stats?.prompts || 0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const filteredPatterns = patterns.filter((pattern) => {
     const categoryMatch =
@@ -130,7 +146,7 @@ export function PatternsClient({ patterns }: PatternsClientProps) {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{siteStats.totalPrompts}</div>
+            <div className="text-2xl font-bold">{totalPrompts}</div>
             <p className="text-xs text-muted-foreground">Example Prompts</p>
           </CardContent>
         </Card>
@@ -259,8 +275,8 @@ export function PatternsClient({ patterns }: PatternsClientProps) {
             Ready to use these patterns?
           </h3>
           <p className="mb-6 text-muted-foreground">
-            Browse our library of {siteStats.totalPrompts}+ expert prompts that
-            use these patterns
+            Browse our library of {totalPrompts}+ expert prompts that use these
+            patterns
           </p>
           <Button size="lg" asChild>
             <Link href="/prompts">
