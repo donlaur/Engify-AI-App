@@ -13,6 +13,7 @@ import { RatingStars } from '@/components/features/RatingStars';
 import { MakeItMineButton } from '@/components/features/MakeItMineButton';
 import { TestResults } from '@/components/prompt/TestResults';
 import { FrameworkRecommendation } from '@/components/prompt/FrameworkRecommendation';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useToast } from '@/hooks/use-toast';
 
 export default function PromptDetailPage() {
@@ -339,17 +340,21 @@ export default function PromptDetailPage() {
             )}
 
             {/* Test Results Card */}
-            <TestResults promptId={prompt.id || prompt._id || id} />
+            <ErrorBoundary>
+              <TestResults promptId={prompt.id || prompt._id || id} />
+            </ErrorBoundary>
 
             {/* Framework & Model Recommendations */}
             {prompt.metadata && (
-              <FrameworkRecommendation
-                framework={prompt.metadata.recommendedFramework}
-                frameworkReasoning={prompt.metadata.frameworkReasoning}
-                recommendedModel={prompt.metadata.recommendedModel}
-                modelReasoning={prompt.metadata.modelReasoning}
-                estimatedCost={prompt.metadata.estimatedCostPerUse}
-              />
+              <ErrorBoundary>
+                <FrameworkRecommendation
+                  framework={prompt.metadata.recommendedFramework}
+                  frameworkReasoning={prompt.metadata.frameworkReasoning}
+                  recommendedModel={prompt.metadata.recommendedModel}
+                  modelReasoning={prompt.metadata.modelReasoning}
+                  estimatedCost={prompt.metadata.estimatedCostPerUse}
+                />
+              </ErrorBoundary>
             )}
 
             {/* Share Card */}
