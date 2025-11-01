@@ -42,15 +42,43 @@ export class AuditLogService extends BaseService<AuditLog> {
     const expiresAt = new Date();
     expiresAt.setFullYear(expiresAt.getFullYear() + 1);
     
+    // Convert string IDs to ObjectId instances, handling invalid formats gracefully
+    let userId: ObjectId | null = null;
+    if (params.userId) {
+      try {
+        userId = ObjectId.isValid(params.userId) ? new ObjectId(params.userId) : null;
+      } catch {
+        userId = null;
+      }
+    }
+
+    let resourceId: ObjectId | null = null;
+    if (params.resourceId) {
+      try {
+        resourceId = ObjectId.isValid(params.resourceId) ? new ObjectId(params.resourceId) : null;
+      } catch {
+        resourceId = null;
+      }
+    }
+
+    let organizationId: ObjectId | null = null;
+    if (params.organizationId) {
+      try {
+        organizationId = ObjectId.isValid(params.organizationId) ? new ObjectId(params.organizationId) : null;
+      } catch {
+        organizationId = null;
+      }
+    }
+    
     const auditLog: Omit<AuditLog, '_id'> = {
       eventType: params.eventType,
       eventCategory,
-      userId: params.userId ? new ObjectId(params.userId) : null,
+      userId,
       userEmail: params.userEmail || null,
       userRole: params.userRole || null,
       resourceType: params.resourceType || null,
-      resourceId: params.resourceId ? new ObjectId(params.resourceId) : null,
-      organizationId: params.organizationId ? new ObjectId(params.organizationId) : null,
+      resourceId,
+      organizationId,
       ipAddress: params.ipAddress,
       userAgent: params.userAgent || null,
       requestId: params.requestId || null,
@@ -62,7 +90,8 @@ export class AuditLogService extends BaseService<AuditLog> {
       expiresAt,
     };
     
-    return await this.insertOne(auditLog as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return await this.insertOne(auditLog as any);
   }
 
   /**
@@ -70,7 +99,7 @@ export class AuditLogService extends BaseService<AuditLog> {
    */
   async query(filters: AuditLogFilters, page: number = 1, limit: number = 50) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: any = {};
+    const query: Record<string, unknown> = {};
     
     if (filters.userId) {
       query.userId = filters.userId;
@@ -104,10 +133,10 @@ export class AuditLogService extends BaseService<AuditLog> {
     if (filters.startDate || filters.endDate) {
       query.timestamp = {};
       if (filters.startDate) {
-        query.timestamp.$gte = filters.startDate;
+        (query.timestamp as Record<string, unknown>).$gte = filters.startDate;
       }
       if (filters.endDate) {
-        query.timestamp.$lte = filters.endDate;
+        (query.timestamp as Record<string, unknown>).$lte = filters.endDate;
       }
     }
     

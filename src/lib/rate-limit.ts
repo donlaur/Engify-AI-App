@@ -5,18 +5,7 @@
  * Tracks usage by IP address and user ID
  */
 
-import { MongoClient } from 'mongodb';
-
-const uri = process.env.MONGODB_URI || '';
-let client: MongoClient | null = null;
-
-async function getClient() {
-  if (!client) {
-    client = new MongoClient(uri);
-    await client.connect();
-  }
-  return client;
-}
+import { getDb } from '@/lib/mongodb';
 
 interface RateLimitConfig {
   maxRequestsPerHour: number;
@@ -57,8 +46,8 @@ export async function checkRateLimit(
   tier: 'anonymous' | 'authenticated' | 'pro' = 'anonymous'
 ): Promise<RateLimitResult> {
   try {
-    const client = await getClient();
-    const db = client.db('engify');
+    const db = await getDb();
+    // Rate limiting uses its own collection - no service class available
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, engify/no-hardcoded-collections
     const collection = db.collection('rate_limits');
 
@@ -131,6 +120,7 @@ export async function checkRateLimit(
     }
 
     // Update usage
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await collection.updateOne(
       { identifier },
       {
@@ -163,8 +153,8 @@ export async function trackTokenUsage(
   tokens: number
 ): Promise<void> {
   try {
-    const client = await getClient();
-    const db = client.db('engify');
+    const db = await getDb();
+    // Rate limiting uses its own collection - no service class available
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, engify/no-hardcoded-collections
     const collection = db.collection('rate_limits');
 
@@ -188,8 +178,9 @@ export function getClientIp(request: Request): string {
   const realIp = request.headers.get('x-real-ip');
   
   if (forwarded) {
+    const parts = forwarded.split(',');
     // eslint-disable-next-line engify/no-unsafe-array-access
-    return forwarded.split(',')[0].trim();
+    return parts[0]?.trim() || 'unknown';
   }
   
   if (realIp) {
@@ -204,8 +195,8 @@ export function getClientIp(request: Request): string {
  */
 export async function resetRateLimit(identifier: string): Promise<void> {
   try {
-    const client = await getClient();
-    const db = client.db('engify');
+    const db = await getDb();
+    // Rate limiting uses its own collection - no service class available
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, engify/no-hardcoded-collections
     const collection = db.collection('rate_limits');
 
