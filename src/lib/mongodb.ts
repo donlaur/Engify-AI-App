@@ -24,9 +24,9 @@ const isSrvUri = uri.startsWith('mongodb+srv://');
 const options = {
   maxPoolSize: 10,
   minPoolSize: 2,
-  serverSelectionTimeoutMS: 30000,
-  socketTimeoutMS: 45000,
-  connectTimeoutMS: 30000,
+  serverSelectionTimeoutMS: 10000, // Reduced from 30s for faster failure detection
+  socketTimeoutMS: 30000, // Reduced from 45s
+  connectTimeoutMS: 10000, // Reduced from 30s
   retryWrites: true,
   retryReads: true,
   w: 'majority' as const,
@@ -41,7 +41,6 @@ const options = {
         tls: true,
         tlsAllowInvalidCertificates: false,
         tlsAllowInvalidHostnames: false,
-        tlsInsecure: false,
       }
     : {
         tls: true,
@@ -52,20 +51,64 @@ const options = {
   heartbeatFrequencyMS: 10000,
   // Additional options for serverless environments
   directConnection: false, // Use replica set connection
-  compressors: ['zlib'], // Enable compression
 };
 
 // Use global variable to cache connection across invocations (important for serverless)
 const globalWithMongo = global as typeof globalThis & {
   _mongoClientPromise?: Promise<MongoClient>;
+  _mongoClient?: MongoClient;
 };
+
+/**
+ * Create MongoDB client with retry logic
+ */
+async function createClientWithRetry(): Promise<MongoClient> {
+  let retries = 3;
+  let lastError: Error | null = null;
+
+  while (retries > 0) {
+    try {
+      const client = new MongoClient(uri, options);
+
+      // Attempt connection with timeout
+      await Promise.race([
+        client.connect(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Connection timeout')), 10000)
+        ),
+      ]);
+
+      // Verify connection works
+      await client.db('admin').command({ ping: 1 });
+
+      return client;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      retries--;
+
+      if (retries > 0) {
+        // Exponential backoff: wait 1s, 2s, 4s
+        const delay = Math.pow(2, 3 - retries) * 1000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw lastError || new Error('Failed to create MongoDB client');
+}
 
 const clientPromise: Promise<MongoClient> =
   globalWithMongo._mongoClientPromise ||
   (() => {
-    const client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
-    return globalWithMongo._mongoClientPromise;
+    const promise = createClientWithRetry();
+    globalWithMongo._mongoClientPromise = promise;
+
+    // Store client reference for cleanup
+    promise.then((client) => {
+      globalWithMongo._mongoClient = client;
+    });
+
+    return promise;
   })();
 
 // Export a module-scoped MongoClient promise. By doing this in a
@@ -73,10 +116,33 @@ const clientPromise: Promise<MongoClient> =
 export default clientPromise;
 
 /**
- * Get MongoDB client
+ * Get MongoDB client with health check
  */
 export async function getClient(): Promise<MongoClient> {
-  return clientPromise;
+  try {
+    const client = await clientPromise;
+
+    // Quick health check
+    try {
+      await client.db('admin').command({ ping: 1 }, { maxTimeMS: 5000 });
+    } catch (pingError) {
+      // Connection might be stale, try to reconnect
+      console.warn('MongoDB ping failed, attempting reconnect...');
+      delete globalWithMongo._mongoClientPromise;
+      delete globalWithMongo._mongoClient;
+
+      const newClient = await createClientWithRetry();
+      globalWithMongo._mongoClientPromise = Promise.resolve(newClient);
+      globalWithMongo._mongoClient = newClient;
+
+      return newClient;
+    }
+
+    return client;
+  } catch (error) {
+    console.error('Failed to get MongoDB client:', error);
+    throw error;
+  }
 }
 
 /**
