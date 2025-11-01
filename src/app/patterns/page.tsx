@@ -364,7 +364,9 @@ export default function PatternsPage() {
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       setSelectedPatternId(pattern.id);
                       setIsDrawerOpen(true);
                     }}
