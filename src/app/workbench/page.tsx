@@ -11,7 +11,7 @@ import { OKRWorkbench } from '@/components/workbench/OKRWorkbench';
 import { RetrospectiveDiagnostician } from '@/components/workbench/RetrospectiveDiagnostician';
 import { TechDebtStrategist } from '@/components/workbench/TechDebtStrategist';
 import { ComingSoonTool } from '@/components/workbench/ComingSoonTool';
-import { WorkbenchToolId, getWorkbenchTool } from '@/types/workbench';
+import { WorkbenchToolId, getWorkbenchTool, WORKBENCH_TOOLS } from '@/types/workbench';
 
 export default function WorkbenchPage() {
   const [selectedTool, setSelectedTool] =
