@@ -77,3 +77,14 @@ next-env.d.ts
 
 # Never commit password reset scripts
 **/reset-password*
+
+# Lambda deployment artifacts
+lambda/**/*.zip
+lambda/bson/
+lambda/dns/
+lambda/gridfs/
+lambda/pymongo/
+lambda/*.dist-info/
+*.zip
+!lambda/rag-lambda.py
+!lambda/package.json
