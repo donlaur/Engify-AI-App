@@ -265,9 +265,9 @@ export default function DashboardPage() {
                 >
                   <Icons.library className="h-5 w-5 text-primary" />
                   <div className="text-left">
-                    <p className="text-sm font-medium">Browse Library</p>
+                    <p className="text-sm font-medium">Prompt Playbook</p>
                     <p className="text-xs text-muted-foreground">
-                      {stats.totalPrompts} prompts
+                      Browse all prompts
                     </p>
                   </div>
                 </Link>
