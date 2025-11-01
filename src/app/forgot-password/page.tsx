@@ -14,21 +14,46 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
 
-    // Simulate sending reset email
-    setTimeout(() => {
-      setEmailSent(true);
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send reset email');
+      }
+
+      if (data.success) {
+        setEmailSent(true);
+      } else {
+        throw new Error(data.error || 'Failed to send reset email');
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to send reset email'
+      );
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -47,6 +72,11 @@ export default function ForgotPasswordPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             {emailSent ? (
               <div className="space-y-4">
                 <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
@@ -68,7 +98,10 @@ export default function ForgotPasswordPage() {
                   <p className="text-muted-foreground">
                     Didn&apos;t receive the email? Check your spam folder or{' '}
                     <button
-                      onClick={() => setEmailSent(false)}
+                      onClick={() => {
+                        setEmailSent(false);
+                        setError(null);
+                      }}
                       className="text-primary hover:underline"
                     >
                       try again
