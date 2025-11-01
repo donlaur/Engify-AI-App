@@ -11,6 +11,7 @@ import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
 import { RatingStars } from '@/components/features/RatingStars';
 import { MakeItMineButton } from '@/components/features/MakeItMineButton';
+import { TestResults } from '@/components/prompt/TestResults';
 import { useToast } from '@/hooks/use-toast';
 
 export default function PromptDetailPage() {
@@ -307,6 +308,9 @@ export default function PromptDetailPage() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Test Results Card */}
+            <TestResults promptId={prompt.id} />
 
             {/* Share Card */}
             <Card>

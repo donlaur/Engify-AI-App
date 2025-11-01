@@ -11,7 +11,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Icons } from '@/lib/icons';
 import {
   Card,
@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useFavorites } from '@/hooks/use-favorites';
 import { MakeItMineButton } from './MakeItMineButton';
 import { PromptDetailModal } from './PromptDetailModal';
+import { QualityBadge } from '@/components/prompt/QualityBadge';
 import type { Prompt } from '@/lib/schemas/prompt';
 
 interface PromptCardProps extends Omit<Prompt, 'createdAt' | 'updatedAt'> {
@@ -36,10 +37,29 @@ interface PromptCardProps extends Omit<Prompt, 'createdAt' | 'updatedAt'> {
 export function PromptCard(props: PromptCardProps) {
   const [copied, setCopied] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [qualityScore, setQualityScore] = useState<number | null>(null);
   const { toast } = useToast();
   const { isFavorite, toggleFavorite } = useFavorites();
   
   const { id, title, description, content, category, role, views = 0, rating = 0, onView } = props;
+
+  // Fetch quality score
+  useEffect(() => {
+    async function fetchQualityScore() {
+      try {
+        const response = await fetch(`/api/prompts/quality-scores?promptIds=${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.scores && data.scores[id]) {
+            setQualityScore(data.scores[id].averageScore);
+          }
+        }
+      } catch (err) {
+        // Silently fail - quality scores are optional
+      }
+    }
+    fetchQualityScore();
+  }, [id]);
 
   const handleCopy = async () => {
     try {
@@ -121,9 +141,12 @@ export function PromptCard(props: PromptCardProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
           <Badge variant="secondary">{category}</Badge>
           {role && <Badge variant="outline">{role}</Badge>}
+          {qualityScore !== null && (
+            <QualityBadge score={qualityScore} size="sm" />
+          )}
         </div>
         <MakeItMineButton
           promptId={id}
