@@ -156,24 +156,8 @@ export function PromptCard(props: PromptCardProps) {
           className="w-full"
         />
       </CardContent>
-      <CardFooter className="flex justify-between text-sm text-muted-foreground">
-        <div className="flex items-center space-x-4">
-          <div className="flex gap-2">
-            <Button variant="ghost" size="icon" onClick={onView}>
-              <Icons.arrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Icons.view className="h-4 w-4" />
-            <span>{views.toLocaleString()}</span>
-          </div>
-          {rating > 0 && (
-            <div className="flex items-center space-x-1">
-              <Icons.star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span>{rating.toFixed(1)}</span>
-            </div>
-          )}
-        </div>
+      <CardFooter className="flex justify-end text-sm text-muted-foreground">
+        {/* Removed fake views and ratings - start with real data at 0 */}
       </CardFooter>
     </Card>
     
