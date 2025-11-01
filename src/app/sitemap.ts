@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${baseUrl}/library`,
+      url: `${baseUrl}/prompts`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
@@ -172,9 +172,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Get all prompts for dynamic routes
   const prompts = getSeedPromptsWithTimestamps();
   
-  // Individual prompt pages: /library/[id]
+  // Individual prompt pages: /prompts/[id]
   const promptPages: MetadataRoute.Sitemap = prompts.map((prompt) => ({
-    url: `${baseUrl}/library/${prompt.id}`,
+    url: `${baseUrl}/prompts/${prompt.id}`,
     lastModified: new Date(prompt.updatedAt || prompt.createdAt),
     changeFrequency: 'monthly' as const,
     priority: 0.7,
@@ -192,17 +192,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     )
   );
 
-  // Category pages: /library/category/[category]
+  // Category pages: /prompts/category/[category]
   const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
-    url: `${baseUrl}/library/category/${category}`,
+    url: `${baseUrl}/prompts/category/${category}`,
     lastModified: now,
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }));
 
-  // Role pages: /library/role/[role]
+  // Role pages: /prompts/role/[role]
   const roleFilterPages: MetadataRoute.Sitemap = roles.map((role) => ({
-    url: `${baseUrl}/library/role/${role}`,
+    url: `${baseUrl}/prompts/role/${role}`,
     lastModified: now,
     changeFrequency: 'weekly' as const,
     priority: 0.7,

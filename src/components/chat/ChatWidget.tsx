@@ -66,10 +66,10 @@ export function ChatWidget() {
     }
 
     if (lowerQuery.includes('example')) {
-      return `Here&apos;s a great example:\n\n**Bad**: "Write code"\n\n**Good**: "Write a Python function that validates email addresses using regex. Include error handling and unit tests. Format: function definition, docstring, implementation, tests."\n\nBrowse ${siteStats.totalPrompts}+ examples in /library!`;
+      return `Here&apos;s a great example:\n\n**Bad**: "Write code"\n\n**Good**: "Write a Python function that validates email addresses using regex. Include error handling and unit tests. Format: function definition, docstring, implementation, tests."\n\nBrowse ${siteStats.totalPrompts}+ examples in /prompts!`;
     }
 
-    return `Great question! I can help with:\n\n• Prompt patterns and techniques\n• Best practices\n• Examples from our library\n• Learning resources\n\nTry asking about specific patterns or check out /library for ${siteStats.totalPrompts}+ prompts!`;
+    return `Great question! I can help with:\n\n• Prompt patterns and techniques\n• Best practices\n• Examples from our library\n• Learning resources\n\nTry asking about specific patterns or check out /prompts for ${siteStats.totalPrompts}+ prompts!`;
   };
 
   if (!isOpen) {

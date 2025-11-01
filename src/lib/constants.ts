@@ -16,7 +16,8 @@ export const CONTACT_EMAIL = 'donlaur@gmail.com';
 
 export const ROUTES = {
   home: '/',
-  library: '/library',
+  library: '/prompts',
+  prompts: '/prompts',
   patterns: '/patterns',
   learn: '/learn',
   blog: '/blog',

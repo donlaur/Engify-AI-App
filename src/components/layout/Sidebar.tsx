@@ -30,7 +30,7 @@ const mainNavigation = [
     badge: 'New',
   },
   { href: '/patterns', label: 'Patterns', icon: Icons.book },
-  { href: '/library', label: 'Library', icon: Icons.library },
+  { href: '/prompts', label: 'Library', icon: Icons.library },
 ];
 
 const secondaryNavigation = [

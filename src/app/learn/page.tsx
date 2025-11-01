@@ -158,7 +158,7 @@ export default function LearnPage() {
                                   <Link href={
                                     step.type === 'workbench' ? '/demo' :
                                     step.type === 'article' ? `/blog/${step.targetId}` :
-                                    `/library/${step.targetId}`
+                                    `/prompts/${step.targetId}`
                                   }>
                                     <Icon className="mr-2 h-4 w-4" />
                                     {step.actionText}
@@ -195,7 +195,7 @@ export default function LearnPage() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/library">
+                <Link href="/prompts">
                   <Icons.library className="mr-2 h-4 w-4" />
                   Browse Prompts
                 </Link>

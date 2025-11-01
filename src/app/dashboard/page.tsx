@@ -260,7 +260,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <Link
-                  href="/library"
+                  href="/prompts"
                   className="flex w-full items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                 >
                   <Icons.library className="h-5 w-5 text-primary" />
@@ -273,7 +273,7 @@ export default function DashboardPage() {
                 </Link>
 
                 <Link
-                  href="/library?filter=favorites"
+                  href="/prompts?filter=favorites"
                   className="flex w-full items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                 >
                   <Icons.heart className="h-5 w-5 text-red-600" />
