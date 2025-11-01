@@ -12,6 +12,9 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI;
+// Detect if using mongodb+srv:// (which auto-handles TLS)
+const isSrvUri = uri.startsWith('mongodb+srv://');
+
 const options = {
   maxPoolSize: 10,
   minPoolSize: 2,
@@ -24,9 +27,14 @@ const options = {
   maxIdleTimeMS: 30000,
   family: 4, // Force IPv4 to avoid DNS issues
   // SSL/TLS options for MongoDB Atlas
-  tls: true,
-  tlsAllowInvalidCertificates: false,
-  tlsAllowInvalidHostnames: false,
+  // Note: mongodb+srv:// automatically handles TLS, but explicit options help with some environments
+  ...(isSrvUri
+    ? {}
+    : {
+        tls: true,
+        tlsAllowInvalidCertificates: false,
+        tlsAllowInvalidHostnames: false,
+      }),
   // Connection pool options
   heartbeatFrequencyMS: 10000,
 };
