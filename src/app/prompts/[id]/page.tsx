@@ -15,6 +15,7 @@ import { TestResults } from '@/components/prompt/TestResults';
 import { FrameworkRecommendation } from '@/components/prompt/FrameworkRecommendation';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useToast } from '@/hooks/use-toast';
+import type { Prompt } from '@/lib/schemas/prompt';
 
 export default function PromptDetailPage() {
   const params = useParams();
