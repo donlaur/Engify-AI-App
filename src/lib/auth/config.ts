@@ -14,6 +14,7 @@ import type { Session, User } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import { userService } from '@/lib/services/UserService';
 import { adminSessionMaxAgeSeconds } from '@/lib/env';
+import { getAuthCache } from '@/lib/auth/RedisAuthCache';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -37,29 +38,55 @@ export const authOptions: NextAuthConfig = {
           // Validate input
           const { email, password } = loginSchema.parse(credentials);
 
-          // Add timeout to prevent hanging
-          const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(
-              () => reject(new Error('Authentication timeout')),
-              10000
-            ); // 10 second timeout
-          });
+          const authCache = getAuthCache();
 
-          // Find user with timeout
-          const user = (await Promise.race([
-            userService.findByEmail(email),
-            timeoutPromise,
-          ])) as Awaited<ReturnType<typeof userService.findByEmail>>;
+          // Rate limiting: Check login attempts
+          const loginAttempts = await authCache.getLoginAttempts(email);
+          const MAX_LOGIN_ATTEMPTS = 5;
+          if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+            console.warn(`Too many login attempts for ${email}`);
+            return null; // Don't reveal if user exists
+          }
+
+          // Try Redis cache first (fast path)
+          // This avoids MongoDB connection if user is cached
+          let user:
+            | Awaited<ReturnType<typeof userService.findByEmail>>
+            | null
+            | undefined = await authCache.getUserByEmail(email);
+
+          // If not in cache (undefined), fall back to MongoDB (with timeout)
+          if (user === undefined) {
+            const timeoutPromise = new Promise((_, reject) => {
+              setTimeout(
+                () => reject(new Error('Authentication timeout')),
+                10000
+              ); // 10 second timeout
+            });
+
+            // Find user with timeout
+            user = (await Promise.race([
+              userService.findByEmail(email),
+              timeoutPromise,
+            ])) as Awaited<ReturnType<typeof userService.findByEmail>> | null;
+          }
 
           if (!user || !user.password) {
+            // Increment failed login attempts
+            await authCache.incrementLoginAttempts(email);
             return null;
           }
 
           // Verify password with bcrypt
           const isValid = await bcrypt.compare(password, user.password);
           if (!isValid) {
+            // Increment failed login attempts
+            await authCache.incrementLoginAttempts(email);
             return null;
           }
+
+          // Success! Reset login attempts
+          await authCache.resetLoginAttempts(email);
 
           // Return user object
           return {

@@ -19,6 +19,7 @@
 import { IUserRepository } from '../repositories/interfaces/IRepository';
 import { UserRepository } from '../repositories/mongodb/UserRepository';
 import type { User } from '@/lib/db/schema';
+import { getAuthCache } from '@/lib/auth/RedisAuthCache';
 
 export interface CreateUserData {
   email: string;
@@ -54,8 +55,8 @@ export class UserService {
       throw new Error('Email is required');
     }
 
-    // Check if user already exists
-    const existingUser = await this.userRepository.findByEmail(userData.email);
+    // Check if user already exists (uses cache)
+    const existingUser = await this.getUserByEmail(userData.email);
     if (existingUser) {
       throw new Error('User with this email already exists');
     }
@@ -82,25 +83,62 @@ export class UserService {
   }
 
   /**
-   * Get user by ID
+   * Get user by ID (with Redis caching)
    */
   async getUserById(id: string): Promise<User | null> {
     if (!id) {
       throw new Error('User ID is required');
     }
 
-    return await this.userRepository.findById(id);
+    const authCache = getAuthCache();
+
+    // Try Redis cache first
+    const cachedUser = await authCache.getUserById(id);
+    if (cachedUser !== null) {
+      return cachedUser;
+    }
+
+    // Cache miss - query MongoDB
+    const user = await this.userRepository.findById(id);
+
+    // Cache result if found
+    if (user) {
+      await authCache.cacheUserById(id, user);
+    }
+
+    return user;
   }
 
   /**
-   * Get user by email
+   * Get user by email (with Redis caching)
    */
   async getUserByEmail(email: string): Promise<User | null> {
     if (!email) {
       throw new Error('Email is required');
     }
 
-    return await this.userRepository.findByEmail(email);
+    const authCache = getAuthCache();
+
+    // Try Redis cache first
+    const cachedResult = await authCache.getUserByEmail(email);
+
+    // If cached as non-existent, return null immediately
+    if (cachedResult === null) {
+      return null;
+    }
+
+    // If cached as User, return it
+    if (cachedResult !== undefined) {
+      return cachedResult;
+    }
+
+    // Cache miss (undefined) - query MongoDB
+    const user = await this.userRepository.findByEmail(email);
+
+    // Cache result (including null for non-existent users)
+    await authCache.cacheUserByEmail(email, user);
+
+    return user;
   }
 
   /**
@@ -118,25 +156,36 @@ export class UserService {
       throw new Error('User ID is required');
     }
 
-    // Check if user exists
-    const existingUser = await this.userRepository.findById(id);
+    // Check if user exists (uses cache)
+    const existingUser = await this.getUserById(id);
     if (!existingUser) {
       throw new Error('User not found');
     }
 
     // Business logic validation
     if (userData.email && userData.email !== existingUser.email) {
-      // Check if new email is already taken
-      const emailExists = await this.userRepository.findByEmail(userData.email);
+      // Check if new email is already taken (uses cache)
+      const emailExists = await this.getUserByEmail(userData.email);
       if (emailExists) {
         throw new Error('Email is already taken');
       }
     }
 
-    return await this.userRepository.update(
+    const updatedUser = await this.userRepository.update(
       id,
       userData as unknown as Partial<User>
     );
+
+    // Invalidate cache when user data changes
+    if (updatedUser) {
+      const authCache = getAuthCache();
+      await authCache.invalidateUser(existingUser.email, id);
+      if (userData.email && userData.email !== existingUser.email) {
+        await authCache.invalidateUser(userData.email);
+      }
+    }
+
+    return updatedUser;
   }
 
   /**
