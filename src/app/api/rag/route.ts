@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 // import { auth } from '@/lib/auth';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { z } from 'zod';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { auth } from '@/lib/auth';
 
 // RAG API route that integrates with Python FastAPI service
 const RAG_API_URL = process.env.RAG_API_URL || 'http://localhost:8000';
@@ -32,14 +34,38 @@ export async function POST(request: NextRequest) {
   if (rbacCheck) return rbacCheck;
 
   try {
+    // Rate limiting
+    const session = await auth();
+    const tier = session?.user ? 'authenticated' : 'anonymous';
+    const identifier = session?.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || request.ip || 'unknown';
+    
+    const rateLimitResult = await checkRateLimit(identifier, tier);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: rateLimitResult.reason || 'Rate limit exceeded',
+          results: [],
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': '3600',
+            'X-RateLimit-Limit': '1000',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
+          }
+        }
+      );
+    }
+
     // Optional: Log usage for authenticated users (future enhancement)
-    // const session = await auth();
 
     const body = await request.json();
     const { query, collection, top_k, filter } = RAGQuerySchema.parse(body);
 
-    // Call Python RAG service
-    const ragResponse = await fetch(`${RAG_API_URL}/api/rag/search`, {
+    // Call Lambda RAG service (API Gateway endpoint)
+    const ragResponse = await fetch(`${RAG_API_URL}/rag/search`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -117,6 +143,28 @@ export async function POST(request: NextRequest) {
 
 // Health check endpoint
 export async function GET(request: NextRequest) {
+  // Rate limiting for health check (lighter limit)
+  const session = await auth();
+  const tier = session?.user ? 'authenticated' : 'anonymous';
+  const identifier = session?.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || request.ip || 'unknown';
+  
+  const rateLimitResult = await checkRateLimit(identifier, tier);
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        status: 'unhealthy',
+        error: 'Rate limit exceeded',
+        timestamp: new Date().toISOString(),
+      },
+      { 
+        status: 429,
+        headers: {
+          'Retry-After': '3600',
+        }
+      }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   // In non-production, allow explicit control via query param (no fetch)
   if (process.env.NODE_ENV !== 'production') {

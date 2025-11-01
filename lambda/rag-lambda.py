@@ -1,83 +1,78 @@
 import json
 import os
-from typing import List, Dict, Any, Optional
-import boto3
-from botocore.exceptions import ClientError
+from typing import List, Dict, Any
+from pymongo import MongoClient
+from pymongo.errors import ServerSelectionTimeoutError
 
-# Initialize AWS clients
-dynamodb = boto3.resource('dynamodb')
-s3 = boto3.client('s3')
+# Initialize MongoDB connection (reused across Lambda invocations)
+_db = None
+_client = None
 
-def generate_embeddings(texts: List[str]) -> List[List[float]]:
-    """
-    Generate embeddings for text inputs
-    TODO: Replace with actual embedding service (AWS Bedrock, OpenAI, etc.)
-    """
-    # Mock embeddings for now - replace with real embedding service
-    return [[0.1] * 384 for _ in texts]
+def get_db():
+    """Get MongoDB database connection (cached across Lambda invocations)"""
+    global _db, _client
+    
+    if _db is not None:
+        return _db
+    
+    mongo_uri = os.getenv('MONGODB_URI')
+    if not mongo_uri:
+        raise ValueError("MONGODB_URI environment variable not set")
+    
+    try:
+        _client = MongoClient(
+            mongo_uri,
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=5000
+        )
+        _db = _client.get_database()
+        # Test connection
+        _client.admin.command('ping')
+        return _db
+    except Exception as e:
+        print(f"MongoDB connection error: {e}")
+        raise
 
-def search_knowledge_base(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+def simple_text_search(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
     """
-    Search the knowledge base for relevant documents
-    TODO: Replace with MongoDB Atlas Vector Search
+    Simple text-based search using MongoDB
+    Falls back to tag/keyword matching if text search fails
     """
-    # Mock search results based on query keywords
-    if 'chain of thought' in query.lower():
-        return [
-            {
-                '_id': 'prompt-001',
-                'title': 'Chain of Thought Prompting',
-                'content': 'Chain of Thought (CoT) is a prompting technique that asks the AI to think step by step before answering. This dramatically improves accuracy on complex reasoning tasks.',
-                'category': 'patterns',
-                'tags': ['reasoning', 'step-by-step', 'accuracy'],
-                'score': 1.0
-            }
-        ]
-    elif 'few-shot' in query.lower():
-        return [
-            {
-                '_id': 'prompt-002',
-                'title': 'Few-Shot Learning',
-                'content': 'Few-Shot Learning provides 2-5 examples of input -> output pairs, then asks the AI to complete a similar task. Best for classification and formatting tasks.',
-                'category': 'patterns',
-                'tags': ['examples', 'classification', 'formatting'],
-                'score': 0.95
-            }
-        ]
-    elif 'okr' in query.lower():
-        return [
-            {
-                '_id': 'workbench-001',
-                'title': 'OKR Workbench',
-                'content': 'The OKR Workbench helps you generate effective Objectives and Key Results with AI assistance. It provides templates, alignment checks, and progress tracking.',
-                'category': 'workbench',
-                'tags': ['okr', 'goals', 'strategy'],
-                'score': 0.9
-            }
-        ]
-    elif 'retrospective' in query.lower():
-        return [
-            {
-                '_id': 'workbench-002',
-                'title': 'Retrospective Diagnostician',
-                'content': 'The Retrospective Diagnostician helps design and facilitate effective team retrospectives. It generates agendas, identifies problems, and creates action items.',
-                'category': 'workbench',
-                'tags': ['retrospective', 'agile', 'team'],
-                'score': 0.9
-            }
-        ]
-    elif 'tech debt' in query.lower():
-        return [
-            {
-                '_id': 'workbench-003',
-                'title': 'Tech Debt Strategist',
-                'content': 'The Tech Debt Strategist helps build compelling business cases for technical debt remediation. It calculates ROI, assesses risks, and creates implementation plans.',
-                'category': 'workbench',
-                'tags': ['tech-debt', 'business-case', 'strategy'],
-                'score': 0.9
-            }
-        ]
-    else:
+    try:
+        db = get_db()
+        collection = db.collection('prompts')
+        
+        query_words = query.lower().split()
+        
+        # Build search query
+        search_query = {
+            'isPublic': True,
+            '$or': [
+                {'title': {'$regex': '|'.join(query_words), '$options': 'i'}},
+                {'description': {'$regex': '|'.join(query_words), '$options': 'i'}},
+                {'tags': {'$in': query_words}},
+            ]
+        }
+        
+        # Execute search
+        results = list(collection.find(search_query).limit(top_k).sort([('isFeatured', -1), ('views', -1)]))
+        
+        # Format results
+        formatted_results = []
+        for doc in results:
+            formatted_results.append({
+                '_id': str(doc.get('_id', doc.get('id', ''))),
+                'title': doc.get('title', ''),
+                'content': doc.get('content', doc.get('description', '')),
+                'score': 0.9,
+                'category': doc.get('category', ''),
+                'tags': doc.get('tags', [])
+            })
+        
+        return formatted_results[:top_k]
+        
+    except Exception as e:
+        print(f"Search error: {e}")
         return []
 
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -122,10 +117,10 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 })
             }
         
-        # Search knowledge base
-        results = search_knowledge_base(query, top_k)
+        # Search MongoDB for real prompts
+        results = simple_text_search(query, top_k)
         
-        # Generate query embedding
+        # Mock embedding (384 dimensions to match expected format)
         query_embedding = [0.1] * 384
         
         return {
@@ -159,20 +154,3 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'details': str(e)
             })
         }
-
-def health_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
-    """Health check endpoint for Lambda"""
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        },
-        'body': json.dumps({
-            'status': 'ok',
-            'service': 'engify-rag-lambda',
-            'version': '1.0.0',
-            'message': 'RAG Lambda service running',
-            'timestamp': context.aws_request_id if context else 'unknown'
-        })
-    }
