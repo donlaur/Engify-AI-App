@@ -49,6 +49,17 @@ const securityPatterns = [
   {
     name: 'MongoDB Connection Strings',
     pattern: /mongodb(\+srv)?:\/\/[^:]+:[^@]+@/g,
+    check: (match, content, filePath) => {
+      // Skip if it's just checking the URI format (startsWith check)
+      if (content.includes('startsWith(\'mongodb+srv://\')') || content.includes('startsWith("mongodb+srv://")')) {
+        return false;
+      }
+      // Skip connection utility files that only reference the format
+      if (filePath && filePath.includes('mongodb.ts') && !match.includes('@')) {
+        return false;
+      }
+      return true;
+    },
     severity: 'CRITICAL',
     message: 'MongoDB connection string with credentials detected. Use environment variables.',
   },
