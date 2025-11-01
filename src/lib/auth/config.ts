@@ -15,11 +15,15 @@ import type { JWT } from 'next-auth/jwt';
 import { userService } from '@/lib/services/UserService';
 import { adminSessionMaxAgeSeconds } from '@/lib/env';
 import { getAuthCache } from '@/lib/auth/RedisAuthCache';
+import { CognitoProvider } from './providers/CognitoProvider';
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 });
+
+// Feature flag: Use Cognito for auth (set COGNITO_USER_POOL_ID to enable)
+const USE_COGNITO = !!process.env.COGNITO_USER_POOL_ID;
 
 export const authOptions: NextAuthConfig = {
   // TODO: Fix adapter version mismatch - temporarily disabled for build
@@ -27,88 +31,95 @@ export const authOptions: NextAuthConfig = {
 
   providers: [
     // Email/Password authentication
-    CredentialsProvider({
-      name: 'credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        try {
-          // Validate input
-          const { email, password } = loginSchema.parse(credentials);
+    // Use Cognito if configured, otherwise fall back to MongoDB
+    ...(USE_COGNITO
+      ? [CognitoProvider()]
+      : [
+          CredentialsProvider({
+            name: 'credentials',
+            credentials: {
+              email: { label: 'Email', type: 'email' },
+              password: { label: 'Password', type: 'password' },
+            },
+            async authorize(credentials) {
+              try {
+                // Validate input
+                const { email, password } = loginSchema.parse(credentials);
 
-          const authCache = getAuthCache();
+                const authCache = getAuthCache();
 
-          // Rate limiting: Check login attempts
-          const loginAttempts = await authCache.getLoginAttempts(email);
-          const MAX_LOGIN_ATTEMPTS = 5;
-          if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-            console.warn(`Too many login attempts for ${email}`);
-            return null; // Don't reveal if user exists
-          }
+                // Rate limiting: Check login attempts
+                const loginAttempts = await authCache.getLoginAttempts(email);
+                const MAX_LOGIN_ATTEMPTS = 5;
+                if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+                  console.warn(`Too many login attempts for ${email}`);
+                  return null; // Don't reveal if user exists
+                }
 
-          // Try Redis cache first (fast path)
-          // This avoids MongoDB connection if user is cached
-          let user:
-            | Awaited<ReturnType<typeof userService.findByEmail>>
-            | null
-            | undefined = await authCache.getUserByEmail(email);
+                // Try Redis cache first (fast path)
+                // This avoids MongoDB connection if user is cached
+                let user:
+                  | Awaited<ReturnType<typeof userService.findByEmail>>
+                  | null
+                  | undefined = await authCache.getUserByEmail(email);
 
-          // If not in cache (undefined), fall back to MongoDB (with timeout)
-          if (user === undefined) {
-            const timeoutPromise = new Promise((_, reject) => {
-              setTimeout(
-                () => reject(new Error('Authentication timeout')),
-                10000
-              ); // 10 second timeout
-            });
+                // If not in cache (undefined), fall back to MongoDB (with timeout)
+                if (user === undefined) {
+                  const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(
+                      () => reject(new Error('Authentication timeout')),
+                      10000
+                    ); // 10 second timeout
+                  });
 
-            // Find user with timeout
-            user = (await Promise.race([
-              userService.findByEmail(email),
-              timeoutPromise,
-            ])) as Awaited<ReturnType<typeof userService.findByEmail>> | null;
-          }
+                  // Find user with timeout
+                  user = (await Promise.race([
+                    userService.findByEmail(email),
+                    timeoutPromise,
+                  ])) as Awaited<
+                    ReturnType<typeof userService.findByEmail>
+                  > | null;
+                }
 
-          if (!user || !user.password) {
-            // Increment failed login attempts
-            await authCache.incrementLoginAttempts(email);
-            return null;
-          }
+                if (!user || !user.password) {
+                  // Increment failed login attempts
+                  await authCache.incrementLoginAttempts(email);
+                  return null;
+                }
 
-          // Verify password with bcrypt
-          const isValid = await bcrypt.compare(password, user.password);
-          if (!isValid) {
-            // Increment failed login attempts
-            await authCache.incrementLoginAttempts(email);
-            return null;
-          }
+                // Verify password with bcrypt
+                const isValid = await bcrypt.compare(password, user.password);
+                if (!isValid) {
+                  // Increment failed login attempts
+                  await authCache.incrementLoginAttempts(email);
+                  return null;
+                }
 
-          // Success! Reset login attempts
-          await authCache.resetLoginAttempts(email);
+                // Success! Reset login attempts
+                await authCache.resetLoginAttempts(email);
 
-          // Return user object
-          return {
-            id: user._id.toString(),
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            organizationId: user.organizationId?.toString() || null,
-          };
-        } catch (error) {
-          console.error('Auth error:', error);
-          // Return more specific error for debugging
-          if (
-            error instanceof Error &&
-            error.message === 'Authentication timeout'
-          ) {
-            console.error('MongoDB connection timeout during login');
-          }
-          return null;
-        }
-      },
-    }),
+                // Return user object
+                return {
+                  id: user._id.toString(),
+                  email: user.email,
+                  name: user.name,
+                  role: user.role,
+                  organizationId: user.organizationId?.toString() || null,
+                };
+              } catch (error) {
+                console.error('Auth error:', error);
+                // Return more specific error for debugging
+                if (
+                  error instanceof Error &&
+                  error.message === 'Authentication timeout'
+                ) {
+                  console.error('MongoDB connection timeout during login');
+                }
+                return null;
+              }
+            },
+          }),
+        ]),
 
     // Google OAuth (optional - can enable later)
     GoogleProvider({
