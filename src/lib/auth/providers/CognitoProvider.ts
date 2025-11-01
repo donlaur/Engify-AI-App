@@ -13,6 +13,7 @@ import {
   AdminGetUserCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { z } from 'zod';
+import { createHmac } from 'crypto';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -37,6 +38,21 @@ const cognitoClient =
 const COGNITO_ISSUER = COGNITO_USER_POOL_ID
   ? `https://cognito-idp.${COGNITO_REGION}.amazonaws.com/${COGNITO_USER_POOL_ID}`
   : '';
+
+/**
+ * Generate SECRET_HASH for Cognito authentication
+ * Required when App Client has a client secret configured
+ * Formula: HMAC-SHA256(USERNAME + CLIENT_ID, CLIENT_SECRET) encoded as base64
+ */
+function generateSecretHash(username: string): string {
+  if (!COGNITO_CLIENT_SECRET || !COGNITO_CLIENT_ID) {
+    throw new Error('Client secret and client ID are required for SECRET_HASH');
+  }
+
+  const hmac = createHmac('sha256', COGNITO_CLIENT_SECRET);
+  hmac.update(username + COGNITO_CLIENT_ID);
+  return hmac.digest('base64');
+}
 
 /**
  * AWS Cognito Credentials Provider
@@ -66,11 +82,15 @@ export function CognitoProvider() {
           PASSWORD: password,
         };
 
-        // Add client secret if using one (some app clients require it)
+        // Generate SECRET_HASH if client secret is configured
+        // Cognito requires SECRET_HASH for App Clients with secrets
         if (COGNITO_CLIENT_SECRET) {
-          // Note: Cognito requires SECRET_HASH for clients with secrets
-          // For now, we'll use USER_PASSWORD_AUTH which doesn't require secret hash
-          // If you need client secret, you'll need to generate SECRET_HASH
+          try {
+            authParams.SECRET_HASH = generateSecretHash(email);
+          } catch (error) {
+            console.error('Failed to generate SECRET_HASH:', error);
+            throw new Error('Cognito client secret configuration error');
+          }
         }
 
         const authCommand = new InitiateAuthCommand({
