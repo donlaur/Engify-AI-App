@@ -1,199 +1,397 @@
 /**
  * Gamification Service
- * 
- * Handles XP, levels, streaks, and activity tracking
+ * Manages XP, levels, achievements, and streaks
  */
 
+import { BaseService } from './BaseService';
 import { ObjectId } from 'mongodb';
-import { getDb } from '@/lib/db/mongodb';
-import { UserStats, XP_REWARDS, getXPForLevel, getLevelFromXP } from '@/lib/db/schemas/user-stats';
+import { z } from 'zod';
+import {
+  XP_REWARDS,
+  getLevelFromXP,
+  getXPForNextLevel,
+} from '@/lib/gamification/levels';
+import { ACHIEVEMENTS, Achievement } from '@/lib/gamification/achievements';
+import { notificationService } from './NotificationService';
 
-export class GamificationService {
+export interface UserGamification {
+  _id?: ObjectId;
+  userId: string;
+  xp: number;
+  level: number;
+  achievements: string[]; // Achievement IDs
+  dailyStreak: number;
+  lastActiveDate: Date;
+  stats: {
+    promptsUsed: number;
+    patternsCompleted: number;
+    skillsTracked: number;
+    skillsMastered: number;
+    timeSaved: number; // hours
+    promptsShared: number;
+    favoritesReceived: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export class GamificationService extends BaseService<UserGamification> {
+  constructor() {
+    super(
+      'user_gamification',
+      z.object({}) as unknown as z.ZodType<UserGamification>
+    );
+  }
+
   /**
-   * Get user stats (create if doesn't exist)
+   * Get or create user gamification data
    */
-  async getUserStats(userId: string): Promise<UserStats> {
-    const db = await getDb();
-    const userObjectId = new ObjectId(userId);
-    
-    let stats = await db.collection('user_stats').findOne({ userId: userObjectId });
-    
-    if (!stats) {
-      // Create default stats
-      const newStats: Omit<UserStats, '_id'> = {
-        userId: userObjectId,
+  async getUserGamification(userId: string): Promise<UserGamification> {
+    const collection = await this.getCollection();
+    let gamification = (await collection.findOne({
+      userId,
+    })) as UserGamification | null;
+
+    if (!gamification) {
+      gamification = {
+        userId,
         xp: 0,
         level: 1,
-        promptsUsed: 0,
-        favoritePrompts: 0,
-        patternsLearned: 0,
-        currentStreak: 0,
-        longestStreak: 0,
-        lastActivityDate: undefined,
-        recentActivity: [],
+        achievements: [],
+        dailyStreak: 0,
+        lastActiveDate: new Date(),
+        stats: {
+          promptsUsed: 0,
+          patternsCompleted: 0,
+          skillsTracked: 0,
+          skillsMastered: 0,
+          timeSaved: 0,
+          promptsShared: 0,
+          favoritesReceived: 0,
+        },
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      
-      const result = await db.collection('user_stats').insertOne(newStats);
-      stats = { ...newStats, _id: result.insertedId };
+
+      await collection.insertOne(gamification);
     }
-    
-    return stats as UserStats;
+
+    return gamification;
   }
-  
+
   /**
-   * Award XP and update level
+   * Award XP and check for level ups
    */
   async awardXP(
     userId: string,
-    xpAmount: number,
-    activityType: 'prompt_used' | 'pattern_learned' | 'prompt_favorited' | 'challenge_completed',
-    metadata?: { promptId?: string; promptTitle?: string }
-  ): Promise<{ newXP: number; newLevel: number; leveledUp: boolean }> {
-    const db = await getDb();
-    const userObjectId = new ObjectId(userId);
-    
-    const stats = await this.getUserStats(userId);
-    const oldLevel = stats.level;
-    const newXP = stats.xp + xpAmount;
+    amount: number,
+    _reason: string
+  ): Promise<{
+    newXP: number;
+    leveledUp: boolean;
+    newLevel?: number;
+    achievementsUnlocked: Achievement[];
+  }> {
+    const gamification = await this.getUserGamification(userId);
+    const oldLevel = getLevelFromXP(gamification.xp);
+    const newXP = gamification.xp + amount;
     const newLevel = getLevelFromXP(newXP);
-    const leveledUp = newLevel > oldLevel;
-    
-    // Add to recent activity (keep last 10)
-    const activity = {
-      type: activityType,
-      promptId: metadata?.promptId,
-      promptTitle: metadata?.promptTitle,
-      xpEarned: xpAmount,
-      timestamp: new Date(),
-    };
-    
-    const recentActivity = [activity, ...stats.recentActivity].slice(0, 10);
-    
-    // Update streak
-    const { currentStreak, longestStreak } = this.updateStreak(stats);
-    
-    await db.collection('user_stats').updateOne(
-      { userId: userObjectId },
+    const leveledUp = newLevel.level > oldLevel.level;
+
+    // Update XP
+    const collection = await this.getCollection();
+    await collection.updateOne(
+      { userId },
       {
         $set: {
           xp: newXP,
-          level: newLevel,
-          currentStreak,
-          longestStreak,
-          lastActivityDate: new Date(),
-          recentActivity,
+          level: newLevel.level,
           updatedAt: new Date(),
         },
       }
     );
-    
-    return { newXP, newLevel, leveledUp };
+
+    // Check for achievements
+    const achievementsUnlocked = await this.checkAchievements(userId);
+
+    // Send level up notification
+    if (leveledUp) {
+      await notificationService.sendAchievement(
+        userId,
+        `Level ${newLevel.level} Unlocked! 🎉`,
+        `You're now a ${newLevel.name}! ${newLevel.rewards.join(', ')}`,
+        '🎉'
+      );
+    }
+
+    return {
+      newXP,
+      leveledUp,
+      newLevel: leveledUp ? newLevel.level : undefined,
+      achievementsUnlocked,
+    };
   }
-  
+
   /**
    * Track prompt usage
    */
-  async trackPromptUsed(userId: string, promptId: string, promptTitle: string) {
-    const db = await getDb();
-    const userObjectId = new ObjectId(userId);
-    
-    await db.collection('user_stats').updateOne(
-      { userId: userObjectId },
+  async trackPromptUsage(userId: string): Promise<void> {
+    const gamification = await this.getUserGamification(userId);
+    const collection = await this.getCollection();
+
+    // Update stats
+    const newPromptsUsed = gamification.stats.promptsUsed + 1;
+    await collection.updateOne(
+      { userId },
       {
-        $inc: { promptsUsed: 1 },
+        $inc: {
+          'stats.promptsUsed': 1,
+          'stats.timeSaved': 0.033, // 2 minutes = 0.033 hours
+        },
         $set: { updatedAt: new Date() },
       }
     );
-    
-    await this.awardXP(userId, XP_REWARDS.PROMPT_USED, 'prompt_used', {
-      promptId,
-      promptTitle,
-    });
-  }
-  
-  /**
-   * Track prompt favorited
-   */
-  async trackPromptFavorited(userId: string, promptId: string, promptTitle: string, favorited: boolean) {
-    const db = await getDb();
-    const userObjectId = new ObjectId(userId);
-    
-    await db.collection('user_stats').updateOne(
-      { userId: userObjectId },
-      {
-        $inc: { favoritePrompts: favorited ? 1 : -1 },
-        $set: { updatedAt: new Date() },
-      }
-    );
-    
-    if (favorited) {
-      await this.awardXP(userId, XP_REWARDS.PROMPT_FAVORITED, 'prompt_favorited', {
-        promptId,
-        promptTitle,
-      });
+
+    // Award XP
+    let xpToAward = XP_REWARDS.PROMPT_USED;
+
+    // First prompt of the day bonus
+    if (await this.isFirstActionToday(userId)) {
+      xpToAward += XP_REWARDS.FIRST_PROMPT_OF_DAY;
+      await this.updateDailyStreak(userId);
     }
+
+    // Milestone bonuses
+    if (newPromptsUsed === 10) {
+      xpToAward += XP_REWARDS.FIRST_10_PROMPTS;
+    } else if (newPromptsUsed === 50) {
+      xpToAward += XP_REWARDS.FIRST_50_PROMPTS;
+    } else if (newPromptsUsed === 100) {
+      xpToAward += XP_REWARDS.FIRST_100_PROMPTS;
+    }
+
+    await this.awardXP(userId, xpToAward, 'Prompt used');
   }
-  
+
   /**
-   * Track pattern learned
+   * Track pattern completion
    */
-  async trackPatternLearned(userId: string, patternName: string) {
-    const db = await getDb();
-    const userObjectId = new ObjectId(userId);
-    
-    await db.collection('user_stats').updateOne(
-      { userId: userObjectId },
+  async trackPatternCompletion(
+    userId: string,
+    patternId: string
+  ): Promise<void> {
+    const collection = await this.getCollection();
+    await collection.updateOne(
+      { userId },
       {
-        $inc: { patternsLearned: 1 },
+        $inc: { 'stats.patternsCompleted': 1 },
         $set: { updatedAt: new Date() },
       }
     );
-    
-    await this.awardXP(userId, XP_REWARDS.PATTERN_LEARNED, 'pattern_learned', {
-      promptTitle: patternName,
-    });
+
+    await this.awardXP(
+      userId,
+      XP_REWARDS.PATTERN_COMPLETED,
+      `Completed ${patternId} pattern`
+    );
   }
-  
+
   /**
-   * Update streak logic
+   * Track skill development
    */
-  private updateStreak(stats: UserStats): { currentStreak: number; longestStreak: number } {
-    const now = new Date();
-    const lastActivity = stats.lastActivityDate;
-    
-    if (!lastActivity) {
-      // First activity ever
-      return { currentStreak: 1, longestStreak: 1 };
-    }
-    
-    const hoursSinceLastActivity = (now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60);
-    
-    if (hoursSinceLastActivity < 24) {
-      // Same day or within 24h - keep streak
-      return { currentStreak: stats.currentStreak, longestStreak: stats.longestStreak };
-    } else if (hoursSinceLastActivity < 48) {
-      // Next day - increment streak
-      const newStreak = stats.currentStreak + 1;
-      return {
-        currentStreak: newStreak,
-        longestStreak: Math.max(newStreak, stats.longestStreak),
+  async trackSkillDevelopment(
+    userId: string,
+    skillMastered: boolean = false
+  ): Promise<void> {
+    const collection = await this.getCollection();
+    const update: { $inc: Record<string, number>; $set: { updatedAt: Date } } =
+      {
+        $inc: { 'stats.skillsTracked': 1 },
+        $set: { updatedAt: new Date() },
       };
-    } else {
-      // Streak broken - reset to 1
-      return {
-        currentStreak: 1,
-        longestStreak: stats.longestStreak,
-      };
+
+    if (skillMastered) {
+      update.$inc['stats.skillsMastered'] = 1;
     }
+
+    await collection.updateOne({ userId }, update);
+
+    const xp = skillMastered
+      ? XP_REWARDS.FIRST_SKILL_MASTERED
+      : XP_REWARDS.SKILL_IMPROVED;
+    await this.awardXP(
+      userId,
+      xp,
+      skillMastered ? 'Skill mastered' : 'Skill improved'
+    );
   }
-  
+
   /**
-   * Get XP needed for next level
+   * Update daily streak
    */
-  getXPForNextLevel(currentLevel: number): number {
-    return getXPForLevel(currentLevel);
+  async updateDailyStreak(userId: string): Promise<number> {
+    const gamification = await this.getUserGamification(userId);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const lastActive = new Date(gamification.lastActiveDate);
+    lastActive.setHours(0, 0, 0, 0);
+
+    const daysDiff = Math.floor(
+      (today.getTime() - lastActive.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    let newStreak = gamification.dailyStreak;
+    let xpBonus = 0;
+
+    if (daysDiff === 1) {
+      // Consecutive day
+      newStreak += 1;
+      xpBonus = XP_REWARDS.DAILY_STREAK_DAY;
+
+      // Weekly streak bonus
+      if (newStreak % 7 === 0) {
+        xpBonus += XP_REWARDS.WEEKLY_STREAK;
+      }
+
+      // Monthly streak bonus
+      if (newStreak % 30 === 0) {
+        xpBonus += XP_REWARDS.MONTHLY_STREAK;
+      }
+    } else if (daysDiff > 1) {
+      // Streak broken
+      newStreak = 1;
+    }
+
+    const collection = await this.getCollection();
+    await collection.updateOne(
+      { userId },
+      {
+        $set: {
+          dailyStreak: newStreak,
+          lastActiveDate: new Date(),
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    if (xpBonus > 0) {
+      await this.awardXP(userId, xpBonus, `${newStreak}-day streak`);
+    }
+
+    return newStreak;
+  }
+
+  /**
+   * Check if this is the first action today
+   */
+  async isFirstActionToday(userId: string): Promise<boolean> {
+    const gamification = await this.getUserGamification(userId);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const lastActive = new Date(gamification.lastActiveDate);
+    lastActive.setHours(0, 0, 0, 0);
+
+    return today.getTime() !== lastActive.getTime();
+  }
+
+  /**
+   * Check and unlock achievements
+   */
+  async checkAchievements(userId: string): Promise<Achievement[]> {
+    const gamification = await this.getUserGamification(userId);
+    const unlockedAchievements: Achievement[] = [];
+
+    for (const achievement of ACHIEVEMENTS) {
+      // Skip if already unlocked
+      if (gamification.achievements.includes(achievement.id)) {
+        continue;
+      }
+
+      // Check requirement
+      let unlocked = false;
+      switch (achievement.requirement.type) {
+        case 'prompts_used':
+          unlocked =
+            gamification.stats.promptsUsed >= achievement.requirement.target;
+          break;
+        case 'patterns_tried':
+        case 'patterns_mastered':
+          unlocked =
+            gamification.stats.patternsCompleted >=
+            achievement.requirement.target;
+          break;
+        case 'skills_tracked':
+          unlocked =
+            gamification.stats.skillsTracked >= achievement.requirement.target;
+          break;
+        case 'skills_mastered':
+          unlocked =
+            gamification.stats.skillsMastered >= achievement.requirement.target;
+          break;
+        case 'daily_streak':
+          unlocked = gamification.dailyStreak >= achievement.requirement.target;
+          break;
+        case 'time_saved':
+          unlocked =
+            gamification.stats.timeSaved >= achievement.requirement.target;
+          break;
+        case 'level':
+          unlocked = gamification.level >= achievement.requirement.target;
+          break;
+      }
+
+      if (unlocked) {
+        // Unlock achievement
+        const collection = await this.getCollection();
+        await collection.updateOne(
+          { userId },
+          {
+            $push: { achievements: achievement.id },
+            $set: { updatedAt: new Date() },
+          }
+        );
+
+        // Award XP
+        await this.awardXP(
+          userId,
+          achievement.xpReward,
+          `Achievement: ${achievement.name}`
+        );
+
+        // Send notification
+        await notificationService.sendAchievement(
+          userId,
+          `Achievement Unlocked: ${achievement.name}`,
+          achievement.description,
+          achievement.icon
+        );
+
+        unlockedAchievements.push(achievement);
+      }
+    }
+
+    return unlockedAchievements;
+  }
+
+  /**
+   * Get user's progress summary
+   */
+  async getProgressSummary(userId: string) {
+    const gamification = await this.getUserGamification(userId);
+    const currentLevel = getLevelFromXP(gamification.xp);
+    const xpForNext = getXPForNextLevel(gamification.xp);
+
+    return {
+      xp: gamification.xp,
+      level: currentLevel,
+      xpForNextLevel: xpForNext,
+      achievements: gamification.achievements.length,
+      totalAchievements: ACHIEVEMENTS.length,
+      dailyStreak: gamification.dailyStreak,
+      stats: gamification.stats,
+    };
   }
 }
 

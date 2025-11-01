@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -12,24 +13,74 @@ import {
 import { Icons } from '@/lib/icons';
 import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 
+interface GamificationStats {
+  xp: number;
+  level: number;
+  xpForNextLevel: number;
+  dailyStreak: number;
+  achievements: string[];
+  stats: {
+    promptsUsed: number;
+    patternsCompleted: number;
+    skillsTracked: number;
+    skillsMastered: number;
+    timeSaved: number;
+    promptsShared: number;
+    favoritesReceived: number;
+  };
+}
+
 export default function DashboardPage() {
   // Get prompts for stats
   const allPrompts = getSeedPromptsWithTimestamps();
 
-  // Real user stats - starts at zero
-  // TODO: Fetch these from user's actual activity in MongoDB using gamification API
-  const stats = {
+  // Real gamification data from API
+  const [gamificationData, setGamificationData] = useState<GamificationStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchGamificationStats() {
+      try {
+        const response = await fetch('/api/gamification/stats');
+        if (response.ok) {
+          const result = await response.json();
+          setGamificationData(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch gamification stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchGamificationStats();
+  }, []);
+
+  // Use real data if available, otherwise show defaults
+  const stats = gamificationData ? {
+    promptsUsed: gamificationData.stats.promptsUsed,
+    totalPrompts: allPrompts.length,
+    favoritePrompts: gamificationData.stats.favoritesReceived,
+    patternsLearned: gamificationData.stats.patternsCompleted,
+    totalPatterns: 15,
+    streak: gamificationData.dailyStreak,
+    totalViews: 0,
+  } : {
     promptsUsed: 0,
     totalPrompts: allPrompts.length,
     favoritePrompts: 0,
     patternsLearned: 0,
     totalPatterns: 15,
-    streak: 0, // TODO: Calculate from user's login history
+    streak: 0,
     totalViews: 0,
   };
 
-  // Placeholder user data - will be replaced with real data from gamification API
-  const user = {
+  const user = gamificationData ? {
+    name: 'Explorer',
+    level: gamificationData.level,
+    xp: gamificationData.xp,
+    xpToNextLevel: gamificationData.xpForNextLevel,
+  } : {
     name: 'Explorer',
     level: 1,
     xp: 0,
@@ -37,7 +88,7 @@ export default function DashboardPage() {
   };
 
   // Calculate XP percentage
-  const xpPercentage = (user.xp / user.xpToNextLevel) * 100;
+  const xpPercentage = user.xpToNextLevel > 0 ? (user.xp / user.xpToNextLevel) * 100 : 0;
 
   // Recent activity - will populate as user uses the app
   const recentActivity: Array<{
