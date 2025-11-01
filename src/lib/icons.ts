@@ -182,6 +182,7 @@ export const Icons = {
 
   // Content
   view: Eye,
+  eye: Eye, // Alias for view
   hide: EyeOff,
   star: Star,
   heart: Heart,
@@ -246,6 +247,7 @@ export const Icons = {
   shield: Shield,
   tree: TreePine,
   refresh: RefreshCw,
+  refreshCw: RefreshCw, // Alias for refresh
   database: Database,
   bot: Bot,
   
