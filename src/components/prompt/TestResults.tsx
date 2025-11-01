@@ -132,7 +132,7 @@ export function TestResults({ promptId }: TestResultsProps) {
       case 'anthropic':
         return 'bg-purple-100 text-purple-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200';
     }
   };
 

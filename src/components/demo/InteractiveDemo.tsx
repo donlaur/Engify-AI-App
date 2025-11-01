@@ -275,7 +275,7 @@ export function InteractiveDemo() {
             {showComparison && (
               <div className="space-y-2">
                 <p className="text-sm font-medium">AI Response:</p>
-                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm whitespace-pre-wrap">
+                <div className="p-4 bg-muted rounded-lg text-sm whitespace-pre-wrap text-foreground">
                   {selectedExample.badResponse}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-red-600">
@@ -304,7 +304,7 @@ export function InteractiveDemo() {
             {showComparison && (
               <div className="space-y-2">
                 <p className="text-sm font-medium">AI Response:</p>
-                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm whitespace-pre-wrap">
+                <div className="p-4 bg-muted rounded-lg text-sm whitespace-pre-wrap text-foreground">
                   {selectedExample.goodResponse}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-green-600">

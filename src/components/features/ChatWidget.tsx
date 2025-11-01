@@ -115,10 +115,10 @@ export function ChatWidget() {
                   {/* Show sources if available */}
                   {message.sources && message.sources.length > 0 && (
                     <div className="mt-2 border-t border-gray-200 pt-2">
-                      <p className="mb-1 text-xs text-gray-500">Sources:</p>
+                      <p className="mb-1 text-xs text-muted-foreground">Sources:</p>
                       <div className="space-y-1">
                         {message.sources.map((source, idx) => (
-                          <div key={idx} className="text-xs text-gray-600">
+                          <div key={idx} className="text-xs text-muted-foreground">
                             • {source.title} (score: {source.score.toFixed(2)})
                           </div>
                         ))}

@@ -98,7 +98,7 @@ export function ModelSelector({
               ))}
 
             {/* Affordable models */}
-            <div className="px-2 py-1 text-xs font-semibold text-gray-500 mt-2">
+            <div className="px-2 py-1 text-xs font-semibold text-muted-foreground mt-2">
               Affordable
             </div>
             {Object.values(AI_MODELS)
@@ -107,7 +107,7 @@ export function ModelSelector({
                 <SelectItem key={model.id} value={model.id}>
                   <div className="flex items-center gap-2">
                     <span>{model.displayName}</span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       ${model.inputCostPer1M.toFixed(2)}/1M
                     </span>
                   </div>
@@ -117,7 +117,7 @@ export function ModelSelector({
             {/* Premium models */}
             {userTier === 'pro' || userTier === 'enterprise' ? (
               <>
-                <div className="px-2 py-1 text-xs font-semibold text-gray-500 mt-2">
+                <div className="px-2 py-1 text-xs font-semibold text-muted-foreground mt-2">
                   Premium
                 </div>
                 {Object.values(AI_MODELS)
@@ -146,7 +146,7 @@ export function ModelSelector({
 
       {/* Model details */}
       {displayModel && (
-        <div className="p-3 bg-gray-50 rounded-lg space-y-2 text-sm">
+        <div className="p-3 bg-muted rounded-lg space-y-2 text-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-medium">{displayModel.displayName}</span>
@@ -156,7 +156,7 @@ export function ModelSelector({
                 </Badge>
               )}
             </div>
-            <span className="text-xs text-gray-500 capitalize">
+            <span className="text-xs text-muted-foreground capitalize">
               {displayModel.provider}
             </span>
           </div>
@@ -164,8 +164,8 @@ export function ModelSelector({
           {/* Auto-selection reasons */}
           {selectedModel === 'auto' && autoRecommendation && (
             <div className="space-y-1">
-              <p className="text-xs font-medium text-gray-700">Why this model:</p>
-              <ul className="text-xs text-gray-600 space-y-1">
+              <p className="text-xs font-medium text-foreground">Why this model:</p>
+              <ul className="text-xs text-muted-foreground space-y-1">
                 {autoRecommendation.reasons.slice(0, 3).map((reason, i) => (
                   <li key={i} className="flex items-start gap-1">
                     <Icons.check className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
@@ -180,25 +180,25 @@ export function ModelSelector({
           {showDetails && (
             <div className="grid grid-cols-2 gap-2 pt-2 border-t">
               <div>
-                <p className="text-xs text-gray-500">Context</p>
+                <p className="text-xs text-muted-foreground">Context</p>
                 <p className="font-medium">
                   {formatNumber(displayModel.contextWindow)} tokens
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Cost</p>
+                <p className="text-xs text-muted-foreground">Cost</p>
                 <p className="font-medium">
                   ${displayModel.inputCostPer1M.toFixed(2)}/1M
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Max Output</p>
+                <p className="text-xs text-muted-foreground">Max Output</p>
                 <p className="font-medium">
                   {formatNumber(displayModel.maxOutputTokens)} tokens
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Features</p>
+                <p className="text-xs text-muted-foreground">Features</p>
                 <div className="flex gap-1">
                   {displayModel.supportsStreaming && (
                     <Badge variant="outline" className="text-xs">Stream</Badge>
@@ -213,7 +213,7 @@ export function ModelSelector({
 
           {/* Estimated cost */}
           {autoRecommendation && (
-            <div className="pt-2 border-t text-xs text-gray-600">
+            <div className="pt-2 border-t text-xs text-muted-foreground">
               <span>Estimated cost: </span>
               <span className="font-medium">
                 ${autoRecommendation.estimatedCost.toFixed(4)}
