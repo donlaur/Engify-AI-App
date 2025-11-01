@@ -259,7 +259,7 @@ export default async function PricingPage() {
               </p>
               <div className="flex justify-center gap-4">
                 <Button variant="default" asChild>
-                  <a href="mailto:support@engify.ai">
+                  <a href="mailto:donlaur@engify.ai">
                     <Icons.inbox className="mr-2 h-4 w-4" />
                     Contact Support
                   </a>

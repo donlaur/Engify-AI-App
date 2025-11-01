@@ -24,7 +24,7 @@ SENDGRID_FROM_EMAIL=noreply@engify.ai
 SENDGRID_FROM_NAME=Engify AI
 
 # Reply-To Email (Optional)
-SENDGRID_REPLY_TO=support@engify.ai
+SENDGRID_REPLY_TO=donlaur@engify.ai
 ```
 
 ### **Dynamic Template IDs**

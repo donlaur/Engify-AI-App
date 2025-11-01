@@ -181,7 +181,7 @@ If critical issues:
 
 ### Channels
 
-- Email: support@engify.ai
+- Email: donlaur@engify.ai
 - GitHub Issues
 - Discord (planned)
 - Twitter

@@ -134,7 +134,7 @@ export function Footer() {
           </p>
           <div className="flex flex-wrap gap-4 md:gap-6">
             <a
-              href="mailto:donlaur@engify.ai"
+              href="mailto:contact@engify.ai"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               Contact

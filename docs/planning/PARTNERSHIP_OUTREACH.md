@@ -124,7 +124,7 @@ Would you be open to a 15-min call to explore partnership?
 Best,
 Don Laurie
 Founder, Engify.ai
-hello@engify.ai
+hello@engify.ai → donlaur@engify.ai
 ```
 
 ---

@@ -223,7 +223,7 @@ fetch(API_ROUTES.ai, {
 
 - **Documentation**: https://docs.engify.ai
 - **API Status**: https://status.engify.ai
-- **Support**: support@engify.ai
+- **Support**: donlaur@engify.ai
 
 ---
 

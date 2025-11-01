@@ -619,6 +619,6 @@ export async function GET() {
 
 For questions or issues:
 
-- **Email**: donlaur@gmail.com
+- **Email**: donlaur@engify.ai
 - **Documentation**: https://engify.ai/api-docs
 - **GitHub**: https://github.com/donlaur/Engify-AI-App

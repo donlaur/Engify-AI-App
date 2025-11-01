@@ -94,3 +94,4 @@ lambda/*.dist-info/
 *.zip
 !lambda/rag-lambda.py
 !lambda/package.json
+.env.local.backup

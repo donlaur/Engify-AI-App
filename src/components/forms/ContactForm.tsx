@@ -155,8 +155,8 @@ export function ContactForm() {
         <div className="mt-6 text-center text-sm text-muted-foreground">
           <p>We typically respond within 24 hours.</p>
           <p>For urgent matters, email us directly at{' '}
-            <a href="mailto:donlaur@engify.ai" className="text-primary hover:underline">
-              donlaur@engify.ai
+            <a href="mailto:contact@engify.ai" className="text-primary hover:underline">
+              contact@engify.ai
             </a>
           </p>
         </div>

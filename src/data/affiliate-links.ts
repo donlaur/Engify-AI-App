@@ -149,7 +149,7 @@ Would you be open to a brief call to discuss partnership opportunities?
 Best regards,
 Don Laurie
 Founder, Engify.ai
-hello@engify.ai`,
+hello@engify.ai → donlaur@engify.ai`,
 };
 
 /**
