@@ -1,7 +1,49 @@
 import { Metadata } from 'next';
 import { APP_URL } from '@/lib/constants';
 import TagPageClient from './tag-page-client';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import { getMongoDb } from '@/lib/db/mongodb';
+
+async function getPromptsByTag(tag: string) {
+  try {
+    const db = await getMongoDb();
+    const collection = db.collection('prompts');
+    
+    // Use MongoDB index for efficient tag filtering
+    const prompts = await collection
+      .find({
+        tags: { $in: [tag.toLowerCase()] },
+        isPublic: true,
+      })
+      .sort({ isFeatured: -1, views: -1 })
+      .limit(100)
+      .toArray();
+
+    return prompts.map((p) => ({
+      id: p.id || p._id.toString(),
+      slug: p.slug,
+      title: p.title,
+      description: p.description,
+      content: p.content,
+      category: p.category,
+      role: p.role,
+      pattern: p.pattern,
+      tags: p.tags || [],
+      isFeatured: p.isFeatured || false,
+      views: p.views || 0,
+      rating: p.rating || p.stats?.averageRating || 0,
+      ratingCount: p.ratingCount || p.stats?.totalRatings || 0,
+      createdAt: p.createdAt || new Date(),
+    }));
+  } catch (error) {
+    console.error('Error fetching prompts by tag:', error);
+    // Fallback to static data
+    const { getSeedPromptsWithTimestamps } = await import('@/data/seed-prompts');
+    const allPrompts = getSeedPromptsWithTimestamps();
+    return allPrompts.filter((p) => 
+      p.tags && p.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
+    );
+  }
+}
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   const tag = decodeURIComponent(params.tag);
@@ -11,10 +53,7 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
     .join(' ');
 
   // Get prompts with this tag
-  const allPrompts = getSeedPromptsWithTimestamps();
-  const taggedPrompts = allPrompts.filter((p) => 
-    p.tags && p.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
-  );
+  const taggedPrompts = await getPromptsByTag(tag);
 
   const title = `${displayTag} - Prompt Engineering Prompts | Engify.ai`;
   const description = `Explore ${taggedPrompts.length} prompt${taggedPrompts.length !== 1 ? 's' : ''} tagged with "${displayTag}". Find prompts for ${displayTag.toLowerCase()} and improve your prompt engineering skills.`;
@@ -56,11 +95,8 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  // Get prompts with this tag
-  const allPrompts = getSeedPromptsWithTimestamps();
-  const taggedPrompts = allPrompts.filter((p) => 
-    p.tags && p.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
-  );
+  // Get prompts with this tag from MongoDB
+  const taggedPrompts = await getPromptsByTag(tag);
 
   // Generate JSON-LD structured data
   const jsonLd = {
@@ -79,7 +115,7 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
           '@type': 'Article',
           name: prompt.title,
           description: prompt.description,
-          url: `${APP_URL}/library/${prompt.id}`,
+          url: `${APP_URL}/library/${prompt.id || prompt.slug}`,
         },
       })),
     },
