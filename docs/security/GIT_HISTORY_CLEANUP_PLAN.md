@@ -4,9 +4,9 @@
 
 The security audit found the following **real credentials** exposed in git history:
 
-1. **Cognito Client ID**: `64haaujuedgbhsu9p01avf4d10` (REAL)
-2. **Cognito User Pool ID**: `us-east-1_tsIIjaxYi` (REAL)
-3. **AWS Account ID**: `8257-6541-9928` (REAL)
+1. **Cognito Client ID**: `[REDACTED_CLIENT_ID]` (REAL - found in history)
+2. **Cognito User Pool ID**: `[REDACTED_USER_POOL_ID]` (REAL - found in history)
+3. **AWS Account ID**: `[REDACTED_ACCOUNT_ID]` (REAL - found in history)
 
 **Note:** These were found in documentation commits that have since been redacted, but they remain in git history.
 
@@ -100,9 +100,9 @@ The script will:
 
 ```bash
 # Verify secrets are removed
-git log --all --full-history -p | grep -E "64haaujuedgbhsu9p01avf4d10|us-east-1_tsIIjaxYi|8257-6541-9928"
+git log --all --full-history -p | grep -E "\[REDACTED_CLIENT_ID\]|\[REDACTED_USER_POOL_ID\]|\[REDACTED_ACCOUNT_ID\]"
 
-# Should return no results
+# Should return no results after cleanup
 ```
 
 ### Step 5: Force Push
