@@ -85,7 +85,7 @@ export default async function Home() {
             </Badge>
 
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
-              Amplify Your Team with{' '}
+              Amplify Engineering with{' '}
               <span className="bg-gradient-to-r from-green-300 to-cyan-300 bg-clip-text text-transparent">
                 AI Power
               </span>
@@ -93,7 +93,7 @@ export default async function Home() {
 
             <p className="mx-auto max-w-2xl text-xl text-white">
               Expert prompts, battle-tested patterns, and gamified learning.
-              Transform your team&apos;s capabilities with Engify.ai
+              Transform engineering capabilities across all roles with Engify.ai
             </p>
 
             <div className="flex flex-col justify-center gap-4 pt-8">
