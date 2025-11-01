@@ -160,6 +160,19 @@ export const authOptions: NextAuthConfig = {
     updateAge: Math.min(adminSessionMaxAgeSeconds / 2, 15 * 60),
   },
 
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' ? '.engify.ai' : undefined, // Works for both engify.ai and www.engify.ai
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
+
   pages: {
     signIn: '/login',
     signOut: '/logout',
