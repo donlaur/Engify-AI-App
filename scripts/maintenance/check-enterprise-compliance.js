@@ -160,6 +160,7 @@ const complianceRules = [
       // Check if test file exists
       const testFilePath = filePath.replace('/route.ts', '.test.ts');
       const testFileExists = fs.existsSync(testFilePath) || 
+                            fs.existsSync(testFilePath.replace('/app/api/', '/__tests__/api/')) ||
                             fs.existsSync(testFilePath.replace('/api/', '/__tests__/api/'));
       
       return !testFileExists;

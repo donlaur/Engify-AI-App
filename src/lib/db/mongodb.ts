@@ -29,6 +29,12 @@ const options = {
   w: 'majority' as const,
   maxIdleTimeMS: 30000,
   family: 4, // Force IPv4 to avoid DNS issues
+  // SSL/TLS options for MongoDB Atlas
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  tlsAllowInvalidHostnames: false,
+  // Connection pool options
+  heartbeatFrequencyMS: 10000,
 };
 
 let client: MongoClient;

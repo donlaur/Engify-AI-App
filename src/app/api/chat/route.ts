@@ -1,20 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { auth } from '@/lib/auth';
+import { sanitizeText } from '@/lib/security/sanitize';
+import { getModelById } from '@/lib/config/ai-models';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function POST(request: NextRequest) {
+  let body: {
+    messages?: Array<{ role: string; content: string }>;
+    useRAG?: boolean;
+  };
+
   try {
-    const { messages, useRAG = true } = await request.json();
-    const lastMessage = messages[messages.length - 1]?.content || '';
+    // Rate limiting
+    const session = await auth();
+    const tier = session?.user ? 'authenticated' : 'anonymous';
+    const identifier =
+      session?.user?.id ||
+      request.headers.get('x-forwarded-for')?.split(',')[0] ||
+      request.ip ||
+      'unknown';
+
+    const rateLimitResult = await checkRateLimit(identifier, tier);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: rateLimitResult.reason || 'Rate limit exceeded',
+          message: 'Sorry, too many requests. Please try again later.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': '60',
+            'X-RateLimit-Limit': '100',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
+          },
+        }
+      );
+    }
+
+    body = await request.json();
+    const { messages, useRAG = true } = body;
+
+    // Sanitize user input
+    const sanitizedMessages = Array.isArray(messages)
+      ? messages.map((msg: { role: string; content: string }) => ({
+          role: msg.role,
+          content: sanitizeText(msg.content || ''),
+        }))
+      : [];
+
+    const lastMessage =
+      sanitizedMessages[sanitizedMessages.length - 1]?.content || '';
+    const sanitizedLastMessage = sanitizeText(lastMessage);
 
     let context = '';
     let sources: Array<{ title: string; content: string; score: number }> = [];
 
     // Use RAG to get relevant context if enabled
-    if (useRAG && lastMessage) {
+    if (useRAG && sanitizedLastMessage) {
       try {
         const ragResponse = await fetch(
           `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/rag`,
@@ -22,8 +71,8 @@ export async function POST(request: NextRequest) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              query: lastMessage,
-              collection: 'knowledge_base',
+              query: sanitizedLastMessage,
+              collection: 'prompts', // Lambda searches 'prompts' collection
               top_k: 3,
             }),
           }
@@ -32,7 +81,13 @@ export async function POST(request: NextRequest) {
         if (ragResponse.ok) {
           const ragData = await ragResponse.json();
           if (ragData.success && ragData.results.length > 0) {
-            sources = ragData.results;
+            sources = ragData.results.map(
+              (source: { title: string; content: string; score: number }) => ({
+                title: sanitizeText(source.title || ''),
+                content: sanitizeText(source.content || ''),
+                score: source.score || 0,
+              })
+            );
             context = sources
               .map((source) => `**${source.title}**\n${source.content}`)
               .join('\n\n');
@@ -47,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build system prompt with RAG context
-    const systemPrompt = `You are a helpful AI assistant for Engify.ai, a prompt engineering education platform.
+    const systemPrompt = `You are Engify Assistant, a helpful AI assistant for Engify.ai, a prompt engineering education platform.
 
 You help users:
 - Find the right prompts from our library of 100+ expert prompts
@@ -59,17 +114,22 @@ ${context ? `\n**Relevant Knowledge Base Content:**\n${context}\n` : ''}
 
 Be concise, friendly, and always reference our content when relevant.
 ${sources.length > 0 ? `\nWhen referencing information, mention it came from our knowledge base.` : ''}
-Suggest specific pages: /library, /patterns, /learn, /ai-coding, /mcp`;
+Suggest specific pages: /prompts, /patterns, /learn, /workbench`;
+
+    // Get model from centralized config
+    const modelConfig =
+      getModelById('gpt-3.5-turbo') || getModelById('gpt-4o-mini');
+    const modelId = modelConfig?.id || 'gpt-3.5-turbo';
 
     // Use OpenAI to generate response
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: modelId,
       messages: [
         {
           role: 'system',
           content: systemPrompt,
         },
-        ...messages,
+        ...sanitizedMessages,
       ],
       temperature: 0.7,
       max_tokens: 400,
@@ -79,8 +139,10 @@ Suggest specific pages: /library, /patterns, /learn, /ai-coding, /mcp`;
       completion.choices[0]?.message?.content ||
       'Sorry, I could not generate a response.';
 
+    const sanitizedResponse = sanitizeText(response);
+
     return NextResponse.json({
-      message: response,
+      message: sanitizedResponse,
       sources:
         sources.length > 0
           ? sources.map((s) => ({ title: s.title, score: s.score }))
@@ -91,20 +153,31 @@ Suggest specific pages: /library, /patterns, /learn, /ai-coding, /mcp`;
     console.error('Chat API error:', error);
 
     // Fallback to knowledge-based response if OpenAI fails
-    const { messages } = await request.json();
-    const lastMessage = messages[messages.length - 1]?.content || '';
-    const response = generateKnowledgeResponse(lastMessage);
+    try {
+      const messages = body?.messages || [];
+      const lastMessage = messages[messages.length - 1]?.content || '';
+      const sanitizedQuery = sanitizeText(lastMessage);
+      const response = generateKnowledgeResponse(sanitizedQuery);
 
-    return NextResponse.json({
-      message: response,
-      sources: [],
-      usedRAG: false,
-    });
+      return NextResponse.json({
+        message: response,
+        sources: [],
+        usedRAG: false,
+      });
+    } catch (fallbackError) {
+      return NextResponse.json(
+        {
+          error: 'Chat service unavailable',
+          message: 'Sorry, I encountered an error. Please try again later.',
+        },
+        { status: 500 }
+      );
+    }
   }
 }
 
 function generateKnowledgeResponse(query: string): string {
-  const lowerQuery = query.toLowerCase();
+  const lowerQuery = sanitizeText(query).toLowerCase();
 
   // Pattern-based responses from our knowledge base
   const responses: Record<string, string> = {
@@ -136,7 +209,7 @@ Now: Input: 'angry' → Output: ?"
 
 **Best for:** Classification, formatting, style matching
 
-🎯 67+ examples in /library`,
+🎯 67+ examples in /prompts`,
 
     role: `**Role Prompting** defines who the AI should be!
 
@@ -150,7 +223,7 @@ Now: Input: 'angry' → Output: ?"
 
 **Impact:** More relevant, contextual responses
 
-👥 See role-based prompts in /library`,
+👥 See role-based prompts in /prompts`,
   };
 
   // Find matching response
@@ -175,7 +248,7 @@ Try asking about:
 - "Explain few-shot learning"
 
 Or explore:
-📚 /library - Browse all prompts
+📚 /prompts - Browse all prompts
 🎯 /patterns - Learn techniques
 📖 /learn - Guided pathways`;
 }

@@ -1,6 +1,6 @@
 /**
  * MongoDB Client
- * 
+ *
  * Singleton connection to MongoDB with connection pooling
  */
 
@@ -14,6 +14,19 @@ const uri = process.env.MONGODB_URI;
 const options = {
   maxPoolSize: 10,
   minPoolSize: 5,
+  // SSL/TLS options for MongoDB Atlas
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  tlsAllowInvalidHostnames: false,
+  // Connection timeouts
+  serverSelectionTimeoutMS: 30000,
+  socketTimeoutMS: 45000,
+  connectTimeoutMS: 30000,
+  // Retry configuration
+  retryWrites: true,
+  retryReads: true,
+  // Connection pool
+  heartbeatFrequencyMS: 10000,
 };
 
 let client: MongoClient;
