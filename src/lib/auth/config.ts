@@ -37,8 +37,20 @@ export const authOptions: NextAuthConfig = {
           // Validate input
           const { email, password } = loginSchema.parse(credentials);
 
-          // Find user
-          const user = await userService.findByEmail(email);
+          // Add timeout to prevent hanging
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(
+              () => reject(new Error('Authentication timeout')),
+              10000
+            ); // 10 second timeout
+          });
+
+          // Find user with timeout
+          const user = (await Promise.race([
+            userService.findByEmail(email),
+            timeoutPromise,
+          ])) as Awaited<ReturnType<typeof userService.findByEmail>>;
+
           if (!user || !user.password) {
             return null;
           }
@@ -59,6 +71,13 @@ export const authOptions: NextAuthConfig = {
           };
         } catch (error) {
           console.error('Auth error:', error);
+          // Return more specific error for debugging
+          if (
+            error instanceof Error &&
+            error.message === 'Authentication timeout'
+          ) {
+            console.error('MongoDB connection timeout during login');
+          }
           return null;
         }
       },
