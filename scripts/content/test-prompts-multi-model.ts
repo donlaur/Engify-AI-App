@@ -5,9 +5,10 @@
  * Uses existing AIProvider adapters for consistent testing across providers
  * 
  * Usage:
- *   npx tsx scripts/content/test-prompts-multi-model.ts --dry-run  // Test 3 prompts
- *   npx tsx scripts/content/test-prompts-multi-model.ts --limit=10 // Test 10 prompts
- *   npx tsx scripts/content/test-prompts-multi-model.ts --all      // Test all prompts
+ *   npx tsx scripts/content/test-prompts-multi-model.ts --dry-run           // Test 3 prompts
+ *   npx tsx scripts/content/test-prompts-multi-model.ts --limit=10          // Test 10 prompts
+ *   npx tsx scripts/content/test-prompts-multi-model.ts --all              // Test all prompts
+ *   npx tsx scripts/content/test-prompts-multi-model.ts --management-only  // Test only management prompts
  */
 
 import { config } from 'dotenv';
@@ -91,6 +92,7 @@ async function main() {
       ? 3
       : 0;
   const testAll = args.includes('--all');
+  const managementOnly = args.includes('--management-only');
 
   console.log('\n🧪 MULTI-MODEL PROMPT TESTING\n');
   console.log('=' + '='.repeat(60));
@@ -99,6 +101,8 @@ async function main() {
     console.log('🔬 DRY RUN MODE - Testing 3 prompts only\n');
   } else if (limit) {
     console.log(`📊 Testing ${limit} prompts\n`);
+  } else if (managementOnly) {
+    console.log('📋 Testing MANAGEMENT prompts only (pip-, conflict-, facilitator-, decision-)\n');
   } else if (testAll) {
     console.log('🚀 Testing ALL prompts\n');
   }
@@ -110,7 +114,15 @@ async function main() {
 
   // Get prompts to test (using collection name directly - script context)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const promptsQuery = db.collection('prompts').find({}) as any;
+  let promptsQuery = db.collection('prompts').find({}) as any;
+  
+  // Filter for management prompts if requested
+  if (managementOnly) {
+    promptsQuery = db.collection('prompts').find({
+      id: { $regex: /^(pip|conflict|facilitator|decision)-/ }
+    }) as any;
+  }
+  
   const allPrompts = await (limit || dryRun ? promptsQuery.limit(limit) : promptsQuery).toArray();
 
   console.log(`Testing ${allPrompts.length} prompts with ${MODELS_TO_TEST.length} models...\n`);
