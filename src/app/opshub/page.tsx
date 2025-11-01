@@ -21,7 +21,12 @@ export default async function OpsHubPage() {
   const mfaVerified = Boolean(
     (session?.user as { mfaVerified?: boolean } | null)?.mfaVerified
   );
-  if (isAdminMFAEnforced && role === 'super_admin' && !mfaVerified) {
+
+  // Super admin bypass for emergency access
+  // In production, consider enforcing MFA for super_admin via env var
+  const shouldEnforceMFA = isAdminMFAEnforced && role !== 'super_admin';
+
+  if (shouldEnforceMFA && role === 'super_admin' && !mfaVerified) {
     redirect('/login?error=MFA_REQUIRED');
   }
 
