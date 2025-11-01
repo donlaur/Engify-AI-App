@@ -1,0 +1,14 @@
+# Git History Cleanup Replacements
+# 
+# ⚠️ THIS FILE CONTAINS REAL SECRETS
+# ⚠️ DO NOT COMMIT TO GIT
+# 
+# This file is gitignored. Create it locally with actual values:
+#
+# Format: old_value==>new_value
+#
+# Example:
+# 64haaujuedgbhsu9p01avf4d10==>[YOUR_CLIENT_ID]
+# us-east-1_tsIIjaxYi==>[YOUR_USER_POOL_ID]
+# 8257-6541-9928==>[YOUR_AWS_ACCOUNT_ID]
+
