@@ -81,7 +81,7 @@ export function ModelSelector({
             <div className="h-px bg-gray-200 my-2" />
 
             {/* Free tier models */}
-            <div className="px-2 py-1 text-xs font-semibold text-gray-500">
+            <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
               Free Tier
             </div>
             {Object.values(AI_MODELS)
