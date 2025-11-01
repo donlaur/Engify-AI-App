@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # AWS Lambda Deployment Script for Engify RAG Service
-# Account: 8257-6541-9928
+# Account: [YOUR_AWS_ACCOUNT_ID]
 # Region: us-east-2 (Ohio)
 
 set -e
