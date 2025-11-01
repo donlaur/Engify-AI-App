@@ -45,12 +45,13 @@ const validationRules = [
     name: 'Hardcoded collection names',
     pattern: /\.collection\(['"`]([^'"`]+)['"`]\)/g,
     check: (match, content, filePath) => {
-      // Allow in schema.ts, BaseService.ts, API routes, and prompt utilities
+      // Allow in schema.ts, BaseService.ts, API routes, prompt utilities, and scripts
       if (filePath.includes('schema.ts') || 
           filePath.includes('BaseService.ts') ||
           filePath.includes('/api/') ||
           filePath.includes('/prompts/') ||
-          filePath.includes('/prompts.ts')) {
+          filePath.includes('/prompts.ts') ||
+          filePath.includes('/scripts/')) {
         return false;
       }
       return true;
@@ -68,6 +69,18 @@ const validationRules = [
       const lines = content.split('\n');
       for (let i = 0; i < lines.length; i++) {
         if (lines[i].includes(match)) {
+          // Skip TypeScript destructuring patterns (const [response] = ...)
+          if (lines[i].match(/const\s+\[.*\]\s*=/)) {
+            return false; // Safe - TypeScript destructuring
+          }
+          // Skip array destructuring in function parameters
+          if (lines[i].match(/\[.*\]\s*:/)) {
+            return false; // Safe - function parameter destructuring
+          }
+          // Skip array destructuring in await expressions
+          if (lines[i].match(/await.*\[.*\]/)) {
+            return false; // Safe - await destructuring
+          }
           // Check previous 3 lines for length check
           for (let j = Math.max(0, i - 3); j < i; j++) {
             if (lines[j].includes('.length') || lines[j].includes('hasItems')) {

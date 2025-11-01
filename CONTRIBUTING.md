@@ -379,7 +379,7 @@ Before submitting a PR:
 
 - **Issues**: [GitHub Issues](https://github.com/donlaur/Engify-AI-App/issues)
 - **Discussions**: Use GitHub Discussions for questions
-- **Email**: donlaur@gmail.com
+- **Email**: donlaur@engify.ai
 
 ### Code of Conduct
 

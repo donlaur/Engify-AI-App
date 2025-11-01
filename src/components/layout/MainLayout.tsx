@@ -10,6 +10,7 @@
 
 import { ReactNode } from 'react';
 import { Header } from './Header';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from './Footer';
 import { ChatWidget } from '@/components/features/ChatWidget';
 
@@ -22,7 +23,9 @@ export function MainLayout({ children }: MainLayoutProps) {
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">{children}</main>
-      <Footer />
+      <ErrorBoundary>
+        <Footer />
+      </ErrorBoundary>
       <ChatWidget />
       <ChatWidget />
     </div>

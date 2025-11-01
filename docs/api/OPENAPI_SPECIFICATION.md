@@ -10,7 +10,7 @@ This document provides comprehensive API documentation for Engify.ai's v2 API en
 - **Description**: Enterprise-grade AI execution platform with intelligent strategy selection
 - **Version**: 2.0.0
 - **Base URL**: `https://engify.ai/api/v2`
-- **Contact**: donlaur@gmail.com
+- **Contact**: donlaur@engify.ai
 - **License**: MIT
 
 ## Authentication

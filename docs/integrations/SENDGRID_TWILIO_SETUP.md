@@ -48,7 +48,7 @@ Add to your `.env.local`:
 SENDGRID_API_KEY=SG.your_api_key_here
 SENDGRID_FROM_EMAIL=noreply@engify.ai
 SENDGRID_FROM_NAME=Engify AI
-SENDGRID_REPLY_TO=support@engify.ai
+SENDGRID_REPLY_TO=donlaur@engify.ai
 
 # Email Templates
 SENDGRID_WELCOME_TEMPLATE_ID=d-xxxxxxxxx

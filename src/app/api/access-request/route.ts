@@ -11,6 +11,7 @@ import { logger } from '@/lib/logging/logger';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { sendEmail } from '@/lib/services/emailService';
 import { auditLog } from '@/lib/logging/audit';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 const accessRequestSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -28,6 +29,32 @@ const accessRequestSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // Rate limiting
+  const ipAddress = 
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    req.ip ||
+    'unknown';
+  
+  const rateLimitResult = await checkRateLimit(ipAddress, 'anonymous');
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: rateLimitResult.reason || 'Rate limit exceeded. Please try again later.',
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': '60',
+          'X-RateLimit-Limit': '10',
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
+        },
+      }
+    );
+  }
+
   try {
     const body = await req.json();
 

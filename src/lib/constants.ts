@@ -12,7 +12,7 @@ export const SOCIAL_LINKS = {
   twitter: 'https://twitter.com/donlaur',
 };
 
-export const CONTACT_EMAIL = 'donlaur@gmail.com';
+export const CONTACT_EMAIL = 'donlaur@engify.ai';
 
 export const ROUTES = {
   home: '/',

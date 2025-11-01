@@ -57,7 +57,7 @@ import('mongodb').then(async ({ MongoClient, ObjectId }) => {
     });
     
     console.log('✅ Created super_admin account');
-    console.log('   Email: donlaur@engify.ai');
+    console.log('   Email: contact@engify.ai');
     console.log('   Temp Password: TempPass123!');
     console.log('   Role: super_admin');
     console.log('\n⚠️  Login and change password immediately!\n');

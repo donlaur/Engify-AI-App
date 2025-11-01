@@ -1,5 +1,6 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ContactForm } from '@/components/forms/ContactForm';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function ContactPage() {
   return (
@@ -15,7 +16,9 @@ export default function ContactPage() {
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Contact Form */}
           <div>
-            <ContactForm />
+            <ErrorBoundary>
+              <ContactForm />
+            </ErrorBoundary>
           </div>
 
           {/* Contact Information */}
