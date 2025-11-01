@@ -37,7 +37,7 @@ interface HeaderProps {
 
 const navigationLinks = [
   { href: '/patterns', label: 'Patterns' },
-  { href: '/library', label: 'Library' },
+  { href: '/prompts', label: 'Library' },
   { href: '/learn', label: 'Learn' },
   { href: '/workbench', label: 'Workbench' },
 ];
@@ -57,7 +57,7 @@ export function Header({ user }: HeaderProps) {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex md:items-center md:space-x-6">
           <Link
-            href="/library"
+            href="/prompts"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
             Prompt Playbooks

@@ -16,7 +16,7 @@ const footerLinks = {
   product: [
     { href: '/demo', label: 'AI Workbench' },
     { href: '/patterns', label: 'Patterns' },
-    { href: '/library', label: 'Library' },
+    { href: '/prompts', label: 'Library' },
     { href: '/pricing', label: 'Pricing' },
   ],
   company: [
@@ -27,7 +27,7 @@ const footerLinks = {
   resources: [
     { href: '/learn', label: 'Documentation' },
     { href: '/patterns', label: 'Patterns' },
-    { href: '/library', label: 'Prompt Library' },
+    { href: '/prompts', label: 'Prompt Library' },
     { href: '/api-docs', label: 'API Reference' },
   ],
   legal: [

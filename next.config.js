@@ -89,6 +89,22 @@ const nextConfig = {
     ];
   },
   
+  // SEO: Redirect /library/* to /prompts/* (301 permanent redirect)
+  async redirects() {
+    return [
+      {
+        source: '/library',
+        destination: '/prompts',
+        permanent: true, // 301 redirect
+      },
+      {
+        source: '/library/:path*',
+        destination: '/prompts/:path*',
+        permanent: true, // 301 redirect
+      },
+    ];
+  },
+  
   // Webpack configuration
   webpack: (config, { isServer }) => {
     // Fix for MongoDB in client-side builds
