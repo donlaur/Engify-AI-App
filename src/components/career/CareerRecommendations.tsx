@@ -7,7 +7,13 @@
 
 import { useState, useEffect } from 'react';
 import { Icons } from '@/lib/icons';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -30,44 +36,22 @@ export function CareerRecommendations({ userId }: CareerRecommendationsProps) {
 
   useEffect(() => {
     loadRecommendations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const loadRecommendations = async () => {
     try {
-      // TODO: Call API endpoint
-      // const response = await fetch(`/api/career/recommendations?userId=${userId}`);
-      // const data = await response.json();
-      // setRecommendations(data.recommendations);
-      
-      // Mock data for now
-      setRecommendations([
-        {
-          type: 'pattern',
-          title: 'Master System Design Patterns',
-          description: 'Use Tree of Thoughts and RAG patterns to design scalable systems',
-          reason: 'Required for Staff level',
-          priority: 'high',
-          skillsAddressed: ['system-design', 'architecture'],
-        },
-        {
-          type: 'prompt',
-          title: 'Lead Technical Decisions',
-          description: 'Use prompts for RFC writing, design docs, and technical proposals',
-          reason: 'Key skill for Staff',
-          priority: 'high',
-          skillsAddressed: ['technical-leadership', 'communication'],
-        },
-        {
-          type: 'project',
-          title: 'Mentor Junior Engineers',
-          description: 'Use code explanation and teaching prompts to mentor team members',
-          reason: 'Expected at Staff level',
-          priority: 'medium',
-          skillsAddressed: ['mentoring', 'communication'],
-        },
-      ]);
+      // Call real API endpoint
+      const response = await fetch(`/api/career/recommendations`);
+      if (response.ok) {
+        const data = await response.json();
+        setRecommendations(data.recommendations || []);
+      } else {
+        setRecommendations([]);
+      }
     } catch (error) {
       console.error('Failed to load recommendations:', error);
+      setRecommendations([]);
     } finally {
       setLoading(false);
     }
@@ -118,15 +102,13 @@ export function CareerRecommendations({ userId }: CareerRecommendationsProps) {
           <Icons.lightbulb className="h-5 w-5" />
           Recommended for You
         </CardTitle>
-        <CardDescription>
-          Based on your career level and goals
-        </CardDescription>
+        <CardDescription>Based on your career level and goals</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {recommendations.map((rec, index) => (
           <div
             key={index}
-            className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+            className="rounded-lg border p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-2">
@@ -137,19 +119,19 @@ export function CareerRecommendations({ userId }: CareerRecommendationsProps) {
                     {rec.priority}
                   </Badge>
                 </div>
-                
+
                 <p className="text-sm text-muted-foreground">
                   {rec.description}
                 </p>
-                
+
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Icons.info className="h-3 w-3" />
                   <span>{rec.reason}</span>
                 </div>
 
                 {rec.skillsAddressed.length > 0 && (
-                  <div className="flex gap-1 flex-wrap">
-                    {rec.skillsAddressed.map(skill => (
+                  <div className="flex flex-wrap gap-1">
+                    {rec.skillsAddressed.map((skill) => (
                       <Badge key={skill} variant="outline" className="text-xs">
                         {skill.replace('-', ' ')}
                       </Badge>
@@ -169,12 +151,13 @@ export function CareerRecommendations({ userId }: CareerRecommendationsProps) {
         ))}
 
         {recommendations.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            <Icons.target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Complete your career assessment to get personalized recommendations</p>
-            <Button className="mt-4">
-              Start Assessment
-            </Button>
+          <div className="py-8 text-center text-muted-foreground">
+            <Icons.target className="mx-auto mb-4 h-12 w-12 opacity-50" />
+            <p>
+              Complete your career assessment to get personalized
+              recommendations
+            </p>
+            <Button className="mt-4">Start Assessment</Button>
           </div>
         )}
       </CardContent>
