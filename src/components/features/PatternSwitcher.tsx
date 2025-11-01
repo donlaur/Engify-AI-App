@@ -121,7 +121,7 @@ export function PatternSwitcher({
             <Badge>{selectedPattern}</Badge>
             <span className="text-sm font-medium">Current Pattern</span>
           </div>
-          <pre className="whitespace-pre-wrap text-sm text-gray-700">
+          <pre className="whitespace-pre-wrap text-sm text-foreground">
             {transformPrompt(selectedPattern)}
           </pre>
         </div>
@@ -136,23 +136,23 @@ export function PatternSwitcher({
 
             <div className="grid gap-4 md:grid-cols-2">
               {/* Original */}
-              <div className="rounded-lg border bg-gray-50 p-4">
+              <div className="rounded-lg border bg-muted p-4">
                 <div className="mb-2 flex items-center gap-2">
                   <Badge variant="outline">{currentPattern}</Badge>
                   <span className="text-xs font-medium">Original</span>
                 </div>
-                <pre className="whitespace-pre-wrap text-xs text-gray-600">
+                <pre className="whitespace-pre-wrap text-xs text-muted-foreground">
                   {transformPrompt(currentPattern)}
                 </pre>
               </div>
 
               {/* Selected */}
-              <div className="rounded-lg border-2 border-green-200 bg-green-50 p-4">
+              <div className="rounded-lg border-2 border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950/50">
                 <div className="mb-2 flex items-center gap-2">
                   <Badge className="bg-green-600">{selectedPattern}</Badge>
                   <span className="text-xs font-medium">New Pattern</span>
                 </div>
-                <pre className="whitespace-pre-wrap text-xs text-gray-600">
+                <pre className="whitespace-pre-wrap text-xs text-green-900 dark:text-green-100">
                   {transformPrompt(selectedPattern)}
                 </pre>
               </div>
@@ -177,7 +177,7 @@ export function PatternSwitcher({
                       </p>
                     )}
                     {selectedPattern === 'few-shot' && (
-                      <p className="text-blue-800">
+                      <p className="text-blue-800 dark:text-blue-200">
                         ✅ Ensures consistent format
                         <br />
                         ✅ Reduces ambiguity

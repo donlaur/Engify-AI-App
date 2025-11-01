@@ -44,12 +44,12 @@ export function FrameworkRecommendation({
       case 'persona':
         return 'bg-indigo-100 text-indigo-800 border-indigo-300';
       default:
-        return 'bg-slate-100 text-slate-800 border-slate-300';
+        return 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600';
     }
   };
 
   const getModelBadgeColor = (model?: string) => {
-    if (!model) return 'bg-gray-100 text-gray-800';
+    if (!model) return 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200';
     if (model.includes('mini') || model.includes('flash')) {
       return 'bg-green-100 text-green-800';
     }
