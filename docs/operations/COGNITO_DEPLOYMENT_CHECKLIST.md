@@ -2,12 +2,12 @@
 
 ## ✅ Completed
 
-1. ✅ Cognito User Pool created: `us-east-1_tsIIjaxYi`
+1. ✅ Cognito User Pool created: `[YOUR_USER_POOL_ID]`
 2. ✅ App Client created: `engify-web-app`
 3. ✅ Environment variables added to Vercel:
    - `COGNITO_REGION=us-east-1`
-   - `COGNITO_USER_POOL_ID=us-east-1_tsIIjaxYi`
-   - `COGNITO_CLIENT_ID=64haaujuedgbhsu9p01avf4d10`
+   - `COGNITO_USER_POOL_ID=[YOUR_USER_POOL_ID]`
+   - `COGNITO_CLIENT_ID=[YOUR_CLIENT_ID]`
 
 ## 🔄 Next Steps
 

@@ -7,8 +7,8 @@ Based on your AWS Console, here are your credentials:
 ```bash
 # AWS Cognito Configuration
 COGNITO_REGION=us-east-1
-COGNITO_USER_POOL_ID=us-east-1_tsIIjaxYi
-COGNITO_CLIENT_ID=64haaujuedgbhsu9p01avf4d10
+COGNITO_USER_POOL_ID=[YOUR_USER_POOL_ID]
+COGNITO_CLIENT_ID=[YOUR_CLIENT_ID]
 COGNITO_CLIENT_SECRET=<get from AWS Console if you have one>
 ```
 
@@ -64,8 +64,8 @@ Add to `.env.local`:
 ```bash
 # AWS Cognito
 COGNITO_REGION=us-east-1
-COGNITO_USER_POOL_ID=us-east-1_tsIIjaxYi
-COGNITO_CLIENT_ID=64haaujuedgbhsu9p01avf4d10
+COGNITO_USER_POOL_ID=[YOUR_USER_POOL_ID]
+COGNITO_CLIENT_ID=[YOUR_CLIENT_ID]
 # COGNITO_CLIENT_SECRET= (only if your app client has a secret)
 ```
 
