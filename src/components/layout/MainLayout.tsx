@@ -27,7 +27,6 @@ export function MainLayout({ children }: MainLayoutProps) {
         <Footer />
       </ErrorBoundary>
       <ChatWidget />
-      <ChatWidget />
     </div>
   );
 }

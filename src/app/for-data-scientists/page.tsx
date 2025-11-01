@@ -204,7 +204,7 @@ export default function ForDataScientistsPage() {
                 className="bg-gradient-to-r from-blue-600 to-purple-600"
                 asChild
               >
-                <Link href="/library">
+                <Link href="/prompts">
                   Browse Prompts
                   <Icons.arrowRight className="ml-2 h-4 w-4" />
                 </Link>

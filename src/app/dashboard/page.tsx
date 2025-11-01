@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -14,25 +13,11 @@ import { Icons } from '@/lib/icons';
 import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
-  const user = session?.user;
-
-  // If not logged in, show loading or redirect
-  if (!session) {
-    return (
-      <MainLayout>
-        <div className="container py-20 text-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </MainLayout>
-    );
-  }
-
   // Get prompts for stats
   const allPrompts = getSeedPromptsWithTimestamps();
 
   // Real user stats - starts at zero
-  // TODO: Fetch these from user's actual activity in MongoDB
+  // TODO: Fetch these from user's actual activity in MongoDB using gamification API
   const stats = {
     promptsUsed: 0,
     totalPrompts: allPrompts.length,
@@ -41,6 +26,14 @@ export default function DashboardPage() {
     totalPatterns: 15,
     streak: 0, // TODO: Calculate from user's login history
     totalViews: 0,
+  };
+
+  // Placeholder user data - will be replaced with real data from gamification API
+  const user = {
+    name: 'Explorer',
+    level: 1,
+    xp: 0,
+    xpToNextLevel: 500,
   };
 
   // Calculate XP percentage

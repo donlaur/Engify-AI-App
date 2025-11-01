@@ -13,7 +13,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
 import { Icons } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +28,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
+interface HeaderProps {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  } | null;
+}
+
 const navigationLinks = [
   { href: '/patterns', label: 'Patterns' },
   { href: '/prompts', label: 'Library' },
@@ -35,10 +43,8 @@ const navigationLinks = [
   { href: '/workbench', label: 'Workbench' },
 ];
 
-export function Header() {
+export function Header({ user }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: session, status } = useSession();
-  const user = session?.user;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
