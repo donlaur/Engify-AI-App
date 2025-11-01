@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import { ACHIEVEMENTS } from '@/lib/gamification/achievements';
 
 interface GamificationStats {
   xp: number;
@@ -35,8 +36,8 @@ export default function DashboardPage() {
   const allPrompts = getSeedPromptsWithTimestamps();
 
   // Real gamification data from API
-  const [gamificationData, setGamificationData] = useState<GamificationStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [gamificationData, setGamificationData] =
+    useState<GamificationStats | null>(null);
 
   useEffect(() => {
     async function fetchGamificationStats() {
@@ -48,8 +49,6 @@ export default function DashboardPage() {
         }
       } catch (error) {
         console.error('Failed to fetch gamification stats:', error);
-      } finally {
-        setLoading(false);
       }
     }
 
@@ -57,38 +56,43 @@ export default function DashboardPage() {
   }, []);
 
   // Use real data if available, otherwise show defaults
-  const stats = gamificationData ? {
-    promptsUsed: gamificationData.stats.promptsUsed,
-    totalPrompts: allPrompts.length,
-    favoritePrompts: gamificationData.stats.favoritesReceived,
-    patternsLearned: gamificationData.stats.patternsCompleted,
-    totalPatterns: 15,
-    streak: gamificationData.dailyStreak,
-    totalViews: 0,
-  } : {
-    promptsUsed: 0,
-    totalPrompts: allPrompts.length,
-    favoritePrompts: 0,
-    patternsLearned: 0,
-    totalPatterns: 15,
-    streak: 0,
-    totalViews: 0,
-  };
+  const stats = gamificationData
+    ? {
+        promptsUsed: gamificationData.stats.promptsUsed,
+        totalPrompts: allPrompts.length,
+        favoritePrompts: gamificationData.stats.favoritesReceived,
+        patternsLearned: gamificationData.stats.patternsCompleted,
+        totalPatterns: 15,
+        streak: gamificationData.dailyStreak,
+        totalViews: 0,
+      }
+    : {
+        promptsUsed: 0,
+        totalPrompts: allPrompts.length,
+        favoritePrompts: 0,
+        patternsLearned: 0,
+        totalPatterns: 15,
+        streak: 0,
+        totalViews: 0,
+      };
 
-  const user = gamificationData ? {
-    name: 'Explorer',
-    level: gamificationData.level,
-    xp: gamificationData.xp,
-    xpToNextLevel: gamificationData.xpForNextLevel,
-  } : {
-    name: 'Explorer',
-    level: 1,
-    xp: 0,
-    xpToNextLevel: 500,
-  };
+  const user = gamificationData
+    ? {
+        name: 'Explorer',
+        level: gamificationData.level,
+        xp: gamificationData.xp,
+        xpToNextLevel: gamificationData.xpForNextLevel,
+      }
+    : {
+        name: 'Explorer',
+        level: 1,
+        xp: 0,
+        xpToNextLevel: 500,
+      };
 
   // Calculate XP percentage
-  const xpPercentage = user.xpToNextLevel > 0 ? (user.xp / user.xpToNextLevel) * 100 : 0;
+  const xpPercentage =
+    user.xpToNextLevel > 0 ? (user.xp / user.xpToNextLevel) * 100 : 0;
 
   // Recent activity - will populate as user uses the app
   const recentActivity: Array<{
@@ -267,36 +271,44 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {recentActivity.map((activity) => {
-                    const Icon = getActivityIcon(activity.type);
-                    const colorClass = getActivityColor(activity.type);
+                {recentActivity.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentActivity.map((activity) => {
+                      const Icon = getActivityIcon(activity.type);
+                      const colorClass = getActivityColor(activity.type);
 
-                    return (
-                      <div
-                        key={activity.id}
-                        className="flex items-start gap-4 border-b pb-4 last:border-0 last:pb-0"
-                      >
-                        <div className={`mt-1 ${colorClass}`}>
-                          <Icon className="h-5 w-5" />
+                      return (
+                        <div
+                          key={activity.id}
+                          className="flex items-start gap-4 border-b pb-4 last:border-0 last:pb-0"
+                        >
+                          <div className={`mt-1 ${colorClass}`}>
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <p className="text-sm font-medium leading-none">
+                              {activity.type === 'used' && 'Used prompt'}
+                              {activity.type === 'favorited' && 'Favorited'}
+                              {activity.type === 'learned' && 'Learned'}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {activity.promptTitle}
+                            </p>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {formatTimestamp(activity.timestamp)}
+                          </div>
                         </div>
-                        <div className="flex-1 space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            {activity.type === 'used' && 'Used prompt'}
-                            {activity.type === 'favorited' && 'Favorited'}
-                            {activity.type === 'learned' && 'Learned'}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {activity.promptTitle}
-                          </p>
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {formatTimestamp(activity.timestamp)}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      No recent activity - start exploring prompts!
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -356,41 +368,59 @@ export default function DashboardPage() {
                 <CardTitle>Recent Achievements</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
-                    <Icons.trophy className="h-5 w-5 text-yellow-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Week Warrior</p>
-                    <p className="text-xs text-muted-foreground">
-                      7-day streak!
-                    </p>
-                  </div>
-                </div>
+                {gamificationData &&
+                gamificationData.achievements &&
+                gamificationData.achievements.length > 0 ? (
+                  gamificationData.achievements
+                    .slice(0, 3)
+                    .map((achievementId: string) => {
+                      const achievement = ACHIEVEMENTS.find(
+                        (a) => a.id === achievementId
+                      );
+                      if (!achievement) return null;
 
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                    <Icons.zap className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Power User</p>
-                    <p className="text-xs text-muted-foreground">
-                      20+ prompts used
-                    </p>
-                  </div>
-                </div>
+                      const iconBgMap: Record<string, string> = {
+                        common: 'bg-gray-100',
+                        rare: 'bg-blue-100',
+                        epic: 'bg-purple-100',
+                        legendary: 'bg-yellow-100',
+                      };
 
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-                    <Icons.sparkles className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Pattern Explorer</p>
-                    <p className="text-xs text-muted-foreground">
-                      5 patterns learned
+                      return (
+                        <div
+                          key={achievementId}
+                          className="flex items-center gap-3"
+                        >
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-full ${iconBgMap[achievement.rarity] || 'bg-gray-100'} text-lg`}
+                          >
+                            {achievement.icon}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">
+                              {achievement.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {achievement.description}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                ) : (
+                  <div className="py-8 text-center">
+                    <p className="mb-4 text-sm text-muted-foreground">
+                      No achievements yet - start exploring prompts to unlock
+                      badges!
                     </p>
+                    <Link
+                      href="/prompts"
+                      className="text-primary hover:underline"
+                    >
+                      Browse Prompts
+                    </Link>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>
