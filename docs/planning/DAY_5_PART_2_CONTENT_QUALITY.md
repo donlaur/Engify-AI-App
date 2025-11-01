@@ -20,7 +20,11 @@ Status Legend: ✅ done · ⚠️ not yet finished
 
 - ✅ Design comprehensive tag system (roles, categories, patterns, skills, use-cases)
 - ✅ Create Zod schemas for tag validation in `src/lib/db/schemas/tags.ts`
-- ⚠️ Add MongoDB indexes on tags array for filtering
+- ✅ Add MongoDB indexes on tags array for filtering (COMPLETE)
+  - ✅ Created index creation script (`scripts/db/create-prompt-indexes.ts`)
+  - ✅ Indexes verified: tags, category, role, pattern, compound indexes
+  - ✅ Text search index for title/description/content
+  - ✅ All indexes created successfully
 - ✅ Define tagging rules: 4-8 tags per prompt (1 role + 1 category + 2-3 patterns/skills)
 
 More detail: [Tag Taxonomy Design](../content/TAG_TAXONOMY.md)
