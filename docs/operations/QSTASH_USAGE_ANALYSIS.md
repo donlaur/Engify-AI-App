@@ -41,7 +41,7 @@ QSTASH_WEBHOOK_URL=https://engify.ai/api/webhooks/qstash  # Optional
 
 ### Option 1: New Account for Redis (Recommended)
 
-- Create new Upstash account with `donlaur@engify.ai`
+- Create new Upstash account with your email
 - Use for **Redis only** (auth cache)
 - Keep existing account for **QStash** (email processing)
 
@@ -91,15 +91,15 @@ QSTASH_WEBHOOK_URL=https://engify.ai/api/webhooks/qstash  # Optional
 
 ## Decision Matrix
 
-| Scenario           | QStash Status    | Redis Status                      | Cost          | Complexity          |
-| ------------------ | ---------------- | --------------------------------- | ------------- | ------------------- |
-| **Keep both**      | Existing account | New account (`donlaur@engify.ai`) | $0/month      | Medium (2 accounts) |
-| **Disable QStash** | Remove           | New account (`donlaur@engify.ai`) | $0/month      | Low (1 account)     |
-| **Pay for both**   | Existing account | Same account upgrade              | ~$10-20/month | Low (1 account)     |
+| Scenario           | QStash Status    | Redis Status             | Cost          | Complexity          |
+| ------------------ | ---------------- | ------------------------ | ------------- | ------------------- |
+| **Keep both**      | Existing account | New account (your email) | $0/month      | Medium (2 accounts) |
+| **Disable QStash** | Remove           | New account (your email) | $0/month      | Low (1 account)     |
+| **Pay for both**   | Existing account | Same account upgrade     | ~$10-20/month | Low (1 account)     |
 
 ## Recommendation
 
-**Create new Upstash account (`donlaur@engify.ai`) for Redis only:**
+**Create new Upstash account for Redis only:**
 
 1. ✅ Keep existing QStash (used for SendGrid webhooks)
 2. ✅ Get free Redis tier for auth cache
@@ -108,7 +108,7 @@ QSTASH_WEBHOOK_URL=https://engify.ai/api/webhooks/qstash  # Optional
 
 **Next Steps:**
 
-1. Create Upstash account with `donlaur@engify.ai`
+1. Create Upstash account with your email
 2. Create Redis database (free tier)
 3. Add to Vercel integration
 4. Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` env vars

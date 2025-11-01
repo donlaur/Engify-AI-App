@@ -16,12 +16,12 @@
 **OR use this temporary MongoDB for demo**:
 
 ```
-mongodb+srv://demo:demo123@cluster0.xxxxx.mongodb.net/engify?retryWrites=true&w=majority
+mongodb+srv://[username]:[password]@[cluster].mongodb.net/engify?retryWrites=true&w=majority
 ```
 
 ### Step 2: Add Environment Variables to Vercel
 
-1. **Go to**: https://vercel.com/donlaurs-projects/engify-ai-app/settings/environment-variables
+1. **Go to**: Vercel Dashboard → Your Project → Settings → Environment Variables
 
 2. **Add these variables** (click "Add" for each):
 
@@ -48,7 +48,7 @@ Value: production
 
 ### Step 3: Redeploy
 
-1. Go to: https://vercel.com/donlaurs-projects/engify-ai-app
+1. Go to: Vercel Dashboard → Your Project
 2. Click "Deployments"
 3. Click "..." on the latest deployment
 4. Click "Redeploy"

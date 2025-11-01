@@ -20,7 +20,7 @@
 
 1. **AWS Console** → Cognito → User Pools → "User pool - dz9-no"
 2. **User management** → **Users**
-3. **Click on your user** (`donlaur@engify.ai`)
+3. **Click on your user** ([your-email@example.com])
 4. **Click "Actions"** dropdown (top right)
 5. **Click "Delete user"** (last option in dropdown)
 6. **Confirm deletion**
@@ -29,8 +29,8 @@
 
 1. **Same page** → Click **"Create user"** button (top right)
 2. **User creation form:**
-   - **Username:** `donlaur@engify.ai` (or leave blank to use email)
-   - **Email:** `donlaur@engify.ai`
+   - **Username:** [your-email@example.com] (or leave blank to use email)
+   - **Email:** [your-email@example.com]
    - **Email verified:** ✅ Check this box
    - **Password:** Enter your desired password
    - **Temporary password:** ❌ Uncheck (leave unchecked if you want permanent password)
@@ -40,7 +40,7 @@
 
 If you created with a temporary password:
 
-1. **Click on the new user** (`donlaur@engify.ai`)
+1. **Click on the new user** ([your-email@example.com])
 2. **Click "Actions"** → **"Set password"** (should be available now)
 3. **Enter your password**
 4. **Mark as permanent:** ✅
@@ -49,7 +49,7 @@ If you created with a temporary password:
 ### Step 4: Test Login
 
 1. Go to `https://engify.ai/login`
-2. Email: `donlaur@engify.ai`
+2. Email: [your-email@example.com]
 3. Password: (your password)
 4. Should login successfully!
 
