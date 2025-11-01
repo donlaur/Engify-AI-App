@@ -176,21 +176,26 @@ export const authOptions: NextAuthConfig = {
       // Log redirect attempts for debugging
       console.log('🔀 [REDIRECT] url:', url, 'baseUrl:', baseUrl);
       
+      // Normalize URLs to remove www for consistency
+      const normalizeUrl = (u: string) => u.replace('://www.', '://');
+      const normalizedUrl = normalizeUrl(url);
+      const normalizedBaseUrl = normalizeUrl(baseUrl);
+      
       // If url is relative, make it absolute with baseUrl
       if (url.startsWith('/')) {
-        const redirectUrl = `${baseUrl}${url}`;
+        const redirectUrl = `${normalizedBaseUrl}${url}`;
         console.log('🔀 [REDIRECT] Redirecting to:', redirectUrl);
         return redirectUrl;
       }
       
-      // If url is on the same origin, allow it
-      if (url.startsWith(baseUrl)) {
-        console.log('🔀 [REDIRECT] Same origin redirect to:', url);
-        return url;
+      // If url is on the same origin (after normalization), allow it
+      if (normalizedUrl.startsWith(normalizedBaseUrl)) {
+        console.log('🔀 [REDIRECT] Same origin redirect to:', normalizedUrl);
+        return normalizedUrl;
       }
       
       // Otherwise redirect to dashboard
-      const dashboardUrl = `${baseUrl}/dashboard`;
+      const dashboardUrl = `${normalizedBaseUrl}/dashboard`;
       console.log('🔀 [REDIRECT] Default redirect to:', dashboardUrl);
       return dashboardUrl;
     },
