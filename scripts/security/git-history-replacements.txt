@@ -1,0 +1,12 @@
+# Git History Cleanup - Remove Exposed Secrets
+# This file contains replacements for BFG Repo-Cleaner
+
+# Cognito Client ID (real - must be removed)
+64haaujuedgbhsu9p01avf4d10==>[YOUR_CLIENT_ID]
+
+# Cognito User Pool ID (real - must be removed)
+us-east-1_tsIIjaxYi==>[YOUR_USER_POOL_ID]
+
+# AWS Account ID (real - must be removed)
+8257-6541-9928==>[YOUR_AWS_ACCOUNT_ID]
+
