@@ -96,54 +96,6 @@ export default async function Home() {
               Transform your team&apos;s capabilities with Engify.ai
             </p>
 
-            {/* MCP Section */}
-            <div className="container py-16">
-              <div className="mx-auto max-w-4xl">
-                <div className="mb-12 text-center">
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700 dark:bg-purple-900 dark:text-purple-200">
-                    <Icons.zap className="h-4 w-4" />
-                    Model Context Protocol
-                  </div>
-                  <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                    Powered by MCP
-                  </h2>
-                  <p className="text-xl text-muted-foreground">
-                    We use the Model Context Protocol to connect AI to your
-                    tools, data, and workflows
-                  </p>
-                </div>
-                <div className="grid gap-6 md:grid-cols-3">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <Icons.alertTriangle className="mb-4 h-8 w-8 text-purple-600" />
-                      <h3 className="mb-2 font-semibold">Sentry Integration</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Query errors, analyze trends, get AI-powered fixes
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="pt-6">
-                      <Icons.database className="mb-4 h-8 w-8 text-blue-600" />
-                      <h3 className="mb-2 font-semibold">Database Access</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Natural language queries over our prompt library
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="pt-6">
-                      <Icons.code className="mb-4 h-8 w-8 text-green-600" />
-                      <h3 className="mb-2 font-semibold">GitHub Integration</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Create issues, review PRs, all through AI
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </div>
-
             <div className="flex flex-col justify-center gap-4 pt-8">
               <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-gray-900/80 to-black/80 p-8 backdrop-blur-sm">
                 <h3 className="mb-2 text-2xl font-bold text-white">
