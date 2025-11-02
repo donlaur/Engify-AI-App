@@ -112,13 +112,14 @@ Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUD
   - Logs user out and redirects to homepage
   - Shows loading spinner during logout
 
-- [ ] **#5 - Hardcoded/Inconsistent Stats (DRY VIOLATION)** ⚠️ IN PROGRESS
-  - Create `/api/stats` endpoint with MongoDB queries
-  - Return all counts (prompts, patterns, breakdowns)
-  - Implement ISR with 1-hour revalidation
-  - Add QStash webhook for on-demand revalidation
-  - Remove ALL hardcoded numbers (76, 23, 113, etc.)
-  - Update all components to use `/api/stats`
+- [x] **#5 - Hardcoded/Inconsistent Stats (DRY VIOLATION)** ✅ DONE
+  - Created `/api/stats` endpoint with MongoDB queries + role/category breakdowns
+  - Added Upstash Redis caching (1 hour TTL)
+  - Implemented ISR with 1-hour revalidation on homepage
+  - Added QStash webhook endpoint `/api/stats/invalidate` for cache busting
+  - Removed ALL hardcoded numbers from homepage (76, 23, 113, etc.)
+  - Homepage now pulls from single source of truth
+  - Rate limiting added (10/min for stats, 5/min for webhook)
 
 - [x] **#8 - CTA Buttons Don't Link** ✅ DONE (Already working)
   - "Browse Prompt Playbook" → `/prompts` ✓
