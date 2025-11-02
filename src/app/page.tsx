@@ -43,14 +43,17 @@ const features = [
 // Fetch stats from API (with ISR for performance)
 async function getStats() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/stats`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
-    
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/stats`,
+      {
+        next: { revalidate: 3600 }, // Revalidate every hour
+      }
+    );
+
     if (!res.ok) {
       throw new Error('Failed to fetch stats');
     }
-    
+
     return await res.json();
   } catch (error) {
     console.error('Failed to fetch stats:', error);
@@ -69,8 +72,14 @@ export default async function Home() {
 
   // Build stats for display
   const stats = [
-    { label: 'Expert Prompts', value: `${data.prompts?.total || data.stats?.prompts || 76}+` },
-    { label: 'Proven Patterns', value: `${data.patterns?.total || data.stats?.patterns || 23}` },
+    {
+      label: 'Expert Prompts',
+      value: `${data.prompts?.total || data.stats?.prompts || 76}+`,
+    },
+    {
+      label: 'Proven Patterns',
+      value: `${data.patterns?.total || data.stats?.patterns || 23}`,
+    },
     { label: 'AI Providers', value: '4' },
     { label: 'Starting At', value: 'Free Beta' },
   ];
@@ -108,10 +117,10 @@ export default async function Home() {
     <MainLayout>
       {/* Hero Section - Vibrant Gradient like Vibe Code Careers */}
       <section className="relative overflow-hidden bg-gradient-to-br from-red-500 via-blue-600 via-purple-600 to-teal-500 dark:from-red-600 dark:via-blue-700 dark:via-purple-700 dark:to-teal-600">
-        {/* Animated background gradient overlay */}
-        <div className="absolute inset-0 bg-black/20" />
+        {/* Animated background gradient overlay - BEHIND content, not blocking clicks */}
+        <div className="absolute inset-0 -z-10 bg-black/20" />
 
-        <div className="container relative py-24 md:py-32">
+        <div className="container relative z-10 py-24 md:py-32">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
             <Badge
               variant="secondary"
