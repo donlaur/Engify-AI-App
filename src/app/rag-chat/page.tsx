@@ -204,7 +204,7 @@ export default function RAGChatPage() {
                     RAG-Powered
                   </Badge>
                   <Badge variant="secondary" className="text-xs">
-                    Beta
+                    Early Access
                   </Badge>
                 </div>
               </div>

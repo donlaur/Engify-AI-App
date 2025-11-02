@@ -144,7 +144,7 @@ export default async function Home() {
                   asChild
                 >
                   <Link href="/signup">
-                    {allowSignup ? 'Start Free' : 'Request Beta Access'}
+                    {allowSignup ? 'Start Free' : 'Request Early Access'}
                   </Link>
                 </Button>
               </div>
@@ -383,7 +383,7 @@ export default async function Home() {
                 asChild
               >
                 <Link href="/signup">
-                  {allowSignup ? 'Start Learning Now' : 'Request Beta Access'}
+                  {allowSignup ? 'Start Learning Now' : 'Request Early Access'}
                   <Icons.arrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
