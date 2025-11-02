@@ -162,10 +162,42 @@ Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUD
   - Resume download button fixed
   - Footer "Built by Donnie Laur" links to /hireme
 
-- [ ] **#12 - Homepage Stats Breakdown** (2 hours)
+- [ ] **#12 - Homepage Stats Breakdown** (DEFERRED)
   - Add stats section with breakdown by role/category/persona
   - Pull from `/api/stats` endpoint (Issue #5)
   - Use shadcn/ui cards with icons and colors
+
+---
+
+### 1.4 QA: /prompts Page (Prompt Library)
+
+**Status:** ⚠️ In Progress  
+**Priority:** Critical - Core value proposition, high-traffic page
+
+**Pre-QA Code Review:**
+
+- ✅ Fake views/ratings already removed from `PromptCard`
+- ✅ Real MongoDB data fetched server-side
+- ✅ Client-side filtering (search, category, role)
+- ✅ Copy and favorite functionality implemented
+
+**User Testing Checklist:**
+
+| Feature              | Status | Notes                                |
+| -------------------- | ------ | ------------------------------------ |
+| Search functionality | [ ]    | Type queries, verify results         |
+| Category filters     | [ ]    | Click each filter, verify filtering  |
+| Role filters         | [ ]    | Click each filter, verify filtering  |
+| Prompt card click    | [ ]    | Opens modal with full content        |
+| Copy button          | [ ]    | Clipboard works, shows toast         |
+| Favorite button      | [ ]    | Heart icon toggles, shows toast      |
+| Mobile responsive    | [ ]    | Cards stack properly on mobile       |
+| No fake data         | [ ]    | Views/ratings removed (already done) |
+| Text readability     | [ ]    | Contrast good in light/dark mode     |
+| Empty state          | [ ]    | Clear filters button works           |
+
+**Issues Found:**
+_(User to document issues here during testing)_
 
 ---
 
