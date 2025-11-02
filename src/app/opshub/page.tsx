@@ -2,11 +2,12 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
 import { isAdminMFAEnforced } from '@/lib/env';
-import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
-import { UserManagement } from '@/components/admin/UserManagement';
-import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
-import { SettingsPanel } from '@/components/admin/SettingsPanel';
 import { ContentManagementCMS } from '@/components/admin/ContentManagementCMS';
+// Temporarily disabled - need to fix API routes
+// import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
+// import { UserManagement } from '@/components/admin/UserManagement';
+// import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
+// import { SettingsPanel } from '@/components/admin/SettingsPanel';
 // import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
 // import { AffiliateLinkManagement } from '@/components/admin/AffiliateLinkManagement';
 
@@ -156,6 +157,7 @@ export default async function OpsHubPage() {
           <ContentManagementCMS />
         </section>
 
+        {/* Temporarily disabled - need to fix API routes
         <section className="rounded-lg border bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold">Content Review Queue</h2>
           <ContentReviewQueue />
@@ -175,6 +177,7 @@ export default async function OpsHubPage() {
           <h2 className="mb-3 text-lg font-semibold">System Settings</h2>
           <SettingsPanel />
         </section>
+        */}
 
         {/* Testing CMS - ContentQualityPanel and AffiliateLinkManagement disabled
         <section className="rounded-lg border bg-white p-4">
