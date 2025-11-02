@@ -14,7 +14,7 @@ export default function HireMePage() {
     { name: 'Full-Stack Development', icon: Icons.code, level: 'Expert' },
     { name: 'Next.js + React', icon: Icons.zap, level: 'Expert' },
     { name: 'AI/ML Integration', icon: Icons.sparkles, level: 'Advanced' },
-    { name: 'Cloud Architecture (AWS)', icon: Icons.cloud, level: 'Advanced' },
+    { name: 'Cloud Architecture (AWS)', icon: Icons.server, level: 'Advanced' },
     { name: 'MongoDB + PostgreSQL', icon: Icons.database, level: 'Expert' },
     { name: 'TypeScript', icon: Icons.code, level: 'Expert' },
   ];
