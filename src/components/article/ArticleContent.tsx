@@ -1,3 +1,12 @@
+/**
+ * ArticleContent Component
+ * 
+ * Ultra-minimal server component for rendering article HTML.
+ * No client-side code, no hooks, no interactivity.
+ * 
+ * Fixed: React error #130 - removed all client-side logic
+ */
+
 interface ArticleContentProps {
   html: string;
 }
