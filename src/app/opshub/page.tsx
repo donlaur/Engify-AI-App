@@ -7,6 +7,7 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 import { SettingsPanel } from '@/components/admin/SettingsPanel';
 import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
+import { AffiliateLinkManagement } from '@/components/admin/AffiliateLinkManagement';
 import { isAdminMFAEnforced } from '@/lib/env';
 
 export default async function OpsHubPage() {
@@ -163,6 +164,10 @@ export default async function OpsHubPage() {
 
         <section className="rounded-lg border bg-white p-4">
           <SettingsPanel />
+        </section>
+
+        <section className="rounded-lg border bg-white p-4">
+          <AffiliateLinkManagement />
         </section>
       </div>
     </div>
