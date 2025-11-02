@@ -19,9 +19,6 @@
 
 /* eslint-disable no-console */
 
-import { config } from 'dotenv';
-config({ path: '.env.local' });
-
 import { MongoClient } from 'mongodb';
 import readline from 'readline';
 
