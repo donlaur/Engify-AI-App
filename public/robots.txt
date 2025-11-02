@@ -3,6 +3,9 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /dashboard/
+Disallow: /opshub/
+Disallow: /admin/
+Disallow: /manager/
 
 # Sitemaps
 Sitemap: https://engify.ai/sitemap.xml
