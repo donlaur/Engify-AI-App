@@ -35,6 +35,7 @@ export default function DashboardPage() {
   const [gamificationData, setGamificationData] =
     useState<GamificationStats | null>(null);
   const [totalPrompts, setTotalPrompts] = useState(0);
+  const [totalPatterns, setTotalPatterns] = useState(0);
 
   useEffect(() => {
     async function fetchGamificationStats() {
@@ -55,6 +56,7 @@ export default function DashboardPage() {
         if (response.ok) {
           const data = await response.json();
           setTotalPrompts(data.stats?.prompts || 0);
+          setTotalPatterns(data.stats?.patterns || 0);
         }
       } catch (error) {
         console.error('Failed to fetch stats:', error);
@@ -72,7 +74,7 @@ export default function DashboardPage() {
         totalPrompts,
         favoritePrompts: gamificationData.stats.favoritesReceived,
         patternsLearned: gamificationData.stats.patternsCompleted,
-        totalPatterns: 15,
+        totalPatterns,
         streak: gamificationData.dailyStreak,
         totalViews: 0,
       }
@@ -81,7 +83,7 @@ export default function DashboardPage() {
         totalPrompts,
         favoritePrompts: 0,
         patternsLearned: 0,
-        totalPatterns: 15,
+        totalPatterns,
         streak: 0,
         totalViews: 0,
       };
