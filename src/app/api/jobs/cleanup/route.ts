@@ -1,14 +1,9 @@
 /**
- * Cleanup Tasks Job
- *
- * Runs cleanup tasks:
- * - Expired MFA codes
- * - Old audit logs (optional)
- * - Temporary files
- *
- * POST /api/jobs/cleanup
- *
- * Called by QStash scheduled job (daily)
+ * AI Summary: Cleanup Tasks Job - Runs daily cleanup of expired data
+ * Protected endpoint requiring cron authentication. Cleans up expired MFA codes,
+ * old audit logs (optional), and temporary files. Called by QStash scheduled job daily.
+ * Part of Day 7 Audit #6 medium priority security improvements.
+ * Last updated: 2025-11-02
  */
 
 import { NextRequest, NextResponse } from 'next/server';

@@ -1,10 +1,9 @@
 /**
- * Prompt Library Page
- *
- * Browse and search prompts
- * Filter by category and role
- *
- * Performance: Server-side rendering with MongoDB data
+ * AI Summary: Prompt Library Page - Browse and filter prompts by category and role
+ * Server-side rendered page with dynamic SEO metadata. Fetches prompts from MongoDB,
+ * displays stats (total prompts, categories, roles), and provides filtering/search.
+ * Includes JSON-LD structured data for SEO. Part of Day 7 QA improvements.
+ * Last updated: 2025-11-02
  */
 
 import type { Metadata } from 'next';
