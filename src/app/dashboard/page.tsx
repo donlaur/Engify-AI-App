@@ -36,6 +36,7 @@ export default function DashboardPage() {
     useState<GamificationStats | null>(null);
   const [totalPrompts, setTotalPrompts] = useState(0);
   const [totalPatterns, setTotalPatterns] = useState(0);
+  const [favoritesCount, setFavoritesCount] = useState(0);
 
   useEffect(() => {
     async function fetchGamificationStats() {
@@ -63,8 +64,21 @@ export default function DashboardPage() {
       }
     }
 
+    async function fetchFavorites() {
+      try {
+        const response = await fetch('/api/favorites');
+        if (response.ok) {
+          const data = await response.json();
+          setFavoritesCount(data.count || 0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch favorites:', error);
+      }
+    }
+
     fetchGamificationStats();
     fetchStats();
+    fetchFavorites();
   }, []);
 
   // Use real data if available, otherwise show defaults
@@ -72,7 +86,7 @@ export default function DashboardPage() {
     ? {
         promptsUsed: gamificationData.stats.promptsUsed,
         totalPrompts,
-        favoritePrompts: gamificationData.stats.favoritesReceived,
+        favoritePrompts: favoritesCount, // Use real favorites count from API
         patternsLearned: gamificationData.stats.patternsCompleted,
         totalPatterns,
         streak: gamificationData.dailyStreak,
