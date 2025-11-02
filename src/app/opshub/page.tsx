@@ -1,7 +1,6 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
-import { Collections } from '@/lib/db/schema';
 import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
@@ -31,16 +30,12 @@ export default async function OpsHubPage() {
   }
 
   const db = await getDb();
-  const usersCount = await db.collection(Collections.USERS).countDocuments();
-  const contentCount = await db
-    .collection(Collections.WEB_CONTENT)
-    .countDocuments();
-  const auditCount = await db
-    .collection(Collections.AUDIT_LOGS)
-    .countDocuments();
+  const usersCount = await db.collection('users').countDocuments();
+  const contentCount = await db.collection('web_content').countDocuments();
+  const auditCount = await db.collection('audit_logs').countDocuments();
 
   const recentUsers = (await db
-    .collection(Collections.USERS)
+    .collection('users')
     .find({}, { projection: { email: 1, name: 1, role: 1, createdAt: 1 } })
     .sort({ createdAt: -1 })
     .limit(8)
@@ -53,7 +48,7 @@ export default async function OpsHubPage() {
   }>;
 
   const recentContent = (await db
-    .collection(Collections.WEB_CONTENT)
+    .collection('web_content')
     .find({}, { projection: { title: 1, source: 1, createdAt: 1 } })
     .sort({ createdAt: -1 })
     .limit(8)

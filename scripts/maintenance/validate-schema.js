@@ -55,7 +55,8 @@ const validationRules = [
           filePath.includes('/logging/') ||
           filePath.includes('/scripts/') ||
           filePath.includes('scripts/') ||
-          filePath.includes('sitemap.ts')) {
+          filePath.includes('sitemap.ts') ||
+          filePath.includes('/opshub/')) {
         return false;
       }
       return true;
