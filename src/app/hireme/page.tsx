@@ -12,44 +12,56 @@ import Link from 'next/link';
 export default function HireMePage() {
   const skills = [
     { name: 'Engineering Leadership', icon: Icons.users, level: 'Expert' },
-    { name: 'AI Transformation', icon: Icons.sparkles, level: 'Expert' },
-    { name: 'SaaS Modernization', icon: Icons.zap, level: 'Expert' },
-    { name: 'Team Building', icon: Icons.target, level: 'Expert' },
-    { name: 'Process Excellence', icon: Icons.checkCircle, level: 'Expert' },
-    { name: 'Strategic Planning', icon: Icons.trendingUp, level: 'Expert' },
+    {
+      name: 'AI Transformation & Training',
+      icon: Icons.sparkles,
+      level: 'Expert',
+    },
+    { name: 'Full-Stack Development', icon: Icons.code, level: 'Expert' },
+    { name: 'Team Building & Coaching', icon: Icons.target, level: 'Expert' },
+    {
+      name: 'Modern Tech Stack (Next.js, TypeScript)',
+      icon: Icons.zap,
+      level: 'Expert',
+    },
+    {
+      name: 'Process & Workflow Design',
+      icon: Icons.checkCircle,
+      level: 'Expert',
+    },
   ];
 
   const achievements = [
     {
-      title: 'AI Transformation Leadership',
+      title: 'AI Enablement & Team Training',
       description:
-        'Led engineering teams through early-stage AI adoption, implementing copilots and developer-assist tools to boost productivity and code quality',
+        'Led engineering teams through early-stage AI adoption, running workshops and implementing copilots (ChatGPT, Claude, Cursor, Windsurf) to boost productivity, code quality, and developer satisfaction',
       metrics: [
-        'ChatGPT/Claude/Cursor adoption',
+        'AI copilot adoption',
         'Custom GPT development',
-        'AI workflow integration',
-        'Team workshops',
+        'Hands-on workshops',
+        'Workflow integration',
       ],
     },
     {
-      title: 'Process as a Product',
+      title: 'Hands-On Engineering Leadership',
       description:
-        'Designed career frameworks, standardized Agile rituals, and built transparent growth paths that reduced cycle time by 20% and eliminated 10 hours of redundant work per sprint',
+        'Built Engify.ai from scratch in 7 days while establishing career frameworks, SDLC optimization, and transparent growth paths that reduced cycle time by 20% and eliminated redundant work',
       metrics: [
+        'Production SaaS platform',
         'Career ladders',
-        'SDLC optimization',
-        'Tech debt prioritization',
+        'Process improvement',
         'DORA metrics',
       ],
     },
     {
-      title: 'Enterprise Platform Development',
+      title: 'Modern Tech Stack Expertise',
       description:
-        'Built production-ready SaaS platforms with enterprise standards: RBAC, audit logging, multi-tenant architecture, and comprehensive testing',
+        'Expert in Next.js, TypeScript, React, Node.js, MongoDB, and AWS. Built enterprise-grade systems with RBAC, audit logging, multi-tenant architecture, and comprehensive testing',
       metrics: [
-        'Engify.ai (7 days)',
+        'Next.js 15 + TypeScript',
         'Enterprise architecture',
-        'Security-first',
+        'Security & compliance',
         'Scalable systems',
       ],
     },
@@ -79,10 +91,10 @@ export default function HireMePage() {
             </h1>
 
             <p className="mx-auto max-w-2xl text-xl text-gray-200">
-              Engineering Manager · AI Transformation Leader · SaaS
-              Modernization
+              Engineering Manager · AI Enablement Coach · Hands-On Technical
+              Leader
               <br />
-              Building high-performance teams that ship production-ready systems
+              Building teams that leverage AI to ship production-ready systems
               at startup speed
             </p>
 
@@ -198,8 +210,9 @@ export default function HireMePage() {
             <h3 className="text-2xl font-bold">Building in Public</h3>
             <p className="mx-auto max-w-2xl text-muted-foreground">
               This entire platform (Engify.ai) was built in 7 days using
-              AI-augmented development. See the code, follow the commits, learn
-              how modern teams ship fast.
+              AI-augmented development with Claude, Cursor, and modern tooling.
+              See the code, follow the commits, and learn how AI can amplify
+              your team&apos;s capabilities.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button variant="default" asChild>
@@ -231,9 +244,9 @@ export default function HireMePage() {
               Let&apos;s Build Something Amazing
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-              Looking for an Engineering Manager or Director who can build
-              high-performance teams, drive AI adoption, and ship
-              production-ready systems? Let&apos;s talk.
+              Looking for a hands-on Engineering Manager who can build teams,
+              teach AI workflows, and ship production-ready systems? Let&apos;s
+              talk.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" asChild>
