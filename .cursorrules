@@ -136,6 +136,10 @@ type(scope): description
 - ❌ NO mixing server/client components incorrectly
 - ❌ NO committing commented-out code
 - ❌ NO TODO comments without tickets
+- ❌ NO mock data in production code (real data or empty states)
+- ❌ NO Server Components with event handlers (use Client Components)
+- ❌ NO unprotected API routes (always check auth/RBAC)
+- ❌ NO hardcoded stats (fetch from `/api/stats` or database)
 
 ## Progressive Enhancement Philosophy
 1. Start with TypeScript files (fast iteration)
@@ -151,9 +155,67 @@ type(scope): description
 4. Will this scale?
 5. Is this secure?
 
+## Day 7 Patterns & Learnings
+
+### Pattern-Based Bug Fixing
+When fixing a bug, always:
+1. Identify the pattern (not just the symptom)
+2. Search entire codebase for same pattern
+3. Fix all instances at once
+4. Document in audit report
+5. Add prevention (pre-commit hook, lint rule, docs)
+
+See: `docs/testing/PATTERN_AUDIT_DAY7.md`
+
+### Mock Data Policy
+- Zero mock data in production code
+- Real data or proper empty states
+- Start metrics at 0, not hardcoded
+- All stats from `/api/stats` endpoint (single source of truth)
+- Document all data sources
+
+See: `docs/development/ADR/ADR-009-mock-data-removal.md`
+
+### Server/Client Component Boundaries
+- Server Components by default (for data fetching)
+- Client Components only when needed (hooks, events, browser APIs)
+- Never pass event handlers to Server Components
+- Extract interactive parts to Client Components
+- Use `'use client'` directive explicitly
+
+### Error Handling Standards
+- Wrap all Client Components with Error Boundaries
+- Provide meaningful error messages
+- Log errors to monitoring service
+- Use proper HTTP status codes in API routes
+- Never expose internal errors to clients
+
+### Loading & Empty States
+- Use skeleton loaders (not "Loading...")
+- Consistent empty state component
+- Helpful messages with CTAs
+- Test dark mode for all states
+
+### Authentication & Authorization
+- All API routes must check auth (except public routes)
+- Use RBAC for admin routes (`RBACPresets.requireSuperAdmin()`)
+- Background jobs verify cron secret (`verifyCronRequest()`)
+- Rate limiting on all public endpoints
+- Audit logging for sensitive operations
+
+See: `docs/testing/AUTH_AUDIT_DAY7.md`
+
+### Code Organization
+- Admin CLI consolidated (`pnpm admin <command>`)
+- DRY principles enforced
+- Single source of truth for all data
+- Constants centralized in `/src/lib/constants/`
+
 ## Remember
 - Velocity AND quality, not one or the other
 - Ship fast, but ship production-ready code
 - No ego - delete and start over if needed
 - Code is read more than written
 - Future you will thank present you for good docs
+- Fix patterns, not just instances
+- Real data or empty states, never fake metrics

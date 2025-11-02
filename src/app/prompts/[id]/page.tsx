@@ -1,8 +1,9 @@
 /**
- * Individual Prompt Page
- *
- * SEO-optimized page for each prompt
- * Shareable URLs, Open Graph tags, JSON-LD
+ * AI Summary: Individual Prompt Detail Page - SEO-optimized page for each prompt
+ * Server-side generated (SSG) page with dynamic metadata, Open Graph tags, and
+ * JSON-LD structured data. Includes breadcrumbs, prompt content, copy/share actions,
+ * and related prompts. Part of Day 7 QA improvements.
+ * Last updated: 2025-11-02
  */
 
 import type { Metadata } from 'next';
