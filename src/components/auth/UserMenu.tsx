@@ -61,6 +61,14 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {user.role === 'super_admin' && (
+          <DropdownMenuItem asChild>
+            <Link href="/opshub" className="cursor-pointer">
+              <Icons.shield className="mr-2 h-4 w-4" />
+              OpsHub
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link href="/dashboard" className="cursor-pointer">
             <Icons.home className="mr-2 h-4 w-4" />
