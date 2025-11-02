@@ -22,18 +22,26 @@ export async function GET(
       const db = await getMongoDb();
       const collection = db.collection('prompts');
 
-      // Try finding by id, slug, or _id
+      // Try finding by id, slug, or _id (only active prompts for public access)
       let prompt = await collection.findOne({
-        $or: [
-          { id },
-          { slug: id },
+        $and: [
+          {
+            $or: [
+              { id },
+              { slug: id },
+            ],
+          },
+          { active: { $ne: false } }, // Only show active prompts
         ],
       });
 
       // If not found, try MongoDB ObjectId
       if (!prompt) {
         try {
-          prompt = await collection.findOne({ _id: new ObjectId(id) });
+          prompt = await collection.findOne({
+            _id: new ObjectId(id),
+            active: { $ne: false },
+          });
         } catch {
           // Invalid ObjectId format, continue to fallback
         }
