@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
 import { isAdminMFAEnforced } from '@/lib/env';
 
-// Admin components temporarily disabled for debugging
-// import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
+// Re-enabling admin components one by one
+import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 // import { UserManagement } from '@/components/admin/UserManagement';
 // import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 // import { SettingsPanel } from '@/components/admin/SettingsPanel';
@@ -152,13 +152,13 @@ export default async function OpsHubPage() {
           </div>
         </section>
 
-        {/* Admin components temporarily disabled for debugging
-        <section className="rounded-lg border bg-white p-4">
-          <ContentQualityPanel />
-        </section>
-
         <section className="rounded-lg border bg-white p-4">
           <ContentReviewQueue />
+        </section>
+
+        {/* Still disabled - testing one at a time
+        <section className="rounded-lg border bg-white p-4">
+          <ContentQualityPanel />
         </section>
 
         <section className="rounded-lg border bg-white p-4">
