@@ -80,7 +80,7 @@ export default function ForPMsPage() {
                   Copy Prompt
                 </Button>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/library">
+                  <Link href="/prompts">
                     <Icons.search className="mr-2 h-4 w-4" />
                     More PM Prompts
                   </Link>

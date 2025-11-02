@@ -207,7 +207,7 @@ export default function ForSecurityEngineersPage() {
                 className="bg-gradient-to-r from-red-600 to-orange-600"
                 asChild
               >
-                <Link href="/library">
+                <Link href="/prompts">
                   Browse Security Prompts
                   <Icons.arrowRight className="ml-2 h-4 w-4" />
                 </Link>

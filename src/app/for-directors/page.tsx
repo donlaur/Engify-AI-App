@@ -180,7 +180,7 @@ export default function ForDirectorsPage() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/library">Browse Prompts</Link>
+                <Link href="/prompts">Browse Prompts</Link>
               </Button>
             </div>
           </CardContent>
