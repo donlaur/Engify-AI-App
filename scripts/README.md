@@ -104,6 +104,33 @@ This directory contains utility scripts for development, testing, deployment, an
 
 ### 📊 Data Management Scripts
 
+#### `content/seed-all-content.ts` ⭐ **Primary Seeding Script**
+
+- **Purpose**: Unified content seeding script (DRY approach)
+- **Usage**:
+
+  ```bash
+  # Seed all content types
+  pnpm tsx scripts/content/seed-all-content.ts
+
+  # Seed specific content types only
+  pnpm tsx scripts/content/seed-all-content.ts --only=patterns
+  pnpm tsx scripts/content/seed-all-content.ts --only=patterns,ai-adoption,affiliate
+  ```
+
+- **Features**:
+  - **Patterns**: Merges data from pattern-constants, pattern-details, and prompt-patterns
+  - **AI Adoption Questions**: Seeds educational content for engineering leaders
+  - **Affiliate Links**: Seeds affiliate configuration and partnership outreach data
+  - Validates data before insertion
+  - Clear progress reporting and summary
+  - Supports selective seeding with `--only` flag
+- **Collections**:
+  - `patterns` - AI prompt patterns with examples and best practices
+  - `learning_content` - Educational content for RAG chatbot
+  - `affiliate_config` - Affiliate link management
+  - `partnership_outreach` - Partnership tracking
+
 #### `seed-prompts-to-db.ts`
 
 - **Purpose**: Seed MongoDB with prompt data
