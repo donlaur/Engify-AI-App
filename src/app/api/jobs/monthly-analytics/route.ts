@@ -11,11 +11,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logging/logger';
 import { getDb } from '@/lib/mongodb';
 import { apiKeyUsageService } from '@/lib/services/ApiKeyUsageService';
+import { verifyCronRequest } from '@/lib/auth/verify-cron';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
+  // Verify this is a scheduled job (not external user)
+  const authError = await verifyCronRequest(request);
+  if (authError) return authError;
+
   try {
     const db = await getDb();
 

@@ -11,16 +11,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logging/logger';
 import { apiKeyUsageService } from '@/lib/services/ApiKeyUsageService';
 import { getDb } from '@/lib/mongodb';
-// QStashMessageQueue import removed - not used in this route
+import { verifyCronRequest } from '@/lib/auth/verify-cron';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
+  // Verify this is a scheduled job
+  const authError = await verifyCronRequest(request);
+  if (authError) return authError;
+
   try {
-    // Verify this is from QStash (optional - add signature verification)
-    // Queue not actually used, just verifying connection available
-    // const queue = new QStashMessageQueue('scheduled-jobs', 'redis', {});
 
     // Get all users with API keys
     const db = await getDb();
