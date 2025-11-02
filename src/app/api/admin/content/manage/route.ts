@@ -15,29 +15,21 @@ import { ObjectId } from 'mongodb';
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
+    console.log('🔐 [CMS API] Session:', session?.user?.email, 'Role:', (session?.user as { role?: string} | null)?.role);
+    
     const role = (session?.user as { role?: string } | null)?.role || 'user';
 
     // RBAC: Only admins can manage content
     if (!['admin', 'super_admin', 'org_admin'].includes(role)) {
+      console.log('❌ [CMS API] Unauthorized - role:', role);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
-
-    // Rate limiting
-    const rateLimitResult = await checkRateLimit(
-      `content-manage-${session?.user?.email}`,
-      10,
-      60
-    );
-    if (!rateLimitResult.allowed) {
-      return NextResponse.json(
-        { error: 'Rate limit exceeded' },
-        { status: 429 }
-      );
     }
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     const category = searchParams.get('category');
+    
+    console.log('📊 [CMS API] Fetching content - type:', type, 'category:', category);
 
     const db = await getDb();
     const collection = db.collection('learning_content');
@@ -52,6 +44,8 @@ export async function GET(request: NextRequest) {
       .sort({ updatedAt: -1 })
       .limit(100)
       .toArray();
+    
+    console.log('✅ [CMS API] Found', content.length, 'items');
 
     return NextResponse.json({
       success: true,
@@ -61,9 +55,9 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('Error fetching content:', error);
+    console.error('❌ [CMS API] Error fetching content:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch content' },
+      { error: 'Failed to fetch content', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
