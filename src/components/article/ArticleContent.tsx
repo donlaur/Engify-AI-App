@@ -1,66 +1,10 @@
-'use client';
-
-import { useEffect, useRef } from 'react';
-
 interface ArticleContentProps {
   html: string;
 }
 
 export function ArticleContent({ html }: ArticleContentProps) {
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!contentRef.current) return;
-
-    // Add copy buttons to all code blocks
-    const codeBlocks = contentRef.current.querySelectorAll('pre');
-    
-    codeBlocks.forEach((block) => {
-      // Skip if already has copy button
-      if (block.querySelector('.copy-button')) return;
-
-      // Create wrapper
-      const wrapper = document.createElement('div');
-      wrapper.className = 'relative group';
-      block.parentNode?.insertBefore(wrapper, block);
-      wrapper.appendChild(block);
-
-      // Create copy button
-      const button = document.createElement('button');
-      button.className =
-        'copy-button absolute top-2 right-2 p-2 rounded-md bg-slate-700 hover:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity';
-      button.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
-          <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-        </svg>
-      `;
-      
-      button.onclick = () => {
-        const code = block.textContent || '';
-        navigator.clipboard.writeText(code);
-        button.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-400">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-        `;
-        setTimeout(() => {
-          button.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
-              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-              <path d="M4 16c-1.1 0-2-.9-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-            </svg>
-          `;
-        }, 2000);
-      };
-
-      wrapper.appendChild(button);
-    });
-  }, [html]);
-
   return (
     <div
-      ref={contentRef}
       className="article-content prose prose-slate dark:prose-invert prose-lg max-w-none
         prose-headings:font-bold prose-headings:tracking-tight
         prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4
@@ -90,4 +34,3 @@ export function ArticleContent({ html }: ArticleContentProps) {
     />
   );
 }
-
