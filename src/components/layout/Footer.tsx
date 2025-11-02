@@ -57,15 +57,15 @@ export function Footer() {
 
   return (
     <footer className="border-t bg-background">
-      <div className="container py-12 md:py-16">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-6">
+      <div className="container px-4 py-12 md:py-16">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
           {/* Brand */}
-          <div className="col-span-2">
+          <div className="col-span-1 sm:col-span-2 md:col-span-4 lg:col-span-2">
             <Link href="/" className="mb-4 flex items-center space-x-2">
               <Icons.sparkles className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold">Engify.ai</span>
             </Link>
-            <p className="text-sm text-muted-foreground">
+            <p className="max-w-xs text-sm text-muted-foreground">
               Master prompt engineering with AI-powered learning and
               gamification.
             </p>
