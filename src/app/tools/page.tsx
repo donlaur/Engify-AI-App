@@ -13,13 +13,17 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Best AI Coding Assistants 2025: Cursor vs Windsurf vs GitHub Copilot | Engify.ai',
+  title: 'Best AI Coding Assistants 2025: Cursor, Windsurf, Replit, Lovable & More | Engify.ai',
   description:
-    'Compare the top AI coding tools for developers. In-depth reviews of Cursor, Windsurf, GitHub Copilot, and more. Real benchmarks, pricing, and use cases from production experience.',
+    'Compare 10+ AI coding tools for developers. In-depth reviews of Cursor, Windsurf, Replit AI, Lovable, v0.dev, Warp, GitHub Copilot. Real benchmarks, pricing, and use cases from production experience.',
   keywords: [
     'AI coding assistant',
     'Cursor IDE review',
     'Windsurf vs Cursor',
+    'Replit AI review 2025',
+    'Lovable AI builder',
+    'v0.dev review',
+    'Warp terminal AI',
     'GitHub Copilot alternative',
     'best AI pair programming',
     'Claude Sonnet 4.5',
@@ -181,6 +185,102 @@ export default function ToolsPage() {
       cta: 'Learn More',
       slug: 'tabnine',
     },
+    {
+      name: 'Replit AI',
+      tagline: 'Code in the browser with AI',
+      icon: Icons.cloud,
+      rating: 4,
+      pricing: 'Free / $20/mo Replit Core',
+      bestFor: 'Rapid prototyping and learning',
+      pros: [
+        'No setup required (browser-based)',
+        'Ghostwriter AI for autocomplete',
+        'Instant deployment',
+        'Great for beginners',
+        'Collaborative coding',
+      ],
+      cons: [
+        'Limited for large codebases',
+        'Browser-only environment',
+        'Less powerful than Cursor',
+        'Dependency on Replit platform',
+      ],
+      affiliate: true,
+      cta: 'Try Replit AI',
+      slug: 'replit',
+    },
+    {
+      name: 'Lovable (formerly GPT Engineer)',
+      tagline: 'AI app builder from prompts',
+      icon: Icons.heart,
+      rating: 4,
+      pricing: '$20/mo Pro',
+      bestFor: 'No-code/low-code app generation',
+      pros: [
+        'Builds full apps from prompts',
+        'React + Tailwind output',
+        'Fast prototyping',
+        'Export to GitHub',
+        'Great for MVPs',
+      ],
+      cons: [
+        'Less control than traditional IDEs',
+        'Generated code needs cleanup',
+        'Limited customization',
+        'New tool (less mature)',
+      ],
+      affiliate: false,
+      cta: 'Try Lovable',
+      slug: 'lovable',
+    },
+    {
+      name: 'Warp Terminal',
+      tagline: 'AI-powered terminal',
+      icon: Icons.terminal,
+      rating: 4,
+      pricing: 'Free / $15/mo Team',
+      bestFor: 'DevOps and command-line workflows',
+      pros: [
+        'AI command suggestions',
+        'Natural language to shell',
+        'Beautiful modern UI',
+        'Command history with AI search',
+        'Team collaboration',
+      ],
+      cons: [
+        'macOS only (no Windows/Linux)',
+        'Terminal-focused (not full IDE)',
+        'Learning curve for features',
+        'Some features require subscription',
+      ],
+      affiliate: false,
+      cta: 'Get Warp',
+      slug: 'warp',
+    },
+    {
+      name: 'v0.dev by Vercel',
+      tagline: 'AI-powered UI generation',
+      icon: Icons.zap,
+      rating: 4,
+      pricing: 'Free (limited) / Credits system',
+      bestFor: 'Frontend UI component generation',
+      pros: [
+        'Generates React components instantly',
+        'Tailwind + shadcn/ui output',
+        'Iterative refinement',
+        'Copy-paste ready code',
+        'Great for UI prototyping',
+      ],
+      cons: [
+        'UI-only (no backend)',
+        'Credit-based pricing',
+        'Can be expensive for heavy use',
+        'Limited to React/Next.js',
+      ],
+      affiliate: false,
+      cta: 'Try v0.dev',
+      slug: 'v0',
+    },
   ];
 
   const comparisonTable = [
@@ -244,9 +344,10 @@ export default function ToolsPage() {
             </h1>
 
             <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              Real-world reviews from building production SaaS. We tested them
-              all—here's what actually works, what doesn't, and which one is
-              right for you.
+              Real-world reviews from building production SaaS. We tested 10+
+              AI coding tools—Cursor, Windsurf, Replit, Lovable, v0.dev, Warp,
+              and more. Here's what actually works, what doesn't, and which one
+              is right for you.
             </p>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
@@ -283,6 +384,15 @@ export default function ToolsPage() {
           <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
             Honest reviews from 1,357 commits of production use
           </p>
+        </div>
+
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-2 justify-center">
+            <Badge variant="outline">Full IDEs</Badge>
+            <Badge variant="outline">AI Builders</Badge>
+            <Badge variant="outline">Terminal Tools</Badge>
+            <Badge variant="outline">UI Generators</Badge>
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

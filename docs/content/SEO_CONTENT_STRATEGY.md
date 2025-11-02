@@ -92,23 +92,44 @@ We've created two high-value content hubs designed for:
 - **Claude Pro:** 20 signups × $15 = $300/mo
 - **Total potential:** **$2,100/mo** at 1,000 monthly visitors
 
-### Affiliate Programs
+### Affiliate Programs & Sponsorships
 1. **Cursor** (Priority #1)
    - Program: Cursor Referral Program
    - Commission: Estimated 20-30% recurring
    - Status: ✅ Affiliate links ready
 
-2. **GitHub Copilot**
+2. **Replit** (Priority #2)
+   - Program: Replit Affiliate + Potential Sponsorship
+   - Commission: Varies (referral program exists)
+   - Credits: Potential for Replit credits
+   - Status: ⚠️ Need to apply + reach out for sponsorship
+
+3. **Lovable** (Priority #3)
+   - Program: Potential Sponsorship/Credits
+   - Commission: TBD (new tool, may offer early adopter benefits)
+   - Status: ⚠️ Reach out to team for partnership
+
+4. **v0.dev (Vercel)** (Priority #4)
+   - Program: Vercel Partners
+   - Credits: Potential for v0.dev credits
+   - Status: ⚠️ Reach out to Vercel partnerships
+
+5. **Warp Terminal** (Priority #5)
+   - Program: Potential Sponsorship
+   - Commission: TBD
+   - Status: ⚠️ Reach out for partnership (growing fast)
+
+6. **GitHub Copilot**
    - Program: GitHub Partners
    - Commission: Varies
    - Status: ⚠️ Need to apply
 
-3. **Claude Pro (Anthropic)**
+7. **Claude Pro (Anthropic)**
    - Program: Anthropic Partners
    - Commission: TBD
    - Status: ⚠️ Need to research
 
-4. **OpenAI (ChatGPT Plus)**
+8. **OpenAI (ChatGPT Plus)**
    - Program: OpenAI Partners
    - Commission: TBD
    - Status: ⚠️ Need to apply
@@ -153,19 +174,26 @@ We've created two high-value content hubs designed for:
 - [x] AI workflow page
 
 ### Phase 2: Individual Tool Reviews (Next)
-Priority order based on search volume:
-1. `/tools/cursor` - Cursor in-depth review
-2. `/tools/github-copilot` - Copilot full review
-3. `/tools/windsurf` - Windsurf detailed review
-4. `/tools/claude` - Claude for coding guide
-5. `/tools/chatgpt` - ChatGPT Code Interpreter
-6. `/tools/tabnine` - Tabnine privacy-focused review
+Priority order based on search volume and sponsorship potential:
+1. `/tools/cursor` - Cursor in-depth review (affiliate)
+2. `/tools/replit` - Replit AI review (affiliate + sponsorship potential) 🔥
+3. `/tools/lovable` - Lovable/GPT Engineer (sponsorship potential) 🔥
+4. `/tools/github-copilot` - Copilot full review (affiliate)
+5. `/tools/v0` - v0.dev by Vercel (credits/sponsorship potential) 🔥
+6. `/tools/warp` - Warp Terminal (sponsorship potential) 🔥
+7. `/tools/windsurf` - Windsurf detailed review
+8. `/tools/claude` - Claude for coding guide
+9. `/tools/chatgpt` - ChatGPT Code Interpreter
+10. `/tools/tabnine` - Tabnine privacy-focused review
 
 ### Phase 3: Comparison Articles
-1. `/tools/cursor-vs-windsurf` - Head-to-head
-2. `/tools/cursor-vs-github-copilot` - Most searched
-3. `/tools/claude-vs-chatgpt-coding` - AI model comparison
-4. `/tools/free-ai-coding-assistants` - Budget options
+1. `/tools/cursor-vs-windsurf` - Head-to-head (most searched)
+2. `/tools/cursor-vs-github-copilot` - Traditional vs AI-first
+3. `/tools/replit-vs-cursor` - Browser vs desktop
+4. `/tools/lovable-vs-v0` - AI builders comparison
+5. `/tools/claude-vs-chatgpt-coding` - AI model comparison
+6. `/tools/free-ai-coding-assistants` - Budget options
+7. `/tools/best-ai-terminal` - Warp vs traditional
 
 ### Phase 4: Use Case Guides
 1. `/learn/ai-coding-for-beginners` - Entry point
