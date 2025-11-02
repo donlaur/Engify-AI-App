@@ -92,15 +92,15 @@ export interface AuditLogEntry {
 // WINSTON LOGGER CONFIGURATION
 // ============================================================================
 
-const auditLogger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'engify-audit' },
-  transports: [
+// Determine if file system logging is allowed (avoid in Vercel serverless)
+const canWriteFiles =
+  process.env.VERCEL !== '1' && process.env.ENABLE_FILE_LOGS !== '0';
+
+const transports: winston.transport[] = [];
+
+// File transports only when allowed (local/dev or when explicitly enabled)
+if (canWriteFiles) {
+  transports.push(
     // Daily rotating file for audit logs
     new DailyRotateFile({
       filename: 'logs/audit-%DATE%.log',
@@ -117,8 +117,19 @@ const auditLogger = winston.createLogger({
       maxSize: '20m',
       maxFiles: '2555d',
       level: 'warning',
-    }),
-  ],
+    })
+  );
+}
+
+const auditLogger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'engify-audit' },
+  transports,
 });
 
 // Console logging in development
