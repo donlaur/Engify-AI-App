@@ -9,8 +9,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
-import { Prompt } from '@/lib/schemas/prompt';
+import { Prompt, categoryLabels, roleLabels, type UserRole } from '@/lib/schemas/prompt';
 import { useState } from 'react';
+import { useFavorites } from '@/hooks/use-favorites';
+import { useToast } from '@/hooks/use-toast';
 
 interface PromptDetailModalProps {
   prompt: Prompt;
@@ -24,7 +26,8 @@ export function PromptDetailModal({
   onClose,
 }: PromptDetailModalProps) {
   const [copied, setCopied] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isFavorite, toggleFavorite, isAuthenticated } = useFavorites();
+  const { toast } = useToast();
 
   const handleCopy = () => {
     navigator.clipboard.writeText(prompt.content);
@@ -32,9 +35,25 @@ export function PromptDetailModal({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    // TODO: Save to user profile
+  const handleFavorite = async () => {
+    if (!isAuthenticated) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in to save favorites',
+        variant: 'default',
+      });
+      return;
+    }
+
+    await toggleFavorite(prompt.id);
+    toast({
+      title: isFavorite(prompt.id)
+        ? 'Removed from favorites'
+        : 'Added to favorites',
+      description: isFavorite(prompt.id)
+        ? 'Prompt removed from your favorites'
+        : 'Prompt saved to your favorites',
+    });
   };
 
   return (
@@ -47,25 +66,30 @@ export function PromptDetailModal({
           </div>
         </DialogHeader>
 
-        {/* Favorite Button - separate from close button */}
+        {/* Favorite Button - separate from close button, consistent heart icon */}
         <div className="absolute right-14 top-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={handleFavorite}
-            className={isFavorite ? 'text-yellow-500' : 'text-muted-foreground'}
-            title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            title={
+              isFavorite(prompt.id)
+                ? 'Remove from favorites'
+                : 'Add to favorites'
+            }
           >
-            <Icons.star
-              className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`}
-            />
+            {isFavorite(prompt.id) ? (
+              <Icons.heart className="h-5 w-5 fill-red-600 text-red-600" />
+            ) : (
+              <Icons.heart className="h-5 w-5" />
+            )}
           </Button>
         </div>
 
         {/* Metadata */}
         <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary">{prompt.category}</Badge>
-          {prompt.role && <Badge variant="outline">{prompt.role}</Badge>}
+          <Badge variant="secondary">{categoryLabels[prompt.category] || prompt.category}</Badge>
+          {prompt.role && <Badge variant="outline">{roleLabels[prompt.role as UserRole] || prompt.role}</Badge>}
           {prompt.pattern && (
             <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100">
               <Icons.brain className="mr-1 h-3 w-3" />
