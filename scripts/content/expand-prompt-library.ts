@@ -131,10 +131,10 @@ const COMPREHENSIVE_ROLES = [
 
 const PROMPT_FRAMEWORKS: PromptFramework[] = [
   {
-    name: 'CRAFT',
-    description: 'Context, Role, Action, Format, Target - Structured approach',
-    bestFor: ['code-generation', 'documentation', 'templates'],
-    complexity: 'simple',
+    name: 'C.R.A.F.T.E.D.',
+    description: 'Context, Role, Action, Format, Tone, Examples, Definition of Done - Complete structured approach',
+    bestFor: ['code-generation', 'documentation', 'templates', 'complex-tasks'],
+    complexity: 'simple-to-medium',
   },
   {
     name: 'KERNEL',

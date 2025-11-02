@@ -48,6 +48,7 @@ import {
   Eye,
   EyeOff,
   Star,
+  Tag,
   Heart,
   Bookmark,
   MessageSquare,
@@ -187,6 +188,7 @@ export const Icons = {
   eye: Eye, // Alias for view
   hide: EyeOff,
   star: Star,
+  tag: Tag,
   heart: Heart,
   bookmark: Bookmark,
   comment: MessageSquare,
