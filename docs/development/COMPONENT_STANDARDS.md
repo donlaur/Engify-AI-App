@@ -16,6 +16,7 @@ This guide covers component architecture standards, including Server vs Client C
 ### Server Components (Default)
 
 **Use for:**
+
 - Data fetching
 - Static content
 - No interactivity needed
@@ -28,7 +29,7 @@ import { getPrompts } from '@/lib/prompts';
 
 export default async function PromptsPage() {
   const prompts = await getPrompts();
-  
+
   return (
     <div>
       <h1>Prompts</h1>
@@ -39,6 +40,7 @@ export default async function PromptsPage() {
 ```
 
 **Benefits:**
+
 - Smaller bundle size
 - Faster initial load
 - Better SEO
@@ -47,6 +49,7 @@ export default async function PromptsPage() {
 ### Client Components (When Needed)
 
 **Use for:**
+
 - Event handlers (`onClick`, `onChange`)
 - React hooks (`useState`, `useEffect`)
 - Browser APIs (`localStorage`, `navigator`)
@@ -68,13 +71,13 @@ interface PromptActionsProps {
 
 export function PromptActions({ promptId, content }: PromptActionsProps) {
   const [copied, setCopied] = useState(false);
-  
+
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  
+
   return (
     <Button onClick={handleCopy}>
       {copied ? 'Copied!' : 'Copy'}
@@ -84,6 +87,7 @@ export function PromptActions({ promptId, content }: PromptActionsProps) {
 ```
 
 **Rules:**
+
 - Must have `'use client'` directive
 - Cannot be async
 - Cannot use Server-only APIs
@@ -186,6 +190,7 @@ import { Suspense } from 'react';
 ```
 
 **Skeleton Guidelines:**
+
 - Match the actual content layout
 - Use `animate-pulse` for animation
 - Support dark mode
@@ -240,6 +245,7 @@ export function EmptyState({ title, description, action, icon }: EmptyStateProps
 ```
 
 **Empty State Guidelines:**
+
 - Clear, helpful message
 - Actionable CTA when appropriate
 - Consistent design across app
@@ -284,6 +290,7 @@ text-muted-foreground // Handles dark mode automatically
 ```
 
 **Testing:**
+
 - Test all components in light and dark mode
 - Check contrast ratios
 - Verify readability
@@ -318,10 +325,10 @@ src/components/
 
 ```typescript
 interface ComponentProps {
-  title: string;                    // Required
-  description?: string;            // Optional
-  onAction: () => void;             // Callback
-  items?: Item[];                   // Array
+  title: string; // Required
+  description?: string; // Optional
+  onAction: () => void; // Callback
+  items?: Item[]; // Array
   variant?: 'primary' | 'secondary'; // Union type
 }
 ```
@@ -489,4 +496,3 @@ export function PromptList({ initialPrompts = [] }: PromptListProps) {
 
 **Last Updated:** 2025-11-02  
 **Author:** Donnie Laur, AI Assistant
-

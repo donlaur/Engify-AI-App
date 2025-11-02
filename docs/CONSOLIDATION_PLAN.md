@@ -10,8 +10,9 @@
 **Total:** 218 markdown files
 
 **Top Offenders:**
+
 - development/: 34 files
-- operations/: 28 files  
+- operations/: 28 files
 - content/: 22 files
 - planning/: 20 files
 - security/: 13 files
@@ -26,6 +27,7 @@
 ### Phase 1: Archive Old Plans (−12 files)
 
 **Move to archive/2025/october/:**
+
 ```
 planning/PHASE_5_CLEANUP_PLAN.md
 planning/PHASE_6_API_DOCUMENTATION.md
@@ -42,6 +44,7 @@ planning/FUTURE_FEATURES_ROADMAP.md
 ```
 
 **Keep Active:**
+
 - DAY_5_PLAN.md ✅
 - DAY_6_CONTENT_HARDENING.md ✅
 - DAY_7_QA_FRONTEND_IMPROVEMENTS.md ✅
@@ -54,6 +57,7 @@ planning/FUTURE_FEATURES_ROADMAP.md
 **Operations has 28 files - consolidate to ~18:**
 
 **Delete duplicates/outdated:**
+
 ```
 operations/daily/*.md (old daily logs) - 6 files
 operations/WEEKLY_*.md (old weekly logs) - 4 files
@@ -66,12 +70,14 @@ operations/WEEKLY_*.md (old weekly logs) - 4 files
 **Development has 34 files - consolidate to ~19:**
 
 **Archive old ADRs to archive/adr/:**
+
 ```
 development/ADR/draft-*.md (drafts) - 3 files
 development/ADR/deprecated-*.md - 2 files
 ```
 
 **Consolidate guides:**
+
 ```
 Merge ADDING_ADMIN_PANEL.md + ADDING_ADMIN_PANELS_GUIDE.md → ADMIN_PANEL_GUIDE.md
 Merge MIGRATION_GUIDE_DRY.md into main MIGRATION_GUIDE
@@ -89,6 +95,7 @@ Delete TODO_RESOLUTION_DAY6.md (completed)
 **Content has 22 files - consolidate to ~14:**
 
 **Archive research docs:**
+
 ```
 content/MULTI_AGENT_TEAM_SIMULATION.md → archive/research/
 content/AGENT_CONTENT_CREATOR.md → archive/research/
@@ -99,6 +106,7 @@ content/TESTING_SETUP_GUIDE.md → merge into testing/README.md
 ```
 
 **Merge similar:**
+
 ```
 CONTENT_GENERATION_PROMPT.md + CONTENT_INGESTION_PLAN.md → CONTENT_STRATEGY.md
 MULTI_AGENT_CONTENT_REVIEW.md + CONTENT_AUDIT_FINAL.md → CONTENT_AUDIT.md
@@ -113,6 +121,7 @@ MULTI_AGENT_CONTENT_REVIEW.md + CONTENT_AUDIT_FINAL.md → CONTENT_AUDIT.md
 **Security has 13 files - consolidate to ~8:**
 
 **Merge summaries:**
+
 ```
 SECURITY_SUMMARY.md + SECURITY_AUDIT_SUMMARY.md → into SECURITY_STANDARDS.md
 GIT_SECRETS_AND_AWS_STATUS.md → archive (point-in-time)
@@ -129,11 +138,13 @@ GIT_HISTORY_CLEANUP_PLAN.md → archive (completed)
 **Research has 5 large files - but archive experimental:**
 
 **Archive to archive/research/:**
+
 ```
 All gemini research docs (experiments, not production)
 ```
 
 **Keep:**
+
 - Core architecture research only
 
 **Savings:** 4 files
@@ -145,6 +156,7 @@ All gemini research docs (experiments, not production)
 **Strategy has 9 files - consolidate to ~4:**
 
 **Merge related:**
+
 ```
 ARCHITECTURE_STRATEGY.md + ENTERPRISE_STRATEGY.md → TECHNICAL_STRATEGY.md
 AUTH_AND_BILLING_STRATEGY.md + PRODUCT_STRATEGY.md → PRODUCT_STRATEGY.md (consolidated)
@@ -161,12 +173,14 @@ STRATEGIC_PATTERNS_SUMMARY.md → archive
 **Testing has 12 files - consolidate to ~7:**
 
 **Archive old:**
+
 ```
 testing/OLD_*.md files
 testing/DEPRECATED_*.md files
 ```
 
 **Merge:**
+
 ```
 Similar test plan docs into single TEST_STRATEGY.md
 ```
@@ -178,6 +192,7 @@ Similar test plan docs into single TEST_STRATEGY.md
 ## 📋 Execution Order
 
 ### Step 1: Create Archive Structure
+
 ```bash
 mkdir -p docs/archive/2025/october
 mkdir -p docs/archive/research
@@ -185,16 +200,19 @@ mkdir -p docs/archive/testing
 ```
 
 ### Step 2: Archive Old Plans (−12)
+
 ```bash
 git mv docs/planning/{PHASE_5,PHASE_6,REFACTORING,TODAY,NEXT_STEPS,OPSHUB,ENTERPRISE_RBAC,PARTNERSHIP,LAUNCH,RICE,FUTURE}* docs/archive/2025/october/
 ```
 
 ### Step 3: Archive Research (−4)
+
 ```bash
 git mv docs/research/GEMINI_* docs/archive/research/
 ```
 
 ### Step 4: Consolidate & Delete (−52)
+
 - Merge similar documents
 - Delete completed/outdated
 - Clean up duplicates
@@ -227,16 +245,19 @@ git mv docs/research/GEMINI_* docs/archive/research/
 ## 🎯 Benefits
 
 ### For AI Agents:
+
 - ✅ Faster search (less noise)
 - ✅ More focused results
 - ✅ Current info easier to find
 
 ### For Hiring Managers:
+
 - ✅ Less overwhelming
 - ✅ Focused on active work
 - ✅ Professional polish
 
 ### For Maintenance:
+
 - ✅ Easier to keep current
 - ✅ Less duplication
 - ✅ Clear structure
@@ -246,6 +267,7 @@ git mv docs/research/GEMINI_* docs/archive/research/
 ## ⚠️ What We Keep
 
 **Core Documentation (Must Keep):**
+
 - ✅ Day 5, 6, 7 plans (show improvement)
 - ✅ Enterprise quality docs (showcase)
 - ✅ Architecture & security standards
@@ -253,6 +275,7 @@ git mv docs/research/GEMINI_* docs/archive/research/
 - ✅ Active API documentation
 
 **What We Archive:**
+
 - Old planning docs (completed work)
 - Research experiments
 - Deprecated guides
@@ -262,4 +285,3 @@ git mv docs/research/GEMINI_* docs/archive/research/
 ---
 
 **Ready to execute?** This will clean up ~31% of docs while preserving all important work.
-

@@ -1,11 +1,8 @@
 # Engify.ai - Robots.txt
-
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /dashboard/
 
 # Sitemaps
 Sitemap: https://engify.ai/sitemap.xml
-
-# Disallow admin/auth pages
-Disallow: /api/
-Disallow: /dashboard/

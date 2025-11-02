@@ -9,7 +9,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
-import { Prompt, categoryLabels, roleLabels, type UserRole } from '@/lib/schemas/prompt';
+import {
+  Prompt,
+  categoryLabels,
+  roleLabels,
+  type UserRole,
+} from '@/lib/schemas/prompt';
 import { useState } from 'react';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useToast } from '@/hooks/use-toast';
@@ -72,6 +77,11 @@ export function PromptDetailModal({
             variant="ghost"
             size="icon"
             onClick={handleFavorite}
+            aria-label={
+              isFavorite(prompt.id)
+                ? 'Remove from favorites'
+                : 'Add to favorites'
+            }
             title={
               isFavorite(prompt.id)
                 ? 'Remove from favorites'
@@ -88,8 +98,14 @@ export function PromptDetailModal({
 
         {/* Metadata */}
         <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary">{categoryLabels[prompt.category] || prompt.category}</Badge>
-          {prompt.role && <Badge variant="outline">{roleLabels[prompt.role as UserRole] || prompt.role}</Badge>}
+          <Badge variant="secondary">
+            {categoryLabels[prompt.category] || prompt.category}
+          </Badge>
+          {prompt.role && (
+            <Badge variant="outline">
+              {roleLabels[prompt.role as UserRole] || prompt.role}
+            </Badge>
+          )}
           {prompt.pattern && (
             <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100">
               <Icons.brain className="mr-1 h-3 w-3" />

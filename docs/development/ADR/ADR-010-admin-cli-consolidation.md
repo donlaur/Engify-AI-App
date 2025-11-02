@@ -135,7 +135,7 @@ export const statsCommand = new Command('stats')
   .option('--users', 'Show user stats only')
   .action(async (options) => {
     const stats = await getStats();
-    
+
     if (options.prompts) {
       console.log(`Total Prompts: ${stats.totalPrompts}`);
       console.log(`Categories: ${stats.categories}`);
@@ -184,10 +184,12 @@ export const statsCommand = new Command('stats')
 ### Alternative 1: Keep Scattered Scripts (Status Quo)
 
 **Pros:**
+
 - Simple, no changes needed
 - Scripts work independently
 
 **Cons:**
+
 - Hard to discover
 - Duplicate code
 - Inconsistent patterns
@@ -198,11 +200,13 @@ export const statsCommand = new Command('stats')
 ### Alternative 2: Separate CLI Package
 
 **Pros:**
+
 - Better separation of concerns
 - Can publish separately
 - Version independently
 
 **Cons:**
+
 - More complex setup
 - Overkill for current needs
 - Extra maintenance
@@ -212,11 +216,13 @@ export const statsCommand = new Command('stats')
 ### Alternative 3: Web-Based Admin UI Only
 
 **Pros:**
+
 - Better UX for non-technical users
 - Visual interface
 - No CLI needed
 
 **Cons:**
+
 - Doesn't help automation
 - Still need CLI for scripts
 - More complex to build
@@ -230,6 +236,7 @@ export const statsCommand = new Command('stats')
 ### Current Commands
 
 **Stats Command:**
+
 ```bash
 pnpm admin stats                    # All stats
 pnpm admin stats --prompts          # Prompt stats only
@@ -238,6 +245,7 @@ pnpm admin stats --users            # User stats only
 ```
 
 **Content Command:**
+
 ```bash
 pnpm admin content list             # List all content
 pnpm admin content review           # Review content
@@ -245,6 +253,7 @@ pnpm admin content generate         # Generate content
 ```
 
 **Prompts Command:**
+
 ```bash
 pnpm admin prompts count            # Count prompts
 pnpm admin prompts review           # Review prompts
@@ -254,6 +263,7 @@ pnpm admin prompts audit            # Audit prompts
 ### Benefits
 
 1. **Discoverability**
+
    ```bash
    pnpm admin --help  # Shows all commands
    ```
@@ -319,17 +329,20 @@ pnpm admin prompts audit            # Audit prompts
 ### Mitigation
 
 **Migration:**
+
 - Migrate incrementally
 - Keep old scripts during transition
 - Test thoroughly
 - Document migration path
 
 **Complexity:**
+
 - Use simple CLI framework (commander.js)
 - Keep commands simple
 - Extract common code
 
 **Learning:**
+
 - Good documentation
 - Clear examples
 - Help text in CLI
@@ -387,4 +400,3 @@ pnpm admin prompts audit            # Audit prompts
 **Last Updated:** 2025-11-02  
 **Authors:** Donnie Laur, AI Assistant  
 **Tags:** #tooling #cli #admin #dry #day7
-
