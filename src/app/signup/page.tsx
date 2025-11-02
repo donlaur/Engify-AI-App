@@ -1,7 +1,7 @@
 /**
  * Signup Page
  * User registration with email/password OR Request Access form
- * Gates signup behind environment variable for beta control
+ * Gates signup behind environment variable for early access control
  */
 
 'use client';
@@ -139,11 +139,11 @@ function SignupContent() {
               <Icons.sparkles className="h-8 w-8 text-blue-600" />
             </div>
             <CardTitle className="text-center text-2xl">
-              Request Beta Access
+              Request Early Access
             </CardTitle>
             <CardDescription className="text-center">
-              Engify.ai is currently in private beta. Request access to get
-              started.
+              Engify.ai is in early access. Request an invitation to get
+              started with exclusive features.
             </CardDescription>
           </CardHeader>
           <CardContent>

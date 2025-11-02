@@ -96,7 +96,7 @@ export function PromptCard(props: PromptCardProps) {
 
   return (
     <>
-      <Card className="group relative transition-all duration-200 hover:border-primary hover:shadow-lg">
+      <Card className="group relative rounded-xl transition-all duration-200 hover:border-primary hover:shadow-xl hover:shadow-primary/10">
         <CardHeader>
           <div className="flex items-start justify-between">
             <div
