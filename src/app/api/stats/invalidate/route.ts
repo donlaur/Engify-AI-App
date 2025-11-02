@@ -1,7 +1,7 @@
-/* eslint-disable engify/no-missing-tests */
 import { NextRequest, NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logging/logger';
 
 /**
  * POST /api/stats/invalidate
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     // Delete the cache key
     await redis.del(CACHE_KEY);
 
-    console.log('✅ Stats cache invalidated successfully');
+    logger.info('Stats cache invalidated successfully');
 
     return NextResponse.json({
       success: true,
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Failed to invalidate stats cache:', error);
+    logger.error('Failed to invalidate stats cache', { error });
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     return NextResponse.json(
