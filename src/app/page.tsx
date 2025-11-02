@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
@@ -40,35 +40,35 @@ export const metadata: Metadata = {
 
 /**
  * Case Study: 7-Day SaaS Build with AI
- * 
+ *
  * SEO-optimized learning content showing real-world AI-augmented development
  */
 export default function CaseStudyPage() {
   const tools = [
     {
       name: 'Cursor IDE',
-      icon: "code" as const,
+      icon: 'code' as const,
       role: 'Primary Development Environment',
       usage: 'Core development with Claude Sonnet 4.5 integration',
       affiliate: true,
     },
     {
       name: 'Claude Sonnet 4.5',
-      icon: "sparkles" as const,
+      icon: 'sparkles' as const,
       role: 'Architecture & Core Development',
       usage: '80% of code generation, pattern design, refactoring',
       affiliate: false,
     },
     {
       name: 'GPT-4',
-      icon: "zap" as const,
+      icon: 'zap' as const,
       role: 'Code Review & Optimization',
       usage: 'Red-hat reviews, quality audits, documentation',
       affiliate: false,
     },
     {
       name: 'Git Worktrees',
-      icon: "gitBranch" as const,
+      icon: 'gitCompare' as const,
       role: 'Parallel Development',
       usage: '3 simultaneous branches without conflicts',
       affiliate: false,
@@ -233,7 +233,10 @@ export default function CaseStudyPage() {
                 className="bg-white text-purple-900 hover:bg-gray-100"
                 asChild
               >
-                <Link href="https://github.com/donlaur/Engify-AI-App" target="_blank">
+                <Link
+                  href="https://github.com/donlaur/Engify-AI-App"
+                  target="_blank"
+                >
                   <Icons.github className="mr-2 h-4 w-4" />
                   View Source Code
                 </Link>
@@ -265,7 +268,11 @@ export default function CaseStudyPage() {
 
         <div className="grid gap-6 md:grid-cols-2">
           {tools.map((tool) => {
-            const Icon = Icons[tool.icon];
+            const Icon = Icons[tool.icon] || Icons.sparkles; // Fallback to sparkles if icon not found
+            if (!Icon) {
+              console.error(`Icon "${tool.icon}" not found in Icons object`);
+              return null;
+            }
             return (
               <Card key={tool.name} className="border-2">
                 <CardHeader>
@@ -297,7 +304,9 @@ export default function CaseStudyPage() {
                       className="mt-4"
                       asChild
                     >
-                      <Link href={`/tools/${tool.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                      <Link
+                        href={`/tools/${tool.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
                         Learn More & Get Started →
                       </Link>
                     </Button>
@@ -491,12 +500,11 @@ export default function CaseStudyPage() {
       <section className="container pb-16">
         <Card className="border-2 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950">
           <CardContent className="space-y-6 py-12 text-center">
-            <h2 className="text-3xl font-bold">
-              Want to Build Like This?
-            </h2>
+            <h2 className="text-3xl font-bold">Want to Build Like This?</h2>
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-              Explore our AI tool reviews, workflow guides, and process documentation.
-              Everything you need to implement AI-augmented development in your team.
+              Explore our AI tool reviews, workflow guides, and process
+              documentation. Everything you need to implement AI-augmented
+              development in your team.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" asChild>
@@ -518,4 +526,3 @@ export default function CaseStudyPage() {
     </MainLayout>
   );
 }
-
