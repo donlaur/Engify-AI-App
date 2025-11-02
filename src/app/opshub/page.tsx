@@ -7,7 +7,7 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 import { SettingsPanel } from '@/components/admin/SettingsPanel';
 import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
-import { AffiliateLinkManagement } from '@/components/admin/AffiliateLinkManagement';
+// import { AffiliateLinkManagement } from '@/components/admin/AffiliateLinkManagement';
 
 export default async function OpsHubPage() {
   const session = await auth();
@@ -175,10 +175,12 @@ export default async function OpsHubPage() {
           <SettingsPanel />
         </section>
 
+        {/* Still disabled - testing AffiliateLinkManagement last
         <section className="rounded-lg border bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold">Affiliate Links</h2>
           <AffiliateLinkManagement />
         </section>
+        */}
       </div>
     </div>
   );
