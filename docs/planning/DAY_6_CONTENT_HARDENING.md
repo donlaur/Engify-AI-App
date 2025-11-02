@@ -237,7 +237,17 @@ More detail: [Phase 5: Site Stats Migration](../operations/SITE_STATS_MIGRATION.
 - ✅ Store in MongoDB `affiliate_config` collection
 - ✅ Update via admin UI, not code changes
 
-#### 6.5 Other TODOs
+#### 6.5 AI Content Generation for CMS
+
+- ✅ New `/api/admin/content/generate` endpoint
+- ✅ Uses `CreatorAgent` for AI-powered content creation
+- ✅ Two AI buttons in CMS: "Generate with AI" and "Enhance with AI"
+- ✅ RBAC (admin only) and rate limiting (10/min)
+- ✅ Budget enforcement ($0.50 default per generation)
+- ✅ Quality scoring and provenance tracking
+- ✅ Integrates with existing prompt library and AI infrastructure
+
+#### 6.6 Other TODOs
 
 - ⚠️ Twilio MFA code storage (2 TODOs) - deferred (low priority)
 - ✅ Prompt rating API connected to tRPC
