@@ -5,7 +5,7 @@ import { isAdminMFAEnforced } from '@/lib/env';
 
 // Re-enabling admin components one by one
 import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
-// import { UserManagement } from '@/components/admin/UserManagement';
+import { UserManagement } from '@/components/admin/UserManagement';
 // import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 // import { SettingsPanel } from '@/components/admin/SettingsPanel';
 // import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
@@ -153,7 +153,13 @@ export default async function OpsHubPage() {
         </section>
 
         <section className="rounded-lg border bg-white p-4">
+          <h2 className="mb-3 text-lg font-semibold">Content Review Queue</h2>
           <ContentReviewQueue />
+        </section>
+
+        <section className="rounded-lg border bg-white p-4">
+          <h2 className="mb-3 text-lg font-semibold">User Management</h2>
+          <UserManagement />
         </section>
 
         {/* Still disabled - testing one at a time
