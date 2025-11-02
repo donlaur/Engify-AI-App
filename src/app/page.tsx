@@ -46,18 +46,21 @@ export default async function Home() {
   const data = await getStats();
   const allowSignup = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
 
-  // Build stats for display
+  // Build stats for display - REAL DATA ONLY (no mock fallbacks)
+  const promptCount = data.prompts?.total || data.stats?.prompts || 0;
+  const patternCount = data.patterns?.total || data.stats?.patterns || 0;
+  
   const stats = [
     {
       label: 'Expert Prompts',
-      value: `${data.prompts?.total || data.stats?.prompts || 76}+`,
+      value: promptCount > 0 ? `${promptCount}+` : 'Growing Daily',
     },
     {
       label: 'Proven Patterns',
-      value: `${data.patterns?.total || data.stats?.patterns || 23}`,
+      value: patternCount > 0 ? `${patternCount}` : 'New Platform',
     },
     { label: 'AI Providers', value: '4' },
-    { label: 'Beta Access', value: 'Free' },
+    { label: 'Early Access', value: 'Free' },
   ];
 
   // Build role stats from data
@@ -84,9 +87,10 @@ export default async function Home() {
         { name: 'PMs', icon: Icons.target, count: '0 prompts' },
       ];
 
+  // Real data only - no mock fallbacks
   const siteStats = {
-    totalPrompts: data.prompts?.total || data.stats?.prompts || 76,
-    totalPatterns: data.patterns?.total || data.stats?.patterns || 23,
+    totalPrompts: data.prompts?.total || data.stats?.prompts || 0,
+    totalPatterns: data.patterns?.total || data.stats?.patterns || 0,
   };
 
   return (
@@ -104,7 +108,7 @@ export default async function Home() {
             >
               <Icons.sparkles className="mr-2 h-3 w-3 text-white" />
               <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text font-bold text-transparent">
-                BETA
+                EARLY ACCESS
               </span>
               <span className="ml-2 text-white">Free</span>
             </Badge>
