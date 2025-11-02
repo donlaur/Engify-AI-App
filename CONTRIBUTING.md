@@ -129,7 +129,7 @@ src/
    }
    ```
 
-3. **Error Boundaries**
+5. **Error Boundaries**
    - Wrap components that might fail
    - Provide meaningful error messages
    - Log errors to monitoring service
@@ -209,6 +209,7 @@ src/
 
 ```typescript
 // Component test
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { PromptCard } from '@/components/PromptCard';
 
@@ -228,8 +229,11 @@ describe('PromptCard', () => {
 });
 
 // API test
+import { describe, it, expect, vi } from 'vitest';
 import { POST } from '@/app/api/ai/execute/route';
 import { NextRequest } from 'next/server';
+
+vi.mock('@/lib/mongodb');
 
 describe('/api/ai/execute', () => {
   it('returns AI response for valid request', async () => {
@@ -250,11 +254,68 @@ describe('/api/ai/execute', () => {
 });
 ```
 
+## Testing Standards
+
+### Test Framework: Vitest
+
+**We use Vitest exclusively.** Do not use Jest syntax.
+
+**Why Vitest?**
+
+- ⚡ Faster than Jest (native ESM, no transpilation)
+- 🎯 Better TypeScript support out of the box
+- 🔥 Vite-native (matches our Next.js + Vite setup)
+- ✅ Compatible API with Jest, but more modern
+
+**Required Syntax:**
+
+```typescript
+// ✅ CORRECT - Vitest
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+vi.mock('@/lib/mongodb');
+const mockFn = vi.fn();
+vi.clearAllMocks();
+```
+
+```typescript
+// ❌ WRONG - Jest (will fail pre-commit)
+jest.mock('@/lib/mongodb');
+const mockFn = jest.fn();
+jest.clearAllMocks();
+```
+
+**Pre-commit Checks:**
+
+- All test files are scanned for Jest syntax
+- Commits are blocked if Jest patterns are found
+- See `docs/development/ADR/012-test-framework-standardization.md` for details
+
+**Running Tests:**
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test
+
+# Run tests once (CI mode)
+pnpm test:run
+
+# Run tests with coverage
+pnpm test:coverage
+
+# Run specific test file
+pnpm test path/to/test.test.ts
+```
+
 ## Quality Assurance
 
 ### Day 7 Patterns & Best Practices
 
 #### Mock Data Removal (ADR-009)
+
 - **Zero tolerance:** No mock data in production code
 - **Start at 0:** Initialization values should be `0`, not fake numbers
 - **Empty states:** Show professional empty states instead of fake data
@@ -263,6 +324,7 @@ describe('/api/ai/execute', () => {
 - **Pre-commit checks:** Mock data patterns are automatically flagged
 
 **Examples:**
+
 ```typescript
 // ❌ BAD: Mock data fallback
 const totalPrompts = data.prompts?.total || 100;
@@ -279,12 +341,14 @@ const totalPrompts = data.prompts?.total || 0;
 ```
 
 #### Pattern-Based Bug Fixing (ADR-009)
+
 - **Fix once, apply everywhere:** When fixing a bug, search for the same pattern
 - **Systematic audit:** Don't fix one instance, fix all instances
 - **Document patterns:** Add findings to `docs/testing/PATTERN_AUDIT_DAY7.md`
 - **Prevent recurrence:** Add pre-commit checks or linting rules
 
 #### Frontend Component Architecture (ADR-011)
+
 - **Server Components by default:** Only use Client Components when needed
 - **Component size:** Target < 200 lines, extract logic to hooks
 - **Error boundaries:** Wrap Client Components in ErrorBoundary
@@ -292,6 +356,7 @@ const totalPrompts = data.prompts?.total || 0;
 - **Optimistic UI:** Use optimistic updates for mutations with rollback
 
 **Server vs Client Component Guidelines:**
+
 ```typescript
 // ✅ Server Component - Data fetching
 export default async function PromptsPage() {
@@ -308,12 +373,14 @@ export function PromptsClient({ prompts }: Props) {
 ```
 
 **When to use Server Components:**
+
 - Fetching data from database
 - Accessing backend resources
 - Static content
 - Heavy dependencies (reduce bundle size)
 
 **When to use Client Components:**
+
 - Interactive elements (buttons, forms, inputs)
 - State management (useState, useReducer)
 - Browser APIs (localStorage, window)

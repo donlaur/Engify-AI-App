@@ -1,22 +1,23 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST, DELETE } from '@/app/api/admin/affiliate-links/route';
 
 // Mock dependencies
-jest.mock('@/lib/auth', () => ({
-  auth: jest.fn(),
+vi.mock('@/lib/auth', () => ({
+  auth: vi.fn(),
 }));
 
-jest.mock('@/lib/mongodb', () => ({
-  getDb: jest.fn(),
+vi.mock('@/lib/mongodb', () => ({
+  getDb: vi.fn(),
 }));
 
-jest.mock('@/lib/rate-limit', () => ({
-  checkRateLimit: jest.fn(),
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn(),
 }));
 
-jest.mock('@/lib/logging/logger', () => ({
+vi.mock('@/lib/logging/logger', () => ({
   logger: {
-    apiError: jest.fn(),
+    apiError: vi.fn(),
   },
 }));
 
@@ -26,13 +27,13 @@ import { checkRateLimit } from '@/lib/rate-limit';
 
 describe('/api/admin/affiliate-links', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (checkRateLimit as jest.Mock).mockResolvedValue({ allowed: true });
+    vi.clearAllMocks();
+    (checkRateLimit as any).mockResolvedValue({ allowed: true });
   });
 
   describe('GET', () => {
     it('should return 401 if not authenticated', async () => {
-      (auth as jest.Mock).mockResolvedValue(null);
+      (auth as any).mockResolvedValue(null);
 
       const request = new NextRequest(
         'http://localhost/api/admin/affiliate-links'
@@ -45,7 +46,7 @@ describe('/api/admin/affiliate-links', () => {
     });
 
     it('should return 401 if not super_admin', async () => {
-      (auth as jest.Mock).mockResolvedValue({
+      (auth as any).mockResolvedValue({
         user: { role: 'admin' },
       });
 
@@ -60,10 +61,10 @@ describe('/api/admin/affiliate-links', () => {
     });
 
     it('should return 429 if rate limited', async () => {
-      (auth as jest.Mock).mockResolvedValue({
+      (auth as any).mockResolvedValue({
         user: { role: 'super_admin' },
       });
-      (checkRateLimit as jest.Mock).mockResolvedValue({ allowed: false });
+      (checkRateLimit as any).mockResolvedValue({ allowed: false });
 
       const request = new NextRequest(
         'http://localhost/api/admin/affiliate-links'
@@ -76,7 +77,7 @@ describe('/api/admin/affiliate-links', () => {
     });
 
     it('should return affiliate data for super_admin', async () => {
-      (auth as jest.Mock).mockResolvedValue({
+      (auth as any).mockResolvedValue({
         user: { role: 'super_admin' },
       });
 
@@ -98,23 +99,23 @@ describe('/api/admin/affiliate-links', () => {
       ];
 
       const mockCollection = {
-        find: jest.fn().mockReturnThis(),
-        toArray: jest.fn().mockResolvedValue(mockLinks),
+        find: vi.fn().mockReturnThis(),
+        toArray: vi.fn().mockResolvedValue(mockLinks),
       };
 
       const mockDb = {
-        collection: jest.fn().mockImplementation((name) => {
+        collection: vi.fn().mockImplementation((name) => {
           if (name === 'partnership_outreach') {
             return {
-              find: jest.fn().mockReturnThis(),
-              toArray: jest.fn().mockResolvedValue(mockOutreach),
+              find: vi.fn().mockReturnThis(),
+              toArray: vi.fn().mockResolvedValue(mockOutreach),
             };
           }
           return mockCollection;
         }),
       };
 
-      (getDb as jest.Mock).mockResolvedValue(mockDb);
+      (getDb as any).mockResolvedValue(mockDb);
 
       const request = new NextRequest(
         'http://localhost/api/admin/affiliate-links'
@@ -136,7 +137,7 @@ describe('/api/admin/affiliate-links', () => {
 
   describe('POST', () => {
     it('should return 401 if not authenticated', async () => {
-      (auth as jest.Mock).mockResolvedValue(null);
+      (auth as any).mockResolvedValue(null);
 
       const request = new NextRequest(
         'http://localhost/api/admin/affiliate-links',
@@ -153,7 +154,7 @@ describe('/api/admin/affiliate-links', () => {
     });
 
     it('should create/update affiliate link', async () => {
-      (auth as jest.Mock).mockResolvedValue({
+      (auth as any).mockResolvedValue({
         user: { role: 'super_admin' },
       });
 
@@ -163,14 +164,14 @@ describe('/api/admin/affiliate-links', () => {
       };
 
       const mockCollection = {
-        updateOne: jest.fn().mockResolvedValue(mockResult),
+        updateOne: vi.fn().mockResolvedValue(mockResult),
       };
 
       const mockDb = {
-        collection: jest.fn().mockReturnValue(mockCollection),
+        collection: vi.fn().mockReturnValue(mockCollection),
       };
 
-      (getDb as jest.Mock).mockResolvedValue(mockDb);
+      (getDb as any).mockResolvedValue(mockDb);
 
       const request = new NextRequest(
         'http://localhost/api/admin/affiliate-links',
@@ -198,7 +199,7 @@ describe('/api/admin/affiliate-links', () => {
 
   describe('DELETE', () => {
     it('should return 401 if not authenticated', async () => {
-      (auth as jest.Mock).mockResolvedValue(null);
+      (auth as any).mockResolvedValue(null);
 
       const request = new NextRequest(
         'http://localhost/api/admin/affiliate-links?id=1&type=link'
@@ -211,7 +212,7 @@ describe('/api/admin/affiliate-links', () => {
     });
 
     it('should delete affiliate link', async () => {
-      (auth as jest.Mock).mockResolvedValue({
+      (auth as any).mockResolvedValue({
         user: { role: 'super_admin' },
       });
 
@@ -220,14 +221,14 @@ describe('/api/admin/affiliate-links', () => {
       };
 
       const mockCollection = {
-        deleteOne: jest.fn().mockResolvedValue(mockResult),
+        deleteOne: vi.fn().mockResolvedValue(mockResult),
       };
 
       const mockDb = {
-        collection: jest.fn().mockReturnValue(mockCollection),
+        collection: vi.fn().mockReturnValue(mockCollection),
       };
 
-      (getDb as jest.Mock).mockResolvedValue(mockDb);
+      (getDb as any).mockResolvedValue(mockDb);
 
       const request = new NextRequest(
         'http://localhost/api/admin/affiliate-links?id=1&type=link'
