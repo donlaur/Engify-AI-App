@@ -5,7 +5,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
-import { ArticleContent } from '@/components/article';
+import { ArticleRenderer } from '@/components/article';
 import { getClient } from '@/lib/mongodb';
 
 interface PageProps {
@@ -165,7 +165,7 @@ export default async function ArticlePage({ params }: PageProps) {
         </header>
 
         {/* Content - Enhanced typography */}
-        <ArticleContent html={article.contentHtml} />
+        <ArticleRenderer html={article.contentHtml} />
 
         {/* Footer - Tech newspaper style */}
         <footer className="mt-16 space-y-8 border-t pt-8">

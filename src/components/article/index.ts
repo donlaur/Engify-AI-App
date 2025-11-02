@@ -2,5 +2,5 @@
  * Article Components Barrel Export
  */
 
-export { ArticleContent } from './ArticleContent';
+export { ArticleRenderer } from './ArticleRenderer';
 

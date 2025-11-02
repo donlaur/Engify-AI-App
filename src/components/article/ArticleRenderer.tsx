@@ -1,17 +1,15 @@
 /**
- * ArticleContent Component
+ * ArticleRenderer Component
  * 
- * Ultra-minimal server component for rendering article HTML.
- * No client-side code, no hooks, no interactivity.
- * 
- * Fixed: React error #130 - removed all client-side logic
+ * Server component for rendering article HTML.
+ * Renamed from ArticleContent to force fresh Vercel build.
  */
 
-interface ArticleContentProps {
+interface ArticleRendererProps {
   html: string;
 }
 
-export function ArticleContent({ html }: ArticleContentProps) {
+export function ArticleRenderer({ html }: ArticleRendererProps) {
   return (
     <div
       className="article-content prose prose-slate dark:prose-invert prose-lg max-w-none
