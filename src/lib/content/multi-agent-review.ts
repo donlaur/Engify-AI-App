@@ -8,7 +8,7 @@
  *       Editor → SME → Final Approval
  */
 
-import { AIProviderFactory } from '@/lib/ai/providers/factory';
+import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 
 export interface ContentReviewAgent {
   role: string;

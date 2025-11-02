@@ -14,7 +14,7 @@
  * Different from engineering review - this is for PUBLISHING content to the site.
  */
 
-import { AIProviderFactory } from '@/lib/ai/providers/factory';
+import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 
 export interface ContentPublishingAgent {
   role: string;
