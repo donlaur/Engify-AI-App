@@ -78,6 +78,7 @@
     "ci:bundle": "tsx scripts/ci/check-bundle-size.ts",
     "content:rss": "tsx scripts/content/rss-fetch.ts",
     "admin:stats": "tsx scripts/admin/db-stats.ts",
+    "admin:review-prompts": "tsx scripts/admin/review-prompts.ts",
     "content:sitemap": "tsx scripts/content/sitemap-crawl.ts",
     "content:extract": "tsx scripts/content/html-extract.ts",
     "content:enrich": "tsx scripts/content/metadata-enrich.ts",

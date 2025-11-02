@@ -64,6 +64,29 @@ export const PromptPatternSchema = z.enum([
   'game-play',
 ]);
 
+/**
+ * Quality Score Rubric (1-10 scale):
+ * - Clarity (1-10): How clear and understandable is the prompt?
+ * - Usefulness (1-10): How practical and applicable is it?
+ * - Specificity (1-10): How well-targeted to role/skill level?
+ * - Completeness (1-10): Does it provide all necessary context?
+ * - Examples (1-10): Are examples helpful and relevant?
+ *
+ * Overall Score: Average of all rubric scores
+ */
+export const QualityRubricSchema = z.object({
+  clarity: z.number().min(1).max(10),
+  usefulness: z.number().min(1).max(10),
+  specificity: z.number().min(1).max(10),
+  completeness: z.number().min(1).max(10),
+  examples: z.number().min(1).max(10),
+  overall: z.number().min(1).max(10), // Computed average
+  reviewedBy: z.string().optional(), // Admin who scored it
+  reviewedAt: z.date().optional(),
+  notes: z.string().optional(), // Review notes
+  organizationId: z.string().optional(), // Multi-tenant support
+});
+
 export const PromptSchema = z.object({
   id: z.string(),
   title: z.string().min(1).max(200),
@@ -82,6 +105,11 @@ export const PromptSchema = z.object({
   authorId: z.string().optional(),
   isPublic: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
+  // New fields for quality management
+  active: z.boolean().default(true), // Toggle to show/hide on site
+  qualityScore: QualityRubricSchema.optional(), // Admin quality review
+  source: z.enum(['seed', 'ai-generated', 'user-submitted']).optional(), // Track origin
+  organizationId: z.string().optional(), // Multi-tenant support
 });
 
 export const CreatePromptSchema = PromptSchema.omit({
@@ -102,6 +130,7 @@ export type ExperienceLevel = z.infer<typeof ExperienceLevelSchema>;
 export type PromptPattern = z.infer<typeof PromptPatternSchema>;
 export type CreatePrompt = z.infer<typeof CreatePromptSchema>;
 export type UpdatePrompt = z.infer<typeof UpdatePromptSchema>;
+export type QualityRubric = z.infer<typeof QualityRubricSchema>;
 
 // Helper functions
 export const categoryLabels: Record<PromptCategory, string> = {
