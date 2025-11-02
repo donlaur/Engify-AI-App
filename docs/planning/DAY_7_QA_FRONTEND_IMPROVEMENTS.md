@@ -10,7 +10,7 @@ Related: docs/planning/DAY_6_CONTENT_HARDENING.md, docs/testing/, docs/architect
 **Priority:** High - Production readiness and professional polish  
 **Standards:** Enterprise patterns, DRY principles, no mock data, atomic commits, lint-compliant
 
-Status Legend: ✅ done · ⚠️ in progress · ❌ blocked
+Status Legend: ✅ complete · ⚠️ in progress · ❌ blocked · [ ] not started
 
 ## Phase Exit Criteria (for every phase)
 
@@ -22,6 +22,19 @@ Status Legend: ✅ done · ⚠️ in progress · ❌ blocked
 - Build passes, all tests green
 - Documentation up-to-date
 - Atomic commits, no force push
+
+---
+
+## Phase Detail Documentation
+
+Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUDIT_REPORT_DAY7.md`).
+
+**Documentation Strategy:**
+
+- Phase-specific docs created AS NEEDED during implementation
+- Existing docs: Phase 1 (QA Audit), Phase 2 (OpsHub Enterprise)
+- New docs created when phase begins to capture technical details
+- All docs use 2-way linking (parent ↔ phase detail)
 
 ---
 
@@ -585,12 +598,12 @@ grep -r "TODO.*mock" src/
 
 ---
 
-## Phase 3 — Frontend UI/UX Improvements
+## Phase 4 — Frontend UI/UX Improvements
 
 **Status:** ⚠️ Not Started  
 **Priority:** Medium - User experience polish
 
-### 3.1 Responsive Design Audit
+### 4.1 Responsive Design Audit
 
 **Tasks:**
 
@@ -600,7 +613,7 @@ grep -r "TODO.*mock" src/
 - [ ] Test dark mode on all pages
 - [ ] Fix any unreadable text (white on white, black on black)
 
-### 3.2 Loading States & Skeletons
+### 4.2 Loading States & Skeletons
 
 **Tasks:**
 
@@ -609,7 +622,7 @@ grep -r "TODO.*mock" src/
 - [ ] Add suspense boundaries for async components
 - [ ] Test loading states on slow connections (throttle to 3G)
 
-### 3.3 Error States & Boundaries
+### 4.3 Error States & Boundaries
 
 **Tasks:**
 
@@ -619,7 +632,7 @@ grep -r "TODO.*mock" src/
 - [ ] Test error states (disconnect network, send bad data)
 - [ ] Ensure errors are logged to audit system
 
-### 3.4 Accessibility (A11y) Audit
+### 4.4 Accessibility (A11y) Audit
 
 **Tasks:**
 
@@ -629,7 +642,7 @@ grep -r "TODO.*mock" src/
 - [ ] Ensure keyboard navigation works everywhere
 - [ ] Test with screen reader (VoiceOver or NVDA)
 
-### 3.5 Empty States
+### 4.5 Empty States
 
 **Tasks:**
 
@@ -692,12 +705,12 @@ Target scores:
 
 ---
 
-## Phase 4 — Code Quality & DRY Improvements
+## Phase 5 — Code Quality & DRY Improvements
 
 **Status:** ⚠️ Not Started  
 **Priority:** Medium - Technical debt reduction
 
-### 4.1 Eliminate Code Duplication
+### 5.1 Eliminate Code Duplication
 
 **Tasks:**
 
@@ -715,7 +728,7 @@ Target scores:
 - MongoDB query patterns repeated
 - Error handling boilerplate
 
-### 4.2 Admin CLI Consolidation
+### 5.2 Admin CLI Consolidation
 
 **Goal:** Single DRY admin tool instead of 10+ one-off scripts
 
@@ -732,7 +745,7 @@ Target scores:
 - [ ] Delete old one-off scripts
 - [ ] Document all admin commands in README
 
-### 4.3 Custom Hooks Extraction
+### 5.3 Custom Hooks Extraction
 
 **Tasks:**
 
@@ -742,7 +755,7 @@ Target scores:
 - [ ] Extract `useToastNotifications` hook
 - [ ] Document all hooks in storybook or docs
 
-### 4.4 Constants Consolidation
+### 5.4 Constants Consolidation
 
 **Tasks:**
 
@@ -798,14 +811,14 @@ grep -r "[0-9]\{3,\}" src/ --include="*.ts" --include="*.tsx"
 
 ---
 
-## Phase 5 — Visual Regression Testing & Test Coverage
+## Phase 6 — Visual Regression Testing & Test Coverage
 
 **Status:** ⚠️ Not Started  
 **Priority:** High - Prevent UI regressions and broken layouts
 
 **Goal:** Visual regression tests catch layout breaks, test coverage prevents logic regressions
 
-### 5.1 Visual Regression Testing (Playwright + Snapshots)
+### 6.1 Visual Regression Testing (Playwright + Snapshots)
 
 **Why:** Visual regression tests catch UI breaks that unit tests miss (layout, CSS, responsive design)
 
@@ -896,7 +909,7 @@ test.describe('Visual Regression Tests', () => {
 - [ ] Fail PR if visual diff detected (unless approved)
 - [ ] Provide diff images in PR comments
 
-### 5.2 Component Unit Tests
+### 6.2 Component Unit Tests
 
 **Goal:** 50% test coverage (up from 0%)
 
@@ -911,7 +924,7 @@ test.describe('Visual Regression Tests', () => {
 - [ ] Test loading states
 - [ ] Test dark mode rendering
 
-### 5.3 API Route Tests
+### 6.3 API Route Tests
 
 **Tasks:**
 
@@ -925,7 +938,7 @@ test.describe('Visual Regression Tests', () => {
 - [ ] Verify RBAC enforcement in all admin routes
 - [ ] Verify rate limiting in all routes
 
-### 5.4 Enhanced Pre-commit Hooks
+### 6.4 Enhanced Pre-commit Hooks
 
 **Current Checks:**
 
@@ -943,7 +956,7 @@ test.describe('Visual Regression Tests', () => {
 - [ ] Verify all new API routes have tests
 - [ ] Run visual regression tests on changed pages
 
-### 5.5 E2E Critical Paths
+### 6.5 E2E Critical Paths
 
 **Tasks:**
 
@@ -978,12 +991,12 @@ More detail: [Visual Regression Testing Strategy](../testing/VISUAL_REGRESSION_S
 
 ---
 
-## Phase 6 — Documentation & Knowledge Management
+## Phase 7 — Documentation & Knowledge Management
 
 **Status:** ⚠️ Not Started  
 **Priority:** Medium - Long-term maintainability
 
-### 6.1 Update All Documentation
+### 7.1 Update All Documentation
 
 **Tasks:**
 
@@ -993,7 +1006,7 @@ More detail: [Visual Regression Testing Strategy](../testing/VISUAL_REGRESSION_S
 - [ ] Update architecture diagrams
 - [ ] Update API documentation
 
-### 6.2 Create Missing ADRs
+### 7.2 Create Missing ADRs
 
 **Tasks:**
 
@@ -1002,7 +1015,7 @@ More detail: [Visual Regression Testing Strategy](../testing/VISUAL_REGRESSION_S
 - [ ] ADR-011: Frontend Component Architecture
 - [ ] Update ADR index with all decisions
 
-### 6.3 Developer Guides
+### 7.3 Developer Guides
 
 **Tasks:**
 
@@ -1011,7 +1024,7 @@ More detail: [Visual Regression Testing Strategy](../testing/VISUAL_REGRESSION_S
 - [ ] Create "Component Standards" guide
 - [ ] Update "Testing Strategy" guide
 
-### 6.4 Cross-link Documentation
+### 7.4 Cross-link Documentation
 
 **Tasks:**
 
@@ -1037,12 +1050,12 @@ More detail: [Documentation Audit](../operations/DOCUMENTATION_AUDIT_DAY7.md)
 
 ---
 
-## Phase 7 — Performance Optimization
+## Phase 8 — Performance Optimization
 
 **Status:** ⚠️ Not Started  
 **Priority:** Low - Nice to have
 
-### 7.1 Lighthouse Audit
+### 8.1 Lighthouse Audit
 
 **Tasks:**
 
@@ -1052,7 +1065,7 @@ More detail: [Documentation Audit](../operations/DOCUMENTATION_AUDIT_DAY7.md)
 - [ ] Fix SEO issues (target: 100)
 - [ ] Fix best practices (target: 100)
 
-### 7.2 Bundle Size Optimization
+### 8.2 Bundle Size Optimization
 
 **Tasks:**
 
@@ -1062,7 +1075,7 @@ More detail: [Documentation Audit](../operations/DOCUMENTATION_AUDIT_DAY7.md)
 - [ ] Remove unused dependencies
 - [ ] Optimize images (use Next.js Image component)
 
-### 7.3 Database Query Optimization
+### 8.3 Database Query Optimization
 
 **Tasks:**
 
@@ -1072,7 +1085,7 @@ More detail: [Documentation Audit](../operations/DOCUMENTATION_AUDIT_DAY7.md)
 - [ ] Add caching for frequently accessed data
 - [ ] Monitor slow queries in production
 
-### 7.4 API Response Time
+### 8.4 API Response Time
 
 **Tasks:**
 
@@ -1099,19 +1112,21 @@ More detail: [Performance Optimization Plan](../performance/OPTIMIZATION_DAY7.md
 
 ---
 
-## Success Criteria
+## Success Criteria (End of Day 7)
+
+**Target: Complete by end of day (aggressive but achievable)**
 
 1. ✅ No quality score badges or "Make it Mine" buttons
 2. ✅ No fake views/ratings displayed anywhere
-3. ⚠️ OpsHub fully functional with all admin panels working
-4. ⚠️ Prompt count accurate (132 → ~67, duplicates removed)
-5. ⚠️ Zero mock data in production code
-6. ⚠️ All UI responsive and accessible (Lighthouse 90+)
-7. ⚠️ Test coverage 50%+
-8. ⚠️ Code duplication reduced 50%+
-9. ⚠️ All documentation up-to-date
-10. ⚠️ Build passes, linting clean, no violations
-11. ⚠️ Enterprise standards maintained throughout
+3. [ ] OpsHub fully functional with all admin panels working
+4. [ ] Prompt count accurate (132 → ~67, duplicates removed)
+5. [ ] Zero mock data in production code
+6. [ ] All UI responsive and accessible (Lighthouse 90+)
+7. [ ] Test coverage 50%+
+8. [ ] Code duplication reduced 50%+
+9. [ ] All documentation up-to-date
+10. [ ] Build passes, linting clean, no violations
+11. [ ] Enterprise standards maintained throughout
 
 ---
 
@@ -1127,15 +1142,15 @@ More detail: [Performance Optimization Plan](../performance/OPTIMIZATION_DAY7.md
 - Phase 1.3: `"feat: enable user management in OpsHub"`
 - Phase 1.4: `"fix: repair broken admin API routes (review, audit, settings)"`
 - Phase 1.5: `"feat: add tabbed structure to OpsHub for better organization"`
-- Phase 2.1: `"refactor: remove all remaining mock data from production code"`
-- Phase 2.2: `"feat: connect favorites system to MongoDB backend"`
-- Phase 2.3: `"fix: verify gamification system uses only real data"`
-- Phase 2.4: `"fix: ensure settings page pulls from MongoDB"`
-- Phase 3: `"feat: improve UI/UX with responsive design, loading states, and error boundaries"`
-- Phase 4: `"refactor: eliminate code duplication and consolidate admin CLI"`
-- Phase 5: `"test: add component and API route tests to reach 50% coverage"`
-- Phase 6: `"docs: update all documentation and create missing ADRs"`
-- Phase 7: `"perf: optimize bundle size, database queries, and API response times"`
+- Phase 3.1: `"refactor: remove all remaining mock data from production code"`
+- Phase 3.2: `"feat: connect favorites system to MongoDB backend"`
+- Phase 3.3: `"fix: verify gamification system uses only real data"`
+- Phase 3.4: `"fix: ensure settings page pulls from MongoDB"`
+- Phase 4: `"feat: improve UI/UX with responsive design, loading states, and error boundaries"`
+- Phase 5: `"refactor: eliminate code duplication and consolidate admin CLI"`
+- Phase 6: `"test: add component and API route tests to reach 50% coverage"`
+- Phase 7: `"docs: update all documentation and create missing ADRs"`
+- Phase 8: `"perf: optimize bundle size, database queries, and API response times"`
 
 **DO NOT push to remote until user approves**
 
@@ -1269,7 +1284,13 @@ More detail: [Performance Optimization Plan](../performance/OPTIMIZATION_DAY7.md
 
 ### Recommendation
 
-Focus on Phases 0-2 for Day 7. Defer Phases 3-7 to Day 8 if time-constrained. Quality over quantity.
+Target: Complete ALL phases (0-8) today. Aggressive but achievable with:
+
+- Phase 0: ✅ Already complete (30 min)
+- Phase 1: QA audit FIRST - results determine priority (2-3 hours)
+- Phase 2-8: Execute based on audit findings (12-18 hours)
+- Break for meals, stay focused, atomic commits throughout
+- Quality maintained, no shortcuts on enterprise standards
 
 ---
 
