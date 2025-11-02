@@ -65,10 +65,10 @@ refactor: extract prompt service to separate module
    - Centralize constants in `/src/lib/constants.ts`
 
 2. **Single Source of Truth**
-   - All site statistics come from `/api/stats` endpoint (MongoDB + Redis cache)
-   - Prompt data lives in MongoDB (not static files)
+   - All site statistics come from `/api/stats` endpoint
+   - Prompt data lives in MongoDB (not hardcoded)
    - No hardcoded numbers or duplicated data
-   - No mock data in production code (real data or empty states)
+   - No mock data fallback values (use 0 or omit)
 
 3. **Type Safety**
    - All components and functions must be fully typed
@@ -103,33 +103,23 @@ src/
 
 ### Component Standards
 
-1. **Server vs Client Components**
-   - **Server Components by default** - Use for data fetching, static content
-   - **Client Components when needed** - Only for hooks, events, browser APIs
-   - Never pass event handlers to Server Components
-   - Extract interactive parts to Client Components
-   - Use `'use client'` directive explicitly
+1. **Server Components by Default**
+   - Use Server Components for data fetching and static content
+   - Only use Client Components when interactivity is required
+   - Clear separation between Server and Client Components
+   - See ADR-011 for detailed guidelines
 
-   ```typescript
-   // ✅ Server Component (default)
-   export default async function Page() {
-     const data = await fetchData();
-     return <DataDisplay data={data} />;
-   }
-   
-   // ✅ Client Component (when needed)
-   'use client';
-   export function InteractiveButton({ onClick }: Props) {
-     return <button onClick={onClick}>Click</button>;
-   }
-   ```
+2. **Component Size**
+   - Target: < 200 lines per component
+   - Extract logic to custom hooks
+   - Break large components into smaller pieces
 
-2. **Functional Components Only**
-   - Use React hooks for state management
-   - Prefer composition over inheritance
-   - Keep components small and focused
+3. **Error Boundaries**
+   - Wrap Client Components in ErrorBoundary
+   - Provide meaningful error messages
+   - Log errors to monitoring service
 
-3. **Props Interface**
+4. **Props Interface**
 
    ```typescript
    interface ComponentProps {
@@ -139,21 +129,10 @@ src/
    }
    ```
 
-4. **Error Boundaries**
-   - Wrap all Client Components with Error Boundaries
+3. **Error Boundaries**
+   - Wrap components that might fail
    - Provide meaningful error messages
    - Log errors to monitoring service
-   - Never expose internal errors to users
-
-5. **Loading States**
-   - Use skeleton loaders (not generic "Loading...")
-   - Consistent loading UI across app
-   - Use Suspense boundaries
-
-6. **Empty States**
-   - Consistent empty state component
-   - Helpful messages with CTAs
-   - Test dark mode support
 
 ### API Standards
 
@@ -192,23 +171,6 @@ src/
    - Validate request bodies
    - Sanitize user inputs
    - Check authentication/authorization
-
-4. **Authentication & Authorization**
-   - All API routes must check auth (except public routes)
-   - Use `requireAuth()` from `@/lib/auth/require-auth`
-   - Admin routes use `RBACPresets.requireSuperAdmin()`
-   - Background jobs verify cron secret (`verifyCronRequest()`)
-   - Rate limiting on all public endpoints
-   - Audit logging for sensitive operations
-
-5. **Mock Data Policy**
-   - **Zero mock data in production code**
-   - Real data or proper empty states
-   - Start metrics at 0, not hardcoded
-   - All stats from `/api/stats` endpoint
-   - Document all data sources
-
-   See: `docs/development/ADR/ADR-009-mock-data-removal.md`
 
 ## Testing Standards
 
@@ -290,15 +252,92 @@ describe('/api/ai/execute', () => {
 
 ## Quality Assurance
 
+### Day 7 Patterns & Best Practices
+
+#### Mock Data Removal (ADR-009)
+- **Zero tolerance:** No mock data in production code
+- **Start at 0:** Initialization values should be `0`, not fake numbers
+- **Empty states:** Show professional empty states instead of fake data
+- **Single source of truth:** All stats come from `/api/stats` endpoint
+- **No fallbacks:** Remove fallback values like `|| 100` for stats (use `0` or omit)
+- **Pre-commit checks:** Mock data patterns are automatically flagged
+
+**Examples:**
+```typescript
+// ❌ BAD: Mock data fallback
+const totalPrompts = data.prompts?.total || 100;
+
+// ✅ GOOD: Real data or 0
+const totalPrompts = data.prompts?.total || 0;
+
+// ✅ BEST: Proper empty state
+{totalPrompts === 0 ? (
+  <EmptyState message="No prompts yet" />
+) : (
+  <StatsDisplay count={totalPrompts} />
+)}
+```
+
+#### Pattern-Based Bug Fixing (ADR-009)
+- **Fix once, apply everywhere:** When fixing a bug, search for the same pattern
+- **Systematic audit:** Don't fix one instance, fix all instances
+- **Document patterns:** Add findings to `docs/testing/PATTERN_AUDIT_DAY7.md`
+- **Prevent recurrence:** Add pre-commit checks or linting rules
+
+#### Frontend Component Architecture (ADR-011)
+- **Server Components by default:** Only use Client Components when needed
+- **Component size:** Target < 200 lines, extract logic to hooks
+- **Error boundaries:** Wrap Client Components in ErrorBoundary
+- **Loading states:** Use branded skeletons, not "Loading..." text
+- **Optimistic UI:** Use optimistic updates for mutations with rollback
+
+**Server vs Client Component Guidelines:**
+```typescript
+// ✅ Server Component - Data fetching
+export default async function PromptsPage() {
+  const prompts = await fetchPrompts();
+  return <PromptsClient prompts={prompts} />;
+}
+
+// ✅ Client Component - Interactivity
+'use client';
+export function PromptsClient({ prompts }: Props) {
+  const [filter, setFilter] = useState('');
+  // Interactive logic
+}
+```
+
+**When to use Server Components:**
+- Fetching data from database
+- Accessing backend resources
+- Static content
+- Heavy dependencies (reduce bundle size)
+
+**When to use Client Components:**
+- Interactive elements (buttons, forms, inputs)
+- State management (useState, useReducer)
+- Browser APIs (localStorage, window)
+- React hooks (useEffect, etc.)
+
 ### Pre-commit Checks
 
 The following checks run automatically:
 
-1. **TypeScript Compilation** - `tsc --noEmit`
-2. **ESLint** - Code quality and style
-3. **Prettier** - Code formatting
-4. **Security Scan** - Check for secrets and vulnerabilities
-5. **Test Suite** - Run all tests
+1. **Enterprise Compliance** - `scripts/maintenance/check-enterprise-compliance.js`
+   - Mock data detection
+   - API route requirements (rate limiting, tests, RBAC)
+   - Component requirements (error boundaries, tests)
+   - Schema requirements (organizationId for multi-tenant)
+
+2. **Schema Validation** - `scripts/maintenance/validate-schema.js`
+
+3. **Security Checks** - `scripts/security/security-check.js`
+
+4. **TypeScript Compilation** - `tsc --noEmit`
+
+5. **ESLint** - Code quality and style
+
+6. **Prettier** - Code formatting
 
 ### Manual Checks
 
@@ -352,12 +391,6 @@ Before submitting a PR:
    - Document major architectural decisions
    - Explain alternatives considered
    - Record consequences and trade-offs
-   - Located in `docs/development/ADR/`
-   - Current ADRs:
-     - ADR 009: Pattern-Based Bug Fixing
-     - ADR 009: Mock Data Removal Strategy
-     - ADR 010: Admin CLI Consolidation
-     - ADR 011: Frontend Component Architecture
 
 ### Markdown Standards
 
@@ -422,25 +455,6 @@ Before submitting a PR:
 - [ ] Caching is implemented
 - [ ] Bundle size is reasonable
 
-## Pattern-Based Bug Fixing (Day 7)
-
-When fixing bugs, follow this systematic approach:
-
-1. **Identify Pattern** - Document root cause, file type, code pattern
-2. **Systematic Audit** - Search entire codebase for same pattern
-3. **Fix All Instances** - Address all occurrences at once
-4. **Document** - Create audit report in `docs/testing/PATTERN_AUDIT_DAY7.md`
-5. **Prevent** - Add pre-commit hook or lint rule
-
-**Example:**
-- Bug: Server Component with `onClick` handler
-- Pattern: Server Components with event handlers
-- Audit: Search all files with `onClick` handlers
-- Fix: Extract to Client Components
-- Prevent: Pre-commit hook checks for pattern
-
-See: `docs/development/ADR/009-pattern-based-bug-fixing.md`
-
 ## Getting Help
 
 ### Resources
@@ -448,10 +462,7 @@ See: `docs/development/ADR/009-pattern-based-bug-fixing.md`
 - **Documentation**: [docs/README.md](docs/README.md)
 - **Architecture**: [docs/architecture/OVERVIEW.md](docs/architecture/OVERVIEW.md)
 - **API Docs**: [docs/api/](docs/api/)
-- **Development Guides**: [docs/development/](docs/development/)
-  - [Adding a New Admin Panel](docs/development/ADDING_ADMIN_PANEL.md)
-  - [Creating API Routes](docs/development/CREATING_API_ROUTES.md)
-  - [Component Standards](docs/development/COMPONENT_STANDARDS.md)
+- **Development Guide**: [docs/DEVELOPMENT_GUIDE.md](docs/DEVELOPMENT_GUIDE.md)
 
 ### Communication
 

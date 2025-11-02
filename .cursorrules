@@ -136,10 +136,65 @@ type(scope): description
 - ❌ NO mixing server/client components incorrectly
 - ❌ NO committing commented-out code
 - ❌ NO TODO comments without tickets
-- ❌ NO mock data in production code (real data or empty states)
-- ❌ NO Server Components with event handlers (use Client Components)
-- ❌ NO unprotected API routes (always check auth/RBAC)
-- ❌ NO hardcoded stats (fetch from `/api/stats` or database)
+- ❌ NO mock data in production code (see ADR-009)
+- ❌ NO fallback values like `|| 100` for stats (use 0 or omit)
+- ❌ NO fake views/ratings (start at 0, show empty state)
+
+## Day 7 Patterns & Best Practices
+
+### Mock Data Removal (ADR-009)
+- **Zero tolerance:** No mock data in production code
+- **Start at 0:** Initialization values should be 0, not fake numbers
+- **Empty states:** Show professional empty states instead of fake data
+- **Single source of truth:** All stats come from `/api/stats` endpoint
+- **Pre-commit checks:** Mock data patterns are automatically flagged
+
+### Pattern-Based Bug Fixing (ADR-009)
+- **Fix once, apply everywhere:** When fixing a bug, search for the same pattern
+- **Systematic audit:** Don't fix one instance, fix all instances
+- **Document patterns:** Add to PATTERN_AUDIT_DAY7.md
+- **Prevent recurrence:** Add pre-commit checks or linting rules
+
+### Frontend Component Architecture (ADR-011)
+- **Server Components by default:** Only use Client Components when needed
+- **Component size:** Target < 200 lines, extract logic to hooks
+- **Error boundaries:** Wrap Client Components in ErrorBoundary
+- **Loading states:** Use branded skeletons, not "Loading..." text
+- **Optimistic UI:** Use optimistic updates for mutations with rollback
+- **Data fetching:** Server Components for DB queries, API routes when needed
+
+### Component Guidelines
+- **Server Components:** Use for data fetching, static content, backend resources
+- **Client Components:** Use for interactivity, hooks, browser APIs, event handlers
+- **Separation:** Clear Server/Client boundary, extract interactive parts
+- **Example Pattern:**
+  ```typescript
+  // Server Component (page.tsx)
+  export default async function Page() {
+    const data = await fetchData();
+    return <ClientComponent data={data} />;
+  }
+  
+  // Client Component (ClientComponent.tsx)
+  'use client';
+  export function ClientComponent({ data }: Props) {
+    const [state, setState] = useState();
+    // Interactive logic
+  }
+  ```
+
+### Pre-commit Hook Standards
+- **Enterprise compliance:** Run automatically on commit
+- **Mock data checks:** Flags fallback values, fake metrics, TODO comments
+- **API route requirements:** Rate limiting, tests, RBAC, audit logging
+- **Component requirements:** Error boundaries, tests for new components
+- **Schema requirements:** organizationId for multi-tenant compliance
+
+### Related Documentation
+- ADR-009: Mock Data Removal Strategy (`docs/development/ADR/009-mock-data-removal-strategy.md`)
+- ADR-011: Frontend Component Architecture (`docs/development/ADR/011-frontend-component-architecture.md`)
+- Pattern Audit: `docs/testing/PATTERN_AUDIT_DAY7.md`
+- Mock Data Audit: `docs/testing/MOCK_DATA_AUDIT_DAY7.md`
 
 ## Progressive Enhancement Philosophy
 1. Start with TypeScript files (fast iteration)
@@ -155,67 +210,9 @@ type(scope): description
 4. Will this scale?
 5. Is this secure?
 
-## Day 7 Patterns & Learnings
-
-### Pattern-Based Bug Fixing
-When fixing a bug, always:
-1. Identify the pattern (not just the symptom)
-2. Search entire codebase for same pattern
-3. Fix all instances at once
-4. Document in audit report
-5. Add prevention (pre-commit hook, lint rule, docs)
-
-See: `docs/testing/PATTERN_AUDIT_DAY7.md`
-
-### Mock Data Policy
-- Zero mock data in production code
-- Real data or proper empty states
-- Start metrics at 0, not hardcoded
-- All stats from `/api/stats` endpoint (single source of truth)
-- Document all data sources
-
-See: `docs/development/ADR/ADR-009-mock-data-removal.md`
-
-### Server/Client Component Boundaries
-- Server Components by default (for data fetching)
-- Client Components only when needed (hooks, events, browser APIs)
-- Never pass event handlers to Server Components
-- Extract interactive parts to Client Components
-- Use `'use client'` directive explicitly
-
-### Error Handling Standards
-- Wrap all Client Components with Error Boundaries
-- Provide meaningful error messages
-- Log errors to monitoring service
-- Use proper HTTP status codes in API routes
-- Never expose internal errors to clients
-
-### Loading & Empty States
-- Use skeleton loaders (not "Loading...")
-- Consistent empty state component
-- Helpful messages with CTAs
-- Test dark mode for all states
-
-### Authentication & Authorization
-- All API routes must check auth (except public routes)
-- Use RBAC for admin routes (`RBACPresets.requireSuperAdmin()`)
-- Background jobs verify cron secret (`verifyCronRequest()`)
-- Rate limiting on all public endpoints
-- Audit logging for sensitive operations
-
-See: `docs/testing/AUTH_AUDIT_DAY7.md`
-
-### Code Organization
-- Admin CLI consolidated (`pnpm admin <command>`)
-- DRY principles enforced
-- Single source of truth for all data
-- Constants centralized in `/src/lib/constants/`
-
 ## Remember
 - Velocity AND quality, not one or the other
 - Ship fast, but ship production-ready code
 - No ego - delete and start over if needed
 - Code is read more than written
 - Future you will thank present you for good docs
-- Fix patterns, not just instances
-- Real data or empty states, never fake metrics
