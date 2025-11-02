@@ -10,15 +10,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { getStats } from '@/lib/stats-cache';
-
-const roles = [
-  { name: 'Engineers', icon: Icons.code, count: '24 prompts' },
-  { name: 'Managers', icon: Icons.users, count: '18 prompts' },
-  { name: 'Designers', icon: Icons.palette, count: '12 prompts' },
-  { name: 'PMs', icon: Icons.target, count: '15 prompts' },
-];
-
 const features = [
   {
     icon: Icons.sparkles,
@@ -29,9 +20,9 @@ const features = [
   },
   {
     icon: Icons.target,
-    title: '15 Proven Patterns',
+    title: 'Battle-Tested Patterns',
     description:
-      'Learn battle-tested patterns used by top AI practitioners worldwide.',
+      'Learn proven patterns used by top AI practitioners worldwide.',
     gradient: 'from-blue-500 to-cyan-500',
   },
   {
@@ -49,23 +40,69 @@ const features = [
   },
 ];
 
+// Fetch stats from API (with ISR for performance)
+async function getStats() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/stats`, {
+      next: { revalidate: 3600 }, // Revalidate every hour
+    });
+    
+    if (!res.ok) {
+      throw new Error('Failed to fetch stats');
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error('Failed to fetch stats:', error);
+    // Fallback to reasonable defaults
+    return {
+      stats: { prompts: 76, patterns: 23, users: 0 },
+      prompts: { total: 76, byRole: {}, byCategory: {} },
+      patterns: { total: 23 },
+    };
+  }
+}
+
 export default async function Home() {
   const data = await getStats();
   const allowSignup = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
 
-  const siteStats = {
-    totalPrompts: data.stats.prompts,
-    totalPatterns: data.stats.patterns,
-    totalArticles: 46,
-    aiProviders: 4,
-  };
-
+  // Build stats for display
   const stats = [
-    { label: 'Expert Prompts', value: `${data.stats.prompts}+` },
-    { label: 'Proven Patterns', value: '23' },
+    { label: 'Expert Prompts', value: `${data.prompts?.total || data.stats?.prompts || 76}+` },
+    { label: 'Proven Patterns', value: `${data.patterns?.total || data.stats?.patterns || 23}` },
     { label: 'AI Providers', value: '4' },
     { label: 'Starting At', value: 'Free Beta' },
   ];
+
+  // Build role stats from data
+  const roleIcons = {
+    Engineers: Icons.code,
+    Managers: Icons.users,
+    Designers: Icons.palette,
+    'Product Managers': Icons.target,
+    PMs: Icons.target,
+  };
+
+  const roles = data.prompts?.byRole
+    ? Object.entries(data.prompts.byRole)
+        .map(([name, count]) => ({
+          name,
+          icon: roleIcons[name as keyof typeof roleIcons] || Icons.code,
+          count: `${count} prompts`,
+        }))
+        .slice(0, 4) // Show top 4 roles
+    : [
+        { name: 'Engineers', icon: Icons.code, count: '0 prompts' },
+        { name: 'Managers', icon: Icons.users, count: '0 prompts' },
+        { name: 'Designers', icon: Icons.palette, count: '0 prompts' },
+        { name: 'PMs', icon: Icons.target, count: '0 prompts' },
+      ];
+
+  const siteStats = {
+    totalPrompts: data.prompts?.total || data.stats?.prompts || 76,
+    totalPatterns: data.patterns?.total || data.stats?.patterns || 23,
+  };
 
   return (
     <MainLayout>
