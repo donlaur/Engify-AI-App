@@ -5,7 +5,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
-import { ArticleRenderer } from '@/components/article';
+// Removed ArticleRenderer import - inlining HTML directly
 import { getClient } from '@/lib/mongodb';
 
 interface PageProps {
@@ -165,7 +165,10 @@ export default async function ArticlePage({ params }: PageProps) {
         </header>
 
         {/* Content - Enhanced typography */}
-        <ArticleRenderer html={article.contentHtml} />
+        <div 
+          className="prose prose-lg max-w-none"
+          dangerouslySetInnerHTML={{ __html: article.contentHtml }} 
+        />
 
         {/* Footer - Tech newspaper style */}
         <footer className="mt-16 space-y-8 border-t pt-8">
