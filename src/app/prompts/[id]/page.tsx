@@ -17,6 +17,7 @@ import {
   roleLabels,
   type UserRole,
 } from '@/lib/schemas/prompt';
+import { CopyButton, ShareButton } from '@/components/features/PromptActions';
 import Link from 'next/link';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
@@ -183,23 +184,14 @@ export default async function PromptPage({
           <div className="rounded-lg border bg-card p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Prompt Template</h2>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(prompt.content);
-                }}
-              >
-                <Icons.copy className="mr-2 h-4 w-4" />
-                Copy
-              </Button>
+              <CopyButton content={prompt.content} />
             </div>
             <pre className="whitespace-pre-wrap rounded-lg bg-muted p-4 text-sm">
               {prompt.content}
             </pre>
           </div>
 
-          {/* Share & Actions */}
+          {/* Navigation & Share */}
           <div className="mt-8 flex gap-4">
             <Button asChild>
               <Link href="/prompts">
@@ -207,23 +199,10 @@ export default async function PromptPage({
                 Back to Library
               </Link>
             </Button>
-            <Button
-              variant="outline"
-              onClick={async () => {
-                if (navigator.share) {
-                  await navigator.share({
-                    title: prompt.title,
-                    text: prompt.description,
-                    url: window.location.href,
-                  });
-                } else {
-                  await navigator.clipboard.writeText(window.location.href);
-                }
-              }}
-            >
-              <Icons.share className="mr-2 h-4 w-4" />
-              Share
-            </Button>
+            <ShareButton
+              title={prompt.title}
+              description={prompt.description}
+            />
           </div>
 
           {/* Related Prompts */}
