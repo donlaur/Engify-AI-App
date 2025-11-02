@@ -1,10 +1,9 @@
 /**
- * Weekly Digest Job
- *
- * Sends weekly email digest to active users
- * POST /api/jobs/weekly-digest
- *
- * Called by QStash scheduled job
+ * AI Summary: Weekly Digest Job - Sends weekly email digest to active users
+ * Protected endpoint requiring cron authentication. Aggregates weekly activity data
+ * and sends personalized email digests to users who used the platform during the week.
+ * Called by QStash scheduled job. Part of Day 7 Audit #6 medium priority security improvements.
+ * Last updated: 2025-11-02
  */
 
 import { NextRequest, NextResponse } from 'next/server';

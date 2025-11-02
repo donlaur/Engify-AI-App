@@ -1,10 +1,9 @@
 /**
- * Daily Usage Report Job
- *
- * Aggregates daily API key usage statistics
- * POST /api/jobs/daily-usage-report
- *
- * Called by QStash scheduled job
+ * AI Summary: Daily Usage Report Job - Aggregates daily API key usage statistics
+ * Protected endpoint requiring cron authentication. Aggregates API key usage data
+ * for all users and generates daily reports. Called by QStash scheduled job.
+ * Part of Day 7 Audit #6 medium priority security improvements.
+ * Last updated: 2025-11-02
  */
 
 import { NextRequest, NextResponse } from 'next/server';
