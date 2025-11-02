@@ -102,3 +102,8 @@ lambda/*.dist-info/
 !lambda/package.json
 .env.local.backup
 .env*.local
+
+# Private/confidential competitive analysis
+**/COMPETITIVE_ANALYSIS*.md
+**/COMPETITOR*.md
+docs/private/
