@@ -6,18 +6,22 @@
 
 import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '../trpc';
+import { userService } from '@/lib/services/UserService';
+import { skillTrackingService } from '@/lib/services/SkillTrackingService';
 
 export const userRouter = createTRPCRouter({
   /**
    * Get current user's profile
    */
   getProfile: protectedProcedure.query(async ({ ctx }) => {
-    // TODO: Implement with MongoDB service
-    // ctx.session.user is available
+    const user = await userService.getUserById(ctx.session.user.id);
+    if (!user) {
+      throw new Error('User not found');
+    }
     return {
-      id: ctx.session.user.id,
-      email: ctx.session.user.email,
-      name: ctx.session.user.name,
+      id: user.id,
+      email: user.email,
+      name: user.name,
     };
   }),
 
@@ -31,18 +35,21 @@ export const userRouter = createTRPCRouter({
         image: z.string().url().optional(),
       })
     )
-    .mutation(async ({ ctx: _ctx, input: _input }) => {
-      // TODO: Implement with MongoDB service
-      // Will use _ctx.session.user.id and _input when implemented
+    .mutation(async ({ ctx, input }) => {
+      const user = await userService.updateUser(ctx.session.user.id, input);
+      if (!user) {
+        throw new Error('Failed to update user');
+      }
       return { success: true };
     }),
 
   /**
    * Get user's learning progress
    */
-  getProgress: protectedProcedure.query(async ({ ctx: _ctx }) => {
-    // TODO: Implement with MongoDB service
-    // Will use _ctx.session.user.id when implemented
-    return [];
+  getProgress: protectedProcedure.query(async ({ ctx }) => {
+    const skills = await skillTrackingService.getUserSkills(
+      ctx.session.user.id
+    );
+    return skills;
   }),
 });

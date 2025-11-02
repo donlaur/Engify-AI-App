@@ -74,6 +74,9 @@ export class GamificationService extends BaseService<UserGamification> {
       };
 
       await collection.insertOne(gamification);
+
+      // Award "First Steps" achievement for new users
+      await this.checkAchievements(userId);
     }
 
     return gamification;
@@ -312,6 +315,10 @@ export class GamificationService extends BaseService<UserGamification> {
       // Check requirement
       let unlocked = false;
       switch (achievement.requirement.type) {
+        case 'welcome':
+          // Welcome achievement unlocks on first login (when gamification record is created)
+          unlocked = true;
+          break;
         case 'prompts_used':
           unlocked =
             gamification.stats.promptsUsed >= achievement.requirement.target;

@@ -18,6 +18,18 @@ export interface Achievement {
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
+  // Milestone Achievements
+  {
+    id: 'welcome',
+    name: 'Welcome Aboard',
+    description: 'Join the Engify community',
+    icon: '👋',
+    category: 'milestone',
+    xpReward: 10,
+    requirement: { type: 'welcome', target: 1 },
+    rarity: 'common',
+  },
+
   // Learning Achievements
   {
     id: 'first-prompt',
@@ -49,7 +61,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: { type: 'patterns_mastered', target: 15 },
     rarity: 'legendary',
   },
-  
+
   // Usage Achievements
   {
     id: 'power-user-10',
@@ -101,7 +113,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: { type: 'daily_streak', target: 30 },
     rarity: 'legendary',
   },
-  
+
   // Career Achievements
   {
     id: 'skill-tracker',
@@ -153,7 +165,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: { type: 'promotion_readiness', target: 90 },
     rarity: 'legendary',
   },
-  
+
   // Social Achievements
   {
     id: 'team-player',
@@ -185,7 +197,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: { type: 'favorites_received', target: 10 },
     rarity: 'rare',
   },
-  
+
   // Milestone Achievements
   {
     id: 'time-saver',

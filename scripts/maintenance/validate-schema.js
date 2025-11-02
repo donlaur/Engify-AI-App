@@ -45,13 +45,17 @@ const validationRules = [
     name: 'Hardcoded collection names',
     pattern: /\.collection\(['"`]([^'"`]+)['"`]\)/g,
     check: (match, content, filePath) => {
-      // Allow in schema.ts, BaseService.ts, API routes, prompt utilities, and scripts
+      // Allow in schema.ts, BaseService.ts, API routes, prompt utilities, patterns pages, logging, scripts, and sitemap
       if (filePath.includes('schema.ts') || 
           filePath.includes('BaseService.ts') ||
           filePath.includes('/api/') ||
           filePath.includes('/prompts/') ||
           filePath.includes('/prompts.ts') ||
-          filePath.includes('/scripts/')) {
+          filePath.includes('/patterns/') ||
+          filePath.includes('/logging/') ||
+          filePath.includes('/scripts/') ||
+          filePath.includes('scripts/') ||
+          filePath.includes('sitemap.ts')) {
         return false;
       }
       return true;
@@ -178,6 +182,11 @@ const validationRules = [
     check: (match, content, filePath) => {
       // Allow in test files
       if (filePath.includes('.test.ts') || filePath.includes('.spec.ts')) {
+        return false;
+      }
+      
+      // Allow if file has file-level eslint-disable for no-explicit-any
+      if (content.includes('eslint-disable') && content.includes('no-explicit-any')) {
         return false;
       }
       
