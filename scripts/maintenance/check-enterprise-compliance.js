@@ -334,6 +334,133 @@ const complianceRules = [
     message: 'Hardcoded AI model name - use centralized config',
     suggestion: 'Import { getModelById } from "@/lib/config/ai-models"',
   },
+  
+  {
+    name: 'Mock data fallback values in production code',
+    pattern: /\|\|\s*\d{2,}/g,
+    check: (match, content, filePath) => {
+      // Skip test files (mock data is acceptable in tests)
+      if (filePath.includes('.test.') || filePath.includes('.spec.') || filePath.includes('__tests__')) {
+        return false;
+      }
+      
+      // Skip seed files (initialization values are acceptable)
+      if (filePath.includes('seed') || filePath.includes('data/seed')) {
+        return false;
+      }
+      
+      // Skip schema files (default values are acceptable)
+      if (filePath.includes('schema') || filePath.includes('schemas')) {
+        return false;
+      }
+      
+      // Skip configuration files (constants are acceptable)
+      if (filePath.includes('constants') || filePath.includes('config')) {
+        return false;
+      }
+      
+      // Skip date calculations (milliseconds, etc.)
+      if (match.includes('1000') || match.includes('60') || match.includes('24')) {
+        // Check if it's a date calculation - need to find match index
+        const matchIndex = content.indexOf(match);
+        if (matchIndex !== -1) {
+          const contextBefore = content.substring(Math.max(0, matchIndex - 50), matchIndex);
+          if (contextBefore.includes('Date') || contextBefore.includes('time') || contextBefore.includes('ms')) {
+            return false;
+          }
+        }
+      }
+      
+      // Check if it's in production code (app/, components/, lib/)
+      const isProductionCode = filePath.includes('src/app/') || 
+                              filePath.includes('src/components/') ||
+                              (filePath.includes('src/lib/') && !filePath.includes('__tests__'));
+      
+      if (!isProductionCode) {
+        return false;
+      }
+      
+      // Check context - is this a fallback for stats/counts?
+      const matchIndex = content.indexOf(match);
+      if (matchIndex === -1) return false;
+      const contextAfter = content.substring(matchIndex, matchIndex + 100);
+      const isStatsFallback = contextAfter.includes('prompts') || 
+                             contextAfter.includes('patterns') ||
+                             contextAfter.includes('total') ||
+                             contextAfter.includes('count') ||
+                             contextAfter.includes('stats');
+      
+      return isStatsFallback;
+    },
+    severity: 'HIGH',
+    message: 'Mock data fallback value detected - violates ADR-009',
+    suggestion: 'Remove fallback value or use 0. See docs/testing/MOCK_DATA_AUDIT_DAY7.md',
+  },
+  
+  {
+    name: 'Mock engagement metrics (views/ratings) in production',
+    pattern: /(views|rating):\s*\d{3,}/g,
+    check: (match, content, filePath) => {
+      // Skip test files
+      if (filePath.includes('.test.') || filePath.includes('.spec.') || filePath.includes('__tests__')) {
+        return false;
+      }
+      
+      // Skip seed files (initialization at 0 is acceptable)
+      if (filePath.includes('seed') || filePath.includes('data/seed')) {
+        return false;
+      }
+      
+      // Skip schema files (default values are acceptable)
+      if (filePath.includes('schema') || filePath.includes('schemas')) {
+        return false;
+      }
+      
+      // Check if it's starting at 0 (acceptable)
+      if (match.includes(': 0') || match.includes('= 0')) {
+        return false;
+      }
+      
+      // Check if it's a calculation or increment
+      const matchIndex = content.indexOf(match);
+      if (matchIndex === -1) return false;
+      const contextBefore = content.substring(Math.max(0, matchIndex - 30), matchIndex);
+      if (contextBefore.includes('$inc') || contextBefore.includes('increment') || contextBefore.includes('+= ')) {
+        return false;
+      }
+      
+      // Check if it's in production code
+      const isProductionCode = filePath.includes('src/app/') || 
+                              filePath.includes('src/components/') ||
+                              (filePath.includes('src/lib/') && !filePath.includes('__tests__'));
+      
+      return isProductionCode;
+    },
+    severity: 'HIGH',
+    message: 'Mock engagement metrics detected - violates ADR-009',
+    suggestion: 'Remove fake views/ratings. Start at 0 or show empty state. See docs/testing/MOCK_DATA_AUDIT_DAY7.md',
+  },
+  
+  {
+    name: 'TODO comments indicating mock/fake data',
+    pattern: /TODO.*(fake|mock|stub|placeholder).*data/gi,
+    check: (match, content, filePath) => {
+      // Skip test files
+      if (filePath.includes('.test.') || filePath.includes('.spec.') || filePath.includes('__tests__')) {
+        return false;
+      }
+      
+      // Check if it's in production code
+      const isProductionCode = filePath.includes('src/app/') || 
+                              filePath.includes('src/components/') ||
+                              (filePath.includes('src/lib/') && !filePath.includes('__tests__'));
+      
+      return isProductionCode;
+    },
+    severity: 'MEDIUM',
+    message: 'TODO comment indicates mock data needs replacement',
+    suggestion: 'Replace mock data with real data source or remove TODO. See ADR-009',
+  },
 ];
 
 // Check a file for compliance violations
@@ -346,7 +473,7 @@ function checkFile(filePath, isNewFile = false) {
     const regex = new RegExp(pattern.source, pattern.flags);
     
     while ((match = regex.exec(content)) !== null) {
-      if (check(match[0], content, filePath, match.index)) {
+      if (check(match[0], content, filePath)) {
         const lines = content.substring(0, match.index).split('\n');
         const lineNumber = lines.length;
         
