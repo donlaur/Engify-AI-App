@@ -202,34 +202,40 @@ export function ContentManagementCMS() {
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription>Total Items</CardDescription>
-            <CardTitle className="text-3xl">{stats.total}</CardTitle>
+            <CardDescription className="text-xs">Total Items</CardDescription>
+            <CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription>AI Questions</CardDescription>
-            <CardTitle className="text-3xl">
+            <CardDescription className="text-xs">AI Questions</CardDescription>
+            <CardTitle className="text-4xl font-bold">
               {stats.ai_adoption_question}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription>Stories</CardDescription>
-            <CardTitle className="text-3xl">{stats.learning_story}</CardTitle>
+            <CardDescription className="text-xs">Stories</CardDescription>
+            <CardTitle className="text-4xl font-bold">
+              {stats.learning_story}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription>Case Studies</CardDescription>
-            <CardTitle className="text-3xl">{stats.case_study}</CardTitle>
+            <CardDescription className="text-xs">Case Studies</CardDescription>
+            <CardTitle className="text-4xl font-bold">
+              {stats.case_study}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription>Frameworks</CardDescription>
-            <CardTitle className="text-3xl">{stats.framework_guide}</CardTitle>
+            <CardDescription className="text-xs">Frameworks</CardDescription>
+            <CardTitle className="text-4xl font-bold">
+              {stats.framework_guide}
+            </CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -241,11 +247,11 @@ export function ContentManagementCMS() {
             placeholder="Search content..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
+            className="max-w-sm bg-white dark:bg-gray-800"
           />
         </div>
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800">
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
           <SelectContent>
@@ -259,7 +265,7 @@ export function ContentManagementCMS() {
       </div>
 
       {/* Content Table */}
-      <Card>
+      <Card className="bg-white dark:bg-gray-900">
         <CardHeader>
           <CardTitle>Content Items</CardTitle>
           <CardDescription>
@@ -277,75 +283,90 @@ export function ContentManagementCMS() {
               No content found
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[300px]">Title</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead>Updated</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredContent.map((item) => (
-                  <TableRow key={item._id}>
-                    <TableCell className="font-medium">
-                      <button
-                        onClick={() => handlePreview(item)}
-                        className="text-left hover:underline"
-                      >
-                        {item.title}
-                      </button>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{item.type}</Badge>
-                    </TableCell>
-                    <TableCell>{item.category || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {item.tags.slice(0, 2).map((tag, i) => (
-                          <Badge
-                            key={i}
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                        {item.tags.length > 2 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{item.tags.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(item.updatedAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEdit(item)}
-                        >
-                          <Icons.edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDelete(item._id)}
-                        >
-                          <Icons.delete className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-50 dark:bg-gray-800">
+                    <TableHead className="w-[300px] font-semibold">
+                      Title
+                    </TableHead>
+                    <TableHead className="font-semibold">Type</TableHead>
+                    <TableHead className="font-semibold">Category</TableHead>
+                    <TableHead className="font-semibold">Tags</TableHead>
+                    <TableHead className="font-semibold">Updated</TableHead>
+                    <TableHead className="text-right font-semibold">
+                      Actions
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredContent.map((item) => (
+                    <TableRow
+                      key={item._id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      <TableCell className="font-medium">
+                        <button
+                          onClick={() => handlePreview(item)}
+                          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+                        >
+                          {item.title}
+                        </button>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-normal">
+                          {item.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-gray-600 dark:text-gray-400">
+                        {item.category || '-'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {item.tags.slice(0, 2).map((tag, i) => (
+                            <Badge
+                              key={i}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                          {item.tags.length > 2 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{item.tags.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                        {new Date(item.updatedAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEdit(item)}
+                            className="hover:bg-blue-50 dark:hover:bg-blue-900"
+                          >
+                            <Icons.edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDelete(item._id)}
+                            className="hover:bg-red-50 dark:hover:bg-red-900"
+                          >
+                            <Icons.delete className="h-4 w-4 text-red-600 dark:text-red-400" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
