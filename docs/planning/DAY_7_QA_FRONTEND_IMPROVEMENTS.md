@@ -139,9 +139,9 @@ Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUD
 #### 🟡 Medium Priority Issues
 
 - [x] **#6 - Tagline Rewrite** ✅ DONE
-  - Removed "AI-Powered Prompt Engineering is Taking Off 🚀"
-  - Replaced with "Engineering Excellence, Amplified"
-  - Headline changed to "Amplify Engineering Workflows"
+  - Changed homepage badge from "Engineering Excellence, Amplified" to "BETA Free" (gradient + white)
+  - Updated stats label from "Starting At: Free Beta" to "Beta Access: Free"
+  - Headline: "Amplify Engineering Workflows"
 
 - [x] **#10 - Patterns Listed Twice in Footer** ✅ DONE
   - Removed duplicate "Patterns" link
@@ -151,6 +151,16 @@ Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUD
   - Consolidated into single cohesive footer
   - GitHub/LinkedIn/Hire Me under Social section
   - Clean copyright + attribution at bottom only
+  - "Built by Donnie Laur" now links to `/hireme`
+
+- [x] **#13 - /hireme Page Created** ✅ DONE
+  - Custom 404 page created with "Robot Has Failed You" theme
+  - /hireme page created with focus on Engineering Leadership
+  - Balance of hands-on technical + leadership skills
+  - Tagline: "Engineering Manager · AI Enablement Coach · Hands-On Technical Leader"
+  - Skills: Leadership + Full-Stack Development + AI Training
+  - Resume download button fixed
+  - Footer "Built by Donnie Laur" links to /hireme
 
 - [ ] **#12 - Homepage Stats Breakdown** (2 hours)
   - Add stats section with breakdown by role/category/persona
