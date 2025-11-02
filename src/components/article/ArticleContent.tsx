@@ -1,9 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Icons } from '@/lib/icons';
-import { toast } from '@/hooks/use-toast';
 
 interface ArticleContentProps {
   html: string;
