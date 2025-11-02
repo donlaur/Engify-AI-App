@@ -107,12 +107,12 @@ Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUD
 
 #### 🔴 Critical Issues (Fix First)
 
-- [ ] **#4 - Logout Page 404** (30 min)
-  - Create `/logout` page or route handler
-  - Log user out and redirect to homepage
-  - Add success toast notification
+- [x] **#4 - Logout Page 404** ✅ DONE
+  - Created `/logout` page with NextAuth signOut
+  - Logs user out and redirects to homepage
+  - Shows loading spinner during logout
 
-- [ ] **#5 - Hardcoded/Inconsistent Stats (DRY VIOLATION)** (2-3 hours)
+- [ ] **#5 - Hardcoded/Inconsistent Stats (DRY VIOLATION)** ⚠️ IN PROGRESS
   - Create `/api/stats` endpoint with MongoDB queries
   - Return all counts (prompts, patterns, breakdowns)
   - Implement ISR with 1-hour revalidation
@@ -120,38 +120,36 @@ Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUD
   - Remove ALL hardcoded numbers (76, 23, 113, etc.)
   - Update all components to use `/api/stats`
 
-- [ ] **#8 - CTA Buttons Don't Link** (10 min)
-  - "Browse Prompt Playbook" → `/prompts`
-  - "Request Beta Access" → `/signup`
-  - Test on all devices
+- [x] **#8 - CTA Buttons Don't Link** ✅ DONE (Already working)
+  - "Browse Prompt Playbook" → `/prompts` ✓
+  - "Request Beta Access" → `/signup` ✓
 
-- [ ] **#9 - API Reference in Footer (SECURITY RISK)** (30 min)
-  - Remove "API Reference" from public footer
-  - Move to authenticated docs area or remove entirely
-  - Verify no sensitive API structure exposed
+- [x] **#9 - API Reference in Footer (SECURITY RISK)** ✅ DONE
+  - Removed "API Reference" from public footer
+  - No sensitive API structure exposed publicly
 
 #### 🟠 High Priority Issues
 
-- [ ] **#7 - Mobile CTA Buttons Don't Stack** (15 min)
-  - Add `flex-col sm:flex-row` responsive classes
-  - Make buttons full-width on mobile
-  - Ensure 44x44px minimum touch targets
+- [x] **#7 - Mobile CTA Buttons Don't Stack** ✅ DONE
+  - Added `flex-col sm:flex-row` responsive classes
+  - Buttons full-width on mobile with proper spacing
+  - Touch targets are adequate
 
 #### 🟡 Medium Priority Issues
 
-- [ ] **#6 - Tagline Rewrite** (15 min)
-  - Remove "AI-Powered Prompt Engineering is Taking Off 🚀"
-  - Replace with "Amplify Engineering Workflows" or similar
-  - Focus on engineering productivity, not cheesy AI power
+- [x] **#6 - Tagline Rewrite** ✅ DONE
+  - Removed "AI-Powered Prompt Engineering is Taking Off 🚀"
+  - Replaced with "Engineering Excellence, Amplified"
+  - Headline changed to "Amplify Engineering Workflows"
 
-- [ ] **#10 - Patterns Listed Twice in Footer** (20 min)
-  - Remove duplicate "Patterns" links
-  - Organize footer: Product, Company, Resources, Legal, Social
+- [x] **#10 - Patterns Listed Twice in Footer** ✅ DONE
+  - Removed duplicate "Patterns" link
+  - Footer organized: Product, Company, Resources, Social, Legal
 
-- [ ] **#11 - Duplicate Footer Sections** (30 min)
-  - Consolidate into single footer
-  - GitHub/LinkedIn/Hire Me under Social (not Legal)
-  - Copyright + social links at bottom only
+- [x] **#11 - Duplicate Footer Sections** ✅ DONE
+  - Consolidated into single cohesive footer
+  - GitHub/LinkedIn/Hire Me under Social section
+  - Clean copyright + attribution at bottom only
 
 - [ ] **#12 - Homepage Stats Breakdown** (2 hours)
   - Add stats section with breakdown by role/category/persona
