@@ -41,25 +41,26 @@ export function PromptDetailModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <DialogTitle className="text-2xl">{prompt.title}</DialogTitle>
-              <p className="mt-2 text-muted-foreground">{prompt.description}</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleFavorite}
-              className={
-                isFavorite ? 'text-yellow-500' : 'text-muted-foreground'
-              }
-            >
-              <Icons.star
-                className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`}
-              />
-            </Button>
+          <div className="pr-8">
+            <DialogTitle className="text-2xl">{prompt.title}</DialogTitle>
+            <p className="mt-2 text-muted-foreground">{prompt.description}</p>
           </div>
         </DialogHeader>
+
+        {/* Favorite Button - separate from close button */}
+        <div className="absolute right-14 top-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleFavorite}
+            className={isFavorite ? 'text-yellow-500' : 'text-muted-foreground'}
+            title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <Icons.star
+              className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`}
+            />
+          </Button>
+        </div>
 
         {/* Metadata */}
         <div className="flex flex-wrap gap-2">

@@ -25,9 +25,17 @@ export default async function LibraryPage() {
   // Get stats from cache
   const data = await getStats();
 
-  // Category counts for display
-  const categoryStats = data.categories || [];
-  const totalPrompts = data.stats.prompts;
+  // Get unique categories and roles from actual prompts
+  const uniqueCategories = [
+    ...new Set(prompts.map((p) => p.category).filter(Boolean)),
+  ];
+  const uniqueRoles = [...new Set(prompts.map((p) => p.role).filter(Boolean))];
+
+  // Category and role counts
+  const categoryStats = data.prompts?.byCategory || {};
+  const roleStats = data.prompts?.byRole || {};
+  const totalPrompts =
+    data.prompts?.total || data.stats?.prompts || prompts.length;
 
   return (
     <MainLayout>
@@ -38,29 +46,16 @@ export default async function LibraryPage() {
           <p className="text-lg text-muted-foreground">
             Browse and discover {totalPrompts} proven prompts for your workflow
           </p>
-
-          {/* Category counts */}
-          {Object.keys(categoryStats).length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {Object.entries(categoryStats).map(([category, count]) => (
-                <div
-                  key={category}
-                  className="rounded-full bg-muted px-3 py-1 text-sm"
-                >
-                  <span className="font-medium capitalize">
-                    {category.replace('-', ' ')}
-                  </span>
-                  <span className="ml-1 text-muted-foreground">
-                    ({String(count)})
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Client-side filtering component */}
-        <LibraryClient initialPrompts={prompts as never} />
+        <LibraryClient
+          initialPrompts={prompts as never}
+          categoryStats={categoryStats}
+          roleStats={roleStats}
+          uniqueCategories={uniqueCategories}
+          uniqueRoles={uniqueRoles}
+        />
       </div>
     </MainLayout>
   );
