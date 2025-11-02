@@ -207,7 +207,7 @@ More detail: [Phase 5: Site Stats Migration](../operations/SITE_STATS_MIGRATION.
 
 ## Phase 6 — Resolve Critical TODOs
 
-**Status:** ⚠️ Not started  
+**Status:** ✅ Mostly Complete  
 **Priority:** Medium-High - code quality and completeness
 
 **Problem:** 39 TODOs scattered across codebase
@@ -216,37 +216,35 @@ More detail: [Phase 5: Site Stats Migration](../operations/SITE_STATS_MIGRATION.
 
 #### 6.1 Auth MongoDB Adapter
 
-- ⚠️ Uncomment MongoDB adapter in `src/lib/auth/config.ts`
-- ⚠️ Fix version mismatch issues
-- ⚠️ Test login/signup flows
+- ✅ Cancelled - version mismatch deferral
 
 #### 6.2 Audit Logging to MongoDB
 
-- ⚠️ Implement `logCriticalEvent` in `src/lib/logging/audit.ts`
-- ⚠️ Implement `queryAuditLogs`
-- ⚠️ Implement `generateComplianceReport`
+- ✅ Implement `logCriticalEvent` in `src/lib/logging/audit.ts`
+- ✅ Implement `queryAuditLogs`
+- ✅ Implement `generateComplianceReport`
 
 #### 6.3 tRPC Implementations
 
-- ⚠️ Connect user router to MongoDB services (8 TODOs)
-- ⚠️ Connect prompt router to MongoDB services
-- ⚠️ Remove placeholder returns
+- ✅ Connect user router to MongoDB services (8 TODOs)
+- ✅ Connect prompt router to MongoDB services
+- ✅ Remove placeholder returns
 
 #### 6.4 Affiliate Links (OpsHub Admin Feature)
 
-- ⚠️ Move affiliate link management to OpsHub
-- ⚠️ Create `/opshub/settings/affiliate-links` page
-- ⚠️ Store in MongoDB `affiliate_config` collection
-- ⚠️ Update via admin UI, not code changes
+- ✅ Move affiliate link management to OpsHub
+- ✅ Added to OpsHub admin dashboard
+- ✅ Store in MongoDB `affiliate_config` collection
+- ✅ Update via admin UI, not code changes
 
 #### 6.5 Other TODOs
 
-- ⚠️ Twilio MFA code storage (2 TODOs)
-- ⚠️ Prompt rating API (1 TODO)
-- ⚠️ Favorite save API (1 TODO)
-- ⚠️ Analytics integration (1 TODO)
-- ⚠️ Firewall stats (1 TODO)
-- ⚠️ Dead letter queue (1 TODO)
+- ⚠️ Twilio MFA code storage (2 TODOs) - deferred (low priority)
+- ✅ Prompt rating API connected to tRPC
+- ✅ Favorite save API already implemented
+- ⚠️ Analytics integration (1 TODO) - deferred (low priority)
+- ⚠️ Firewall stats (1 TODO) - deferred (low priority)
+- ⚠️ Dead letter queue (1 TODO) - deferred (low priority)
 
 More detail: [Phase 6: TODO Resolution](../development/TODO_RESOLUTION_DAY6.md)
 
