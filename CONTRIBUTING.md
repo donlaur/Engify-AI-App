@@ -65,9 +65,10 @@ refactor: extract prompt service to separate module
    - Centralize constants in `/src/lib/constants.ts`
 
 2. **Single Source of Truth**
-   - All site statistics come from `/src/lib/site-stats.ts`
-   - Prompt data lives in `/src/data/playbooks.ts`
+   - All site statistics come from `/api/stats` endpoint
+   - Prompt data lives in MongoDB (not hardcoded)
    - No hardcoded numbers or duplicated data
+   - No mock data fallback values (use 0 or omit)
 
 3. **Type Safety**
    - All components and functions must be fully typed
@@ -102,12 +103,23 @@ src/
 
 ### Component Standards
 
-1. **Functional Components Only**
-   - Use React hooks for state management
-   - Prefer composition over inheritance
-   - Keep components small and focused
+1. **Server Components by Default**
+   - Use Server Components for data fetching and static content
+   - Only use Client Components when interactivity is required
+   - Clear separation between Server and Client Components
+   - See ADR-011 for detailed guidelines
 
-2. **Props Interface**
+2. **Component Size**
+   - Target: < 200 lines per component
+   - Extract logic to custom hooks
+   - Break large components into smaller pieces
+
+3. **Error Boundaries**
+   - Wrap Client Components in ErrorBoundary
+   - Provide meaningful error messages
+   - Log errors to monitoring service
+
+4. **Props Interface**
 
    ```typescript
    interface ComponentProps {
@@ -240,15 +252,92 @@ describe('/api/ai/execute', () => {
 
 ## Quality Assurance
 
+### Day 7 Patterns & Best Practices
+
+#### Mock Data Removal (ADR-009)
+- **Zero tolerance:** No mock data in production code
+- **Start at 0:** Initialization values should be `0`, not fake numbers
+- **Empty states:** Show professional empty states instead of fake data
+- **Single source of truth:** All stats come from `/api/stats` endpoint
+- **No fallbacks:** Remove fallback values like `|| 100` for stats (use `0` or omit)
+- **Pre-commit checks:** Mock data patterns are automatically flagged
+
+**Examples:**
+```typescript
+// ❌ BAD: Mock data fallback
+const totalPrompts = data.prompts?.total || 100;
+
+// ✅ GOOD: Real data or 0
+const totalPrompts = data.prompts?.total || 0;
+
+// ✅ BEST: Proper empty state
+{totalPrompts === 0 ? (
+  <EmptyState message="No prompts yet" />
+) : (
+  <StatsDisplay count={totalPrompts} />
+)}
+```
+
+#### Pattern-Based Bug Fixing (ADR-009)
+- **Fix once, apply everywhere:** When fixing a bug, search for the same pattern
+- **Systematic audit:** Don't fix one instance, fix all instances
+- **Document patterns:** Add findings to `docs/testing/PATTERN_AUDIT_DAY7.md`
+- **Prevent recurrence:** Add pre-commit checks or linting rules
+
+#### Frontend Component Architecture (ADR-011)
+- **Server Components by default:** Only use Client Components when needed
+- **Component size:** Target < 200 lines, extract logic to hooks
+- **Error boundaries:** Wrap Client Components in ErrorBoundary
+- **Loading states:** Use branded skeletons, not "Loading..." text
+- **Optimistic UI:** Use optimistic updates for mutations with rollback
+
+**Server vs Client Component Guidelines:**
+```typescript
+// ✅ Server Component - Data fetching
+export default async function PromptsPage() {
+  const prompts = await fetchPrompts();
+  return <PromptsClient prompts={prompts} />;
+}
+
+// ✅ Client Component - Interactivity
+'use client';
+export function PromptsClient({ prompts }: Props) {
+  const [filter, setFilter] = useState('');
+  // Interactive logic
+}
+```
+
+**When to use Server Components:**
+- Fetching data from database
+- Accessing backend resources
+- Static content
+- Heavy dependencies (reduce bundle size)
+
+**When to use Client Components:**
+- Interactive elements (buttons, forms, inputs)
+- State management (useState, useReducer)
+- Browser APIs (localStorage, window)
+- React hooks (useEffect, etc.)
+
 ### Pre-commit Checks
 
 The following checks run automatically:
 
-1. **TypeScript Compilation** - `tsc --noEmit`
-2. **ESLint** - Code quality and style
-3. **Prettier** - Code formatting
-4. **Security Scan** - Check for secrets and vulnerabilities
-5. **Test Suite** - Run all tests
+1. **Enterprise Compliance** - `scripts/maintenance/check-enterprise-compliance.js`
+   - Mock data detection
+   - API route requirements (rate limiting, tests, RBAC)
+   - Component requirements (error boundaries, tests)
+   - Schema requirements (organizationId for multi-tenant)
+
+2. **Schema Validation** - `scripts/maintenance/validate-schema.js`
+
+3. **Security Checks** - `scripts/security/security-check.js`
+
+4. **TypeScript Compilation** - `tsc --noEmit`
+
+5. **ESLint** - Code quality and style
+
+6. **Prettier** - Code formatting
 
 ### Manual Checks
 
