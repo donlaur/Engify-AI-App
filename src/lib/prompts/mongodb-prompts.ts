@@ -18,7 +18,7 @@ export async function getAllPrompts(): Promise<Prompt[]> {
     const collection = db.collection('prompts');
 
     const prompts = await collection
-      .find({ isPublic: true })
+      .find({ isPublic: true, active: { $ne: false } })
       .sort({ isFeatured: -1, views: -1 })
       .toArray();
 
@@ -101,6 +101,7 @@ export async function getPromptsByCategory(
       .find({
         category: category.toLowerCase(),
         isPublic: true,
+        active: { $ne: false },
       })
       .sort({ isFeatured: -1, views: -1 })
       .limit(100)
@@ -142,6 +143,7 @@ export async function getPromptsByRole(role: string): Promise<Prompt[]> {
       .find({
         role: role.toLowerCase(),
         isPublic: true,
+        active: { $ne: false },
       })
       .sort({ isFeatured: -1, views: -1 })
       .limit(100)

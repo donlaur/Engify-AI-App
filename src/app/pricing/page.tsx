@@ -12,8 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 
 /**
- * Beta Access Page
- * Simple page explaining free beta access and looking for engineering team partners
+ * Early Access Page
+ * Simple page explaining free early access and looking for engineering team partners
  */
 export default function PricingPage() {
   return (
@@ -26,13 +26,13 @@ export default function PricingPage() {
             className="mb-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white"
           >
             <Icons.sparkles className="mr-2 h-3 w-3" />
-            Beta Access
+            Early Access
           </Badge>
           <h1 className="mb-4 text-5xl font-bold">
-            Free Beta Access for Engineering Teams
+            Free Early Access for Engineering Teams
           </h1>
           <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-            Engify.ai is currently in beta. We&apos;re looking for engineering
+            Engify.ai is in early access. We&apos;re looking for engineering
             departments to partner with as we build the future of AI-powered
             engineering workflows.
           </p>
@@ -46,7 +46,7 @@ export default function PricingPage() {
                 <Icons.sparkles className="h-10 w-10 text-white" />
               </div>
               <CardTitle className="text-3xl">
-                Everything Free During Beta
+                Everything Free During Early Access
               </CardTitle>
               <CardDescription className="text-lg">
                 Full access to all features while we build together
@@ -131,7 +131,7 @@ export default function PricingPage() {
                   className="w-full sm:w-auto"
                   asChild
                 >
-                  <Link href="/signup">Request Beta Access</Link>
+                  <Link href="/signup">Request Early Access</Link>
                 </Button>
               </div>
             </CardContent>
@@ -141,7 +141,7 @@ export default function PricingPage() {
         {/* What We're Looking For */}
         <div className="mx-auto mb-16 max-w-4xl">
           <h2 className="mb-8 text-center text-3xl font-bold">
-            Ideal Beta Partners
+            Ideal Early Access Partners
           </h2>
 
           <div className="grid gap-6 md:grid-cols-3">

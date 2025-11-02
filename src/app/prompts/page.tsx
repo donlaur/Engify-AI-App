@@ -64,19 +64,30 @@ export default async function LibraryPage() {
   // Get stats from Redis cache (includes unique categories/roles)
   const data = await getStats();
 
-  // Use cached unique categories and roles (or fallback to extraction)
-  const uniqueCategories = data.prompts?.uniqueCategories || [
-    ...new Set(prompts.map((p) => p.category).filter(Boolean)),
-  ];
-  const uniqueRoles = data.prompts?.uniqueRoles || [
-    ...new Set(prompts.map((p) => p.role).filter(Boolean)),
-  ];
+  // Calculate stats from actual prompts (more reliable than cache during active filter rollout)
+  const uniqueCategories = [...new Set(prompts.map((p) => p.category).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b)); // Alphabetical sort
+  
+  const uniqueRoles = [...new Set(prompts.map((p) => p.role).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b)); // Alphabetical sort
 
-  // Category and role counts (from Redis cache)
-  const categoryStats = data.prompts?.byCategory || {};
-  const roleStats = data.prompts?.byRole || {};
-  const totalPrompts =
-    data.prompts?.total || data.stats?.prompts || prompts.length;
+  // Calculate category counts from actual prompts
+  const categoryStats = prompts.reduce((acc, prompt) => {
+    if (prompt.category) {
+      acc[prompt.category] = (acc[prompt.category] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
+
+  // Calculate role counts from actual prompts
+  const roleStats = prompts.reduce((acc, prompt) => {
+    if (prompt.role) {
+      acc[prompt.role] = (acc[prompt.role] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
+
+  const totalPrompts = prompts.length;
 
   // Generate JSON-LD structured data for SEO
   const jsonLd = {
