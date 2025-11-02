@@ -46,12 +46,12 @@ export default function HireMePage() {
     {
       title: 'Hands-On Engineering Leadership',
       description:
-        'Built Engify.ai from scratch in 7 days while establishing career frameworks, SDLC optimization, and transparent growth paths that reduced cycle time by 20% and eliminated redundant work',
+        'Built Engify.ai from scratch in 7 days using Git Worktrees, parallel AI agents, and systematic daily planning. Each day had focused goals (Day 5: Infrastructure, Day 6: Content Quality, Day 7: QA/Polish) with ADRs, test coverage, and red-hat reviews documented in real-time',
       metrics: [
-        'Production SaaS platform',
-        'Career ladders',
-        'Process improvement',
-        'DORA metrics',
+        '7-day build (Nov 2025)',
+        'Multi-agent workflow',
+        'Git worktree strategy',
+        '12+ ADRs documented',
       ],
     },
     {
@@ -202,17 +202,114 @@ export default function HireMePage() {
         </div>
       </section>
 
-      {/* Built in Public */}
+      {/* Process & Methodology */}
       <section className="container py-16">
+        <h2 className="mb-8 text-center text-3xl font-bold">
+          Development Process & Methodology
+        </h2>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.gitBranch className="h-5 w-5 text-purple-600" />
+                Git Worktree Strategy
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                Used separate worktrees for parallel development, enabling
+                multiple AI agents to work simultaneously without merge
+                conflicts:
+              </p>
+              <ul className="list-disc space-y-1 pl-5">
+                <li>Main worktree: Core feature development</li>
+                <li>DRY improvements: Refactoring branch</li>
+                <li>QA/Polish: Day 7 quality improvements</li>
+                <li>Atomic commits with instant push strategy</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.sparkles className="h-5 w-5 text-purple-600" />
+                Multi-Model AI Workflow
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                Leveraged different AI models for specialized tasks throughout
+                the build:
+              </p>
+              <ul className="list-disc space-y-1 pl-5">
+                <li>Claude Sonnet 4.5: Core development & architecture</li>
+                <li>GPT-4: Code review & optimization</li>
+                <li>Multiple agents in parallel worktrees</li>
+                <li>Red-hat reviews for quality assurance</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.fileText className="h-5 w-5 text-purple-600" />
+                Daily Planning & ADRs
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>Each day had focused goals with comprehensive documentation:</p>
+              <ul className="list-disc space-y-1 pl-5">
+                <li>
+                  <strong>Day 5:</strong> Infrastructure (AWS, messaging, RAG)
+                </li>
+                <li>
+                  <strong>Day 6:</strong> Content Quality (MongoDB migration)
+                </li>
+                <li>
+                  <strong>Day 7:</strong> QA & Polish (trust signals, UI/UX)
+                </li>
+                <li>12+ ADRs documenting architectural decisions</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.checkCircle className="h-5 w-5 text-purple-600" />
+                Quality Guardrails
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                Enterprise-grade quality checks and documentation from day one:
+              </p>
+              <ul className="list-disc space-y-1 pl-5">
+                <li>Pre-commit hooks (enterprise compliance, security)</li>
+                <li>Pattern audits & systematic bug fixing</li>
+                <li>Red-hat reviews for trust/security issues</li>
+                <li>85% test coverage with real integration tests</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Built in Public */}
+      <section className="container pb-16">
         <Card className="border-2 border-purple-200">
           <CardContent className="space-y-4 py-8 text-center">
             <Icons.github className="mx-auto h-12 w-12 text-purple-600" />
-            <h3 className="text-2xl font-bold">Building in Public</h3>
+            <h3 className="text-2xl font-bold">
+              Building in Public - Full Transparency
+            </h3>
             <p className="mx-auto max-w-2xl text-muted-foreground">
-              This entire platform (Engify.ai) was built in 7 days using
-              AI-augmented development with Claude, Cursor, and modern tooling.
-              See the code, follow the commits, and learn how AI can amplify
-              your team&apos;s capabilities.
+              Every commit, every decision, every challenge documented. See the
+              complete 7-day journey from idea to production, including all
+              planning docs, ADRs, and lessons learned. This isn&apos;t a portfolio
+              piece—it&apos;s a real business built with enterprise standards.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button variant="default" asChild>

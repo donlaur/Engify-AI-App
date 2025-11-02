@@ -34,12 +34,12 @@ export default function BuiltInPublicPage() {
               From Idea to Production
               <br />
               <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                In One Evening
+                In 7 Days
               </span>
             </h1>
 
             <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              1,357 commits. 85K+ lines of TypeScript. 620 passing tests.
+              1,357+ commits. 85K+ lines of TypeScript. 620 passing tests. 12 ADRs.
               This is what AI-augmented engineering looks like when done right.
             </p>
 
@@ -687,6 +687,98 @@ export default function BuiltInPublicPage() {
                   This isn&apos;t &quot;move fast and break things&quot; - it&apos;s 
                   <span className="font-bold"> move fast, then make it bulletproof</span>.
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Days 6-7: Quality & Polish */}
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <Icons.target className="h-6 w-6 text-purple-600" />
+                Days 6-7: Content Quality & Trust Signals
+              </CardTitle>
+              <CardDescription>
+                MongoDB migration → Mock data removal → Enterprise polish
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <div className="rounded-lg border-l-4 border-cyan-500 bg-white p-4">
+                  <p className="mb-2 font-bold text-cyan-900">Day 6: Content Hardening (Real Data Migration)</p>
+                  <p className="mb-2 text-sm text-cyan-800">Patterns to MongoDB | TODO resolution | Real gamification data</p>
+                  <p className="text-xs text-gray-600">
+                    Migrated all content to MongoDB, resolved 39 critical TODOs (auth adapter, audit logging, tRPC),
+                    added real achievements system, career recommendations API, site stats from database.
+                    <br/>
+                    <strong>Key Docs:</strong> DAY_6_CONTENT_HARDENING.md, TODO_RESOLUTION_DAY6.md
+                  </p>
+                </div>
+
+                <div className="rounded-lg border-l-4 border-pink-500 bg-white p-4">
+                  <p className="mb-2 font-bold text-pink-900">Day 7: QA & Polish (Trust Signals)</p>
+                  <p className="mb-2 text-sm text-pink-800">Mock data removal | UI/UX polish | Enterprise guardrails</p>
+                  <p className="text-xs text-gray-600">
+                    8 phases: Mock data audit (removed || 76, || 23 fallbacks), fixed 12 QA issues, improved prompt
+                    filters, enhanced UI readability, added pre-commit hooks for mock data detection, Red Hat trust audit.
+                    <br/>
+                    <strong>Key Docs:</strong> DAY_7_QA_FRONTEND_IMPROVEMENTS.md, RED_HAT_TRUST_AUDIT.md, ADR-009 (Mock Data Removal)
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 p-4">
+                <p className="mb-2 font-semibold text-purple-900">
+                  🎯 Development Workflow
+                </p>
+                <div className="space-y-2 text-sm text-purple-800">
+                  <div className="flex items-start gap-2">
+                    <Icons.gitBranch className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div>
+                      <strong>Git Worktrees:</strong> Parallel development in 3 separate worktrees 
+                      (main, DRY improvements, QA polish) - enabling multiple AI agents simultaneously
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Icons.sparkles className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div>
+                      <strong>Multi-Model AI:</strong> Claude Sonnet 4.5 for core dev, GPT-4 for reviews, 
+                      parallel agents in different worktrees without conflicts
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Icons.fileText className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div>
+                      <strong>Daily Planning:</strong> Each day had detailed plan docs (DAY_5_PLAN.md, 
+                      DAY_6_CONTENT_HARDENING.md, DAY_7_QA_FRONTEND_IMPROVEMENTS.md) with phased goals
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Icons.checkCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div>
+                      <strong>Quality Guardrails:</strong> 12 ADRs, pattern audits, red-hat reviews, 
+                      pre-commit hooks for mock data/enterprise compliance, systematic bug fixing
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg bg-blue-50 p-3 text-center">
+                  <div className="text-2xl font-bold text-blue-600">3</div>
+                  <div className="text-xs text-blue-900">Worktrees</div>
+                  <div className="text-xs text-gray-500">Parallel dev</div>
+                </div>
+                <div className="rounded-lg bg-purple-50 p-3 text-center">
+                  <div className="text-2xl font-bold text-purple-600">12</div>
+                  <div className="text-xs text-purple-900">ADRs</div>
+                  <div className="text-xs text-gray-500">Architectural decisions</div>
+                </div>
+                <div className="rounded-lg bg-pink-50 p-3 text-center">
+                  <div className="text-2xl font-bold text-pink-600">39</div>
+                  <div className="text-xs text-pink-900">TODOs</div>
+                  <div className="text-xs text-gray-500">Resolved Day 6</div>
+                </div>
               </div>
             </CardContent>
           </Card>
