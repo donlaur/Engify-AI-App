@@ -107,3 +107,7 @@ lambda/*.dist-info/
 **/COMPETITIVE_ANALYSIS*.md
 **/COMPETITOR*.md
 docs/private/
+
+# Business Intelligence - Private strategies, partnerships, revenue models
+BizIntel/
+**/BizIntel/
