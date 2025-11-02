@@ -1,38 +1,25 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
-import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
-import { UserManagement } from '@/components/admin/UserManagement';
-import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
-import { SettingsPanel } from '@/components/admin/SettingsPanel';
-import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
-import { AffiliateLinkManagement } from '@/components/admin/AffiliateLinkManagement';
 import { isAdminMFAEnforced } from '@/lib/env';
+
+// Admin components temporarily disabled for debugging
+// import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
+// import { UserManagement } from '@/components/admin/UserManagement';
+// import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
+// import { SettingsPanel } from '@/components/admin/SettingsPanel';
+// import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
+// import { AffiliateLinkManagement } from '@/components/admin/AffiliateLinkManagement';
 
 export default async function OpsHubPage() {
   const session = await auth();
 
-  // Debug logging
-  console.log(
-    '🔐 [OPSHUB] Session:',
-    session
-      ? {
-          hasUser: !!session.user,
-          email: session.user?.email,
-          name: session.user?.name,
-        }
-      : 'NO SESSION'
-  );
-
   const role = (session?.user as { role?: string } | null)?.role || 'user';
-  console.log('🔐 [OPSHUB] Extracted role:', role);
 
   const isAdmin =
     role === 'admin' || role === 'super_admin' || role === 'org_admin';
-  console.log('🔐 [OPSHUB] Is admin?', isAdmin);
 
   if (!isAdmin) {
-    console.log('🔐 [OPSHUB] ❌ Not admin, redirecting to /');
     redirect('/');
   }
 
@@ -100,9 +87,12 @@ export default async function OpsHubPage() {
       </div>
 
       <div className="mt-8 grid gap-6">
+        {/* Temporarily disabled for debugging
         <section className="rounded-lg border bg-white p-4">
+          <h2 className="text-lg font-semibold mb-3">User Management</h2>
           <UserManagement />
         </section>
+        */}
 
         <section className="rounded-lg border bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold">Recent Users</h2>
@@ -162,6 +152,7 @@ export default async function OpsHubPage() {
           </div>
         </section>
 
+        {/* Admin components temporarily disabled for debugging
         <section className="rounded-lg border bg-white p-4">
           <ContentQualityPanel />
         </section>
@@ -181,6 +172,7 @@ export default async function OpsHubPage() {
         <section className="rounded-lg border bg-white p-4">
           <AffiliateLinkManagement />
         </section>
+        */}
       </div>
     </div>
   );
