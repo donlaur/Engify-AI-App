@@ -11,40 +11,46 @@ import Link from 'next/link';
  */
 export default function HireMePage() {
   const skills = [
-    { name: 'Full-Stack Development', icon: Icons.code, level: 'Expert' },
-    { name: 'Next.js + React', icon: Icons.zap, level: 'Expert' },
-    { name: 'AI/ML Integration', icon: Icons.sparkles, level: 'Advanced' },
-    { name: 'Cloud Architecture (AWS)', icon: Icons.server, level: 'Advanced' },
-    { name: 'MongoDB + PostgreSQL', icon: Icons.database, level: 'Expert' },
-    { name: 'TypeScript', icon: Icons.code, level: 'Expert' },
+    { name: 'Engineering Leadership', icon: Icons.users, level: 'Expert' },
+    { name: 'AI Transformation', icon: Icons.sparkles, level: 'Expert' },
+    { name: 'SaaS Modernization', icon: Icons.zap, level: 'Expert' },
+    { name: 'Team Building', icon: Icons.target, level: 'Expert' },
+    { name: 'Process Excellence', icon: Icons.checkCircle, level: 'Expert' },
+    { name: 'Strategic Planning', icon: Icons.trendingUp, level: 'Expert' },
   ];
 
   const achievements = [
     {
-      title: 'Engify.ai',
+      title: 'AI Transformation Leadership',
       description:
-        'Built entire platform from scratch in 7 days using AI-augmented development',
+        'Led engineering teams through early-stage AI adoption, implementing copilots and developer-assist tools to boost productivity and code quality',
       metrics: [
-        '76+ prompts',
-        '23 patterns',
-        'Full auth system',
-        'Redis caching',
+        'ChatGPT/Claude/Cursor adoption',
+        'Custom GPT development',
+        'AI workflow integration',
+        'Team workshops',
       ],
     },
     {
-      title: 'Enterprise Architecture',
+      title: 'Process as a Product',
       description:
-        'Designed and implemented scalable, secure systems following best practices',
-      metrics: ['RBAC', 'Audit logging', 'Rate limiting', 'Multi-tenant ready'],
+        'Designed career frameworks, standardized Agile rituals, and built transparent growth paths that reduced cycle time by 20% and eliminated 10 hours of redundant work per sprint',
+      metrics: [
+        'Career ladders',
+        'SDLC optimization',
+        'Tech debt prioritization',
+        'DORA metrics',
+      ],
     },
     {
-      title: 'AI-Powered Development',
+      title: 'Enterprise Platform Development',
       description:
-        'Expert in using Claude, GPT-4, and modern AI tools to accelerate delivery',
+        'Built production-ready SaaS platforms with enterprise standards: RBAC, audit logging, multi-tenant architecture, and comprehensive testing',
       metrics: [
-        '5x faster development',
-        'Production quality',
-        'Enterprise standards',
+        'Engify.ai (7 days)',
+        'Enterprise architecture',
+        'Security-first',
+        'Scalable systems',
       ],
     },
   ];
@@ -73,9 +79,11 @@ export default function HireMePage() {
             </h1>
 
             <p className="mx-auto max-w-2xl text-xl text-gray-200">
-              Full-Stack Engineer · AI Specialist · Cloud Architect
+              Engineering Manager · AI Transformation Leader · SaaS
+              Modernization
               <br />
-              Building production-ready systems at startup speed
+              Building high-performance teams that ship production-ready systems
+              at startup speed
             </p>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
@@ -85,13 +93,14 @@ export default function HireMePage() {
                 className="bg-white text-purple-900 hover:bg-gray-100"
                 asChild
               >
-                <a
+                <Link
                   href="/hireme/Donnie-Laur_Manager-Software-Engineering_AI-Enabled.pdf"
-                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <Icons.download className="mr-2 h-4 w-4" />
                   Download Resume
-                </a>
+                </Link>
               </Button>
               <Button
                 size="lg"
@@ -126,7 +135,9 @@ export default function HireMePage() {
 
       {/* Skills */}
       <section className="container py-16">
-        <h2 className="mb-8 text-center text-3xl font-bold">Core Skills</h2>
+        <h2 className="mb-8 text-center text-3xl font-bold">
+          Leadership Competencies
+        </h2>
         <div className="grid gap-4 md:grid-cols-3">
           {skills.map((skill) => {
             const Icon = skill.icon;
@@ -220,8 +231,9 @@ export default function HireMePage() {
               Let&apos;s Build Something Amazing
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-              Looking for a full-stack engineer who can ship fast, build right,
-              and leverage AI tools? Let&apos;s talk.
+              Looking for an Engineering Manager or Director who can build
+              high-performance teams, drive AI adoption, and ship
+              production-ready systems? Let&apos;s talk.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" asChild>

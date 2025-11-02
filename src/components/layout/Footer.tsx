@@ -173,14 +173,9 @@ export function Footer() {
           </p>
           <p className="text-xs text-muted-foreground">
             Built by{' '}
-            <a
-              href="https://linkedin.com/in/donlaur"
-              className="underline hover:text-foreground"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link href="/hireme" className="underline hover:text-foreground">
               Donnie Laur
-            </a>
+            </Link>
             {' · '}
             <a
               href="mailto:donlaur@engify.ai"

@@ -81,7 +81,7 @@ export default async function Home() {
       value: `${data.patterns?.total || data.stats?.patterns || 23}`,
     },
     { label: 'AI Providers', value: '4' },
-    { label: 'Starting At', value: 'Free Beta' },
+    { label: 'Beta Access', value: 'Free' },
   ];
 
   // Build role stats from data
@@ -124,10 +124,13 @@ export default async function Home() {
           <div className="mx-auto max-w-4xl space-y-8 text-center">
             <Badge
               variant="secondary"
-              className="mb-4 border-white/30 bg-black/30 text-white backdrop-blur-sm"
+              className="mb-4 border-white/30 bg-black/30 backdrop-blur-sm"
             >
-              <Icons.sparkles className="mr-2 h-3 w-3" />
-              Engineering Excellence, Amplified
+              <Icons.sparkles className="mr-2 h-3 w-3 text-white" />
+              <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text font-bold text-transparent">
+                BETA
+              </span>
+              <span className="ml-2 text-white">Free</span>
             </Badge>
 
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
