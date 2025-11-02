@@ -5,7 +5,7 @@ import { isAdminMFAEnforced } from '@/lib/env';
 import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
-import { SettingsPanel } from '@/components/admin/SettingsPanel';
+// import { SettingsPanel } from '@/components/admin/SettingsPanel';
 import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
 // import { AffiliateLinkManagement } from '@/components/admin/AffiliateLinkManagement';
 
@@ -170,12 +170,12 @@ export default async function OpsHubPage() {
           <AuditLogViewer />
         </section>
 
+        {/* Testing ContentQualityPanel only - SettingsPanel and AffiliateLinkManagement disabled
         <section className="rounded-lg border bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold">System Settings</h2>
           <SettingsPanel />
         </section>
 
-        {/* Still disabled - testing AffiliateLinkManagement last
         <section className="rounded-lg border bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold">Affiliate Links</h2>
           <AffiliateLinkManagement />
