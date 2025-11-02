@@ -343,5 +343,316 @@ After audit is complete:
 
 ---
 
-**Last Updated:** November 2, 2025  
+---
+
+## 🔴 ACTIVE QA AUDIT FINDINGS
+
+### Issue #4: Logout Page Returns 404
+
+**Page:** `/logout`  
+**Severity:** Critical  
+**Category:** BROKEN
+
+**Current Behavior:**
+Navigating to `/logout` returns 404 error page
+
+**Expected Behavior:**
+Should log user out and redirect to homepage with success message
+
+**Technical Notes:**
+
+- Missing route or page file
+- Check if logout should be handled via API endpoint instead
+
+**Fix Complexity:** Easy  
+**Estimated Time:** 30 minutes
+
+**Acceptance Criteria:**
+
+- [ ] `/logout` route exists and works
+- [ ] User is logged out of session
+- [ ] User redirected to homepage
+- [ ] Success toast notification shown
+
+---
+
+### Issue #5: Hardcoded/Inconsistent Prompt Counts (CRITICAL DRY VIOLATION)
+
+**Page:** Homepage + Multiple pages  
+**Severity:** Critical  
+**Category:** MOCKED + BAD_UX
+
+**Current Behavior:**
+
+- Homepage shows "76+ EXPERT PROMPTS"
+- Another section says "23 prompts"
+- Yet another says "113"
+- All hardcoded, not pulling from DB
+
+**Expected Behavior:**
+
+- **ONE SINGLE SOURCE OF TRUTH** for all stats
+- Use API endpoint or ISR-generated JSON
+- Store in global state (localStorage, context, or static JSON)
+- Update via webhooks when content changes
+- All components pull from this source
+
+**Technical Notes:**
+
+- Violates DRY principle repeatedly
+- User has emphasized this "many times"
+- Solution: Create `/api/stats` endpoint (cached)
+- Return JSON with all counts:
+  ```json
+  {
+    "prompts": { "total": 76, "byRole": {...}, "byCategory": {...} },
+    "patterns": { "total": 23 },
+    "users": 1250,
+    "lastUpdated": "2025-11-02T10:00:00Z"
+  }
+  ```
+- Generate static JSON via ISR (revalidate every hour)
+- Use QStash webhook to trigger revalidation on content changes
+
+**Fix Complexity:** Medium  
+**Estimated Time:** 2-3 hours
+
+**Acceptance Criteria:**
+
+- [ ] Single `/api/stats` endpoint created
+- [ ] Returns all site statistics from MongoDB
+- [ ] ISR with 1-hour revalidation
+- [ ] QStash webhook triggers on-demand revalidation
+- [ ] All hardcoded numbers removed from codebase
+- [ ] All components use same stats source
+- [ ] Stats include breakdown by role/category/persona
+
+---
+
+### Issue #6: Tagline "AI-Powered Prompt Engineering is Taking Off 🚀"
+
+**Page:** Homepage  
+**Severity:** Medium  
+**Category:** BAD_UX
+
+**Current Behavior:**
+Banner says "🚁 ⚡ AI-Powered Prompt Engineering is Taking Off 🚀"
+
+**Expected Behavior:**
+
+- Remove "rocket engineering" pun (too cheesy)
+- Rephrase to focus on engineering workflows/productivity
+- Align with brand: "Amplify Engineering with [X]"
+- Suggestions:
+  - "Amplify Engineering Workflows"
+  - "Amplify Engineering Productivity"
+  - "Engineering Excellence, Amplified"
+  - Remove "AI Power" (sounds generic/cheesy)
+
+**Fix Complexity:** Easy  
+**Estimated Time:** 15 minutes
+
+**Acceptance Criteria:**
+
+- [ ] Tagline updated to focus on engineering workflows/productivity
+- [ ] No cheesy "powered by AI" or rocket puns
+- [ ] Aligns with "Amplify Engineering" brand
+
+---
+
+### Issue #7: Mobile CTA Buttons Don't Stack
+
+**Page:** Homepage (mobile view)  
+**Severity:** High  
+**Category:** BAD_UI
+
+**Current Behavior:**
+CTA buttons ("Browse Prompt Playbook", "Request Beta Access") display side-by-side on mobile, causing layout issues
+
+**Expected Behavior:**
+
+- Buttons should stack vertically on mobile
+- Full width on mobile for easy tapping
+- Proper spacing between stacked buttons
+
+**Technical Notes:**
+
+- Add responsive classes: `flex-col sm:flex-row`
+- Ensure touch targets are 44x44px minimum
+
+**Fix Complexity:** Easy  
+**Estimated Time:** 15 minutes
+
+**Acceptance Criteria:**
+
+- [ ] Buttons stack vertically on mobile (<640px)
+- [ ] Buttons full-width on mobile
+- [ ] Proper spacing between buttons
+- [ ] Touch targets 44x44px minimum
+
+---
+
+### Issue #8: CTA Buttons Don't Link Anywhere (CRITICAL)
+
+**Page:** Homepage  
+**Severity:** Critical  
+**Category:** BROKEN
+
+**Current Behavior:**
+CTA buttons ("Browse Prompt Playbook", "Request Beta Access") don't link anywhere or do nothing
+
+**Expected Behavior:**
+
+- "Browse Prompt Playbook" → `/prompts`
+- "Request Beta Access" → `/signup` or beta request form
+
+**Fix Complexity:** Easy  
+**Estimated Time:** 10 minutes
+
+**Acceptance Criteria:**
+
+- [ ] "Browse Prompt Playbook" links to `/prompts`
+- [ ] "Request Beta Access" links to `/signup` or beta form
+- [ ] Links work on all devices
+- [ ] Navigation is immediate (no loading delay)
+
+---
+
+### Issue #9: "API Reference" Link in Footer (SECURITY RISK)
+
+**Page:** All pages (footer)  
+**Severity:** Critical  
+**Category:** BAD_UX + SECURITY
+
+**Current Behavior:**
+Footer has "API Reference" link that goes to `/api-docs` - exposes API structure publicly
+
+**Expected Behavior:**
+
+- Remove from public footer
+- Move to authenticated docs area (like `/docs` for logged-in users)
+- OR move to separate developer portal (not linked from main site)
+- API documentation should not be wide open for hackers
+
+**Technical Notes:**
+
+- Check what's exposed at `/api-docs`
+- Consider moving to authenticated route
+- Add RBAC if keeping docs public
+
+**Fix Complexity:** Easy  
+**Estimated Time:** 30 minutes
+
+**Acceptance Criteria:**
+
+- [ ] "API Reference" removed from public footer
+- [ ] API docs moved to authenticated area OR removed entirely
+- [ ] No sensitive API structure exposed publicly
+- [ ] Developer docs accessible only to authorized users
+
+---
+
+### Issue #10: "Patterns" Listed Twice in Footer
+
+**Page:** All pages (footer)  
+**Severity:** Low  
+**Category:** BAD_UX
+
+**Current Behavior:**
+Footer lists "Patterns" in multiple sections (duplicate)
+
+**Expected Behavior:**
+
+- List "Patterns" only once
+- Organize footer logically:
+  - **Product:** AI Workbench, Patterns, Library, Pricing
+  - **Company:** About, Built in Public, Contact
+  - **Resources:** Documentation, Prompt Library
+  - **Legal:** Privacy, Terms
+  - **Social:** GitHub, LinkedIn, Hire Me (resume link)
+
+**Fix Complexity:** Easy  
+**Estimated Time:** 20 minutes
+
+**Acceptance Criteria:**
+
+- [ ] "Patterns" appears only once in footer
+- [ ] Footer organized into clear sections
+- [ ] No duplicate links
+- [ ] All links work correctly
+
+---
+
+### Issue #11: Duplicate Footer (Version Bottom)
+
+**Page:** All pages  
+**Severity:** Medium  
+**Category:** BAD_UI
+
+**Current Behavior:**
+Footer appears to be duplicated with links in multiple places
+Version at bottom has redundant links
+
+**Expected Behavior:**
+
+- Single footer with clear sections
+- GitHub, LinkedIn, "Hire Me" (resume link) acceptable
+- Remove GitHub from "Legal" section (doesn't belong there)
+- Footer structure:
+  - Top: Main footer with product/company/resources/legal sections
+  - Bottom: Simple copyright line + social links only
+
+**Fix Complexity:** Easy  
+**Estimated Time:** 30 minutes
+
+**Acceptance Criteria:**
+
+- [ ] Single cohesive footer design
+- [ ] No duplicate sections
+- [ ] GitHub under Social, not Legal
+- [ ] LinkedIn and "Hire Me" resume link added
+- [ ] Copyright + social links at bottom only
+
+---
+
+### Issue #12: Homepage Needs Stats Breakdown by Section
+
+**Page:** Homepage  
+**Severity:** Medium  
+**Category:** MISSING
+
+**Current Behavior:**
+Homepage shows generic counts (76 prompts, 23 patterns) without breakdown
+
+**Expected Behavior:**
+Add stats section showing:
+
+- Prompts by role (Engineers: 24, Managers: 18, Designers: 12, etc.)
+- Prompts by category (Code Generation: 15, Debugging: 12, etc.)
+- Prompts by persona
+- Patterns by type
+- Active users count (if available)
+
+**Technical Notes:**
+
+- Pull from same `/api/stats` endpoint (Issue #5)
+- Use shadcn/ui stats cards or badges
+- Make it visually interesting (icons, colors)
+
+**Fix Complexity:** Medium  
+**Estimated Time:** 2 hours
+
+**Acceptance Criteria:**
+
+- [ ] Stats breakdown section added to homepage
+- [ ] Shows prompts by role/category/persona
+- [ ] Shows patterns by type
+- [ ] All data from `/api/stats` endpoint
+- [ ] Responsive design
+- [ ] Visually engaging (icons, colors, layout)
+
+---
+
+**Last Updated:** November 2, 2025 10:35 AM (Active QA in progress)  
+**Status:** 🔴 Adding issues as discovered  
 **Next Phase:** [Phase 2: OpsHub Enterprise Build-Out](../planning/OPSHUB_ENTERPRISE_BUILDOUT.md)
