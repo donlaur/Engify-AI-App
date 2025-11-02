@@ -25,6 +25,39 @@ Status Legend: ✅ complete · ⚠️ in progress · ❌ blocked · [ ] not star
 
 ---
 
+## Methodology: Pattern-Based Bug Fixing
+
+**Core Principle:** Fix once, apply everywhere. Don't carry the same bugs forward.
+
+**Process:**
+
+1. **Identify Pattern** - When we fix a bug, document the pattern
+2. **Systematic Audit** - Search entire codebase for same pattern
+3. **Fix All Instances** - Address all occurrences at once
+4. **Document** - Create audit report for future reference
+5. **Prevent** - Add pre-commit checks if applicable
+
+**Example (Day 7):**
+
+- Fixed: Server Component with onClick handlers → Build error
+- Audit: Searched all files with onClick
+- Result: All had 'use client' ✅ (no other instances found)
+- Prevention: Pre-commit hook already checks Client Components
+
+**Benefits:**
+
+- ✅ Shrinks bug backlog exponentially
+- ✅ Prevents regression
+- ✅ Builds quality muscle memory
+- ✅ Faster than fixing one-off issues repeatedly
+
+**Related Docs:**
+
+- `docs/testing/PATTERN_AUDIT_DAY7.md` - Systematic audit findings
+- `docs/development/ADR/009-pattern-based-bug-fixing.md` - Strategy ADR
+
+---
+
 ## Phase Detail Documentation
 
 Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUDIT_REPORT_DAY7.md`).
