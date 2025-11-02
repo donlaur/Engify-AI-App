@@ -273,7 +273,7 @@ export default function PatternPlaygroundPage() {
             Browse our library of 100+ prompts using these patterns
           </p>
           <Button size="lg" asChild>
-            <Link href="/library">
+            <Link href="/prompts">
               Browse Prompt Library
               <Icons.arrowRight className="ml-2 h-4 w-4" />
             </Link>

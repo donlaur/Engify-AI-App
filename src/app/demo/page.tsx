@@ -131,15 +131,21 @@ export default function DemoPage() {
                     <SelectContent>
                       <SelectItem value="persona">Persona</SelectItem>
                       <SelectItem value="template">Template</SelectItem>
-                      <SelectItem value="chain-of-thought">Chain of Thought</SelectItem>
+                      <SelectItem value="chain-of-thought">
+                        Chain of Thought
+                      </SelectItem>
                       <SelectItem value="few-shot">Few-Shot</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    {pattern === 'persona' && 'Assigns a role to the AI for better responses'}
-                    {pattern === 'template' && 'Provides structure with placeholders'}
-                    {pattern === 'chain-of-thought' && 'Breaks down complex reasoning'}
-                    {pattern === 'few-shot' && 'Includes examples to guide output'}
+                    {pattern === 'persona' &&
+                      'Assigns a role to the AI for better responses'}
+                    {pattern === 'template' &&
+                      'Provides structure with placeholders'}
+                    {pattern === 'chain-of-thought' &&
+                      'Breaks down complex reasoning'}
+                    {pattern === 'few-shot' &&
+                      'Includes examples to guide output'}
                   </p>
                 </div>
               </CardContent>
@@ -172,7 +178,7 @@ export default function DemoPage() {
                   <Card className="border-green-200 bg-green-50">
                     <CardHeader>
                       <CardTitle className="text-sm text-green-900">
-                        <Icons.check className="inline mr-2 h-4 w-4" />
+                        <Icons.check className="mr-2 inline h-4 w-4" />
                         What Makes This Prompt Effective
                       </CardTitle>
                     </CardHeader>
@@ -197,12 +203,12 @@ export default function DemoPage() {
 
                 {/* CTA */}
                 <div className="rounded-lg border-2 border-purple-200 bg-purple-50 p-6">
-                  <h3 className="font-semibold text-purple-900 mb-2">
+                  <h3 className="mb-2 font-semibold text-purple-900">
                     Want to Execute This Prompt?
                   </h3>
-                  <p className="text-sm text-purple-800 mb-4">
-                    Sign up for free to run your prompts with OpenAI, Google AI, or Anthropic. 
-                    Save your favorites and track your progress.
+                  <p className="mb-4 text-sm text-purple-800">
+                    Sign up for free to run your prompts with OpenAI, Google AI,
+                    or Anthropic. Save your favorites and track your progress.
                   </p>
                   <div className="flex gap-2">
                     <Button asChild>
@@ -212,9 +218,7 @@ export default function DemoPage() {
                       </Link>
                     </Button>
                     <Button variant="outline" asChild>
-                      <Link href="/library">
-                        Browse {67} Prompts
-                      </Link>
+                      <Link href="/prompts">Browse {67} Prompts</Link>
                     </Button>
                   </div>
                 </div>
@@ -231,7 +235,8 @@ export default function DemoPage() {
               Ready to Master Prompt Engineering?
             </h3>
             <p className="mb-6 text-muted-foreground">
-              Access 67+ expert prompts, 15 proven patterns, and interactive learning
+              Access 67+ expert prompts, 15 proven patterns, and interactive
+              learning
             </p>
             <div className="flex justify-center gap-4">
               <Button size="lg" asChild>

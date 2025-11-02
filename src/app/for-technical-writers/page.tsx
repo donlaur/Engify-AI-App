@@ -204,7 +204,7 @@ export default function ForTechnicalWritersPage() {
                 className="bg-gradient-to-r from-green-600 to-teal-600"
                 asChild
               >
-                <Link href="/library">
+                <Link href="/prompts">
                   Browse Writing Prompts
                   <Icons.arrowRight className="ml-2 h-4 w-4" />
                 </Link>
