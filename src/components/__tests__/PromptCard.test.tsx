@@ -26,7 +26,13 @@ describe('PromptCard', () => {
     title: 'Test Prompt',
     description: 'A test prompt description',
     content: 'This is the prompt content',
-    category: 'Testing',
+    category: 'testing' as const, // Use lowercase to match PromptCategorySchema
+    tags: [],
+    views: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
+    active: true,
   };
 
   it('renders prompt information', () => {
@@ -34,42 +40,39 @@ describe('PromptCard', () => {
 
     expect(screen.getByText('Test Prompt')).toBeInTheDocument();
     expect(screen.getByText('A test prompt description')).toBeInTheDocument();
-    expect(screen.getByText('Testing')).toBeInTheDocument();
+    expect(screen.getByText('testing')).toBeInTheDocument(); // Category badge
   });
 
   it('displays role badge when provided', () => {
-    render(<PromptCard {...defaultProps} role="Engineer" />);
-    expect(screen.getByText('Engineer')).toBeInTheDocument();
+    render(<PromptCard {...defaultProps} role="engineer" />); // Use lowercase to match UserRoleSchema
+    expect(screen.getByText('engineer')).toBeInTheDocument();
   });
 
-  it('displays view count', () => {
-    render(<PromptCard {...defaultProps} views={1250} />);
-    expect(screen.getByText('1,250')).toBeInTheDocument();
-  });
+  // NOTE: View count and rating display removed from PromptCard (Issue #20 - fake data removal)
+  // These will be re-added when real tracking is implemented
 
-  it('displays rating when provided', () => {
-    render(<PromptCard {...defaultProps} rating={4.5} />);
-    expect(screen.getByText('4.5')).toBeInTheDocument();
-  });
-
-  it('renders copy button', () => {
+  it('renders action buttons (heart, share, copy)', () => {
     render(<PromptCard {...defaultProps} />);
 
-    // Copy button should be present
+    // Should have multiple action buttons (heart, share, copy)
     const buttons = screen.getAllByRole('button');
-    expect(buttons.length).toBeGreaterThan(0);
+    expect(buttons.length).toBeGreaterThan(2); // At least 3 icon buttons + "View Details"
   });
 
-  it('calls onView when card is clicked', async () => {
+  it('renders View Details button', () => {
+    render(<PromptCard {...defaultProps} />);
+
+    expect(screen.getByText('View Details')).toBeInTheDocument();
+  });
+
+  it('calls onView when View Details is clicked', async () => {
     const handleView = vi.fn();
     const { user } = render(
       <PromptCard {...defaultProps} onView={handleView} />
     );
 
-    const card = screen.getByText('Test Prompt').closest('.cursor-pointer');
-    if (card) {
-      await user.click(card);
-      expect(handleView).toHaveBeenCalledOnce();
-    }
+    const viewButton = screen.getByText('View Details');
+    await user.click(viewButton);
+    expect(handleView).toHaveBeenCalledOnce();
   });
 });
