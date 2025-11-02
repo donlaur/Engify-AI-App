@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import { getDb } from '@/lib/db/client';
+import { getDb } from '@/lib/mongodb';
 import { Collections } from '@/lib/db/schema';
 import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 import { UserManagement } from '@/components/admin/UserManagement';
