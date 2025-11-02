@@ -174,6 +174,64 @@ Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUD
 **Status:** ⚠️ In Progress  
 **Priority:** Critical - Core value proposition, high-traffic page
 
+#### ✅ Completed Improvements
+
+- [x] **#14 - Add Stats Panel to /prompts Page** ✅ DONE
+  - 3-card stats panel showing Total Prompts, Categories, Roles
+  - Data fetched from cached `/api/stats` endpoint
+  - Responsive grid layout
+
+- [x] **#15 - Dynamic Category/Role Filters** ✅ DONE
+  - Filters now pull from MongoDB (no hardcoded lists)
+  - `uniqueCategories` and `uniqueRoles` cached in Redis
+  - Shows actual counts per filter (e.g., "Documentation (12)")
+
+- [x] **#16 - Results Count Bar** ✅ DONE
+  - Shows "Showing X of Y prompts" when filtering
+  - "Clear all filters" button added
+  - Real-time count updates as user filters
+
+- [x] **#17 - Modal UX Improvements** ✅ DONE
+  - Star/close buttons separated (was too close)
+  - Absolute positioning for favorite button
+
+- [x] **#18 - Dynamic SEO Metadata** ✅ DONE
+  - Meta tags now include real counts from DB
+  - Title: "132+ Expert Prompts Library - 8 Categories, 10 Roles"
+  - Canonical URL explicitly set
+  - JSON-LD structured data added (CollectionPage + ItemList)
+
+- [x] **#19 - Card UX & Shareability** ✅ DONE
+  - Added "View Details" button with arrow icon (clear CTA)
+  - Added share functionality (native share API + clipboard fallback)
+  - Hover states: border-primary, title color change, shadow-lg
+  - Professional engagement tracking (no eye icon)
+  - Social cards ready: OpenGraph + Twitter Card metadata
+
+#### 🔴 Critical Issues Identified
+
+- [ ] **#20 - Favorites System Is Broken (localStorage only, not DB)**
+  - **Current State:**
+    - Heart icon on cards = localStorage only
+    - Star icon in modal = same localStorage data
+    - No auth required = anyone can "favorite" but data lost on browser clear
+    - Not synced to MongoDB = doesn't show in dashboard
+    - Inconsistent UX = heart vs. star icons
+  - **Enterprise Fix Needed:**
+    - Remove favorites for non-authenticated users (or show "Sign in to save")
+    - Authenticated users: Save to MongoDB `users.favorites` array
+    - Use heart icon consistently (industry standard)
+    - Create `/api/favorites` endpoints (GET, POST, DELETE) with RBAC
+    - Show real favorites collection in dashboard
+    - Track engagement metrics (prompt popularity)
+  - **Complexity:** Medium (DB schema + API + hooks)
+  - **Priority:** HIGH - Fake data anti-pattern, no real user value
+
+### 1.4 QA: /prompts Page (Prompt Library) - Continued
+
+**Status:** ⚠️ In Progress  
+**Priority:** Critical - Core value proposition, high-traffic page
+
 **Pre-QA Code Review:**
 
 - ✅ Fake views/ratings already removed from `PromptCard`
