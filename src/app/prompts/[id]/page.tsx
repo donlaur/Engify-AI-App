@@ -1,406 +1,260 @@
-'use client';
+/**
+ * Individual Prompt Page
+ *
+ * SEO-optimized page for each prompt
+ * Shareable URLs, Open Graph tags, JSON-LD
+ */
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
-// Removed: No longer using seed-prompts.ts - fetch from MongoDB API only
-import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
-import { RatingStars } from '@/components/features/RatingStars';
-import { MakeItMineButton } from '@/components/features/MakeItMineButton';
-import { TestResults } from '@/components/prompt/TestResults';
-import { FrameworkRecommendation } from '@/components/prompt/FrameworkRecommendation';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { useToast } from '@/hooks/use-toast';
-import type { Prompt } from '@/lib/schemas/prompt';
+import { getAllPrompts } from '@/lib/prompts/mongodb-prompts';
+import {
+  categoryLabels,
+  roleLabels,
+  type UserRole,
+} from '@/lib/schemas/prompt';
+import Link from 'next/link';
 
-export default function PromptDetailPage() {
-  const params = useParams();
-  const id = params.id as string;
-  const router = useRouter();
-  const [copied, setCopied] = useState(false);
-  const [viewCount, setViewCount] = useState(0);
-  const [userRating, setUserRating] = useState(0);
-  const [prompt, setPrompt] = useState<Prompt | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
-  // Fetch prompt from API (supports MongoDB with metadata)
-  useEffect(() => {
-    async function fetchPrompt() {
-      try {
-        const response = await fetch(`/api/prompts/${id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setPrompt(data.prompt);
-          setViewCount(data.prompt?.views || data.prompt?.stats?.views || 0);
-        } else {
-          // Prompt not found
-          setPrompt(null);
-        }
-      } catch (error) {
-        console.error('Error fetching prompt:', error);
-        setPrompt(null);
-      } finally {
-        setLoading(false);
-      }
-    }
+// Generate static params for all prompts (SSG)
+export async function generateStaticParams() {
+  const prompts = await getAllPrompts();
+  return prompts.map((prompt) => ({
+    id: prompt.id,
+  }));
+}
 
-    if (id) {
-      fetchPrompt();
-    }
-  }, [id]);
+// Dynamic metadata for SEO
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const prompts = await getAllPrompts();
+  const prompt = prompts.find((p) => p.id === params.id);
 
-  // Track view count
-  useEffect(() => {
-    if (prompt && id) {
-      // Load user rating from localStorage
-      const ratingKey = `prompt_rating_${id}`;
-      const savedRating = localStorage.getItem(ratingKey);
-      if (savedRating) {
-        setUserRating(Number(savedRating));
-      }
-    }
-  }, [prompt, id]);
+  if (!prompt) {
+    return {
+      title: 'Prompt Not Found | Engify.ai',
+      description: 'The requested prompt could not be found.',
+    };
+  }
 
-  // Handle rating
-  const handleRate = async (rating: number) => {
-    setUserRating(rating);
+  const title = `${prompt.title} - AI Prompt Template | Engify.ai`;
+  const description = prompt.description;
+  const url = `${APP_URL}/prompts/${prompt.id}`;
 
-    // Save to API
-    try {
-      const response = await fetch('/api/trpc/prompt.rate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          json: {
-            promptId: id,
-            rating,
-          },
-        }),
-      });
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'article',
+      siteName: 'Engify.ai',
+      article: {
+        tags: prompt.tags || [],
+        section: categoryLabels[prompt.category] || prompt.category,
+      },
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+    keywords: [
+      prompt.title,
+      categoryLabels[prompt.category] || prompt.category,
+      prompt.role ? roleLabels[prompt.role as UserRole] : '',
+      'prompt engineering',
+      'AI prompt',
+      'ChatGPT',
+      'Claude',
+      ...(prompt.tags || []),
+    ].filter(Boolean),
+  };
+}
 
-      if (!response.ok) {
-        throw new Error('Failed to save rating');
-      }
+export default async function PromptPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const prompts = await getAllPrompts();
+  const prompt = prompts.find((p) => p.id === params.id);
 
-      toast({
-        title: 'Rating saved!',
-        description: `You rated this prompt ${rating} stars`,
-      });
-    } catch (error) {
-      console.error('Failed to save rating:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to save rating. Please try again.',
-        variant: 'destructive',
-      });
-    }
+  if (!prompt) {
+    notFound();
+  }
+
+  // JSON-LD structured data
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: prompt.title,
+    description: prompt.description,
+    author: {
+      '@type': 'Organization',
+      name: 'Engify.ai',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Engify.ai',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${APP_URL}/logo.png`,
+      },
+    },
+    datePublished: prompt.createdAt?.toISOString(),
+    dateModified: prompt.updatedAt?.toISOString(),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${APP_URL}/prompts/${prompt.id}`,
+    },
+    keywords: prompt.tags?.join(', '),
+    articleSection: categoryLabels[prompt.category] || prompt.category,
   };
 
-  // Handle copy to clipboard
-  const handleCopy = async () => {
-    if (!prompt) return;
-
-    try {
-      await navigator.clipboard.writeText(prompt.content);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  };
-
-  if (loading) {
-    return (
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        // SECURITY: JSON-LD is safe - it's JSON.stringify of our own data, no user input
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <MainLayout>
         <div className="container py-8">
-          <div className="flex min-h-[400px] items-center justify-center">
-            <div className="text-center">
-              <Icons.spinner className="mx-auto mb-4 h-8 w-8 animate-spin" />
-              <p className="text-muted-foreground">Loading prompt...</p>
+          {/* Breadcrumbs */}
+          <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
+            <Link href="/" className="hover:text-primary">
+              Home
+            </Link>
+            <Icons.chevronRight className="h-4 w-4" />
+            <Link href="/prompts" className="hover:text-primary">
+              Prompts
+            </Link>
+            <Icons.chevronRight className="h-4 w-4" />
+            <span className="text-foreground">{prompt.title}</span>
+          </nav>
+
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="mb-4 text-4xl font-bold">{prompt.title}</h1>
+            <p className="mb-6 text-xl text-muted-foreground">
+              {prompt.description}
+            </p>
+
+            {/* Metadata Badges */}
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">
+                {categoryLabels[prompt.category] || prompt.category}
+              </Badge>
+              {prompt.role && (
+                <Badge variant="outline">
+                  {roleLabels[prompt.role as UserRole] || prompt.role}
+                </Badge>
+              )}
+              {prompt.pattern && (
+                <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100">
+                  <Icons.brain className="mr-1 h-3 w-3" />
+                  {prompt.pattern}
+                </Badge>
+              )}
+              {prompt.tags?.map((tag) => (
+                <Badge key={tag} variant="outline" className="text-xs">
+                  <Icons.tag className="mr-1 h-3 w-3" />
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Prompt Content */}
+          <div className="rounded-lg border bg-card p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Prompt Template</h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(prompt.content);
+                }}
+              >
+                <Icons.copy className="mr-2 h-4 w-4" />
+                Copy
+              </Button>
+            </div>
+            <pre className="whitespace-pre-wrap rounded-lg bg-muted p-4 text-sm">
+              {prompt.content}
+            </pre>
+          </div>
+
+          {/* Share & Actions */}
+          <div className="mt-8 flex gap-4">
+            <Button asChild>
+              <Link href="/prompts">
+                <Icons.arrowLeft className="mr-2 h-4 w-4" />
+                Back to Library
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                if (navigator.share) {
+                  await navigator.share({
+                    title: prompt.title,
+                    text: prompt.description,
+                    url: window.location.href,
+                  });
+                } else {
+                  await navigator.clipboard.writeText(window.location.href);
+                }
+              }}
+            >
+              <Icons.share className="mr-2 h-4 w-4" />
+              Share
+            </Button>
+          </div>
+
+          {/* Related Prompts */}
+          <div className="mt-12">
+            <h2 className="mb-4 text-2xl font-bold">More Prompts</h2>
+            <div className="grid gap-4 md:grid-cols-3">
+              {prompts
+                .filter(
+                  (p) =>
+                    p.id !== prompt.id &&
+                    (p.category === prompt.category || p.role === prompt.role)
+                )
+                .slice(0, 3)
+                .map((relatedPrompt) => (
+                  <Link
+                    key={relatedPrompt.id}
+                    href={`/prompts/${relatedPrompt.id}`}
+                    className="rounded-lg border p-4 transition-colors hover:border-primary hover:bg-accent"
+                  >
+                    <h3 className="mb-2 font-semibold">
+                      {relatedPrompt.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {relatedPrompt.description}
+                    </p>
+                  </Link>
+                ))}
             </div>
           </div>
         </div>
       </MainLayout>
-    );
-  }
-
-  // If prompt not found, show error
-  if (!prompt) {
-    return (
-      <MainLayout>
-        <div className="container py-8">
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Icons.alertTriangle className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h2 className="mb-2 text-2xl font-bold">Prompt Not Found</h2>
-              <p className="mb-6 text-muted-foreground">
-                The prompt you&apos;re looking for doesn&apos;t exist.
-              </p>
-              <Button onClick={() => router.push('/library')}>
-                <Icons.arrowLeft className="mr-2 h-4 w-4" />
-                Back to Library
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  return (
-    <MainLayout>
-      <div className="container py-8">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => router.push('/library')}
-          className="mb-6"
-        >
-          <Icons.arrowLeft className="mr-2 h-4 w-4" />
-          Back to Library
-        </Button>
-
-        {/* Main Content */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Prompt Content - Main Column */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <h1 className="mb-2 text-3xl font-bold">{prompt.title}</h1>
-                    <p className="text-lg text-muted-foreground">
-                      {prompt.description}
-                    </p>
-                  </div>
-                  {prompt.isFeatured && (
-                    <Badge variant="default" className="shrink-0">
-                      <Icons.star className="mr-1 h-3 w-3" />
-                      Featured
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-6">
-                {/* Metadata Badges */}
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">
-                    {categoryLabels[prompt.category]}
-                  </Badge>
-                  {prompt.role && (
-                    <Badge variant="outline">{roleLabels[prompt.role]}</Badge>
-                  )}
-                  {prompt.pattern && (
-                    <Badge variant="outline">
-                      <Icons.zap className="mr-1 h-3 w-3" />
-                      {prompt.pattern}
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Tags */}
-                {prompt.tags && prompt.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {prompt.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-
-                {/* Prompt Content */}
-                <div>
-                  <div className="mb-3 flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">Prompt</h2>
-                    <Button
-                      onClick={handleCopy}
-                      variant={copied ? 'default' : 'outline'}
-                      size="sm"
-                    >
-                      {copied ? (
-                        <>
-                          <Icons.check className="mr-2 h-4 w-4" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Icons.copy className="mr-2 h-4 w-4" />
-                          Copy Prompt
-                        </>
-                      )}
-                    </Button>
-                  </div>
-
-                  <div className="rounded-lg border bg-muted/50 p-6">
-                    <pre className="whitespace-pre-wrap font-mono text-sm">
-                      {prompt.content}
-                    </pre>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-3">
-                  <MakeItMineButton
-                    promptId={prompt.id}
-                    promptTitle={prompt.title}
-                    size="lg"
-                    className="w-full"
-                  />
-                  <div className="flex gap-3">
-                    <Button variant="outline" className="flex-1">
-                      <Icons.zap className="mr-2 h-4 w-4" />
-                      Try in Workbench
-                    </Button>
-                    <Button variant="outline" className="flex-1">
-                      <Icons.share className="mr-2 h-4 w-4" />
-                      Share
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar - Stats & Info */}
-          <div className="space-y-6">
-            {/* Stats Card */}
-            <Card>
-              <CardHeader>
-                <h3 className="font-semibold">Statistics</h3>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-muted-foreground">
-                    <Icons.users className="mr-2 h-4 w-4" />
-                    <span className="text-sm">Views</span>
-                  </div>
-                  <span className="font-semibold">
-                    {viewCount.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-muted-foreground">
-                      <Icons.star className="mr-2 h-4 w-4" />
-                      <span className="text-sm">Avg Rating</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold">
-                        {prompt.rating || prompt.stats?.averageRating || 0}
-                      </span>
-                      <span className="text-sm text-muted-foreground">/ 5</span>
-                    </div>
-                  </div>
-
-                  <div className="border-t pt-3">
-                    <p className="mb-2 text-sm text-muted-foreground">
-                      Your Rating:
-                    </p>
-                    <RatingStars
-                      rating={userRating}
-                      onRate={handleRate}
-                      size="lg"
-                    />
-                  </div>
-                </div>
-
-                {(prompt.ratingCount !== undefined ||
-                  prompt.stats?.totalRatings) && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-muted-foreground">
-                      <Icons.users className="mr-2 h-4 w-4" />
-                      <span className="text-sm">Ratings</span>
-                    </div>
-                    <span className="font-semibold">
-                      {(
-                        prompt.ratingCount ||
-                        prompt.stats?.totalRatings ||
-                        0
-                      ).toLocaleString()}
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-muted-foreground">
-                    <Icons.calendar className="mr-2 h-4 w-4" />
-                    <span className="text-sm">Created</span>
-                  </div>
-                  <span className="text-sm">
-                    {new Date(prompt.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Pattern Info Card */}
-            {prompt.pattern && (
-              <Card>
-                <CardHeader>
-                  <h3 className="font-semibold">Pattern Used</h3>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-start gap-3">
-                    <Icons.zap className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                    <div>
-                      <p className="mb-1 font-medium capitalize">
-                        {prompt.pattern}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        This prompt uses the {prompt.pattern} pattern for
-                        optimal results.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Test Results Card */}
-            <ErrorBoundary>
-              <TestResults promptId={prompt.id || prompt._id || id} />
-            </ErrorBoundary>
-
-            {/* Framework & Model Recommendations */}
-            {prompt.metadata && (
-              <ErrorBoundary>
-                <FrameworkRecommendation
-                  framework={prompt.metadata.recommendedFramework}
-                  frameworkReasoning={prompt.metadata.frameworkReasoning}
-                  recommendedModel={prompt.metadata.recommendedModel}
-                  modelReasoning={prompt.metadata.modelReasoning}
-                  estimatedCost={prompt.metadata.estimatedCostPerUse}
-                />
-              </ErrorBoundary>
-            )}
-
-            {/* Share Card */}
-            <Card>
-              <CardHeader>
-                <h3 className="font-semibold">Share</h3>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
-                  <Icons.share className="mr-2 h-4 w-4" />
-                  Copy Link
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Icons.users className="mr-2 h-4 w-4" />
-                  Share with Team
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    </MainLayout>
+    </>
   );
 }
