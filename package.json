@@ -77,6 +77,7 @@
     "ci:flaky": "tsx scripts/testing/flaky-test-detector.ts",
     "ci:bundle": "tsx scripts/ci/check-bundle-size.ts",
     "content:rss": "tsx scripts/content/rss-fetch.ts",
+    "admin:stats": "tsx scripts/admin/db-stats.ts",
     "content:sitemap": "tsx scripts/content/sitemap-crawl.ts",
     "content:extract": "tsx scripts/content/html-extract.ts",
     "content:enrich": "tsx scripts/content/metadata-enrich.ts",
