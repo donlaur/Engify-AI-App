@@ -7,7 +7,7 @@ import {
 } from '@/lib/db/schemas/affiliate-config';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
-import { logAuditEvent } from '@/lib/logging/audit';
+import { auditLog } from '@/lib/logging/audit';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -137,13 +137,17 @@ export async function POST(request: NextRequest) {
       );
 
       // Audit logging
-      await logAuditEvent({
+      await auditLog({
         userId: session.user?.id || 'unknown',
         action: result.upsertedId
-          ? 'affiliate_link.created'
-          : 'affiliate_link.updated',
+          ? ('admin_action' as const)
+          : ('admin_action' as const),
         resource: 'affiliate_config',
-        metadata: { tool: validated.tool, status: validated.status },
+        details: {
+          operation: result.upsertedId ? 'created' : 'updated',
+          tool: validated.tool,
+          status: validated.status,
+        },
       });
 
       return NextResponse.json({
@@ -172,13 +176,15 @@ export async function POST(request: NextRequest) {
       );
 
       // Audit logging
-      await logAuditEvent({
+      await auditLog({
         userId: session.user?.id || 'unknown',
-        action: result.upsertedId
-          ? 'partnership_outreach.created'
-          : 'partnership_outreach.updated',
+        action: 'admin_action' as const,
         resource: 'partnership_outreach',
-        metadata: { company: validated.company, status: validated.status },
+        details: {
+          operation: result.upsertedId ? 'created' : 'updated',
+          company: validated.company,
+          status: validated.status,
+        },
       });
 
       return NextResponse.json({
@@ -238,14 +244,11 @@ export async function DELETE(request: NextRequest) {
     const result = await db.collection(collectionName).deleteOne({ _id: id });
 
     // Audit logging
-    await logAuditEvent({
+    await auditLog({
       userId: session.user?.id || 'unknown',
-      action:
-        type === 'link'
-          ? 'affiliate_link.deleted'
-          : 'partnership_outreach.deleted',
+      action: 'admin_action' as const,
       resource: collectionName,
-      metadata: { id },
+      details: { operation: 'deleted', id },
     });
 
     return NextResponse.json({
