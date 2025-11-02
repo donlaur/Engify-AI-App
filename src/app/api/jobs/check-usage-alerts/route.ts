@@ -1,10 +1,9 @@
 /**
- * Usage Alerts Check Job
- *
- * Checks API key usage against thresholds and sends alerts
- * POST /api/jobs/check-usage-alerts
- *
- * Called by QStash scheduled job (hourly)
+ * AI Summary: Usage Alerts Check Job - Checks API key usage against thresholds
+ * Protected endpoint requiring cron authentication. Monitors API key usage against
+ * user-defined thresholds and sends email alerts when limits are approached or exceeded.
+ * Called by QStash scheduled job hourly. Part of Day 7 Audit #6 medium priority security improvements.
+ * Last updated: 2025-11-02
  */
 
 import { NextRequest, NextResponse } from 'next/server';

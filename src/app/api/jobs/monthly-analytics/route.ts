@@ -1,10 +1,9 @@
 /**
- * Monthly Analytics Aggregation Job
- *
- * Aggregates monthly API key usage, prompt usage, and user activity statistics
- * POST /api/jobs/monthly-analytics
- *
- * Called by QStash scheduled job (first day of month)
+ * AI Summary: Monthly Analytics Aggregation Job - Aggregates monthly usage statistics
+ * Protected endpoint requiring cron authentication (CRON_SECRET, Vercel Cron, or QStash).
+ * Aggregates API key usage, prompt usage, and user activity for the previous month.
+ * Called by QStash scheduled job on the first day of each month. Part of Day 7 Audit #6.
+ * Last updated: 2025-11-02
  */
 
 import { NextRequest, NextResponse } from 'next/server';
