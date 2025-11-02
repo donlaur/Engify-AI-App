@@ -65,9 +65,10 @@ refactor: extract prompt service to separate module
    - Centralize constants in `/src/lib/constants.ts`
 
 2. **Single Source of Truth**
-   - All site statistics come from `/src/lib/site-stats.ts`
-   - Prompt data lives in `/src/data/playbooks.ts`
+   - All site statistics come from `/api/stats` endpoint (MongoDB + Redis cache)
+   - Prompt data lives in MongoDB (not static files)
    - No hardcoded numbers or duplicated data
+   - No mock data in production code (real data or empty states)
 
 3. **Type Safety**
    - All components and functions must be fully typed
@@ -102,12 +103,33 @@ src/
 
 ### Component Standards
 
-1. **Functional Components Only**
+1. **Server vs Client Components**
+   - **Server Components by default** - Use for data fetching, static content
+   - **Client Components when needed** - Only for hooks, events, browser APIs
+   - Never pass event handlers to Server Components
+   - Extract interactive parts to Client Components
+   - Use `'use client'` directive explicitly
+
+   ```typescript
+   // ✅ Server Component (default)
+   export default async function Page() {
+     const data = await fetchData();
+     return <DataDisplay data={data} />;
+   }
+   
+   // ✅ Client Component (when needed)
+   'use client';
+   export function InteractiveButton({ onClick }: Props) {
+     return <button onClick={onClick}>Click</button>;
+   }
+   ```
+
+2. **Functional Components Only**
    - Use React hooks for state management
    - Prefer composition over inheritance
    - Keep components small and focused
 
-2. **Props Interface**
+3. **Props Interface**
 
    ```typescript
    interface ComponentProps {
@@ -117,10 +139,21 @@ src/
    }
    ```
 
-3. **Error Boundaries**
-   - Wrap components that might fail
+4. **Error Boundaries**
+   - Wrap all Client Components with Error Boundaries
    - Provide meaningful error messages
    - Log errors to monitoring service
+   - Never expose internal errors to users
+
+5. **Loading States**
+   - Use skeleton loaders (not generic "Loading...")
+   - Consistent loading UI across app
+   - Use Suspense boundaries
+
+6. **Empty States**
+   - Consistent empty state component
+   - Helpful messages with CTAs
+   - Test dark mode support
 
 ### API Standards
 
@@ -159,6 +192,23 @@ src/
    - Validate request bodies
    - Sanitize user inputs
    - Check authentication/authorization
+
+4. **Authentication & Authorization**
+   - All API routes must check auth (except public routes)
+   - Use `requireAuth()` from `@/lib/auth/require-auth`
+   - Admin routes use `RBACPresets.requireSuperAdmin()`
+   - Background jobs verify cron secret (`verifyCronRequest()`)
+   - Rate limiting on all public endpoints
+   - Audit logging for sensitive operations
+
+5. **Mock Data Policy**
+   - **Zero mock data in production code**
+   - Real data or proper empty states
+   - Start metrics at 0, not hardcoded
+   - All stats from `/api/stats` endpoint
+   - Document all data sources
+
+   See: `docs/development/ADR/ADR-009-mock-data-removal.md`
 
 ## Testing Standards
 
@@ -302,6 +352,12 @@ Before submitting a PR:
    - Document major architectural decisions
    - Explain alternatives considered
    - Record consequences and trade-offs
+   - Located in `docs/development/ADR/`
+   - Current ADRs:
+     - ADR 009: Pattern-Based Bug Fixing
+     - ADR 009: Mock Data Removal Strategy
+     - ADR 010: Admin CLI Consolidation
+     - ADR 011: Frontend Component Architecture
 
 ### Markdown Standards
 
@@ -366,6 +422,25 @@ Before submitting a PR:
 - [ ] Caching is implemented
 - [ ] Bundle size is reasonable
 
+## Pattern-Based Bug Fixing (Day 7)
+
+When fixing bugs, follow this systematic approach:
+
+1. **Identify Pattern** - Document root cause, file type, code pattern
+2. **Systematic Audit** - Search entire codebase for same pattern
+3. **Fix All Instances** - Address all occurrences at once
+4. **Document** - Create audit report in `docs/testing/PATTERN_AUDIT_DAY7.md`
+5. **Prevent** - Add pre-commit hook or lint rule
+
+**Example:**
+- Bug: Server Component with `onClick` handler
+- Pattern: Server Components with event handlers
+- Audit: Search all files with `onClick` handlers
+- Fix: Extract to Client Components
+- Prevent: Pre-commit hook checks for pattern
+
+See: `docs/development/ADR/009-pattern-based-bug-fixing.md`
+
 ## Getting Help
 
 ### Resources
@@ -373,7 +448,10 @@ Before submitting a PR:
 - **Documentation**: [docs/README.md](docs/README.md)
 - **Architecture**: [docs/architecture/OVERVIEW.md](docs/architecture/OVERVIEW.md)
 - **API Docs**: [docs/api/](docs/api/)
-- **Development Guide**: [docs/DEVELOPMENT_GUIDE.md](docs/DEVELOPMENT_GUIDE.md)
+- **Development Guides**: [docs/development/](docs/development/)
+  - [Adding a New Admin Panel](docs/development/ADDING_ADMIN_PANEL.md)
+  - [Creating API Routes](docs/development/CREATING_API_ROUTES.md)
+  - [Component Standards](docs/development/COMPONENT_STANDARDS.md)
 
 ### Communication
 
