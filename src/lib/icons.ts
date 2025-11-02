@@ -125,6 +125,7 @@ import {
   Briefcase,
   X,
   Github,
+  GitBranch,
   Server,
   Key,
   Wrench,
@@ -141,6 +142,10 @@ import {
   Play,
   Wifi,
   Globe,
+  Cloud,
+  Wind,
+  List,
+  Award,
 } from 'lucide-react';
 
 // Export all icons with descriptive names
@@ -264,6 +269,7 @@ export const Icons = {
   briefcase: Briefcase,
   x: X,
   github: Github,
+  gitBranch: GitBranch,
   server: Server,
   key: Key,
   tool: Wrench,
@@ -281,6 +287,10 @@ export const Icons = {
   play: Play,
   wifi: Wifi,
   globe: Globe,
+  cloud: Cloud,
+  wind: Wind,
+  list: List,
+  award: Award,
 
   // Social
   twitter: Twitter,
