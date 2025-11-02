@@ -1,6 +1,9 @@
 /**
- * Manager Dashboard API
- * Returns team overview and analytics
+ * AI Summary: Manager Dashboard API - Returns team overview and analytics for managers
+ * Protected route requiring authentication and manager role (manager, director, etc.).
+ * Includes rate limiting (30 req/min) and fetches team overview data from MongoDB.
+ * Part of Day 7 Audit #6 authentication improvements.
+ * Last updated: 2025-11-02
  */
 
 import { NextRequest, NextResponse } from 'next/server';

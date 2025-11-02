@@ -1,8 +1,9 @@
 /**
- * Verify Cron/Internal API Calls
- * 
- * Protects background job endpoints from unauthorized access
- * Supports both Vercel Cron and QStash
+ * AI Summary: Cron/Internal API Verification - Protects background job endpoints
+ * Provides verifyCronRequest() and verifyInternalRequest() helpers to authenticate
+ * scheduled jobs and internal API calls. Supports CRON_SECRET, Vercel Cron headers,
+ * and QStash signatures. Part of Day 7 Audit #6 medium priority security improvements.
+ * Last updated: 2025-11-02
  */
 
 import { NextRequest, NextResponse } from 'next/server';
