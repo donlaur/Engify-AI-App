@@ -1,3 +1,11 @@
+/**
+ * AI Summary: Homepage - Main landing page with stats, features, and CTAs
+ * Displays real-time platform statistics from MongoDB, showcases key features,
+ * and provides navigation to prompts library and signup. Server-side rendered
+ * with ISR for optimal performance. Part of Day 7 QA improvements.
+ * Last updated: 2025-11-02
+ */
+
 import Link from 'next/link';
 import { Icons } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
