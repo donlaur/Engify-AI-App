@@ -17,7 +17,6 @@ const footerLinks = {
     { href: '/workbench', label: 'AI Workbench' },
     { href: '/patterns', label: 'Patterns' },
     { href: '/prompts', label: 'Prompt Library' },
-    { href: '/pricing', label: 'Pricing' },
   ],
   company: [
     { href: '/about', label: 'About' },

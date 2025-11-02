@@ -10,260 +10,206 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { getStats } from '@/lib/stats-cache';
 
-export default async function PricingPage() {
-  const data = await getStats();
-  const plans = [
-    {
-      name: 'Free',
-      price: '$0',
-      period: 'forever',
-      description: 'Perfect for trying out Engify',
-      features: [
-        { text: `${data.stats.prompts}+ prompt templates`, included: true },
-        { text: '1 custom prompt per week', included: true },
-        { text: 'Browse all 15 patterns', included: true },
-        { text: '10 workbench executions/day', included: true },
-        { text: 'Community support', included: true },
-        { text: 'AI-powered optimization', included: false },
-        { text: 'Unlimited customization', included: false },
-        { text: 'Save custom prompts', included: false },
-        { text: 'Priority support', included: false },
-      ],
-      cta: 'Get Started Free',
-      popular: false,
-    },
-    {
-      name: 'Pro',
-      price: '$19',
-      period: 'per month',
-      description: 'For professionals who want unlimited access',
-      features: [
-        { text: 'Everything in Free, plus:', included: true, bold: true },
-        { text: 'Unlimited custom prompts', included: true },
-        { text: 'AI-powered optimization', included: true },
-        { text: 'Role-based personalization', included: true },
-        { text: 'Pattern mixing & combinations', included: true },
-        { text: 'Save unlimited custom prompts', included: true },
-        { text: 'Unlimited workbench executions', included: true },
-        { text: 'Version history', included: true },
-        { text: 'Email support', included: true },
-      ],
-      cta: 'Start Pro Trial',
-      popular: true,
-    },
-    {
-      name: 'Team',
-      price: '$99',
-      period: 'per month',
-      description: 'For teams that want to collaborate',
-      features: [
-        { text: 'Everything in Pro, plus:', included: true, bold: true },
-        { text: '5 team members included', included: true },
-        { text: 'Shared prompt library', included: true },
-        { text: 'Team templates', included: true },
-        { text: 'Usage analytics', included: true },
-        { text: 'Admin dashboard', included: true },
-        { text: 'Priority support', included: true },
-        { text: 'Onboarding session', included: true },
-        { text: 'Custom integrations', included: true },
-      ],
-      cta: 'Contact Sales',
-      popular: false,
-    },
-  ];
-
+/**
+ * Beta Access Page
+ * Simple page explaining free beta access and looking for engineering team partners
+ */
+export default function PricingPage() {
   return (
     <MainLayout>
       <div className="container py-16">
         {/* Header */}
         <div className="mb-16 text-center">
-          <Badge variant="secondary" className="mb-4">
-            Pricing
+          <Badge
+            variant="secondary"
+            className="mb-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+          >
+            <Icons.sparkles className="mr-2 h-3 w-3" />
+            Beta Access
           </Badge>
-          <h1 className="mb-4 text-5xl font-bold">Choose Your Plan</h1>
+          <h1 className="mb-4 text-5xl font-bold">
+            Free Beta Access for Engineering Teams
+          </h1>
           <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-            Start free, upgrade when you&apos;re ready. All plans include access
-            to our prompt library.
+            Engify.ai is currently in beta. We&apos;re looking for engineering
+            departments to partner with as we build the future of AI-powered
+            engineering workflows.
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="mx-auto mb-16 grid max-w-6xl gap-8 md:grid-cols-3">
-          {plans.map((plan) => (
-            <Card
-              key={plan.name}
-              className={`relative ${
-                plan.popular
-                  ? 'scale-105 border-primary shadow-lg'
-                  : 'border-border'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                  <Badge className="bg-primary text-primary-foreground">
-                    Most Popular
-                  </Badge>
+        {/* Main Card */}
+        <div className="mx-auto mb-16 max-w-4xl">
+          <Card className="border-2 border-purple-200">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500">
+                <Icons.sparkles className="h-10 w-10 text-white" />
+              </div>
+              <CardTitle className="text-3xl">
+                Everything Free During Beta
+              </CardTitle>
+              <CardDescription className="text-lg">
+                Full access to all features while we build together
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-8">
+              {/* Features Grid */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="flex items-start gap-3">
+                  <Icons.check className="mt-1 h-5 w-5 shrink-0 text-green-600" />
+                  <div>
+                    <p className="font-semibold">130+ Expert Prompts</p>
+                    <p className="text-sm text-muted-foreground">
+                      Battle-tested prompts for engineering teams
+                    </p>
+                  </div>
                 </div>
-              )}
 
-              <CardHeader className="pb-8 pt-8 text-center">
-                <CardTitle className="mb-2 text-2xl">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-5xl font-bold">{plan.price}</span>
-                  <span className="ml-2 text-muted-foreground">
-                    {plan.period}
-                  </span>
+                <div className="flex items-start gap-3">
+                  <Icons.check className="mt-1 h-5 w-5 shrink-0 text-green-600" />
+                  <div>
+                    <p className="font-semibold">Proven Patterns</p>
+                    <p className="text-sm text-muted-foreground">
+                      Learn frameworks that work in production
+                    </p>
+                  </div>
                 </div>
-              </CardHeader>
 
-              <CardContent className="space-y-6">
-                {/* Features List */}
-                <ul className="space-y-3">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      {feature.included ? (
-                        <Icons.check className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
-                      ) : (
-                        <Icons.cancel className="mt-0.5 h-5 w-5 shrink-0 text-gray-400" />
-                      )}
-                      <span
-                        className={`text-sm ${
-                          feature.bold ? 'font-semibold' : ''
-                        } ${!feature.included ? 'text-muted-foreground' : ''}`}
-                      >
-                        {feature.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex items-start gap-3">
+                  <Icons.check className="mt-1 h-5 w-5 shrink-0 text-green-600" />
+                  <div>
+                    <p className="font-semibold">AI Workbench</p>
+                    <p className="text-sm text-muted-foreground">
+                      Interactive tools for prompt engineering
+                    </p>
+                  </div>
+                </div>
 
-                {/* CTA Button */}
-                <Button
-                  className="w-full"
-                  variant={plan.popular ? 'default' : 'outline'}
-                  size="lg"
-                  asChild
-                >
-                  <Link
-                    href={
-                      plan.name === 'Free'
-                        ? '/library'
-                        : plan.name === 'Team'
-                          ? 'mailto:sales@engify.ai'
-                          : '/signup'
-                    }
-                  >
-                    {plan.cta}
+                <div className="flex items-start gap-3">
+                  <Icons.check className="mt-1 h-5 w-5 shrink-0 text-green-600" />
+                  <div>
+                    <p className="font-semibold">Learning Resources</p>
+                    <p className="text-sm text-muted-foreground">
+                      Guides for teams adopting AI workflows
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Icons.check className="mt-1 h-5 w-5 shrink-0 text-green-600" />
+                  <div>
+                    <p className="font-semibold">Built in Public</p>
+                    <p className="text-sm text-muted-foreground">
+                      Watch development happen in real-time
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Icons.check className="mt-1 h-5 w-5 shrink-0 text-green-600" />
+                  <div>
+                    <p className="font-semibold">Direct Feedback</p>
+                    <p className="text-sm text-muted-foreground">
+                      Help shape the product direction
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col gap-4 pt-4 sm:flex-row sm:justify-center">
+                <Button size="lg" className="w-full sm:w-auto" asChild>
+                  <Link href="/prompts">
+                    <Icons.sparkles className="mr-2 h-4 w-4" />
+                    Browse Prompt Library
                   </Link>
                 </Button>
-              </CardContent>
-            </Card>
-          ))}
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  asChild
+                >
+                  <Link href="/signup">Request Beta Access</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* FAQ Section */}
-        <div className="mx-auto max-w-3xl">
+        {/* What We're Looking For */}
+        <div className="mx-auto mb-16 max-w-4xl">
           <h2 className="mb-8 text-center text-3xl font-bold">
-            Frequently Asked Questions
+            Ideal Beta Partners
           </h2>
 
-          <div className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-3">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">
-                  Can I switch plans anytime?
-                </CardTitle>
+                <Icons.users className="mb-2 h-8 w-8 text-purple-600" />
+                <CardTitle className="text-xl">Engineering Teams</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Yes! You can upgrade or downgrade your plan at any time.
-                  Changes take effect immediately, and we&apos;ll prorate any
-                  charges.
+                <p className="text-sm text-muted-foreground">
+                  Teams of 5-50 engineers looking to adopt AI workflows and
+                  improve productivity
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">
-                  What&apos;s the difference between static and custom prompts?
-                </CardTitle>
+                <Icons.target className="mb-2 h-8 w-8 text-purple-600" />
+                <CardTitle className="text-xl">Early Adopters</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Static prompts are pre-written templates you can copy and use.
-                  Custom prompts are personalized for your specific role,
-                  experience level, and problem using AI optimization.
+                <p className="text-sm text-muted-foreground">
+                  Organizations already using AI tools (Copilot, ChatGPT,
+                  Claude) who want better workflows
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Do you offer refunds?</CardTitle>
+                <Icons.messageSquare className="mb-2 h-8 w-8 text-purple-600" />
+                <CardTitle className="text-xl">Active Feedback</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Yes! We offer a 14-day money-back guarantee. If you&apos;re
-                  not satisfied with Pro, we&apos;ll refund your payment, no
-                  questions asked.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  How does the free trial work?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Free users get 1 custom prompt per week to try the
-                  personalization feature. Pro users get unlimited
-                  customizations. No credit card required for free tier.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  What payment methods do you accept?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  We accept all major credit cards (Visa, Mastercard, Amex) and
-                  process payments securely through Stripe.
+                <p className="text-sm text-muted-foreground">
+                  Teams willing to share feedback and help us understand what
+                  engineering leaders need
                 </p>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="mt-16 text-center">
-          <Card className="mx-auto max-w-2xl border-primary/20 bg-primary/5">
+        {/* Contact CTA */}
+        <div className="mx-auto max-w-2xl text-center">
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950">
             <CardContent className="py-12">
-              <Icons.sparkles className="mx-auto mb-4 h-12 w-12 text-primary" />
-              <h3 className="mb-2 text-2xl font-bold">Still have questions?</h3>
+              <Icons.mail className="mx-auto mb-4 h-12 w-12 text-purple-600" />
+              <h3 className="mb-2 text-2xl font-bold">
+                Want to Partner with Us?
+              </h3>
               <p className="mb-6 text-muted-foreground">
-                Our team is here to help. Get in touch and we&apos;ll respond
-                within 24 hours.
+                Reach out to discuss how Engify.ai can help your engineering
+                team adopt AI workflows effectively.
               </p>
-              <div className="flex justify-center gap-4">
-                <Button variant="default" asChild>
+              <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                <Button variant="default" size="lg" asChild>
                   <a href="mailto:donlaur@engify.ai">
-                    <Icons.inbox className="mr-2 h-4 w-4" />
-                    Contact Support
+                    <Icons.mail className="mr-2 h-4 w-4" />
+                    Email Me
                   </a>
                 </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/library">Browse Prompts</Link>
+                <Button variant="outline" size="lg" asChild>
+                  <Link href="/built-in-public">
+                    <Icons.github className="mr-2 h-4 w-4" />
+                    See How It&apos;s Built
+                  </Link>
                 </Button>
               </div>
             </CardContent>
