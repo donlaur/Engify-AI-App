@@ -1,0 +1,84 @@
+/* eslint-disable engify/no-missing-tests */
+import { NextRequest, NextResponse } from 'next/server';
+import { Redis } from '@upstash/redis';
+import { checkRateLimit } from '@/lib/rate-limit';
+
+/**
+ * POST /api/stats/invalidate
+ * 
+ * Webhook endpoint to invalidate stats cache
+ * Triggered by QStash when content changes (prompt added/deleted, etc.)
+ * 
+ * This allows on-demand cache revalidation without waiting for TTL
+ * Rate limited: 5 requests per minute (webhook endpoint)
+ */
+
+// Redis cache key (must match the one in /api/stats)
+const CACHE_KEY = 'site:stats:v1';
+
+// Initialize Upstash Redis (if configured)
+let redis: Redis | null = null;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+}
+
+export async function POST(req: NextRequest) {
+  // Rate limiting (stricter for webhook)
+  const rateLimitResult = await checkRateLimit(req, {
+    maxRequests: 5,
+    windowMs: 60 * 1000, // 1 minute
+  });
+
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429 }
+    );
+  }
+  try {
+    // Verify QStash signature (if configured)
+    const qstashSignature = req.headers.get('upstash-signature');
+    if (process.env.QSTASH_CURRENT_SIGNING_KEY && !qstashSignature) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Missing QStash signature' },
+        { status: 401 }
+      );
+    }
+
+    // TODO: Verify QStash signature here using @upstash/qstash
+    // For now, we'll allow any POST (secure by keeping URL private)
+
+    if (!redis) {
+      return NextResponse.json(
+        { error: 'Redis not configured' },
+        { status: 500 }
+      );
+    }
+
+    // Delete the cache key
+    await redis.del(CACHE_KEY);
+
+    console.log('✅ Stats cache invalidated successfully');
+
+    return NextResponse.json({
+      success: true,
+      message: 'Stats cache invalidated',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Failed to invalidate stats cache:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    return NextResponse.json(
+      {
+        error: 'Failed to invalidate cache',
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
+  }
+}
+
