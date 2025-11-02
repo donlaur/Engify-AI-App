@@ -385,7 +385,7 @@ export function getPersonaDescription(persona: Persona): string {
   return `${expDef.label} ${roleDef.title} with ${persona.yearsOfExperience} years of experience`;
 }
 
-export function canImpersonate(actualRole: Role, targetRole: Role): boolean {
+export function canImpersonate(_actualRole: Role, _targetRole: Role): boolean {
   // Everyone can impersonate for empathy/learning
   return true;
 }
@@ -394,7 +394,7 @@ export function getImpersonationInsights(
   actualRole: Role,
   targetRole: Role
 ): string[] {
-  const actualDef = ROLE_DEFINITIONS[actualRole];
+  const _actualDef = ROLE_DEFINITIONS[actualRole];
   const targetDef = ROLE_DEFINITIONS[targetRole];
   
   return [
