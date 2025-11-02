@@ -1,6 +1,15 @@
-export const dynamic = 'force-dynamic';
+/**
+ * AI Summary: Homepage - Main landing page with stats, features, and CTAs
+ * Displays real-time platform statistics from MongoDB, showcases key features,
+ * and provides navigation to prompts library and signup. Server-side rendered
+ * with ISR for optimal performance. Part of Day 7 QA improvements.
+ * Last updated: 2025-11-02
+ */
 
-import { MainLayout } from '@/components/layout/MainLayout';
+import Link from 'next/link';
+import { Icons } from '@/lib/icons';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -8,520 +17,383 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Icons } from '@/lib/icons';
-import Link from 'next/link';
-import { Metadata } from 'next';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { getStats } from '@/lib/stats-cache';
 
-export const metadata: Metadata = {
-  title: 'Case Study: Building a Production SaaS in 7 Days with AI | Engify.ai',
-  description:
-    'Learn how to build enterprise-grade SaaS using AI augmented development. Git worktrees, multi-model strategy, automated guardrails, and systematic planning. Real commits, ADRs, and lessons learned.',
-  keywords: [
-    'AI augmented development',
-    'build SaaS with AI',
-    'Claude Sonnet 4.5',
-    'Cursor IDE',
-    'git worktrees',
-    'enterprise SaaS development',
-    'AI coding assistant case study',
-    'production ready in 7 days',
-    'systematic AI workflow',
-    'pre-commit hooks',
-  ],
-  openGraph: {
-    title: 'Case Study: Production SaaS Built in 7 Days Using AI',
+const features = [
+  {
+    icon: Icons.sparkles,
+    title: 'AI-Powered Learning',
     description:
-      '1,357 commits, 12 ADRs, 620 tests. Learn the systematic process, guardrails, and multi-model AI strategy.',
-    type: 'article',
+      'Master prompt engineering with intelligent guidance and real-time feedback.',
+    gradient: 'from-purple-500 to-pink-500',
   },
-};
+  {
+    icon: Icons.target,
+    title: 'Battle-Tested Patterns',
+    description:
+      'Learn proven patterns used by top AI practitioners worldwide.',
+    gradient: 'from-blue-500 to-cyan-500',
+  },
+  {
+    icon: Icons.trophy,
+    title: 'Gamified Progress',
+    description: 'Unlock achievements, level up, and compete with your team.',
+    gradient: 'from-orange-500 to-red-500',
+  },
+  {
+    icon: Icons.zap,
+    title: 'Instant Results',
+    description:
+      'See your prompts in action with multi-provider AI integration.',
+    gradient: 'from-green-500 to-emerald-500',
+  },
+];
 
-/**
- * Case Study: 7-Day SaaS Build with AI
- *
- * SEO-optimized learning content showing real-world AI-augmented development
- */
-export default function CaseStudyPage() {
-  const tools = [
+export default async function Home() {
+  const data = await getStats();
+  const allowSignup = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
+
+  // Build stats for display
+  const stats = [
     {
-      name: 'Cursor IDE',
-      icon: 'code' as const,
-      role: 'Primary Development Environment',
-      usage: 'Core development with Claude Sonnet 4.5 integration',
-      affiliate: true,
+      label: 'Expert Prompts',
+      value: `${data.prompts?.total || data.stats?.prompts || 0}+`,
     },
     {
-      name: 'Claude Sonnet 4.5',
-      icon: 'sparkles' as const,
-      role: 'Architecture & Core Development',
-      usage: '80% of code generation, pattern design, refactoring',
-      affiliate: false,
+      label: 'Proven Patterns',
+      value: `${data.patterns?.total || data.stats?.patterns || 0}`,
     },
-    {
-      name: 'GPT-4',
-      icon: 'zap' as const,
-      role: 'Code Review & Optimization',
-      usage: 'Red-hat reviews, quality audits, documentation',
-      affiliate: false,
-    },
-    {
-      name: 'Git Worktrees',
-      icon: 'gitCompare' as const,
-      role: 'Parallel Development',
-      usage: '3 simultaneous branches without conflicts',
-      affiliate: false,
-    },
+    { label: 'AI Providers', value: '4' },
+    { label: 'Beta Access', value: 'Free' },
   ];
 
-  const dailyBreakdown = [
-    {
-      day: 'Day 1-2',
-      focus: 'MVP Sprint',
-      commits: '500+',
-      achievements: [
-        'Next.js 15 + TypeScript setup',
-        'NextAuth v5 with MongoDB',
-        '67 prompts in TypeScript files',
-        'Shadcn UI components',
-        'Basic routing and navigation',
-      ],
-      lessons: [
-        'Start with TypeScript files, migrate to DB later',
-        'Real auth from day 1 (not toy login)',
-        'Ship working features over perfect architecture',
-      ],
-    },
-    {
-      day: 'Day 3-4',
-      focus: 'Business Patterns',
-      commits: '400+',
-      achievements: [
-        'Repository pattern implemented',
-        'AI Provider Factory (5 providers)',
-        'Enterprise RBAC (6 roles, 13 permissions)',
-        'OpsHub admin dashboard',
-        '91 repository tests',
-      ],
-      lessons: [
-        'Add patterns when APIs stabilize',
-        'Multi-tenant from the start (organizationId)',
-        'Test business logic, not just units',
-      ],
-    },
-    {
-      day: 'Day 5',
-      focus: 'Production Hardening',
-      commits: '200+',
-      achievements: [
-        '620 passing tests',
-        'RED metrics (p50/p95/p99)',
-        'PII redaction (GDPR/SOC2)',
-        'Rate limiting + replay protection',
-        '3 incident playbooks',
-        '4 ADRs documented',
-      ],
-      lessons: [
-        'Observability is not optional',
-        'Budget enforcement prevents runaway costs',
-        'Document decisions as you make them',
-      ],
-    },
-    {
-      day: 'Day 6',
-      focus: 'Content Quality',
-      commits: '150+',
-      achievements: [
-        'Patterns migrated to MongoDB',
-        '39 critical TODOs resolved',
-        'Real achievements system',
-        'Career recommendations API',
-        'Site stats from database',
-      ],
-      lessons: [
-        'Systematic TODO resolution > random fixes',
-        'Migrate when patterns emerge, not day 1',
-        'Real data builds trust',
-      ],
-    },
-    {
-      day: 'Day 7',
-      focus: 'QA & Trust Signals',
-      commits: '100+',
-      achievements: [
-        'Mock data removal (|| 76, || 23)',
-        '12 QA issues fixed',
-        'Pre-commit hooks for compliance',
-        'UI/UX polish (dark mode, readability)',
-        'Red Hat trust audit',
-      ],
-      lessons: [
-        'Pattern audits catch systematic bugs',
-        'Pre-commit hooks prevent regressions',
-        'Fake data destroys credibility',
-      ],
-    },
-  ];
+  // Build role stats from data
+  const roleIcons = {
+    Engineers: Icons.code,
+    Managers: Icons.users,
+    Designers: Icons.palette,
+    'Product Managers': Icons.target,
+    PMs: Icons.target,
+  };
 
-  const keyTechniques = [
-    {
-      technique: 'Git Worktrees for Parallel Development',
-      problem: 'Multiple AI agents causing merge conflicts',
-      solution:
-        'Created 3 separate worktrees (main, DRY improvements, QA polish) enabling simultaneous development',
-      result: 'Zero merge conflicts despite 3 parallel branches',
-      code: 'git worktree add ../JmZIo chore-day7-audit-qa-JmZIo',
-    },
-    {
-      technique: 'Multi-Model AI Strategy',
-      problem: 'One AI model is not optimal for all tasks',
-      solution:
-        'Claude for architecture, GPT-4 for reviews, Gemini for research',
-      result: '20-30% faster by using model-specific strengths',
-      code: null,
-    },
-    {
-      technique: 'Pre-Commit Hooks as Guardrails',
-      problem: 'Quality regression from rapid AI-assisted development',
-      solution:
-        'Automated checks for mock data, enterprise compliance, schema validation',
-      result: 'Caught 15+ issues before they reached production',
-      code: 'scripts/maintenance/check-enterprise-compliance.js',
-    },
-    {
-      technique: 'ADRs for Every Decision',
-      problem: 'Losing context on why decisions were made',
-      solution:
-        'Document architectural decisions in ADR format with context, decision, consequences',
-      result: '12 ADRs created, zero "why did we do this?" questions',
-      code: 'docs/development/ADR/001-ai-provider-interface.md',
-    },
-  ];
+  const roles = data.prompts?.byRole
+    ? Object.entries(data.prompts.byRole)
+        .map(([name, count]) => ({
+          name,
+          icon: roleIcons[name as keyof typeof roleIcons] || Icons.code,
+          count: `${count} prompts`,
+        }))
+        .slice(0, 4) // Show top 4 roles
+    : [
+        { name: 'Engineers', icon: Icons.code, count: '0 prompts' },
+        { name: 'Managers', icon: Icons.users, count: '0 prompts' },
+        { name: 'Designers', icon: Icons.palette, count: '0 prompts' },
+        { name: 'PMs', icon: Icons.target, count: '0 prompts' },
+      ];
+
+  const siteStats = {
+    totalPrompts: data.prompts?.total || data.stats?.prompts || 0,
+    totalPatterns: data.patterns?.total || data.stats?.patterns || 0,
+  };
 
   return (
     <MainLayout>
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-24">
-        <div className="container">
+      {/* Hero Section - Vibrant Gradient like Vibe Code Careers */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-red-500 via-blue-600 via-purple-600 to-teal-500 dark:from-red-600 dark:via-blue-700 dark:via-purple-700 dark:to-teal-600">
+        {/* Animated background gradient overlay - BEHIND content, not blocking clicks */}
+        <div className="absolute inset-0 -z-10 bg-black/20" />
+
+        <div className="container relative z-10 py-24 md:py-32">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
             <Badge
               variant="secondary"
-              className="border-white/20 bg-white/10 text-white"
+              className="mb-4 border-white/30 bg-black/30 backdrop-blur-sm"
             >
-              <Icons.bookOpen className="mr-2 h-3 w-3" />
-              Case Study
+              <Icons.sparkles className="mr-2 h-3 w-3 text-white" />
+              <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text font-bold text-transparent">
+                BETA
+              </span>
+              <span className="ml-2 text-white">Free</span>
             </Badge>
 
-            <h1 className="text-5xl font-bold text-white sm:text-6xl">
-              Building Production SaaS
-              <br />
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                in 7 Days with AI
+            <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
+              Amplify Engineering{' '}
+              <span className="bg-gradient-to-r from-green-300 to-cyan-300 bg-clip-text text-transparent">
+                Workflows
               </span>
             </h1>
 
-            <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              A systematic approach to AI-augmented development: real commits,
-              real challenges, real solutions. Learn from 1,357 commits and 12
-              architectural decisions.
+            <p className="mx-auto max-w-2xl text-xl text-white">
+              Expert prompts, battle-tested patterns, and gamified learning.
+              Transform engineering capabilities across all roles with Engify.ai
             </p>
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button
-                size="lg"
-                className="bg-white text-purple-900 hover:bg-gray-100"
-                asChild
-              >
-                <Link
-                  href="https://github.com/donlaur/Engify-AI-App"
-                  target="_blank"
+            <div className="flex justify-center pt-8">
+              <div className="flex w-full max-w-md flex-col gap-4 sm:w-auto sm:flex-row">
+                <Button
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-green-500 to-cyan-500 font-bold text-black hover:from-green-600 hover:to-cyan-600 sm:w-auto"
+                  asChild
                 >
-                  <Icons.github className="mr-2 h-4 w-4" />
-                  View Source Code
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white bg-white/90 text-purple-900 hover:bg-white"
-                asChild
-              >
-                <Link href="/ai-workflow">
-                  <Icons.target className="mr-2 h-4 w-4" />
-                  See the Workflow
-                </Link>
-              </Button>
+                  <Link href="/prompts">
+                    Browse Prompt Playbook
+                    <Icons.arrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full border-white/30 text-white hover:bg-white/10 sm:w-auto"
+                  asChild
+                >
+                  <Link href="/signup">
+                    {allowSignup ? 'Start Free' : 'Request Beta Access'}
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Tools Used */}
-      <section className="container py-16">
-        <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-bold">Tools & Stack</h2>
-          <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-            The right tools for the right job
-          </p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          {tools.map((tool) => {
-            const Icon = Icons[tool.icon] || Icons.sparkles; // Fallback to sparkles if icon not found
-            if (!Icon) {
-              console.error(`Icon "${tool.icon}" not found in Icons object`);
-              return null;
-            }
-            return (
-              <Card key={tool.name} className="border-2">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
-                        <Icon className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          {tool.name}
-                          {tool.affiliate && (
-                            <Badge variant="secondary" className="text-xs">
-                              Affiliate
-                            </Badge>
-                          )}
-                        </CardTitle>
-                        <CardDescription>{tool.role}</CardDescription>
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{tool.usage}</p>
-                  {tool.affiliate && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-4"
-                      asChild
-                    >
-                      <Link
-                        href={`/tools/${tool.name.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        Learn More & Get Started →
-                      </Link>
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            Want detailed reviews of each AI coding tool?{' '}
-            <Link href="/tools" className="text-primary hover:underline">
-              See our comprehensive tool comparisons →
-            </Link>
-          </p>
+        {/* Wave separator */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="h-12 w-full fill-white">
+            <path d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path>
+          </svg>
         </div>
       </section>
 
-      {/* Daily Breakdown */}
-      <section className="bg-muted/30 py-16">
-        <div className="container">
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold">Day-by-Day Breakdown</h2>
-            <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-              How the 7 days unfolded in reality
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {dailyBreakdown.map((day, index) => (
-              <Card key={day.day} className="border-2">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-2xl font-bold text-white">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <CardTitle className="text-2xl">{day.day}</CardTitle>
-                        <CardDescription className="text-lg">
-                          Focus: {day.focus}
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="text-lg">
-                      {day.commits} commits
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <div>
-                      <h4 className="mb-3 font-semibold text-green-700 dark:text-green-400">
-                        ✅ Achievements
-                      </h4>
-                      <ul className="space-y-2 text-sm text-muted-foreground">
-                        {day.achievements.map((achievement, i) => (
-                          <li key={i} className="flex items-start gap-2">
-                            <Icons.check className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
-                            <span>{achievement}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="mb-3 font-semibold text-blue-700 dark:text-blue-400">
-                        💡 Key Lessons
-                      </h4>
-                      <ul className="space-y-2 text-sm text-muted-foreground">
-                        {day.lessons.map((lesson, i) => (
-                          <li key={i} className="flex items-start gap-2">
-                            <Icons.lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-yellow-600" />
-                            <span>{lesson}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* Stats Section */}
+      <section className="container bg-white py-16 dark:bg-gray-900">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-8 md:grid-cols-4">
+            {stats.map((stat, i) => (
+              <div
+                key={stat.label}
+                className="animate-fade-in text-center"
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                <div className="mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-6xl font-bold text-transparent">
+                  {stat.value}
+                </div>
+                <p className="text-base font-semibold uppercase tracking-wide text-gray-900 dark:text-gray-100">
+                  {stat.label}
+                </p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Key Techniques */}
-      <section className="container py-16">
-        <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-bold">Key Techniques</h2>
-          <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-            What made this approach different
-          </p>
-        </div>
-
-        <div className="space-y-6">
-          {keyTechniques.map((item) => (
-            <Card key={item.technique} className="border-2">
-              <CardHeader>
-                <CardTitle className="text-xl">{item.technique}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div>
-                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-red-600">
-                        Problem
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {item.problem}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-blue-600">
-                        Solution
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {item.solution}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-green-600">
-                        Result
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {item.result}
-                      </p>
-                    </div>
-                  </div>
-                  {item.code && (
-                    <div className="rounded-md bg-slate-100 p-3 font-mono text-sm dark:bg-slate-800">
-                      {item.code}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* Metrics */}
-      <section className="bg-muted/30 py-16">
-        <div className="container">
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold">By the Numbers</h2>
-            <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-              Measurable outcomes from 7 days
+      {/* Roles Section */}
+      <section className="container bg-gradient-to-b from-white to-gray-50 py-12 dark:from-gray-950 dark:to-gray-900">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-8 text-center">
+            <h2 className="mb-4 text-4xl font-bold">Built for Every Role</h2>
+            <p className="text-xl text-gray-700 dark:text-gray-300">
+              Tailored prompts for your entire engineering organization
             </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-4">
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-5xl font-bold text-purple-600">1,357</div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  Total Commits
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-5xl font-bold text-blue-600">620</div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  Passing Tests
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-5xl font-bold text-pink-600">12</div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  ADRs Documented
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-4xl font-bold text-green-600">115+</div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  Documentation Pages
-                </div>
-              </CardContent>
-            </Card>
+            {roles.map((role, i) => {
+              const Icon = role.icon;
+              return (
+                <Card
+                  key={role.name}
+                  className="group animate-fade-in border-2 transition-all duration-300 hover:-translate-y-2 hover:border-purple-200 hover:shadow-2xl"
+                  style={{ animationDelay: `${i * 100}ms` }}
+                >
+                  <CardHeader className="pb-4 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 transition-transform group-hover:scale-110">
+                      <Icon className="h-8 w-8 text-white" />
+                    </div>
+                    <CardTitle className="text-xl">{role.name}</CardTitle>
+                    <CardDescription className="font-semibold text-purple-600">
+                      {role.count}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="container pb-16">
-        <Card className="border-2 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950">
-          <CardContent className="space-y-6 py-12 text-center">
-            <h2 className="text-3xl font-bold">Want to Build Like This?</h2>
-            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-              Explore our AI tool reviews, workflow guides, and process
-              documentation. Everything you need to implement AI-augmented
-              development in your team.
+      {/* Features Section */}
+      <section className="container bg-white py-12 dark:bg-gray-950">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-10 text-center">
+            <h2 className="mb-4 text-4xl font-bold">
+              Everything You Need to Master AI
+            </h2>
+            <p className="text-xl text-gray-700 dark:text-gray-300">
+              From beginner to expert, we&apos;ve got you covered
             </p>
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button size="lg" asChild>
-                <Link href="/tools">
-                  <Icons.wrench className="mr-2 h-5 w-5" />
-                  Compare AI Coding Tools
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/ai-workflow">
-                  <Icons.target className="mr-2 h-5 w-5" />
-                  See Our Workflow
-                </Link>
-              </Button>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-2">
+            {features.map((feature, i) => {
+              const Icon = feature.icon;
+              return (
+                <Card
+                  key={feature.title}
+                  className="group animate-fade-in overflow-hidden border-2 transition-all duration-300 hover:border-transparent hover:shadow-2xl"
+                  style={{ animationDelay: `${i * 100}ms` }}
+                >
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r ${feature.gradient} opacity-0 transition-opacity group-hover:opacity-5`}
+                  />
+                  <CardHeader>
+                    <div
+                      className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-r ${feature.gradient}`}
+                    >
+                      <Icon className="h-7 w-7 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl">{feature.title}</CardTitle>
+                    <CardDescription className="text-base text-gray-700 dark:text-gray-300">
+                      {feature.description}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Built in Public Section */}
+      <section className="container bg-white py-12 dark:bg-gray-950">
+        <div className="mx-auto max-w-6xl">
+          <Card className="overflow-hidden border-2 border-purple-200">
+            <div className="grid md:grid-cols-2">
+              <div className="flex items-center justify-center bg-gradient-to-br from-purple-900 via-pink-900 to-blue-900 p-12">
+                <div className="space-y-6 text-center">
+                  <div className="inline-flex h-24 w-24 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 backdrop-blur-sm">
+                    <Icons.code className="h-12 w-12 text-white" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-6xl font-bold text-white">350+</div>
+                    <div className="text-xl text-gray-200">Commits Today</div>
+                  </div>
+                  <div className="space-y-1 text-sm text-gray-300">
+                    <div>✓ Real Auth</div>
+                    <div>✓ AI Integration</div>
+                    <div>✓ Production Ready</div>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-6 p-12">
+                <Badge className="border-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                  <Icons.github className="mr-2 h-3 w-3" />
+                  Built in Public
+                </Badge>
+                <h2 className="text-3xl font-bold">Watch This Being Built</h2>
+                <p className="text-lg text-gray-700 dark:text-gray-300">
+                  Built using AI-augmented development. See the code, follow the
+                  commits, learn how modern teams ship fast.
+                </p>
+                <div className="rounded-lg bg-blue-50 p-4 text-sm">
+                  <p className="mb-1 font-semibold text-blue-900">
+                    The Philosophy:
+                  </p>
+                  <p className="text-blue-800">
+                    Start with TypeScript files, not databases. UI can be
+                    rebuilt in minutes. Ship fast, validate, then optimize. This
+                    is modern rapid prototyping.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Icons.check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
+                    <div>
+                      <div className="font-semibold">
+                        AI-Augmented Development
+                      </div>
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
+                        Cursor, Claude, modern AI tools
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Icons.check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
+                    <div>
+                      <div className="font-semibold">Production Quality</div>
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
+                        Real auth, DB, APIs
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Icons.check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
+                    <div>
+                      <div className="font-semibold">Rapid Iteration</div>
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
+                        Ship fast, learn faster
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600"
+                    asChild
+                  >
+                    <Link href="/built-in-public">
+                      <Icons.code className="mr-2 h-4 w-4" />
+                      See How It&apos;s Built
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild>
+                    <Link href="/signup">
+                      {allowSignup ? 'Try Free' : 'Request Access'}
+                    </Link>
+                  </Button>
+                </div>
+                <div className="border-t pt-4 text-sm text-gray-600 dark:text-gray-400">
+                  <p>
+                    Part of the{' '}
+                    <span className="font-semibold">HireLadder.ai</span>{' '}
+                    ecosystem - AI-powered career tools for engineers (resume
+                    builder coming soon)
+                  </p>
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </Card>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-purple-900 via-pink-900 to-blue-900 py-24">
+        <div className="absolute inset-0 animate-glow bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-blue-500/10" />
+
+        <div className="container relative">
+          <Card className="mx-auto max-w-3xl border-white/20 bg-white/10 backdrop-blur-sm">
+            <CardContent className="space-y-6 py-12 text-center">
+              <Icons.trophy className="mx-auto h-16 w-16 text-white" />
+              <h2 className="text-4xl font-bold text-white">
+                Ready to Transform Your Team?
+              </h2>
+              <p className="mx-auto max-w-2xl text-xl text-gray-200">
+                Master AI with {siteStats.totalPrompts} expert prompts. Start
+                free today—no credit card required.
+              </p>
+              <Button
+                size="lg"
+                className="bg-white text-purple-900 hover:bg-gray-100"
+                asChild
+              >
+                <Link href="/signup">
+                  {allowSignup ? 'Start Learning Now' : 'Request Beta Access'}
+                  <Icons.arrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </section>
     </MainLayout>
   );
