@@ -3,6 +3,7 @@
  * Critical: Required for Day 7 enterprise compliance
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST, DELETE } from '../route';
 import { auth } from '@/lib/auth';
@@ -12,25 +13,25 @@ import { auditLog } from '@/lib/logging/audit';
 import { ObjectId } from 'mongodb';
 
 // Mock dependencies
-jest.mock('@/lib/auth');
-jest.mock('@/lib/mongodb');
-jest.mock('@/lib/rate-limit');
-jest.mock('@/lib/logging/audit');
+vi.mock('@/lib/auth');
+vi.mock('@/lib/mongodb');
+vi.mock('@/lib/rate-limit');
+vi.mock('@/lib/logging/audit');
 
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
-const mockGetDb = getDb as jest.MockedFunction<typeof getDb>;
-const mockCheckRateLimit = checkRateLimit as jest.MockedFunction<typeof checkRateLimit>;
-const mockAuditLog = auditLog as jest.MockedFunction<typeof auditLog>;
+const mockAuth = auth as ReturnType<typeof vi.fn>;
+const mockGetDb = getDb as ReturnType<typeof vi.fn>;
+const mockCheckRateLimit = checkRateLimit as ReturnType<typeof vi.fn>;
+const mockAuditLog = auditLog as ReturnType<typeof vi.fn>;
 
 describe('GET /api/favorites', () => {
   const mockUserId = new ObjectId().toString();
   const mockFavorites = ['prompt-1', 'prompt-2', 'prompt-3'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    
+    vi.clearAllMocks();
+
     // Default rate limit: allowed
-    mockCheckRateLimit.mockResolvedValue({
+    (mockCheckRateLimit as any).mockResolvedValue({
       allowed: true,
       remaining: 100,
       resetAt: new Date(Date.now() + 60000),
@@ -55,9 +56,11 @@ describe('GET /api/favorites', () => {
     } as any);
 
     const mockCollection = {
-      findOne: jest.fn().mockResolvedValue({ _id: new ObjectId(mockUserId) }),
+      findOne: vi.fn().mockResolvedValue({ _id: new ObjectId(mockUserId) }),
     };
-    mockGetDb.mockResolvedValue({ collection: jest.fn().mockReturnValue(mockCollection) } as any);
+    mockGetDb.mockResolvedValue({
+      collection: vi.fn().mockReturnValue(mockCollection),
+    } as any);
 
     const request = new NextRequest('http://localhost:3000/api/favorites');
     const response = await GET(request);
@@ -75,12 +78,14 @@ describe('GET /api/favorites', () => {
     } as any);
 
     const mockCollection = {
-      findOne: jest.fn().mockResolvedValue({
+      findOne: vi.fn().mockResolvedValue({
         _id: new ObjectId(mockUserId),
         favoritePrompts: mockFavorites,
       }),
     };
-    mockGetDb.mockResolvedValue({ collection: jest.fn().mockReturnValue(mockCollection) } as any);
+    mockGetDb.mockResolvedValue({
+      collection: vi.fn().mockReturnValue(mockCollection),
+    } as any);
 
     const request = new NextRequest('http://localhost:3000/api/favorites');
     const response = await GET(request);
@@ -112,7 +117,9 @@ describe('GET /api/favorites', () => {
     expect(response.status).toBe(429);
     expect(data.error).toBe('Too many requests');
     expect(response.headers.get('Retry-After')).toBe('60');
-    expect(response.headers.get('X-RateLimit-Reset')).toBe(resetDate.toISOString());
+    expect(response.headers.get('X-RateLimit-Reset')).toBe(
+      resetDate.toISOString()
+    );
   });
 
   it('handles database errors gracefully', async () => {
@@ -137,8 +144,8 @@ describe('POST /api/favorites', () => {
   const mockPromptId = 'debugging-nodejs-memory-leak';
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    
+    vi.clearAllMocks();
+
     mockCheckRateLimit.mockResolvedValue({
       allowed: true,
       remaining: 100,
@@ -184,10 +191,10 @@ describe('POST /api/favorites', () => {
     } as any);
 
     const mockPromptsCollection = {
-      findOne: jest.fn().mockResolvedValue(null),
+      findOne: vi.fn().mockResolvedValue(null),
     };
     mockGetDb.mockResolvedValue({
-      collection: jest.fn().mockReturnValue(mockPromptsCollection),
+      collection: vi.fn().mockReturnValue(mockPromptsCollection),
     } as any);
 
     const request = new NextRequest('http://localhost:3000/api/favorites', {
@@ -214,14 +221,16 @@ describe('POST /api/favorites', () => {
 
     let collectionCalls = 0;
     const mockPromptsCollection = {
-      findOne: jest.fn().mockResolvedValue(mockPrompt),
+      findOne: vi.fn().mockResolvedValue(mockPrompt),
     };
     const mockUsersCollection = {
-      updateOne: jest.fn().mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
+      updateOne: vi
+        .fn()
+        .mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
     };
 
     mockGetDb.mockResolvedValue({
-      collection: jest.fn().mockImplementation((name) => {
+      collection: vi.fn().mockImplementation((_name) => {
         collectionCalls++;
         if (collectionCalls === 1) return mockPromptsCollection;
         if (collectionCalls === 2) return mockUsersCollection;
@@ -264,14 +273,16 @@ describe('POST /api/favorites', () => {
 
     let collectionCalls = 0;
     const mockPromptsCollection = {
-      findOne: jest.fn().mockResolvedValue(mockPrompt),
+      findOne: vi.fn().mockResolvedValue(mockPrompt),
     };
     const mockUsersCollection = {
-      updateOne: jest.fn().mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
+      updateOne: vi
+        .fn()
+        .mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
     };
 
     mockGetDb.mockResolvedValue({
-      collection: jest.fn().mockImplementation((name) => {
+      collection: vi.fn().mockImplementation((_name) => {
         collectionCalls++;
         if (collectionCalls === 1) return mockPromptsCollection;
         if (collectionCalls === 2) return mockUsersCollection;
@@ -314,14 +325,16 @@ describe('POST /api/favorites', () => {
 
     let collectionCalls = 0;
     const mockPromptsCollection = {
-      findOne: jest.fn().mockResolvedValue(mockPrompt),
+      findOne: vi.fn().mockResolvedValue(mockPrompt),
     };
     const mockUsersCollection = {
-      updateOne: jest.fn().mockResolvedValue({ matchedCount: 0, modifiedCount: 0 }),
+      updateOne: vi
+        .fn()
+        .mockResolvedValue({ matchedCount: 0, modifiedCount: 0 }),
     };
 
     mockGetDb.mockResolvedValue({
-      collection: jest.fn().mockImplementation((name) => {
+      collection: vi.fn().mockImplementation((_name) => {
         collectionCalls++;
         if (collectionCalls === 1) return mockPromptsCollection;
         if (collectionCalls === 2) return mockUsersCollection;
@@ -370,8 +383,8 @@ describe('DELETE /api/favorites', () => {
   const mockPromptId = 'debugging-nodejs-memory-leak';
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    
+    vi.clearAllMocks();
+
     mockCheckRateLimit.mockResolvedValue({
       allowed: true,
       remaining: 100,
@@ -417,11 +430,13 @@ describe('DELETE /api/favorites', () => {
     } as any);
 
     const mockUsersCollection = {
-      updateOne: jest.fn().mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
+      updateOne: vi
+        .fn()
+        .mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
     };
 
     mockGetDb.mockResolvedValue({
-      collection: jest.fn().mockReturnValue(mockUsersCollection),
+      collection: vi.fn().mockReturnValue(mockUsersCollection),
     } as any);
 
     const request = new NextRequest('http://localhost:3000/api/favorites', {
@@ -452,11 +467,13 @@ describe('DELETE /api/favorites', () => {
     } as any);
 
     const mockUsersCollection = {
-      updateOne: jest.fn().mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
+      updateOne: vi
+        .fn()
+        .mockResolvedValue({ matchedCount: 1, modifiedCount: 1 }),
     };
 
     mockGetDb.mockResolvedValue({
-      collection: jest.fn().mockReturnValue(mockUsersCollection),
+      collection: vi.fn().mockReturnValue(mockUsersCollection),
     } as any);
 
     const request = new NextRequest('http://localhost:3000/api/favorites', {
@@ -486,11 +503,13 @@ describe('DELETE /api/favorites', () => {
     } as any);
 
     const mockUsersCollection = {
-      updateOne: jest.fn().mockResolvedValue({ matchedCount: 0, modifiedCount: 0 }),
+      updateOne: vi
+        .fn()
+        .mockResolvedValue({ matchedCount: 0, modifiedCount: 0 }),
     };
 
     mockGetDb.mockResolvedValue({
-      collection: jest.fn().mockReturnValue(mockUsersCollection),
+      collection: vi.fn().mockReturnValue(mockUsersCollection),
     } as any);
 
     const request = new NextRequest('http://localhost:3000/api/favorites', {
@@ -528,4 +547,3 @@ describe('DELETE /api/favorites', () => {
     expect(data.error).toBe('Too many requests');
   });
 });
-
