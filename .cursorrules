@@ -210,6 +210,56 @@ type(scope): description
 4. Will this scale?
 5. Is this secure?
 
+## MANDATORY: AI Guardrails (Pre-Change Checklist)
+
+**CRITICAL:** Before making ANY changes, AI assistants MUST:
+
+### 1. Search for Existing Tools (MANDATORY)
+```bash
+# Before creating ANY script/validation:
+find scripts/ -name "*<keyword>*"
+grep -r "validate\|check\|audit" scripts/ --include="*.ts" --include="*.js"
+
+# If tool exists: USE IT, don't duplicate
+# Example: Icon audit script existed but wasn't used → broke production
+```
+
+### 2. Check Pre-Commit Hooks (MANDATORY)
+```bash
+# Before adding validation:
+cat .husky/pre-commit
+
+# If similar check exists: EXTEND IT
+# If missing: ADD IT to pre-commit
+# Never bypass with --no-verify without documenting why
+```
+
+### 3. Run Guardrail Check (MANDATORY)
+```bash
+# Before making changes:
+./scripts/ai/pre-change-check.sh all
+
+# Or for specific type:
+./scripts/ai/pre-change-check.sh validation <keyword>
+```
+
+### 4. Verify Tooling Works (MANDATORY)
+```bash
+# If using existing tool:
+tsx scripts/path/to/existing-tool.ts
+
+# If tool broken: FIX IT, don't work around
+```
+
+### 5. Document Decisions
+- If bypassing hook: Explain why in commit message
+- If creating duplicate: Explain why existing won't work
+- If ignoring existing pattern: Explain why
+
+**Reference:** `docs/development/AI_GUARDRAILS.md` for full guide
+
+**Failure to follow these guardrails = preventable production breakage**
+
 ## Remember
 - Velocity AND quality, not one or the other
 - Ship fast, but ship production-ready code
