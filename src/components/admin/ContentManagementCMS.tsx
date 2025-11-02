@@ -66,6 +66,7 @@ export function ContentManagementCMS() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     fetchContent();
@@ -160,6 +161,97 @@ export function ContentManagementCMS() {
     } catch (error) {
       console.error('Failed to delete content:', error);
       alert('Failed to delete content');
+    }
+  };
+
+  const handleGenerateWithAI = async () => {
+    if (!editingItem) return;
+
+    setIsGenerating(true);
+    try {
+      const prompt = `Generate comprehensive content for the following:
+
+Title: ${editingItem.title || 'AI-generated content'}
+Type: ${editingItem.type}
+Category: ${editingItem.category || 'General'}
+
+Create detailed, professional content in markdown format. Include:
+- Clear introduction explaining why this matters
+- Key concepts and definitions
+- Practical examples and use cases
+- Best practices
+- Common pitfalls to avoid
+- Related resources or frameworks
+
+Make it educational, actionable, and suitable for ${editingItem.type === 'ai_adoption_question' ? 'engineering leaders' : 'technical professionals'}.`;
+
+      const res = await fetch('/api/admin/content/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, type: editingItem.type }),
+      });
+
+      const data = await res.json();
+
+      if (data.success && data.content) {
+        setEditingItem({
+          ...editingItem,
+          content: data.content,
+          title: data.title || editingItem.title,
+          tags: data.tags || editingItem.tags,
+        });
+      } else {
+        alert(`Error: ${data.error || 'Failed to generate content'}`);
+      }
+    } catch (error) {
+      console.error('Failed to generate content:', error);
+      alert('Failed to generate content');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleEnhanceWithAI = async () => {
+    if (!editingItem || !editingItem.content) return;
+
+    setIsGenerating(true);
+    try {
+      const prompt = `Enhance and improve the following content:
+
+Title: ${editingItem.title}
+Current Content:
+${editingItem.content}
+
+Improve it by:
+- Making it more clear and concise
+- Adding practical examples if missing
+- Improving structure and flow
+- Ensuring it's actionable and valuable
+- Maintaining the same tone and purpose
+
+Return enhanced markdown content.`;
+
+      const res = await fetch('/api/admin/content/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, type: 'enhance' }),
+      });
+
+      const data = await res.json();
+
+      if (data.success && data.content) {
+        setEditingItem({
+          ...editingItem,
+          content: data.content,
+        });
+      } else {
+        alert(`Error: ${data.error || 'Failed to enhance content'}`);
+      }
+    } catch (error) {
+      console.error('Failed to enhance content:', error);
+      alert('Failed to enhance content');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -443,17 +535,56 @@ export function ContentManagementCMS() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content">Content (Markdown)</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="content">Content (Markdown)</Label>
+                  <div className="flex gap-2">
+                    {editingItem.content && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleEnhanceWithAI}
+                        disabled={isGenerating}
+                      >
+                        {isGenerating ? (
+                          <Icons.spinner className="mr-2 h-3 w-3 animate-spin" />
+                        ) : (
+                          <Icons.zap className="mr-2 h-3 w-3" />
+                        )}
+                        Enhance with AI
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleGenerateWithAI}
+                      disabled={isGenerating || !editingItem.title}
+                    >
+                      {isGenerating ? (
+                        <Icons.spinner className="mr-2 h-3 w-3 animate-spin" />
+                      ) : (
+                        <Icons.sparkles className="mr-2 h-3 w-3" />
+                      )}
+                      Generate with AI
+                    </Button>
+                  </div>
+                </div>
                 <Textarea
                   id="content"
                   value={editingItem.content}
                   onChange={(e) =>
                     setEditingItem({ ...editingItem, content: e.target.value })
                   }
-                  placeholder="Content in markdown format..."
+                  placeholder="Content in markdown format... (or use AI generation)"
                   rows={15}
                   className="font-mono text-sm"
                 />
+                <p className="text-xs text-muted-foreground">
+                  💡 Tip: Enter a title and click &quot;Generate with AI&quot;
+                  to create content automatically, or write your own and use
+                  &quot;Enhance with AI&quot; to improve it.
+                </p>
               </div>
 
               <div className="space-y-2">
