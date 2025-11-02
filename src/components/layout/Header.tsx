@@ -13,7 +13,6 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { signOut } from 'next-auth/react';
 import { Icons } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
 import {
@@ -57,6 +56,13 @@ export function Header({ user }: HeaderProps) {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex md:items-center md:space-x-6">
+          <Link
+            href="/"
+            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+            title="Home"
+          >
+            <Icons.home className="h-4 w-4" />
+          </Link>
           <Link
             href="/prompts"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"

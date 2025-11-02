@@ -203,11 +203,11 @@ export default async function Home() {
       </section>
 
       {/* Roles Section */}
-      <section className="container bg-gradient-to-b from-white to-gray-50 py-20">
+      <section className="container bg-gradient-to-b from-white to-gray-50 py-12 dark:from-gray-950 dark:to-gray-900">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
+          <div className="mb-8 text-center">
             <h2 className="mb-4 text-4xl font-bold">Built for Every Role</h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-700 dark:text-gray-300">
               Tailored prompts for your entire engineering organization
             </p>
           </div>
@@ -238,13 +238,13 @@ export default async function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="container bg-white py-20">
+      <section className="container bg-white py-12 dark:bg-gray-950">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-16 text-center">
+          <div className="mb-10 text-center">
             <h2 className="mb-4 text-4xl font-bold">
               Everything You Need to Master AI
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-700 dark:text-gray-300">
               From beginner to expert, we&apos;ve got you covered
             </p>
           </div>
@@ -268,7 +268,7 @@ export default async function Home() {
                       <Icon className="h-7 w-7 text-white" />
                     </div>
                     <CardTitle className="text-2xl">{feature.title}</CardTitle>
-                    <CardDescription className="text-base text-gray-600">
+                    <CardDescription className="text-base text-gray-700 dark:text-gray-300">
                       {feature.description}
                     </CardDescription>
                   </CardHeader>
@@ -280,7 +280,7 @@ export default async function Home() {
       </section>
 
       {/* Built in Public Section */}
-      <section className="container bg-white py-20">
+      <section className="container bg-white py-12 dark:bg-gray-950">
         <div className="mx-auto max-w-6xl">
           <Card className="overflow-hidden border-2 border-purple-200">
             <div className="grid md:grid-cols-2">
