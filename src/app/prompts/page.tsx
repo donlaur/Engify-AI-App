@@ -17,9 +17,9 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 // Dynamic SEO Metadata
 export async function generateMetadata(): Promise<Metadata> {
   const data = await getStats();
-  const promptCount = data.prompts?.total || data.stats?.prompts || 100;
-  const categoryCount = data.prompts?.uniqueCategories?.length || 6;
-  const roleCount = data.prompts?.uniqueRoles?.length || 7;
+  const promptCount = data.prompts?.total || data.stats?.prompts || 0;
+  const categoryCount = data.prompts?.uniqueCategories?.length || 0;
+  const roleCount = data.prompts?.uniqueRoles?.length || 0;
 
   const title = `${promptCount}+ Expert Prompts Library - ${categoryCount} Categories, ${roleCount} Roles | Engify.ai`;
   const description = `Browse ${promptCount}+ expert-crafted prompts across ${categoryCount} categories and ${roleCount} roles. All prompts are tagged with proven patterns and KERNEL-compliant. Free access during beta.`;

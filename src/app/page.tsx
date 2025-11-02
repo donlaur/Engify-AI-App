@@ -58,11 +58,11 @@ export default async function Home() {
   const stats = [
     {
       label: 'Expert Prompts',
-      value: `${data.prompts?.total || data.stats?.prompts || 76}+`,
+      value: `${data.prompts?.total || data.stats?.prompts || 0}+`,
     },
     {
       label: 'Proven Patterns',
-      value: `${data.patterns?.total || data.stats?.patterns || 23}`,
+      value: `${data.patterns?.total || data.stats?.patterns || 0}`,
     },
     { label: 'AI Providers', value: '4' },
     { label: 'Beta Access', value: 'Free' },
@@ -93,8 +93,8 @@ export default async function Home() {
       ];
 
   const siteStats = {
-    totalPrompts: data.prompts?.total || data.stats?.prompts || 76,
-    totalPatterns: data.patterns?.total || data.stats?.patterns || 23,
+    totalPrompts: data.prompts?.total || data.stats?.prompts || 0,
+    totalPatterns: data.patterns?.total || data.stats?.patterns || 0,
   };
 
   return (
