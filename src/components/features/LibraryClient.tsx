@@ -174,11 +174,8 @@ export function LibraryClient({
             <PromptCard
               key={prompt.id}
               {...prompt}
-              role={
-                (prompt.role && prompt.role in roleLabels
-                  ? roleLabels[prompt.role as UserRole]
-                  : undefined) as UserRole | undefined
-              }
+              // Pass raw role/category - PromptCard will handle display labels
+              role={prompt.role as UserRole | undefined}
               category={prompt.category as PromptCategory}
             />
           ))}

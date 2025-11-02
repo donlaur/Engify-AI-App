@@ -27,6 +27,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useFavorites } from '@/hooks/use-favorites';
 import { PromptDetailModal } from './PromptDetailModal';
 import type { Prompt } from '@/lib/schemas/prompt';
+import {
+  categoryLabels,
+  roleLabels,
+  type UserRole,
+} from '@/lib/schemas/prompt';
 
 interface PromptCardProps extends Omit<Prompt, 'createdAt' | 'updatedAt'> {
   onView?: () => void;
@@ -163,8 +168,14 @@ export function PromptCard(props: PromptCardProps) {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{category}</Badge>
-            {role && <Badge variant="outline">{role}</Badge>}
+            <Badge variant="secondary">
+              {categoryLabels[category] || category}
+            </Badge>
+            {role && (
+              <Badge variant="outline">
+                {roleLabels[role as UserRole] || role}
+              </Badge>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex items-center justify-between">

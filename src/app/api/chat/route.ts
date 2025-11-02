@@ -65,37 +65,78 @@ export async function POST(request: NextRequest) {
     // Use RAG to get relevant context if enabled
     if (useRAG && sanitizedLastMessage) {
       try {
-        const ragResponse = await fetch(
-          `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/rag`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              query: sanitizedLastMessage,
-              collection: 'prompts', // Lambda searches 'prompts' collection
-              top_k: 3,
-            }),
-          }
-        );
+        // First, try MongoDB direct search (fallback if Python RAG service not deployed)
+        try {
+          const { getDb } = await import('@/lib/mongodb');
+          const db = await getDb();
+          const prompts = await db
+            .collection('prompts')
+            .find(
+              {
+                $text: { $search: sanitizedLastMessage },
+                active: { $ne: false },
+              },
+              {
+                score: { $meta: 'textScore' },
+              }
+            )
+            .sort({ score: { $meta: 'textScore' } })
+            .limit(3)
+            .toArray();
 
-        if (ragResponse.ok) {
-          const ragData = await ragResponse.json();
-          if (ragData.success && ragData.results.length > 0) {
-            sources = ragData.results.map(
-              (source: { title: string; content: string; score: number }) => ({
-                title: sanitizeText(source.title || ''),
-                content: sanitizeText(source.content || ''),
-                score: source.score || 0,
-              })
-            );
+          if (prompts.length > 0) {
+            sources = prompts.map((prompt: Record<string, unknown>) => ({
+              title: sanitizeText(String(prompt.title || '')),
+              content: sanitizeText(String(prompt.description || '')),
+              score: Number(prompt.score || 0),
+            }));
             context = sources
               .map((source) => `**${source.title}**\n${source.content}`)
               .join('\n\n');
           }
+        } catch (mongoError) {
+          console.warn(
+            'MongoDB search unavailable, trying RAG service:',
+            mongoError
+          );
+
+          // Fallback to Python RAG service (if deployed)
+          const ragResponse = await fetch(
+            `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/rag`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                query: sanitizedLastMessage,
+                collection: 'prompts',
+                top_k: 3,
+              }),
+            }
+          );
+
+          if (ragResponse.ok) {
+            const ragData = await ragResponse.json();
+            if (ragData.success && ragData.results.length > 0) {
+              sources = ragData.results.map(
+                (source: {
+                  title: string;
+                  content: string;
+                  score: number;
+                }) => ({
+                  title: sanitizeText(source.title || ''),
+                  content: sanitizeText(source.content || ''),
+                  score: source.score || 0,
+                })
+              );
+              context = sources
+                .map((source) => `**${source.title}**\n${source.content}`)
+                .join('\n\n');
+            }
+          }
         }
       } catch (ragError) {
         console.warn(
-          'RAG service unavailable, falling back to basic response:',
+          'RAG service unavailable, falling back to knowledge-based response:',
           ragError
         );
       }
