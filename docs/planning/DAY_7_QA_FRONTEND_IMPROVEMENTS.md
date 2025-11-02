@@ -92,10 +92,75 @@ Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUD
 
 ---
 
-## Phase 1 — Comprehensive QA Audit (User-Driven)
+## Phase 1 — Comprehensive QA Audit (User-Driven) + Critical Fixes
 
 **Status:** ⚠️ In Progress  
 **Priority:** Critical - Identify all issues before fixing
+
+**Goal:** User manually tests every page and feature, documents broken/mocked/bad UX areas, then fix them immediately
+
+---
+
+### 1.0 Critical QA Fixes (Fix Now)
+
+**Status:** ⚠️ In Progress
+
+#### 🔴 Critical Issues (Fix First)
+
+- [ ] **#4 - Logout Page 404** (30 min)
+  - Create `/logout` page or route handler
+  - Log user out and redirect to homepage
+  - Add success toast notification
+
+- [ ] **#5 - Hardcoded/Inconsistent Stats (DRY VIOLATION)** (2-3 hours)
+  - Create `/api/stats` endpoint with MongoDB queries
+  - Return all counts (prompts, patterns, breakdowns)
+  - Implement ISR with 1-hour revalidation
+  - Add QStash webhook for on-demand revalidation
+  - Remove ALL hardcoded numbers (76, 23, 113, etc.)
+  - Update all components to use `/api/stats`
+
+- [ ] **#8 - CTA Buttons Don't Link** (10 min)
+  - "Browse Prompt Playbook" → `/prompts`
+  - "Request Beta Access" → `/signup`
+  - Test on all devices
+
+- [ ] **#9 - API Reference in Footer (SECURITY RISK)** (30 min)
+  - Remove "API Reference" from public footer
+  - Move to authenticated docs area or remove entirely
+  - Verify no sensitive API structure exposed
+
+#### 🟠 High Priority Issues
+
+- [ ] **#7 - Mobile CTA Buttons Don't Stack** (15 min)
+  - Add `flex-col sm:flex-row` responsive classes
+  - Make buttons full-width on mobile
+  - Ensure 44x44px minimum touch targets
+
+#### 🟡 Medium Priority Issues
+
+- [ ] **#6 - Tagline Rewrite** (15 min)
+  - Remove "AI-Powered Prompt Engineering is Taking Off 🚀"
+  - Replace with "Amplify Engineering Workflows" or similar
+  - Focus on engineering productivity, not cheesy AI power
+
+- [ ] **#10 - Patterns Listed Twice in Footer** (20 min)
+  - Remove duplicate "Patterns" links
+  - Organize footer: Product, Company, Resources, Legal, Social
+
+- [ ] **#11 - Duplicate Footer Sections** (30 min)
+  - Consolidate into single footer
+  - GitHub/LinkedIn/Hire Me under Social (not Legal)
+  - Copyright + social links at bottom only
+
+- [ ] **#12 - Homepage Stats Breakdown** (2 hours)
+  - Add stats section with breakdown by role/category/persona
+  - Pull from `/api/stats` endpoint (Issue #5)
+  - Use shadcn/ui cards with icons and colors
+
+---
+
+### 1.1 QA Audit Documentation
 
 **Goal:** User manually tests every page and feature, documents broken/mocked/bad UX areas
 
