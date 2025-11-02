@@ -14,26 +14,41 @@ import { Separator } from '@/components/ui/separator';
 
 const footerLinks = {
   product: [
-    { href: '/demo', label: 'AI Workbench' },
+    { href: '/workbench', label: 'AI Workbench' },
     { href: '/patterns', label: 'Patterns' },
-    { href: '/prompts', label: 'Library' },
+    { href: '/prompts', label: 'Prompt Library' },
     { href: '/pricing', label: 'Pricing' },
   ],
   company: [
-    { href: '/built-in-public', label: 'About' },
+    { href: '/about', label: 'About' },
     { href: '/built-in-public', label: 'Built in Public' },
     { href: '/contact', label: 'Contact' },
   ],
   resources: [
     { href: '/learn', label: 'Documentation' },
-    { href: '/patterns', label: 'Patterns' },
-    { href: '/prompts', label: 'Prompt Library' },
-    { href: '/api-docs', label: 'API Reference' },
+    { href: '/patterns', label: 'Pattern Reference' },
+    { href: '/prompts', label: 'Prompt Playbook' },
+  ],
+  social: [
+    {
+      href: 'https://github.com/donlaur/Engify-AI-App',
+      label: 'GitHub',
+      external: true,
+    },
+    {
+      href: 'https://linkedin.com/in/donlaur',
+      label: 'LinkedIn',
+      external: true,
+    },
+    {
+      href: '/hireme',
+      label: 'Hire Me',
+      external: false,
+    },
   ],
   legal: [
     { href: '/privacy', label: 'Privacy' },
     { href: '/terms', label: 'Terms' },
-    { href: 'https://github.com/donlaur/Engify-AI-App', label: 'GitHub', external: true },
   ],
 };
 
@@ -43,9 +58,9 @@ export function Footer() {
   return (
     <footer className="border-t bg-background">
       <div className="container py-12 md:py-16">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-6">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="col-span-2">
             <Link href="/" className="mb-4 flex items-center space-x-2">
               <Icons.sparkles className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold">Engify.ai</span>
@@ -107,9 +122,33 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Legal Links */}
+          {/* Social & Legal Links */}
           <div>
-            <h3 className="mb-4 font-semibold">Legal</h3>
+            <h3 className="mb-4 font-semibold">Social</h3>
+            <ul className="space-y-3">
+              {footerLinks.social.map((link) => (
+                <li key={link.href}>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <h3 className="mb-4 mt-6 font-semibold">Legal</h3>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.href}>
@@ -127,47 +166,29 @@ export function Footer() {
 
         <Separator className="my-8" />
 
-        {/* Bottom Bar */}
-        <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
+        {/* Bottom Bar - Copyright Only */}
+        <div className="flex flex-col items-center justify-center space-y-2 text-center">
           <p className="text-sm text-muted-foreground">
-            {currentYear} Engify.ai. All rights reserved.
+            © {currentYear} Engify.ai. All rights reserved.
           </p>
-          <div className="flex flex-wrap gap-4 md:gap-6">
+          <p className="text-xs text-muted-foreground">
+            Built by{' '}
             <a
-              href="mailto:contact@engify.ai"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Contact
-            </a>
-            <Link
-              href="/privacy"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Terms
-            </Link>
-            <Link
-              href="https://github.com/donlaur/Engify-AI-App"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              GitHub
-            </Link>
-            <Link
               href="https://linkedin.com/in/donlaur"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="underline hover:text-foreground"
               target="_blank"
               rel="noopener noreferrer"
             >
-              LinkedIn
-            </Link>
-          </div>
+              Donnie Laur
+            </a>
+            {' · '}
+            <a
+              href="mailto:donlaur@engify.ai"
+              className="underline hover:text-foreground"
+            >
+              donlaur@engify.ai
+            </a>
+          </p>
         </div>
       </div>
     </footer>

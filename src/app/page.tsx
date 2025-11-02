@@ -80,14 +80,14 @@ export default async function Home() {
               variant="secondary"
               className="mb-4 border-white/30 bg-black/30 text-white backdrop-blur-sm"
             >
-              <Icons.sparkles className="mr-2 h-3 w-3" />⚡ AI-Powered Prompt
-              Engineering is Taking Off 🚀
+              <Icons.sparkles className="mr-2 h-3 w-3" />
+              Engineering Excellence, Amplified
             </Badge>
 
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
-              Amplify Engineering with{' '}
+              Amplify Engineering{' '}
               <span className="bg-gradient-to-r from-green-300 to-cyan-300 bg-clip-text text-transparent">
-                AI Power
+                Workflows
               </span>
             </h1>
 
@@ -96,11 +96,11 @@ export default async function Home() {
               Transform engineering capabilities across all roles with Engify.ai
             </p>
 
-            <div className="flex flex-col justify-center gap-4 pt-8">
-              <div className="flex justify-center gap-4">
+            <div className="flex justify-center pt-8">
+              <div className="flex w-full max-w-md flex-col gap-4 sm:w-auto sm:flex-row">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-green-500 to-cyan-500 font-bold text-black hover:from-green-600 hover:to-cyan-600"
+                  className="w-full bg-gradient-to-r from-green-500 to-cyan-500 font-bold text-black hover:from-green-600 hover:to-cyan-600 sm:w-auto"
                   asChild
                 >
                   <Link href="/prompts">
@@ -111,7 +111,7 @@ export default async function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
+                  className="w-full border-white/30 text-white hover:bg-white/10 sm:w-auto"
                   asChild
                 >
                   <Link href="/signup">
