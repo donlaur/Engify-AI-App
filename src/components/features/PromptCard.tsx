@@ -58,6 +58,30 @@ export function PromptCard(props: PromptCardProps) {
     }
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: `${title} - Engify.ai Prompt`,
+      text: description,
+      url: `${window.location.origin}/prompts/${id}`,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy link to clipboard
+        await navigator.clipboard.writeText(shareData.url);
+        toast({
+          title: 'Link Copied',
+          description: 'Prompt link copied to clipboard',
+        });
+      }
+    } catch (error) {
+      // User cancelled or error occurred
+      console.error('Share failed:', error);
+    }
+  };
+
   const handleView = () => {
     setShowModal(true);
     if (onView) {
@@ -67,14 +91,16 @@ export function PromptCard(props: PromptCardProps) {
 
   return (
     <>
-      <Card
-        className="cursor-pointer transition-shadow hover:shadow-lg"
-        onClick={handleView}
-      >
+      <Card className="group relative transition-all duration-200 hover:border-primary hover:shadow-lg">
         <CardHeader>
           <div className="flex items-start justify-between">
-            <div className="flex-1 space-y-1">
-              <CardTitle className="text-lg">{title}</CardTitle>
+            <div
+              className="flex-1 cursor-pointer space-y-1"
+              onClick={handleView}
+            >
+              <CardTitle className="text-lg transition-colors group-hover:text-primary">
+                {title}
+              </CardTitle>
               <CardDescription>{description}</CardDescription>
             </div>
             <div className="flex shrink-0 gap-1">
@@ -94,6 +120,9 @@ export function PromptCard(props: PromptCardProps) {
                   });
                 }}
                 className="shrink-0"
+                title={
+                  isFavorite(id) ? 'Remove from favorites' : 'Add to favorites'
+                }
               >
                 {isFavorite(id) ? (
                   <Icons.heart className="h-4 w-4 fill-red-600 text-red-600" />
@@ -106,9 +135,22 @@ export function PromptCard(props: PromptCardProps) {
                 size="icon"
                 onClick={(e) => {
                   e.stopPropagation();
+                  handleShare();
+                }}
+                className="shrink-0"
+                title="Share prompt"
+              >
+                <Icons.share className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
                   handleCopy();
                 }}
                 className="shrink-0"
+                title="Copy to clipboard"
               >
                 {copied ? (
                   <Icons.check className="h-4 w-4 text-green-600" />
@@ -125,8 +167,16 @@ export function PromptCard(props: PromptCardProps) {
             {role && <Badge variant="outline">{role}</Badge>}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end text-sm text-muted-foreground">
-          {/* Removed fake views and ratings - start with real data at 0 */}
+        <CardFooter className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleView}
+            className="transition-colors group-hover:bg-primary group-hover:text-primary-foreground"
+          >
+            View Details
+            <Icons.arrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </CardFooter>
       </Card>
 
