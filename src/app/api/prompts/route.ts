@@ -22,7 +22,10 @@ export async function GET(request: NextRequest) {
       const collection = db.collection('prompts');
 
       // Build query
-      const query: Record<string, unknown> = {};
+      const query: Record<string, unknown> = {
+        // Only show active prompts on public pages
+        active: { $ne: false }, // Include docs without 'active' field (old data) and those with active: true
+      };
       if (category && category !== 'all') {
         query.category = category;
       }
