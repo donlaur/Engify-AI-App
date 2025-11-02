@@ -22,7 +22,6 @@ tsx scripts/content/generate-article.ts "Mastering AI Prompts" \
 ### Output Location
 
 Articles are saved to `content/drafts/`:
-
 - `YYYY-MM-DD-slug.md` - Final content with SEO metadata
 - `YYYY-MM-DD-slug-REVIEW.md` - Multi-agent review report
 - `YYYY-MM-DD-slug-DRAFT.md` - Original draft for comparison
@@ -32,7 +31,7 @@ Articles are saved to `content/drafts/`:
 ## The Pipeline
 
 ```
-Content Generator → SEO Specialist → Human Tone Editor →
+Content Generator → SEO Specialist → Human Tone Editor → 
 Learning Expert → Tech Accuracy SME → Final Publisher
 ```
 
@@ -60,14 +59,12 @@ Learning Expert → Tech Accuracy SME → Final Publisher
 ## What Gets Generated
 
 ### SEO Metadata
-
 - ✅ Title (50-60 chars, keyword-optimized)
 - ✅ Description (150-160 chars)
 - ✅ URL slug (short, descriptive)
 - ✅ Keywords (primary + secondary)
 
 ### Content Quality
-
 - ✅ Human-sounding tone (no AI patterns)
 - ✅ Actionable & educational
 - ✅ Technically accurate
@@ -129,3 +126,4 @@ POST /api/content/publish
 
 **Status:** ✅ Active (OpsHub Admin Only)  
 **Last Updated:** November 2, 2025
+
