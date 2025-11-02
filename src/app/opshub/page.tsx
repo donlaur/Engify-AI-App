@@ -11,10 +11,28 @@ import { isAdminMFAEnforced } from '@/lib/env';
 
 export default async function OpsHubPage() {
   const session = await auth();
+
+  // Debug logging
+  console.log(
+    '🔐 [OPSHUB] Session:',
+    session
+      ? {
+          hasUser: !!session.user,
+          email: session.user?.email,
+          name: session.user?.name,
+        }
+      : 'NO SESSION'
+  );
+
   const role = (session?.user as { role?: string } | null)?.role || 'user';
+  console.log('🔐 [OPSHUB] Extracted role:', role);
+
   const isAdmin =
     role === 'admin' || role === 'super_admin' || role === 'org_admin';
+  console.log('🔐 [OPSHUB] Is admin?', isAdmin);
+
   if (!isAdmin) {
+    console.log('🔐 [OPSHUB] ❌ Not admin, redirecting to /');
     redirect('/');
   }
 
