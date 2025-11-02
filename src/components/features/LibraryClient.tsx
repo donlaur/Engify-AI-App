@@ -24,6 +24,9 @@ interface LibraryClientProps {
   uniqueRoles: string[];
 }
 
+const INITIAL_VISIBLE_CATEGORIES = 8;
+const INITIAL_VISIBLE_ROLES = 10;
+
 export function LibraryClient({
   initialPrompts,
   categoryStats,
@@ -36,6 +39,8 @@ export function LibraryClient({
     PromptCategory | 'all'
   >('all');
   const [selectedRole, setSelectedRole] = useState<UserRole | 'all'>('all');
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showAllRoles, setShowAllRoles] = useState(false);
 
   // Filter prompts
   const filteredPrompts = initialPrompts.filter((prompt) => {
@@ -49,16 +54,25 @@ export function LibraryClient({
     return matchesSearch && matchesCategory && matchesRole;
   });
 
-  // Dynamic filters from DB
-  const categories: Array<PromptCategory | 'all'> = [
+  // Dynamic filters from DB (already sorted alphabetically from server)
+  const allCategories: Array<PromptCategory | 'all'> = [
     'all',
     ...(uniqueCategories as PromptCategory[]),
   ];
 
-  const roles: Array<UserRole | 'all'> = [
+  const allRoles: Array<UserRole | 'all'> = [
     'all',
     ...(uniqueRoles as UserRole[]),
   ];
+
+  // Limit visible items with "Show More" functionality
+  const visibleCategories = showAllCategories 
+    ? allCategories 
+    : allCategories.slice(0, INITIAL_VISIBLE_CATEGORIES);
+  
+  const visibleRoles = showAllRoles
+    ? allRoles
+    : allRoles.slice(0, INITIAL_VISIBLE_ROLES);
 
   return (
     <>
@@ -102,11 +116,11 @@ export function LibraryClient({
             )}
           </div>
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
+            {visibleCategories.map((category) => (
               <Badge
                 key={category}
                 variant={selectedCategory === category ? 'default' : 'outline'}
-                className="cursor-pointer"
+                className="cursor-pointer transition-colors hover:bg-primary/10"
                 onClick={() => setSelectedCategory(category)}
               >
                 {category === 'all'
@@ -114,6 +128,25 @@ export function LibraryClient({
                   : `${categoryLabels[category] || category} (${categoryStats[category] || 0})`}
               </Badge>
             ))}
+            {allCategories.length > INITIAL_VISIBLE_CATEGORIES && (
+              <Badge
+                variant="ghost"
+                className="cursor-pointer text-primary hover:bg-primary/10"
+                onClick={() => setShowAllCategories(!showAllCategories)}
+              >
+                {showAllCategories ? (
+                  <>
+                    <Icons.chevronUp className="mr-1 h-3 w-3" />
+                    Show Less
+                  </>
+                ) : (
+                  <>
+                    <Icons.chevronDown className="mr-1 h-3 w-3" />
+                    Show {allCategories.length - INITIAL_VISIBLE_CATEGORIES} More
+                  </>
+                )}
+              </Badge>
+            )}
           </div>
         </div>
 
@@ -128,11 +161,11 @@ export function LibraryClient({
             )}
           </div>
           <div className="flex flex-wrap gap-2">
-            {roles.map((role) => (
+            {visibleRoles.map((role) => (
               <Badge
                 key={role}
                 variant={selectedRole === role ? 'default' : 'outline'}
-                className="cursor-pointer"
+                className="cursor-pointer transition-colors hover:bg-primary/10"
                 onClick={() => setSelectedRole(role)}
               >
                 {role === 'all'
@@ -140,6 +173,25 @@ export function LibraryClient({
                   : `${roleLabels[role] || role} (${roleStats[role] || 0})`}
               </Badge>
             ))}
+            {allRoles.length > INITIAL_VISIBLE_ROLES && (
+              <Badge
+                variant="ghost"
+                className="cursor-pointer text-primary hover:bg-primary/10"
+                onClick={() => setShowAllRoles(!showAllRoles)}
+              >
+                {showAllRoles ? (
+                  <>
+                    <Icons.chevronUp className="mr-1 h-3 w-3" />
+                    Show Less
+                  </>
+                ) : (
+                  <>
+                    <Icons.chevronDown className="mr-1 h-3 w-3" />
+                    Show {allRoles.length - INITIAL_VISIBLE_ROLES} More
+                  </>
+                )}
+              </Badge>
+            )}
           </div>
         </div>
       </div>

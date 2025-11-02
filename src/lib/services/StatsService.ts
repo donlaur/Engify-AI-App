@@ -41,19 +41,24 @@ export interface PlatformStats {
 export async function getPlatformStats(): Promise<PlatformStats> {
   const db = await getMongoDb();
 
-  // Get prompt count from database
-  const promptCount = await db.collection('prompts').countDocuments({});
+  // Get prompt count from database (only active, public prompts)
+  const promptCount = await db.collection('prompts').countDocuments({ 
+    isPublic: true, 
+    active: { $ne: false } 
+  });
   
-  // Get prompts by category
+  // Get prompts by category (only active, public prompts)
   const promptsByCategory = await db.collection('prompts')
     .aggregate([
+      { $match: { isPublic: true, active: { $ne: false } } },
       { $group: { _id: '$category', count: { $sum: 1 } } },
     ])
     .toArray();
 
-  // Get prompts by role
+  // Get prompts by role (only active, public prompts)
   const promptsByRole = await db.collection('prompts')
     .aggregate([
+      { $match: { isPublic: true, active: { $ne: false } } },
       { $group: { _id: '$role', count: { $sum: 1 } } },
     ])
     .toArray();
