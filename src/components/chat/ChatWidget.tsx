@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
-import { siteStats } from '@/lib/constants';
 import { Badge } from '@/components/ui/badge';
 
 interface Message {
@@ -23,6 +22,23 @@ export function ChatWidget() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [totalPrompts, setTotalPrompts] = useState(0);
+
+  // Fetch real-time stats from API
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setTotalPrompts(data.stats?.prompts || 0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const quickPrompts = [
     'What are the best prompt patterns?',
@@ -66,10 +82,10 @@ export function ChatWidget() {
     }
 
     if (lowerQuery.includes('example')) {
-      return `Here&apos;s a great example:\n\n**Bad**: "Write code"\n\n**Good**: "Write a Python function that validates email addresses using regex. Include error handling and unit tests. Format: function definition, docstring, implementation, tests."\n\nBrowse ${siteStats.totalPrompts}+ examples in /prompts!`;
+      return `Here&apos;s a great example:\n\n**Bad**: "Write code"\n\n**Good**: "Write a Python function that validates email addresses using regex. Include error handling and unit tests. Format: function definition, docstring, implementation, tests."\n\nBrowse ${totalPrompts}+ examples in /prompts!`;
     }
 
-    return `Great question! I can help with:\n\n• Prompt patterns and techniques\n• Best practices\n• Examples from our library\n• Learning resources\n\nTry asking about specific patterns or check out /prompts for ${siteStats.totalPrompts}+ prompts!`;
+    return `Great question! I can help with:\n\n• Prompt patterns and techniques\n• Best practices\n• Examples from our library\n• Learning resources\n\nTry asking about specific patterns or check out /prompts for ${totalPrompts}+ prompts!`;
   };
 
   if (!isOpen) {

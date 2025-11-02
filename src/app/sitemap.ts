@@ -1,11 +1,14 @@
 import { MetadataRoute } from 'next';
 import { APP_URL } from '@/lib/constants';
-import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
+import { getDb } from '@/lib/mongodb';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-console */
 
 /**
  * Dynamic Sitemap Generator
  * Generates 200+ URLs from static pages + dynamic content (prompts, patterns, tags)
- * 
+ *
  * SEO Strategy:
  * - Priority 1.0: Homepage
  * - Priority 0.9: Main sections (library, patterns, built-in-public)
@@ -18,7 +21,7 @@ import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_URL;
   const now = new Date();
-  
+
   // Static core pages
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -169,9 +172,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Get all prompts for dynamic routes
-  const prompts = getSeedPromptsWithTimestamps();
-  
+  // Get all prompts for dynamic routes from MongoDB
+  let prompts: Array<{
+    id: string;
+    category?: string;
+    role?: string;
+    pattern?: string;
+    tags?: string[];
+    updatedAt?: Date;
+    createdAt?: Date;
+  }> = [];
+
+  try {
+    const db = await getDb();
+    const promptsCollection = await db.collection('prompts').find({}).toArray();
+    prompts = promptsCollection.map((p: any) => ({
+      id: p.id || p._id?.toString(),
+      category: p.category,
+      role: p.role,
+      pattern: p.pattern,
+      tags: p.tags,
+      updatedAt: p.updatedAt ? new Date(p.updatedAt) : undefined,
+      createdAt: p.createdAt ? new Date(p.createdAt) : undefined,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch prompts from MongoDB for sitemap:', error);
+    // If MongoDB fails, we'll just have fewer URLs in the sitemap
+  }
+
   // Individual prompt pages: /prompts/[id]
   const promptPages: MetadataRoute.Sitemap = prompts.map((prompt) => ({
     url: `${baseUrl}/prompts/${prompt.id}`,
@@ -181,15 +209,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Extract unique categories, roles, patterns, and tags
-  const categories = Array.from(new Set(prompts.map((p) => p.category).filter(Boolean)));
+  const categories = Array.from(
+    new Set(prompts.map((p) => p.category).filter(Boolean))
+  );
   const roles = Array.from(new Set(prompts.map((p) => p.role).filter(Boolean)));
-  const patterns = Array.from(new Set(prompts.map((p) => p.pattern).filter(Boolean)));
-  
+  const patterns = Array.from(
+    new Set(prompts.map((p) => p.pattern).filter(Boolean))
+  );
+
   // Collect all unique tags
   const allTags = Array.from(
-    new Set(
-      prompts.flatMap((p) => p.tags || []).filter(Boolean)
-    )
+    new Set(prompts.flatMap((p) => p.tags || []).filter(Boolean))
   );
 
   // Category pages: /prompts/category/[category]

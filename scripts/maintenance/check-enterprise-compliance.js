@@ -163,9 +163,17 @@ const complianceRules = [
       
       // Check if test file exists
       const testFilePath = filePath.replace('/route.ts', '.test.ts');
+      // For nested routes like src/app/api/prompts/audit/route.ts -> src/__tests__/api/prompts/audit.test.ts
+      const testFileFlattened = filePath.replace('src/app/api/', 'src/__tests__/api/').replace('/route.ts', '.test.ts');
+      // Also check for flattened name (prompts/audit -> audit)
+      const pathParts = filePath.replace('src/app/api/', '').replace('/route.ts', '').split('/');
+      const flattenedName = pathParts[pathParts.length - 1]; // Get last part
+      const testFileFlattenedName = 'src/__tests__/api/' + flattenedName + '.test.ts';
       const testFileExists = fs.existsSync(testFilePath) || 
                             fs.existsSync(testFilePath.replace('/app/api/', '/__tests__/api/')) ||
-                            fs.existsSync(testFilePath.replace('/api/', '/__tests__/api/'));
+                            fs.existsSync(testFilePath.replace('/api/', '/__tests__/api/')) ||
+                            fs.existsSync(testFileFlattened) ||
+                            fs.existsSync(testFileFlattenedName);
       
       return !testFileExists;
     },

@@ -67,15 +67,38 @@ export default function PromptDetailPage() {
   }, [prompt, id]);
 
   // Handle rating
-  const handleRate = (rating: number) => {
+  const handleRate = async (rating: number) => {
     setUserRating(rating);
-    localStorage.setItem(`prompt_rating_${id}`, String(rating));
-    toast({
-      title: 'Rating saved!',
-      description: `You rated this prompt ${rating} stars`,
-    });
-    // TODO: In production, send to API
-    // await fetch(`/api/prompts/${id}/rate`, { method: 'POST', body: { rating } });
+
+    // Save to API
+    try {
+      const response = await fetch('/api/trpc/prompt.rate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          json: {
+            promptId: id,
+            rating,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save rating');
+      }
+
+      toast({
+        title: 'Rating saved!',
+        description: `You rated this prompt ${rating} stars`,
+      });
+    } catch (error) {
+      console.error('Failed to save rating:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save rating. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   // Handle copy to clipboard

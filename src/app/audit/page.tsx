@@ -46,64 +46,30 @@ export default function PromptAuditPage() {
 
     setIsAnalyzing(true);
 
-    // Simulate analysis (in production, this would call an AI API)
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // Call real AI analysis API
+      const response = await fetch('/api/prompts/audit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
 
-    // Mock audit result
-    const result: AuditResult = {
-      overallScore: 72,
-      kernelScores: {
-        keepSimple: 90,
-        easyToVerify: 60,
-        reproducible: 85,
-        narrowScope: 55,
-        explicitConstraints: 30,
-        logicalStructure: 80,
-      },
-      issues: [
-        {
-          severity: 'critical',
-          category: 'Explicit Constraints',
-          description: 'No explicit constraints defined',
-          fix: 'Add "Do NOT modify X" or "Keep under Y lines" constraints',
-        },
-        {
-          severity: 'critical',
-          category: 'Verification',
-          description: 'Success criteria too vague',
-          fix: 'Define specific, measurable success metrics',
-        },
-        {
-          severity: 'warning',
-          category: 'Scope',
-          description: 'Scope could be narrower',
-          fix: 'Focus on single feature instead of multiple goals',
-        },
-        {
-          severity: 'warning',
-          category: 'Structure',
-          description: 'Missing output format specification',
-          fix: 'Add template or example of expected output',
-        },
-        {
-          severity: 'suggestion',
-          category: 'Examples',
-          description: 'No examples provided',
-          fix: 'Include 1-2 examples of desired output',
-        },
-      ],
-      recommendations: [
-        'Add explicit constraints (e.g., "Do NOT modify authentication logic")',
-        'Define specific success metrics (e.g., "Must handle 3 edge cases")',
-        'Narrow scope to single, focused goal',
-        'Specify output format with template',
-        'Include examples for clarity',
-      ],
-      improvedVersion: `${prompt}\n\n### Constraints:\n- Do NOT modify existing authentication\n- Keep changes under 100 lines\n- Follow existing code style\n\n### Success Criteria:\n- All tests pass\n- Handles edge cases: null, empty, invalid\n- Response time < 100ms\n\n### Output Format:\n\`\`\`typescript\n// Your code here\n\`\`\``,
-    };
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to analyze prompt');
+      }
 
-    setAuditResult(result);
-    setIsAnalyzing(false);
+      const result = await response.json();
+      setAuditResult(result.analysis);
+    } catch (error) {
+      console.error('Error analyzing prompt:', error);
+      // Fallback to empty result
+      setAuditResult(null);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const getScoreColor = (score: number) => {

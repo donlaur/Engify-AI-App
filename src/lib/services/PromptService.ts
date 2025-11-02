@@ -17,6 +17,7 @@
  */
 
 import { IPromptRepository } from '../repositories/interfaces/IRepository';
+import { PromptRepository } from '../repositories/mongodb/PromptRepository';
 import type { PromptTemplate } from '@/lib/db/schema';
 
 // Use PromptTemplate as the Prompt type for the service
@@ -383,3 +384,6 @@ export class PromptService {
     return await this.promptRepository.count();
   }
 }
+
+// Export singleton instance
+export const promptService = new PromptService(new PromptRepository());
