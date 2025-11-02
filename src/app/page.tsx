@@ -282,7 +282,7 @@ export default async function Home() {
                   Built in Public
                 </Badge>
                 <h2 className="text-3xl font-bold">Watch This Being Built</h2>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-gray-700 dark:text-gray-300">
                   Built using AI-augmented development. See the code, follow the
                   commits, learn how modern teams ship fast.
                 </p>
@@ -303,7 +303,7 @@ export default async function Home() {
                       <div className="font-semibold">
                         AI-Augmented Development
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         Cursor, Claude, modern AI tools
                       </div>
                     </div>
@@ -312,7 +312,7 @@ export default async function Home() {
                     <Icons.check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
                     <div>
                       <div className="font-semibold">Production Quality</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         Real auth, DB, APIs
                       </div>
                     </div>
@@ -321,7 +321,7 @@ export default async function Home() {
                     <Icons.check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
                     <div>
                       <div className="font-semibold">Rapid Iteration</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         Ship fast, learn faster
                       </div>
                     </div>
@@ -344,7 +344,7 @@ export default async function Home() {
                     </Link>
                   </Button>
                 </div>
-                <div className="border-t pt-4 text-sm text-gray-500">
+                <div className="border-t pt-4 text-sm text-gray-600 dark:text-gray-400">
                   <p>
                     Part of the{' '}
                     <span className="font-semibold">HireLadder.ai</span>{' '}

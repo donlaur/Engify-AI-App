@@ -7,7 +7,6 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Icons } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,6 @@ import {
 } from '@/components/ui/card';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -42,13 +40,9 @@ export default function LoginPage() {
         callbackUrl: '/dashboard',
       });
 
-      console.log('🔐 [LOGIN] SignIn result:', result);
-
       if (result?.error) {
-        console.error('🔐 [LOGIN] Error:', result.error);
         setError('Invalid email or password');
       } else if (result?.ok) {
-        console.log('🔐 [LOGIN] Success! Redirecting to dashboard...');
         // Force a hard redirect to ensure session is loaded
         window.location.href = '/dashboard';
       } else {
@@ -130,7 +124,7 @@ export default function LoginPage() {
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-700 dark:text-gray-300">
             Don&apos;t have an account?{' '}
             <Link
               href="/signup"
