@@ -125,6 +125,9 @@ export function PromptCard(props: PromptCardProps) {
                   });
                 }}
                 className="shrink-0"
+                aria-label={
+                  isFavorite(id) ? 'Remove from favorites' : 'Add to favorites'
+                }
                 title={
                   isFavorite(id) ? 'Remove from favorites' : 'Add to favorites'
                 }
@@ -143,6 +146,7 @@ export function PromptCard(props: PromptCardProps) {
                   handleShare();
                 }}
                 className="shrink-0"
+                aria-label="Share prompt"
                 title="Share prompt"
               >
                 <Icons.share className="h-4 w-4" />
@@ -155,6 +159,7 @@ export function PromptCard(props: PromptCardProps) {
                   handleCopy();
                 }}
                 className="shrink-0"
+                aria-label={copied ? 'Copied!' : 'Copy to clipboard'}
                 title="Copy to clipboard"
               >
                 {copied ? (

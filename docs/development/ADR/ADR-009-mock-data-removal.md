@@ -103,21 +103,23 @@ grep -r "const.*=.*\[.*\]" src/ | grep -i "mock\|fake\|dummy"
 **Rules:**
 
 1. **Remove fake metrics**
+
    ```typescript
    // ❌ BEFORE
    <div>Views: 576</div>
    <div>Rating: 4.5</div>
-   
+
    // ✅ AFTER
    // Metrics removed - will add real tracking later
    // Or: <div>Views: {prompt.views || 0}</div>
    ```
 
 2. **Replace hardcoded stats**
+
    ```typescript
    // ❌ BEFORE
    const totalPatterns = 15;
-   
+
    // ✅ AFTER
    const stats = await fetch('/api/stats');
    const totalPatterns = stats.patterns || 0;
@@ -149,10 +151,12 @@ grep -r "const.*=.*\[.*\]" src/ | grep -i "mock\|fake\|dummy"
 ### Alternative 1: Keep Mock Data for Development
 
 **Pros:**
+
 - Faster development
 - UI always looks "good"
 
 **Cons:**
+
 - Misleading in production
 - Hard to distinguish real vs fake
 - User trust issues
@@ -162,10 +166,12 @@ grep -r "const.*=.*\[.*\]" src/ | grep -i "mock\|fake\|dummy"
 ### Alternative 2: Show Mock Data Only for Non-Auth Users
 
 **Pros:**
+
 - Better UX for visitors
 - Real data for logged-in users
 
 **Cons:**
+
 - Still misleading
 - Complex conditional logic
 - Harder to maintain
@@ -175,11 +181,13 @@ grep -r "const.*=.*\[.*\]" src/ | grep -i "mock\|fake\|dummy"
 ### Alternative 3: Start Metrics at 0
 
 **Pros:**
+
 - Honest representation
 - Real data from day one
 - Simple implementation
 
 **Cons:**
+
 - Looks "empty" initially
 - Requires patience
 
@@ -287,16 +295,19 @@ const stats = await getStats(); // From /api/stats
 ### Mitigation
 
 **Empty States:**
+
 - Design helpful empty states
 - Provide clear CTAs
 - Make it feel intentional
 
 **Development:**
+
 - Use test data in development
 - Keep seeding scripts
 - Mock APIs for testing only
 
 **Tracking:**
+
 - Implement incrementally
 - Start with critical metrics
 - Add as needed
@@ -353,4 +364,3 @@ const stats = await getStats(); // From /api/stats
 **Last Updated:** 2025-11-02  
 **Authors:** Donnie Laur, AI Assistant  
 **Tags:** #quality #data #mock-data #day7 #user-trust
-

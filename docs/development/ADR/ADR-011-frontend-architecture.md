@@ -95,7 +95,7 @@ import { getPrompts } from '@/lib/prompts';
 
 export default async function PromptsPage() {
   const prompts = await getPrompts();
-  
+
   return (
     <div>
       <h1>Prompts</h1>
@@ -106,6 +106,7 @@ export default async function PromptsPage() {
 ```
 
 **When to Use:**
+
 - Data fetching
 - Static content
 - No interactivity needed
@@ -127,13 +128,13 @@ interface PromptActionsProps {
 
 export function PromptActions({ promptId, content }: PromptActionsProps) {
   const [copied, setCopied] = useState(false);
-  
+
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  
+
   return (
     <Button onClick={handleCopy}>
       {copied ? 'Copied!' : 'Copy'}
@@ -143,6 +144,7 @@ export function PromptActions({ promptId, content }: PromptActionsProps) {
 ```
 
 **When to Use:**
+
 - Event handlers (`onClick`, `onChange`)
 - React hooks (`useState`, `useEffect`)
 - Browser APIs (`localStorage`, `navigator`)
@@ -302,10 +304,12 @@ src/components/
 ### Alternative 1: All Client Components
 
 **Pros:**
+
 - Simpler mental model
 - No boundary confusion
 
 **Cons:**
+
 - Poor performance
 - Larger bundle size
 - Not Next.js best practice
@@ -315,10 +319,12 @@ src/components/
 ### Alternative 2: Minimal Error Handling
 
 **Pros:**
+
 - Less code
 - Faster development
 
 **Cons:**
+
 - Poor UX on errors
 - Unprofessional appearance
 - Hard to debug
@@ -328,10 +334,12 @@ src/components/
 ### Alternative 3: Custom Loading States Per Component
 
 **Pros:**
+
 - Flexible
 - Component-specific
 
 **Cons:**
+
 - Inconsistent
 - More work
 - Harder to maintain
@@ -391,4 +399,3 @@ src/components/
 **Last Updated:** 2025-11-02  
 **Authors:** Donnie Laur, AI Assistant  
 **Tags:** #frontend #architecture #components #day7 #ux
-
