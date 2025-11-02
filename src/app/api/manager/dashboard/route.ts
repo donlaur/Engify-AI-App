@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { managerDashboardService } from '@/lib/services/ManagerDashboardService';
+import { requireAuth } from '@/lib/auth/require-auth';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,10 +15,36 @@ export const dynamic = 'force-dynamic';
  * GET /api/manager/dashboard
  * Get manager dashboard data
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
+  // Authentication required
+  const { user, error: authError } = await requireAuth(request);
+  if (authError) return authError;
+
+  // Role check: manager, director, or higher
+  const allowedRoles = ['manager', 'director', 'enterprise_admin', 'super_admin'];
+  if (!allowedRoles.includes(user.role)) {
+    return NextResponse.json(
+      { error: 'Forbidden - Manager role required' },
+      { status: 403 }
+    );
+  }
+
+  // Rate limiting: 30 requests per minute
+  const rateLimitResult = await checkRateLimit(
+    request,
+    'manager-dashboard',
+    30,
+    60
+  );
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded' },
+      { status: 429 }
+    );
+  }
+
   try {
-    // TODO: Get user from session
-    const managerId = 'temp-manager-id'; // Replace with actual session
+    const managerId = user._id.toString();
 
     const overview = await managerDashboardService.getTeamOverview(managerId);
     const firstTeam = overview && overview.length > 0 ? overview[0] : null;
