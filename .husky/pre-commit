@@ -33,6 +33,20 @@ else
 fi
 echo ""
 
+# 3.5. Icon validation check (CRITICAL - prevents React error #130)
+echo "🎨 Checking icon usage and validation..."
+STAGED_ICON_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' | grep -v '\.test\.' || true)
+if [ -n "$STAGED_ICON_FILES" ]; then
+    tsx scripts/development/audit-icons.ts
+    if [ $? -ne 0 ]; then
+        echo "❌ Icon validation failed. Fix undefined icons before committing!"
+        exit 1
+    fi
+else
+    echo "  No icon-related files to check"
+fi
+echo ""
+
 # 4. Security checks
 echo "🛡️  Checking for security issues..."
 node scripts/security/security-check.js
