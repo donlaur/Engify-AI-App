@@ -1,36 +1,28 @@
 /**
  * Authentication Helper for API Routes
- * Provides consistent authentication checks across all API endpoints
+ * 
+ * Provides reusable auth checks for protected API endpoints
  */
 
+import { auth } from '@/lib/auth/config';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import type { Session } from 'next-auth';
 
-interface AuthResult {
-  user: NonNullable<Session['user']>;
-  error?: never;
-}
+export type AuthResult = {
+  user: {
+    id: string;
+    email: string;
+    name?: string | null;
+    role?: string;
+  };
+};
 
-interface AuthError {
-  user?: never;
+export type AuthError = {
   error: NextResponse;
-}
+};
 
 /**
- * Require authentication for API routes
- * Returns user or error response
- *
- * @example
- * ```typescript
- * export async function GET(request: NextRequest) {
- *   const { user, error } = await requireAuth(request);
- *   if (error) return error;
- *
- *   // user is guaranteed to be defined here
- *   return NextResponse.json({ data: user });
- * }
- * ```
+ * Require authentication for an API route
+ * Returns user object or error response
  */
 export async function requireAuth(
   _request: NextRequest
@@ -46,60 +38,41 @@ export async function requireAuth(
     };
   }
 
-  // Ensure user has required fields
-  if (!session.user.id || !session.user.email) {
-    return {
-      error: NextResponse.json(
-        { error: 'Unauthorized - Invalid session' },
-        { status: 401 }
-      ),
-    };
-  }
-
   return {
-    user: session.user as NonNullable<Session['user']>,
+    user: {
+      id: session.user.id as string,
+      email: session.user.email as string,
+      name: session.user.name,
+      role: (session.user as { role?: string }).role,
+    },
   };
 }
 
 /**
- * Require specific role for API routes
- * Returns user or error response
- *
- * @example
- * ```typescript
- * export async function GET(request: NextRequest) {
- *   const { user, error } = await requireRole(request, ['admin', 'super_admin']);
- *   if (error) return error;
- *
- *   // user is guaranteed to be admin or super_admin
- *   return NextResponse.json({ data: user });
- * }
- * ```
+ * Require specific role for an API route
+ * Returns user object or error response
  */
 export async function requireRole(
-  request: NextRequest,
+  _request: NextRequest,
   allowedRoles: string[]
 ): Promise<AuthResult | AuthError> {
-  const authResult = await requireAuth(request);
+  const authResult = await requireAuth(_request);
 
-  if (authResult.error) {
+  if ('error' in authResult) {
     return authResult;
   }
 
-  const { user } = authResult;
+  const userRole = authResult.user.role || 'user';
 
-  if (!user.role || !allowedRoles.includes(user.role)) {
+  if (!allowedRoles.includes(userRole)) {
     return {
       error: NextResponse.json(
-        {
-          error: 'Forbidden - Insufficient permissions',
-          required: allowedRoles,
-          actual: user.role || 'none',
-        },
+        { error: 'Forbidden - Insufficient permissions' },
         { status: 403 }
       ),
     };
   }
 
-  return { user };
+  return authResult;
 }
+
