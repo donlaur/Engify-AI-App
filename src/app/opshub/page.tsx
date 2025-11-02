@@ -2,14 +2,12 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
 import { isAdminMFAEnforced } from '@/lib/env';
-
-// Re-enabling admin components one by one
 import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 import { UserManagement } from '@/components/admin/UserManagement';
-// import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
-// import { SettingsPanel } from '@/components/admin/SettingsPanel';
-// import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
-// import { AffiliateLinkManagement } from '@/components/admin/AffiliateLinkManagement';
+import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
+import { SettingsPanel } from '@/components/admin/SettingsPanel';
+import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
+import { AffiliateLinkManagement } from '@/components/admin/AffiliateLinkManagement';
 
 export default async function OpsHubPage() {
   const session = await auth();
@@ -153,6 +151,11 @@ export default async function OpsHubPage() {
         </section>
 
         <section className="rounded-lg border bg-white p-4">
+          <h2 className="mb-3 text-lg font-semibold">Content Quality</h2>
+          <ContentQualityPanel />
+        </section>
+
+        <section className="rounded-lg border bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold">Content Review Queue</h2>
           <ContentReviewQueue />
         </section>
@@ -162,23 +165,20 @@ export default async function OpsHubPage() {
           <UserManagement />
         </section>
 
-        {/* Still disabled - testing one at a time
         <section className="rounded-lg border bg-white p-4">
-          <ContentQualityPanel />
-        </section>
-
-        <section className="rounded-lg border bg-white p-4">
+          <h2 className="mb-3 text-lg font-semibold">Audit Logs</h2>
           <AuditLogViewer />
         </section>
 
         <section className="rounded-lg border bg-white p-4">
+          <h2 className="mb-3 text-lg font-semibold">System Settings</h2>
           <SettingsPanel />
         </section>
 
         <section className="rounded-lg border bg-white p-4">
+          <h2 className="mb-3 text-lg font-semibold">Affiliate Links</h2>
           <AffiliateLinkManagement />
         </section>
-        */}
       </div>
     </div>
   );
