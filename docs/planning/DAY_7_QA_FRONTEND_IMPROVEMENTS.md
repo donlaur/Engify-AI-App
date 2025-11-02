@@ -237,15 +237,104 @@ Each phase links to detailed technical documentation (e.g., `docs/testing/QA_AUD
 
 ### 1.4 QA: /prompts Page (Prompt Library) - Continued
 
-**Status:** ⚠️ In Progress  
+**Status:** ✅ Complete (SEO + UX Done)  
 **Priority:** Critical - Core value proposition, high-traffic page
 
-**Pre-QA Code Review:**
+**Completed:**
 
-- ✅ Fake views/ratings already removed from `PromptCard`
+- ✅ Fake views/ratings removed from `PromptCard`
 - ✅ Real MongoDB data fetched server-side
 - ✅ Client-side filtering (search, category, role)
-- ✅ Copy and favorite functionality implemented
+- ✅ Copy and favorite functionality (MongoDB persistence)
+- ✅ Individual prompt pages created (`/prompts/[id]`)
+- ✅ SEO optimized (dynamic meta tags, JSON-LD, Open Graph)
+- ✅ Category/role labels with proper casing
+- ✅ Share functionality added
+- ✅ Stats panel and results count
+- ✅ DRY stats fetching with Redis cache
+
+---
+
+## 🚨 OUTSTANDING TASKS - Day 7
+
+### High Priority (Must-Do Before Merge)
+
+- [ ] **#21 - Push to Remote & Verify Build** (5 min)
+  - Push feature branch to remote
+  - Verify Vercel build succeeds
+  - Check for runtime errors in production
+  - Quick smoke test on deployed site
+  - **Priority:** CRITICAL - Blocks merge
+
+- [ ] **#22 - Add Tests for `/api/favorites`** (30 min)
+  - Unit tests for GET/POST/DELETE endpoints
+  - Test authentication requirements
+  - Test rate limiting
+  - Test error cases (invalid ID, non-existent prompt)
+  - **Priority:** HIGH - Enterprise standard, blocked pre-commit hook
+
+- [ ] **#23 - Run MongoDB Text Indexes in Production** (5 min)
+  - SSH into production or run via deployment script
+  - Execute `tsx scripts/admin/ensure-text-indexes.ts`
+  - Verify indexes created successfully
+  - **Priority:** HIGH - RAG chat won't work properly without this
+
+### Medium Priority (Should-Do)
+
+- [ ] **#24 - Dashboard Favorites Integration** (20 min)
+  - Show favorites count in dashboard stats
+  - Display "My Favorites" collection/list
+  - Add empty state for zero favorites
+  - Link to individual prompt pages
+  - **Priority:** MEDIUM - Completes favorites feature
+
+- [ ] **#25 - Quick Mobile Testing** (10 min)
+  - Test on real device or BrowserStack
+  - Verify touch targets work
+  - Check responsive breakpoints
+  - Test floating chat button
+  - **Priority:** MEDIUM - UX validation
+
+- [ ] **#26 - Lighthouse Audit** (10 min)
+  - Run on `/prompts` page
+  - Check performance score
+  - Verify accessibility
+  - Ensure no regressions
+  - **Priority:** MEDIUM - Performance validation
+
+- [ ] **#27 - Add Real View Tracking** (30 min)
+  - Add `views` field tracking to prompts
+  - Create API endpoint for view increment
+  - Add client-side tracking hook
+  - Display view count (start at 0, not fake)
+  - **Priority:** MEDIUM - Engagement metrics
+
+### Low Priority (Nice-to-Have)
+
+- [ ] **#28 - Category Coverage Audit** (1-2 hours)
+  - Analyze prompt distribution across categories
+  - Identify under-represented categories
+  - Rebalance or create new prompts
+  - **Priority:** LOW - Content strategy work
+
+- [ ] **#29 - Additional Filters** (30 min each)
+  - Add skill level filter (beginner, intermediate, advanced)
+  - Add framework filter (React, Vue, Angular, etc.)
+  - Add use-case filter (debugging, optimization, learning)
+  - **Priority:** LOW - Enhancement
+
+- [ ] **#30 - Comprehensive Mock Data Audit** (2-3 hours)
+  - Search entire codebase for hardcoded values
+  - Grep for: "TODO", "MOCK", "FAKE", hardcoded numbers
+  - Create systematic fix plan
+  - **Priority:** LOW - Technical debt cleanup
+
+- [ ] **#31 - Google Analytics Events** (30 min)
+  - Track favorite button clicks
+  - Track share button clicks
+  - Track filter usage
+  - Track search queries
+  - **Priority:** LOW - Product analytics
 
 **User Testing Checklist:**
 
