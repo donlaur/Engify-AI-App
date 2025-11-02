@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   Dialog,
   DialogContent,
@@ -51,7 +50,9 @@ export function PromptDetailModal({
               variant="ghost"
               size="icon"
               onClick={handleFavorite}
-              className={isFavorite ? 'text-yellow-500' : 'text-muted-foreground'}
+              className={
+                isFavorite ? 'text-yellow-500' : 'text-muted-foreground'
+              }
             >
               <Icons.star
                 className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`}
@@ -72,20 +73,7 @@ export function PromptDetailModal({
           )}
         </div>
 
-        {/* Stats */}
-        <div className="flex gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Icons.view className="h-4 w-4" />
-            <span>{prompt.views} views</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Icons.star className="h-4 w-4" />
-            <span>
-              {prompt.rating?.toFixed(1) || 0} ({prompt.ratingCount || 0}{' '}
-              ratings)
-            </span>
-          </div>
-        </div>
+        {/* Stats - removed fake views/ratings */}
 
         {/* Prompt Content */}
         <div className="space-y-4">
@@ -144,26 +132,6 @@ export function PromptDetailModal({
             <Icons.copy className="mr-2 h-4 w-4" />
             {copied ? 'Copied!' : 'Copy to Clipboard'}
           </Button>
-          <Button variant="outline" className="flex-1" asChild>
-            <Link href={`/demo?prompt=${encodeURIComponent(prompt.content)}`}>
-              <Icons.edit className="mr-2 h-4 w-4" />
-              Edit & Customize
-            </Link>
-          </Button>
-        </div>
-
-        {/* Make it Mine Explanation */}
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm dark:border-blue-800 dark:bg-blue-950/50">
-          <p className="mb-1 font-semibold text-blue-900 dark:text-blue-100">
-            <Icons.info className="mr-1 inline h-4 w-4" />
-            What is &quot;Make it Mine&quot;?
-          </p>
-          <p className="text-blue-800 dark:text-blue-200">
-            Customize this prompt for your specific use case. Our AI will adapt
-            the prompt to your context, add your company&apos;s terminology, and
-            optimize it for your workflow. Save customized versions to your
-            profile.
-          </p>
         </div>
       </DialogContent>
     </Dialog>
