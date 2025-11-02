@@ -29,11 +29,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Label } from '@/components/ui/label';
 
 interface ContentItem {
   _id: string;
@@ -52,11 +62,14 @@ export function ContentManagementCMS() {
   const [filter, setFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
+  const [previewItem, setPreviewItem] = useState<ContentItem | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     fetchContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   const fetchContent = async () => {
@@ -64,10 +77,10 @@ export function ContentManagementCMS() {
     try {
       const params = new URLSearchParams();
       if (filter !== 'all') params.append('type', filter);
-      
+
       const res = await fetch(`/api/admin/content/manage?${params}`);
       const data = await res.json();
-      
+
       if (data.success) {
         setContentItems(data.content);
       }
@@ -84,10 +97,15 @@ export function ContentManagementCMS() {
     setIsEditDialogOpen(true);
   };
 
+  const handlePreview = (item: ContentItem) => {
+    setPreviewItem(item);
+    setIsPreviewOpen(true);
+  };
+
   const handleCreate = () => {
     setEditingItem({
       _id: '',
-      type: 'learning_content',
+      type: 'ai_adoption_question',
       category: '',
       title: '',
       content: '',
@@ -152,16 +170,6 @@ export function ContentManagementCMS() {
       : true
   );
 
-  const contentByType = {
-    all: filteredContent,
-    ai_adoption_question: filteredContent.filter(
-      (c) => c.type === 'ai_adoption_question'
-    ),
-    learning_story: filteredContent.filter((c) => c.type === 'learning_story'),
-    case_study: filteredContent.filter((c) => c.type === 'case_study'),
-    framework_guide: filteredContent.filter((c) => c.type === 'framework_guide'),
-  };
-
   const stats = {
     total: contentItems.length,
     ai_adoption_question: contentItems.filter(
@@ -176,57 +184,58 @@ export function ContentManagementCMS() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Content Management System</h3>
+          <h3 className="text-2xl font-bold">Content Management</h3>
           <p className="text-sm text-muted-foreground">
             Manage learning content, patterns, and prompts
           </p>
         </div>
-        <Button onClick={handleCreate}>
-          <Icons.plus className="h-4 w-4 mr-2" />
+        <Button onClick={handleCreate} size="lg">
+          <Icons.plus className="mr-2 h-4 w-4" />
           Create Content
         </Button>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">Total Items</p>
-          </CardContent>
+          <CardHeader className="pb-3">
+            <CardDescription>Total Items</CardDescription>
+            <CardTitle className="text-3xl">{stats.total}</CardTitle>
+          </CardHeader>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">
+          <CardHeader className="pb-3">
+            <CardDescription>AI Questions</CardDescription>
+            <CardTitle className="text-3xl">
               {stats.ai_adoption_question}
-            </div>
-            <p className="text-xs text-muted-foreground">AI Questions</p>
-          </CardContent>
+            </CardTitle>
+          </CardHeader>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.learning_story}</div>
-            <p className="text-xs text-muted-foreground">Stories</p>
-          </CardContent>
+          <CardHeader className="pb-3">
+            <CardDescription>Stories</CardDescription>
+            <CardTitle className="text-3xl">{stats.learning_story}</CardTitle>
+          </CardHeader>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.case_study}</div>
-            <p className="text-xs text-muted-foreground">Case Studies</p>
-          </CardContent>
+          <CardHeader className="pb-3">
+            <CardDescription>Case Studies</CardDescription>
+            <CardTitle className="text-3xl">{stats.case_study}</CardTitle>
+          </CardHeader>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{stats.framework_guide}</div>
-            <p className="text-xs text-muted-foreground">Frameworks</p>
-          </CardContent>
+          <CardHeader className="pb-3">
+            <CardDescription>Frameworks</CardDescription>
+            <CardTitle className="text-3xl">{stats.framework_guide}</CardTitle>
+          </CardHeader>
         </Card>
       </div>
 
-      {/* Search and Filter */}
-      <div className="flex gap-4">
+      {/* Filters */}
+      <div className="flex flex-col gap-4 sm:flex-row">
         <div className="flex-1">
           <Input
             placeholder="Search content..."
@@ -249,10 +258,10 @@ export function ContentManagementCMS() {
         </Select>
       </div>
 
-      {/* Content List */}
+      {/* Content Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Content Items</CardTitle>
+          <CardTitle>Content Items</CardTitle>
           <CardDescription>
             {filteredContent.length} items
             {searchTerm && ` matching "${searchTerm}"`}
@@ -264,60 +273,86 @@ export function ContentManagementCMS() {
               <Icons.spinner className="h-6 w-6 animate-spin" />
             </div>
           ) : filteredContent.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="py-8 text-center text-muted-foreground">
               No content found
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredContent.map((item) => (
-                <div
-                  key={item._id}
-                  className="flex items-start justify-between border rounded-lg p-4 hover:bg-muted/50"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium">{item.title}</h4>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[300px]">Title</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Tags</TableHead>
+                  <TableHead>Updated</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredContent.map((item) => (
+                  <TableRow key={item._id}>
+                    <TableCell className="font-medium">
+                      <button
+                        onClick={() => handlePreview(item)}
+                        className="text-left hover:underline"
+                      >
+                        {item.title}
+                      </button>
+                    </TableCell>
+                    <TableCell>
                       <Badge variant="outline">{item.type}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {item.content.substring(0, 150)}...
-                    </p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{item.category}</span>
-                      <span>•</span>
-                      <span>{item.tags.slice(0, 3).join(', ')}</span>
-                      <span>•</span>
-                      <span>
-                        {new Date(item.updatedAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleEdit(item)}
-                    >
-                      <Icons.edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDelete(item._id)}
-                    >
-                      <Icons.delete className="h-4 w-4 text-red-600" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    </TableCell>
+                    <TableCell>{item.category || '-'}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {item.tags.slice(0, 2).map((tag, i) => (
+                          <Badge
+                            key={i}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                        {item.tags.length > 2 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{item.tags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {new Date(item.updatedAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEdit(item)}
+                        >
+                          <Icons.edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDelete(item._id)}
+                        >
+                          <Icons.delete className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
 
       {/* Edit/Create Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {isCreating ? 'Create New Content' : 'Edit Content'}
@@ -331,44 +366,53 @@ export function ContentManagementCMS() {
 
           {editingItem && (
             <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Type</label>
-                <Select
-                  value={editingItem.type}
-                  onValueChange={(value) =>
-                    setEditingItem({ ...editingItem, type: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ai_adoption_question">
-                      AI Adoption Question
-                    </SelectItem>
-                    <SelectItem value="learning_story">Learning Story</SelectItem>
-                    <SelectItem value="case_study">Case Study</SelectItem>
-                    <SelectItem value="framework_guide">
-                      Framework Guide
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="type">Type</Label>
+                  <Select
+                    value={editingItem.type}
+                    onValueChange={(value) =>
+                      setEditingItem({ ...editingItem, type: value })
+                    }
+                  >
+                    <SelectTrigger id="type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ai_adoption_question">
+                        AI Adoption Question
+                      </SelectItem>
+                      <SelectItem value="learning_story">
+                        Learning Story
+                      </SelectItem>
+                      <SelectItem value="case_study">Case Study</SelectItem>
+                      <SelectItem value="framework_guide">
+                        Framework Guide
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Input
+                    id="category"
+                    value={editingItem.category}
+                    onChange={(e) =>
+                      setEditingItem({
+                        ...editingItem,
+                        category: e.target.value,
+                      })
+                    }
+                    placeholder="e.g., Strategic, Technical, etc."
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Category</label>
+              <div className="space-y-2">
+                <Label htmlFor="title">Title</Label>
                 <Input
-                  value={editingItem.category}
-                  onChange={(e) =>
-                    setEditingItem({ ...editingItem, category: e.target.value })
-                  }
-                  placeholder="e.g., Strategic, Technical, etc."
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Title</label>
-                <Input
+                  id="title"
                   value={editingItem.title}
                   onChange={(e) =>
                     setEditingItem({ ...editingItem, title: e.target.value })
@@ -377,9 +421,10 @@ export function ContentManagementCMS() {
                 />
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Content (Markdown)</label>
+              <div className="space-y-2">
+                <Label htmlFor="content">Content (Markdown)</Label>
                 <Textarea
+                  id="content"
                   value={editingItem.content}
                   onChange={(e) =>
                     setEditingItem({ ...editingItem, content: e.target.value })
@@ -390,11 +435,10 @@ export function ContentManagementCMS() {
                 />
               </div>
 
-              <div>
-                <label className="text-sm font-medium">
-                  Tags (comma-separated)
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="tags">Tags (comma-separated)</Label>
                 <Input
+                  id="tags"
                   value={editingItem.tags.join(', ')}
                   onChange={(e) =>
                     setEditingItem({
@@ -421,7 +465,91 @@ export function ContentManagementCMS() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Preview Sheet */}
+      <Sheet open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <SheetContent className="w-[600px] overflow-y-auto sm:max-w-[600px]">
+          {previewItem && (
+            <>
+              <SheetHeader>
+                <SheetTitle>{previewItem.title}</SheetTitle>
+                <SheetDescription>
+                  <div className="mt-2 flex items-center gap-2">
+                    <Badge>{previewItem.type}</Badge>
+                    {previewItem.category && (
+                      <Badge variant="outline">{previewItem.category}</Badge>
+                    )}
+                  </div>
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="mt-6 space-y-4">
+                <div>
+                  <h4 className="mb-2 text-sm font-semibold">Content</h4>
+                  <div className="prose prose-sm max-w-none">
+                    <pre className="whitespace-pre-wrap text-sm">
+                      {previewItem.content}
+                    </pre>
+                  </div>
+                </div>
+
+                {previewItem.tags.length > 0 && (
+                  <div>
+                    <h4 className="mb-2 text-sm font-semibold">Tags</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {previewItem.tags.map((tag, i) => (
+                        <Badge key={i} variant="secondary">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <h4 className="mb-2 text-sm font-semibold">Metadata</h4>
+                  <dl className="space-y-1 text-sm">
+                    <div>
+                      <dt className="inline font-medium">Created:</dt>
+                      <dd className="ml-2 inline text-muted-foreground">
+                        {new Date(previewItem.createdAt).toLocaleString()}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="inline font-medium">Updated:</dt>
+                      <dd className="ml-2 inline text-muted-foreground">
+                        {new Date(previewItem.updatedAt).toLocaleString()}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={() => {
+                      setIsPreviewOpen(false);
+                      handleEdit(previewItem);
+                    }}
+                    className="flex-1"
+                  >
+                    <Icons.edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      setIsPreviewOpen(false);
+                      handleDelete(previewItem._id);
+                    }}
+                  >
+                    <Icons.delete className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
-
