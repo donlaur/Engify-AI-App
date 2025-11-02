@@ -74,6 +74,8 @@ export async function GET(req: NextRequest) {
         userCount,
         promptsByRole,
         promptsByCategory,
+        uniqueCategories,
+        uniqueRoles,
       ] = await Promise.all([
         db.collection('prompts').countDocuments({ active: { $ne: false } }),
         db.collection('patterns').countDocuments(),
@@ -96,6 +98,10 @@ export async function GET(req: NextRequest) {
             { $sort: { count: -1 } },
           ])
           .toArray(),
+        // Get unique categories
+        db.collection('prompts').distinct('category', { active: { $ne: false } }),
+        // Get unique roles
+        db.collection('prompts').distinct('role', { active: { $ne: false } }),
       ]);
 
       // Build comprehensive stats response
@@ -124,6 +130,8 @@ export async function GET(req: NextRequest) {
             },
             {} as Record<string, number>
           ),
+          uniqueCategories: uniqueCategories.filter(Boolean),
+          uniqueRoles: uniqueRoles.filter(Boolean),
         },
         patterns: {
           total: patternCount,

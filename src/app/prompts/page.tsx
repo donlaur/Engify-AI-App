@@ -22,16 +22,18 @@ export default async function LibraryPage() {
   // Fetch prompts from MongoDB (production content)
   const prompts = await getAllPrompts();
 
-  // Get stats from cache
+  // Get stats from Redis cache (includes unique categories/roles)
   const data = await getStats();
 
-  // Get unique categories and roles from actual prompts
-  const uniqueCategories = [
+  // Use cached unique categories and roles (or fallback to extraction)
+  const uniqueCategories = data.prompts?.uniqueCategories || [
     ...new Set(prompts.map((p) => p.category).filter(Boolean)),
   ];
-  const uniqueRoles = [...new Set(prompts.map((p) => p.role).filter(Boolean))];
-
-  // Category and role counts
+  const uniqueRoles = data.prompts?.uniqueRoles || [
+    ...new Set(prompts.map((p) => p.role).filter(Boolean)),
+  ];
+  
+  // Category and role counts (from Redis cache)
   const categoryStats = data.prompts?.byCategory || {};
   const roleStats = data.prompts?.byRole || {};
   const totalPrompts =
