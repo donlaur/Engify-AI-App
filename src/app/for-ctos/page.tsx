@@ -533,7 +533,7 @@ export default function ForCTOsPage() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/library">
+                <Link href="/prompts">
                   <Icons.book className="mr-2 h-5 w-5" />
                   Browse Prompt Library
                 </Link>

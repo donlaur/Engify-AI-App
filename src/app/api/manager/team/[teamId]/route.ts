@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { managerDashboardService } from '@/lib/services/ManagerDashboardService';
+import { requireAuth } from '@/lib/auth/require-auth';
+import { checkRateLimit } from '@/lib/rate-limit';
 // import { teamService } from '@/lib/services/TeamService';
 
 export const runtime = 'nodejs';
@@ -15,13 +17,41 @@ export const dynamic = 'force-dynamic';
  * Get team details
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { teamId: string } }
 ) {
+  // Authentication required
+  const { user, error: authError } = await requireAuth(request);
+  if (authError) return authError;
+
+  // Role check: manager, director, or higher
+  const allowedRoles = ['manager', 'director', 'enterprise_admin', 'super_admin'];
+  if (!allowedRoles.includes(user.role)) {
+    return NextResponse.json(
+      { error: 'Forbidden - Manager role required' },
+      { status: 403 }
+    );
+  }
+
+  // Rate limiting: 60 requests per minute (higher for team details)
+  const rateLimitResult = await checkRateLimit(
+    request,
+    'manager-team',
+    60,
+    60
+  );
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded' },
+      { status: 429 }
+    );
+  }
+
   try {
     const { teamId } = params;
 
-    // TODO: Verify user is manager of this team
+    // TODO: Verify user is actually manager of THIS specific team
+    // For now, any manager can view any team (will add team ownership check later)
 
     const [members, skillMatrix, pipeline, roi] = await Promise.all([
       managerDashboardService.getMemberProgress(teamId),
