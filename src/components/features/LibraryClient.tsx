@@ -18,9 +18,19 @@ import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
 
 interface LibraryClientProps {
   initialPrompts: Prompt[];
+  categoryStats: Record<string, number>;
+  roleStats: Record<string, number>;
+  uniqueCategories: string[];
+  uniqueRoles: string[];
 }
 
-export function LibraryClient({ initialPrompts }: LibraryClientProps) {
+export function LibraryClient({
+  initialPrompts,
+  categoryStats,
+  roleStats,
+  uniqueCategories,
+  uniqueRoles,
+}: LibraryClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<
     PromptCategory | 'all'
@@ -39,27 +49,35 @@ export function LibraryClient({ initialPrompts }: LibraryClientProps) {
     return matchesSearch && matchesCategory && matchesRole;
   });
 
+  // Dynamic filters from DB
   const categories: Array<PromptCategory | 'all'> = [
     'all',
-    'code-generation',
-    'debugging',
-    'documentation',
-    'testing',
-    'architecture',
+    ...(uniqueCategories as PromptCategory[]),
   ];
 
   const roles: Array<UserRole | 'all'> = [
     'all',
-    'c-level',
-    'engineering-manager',
-    'engineer',
-    'product-manager',
-    'designer',
-    'qa',
+    ...(uniqueRoles as UserRole[]),
   ];
 
   return (
     <>
+      {/* Stats Panel */}
+      <div className="mb-6 grid gap-4 md:grid-cols-3">
+        <div className="rounded-lg border bg-card p-4">
+          <div className="text-sm text-muted-foreground">Total Prompts</div>
+          <div className="text-2xl font-bold">{initialPrompts.length}</div>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <div className="text-sm text-muted-foreground">Categories</div>
+          <div className="text-2xl font-bold">{uniqueCategories.length}</div>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <div className="text-sm text-muted-foreground">Roles</div>
+          <div className="text-2xl font-bold">{uniqueRoles.length}</div>
+        </div>
+      </div>
+
       {/* Search and Filters */}
       <div className="mb-8 space-y-4">
         {/* Search */}
@@ -75,7 +93,14 @@ export function LibraryClient({ initialPrompts }: LibraryClientProps) {
 
         {/* Category Filter */}
         <div>
-          <p className="mb-2 text-sm font-medium">Category</p>
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-medium">Category</p>
+            {selectedCategory !== 'all' && (
+              <span className="text-xs text-muted-foreground">
+                {categoryStats[selectedCategory] || 0} prompts
+              </span>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
             {categories.map((category) => (
               <Badge
@@ -84,7 +109,9 @@ export function LibraryClient({ initialPrompts }: LibraryClientProps) {
                 className="cursor-pointer"
                 onClick={() => setSelectedCategory(category)}
               >
-                {category === 'all' ? 'All' : categoryLabels[category]}
+                {category === 'all'
+                  ? `All (${initialPrompts.length})`
+                  : `${categoryLabels[category] || category} (${categoryStats[category] || 0})`}
               </Badge>
             ))}
           </div>
@@ -92,7 +119,14 @@ export function LibraryClient({ initialPrompts }: LibraryClientProps) {
 
         {/* Role Filter */}
         <div>
-          <p className="mb-2 text-sm font-medium">Role</p>
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-medium">Role</p>
+            {selectedRole !== 'all' && (
+              <span className="text-xs text-muted-foreground">
+                {roleStats[selectedRole] || 0} prompts
+              </span>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
             {roles.map((role) => (
               <Badge
@@ -101,11 +135,36 @@ export function LibraryClient({ initialPrompts }: LibraryClientProps) {
                 className="cursor-pointer"
                 onClick={() => setSelectedRole(role)}
               >
-                {role === 'all' ? 'All' : roleLabels[role]}
+                {role === 'all'
+                  ? `All (${initialPrompts.length})`
+                  : `${roleLabels[role] || role} (${roleStats[role] || 0})`}
               </Badge>
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Results Count */}
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          {filteredPrompts.length === initialPrompts.length
+            ? `Showing all ${filteredPrompts.length} prompts`
+            : `Showing ${filteredPrompts.length} of ${initialPrompts.length} prompts`}
+        </p>
+        {(searchQuery ||
+          selectedCategory !== 'all' ||
+          selectedRole !== 'all') && (
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedCategory('all');
+              setSelectedRole('all');
+            }}
+            className="text-sm text-primary hover:underline"
+          >
+            Clear all filters
+          </button>
+        )}
       </div>
 
       {/* Results */}
