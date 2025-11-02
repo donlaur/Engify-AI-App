@@ -6,6 +6,7 @@ import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { AuditLogViewer } from '@/components/admin/AuditLogViewer';
 import { SettingsPanel } from '@/components/admin/SettingsPanel';
+import { ContentManagementCMS } from '@/components/admin/ContentManagementCMS';
 // import { ContentQualityPanel } from '@/components/admin/ContentQualityPanel';
 // import { AffiliateLinkManagement } from '@/components/admin/AffiliateLinkManagement';
 
@@ -151,6 +152,11 @@ export default async function OpsHubPage() {
         </section>
 
         <section className="rounded-lg border bg-white p-4">
+          <h2 className="mb-3 text-lg font-semibold">Content Management</h2>
+          <ContentManagementCMS />
+        </section>
+
+        <section className="rounded-lg border bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold">Content Review Queue</h2>
           <ContentReviewQueue />
         </section>
@@ -170,7 +176,7 @@ export default async function OpsHubPage() {
           <SettingsPanel />
         </section>
 
-        {/* Testing SettingsPanel - ContentQualityPanel and AffiliateLinkManagement disabled
+        {/* Testing CMS - ContentQualityPanel and AffiliateLinkManagement disabled
         <section className="rounded-lg border bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold">Content Quality</h2>
           <ContentQualityPanel />
