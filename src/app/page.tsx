@@ -10,6 +10,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { getStats } from '@/lib/stats-cache';
+
 const features = [
   {
     icon: Icons.sparkles,
@@ -39,32 +41,6 @@ const features = [
     gradient: 'from-green-500 to-emerald-500',
   },
 ];
-
-// Fetch stats from API (with ISR for performance)
-async function getStats() {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/stats`,
-      {
-        next: { revalidate: 3600 }, // Revalidate every hour
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error('Failed to fetch stats');
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error('Failed to fetch stats:', error);
-    // Fallback to reasonable defaults
-    return {
-      stats: { prompts: 76, patterns: 23, users: 0 },
-      prompts: { total: 76, byRole: {}, byCategory: {} },
-      patterns: { total: 23 },
-    };
-  }
-}
 
 export default async function Home() {
   const data = await getStats();
