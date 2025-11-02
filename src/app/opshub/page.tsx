@@ -25,9 +25,8 @@ export default async function OpsHubPage() {
 
   // Super admin bypass for emergency access
   // In production, consider enforcing MFA for super_admin via env var
-  const shouldEnforceMFA = isAdminMFAEnforced && role !== 'super_admin';
-
-  if (shouldEnforceMFA && role === 'super_admin' && !mfaVerified) {
+  // Only enforce MFA for non-super_admin roles
+  if (isAdminMFAEnforced && role !== 'super_admin' && !mfaVerified) {
     redirect('/login?error=MFA_REQUIRED');
   }
 
