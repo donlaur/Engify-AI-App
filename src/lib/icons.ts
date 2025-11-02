@@ -149,6 +149,7 @@ export const Icons = {
   menu: Menu,
   close: X,
   arrowRight: ChevronRight,
+  chevronRight: ChevronRight, // Alias for breadcrumbs and navigation
   check: Check,
   left: ChevronLeft,
   chevronDown: ChevronDown,
@@ -255,7 +256,7 @@ export const Icons = {
   refreshCw: RefreshCw, // Alias for refresh
   database: Database,
   bot: Bot,
-  
+
   // Auto-added icons
   lightbulb: Lightbulb,
   compass: Compass,
@@ -280,12 +281,12 @@ export const Icons = {
   play: Play,
   wifi: Wifi,
   globe: Globe,
-  
+
   // Social
   twitter: Twitter,
   linkedin: Linkedin,
   facebook: Facebook,
-  
+
   // Additional
   calculator: Calculator,
   rocket: Rocket,
