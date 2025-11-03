@@ -1,10 +1,10 @@
 /**
  * Authentication Helper for API Routes
- * 
+ *
  * Provides reusable auth checks for protected API endpoints
  */
 
-import { auth } from '@/lib/auth/config';
+import { auth } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 export type AuthResult = {
@@ -75,4 +75,3 @@ export async function requireRole(
 
   return authResult;
 }
-
