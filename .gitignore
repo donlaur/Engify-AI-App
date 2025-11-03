@@ -111,3 +111,4 @@ docs/private/
 # Business Intelligence - Private strategies, partnerships, revenue models
 BizIntel/
 **/BizIntel/
+.env.vercel
