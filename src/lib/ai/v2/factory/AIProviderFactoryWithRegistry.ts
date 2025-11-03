@@ -36,6 +36,8 @@ const PROVIDER_TO_MODEL_ID: Record<string, string> = {
   'groq-llama3-8b': 'llama3-8b-8192',
   'groq-llama3-70b': 'llama3-70b-8192',
   'groq-mixtral': 'mixtral-8x7b-32768',
+  // Replicate: Special handling - providerName like 'replicate-owner/model' 
+  // will extract 'owner/model' as the model ID
 };
 
 /**
