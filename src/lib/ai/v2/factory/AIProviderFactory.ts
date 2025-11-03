@@ -4,6 +4,7 @@ import { ClaudeAdapter } from '../adapters/ClaudeAdapter';
 import { GeminiAdapter } from '../adapters/GeminiAdapter';
 import { GroqAdapter } from '../adapters/GroqAdapter';
 import { ReplicateAdapter } from '../adapters/ReplicateAdapter';
+import { getActiveModels, getModelsByProvider, isModelAllowed } from '@/lib/services/AIModelRegistry';
 
 /**
  * AIProviderFactory

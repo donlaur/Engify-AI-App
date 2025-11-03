@@ -14,7 +14,7 @@
  * Different from engineering review - this is for PUBLISHING content to the site.
  */
 
-import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
+import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFactoryWithRegistry';
 
 /**
  * BUSINESS CONTEXT for Content Generation
@@ -40,7 +40,7 @@ export interface ContentPublishingAgent {
   role: string;
   name: string;
   model: string;
-  provider: 'openai' | 'anthropic' | 'google';
+  provider: string; // Allow provider names like 'claude-sonnet'
   systemPrompt: string;
   temperature: number;
   maxTokens: number;
@@ -495,8 +495,8 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
     const avgScore = result.reviews.reduce((sum, r) => sum + r.score, 0) / result.reviews.length;
     result.readabilityScore = avgScore;
 
-    const allApproved = result.reviews.every((r) => r.approved);
-    const publisherApproved = result.reviews.find((r) => r.agentName === 'Final Publisher')?.approved;
+    const allApproved = result.reviews.every((r) => r.approved ?? false);
+    const publisherApproved = result.reviews.find((r) => r.agentName === 'Final Publisher')?.approved ?? false;
 
     result.approved = allApproved;
     result.publishReady = allApproved && publisherApproved && avgScore >= 8.0;
@@ -511,7 +511,7 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
    * Run a single agent to generate or review content
    */
   private async runAgent(agent: ContentPublishingAgent, prompt: string): Promise<string> {
-    const provider = await AIProviderFactory.create(agent.provider, this.organizationId);
+    const provider = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
 
     const response = await provider.execute({
       prompt: prompt,
@@ -545,14 +545,14 @@ Provide your review in JSON format as specified in your system prompt.
 `;
 
     try {
-      const provider = await AIProviderFactory.create(agent.provider, this.organizationId);
+      const provider = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
 
+      // Note: JSON mode handled by adapter, not in request interface
       const response = await provider.execute({
-        prompt: reviewPrompt,
-        systemPrompt: agent.systemPrompt,
+        prompt: reviewPrompt + '\n\nRespond in valid JSON format only.',
+        systemPrompt: agent.systemPrompt + '\n\nYou must respond with valid JSON only. No markdown, no code blocks, just raw JSON.',
         temperature: agent.temperature,
         maxTokens: agent.maxTokens,
-        responseFormat: { type: 'json_object' },
       });
 
       const parsed = JSON.parse(response.content);
