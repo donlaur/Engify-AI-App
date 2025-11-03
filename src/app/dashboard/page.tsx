@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { ACHIEVEMENTS } from '@/lib/gamification/achievements';
+import { getPromptSlug } from '@/lib/utils/slug';
 
 interface GamificationStats {
   xp: number;
@@ -412,7 +413,7 @@ export default function DashboardPage() {
                     {favoritePrompts.map((prompt) => (
                       <Link
                         key={prompt.id}
-                        href={`/prompts/${prompt.id}`}
+                        href={`/prompts/${getPromptSlug(prompt)}`}
                         className="flex items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                       >
                         <div className="mt-1">

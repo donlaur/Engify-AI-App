@@ -121,8 +121,8 @@ export default async function Home() {
               Engify.ai
             </h1>
 
-            <p className="mx-auto max-w-2xl text-xl text-white">
-              Engineering amplified with AI
+            <p className="mx-auto max-w-3xl text-2xl font-semibold leading-relaxed text-white sm:text-3xl">
+              Expert prompts, battle-tested patterns, and gamified learning. Transform engineering capabilities across all roles with Engify.ai
             </p>
 
             <div className="flex justify-center pt-8">

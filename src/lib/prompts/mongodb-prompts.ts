@@ -47,16 +47,22 @@ export async function getAllPrompts(): Promise<Prompt[]> {
 }
 
 /**
- * Fetch a single prompt by ID from MongoDB
+ * Fetch a single prompt by ID or slug from MongoDB
  */
-export async function getPromptById(id: string): Promise<Prompt | null> {
+export async function getPromptById(idOrSlug: string): Promise<Prompt | null> {
   try {
     const db = await getDb();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const collection = db.collection('prompts');
 
     const prompt = await collection.findOne({
-      $or: [{ id }, { _id: id }],
+      $or: [
+        { id: idOrSlug },
+        { slug: idOrSlug },
+        { _id: idOrSlug },
+      ],
+      isPublic: true,
+      active: { $ne: false },
     });
 
     if (!prompt) {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getClient } from '@/lib/mongodb';
+import { logger } from '@/lib/logging/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
     const collection = db.collection('learning_resources');
     
     // Build query - ONLY active resources
-    const query: any = { status: 'active' };
+    const query: Record<string, unknown> = { status: 'active' };
     
     if (category) query.category = category;
     if (level) query.level = level;
@@ -74,7 +75,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error('Error fetching learning resources:', error);
+    logger.apiError('/api/learning', error, { method: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch resources' },
       { status: 500 }

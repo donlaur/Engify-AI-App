@@ -23,9 +23,11 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { useFavorites } from '@/hooks/use-favorites';
 import { PromptDetailModal } from './PromptDetailModal';
+import { getPromptSlug } from '@/lib/utils/slug';
 import type { Prompt } from '@/lib/schemas/prompt';
 import {
   categoryLabels,
@@ -43,7 +45,8 @@ export function PromptCard(props: PromptCardProps) {
   const { toast } = useToast();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const { id, title, description, content, category, role, onView } = props;
+  const { id, title, description, content, category, role, slug, onView } = props;
+  const promptSlug = getPromptSlug({ title, slug });
 
   const handleCopy = async () => {
     try {
@@ -67,7 +70,7 @@ export function PromptCard(props: PromptCardProps) {
     const shareData = {
       title: `${title} - Engify.ai Prompt`,
       text: description,
-      url: `${window.location.origin}/prompts/${id}`,
+      url: `${window.location.origin}/prompts/${promptSlug}`,
     };
 
     try {
@@ -99,15 +102,23 @@ export function PromptCard(props: PromptCardProps) {
       <Card className="group relative rounded-xl transition-all duration-200 hover:border-primary hover:shadow-xl hover:shadow-primary/10">
         <CardHeader>
           <div className="flex items-start justify-between">
-            <div
-              className="flex-1 cursor-pointer space-y-1"
-              onClick={handleView}
+            <Link
+              href={`/prompts/${promptSlug}`}
+              className="flex-1 space-y-1 transition-colors hover:text-primary"
+              onClick={(e) => {
+                // Allow modal to open on middle-click or ctrl-click, but default to page navigation
+                if (e.metaKey || e.ctrlKey) return;
+                // Track view for analytics
+                if (onView) {
+                  onView();
+                }
+              }}
             >
               <CardTitle className="text-lg transition-colors group-hover:text-primary">
                 {title}
               </CardTitle>
               <CardDescription>{description}</CardDescription>
-            </div>
+            </Link>
             <div className="flex shrink-0 gap-1">
               <Button
                 variant="ghost"
@@ -190,8 +201,19 @@ export function PromptCard(props: PromptCardProps) {
             onClick={handleView}
             className="transition-colors group-hover:bg-primary group-hover:text-primary-foreground"
           >
-            View Details
+            Quick View
             <Icons.arrowRight className="ml-2 h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="transition-colors group-hover:bg-primary group-hover:text-primary-foreground"
+          >
+            <Link href={`/prompts/${promptSlug}`}>
+              View Page
+              <Icons.externalLink className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
         </CardFooter>
       </Card>

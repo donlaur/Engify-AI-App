@@ -200,9 +200,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // If MongoDB fails, we'll just have fewer URLs in the sitemap
   }
 
-  // Individual prompt pages: /prompts/[id]
+  // Individual prompt pages: /prompts/[slug] - use slug for better SEO
+  const { getPromptSlug } = await import('@/lib/utils/slug');
   const promptPages: MetadataRoute.Sitemap = prompts.map((prompt) => ({
-    url: `${baseUrl}/prompts/${prompt.id}`,
+    url: `${baseUrl}/prompts/${getPromptSlug(prompt)}`,
     lastModified: new Date(prompt.updatedAt || prompt.createdAt),
     changeFrequency: 'monthly' as const,
     priority: 0.7,
@@ -307,8 +308,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...learnPages,
   ];
 
-  // Log count for monitoring
-  console.log(`?? Sitemap generated: ${allPages.length} URLs`);
+  // Sitemap generated with allPages.length URLs
 
   return allPages;
 }

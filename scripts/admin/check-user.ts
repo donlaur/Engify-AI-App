@@ -40,7 +40,7 @@ import('mongodb').then(async ({ MongoClient, ObjectId }) => {
     const bcrypt = await import('bcryptjs');
     const hashedPassword = await bcrypt.default.hash('TempPass123!', 12);
     
-    const result = await db.collection('users').insertOne({
+    await db.collection('users').insertOne({
       _id: new ObjectId(),
       email: 'donlaur@engify.ai',
       name: 'Donnie Laur',
@@ -57,7 +57,7 @@ import('mongodb').then(async ({ MongoClient, ObjectId }) => {
     });
     
     console.log('✅ Created super_admin account');
-    console.log('   Email: contact@engify.ai');
+    console.log('   Email: donlaur@engify.ai');
     console.log('   Temp Password: TempPass123!');
     console.log('   Role: super_admin');
     console.log('\n⚠️  Login and change password immediately!\n');

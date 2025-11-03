@@ -9,7 +9,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import {
   ContentReviewService,
-  reviewArticle,
   generateAndReviewArticle,
 } from '@/lib/content/multi-agent-review';
 import { z } from 'zod';
@@ -58,7 +57,7 @@ export async function POST(request: NextRequest) {
       // Generate new content
       const validated = GenerateRequestSchema.parse(body);
 
-      console.log('📝 Generating and reviewing article:', validated.topic);
+      // Generate and review article
 
       const result = await generateAndReviewArticle(
         validated.topic,
@@ -80,11 +79,7 @@ export async function POST(request: NextRequest) {
       // Review existing content
       const validated = ReviewRequestSchema.parse(body);
 
-      console.log('🔍 Reviewing content:', {
-        length: validated.content.length,
-        autoRevise: validated.autoRevise,
-        maxIterations: validated.maxIterations,
-      });
+      // Review content through multi-agent pipeline
 
       const service = new ContentReviewService(
         session.user.organizationId || 'default'
@@ -139,7 +134,7 @@ export async function POST(request: NextRequest) {
  * GET /api/content/review/agents
  * Get list of available review agents and their personas
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {

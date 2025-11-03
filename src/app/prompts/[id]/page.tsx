@@ -16,19 +16,52 @@ import { getAllPrompts } from '@/lib/prompts/mongodb-prompts';
 import {
   categoryLabels,
   roleLabels,
+  patternLabels,
   type UserRole,
 } from '@/lib/schemas/prompt';
 import { CopyButton, ShareButton } from '@/components/features/PromptActions';
+import { getPromptSlug } from '@/lib/utils/slug';
 import Link from 'next/link';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
-// Generate static params for all prompts (SSG)
+// Helper function to enrich description with category, role, and pattern context
+function enrichPromptDescription(
+  prompt: {
+    description: string;
+    role?: string | null;
+    pattern?: string | null;
+  },
+  roleLabel: string | null,
+  patternLabel: string | null
+): string {
+  const descriptionParts = [prompt.description];
+  if (roleLabel) {
+    descriptionParts.push(`Specifically designed for ${roleLabel.toLowerCase()}s.`);
+  }
+  if (patternLabel) {
+    descriptionParts.push(`Uses the ${patternLabel} pattern.`);
+  }
+  descriptionParts.push('Ready to use with ChatGPT, Claude, Gemini, and other AI models.');
+  return descriptionParts.join(' ');
+}
+
+// Generate static params for all prompts (SSG) - both ID and slug routes
 export async function generateStaticParams() {
   const prompts = await getAllPrompts();
-  return prompts.map((prompt) => ({
-    id: prompt.id,
-  }));
+  const params: Array<{ id: string }> = [];
+  
+  prompts.forEach((prompt) => {
+    // Add ID route
+    params.push({ id: prompt.id });
+    // Add slug route if slug exists (or generate from title)
+    const slug = getPromptSlug(prompt);
+    if (slug && slug !== prompt.id) {
+      params.push({ id: slug });
+    }
+  });
+  
+  return params;
 }
 
 // Dynamic metadata for SEO
@@ -38,7 +71,11 @@ export async function generateMetadata({
   params: { id: string };
 }): Promise<Metadata> {
   const prompts = await getAllPrompts();
-  const prompt = prompts.find((p) => p.id === params.id);
+  // Try to find by ID first, then by slug
+  let prompt = prompts.find((p) => p.id === params.id);
+  if (!prompt) {
+    prompt = prompts.find((p) => getPromptSlug(p) === params.id);
+  }
 
   if (!prompt) {
     return {
@@ -47,42 +84,71 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${prompt.title} - AI Prompt Template | Engify.ai`;
-  const description = prompt.description;
-  const url = `${APP_URL}/prompts/${prompt.id}`;
+  // Enrich metadata based on category, role, and pattern
+  const categoryLabel = categoryLabels[prompt.category] || prompt.category;
+  const roleLabel = prompt.role ? roleLabels[prompt.role as UserRole] : null;
+  const patternLabel = prompt.pattern 
+    ? patternLabels[prompt.pattern as keyof typeof patternLabels] 
+    : null;
+
+  // Enhanced title with category/role context
+  const titleParts = [prompt.title];
+  if (roleLabel) {
+    titleParts.push(`for ${roleLabel}`);
+  }
+  titleParts.push(`| ${categoryLabel} Prompt Template | Engify.ai`);
+  const title = titleParts.join(' ');
+
+  // Enhanced description with context
+  const enrichedDescription = enrichPromptDescription(prompt, roleLabel, patternLabel);
+
+  const slug = getPromptSlug(prompt);
+  const url = `${APP_URL}/prompts/${slug}`;
+
+  // Enhanced keywords array
+  const keywords = [
+    prompt.title,
+    categoryLabel,
+    ...(roleLabel ? [roleLabel, `${roleLabel} prompts`, `prompts for ${roleLabel.toLowerCase()}s`] : []),
+    ...(patternLabel ? [patternLabel, `${patternLabel.toLowerCase()} pattern`] : []),
+    `${categoryLabel} prompt`,
+    `${categoryLabel} template`,
+    'prompt engineering',
+    'AI prompt template',
+    'ChatGPT prompt',
+    'Claude prompt',
+    'Gemini prompt',
+    'AI assistant prompt',
+    ...(prompt.tags || []),
+  ].filter(Boolean);
 
   return {
     title,
-    description,
+    description: enrichedDescription,
     alternates: {
       canonical: url,
     },
     openGraph: {
       title,
-      description,
+      description: enrichedDescription,
       url,
       type: 'article',
       siteName: 'Engify.ai',
       article: {
-        tags: prompt.tags || [],
-        section: categoryLabels[prompt.category] || prompt.category,
+        publishedTime: prompt.createdAt?.toISOString(),
+        modifiedTime: prompt.updatedAt?.toISOString(),
+        authors: ['Engify.ai'],
+        tags: keywords,
+        section: categoryLabel,
       },
     },
     twitter: {
       card: 'summary_large_image',
       title,
-      description,
+      description: enrichedDescription,
+      creator: '@engifyai',
     },
-    keywords: [
-      prompt.title,
-      categoryLabels[prompt.category] || prompt.category,
-      prompt.role ? roleLabels[prompt.role as UserRole] : '',
-      'prompt engineering',
-      'AI prompt',
-      'ChatGPT',
-      'Claude',
-      ...(prompt.tags || []),
-    ].filter(Boolean),
+    keywords,
   };
 }
 
@@ -92,21 +158,52 @@ export default async function PromptPage({
   params: { id: string };
 }) {
   const prompts = await getAllPrompts();
-  const prompt = prompts.find((p) => p.id === params.id);
+  // Try to find by ID first, then by slug
+  let prompt = prompts.find((p) => p.id === params.id);
+  if (!prompt) {
+    prompt = prompts.find((p) => getPromptSlug(p) === params.id);
+  }
 
   if (!prompt) {
     notFound();
   }
+  
+  const slug = getPromptSlug(prompt);
 
-  // JSON-LD structured data
+  // Enhanced JSON-LD structured data with category, role, and pattern
+  const categoryLabel = categoryLabels[prompt.category] || prompt.category;
+  const roleLabel = prompt.role ? roleLabels[prompt.role as UserRole] : null;
+  const patternLabel = prompt.pattern 
+    ? patternLabels[prompt.pattern as keyof typeof patternLabels] 
+    : null;
+  const enrichedDescription = enrichPromptDescription(prompt, roleLabel, patternLabel);
+
+  // Enhanced keywords
+  const keywords = [
+    prompt.title,
+    categoryLabel,
+    ...(roleLabel ? [roleLabel, `${roleLabel} prompts`, `prompts for ${roleLabel.toLowerCase()}s`] : []),
+    ...(patternLabel ? [patternLabel, `${patternLabel.toLowerCase()} pattern`] : []),
+    `${categoryLabel} prompt`,
+    `${categoryLabel} template`,
+    'prompt engineering',
+    'AI prompt template',
+    'ChatGPT prompt',
+    'Claude prompt',
+    'Gemini prompt',
+    'AI assistant prompt',
+    ...(prompt.tags || []),
+  ].filter(Boolean);
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: prompt.title,
-    description: prompt.description,
+    description: enrichedDescription,
     author: {
       '@type': 'Organization',
       name: 'Engify.ai',
+      url: APP_URL,
     },
     publisher: {
       '@type': 'Organization',
@@ -120,10 +217,25 @@ export default async function PromptPage({
     dateModified: prompt.updatedAt?.toISOString(),
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${APP_URL}/prompts/${prompt.id}`,
+      '@id': `${APP_URL}/prompts/${slug}`,
     },
-    keywords: prompt.tags?.join(', '),
-    articleSection: categoryLabels[prompt.category] || prompt.category,
+    keywords: keywords.join(', '),
+    articleSection: categoryLabel,
+    ...(roleLabel && {
+      audience: {
+        '@type': 'Audience',
+        audienceType: roleLabel,
+      },
+    }),
+    ...(patternLabel && {
+      about: {
+        '@type': 'Thing',
+        name: patternLabel,
+        description: `Prompt pattern: ${patternLabel}`,
+      },
+    }),
+    category: categoryLabel,
+    inLanguage: 'en-US',
   };
 
   return (
@@ -220,7 +332,7 @@ export default async function PromptPage({
                 .map((relatedPrompt) => (
                   <Link
                     key={relatedPrompt.id}
-                    href={`/prompts/${relatedPrompt.id}`}
+                    href={`/prompts/${getPromptSlug(relatedPrompt)}`}
                     className="rounded-lg border p-4 transition-colors hover:border-primary hover:bg-accent"
                   >
                     <h3 className="mb-2 font-semibold">
