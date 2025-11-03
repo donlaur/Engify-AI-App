@@ -4,7 +4,7 @@
 
 export interface AnalyticsEvent {
   name: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
   userId?: string;
   timestamp?: Date;
 }
@@ -12,6 +12,7 @@ export interface AnalyticsEvent {
 export function trackEvent(event: AnalyticsEvent): void {
   // In production, send to analytics service
   if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
     console.log('[Analytics]', event);
   }
   

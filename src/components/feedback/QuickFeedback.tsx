@@ -43,7 +43,9 @@ export function QuickFeedback({
           action,
           metadata: {
             timeOnPage: Math.round(performance.now() / 1000),
-            copiedContent: document.queryCommandSupported('copy'),
+            copiedContent: typeof document !== 'undefined' && document.queryCommandSupported 
+              ? document.queryCommandSupported('copy') 
+              : false,
           },
         }),
       });

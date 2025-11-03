@@ -89,6 +89,7 @@ export const QualityRubricSchema = z.object({
 
 export const PromptSchema = z.object({
   id: z.string(),
+  slug: z.string().optional(), // URL-friendly slug for SEO
   title: z.string().min(1).max(200),
   description: z.string().min(1).max(500),
   content: z.string().min(1),

@@ -61,7 +61,7 @@ async function handleRecategorize(userId: string, limit?: number) {
   for (const prompt of prompts) {
     const title = (prompt.title || '').toLowerCase();
     const tags = prompt.tags || [];
-    let newCategory = categorizeByTitleAndTags(title, tags);
+    const newCategory = categorizeByTitleAndTags(title, tags);
 
     if (newCategory !== 'general') {
       await db.collection('prompts').updateOne(
@@ -122,7 +122,8 @@ async function handleTestPrompts(userId: string, limit?: number) {
           },
           {
             role: 'user',
-            content: (prompt as any).content || (prompt as any).prompt || '',
+            content: (prompt as { content?: string; prompt?: string }).content || 
+                     (prompt as { content?: string; prompt?: string }).prompt || '',
           },
         ],
         max_tokens: 300,
@@ -135,8 +136,8 @@ async function handleTestPrompts(userId: string, limit?: number) {
       const cost = (tokens / 1000) * 0.002;
 
       const result = {
-        promptId: (prompt as any)._id.toString(),
-        promptTitle: (prompt as any).title,
+        promptId: (prompt as { _id: { toString: () => string } })._id.toString(),
+        promptTitle: (prompt as { title?: string }).title,
         model: 'gpt-3.5-turbo',
         provider: 'openai',
         response: content.substring(0, 200), // Truncate for API response
@@ -154,7 +155,7 @@ async function handleTestPrompts(userId: string, limit?: number) {
       await db.collection('prompt_test_results').insertOne(result);
     } catch (error) {
       logger.error('prompt-test-error', {
-        promptId: (prompt as any)._id,
+        promptId: (prompt as { _id: unknown })._id,
         error: error instanceof Error ? error.message : 'Unknown',
       });
     }

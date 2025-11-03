@@ -14,7 +14,7 @@ import { z } from 'zod';
 import { ObjectId } from 'mongodb';
 
 // GET /api/favorites - Get user's favorite prompts
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Auth required
     const session = await auth();

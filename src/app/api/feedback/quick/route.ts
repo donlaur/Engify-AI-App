@@ -13,7 +13,6 @@ import { getDb } from '@/lib/mongodb';
 import { QuickFeedbackSchema, FEEDBACK_COLLECTIONS } from '@/lib/db/schemas/user-feedback';
 import { auth } from '@/lib/auth';
 import { checkFeedbackRateLimit } from '@/lib/security/feedback-rate-limit';
-import { sanitizeText } from '@/lib/security/sanitize';
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,7 +45,7 @@ export async function POST(request: NextRequest) {
     
     // Update aggregates asynchronously (don't wait)
     // Note: Aggregates are global (prompts are public content)
-    updateAggregatesAsync(validatedData.promptId, db, validatedData.organizationId).catch(console.error);
+    updateAggregatesAsync(validatedData.promptId, db).catch(console.error);
     
     return NextResponse.json({ 
       success: true,
@@ -62,7 +61,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function updateAggregatesAsync(promptId: string, db: any, organizationId?: string) {
+async function updateAggregatesAsync(promptId: string, db: any) {
   // Recalculate aggregate scores for this prompt
   // Note: Prompts are public content, so aggregates are global (not org-scoped)
   // If org-specific analytics needed, use separate aggregation structure
