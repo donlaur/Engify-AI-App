@@ -47,21 +47,22 @@ This plan consolidates unfinished work from:
 
 ### 1.1 Individual Prompt Pages (SEO Critical)
 
+**Status:** ✅ Complete  
 **Problem:** JSON-LD structured data points to `/prompts/[id]` URLs that don't exist yet  
 **Impact:** HIGH - SEO suffers, can't share specific prompts  
 **Effort:** 30-45 minutes
 
 **Tasks:**
 
-- [ ] Create `/prompts/[id]/page.tsx` (dynamic route)
-- [ ] Fetch prompt from MongoDB by ID
-- [ ] Add SEO metadata (title, description, OpenGraph)
-- [ ] Add JSON-LD structured data (Article schema)
-- [ ] Add share functionality
-- [ ] Add favorite button
-- [ ] Add copy button
-- [ ] Handle 404 for non-existent prompts
-- [ ] Test with existing prompt IDs
+- [x] Create `/prompts/[id]/page.tsx` (dynamic route)
+- [x] Fetch prompt from MongoDB by ID
+- [x] Add SEO metadata (title, description, OpenGraph)
+- [x] Add JSON-LD structured data (Article schema)
+- [x] Add share functionality
+- [x] Add favorite button
+- [x] Add copy button
+- [x] Handle 404 for non-existent prompts
+- [x] Test with existing prompt IDs
 
 **Acceptance:**
 
@@ -209,16 +210,18 @@ Next.js Frontend → Next.js API Route → AWS Lambda (LangGraph) → MongoDB
 
 ### 1.4 Run MongoDB Text Indexes in Production
 
+**Status:** ✅ Complete  
 **Problem:** Text search index not created in production  
 **Impact:** HIGH - RAG chat won't work properly  
 **Effort:** 5 minutes
 
 **Tasks:**
 
-- [ ] SSH into production or run via deployment script
-- [ ] Execute `tsx scripts/admin/ensure-text-indexes.ts`
-- [ ] Verify indexes created successfully
-- [ ] Test text search functionality
+- [x] Scripts created (`ensure-text-indexes.ts`, `verify-text-indexes.ts`)
+- [x] Documentation complete (`docs/operations/MONGODB_TEXT_INDEXES_DEPLOYMENT.md`)
+- [x] Execute `tsx scripts/admin/ensure-text-indexes.ts` in production
+- [x] Verify indexes created successfully
+- [x] Test text search functionality
 
 **Acceptance:**
 
