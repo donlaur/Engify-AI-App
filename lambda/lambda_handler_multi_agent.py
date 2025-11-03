@@ -40,13 +40,28 @@ async def handler(event, context):
     """
     Lambda handler for scrum meeting multi-agent workflow.
     Beta: 5-minute timeout, single invocation, no chunking.
+    
+    Note: When invoked directly via Lambda SDK (not API Gateway),
+    the payload is passed directly as the event object.
     """
     try:
-        # Parse request body
-        if isinstance(event.get('body'), str):
-            body = json.loads(event.get('body', '{}'))
+        # Parse request payload
+        # Direct Lambda invocation: payload is the event itself
+        # API Gateway format: payload is in event.body (string or dict)
+        if isinstance(event, dict):
+            # Check if this is API Gateway format (has 'body' field)
+            if 'body' in event:
+                # API Gateway format - parse body
+                if isinstance(event.get('body'), str):
+                    body = json.loads(event.get('body', '{}'))
+                else:
+                    body = event.get('body', {})
+            else:
+                # Direct Lambda SDK invocation - event IS the payload
+                body = event
         else:
-            body = event.get('body', {})
+            # Fallback: treat as empty dict
+            body = {}
         
         agenda = body.get('agenda', '').strip()
         topics = body.get('topics', [])

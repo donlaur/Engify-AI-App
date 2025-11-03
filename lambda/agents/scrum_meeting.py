@@ -7,6 +7,7 @@ Beta-optimized: 5-minute timeout, GPT-4o-mini, simple state management
 from typing import TypedDict, List, Literal
 from langgraph.graph import StateGraph, END
 from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage
 
 # State schema for scrum meeting workflow
 class ScrumState(TypedDict):
@@ -23,37 +24,42 @@ class ScrumState(TypedDict):
     turn_count: int
     max_turns: int
 
+# System prompts for each agent
+SCRUM_MASTER_SYSTEM = """You are a Scrum Master facilitating a sprint planning meeting.
+Focus on: timeboxing, removing blockers, facilitating discussion.
+Ask: 'What are the blockers?' 'Can we commit to this?' 'What's our velocity?'"""
+
+PM_SYSTEM = """You are a Product Manager.
+Focus on: business value, priorities, user needs, ROI.
+Ask: 'Why is this important?' 'What's the business impact?' 'What's the priority?'"""
+
+PO_SYSTEM = """You are a Product Owner.
+Focus on: story clarity, acceptance criteria, definition of done.
+Ensure stories are well-defined and testable."""
+
+ENGINEER_SYSTEM = """You are a Senior Engineer.
+Focus on: technical feasibility, effort estimation, implementation details.
+Ask: 'Can we build this?' 'How long?' 'What are the risks?'"""
+
 # Initialize agents (Beta: all use GPT-4o-mini for cost-effectiveness)
 scrum_master = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0.7,
-    system_message="""You are a Scrum Master facilitating a sprint planning meeting.
-    Focus on: timeboxing, removing blockers, facilitating discussion.
-    Ask: 'What are the blockers?' 'Can we commit to this?' 'What's our velocity?'"""
 )
 
 pm = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0.7,
-    system_message="""You are a Product Manager.
-    Focus on: business value, priorities, user needs, ROI.
-    Ask: 'Why is this important?' 'What's the business impact?' 'What's the priority?'"""
 )
 
 po = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0.7,
-    system_message="""You are a Product Owner.
-    Focus on: story clarity, acceptance criteria, definition of done.
-    Ensure stories are well-defined and testable."""
 )
 
 engineer = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0.7,
-    system_message="""You are a Senior Engineer.
-    Focus on: technical feasibility, effort estimation, implementation details.
-    Ask: 'Can we build this?' 'How long?' 'What are the risks?'"""
 )
 
 # Node functions for each agent
@@ -62,10 +68,12 @@ def scrum_master_turn(state: ScrumState) -> ScrumState:
     if state['turn_count'] >= state['max_turns']:
         return state
     
-    response = scrum_master.invoke([
-        {"role": "system", "content": f"Meeting agenda: {state['agenda']}"},
-        {"role": "user", "content": f"Current topic: {state['current_topic']}. Facilitate discussion. Previous notes: {state['scrum_master_notes']}"}
-    ])
+    messages = [
+        SystemMessage(content=f"{SCRUM_MASTER_SYSTEM}\n\nMeeting agenda: {state['agenda']}"),
+        HumanMessage(content=f"Current topic: {state['current_topic']}. Facilitate discussion. Previous notes: {state['scrum_master_notes']}")
+    ]
+    
+    response = scrum_master.invoke(messages)
     
     return {
         **state,
@@ -78,10 +86,12 @@ def pm_turn(state: ScrumState) -> ScrumState:
     if state['turn_count'] >= state['max_turns']:
         return state
     
-    response = pm.invoke([
-        {"role": "system", "content": f"Meeting agenda: {state['agenda']}"},
-        {"role": "user", "content": f"Topic: {state['current_topic']}. Provide business perspective. Previous notes: {state['pm_notes']}. Scrum Master said: {state['scrum_master_notes'][-200:]}"}
-    ])
+    messages = [
+        SystemMessage(content=f"{PM_SYSTEM}\n\nMeeting agenda: {state['agenda']}"),
+        HumanMessage(content=f"Topic: {state['current_topic']}. Provide business perspective. Previous notes: {state['pm_notes']}. Scrum Master said: {state['scrum_master_notes'][-200:]}")
+    ]
+    
+    response = pm.invoke(messages)
     
     return {
         **state,
@@ -94,10 +104,12 @@ def po_turn(state: ScrumState) -> ScrumState:
     if state['turn_count'] >= state['max_turns']:
         return state
     
-    response = po.invoke([
-        {"role": "system", "content": f"Meeting agenda: {state['agenda']}"},
-        {"role": "user", "content": f"Topic: {state['current_topic']}. Clarify requirements. Previous notes: {state['po_notes']}. PM said: {state['pm_notes'][-200:]}"}
-    ])
+    messages = [
+        SystemMessage(content=f"{PO_SYSTEM}\n\nMeeting agenda: {state['agenda']}"),
+        HumanMessage(content=f"Topic: {state['current_topic']}. Clarify requirements. Previous notes: {state['po_notes']}. PM said: {state['pm_notes'][-200:]}")
+    ]
+    
+    response = po.invoke(messages)
     
     return {
         **state,
@@ -110,10 +122,12 @@ def engineer_turn(state: ScrumState) -> ScrumState:
     if state['turn_count'] >= state['max_turns']:
         return state
     
-    response = engineer.invoke([
-        {"role": "system", "content": f"Meeting agenda: {state['agenda']}"},
-        {"role": "user", "content": f"Topic: {state['current_topic']}. Provide technical assessment. Previous notes: {state['engineer_notes']}. PO said: {state['po_notes'][-200:]}"}
-    ])
+    messages = [
+        SystemMessage(content=f"{ENGINEER_SYSTEM}\n\nMeeting agenda: {state['agenda']}"),
+        HumanMessage(content=f"Topic: {state['current_topic']}. Provide technical assessment. Previous notes: {state['engineer_notes']}. PO said: {state['po_notes'][-200:]}")
+    ]
+    
+    response = engineer.invoke(messages)
     
     # Extract action items and blockers from engineer response
     content = response.content.lower()
