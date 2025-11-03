@@ -5,7 +5,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
-// Removed ArticleRenderer import - inlining HTML directly
+import { ArticleRenderer } from '@/components/article/ArticleRenderer';
 import { getClient } from '@/lib/mongodb';
 
 interface PageProps {
@@ -85,7 +85,7 @@ export default async function ArticlePage({ params }: PageProps) {
       </nav>
 
       <article className="container max-w-4xl py-12">
-        {/* Header - Tech newspaper style */}
+        {/* Header - Professional tech article style */}
         <header className="mb-12 space-y-6 border-b pb-8">
           <div className="flex items-center gap-3">
             {article.category && (
@@ -106,12 +106,12 @@ export default async function ArticlePage({ params }: PageProps) {
             )}
           </div>
           
-          <h1 className="font-serif text-5xl font-bold leading-tight tracking-tight sm:text-6xl">
+          <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
             {article.title}
           </h1>
 
           {article.description && (
-            <p className="text-2xl leading-relaxed text-muted-foreground">
+            <p className="text-xl leading-relaxed text-muted-foreground">
               {article.description}
             </p>
           )}
@@ -164,13 +164,10 @@ export default async function ArticlePage({ params }: PageProps) {
           )}
         </header>
 
-        {/* Content - Enhanced typography */}
-        <div 
-          className="prose prose-lg max-w-none"
-          dangerouslySetInnerHTML={{ __html: article.contentHtml }} 
-        />
+        {/* Content - Rendered Markdown with syntax highlighting, copy buttons, proper formatting */}
+        <ArticleRenderer content={article.content || article.contentHtml || ''} />
 
-        {/* Footer - Tech newspaper style */}
+        {/* Footer - Engagement and metadata */}
         <footer className="mt-16 space-y-8 border-t pt-8">
           {/* Share buttons */}
           <div className="flex items-center justify-between">
@@ -221,7 +218,7 @@ export default async function ArticlePage({ params }: PageProps) {
         </footer>
       </article>
 
-      {/* Schema.org structured data */}
+      {/* Schema.org structured data for SEO */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -251,4 +248,3 @@ export default async function ArticlePage({ params }: PageProps) {
     </MainLayout>
   );
 }
-

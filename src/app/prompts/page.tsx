@@ -11,6 +11,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { LibraryClient } from '@/components/features/LibraryClient';
 import { getAllPrompts } from '@/lib/prompts/mongodb-prompts';
 import { getStats } from '@/lib/stats-cache';
+import { getPromptSlug } from '@/lib/utils/slug';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -106,7 +107,7 @@ export default async function LibraryPage() {
           '@type': 'Article',
           name: prompt.title,
           description: prompt.description,
-          url: `${APP_URL}/prompts/${prompt.id}`,
+          url: `${APP_URL}/prompts/${getPromptSlug(prompt)}`,
         },
       })),
     },

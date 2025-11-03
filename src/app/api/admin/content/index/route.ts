@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RBACPresets } from '@/lib/middleware/rbac';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { z } from 'zod';
 
 const IndexRequestSchema = z.object({
@@ -15,6 +16,22 @@ export async function GET(request: NextRequest) {
   const r = await RBACPresets.requireSuperAdmin()(request);
   if (r) return r;
 
+  // Rate limiting
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0] ||
+    request.headers.get('x-real-ip') ||
+    'unknown';
+  const rateLimitResult = await checkRateLimit(
+    `admin-index-${ip}`,
+    'authenticated'
+  );
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded', reason: rateLimitResult.reason },
+      { status: 429 }
+    );
+  }
+
   if (!isIndexerEnabled()) {
     return NextResponse.json(
       { success: false, error: 'Indexer disabled' },
@@ -27,6 +44,22 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const r = await RBACPresets.requireSuperAdmin()(request);
   if (r) return r;
+
+  // Rate limiting
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0] ||
+    request.headers.get('x-real-ip') ||
+    'unknown';
+  const rateLimitResult = await checkRateLimit(
+    `admin-index-post-${ip}`,
+    'authenticated'
+  );
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded', reason: rateLimitResult.reason },
+      { status: 429 }
+    );
+  }
 
   if (!isIndexerEnabled()) {
     return NextResponse.json(
@@ -52,4 +85,3 @@ export async function POST(request: NextRequest) {
   // Stub: pretend to enqueue indexing jobs; just echo count for now
   return NextResponse.json({ success: true, enqueued: hashes.length });
 }
-

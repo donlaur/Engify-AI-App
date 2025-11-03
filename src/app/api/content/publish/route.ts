@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { ContentPublishingService } from '@/lib/content/content-publishing-pipeline';
+import { logger } from '@/lib/logging/logger';
 import { z } from 'zod';
 
 const PublishRequestSchema = z.object({
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = PublishRequestSchema.parse(body);
 
-    console.log('📝 Content Publishing Request:', {
+    logger.debug('Content publishing request', {
       topic: validated.topic,
       category: validated.category,
       tone: validated.tone,
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
       report,
     });
   } catch (error) {
-    console.error('Content publishing error:', error);
+    logger.apiError('/api/content/publish', error, { method: 'POST' });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -124,7 +125,7 @@ export async function GET() {
       ],
     });
   } catch (error) {
-    console.error('Error fetching agents:', error);
+    logger.apiError('/api/content/publish', error, { method: 'GET' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
