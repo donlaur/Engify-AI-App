@@ -37,6 +37,8 @@ Create a file `vercel-lambda-policy.json`:
 }
 ```
 
+**Replace `<YOUR_ACCOUNT_ID>` with your AWS Account ID** (get it with `aws sts get-caller-identity --query Account --output text`)
+
 Attach the policy:
 
 ```bash
