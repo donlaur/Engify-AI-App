@@ -63,9 +63,9 @@ export async function POST(request: NextRequest) {
       turn_count: result.turn_count,
     });
   } catch (error) {
-    logger.apiError('Engineering leadership analysis error', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
+    logger.apiError('Engineering leadership analysis error', error, {
+      route: '/api/agents/scrum-meeting',
+      method: 'POST',
     });
 
     return NextResponse.json(

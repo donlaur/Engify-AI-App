@@ -65,6 +65,19 @@ if (process.env.NODE_ENV !== 'production') {
   );
 }
 
+// Console transport for production (JSON format for Vercel logs)
+// Always add console transport so logs go to Vercel's log stream
+if (process.env.NODE_ENV === 'production' || process.env.VERCEL === '1') {
+  appLogger.add(
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      ),
+    })
+  );
+}
+
 /**
  * Application Logger Interface
  *
