@@ -47,6 +47,27 @@ const securityPatterns = [
     message: 'Hardcoded API key detected. Use environment variables instead.',
   },
   {
+    name: 'AWS Account IDs',
+    pattern: /(?:AWS_ACCOUNT_ID|account[_-]?id|AccountId)\s*[:=]\s*['"]?(\d{12})['"]?/gi,
+    check: (match, content, filePath) => {
+      // Skip if it's a placeholder example (123456789012)
+      if (match.includes('123456789012')) {
+        return false;
+      }
+      // Skip if it's getting account ID from AWS CLI
+      if (content.includes('aws sts get-caller-identity') || content.includes('getCallerIdentity')) {
+        return false;
+      }
+      // Skip documentation that shows the pattern but not real values
+      if (content.includes('<YOUR_ACCOUNT_ID>') || content.includes('YOUR_ACCOUNT_ID')) {
+        return false;
+      }
+      return true;
+    },
+    severity: 'CRITICAL',
+    message: 'AWS Account ID detected. Use environment variable or auto-detect from AWS CLI.',
+  },
+  {
     name: 'MongoDB Connection Strings',
     pattern: /mongodb(\+srv)?:\/\/[^:]+:[^@]+@/g,
     check: (match, content, filePath) => {
