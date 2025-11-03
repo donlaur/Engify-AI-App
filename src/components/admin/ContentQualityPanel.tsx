@@ -205,7 +205,7 @@ export function ContentQualityPanel() {
   );
 }
 
-function categorizeByTitleAndTags(title: string, tags: string[]): string {
+function _categorizeByTitleAndTags(title: string, tags: string[]): string {
   if (title.match(/code|function|class|api|component/) || tags.includes('code')) {
     return 'code-generation';
   } else if (title.match(/test|qa|bug/) || tags.includes('testing')) {

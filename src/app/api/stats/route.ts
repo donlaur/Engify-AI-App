@@ -3,6 +3,7 @@ import { getMongoDb } from '@/lib/db/mongodb';
 import type { Db } from 'mongodb';
 import { Redis } from '@upstash/redis';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logging/logger';
 
 // Redis cache key and TTL
 const CACHE_KEY = 'site:stats:v1';
@@ -51,7 +52,9 @@ export async function GET(req: NextRequest) {
           });
         }
       } catch (redisError) {
-        console.error('Redis cache read failed:', redisError);
+        logger.warn('Redis cache read failed', {
+          error: redisError instanceof Error ? redisError.message : String(redisError),
+        });
         // Continue to MongoDB if Redis fails
       }
     }
@@ -144,9 +147,11 @@ export async function GET(req: NextRequest) {
       if (redis) {
         try {
           await redis.setex(CACHE_KEY, CACHE_TTL, JSON.stringify(statsResponse));
-          console.log(`✅ Stats cached in Redis for ${CACHE_TTL}s`);
+          logger.debug('Stats cached in Redis', { ttl: CACHE_TTL });
         } catch (redisError) {
-          console.error('Redis cache write failed:', redisError);
+          logger.warn('Redis cache write failed', {
+            error: redisError instanceof Error ? redisError.message : String(redisError),
+          });
           // Continue even if Redis caching fails
         }
       }
@@ -187,7 +192,10 @@ export async function GET(req: NextRequest) {
       });
     }
   } catch (error) {
-    console.error('Stats API error:', error);
+    logger.apiError('Stats API error', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       { error: 'Failed to fetch stats' },
       { status: 500 }

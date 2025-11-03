@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { generateMetadata as generatePatternMetadata } from '@/lib/seo';
 import { APP_URL } from '@/lib/constants';
 import PatternDetailClient from './pattern-detail-client';
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { logger } from '@/lib/logging/logger';
 
 // Use Groq (free tier) if OpenAI key not available
 const apiKey = process.env.OPENAI_API_KEY || process.env.GROQ_API_KEY;
@@ -177,7 +178,7 @@ export async function POST(request: NextRequest) {
   try {
     // Check if API key is configured
     if (!apiKey) {
-      console.error('No API key found in environment variables');
+      logger.error('No API key found in environment variables');
       return NextResponse.json(
         {
           error:
@@ -190,8 +191,8 @@ export async function POST(request: NextRequest) {
     const body: MultiAgentRequest = await request.json();
     const { idea, roles, mode = 'sequential' } = body;
 
-    console.log('Multi-agent request:', {
-      idea: idea.substring(0, 50) + '...',
+    logger.debug('Multi-agent request', {
+      ideaLength: idea.length,
       roles,
       mode,
     });
@@ -241,10 +242,9 @@ export async function POST(request: NextRequest) {
       completion.choices[0]?.message?.content ||
       'Unable to generate simulation.';
 
-    console.log(
-      'Simulation generated successfully. Length:',
-      simulation.length
-    );
+    logger.debug('Simulation generated successfully', {
+      length: simulation.length,
+    });
 
     return NextResponse.json({
       success: true,
@@ -258,11 +258,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Multi-agent simulation error:', error);
-    console.error(
-      'Error details:',
-      error instanceof Error ? error.message : 'Unknown error'
-    );
+    logger.apiError('Multi-agent simulation error', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
 
     if (error instanceof Error && error.message.includes('API key')) {
       return NextResponse.json(

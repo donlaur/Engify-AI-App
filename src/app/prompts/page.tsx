@@ -62,9 +62,6 @@ export default async function LibraryPage() {
   // Fetch prompts from MongoDB (production content)
   const prompts = await getAllPrompts();
 
-  // Get stats from Redis cache (includes unique categories/roles)
-  const data = await getStats();
-
   // Calculate stats from actual prompts (more reliable than cache during active filter rollout)
   const uniqueCategories = [...new Set(prompts.map((p) => p.category).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b)); // Alphabetical sort
