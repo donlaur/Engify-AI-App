@@ -1,0 +1,16 @@
+# Lambda Container Image Dockerfile for Multi-Agent Workflow
+# Based on AWS Lambda Python base image
+
+FROM public.ecr.aws/lambda/python:3.11
+
+# Install dependencies
+COPY lambda/requirements-multi-agent.txt ${LAMBDA_TASK_ROOT}/
+RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-multi-agent.txt
+
+# Copy code
+COPY lambda/agents/ ${LAMBDA_TASK_ROOT}/agents/
+COPY lambda/lambda_handler_multi_agent.py ${LAMBDA_TASK_ROOT}/lambda_handler.py
+
+# Set handler
+CMD [ "lambda_handler.handler" ]
+
