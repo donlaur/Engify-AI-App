@@ -1,4 +1,3 @@
-
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,11 @@ export default function HireMePage() {
       level: 'Expert',
     },
     { name: 'Full-Stack Development', icon: 'code' as const, level: 'Expert' },
-    { name: 'Team Building & Coaching', icon: 'target' as const, level: 'Expert' },
+    {
+      name: 'Team Building & Coaching',
+      icon: 'target' as const,
+      level: 'Expert',
+    },
     {
       name: 'Modern Tech Stack (Next.js, TypeScript)',
       icon: 'zap' as const,
@@ -215,7 +218,7 @@ export default function HireMePage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Icons.gitBranch className="h-5 w-5 text-purple-600" />
+                <Icons.gitCompare className="h-5 w-5 text-purple-600" />
                 Git Worktree Strategy
               </CardTitle>
             </CardHeader>
@@ -263,7 +266,9 @@ export default function HireMePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>Each day had focused goals with comprehensive documentation:</p>
+              <p>
+                Each day had focused goals with comprehensive documentation:
+              </p>
               <ul className="list-disc space-y-1 pl-5">
                 <li>
                   <strong>Day 5:</strong> Infrastructure (AWS, messaging, RAG)
@@ -312,8 +317,9 @@ export default function HireMePage() {
             <p className="mx-auto max-w-2xl text-muted-foreground">
               Every commit, every decision, every challenge documented. See the
               complete 7-day journey from idea to production, including all
-              planning docs, ADRs, and lessons learned. This isn&apos;t a portfolio
-              piece—it&apos;s a real business built with enterprise standards.
+              planning docs, ADRs, and lessons learned. This isn&apos;t a
+              portfolio piece—it&apos;s a real business built with enterprise
+              standards.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button variant="default" asChild>

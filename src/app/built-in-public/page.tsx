@@ -1,4 +1,3 @@
-
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -38,8 +37,9 @@ export default function BuiltInPublicPage() {
             </h1>
 
             <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              1,357+ commits. 85K+ lines of TypeScript. 620 passing tests. 12 ADRs.
-              This is what AI-augmented engineering looks like when done right.
+              1,357+ commits. 85K+ lines of TypeScript. 620 passing tests. 12
+              ADRs. This is what AI-augmented engineering looks like when done
+              right.
             </p>
 
             <div className="flex justify-center gap-4">
@@ -75,7 +75,7 @@ export default function BuiltInPublicPage() {
         </div>
       </section>
 
-          {/* The Journey */}
+      {/* The Journey */}
       <section className="container py-20">
         <div className="mx-auto max-w-4xl space-y-12">
           <div className="text-center">
@@ -85,11 +85,17 @@ export default function BuiltInPublicPage() {
             </p>
             <div className="mt-6 rounded-lg border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50 p-6">
               <p className="text-sm font-medium text-purple-900">
-                Built by <span className="font-bold">Donnie Laur</span> - Engineering Leader & AI/SaaS Architect
+                Built by <span className="font-bold">Donnie Laur</span> -
+                Engineering Leader & AI/SaaS Architect
               </p>
               <p className="mt-2 text-sm text-purple-800">
-                Available for <span className="font-semibold">Engineering Manager</span>, <span className="font-semibold">Director of Engineering</span> roles, 
-                or consulting on <span className="font-semibold">AI integration into developer workflows</span>
+                Available for{' '}
+                <span className="font-semibold">Engineering Manager</span>,{' '}
+                <span className="font-semibold">Director of Engineering</span>{' '}
+                roles, or consulting on{' '}
+                <span className="font-semibold">
+                  AI integration into developer workflows
+                </span>
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-3">
                 <Button size="sm" variant="outline" asChild>
@@ -104,8 +110,16 @@ export default function BuiltInPublicPage() {
                     donlaur@engify.ai
                   </Link>
                 </Button>
-                <Button size="sm" variant="default" className="bg-purple-600 hover:bg-purple-700" asChild>
-                  <Link href="/hireme/Donnie-Laur_Manager-Software-Engineering_AI-Enabled.pdf" target="_blank">
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="bg-purple-600 hover:bg-purple-700"
+                  asChild
+                >
+                  <Link
+                    href="/hireme/Donnie-Laur_Manager-Software-Engineering_AI-Enabled.pdf"
+                    target="_blank"
+                  >
                     <Icons.fileText className="mr-2 h-4 w-4" />
                     View Resume
                   </Link>
@@ -382,19 +396,23 @@ export default function BuiltInPublicPage() {
                 <div className="space-y-1 text-sm text-green-800">
                   <div className="flex items-center gap-2">
                     <Icons.check className="h-4 w-4 text-green-600" />
-                    <span className="font-medium">Day 1-2:</span> Ship features, validate concept (500+ commits)
+                    <span className="font-medium">Day 1-2:</span> Ship features,
+                    validate concept (500+ commits)
                   </div>
                   <div className="flex items-center gap-2">
                     <Icons.check className="h-4 w-4 text-green-600" />
-                    <span className="font-medium">Day 3-4:</span> Added 620 unit tests, RBAC, Repository Pattern
+                    <span className="font-medium">Day 3-4:</span> Added 620 unit
+                    tests, RBAC, Repository Pattern
                   </div>
                   <div className="flex items-center gap-2">
                     <Icons.check className="h-4 w-4 text-green-600" />
-                    <span className="font-medium">Day 5:</span> Production hardening - observability, security, incident playbooks
+                    <span className="font-medium">Day 5:</span> Production
+                    hardening - observability, security, incident playbooks
                   </div>
                   <div className="flex items-center gap-2">
                     <Icons.sparkles className="h-4 w-4 text-purple-600" />
-                    <span className="font-medium">Now:</span> Enterprise-ready SaaS with cost controls & compliance
+                    <span className="font-medium">Now:</span> Enterprise-ready
+                    SaaS with cost controls & compliance
                   </div>
                 </div>
               </div>
@@ -411,8 +429,8 @@ export default function BuiltInPublicPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-lg font-semibold text-red-900">
-                1,357 total commits. Not sloppy - strategic. Small, atomic, revertable.
-                Each commit ships working code.
+                1,357 total commits. Not sloppy - strategic. Small, atomic,
+                revertable. Each commit ships working code.
               </p>
               <div className="space-y-3">
                 <div className="rounded-lg border-l-4 border-red-500 bg-white p-4">
@@ -605,9 +623,7 @@ export default function BuiltInPublicPage() {
               <CardContent className="pt-6 text-center">
                 <div className="text-5xl font-bold text-green-600">620</div>
                 <div className="text-sm text-gray-600">Unit Tests</div>
-                <div className="mt-1 text-xs text-gray-500">
-                  100% passing
-                </div>
+                <div className="mt-1 text-xs text-gray-500">100% passing</div>
               </CardContent>
             </Card>
             <Card>
@@ -644,29 +660,45 @@ export default function BuiltInPublicPage() {
             <CardContent className="space-y-4">
               <div className="space-y-4">
                 <div className="rounded-lg border-l-4 border-purple-500 bg-white p-4">
-                  <p className="mb-2 font-bold text-purple-900">Day 1-2: MVP Sprint (Rapid Prototyping)</p>
-                  <p className="mb-2 text-sm text-purple-800">500+ commits | TypeScript-first | Real auth & AI from day 1</p>
+                  <p className="mb-2 font-bold text-purple-900">
+                    Day 1-2: MVP Sprint (Rapid Prototyping)
+                  </p>
+                  <p className="mb-2 text-sm text-purple-800">
+                    500+ commits | TypeScript-first | Real auth & AI from day 1
+                  </p>
                   <p className="text-xs text-gray-600">
-                    Philosophy: Validate concept fast. TypeScript files for prompts (5min) vs database schema (2hr). 
-                    Ship working features, refactor when patterns emerge.
+                    Philosophy: Validate concept fast. TypeScript files for
+                    prompts (5min) vs database schema (2hr). Ship working
+                    features, refactor when patterns emerge.
                   </p>
                 </div>
 
                 <div className="rounded-lg border-l-4 border-blue-500 bg-white p-4">
-                  <p className="mb-2 font-bold text-blue-900">Day 3-4: Business Patterns (Scaling Foundation)</p>
-                  <p className="mb-2 text-sm text-blue-800">Repository Pattern | AI Provider Factory | Enterprise RBAC</p>
+                  <p className="mb-2 font-bold text-blue-900">
+                    Day 3-4: Business Patterns (Scaling Foundation)
+                  </p>
+                  <p className="mb-2 text-sm text-blue-800">
+                    Repository Pattern | AI Provider Factory | Enterprise RBAC
+                  </p>
                   <p className="text-xs text-gray-600">
-                    Added structure: 91 repository tests, 5-provider abstraction, 6-role RBAC with 13 permissions, 
-                    OpsHub admin dashboard. Multi-tenant architecture emerged.
+                    Added structure: 91 repository tests, 5-provider
+                    abstraction, 6-role RBAC with 13 permissions, OpsHub admin
+                    dashboard. Multi-tenant architecture emerged.
                   </p>
                 </div>
 
                 <div className="rounded-lg border-l-4 border-green-500 bg-white p-4">
-                  <p className="mb-2 font-bold text-green-900">Day 5: Production Hardening (Enterprise Ready)</p>
-                  <p className="mb-2 text-sm text-green-800">620 tests | Observability | Security | Cost controls</p>
+                  <p className="mb-2 font-bold text-green-900">
+                    Day 5: Production Hardening (Enterprise Ready)
+                  </p>
+                  <p className="mb-2 text-sm text-green-800">
+                    620 tests | Observability | Security | Cost controls
+                  </p>
                   <p className="text-xs text-gray-600">
-                    Bulletproofed for customers: Budget enforcement ($0.75-$2.50 per tool), RED metrics (p50/p95/p99), 
-                    PII redaction (GDPR/SOC2), rate limiting, replay protection, 3 incident playbooks, 4 ADRs.
+                    Bulletproofed for customers: Budget enforcement ($0.75-$2.50
+                    per tool), RED metrics (p50/p95/p99), PII redaction
+                    (GDPR/SOC2), rate limiting, replay protection, 3 incident
+                    playbooks, 4 ADRs.
                   </p>
                 </div>
               </div>
@@ -676,15 +708,23 @@ export default function BuiltInPublicPage() {
                   🎯 The Progression Pattern
                 </p>
                 <p className="text-sm text-green-800">
-                  <span className="font-bold">Week 1</span>: Ship fast, validate concept, get real usage data
-                  <br/>
-                  <span className="font-bold">Week 2</span>: Add patterns when APIs stabilize, structured testing
-                  <br/>
-                  <span className="font-bold">Week 3</span>: Production-harden with security, observability, ops maturity
-                  <br/>
-                  <br/>
-                  This isn&apos;t &quot;move fast and break things&quot; - it&apos;s 
-                  <span className="font-bold"> move fast, then make it bulletproof</span>.
+                  <span className="font-bold">Week 1</span>: Ship fast, validate
+                  concept, get real usage data
+                  <br />
+                  <span className="font-bold">Week 2</span>: Add patterns when
+                  APIs stabilize, structured testing
+                  <br />
+                  <span className="font-bold">Week 3</span>: Production-harden
+                  with security, observability, ops maturity
+                  <br />
+                  <br />
+                  This isn&apos;t &quot;move fast and break things&quot; -
+                  it&apos;s
+                  <span className="font-bold">
+                    {' '}
+                    move fast, then make it bulletproof
+                  </span>
+                  .
                 </p>
               </div>
             </CardContent>
@@ -704,24 +744,40 @@ export default function BuiltInPublicPage() {
             <CardContent className="space-y-4">
               <div className="space-y-4">
                 <div className="rounded-lg border-l-4 border-cyan-500 bg-white p-4">
-                  <p className="mb-2 font-bold text-cyan-900">Day 6: Content Hardening (Real Data Migration)</p>
-                  <p className="mb-2 text-sm text-cyan-800">Patterns to MongoDB | TODO resolution | Real gamification data</p>
+                  <p className="mb-2 font-bold text-cyan-900">
+                    Day 6: Content Hardening (Real Data Migration)
+                  </p>
+                  <p className="mb-2 text-sm text-cyan-800">
+                    Patterns to MongoDB | TODO resolution | Real gamification
+                    data
+                  </p>
                   <p className="text-xs text-gray-600">
-                    Migrated all content to MongoDB, resolved 39 critical TODOs (auth adapter, audit logging, tRPC),
-                    added real achievements system, career recommendations API, site stats from database.
-                    <br/>
-                    <strong>Key Docs:</strong> DAY_6_CONTENT_HARDENING.md, TODO_RESOLUTION_DAY6.md
+                    Migrated all content to MongoDB, resolved 39 critical TODOs
+                    (auth adapter, audit logging, tRPC), added real achievements
+                    system, career recommendations API, site stats from
+                    database.
+                    <br />
+                    <strong>Key Docs:</strong> DAY_6_CONTENT_HARDENING.md,
+                    TODO_RESOLUTION_DAY6.md
                   </p>
                 </div>
 
                 <div className="rounded-lg border-l-4 border-pink-500 bg-white p-4">
-                  <p className="mb-2 font-bold text-pink-900">Day 7: QA & Polish (Trust Signals)</p>
-                  <p className="mb-2 text-sm text-pink-800">Mock data removal | UI/UX polish | Enterprise guardrails</p>
+                  <p className="mb-2 font-bold text-pink-900">
+                    Day 7: QA & Polish (Trust Signals)
+                  </p>
+                  <p className="mb-2 text-sm text-pink-800">
+                    Mock data removal | UI/UX polish | Enterprise guardrails
+                  </p>
                   <p className="text-xs text-gray-600">
-                    8 phases: Mock data audit (removed || 76, || 23 fallbacks), fixed 12 QA issues, improved prompt
-                    filters, enhanced UI readability, added pre-commit hooks for mock data detection, Red Hat trust audit.
-                    <br/>
-                    <strong>Key Docs:</strong> DAY_7_QA_FRONTEND_IMPROVEMENTS.md, RED_HAT_TRUST_AUDIT.md, ADR-009 (Mock Data Removal)
+                    8 phases: Mock data audit (removed || 76, || 23 fallbacks),
+                    fixed 12 QA issues, improved prompt filters, enhanced UI
+                    readability, added pre-commit hooks for mock data detection,
+                    Red Hat trust audit.
+                    <br />
+                    <strong>Key Docs:</strong>{' '}
+                    DAY_7_QA_FRONTEND_IMPROVEMENTS.md, RED_HAT_TRUST_AUDIT.md,
+                    ADR-009 (Mock Data Removal)
                   </p>
                 </div>
               </div>
@@ -732,31 +788,35 @@ export default function BuiltInPublicPage() {
                 </p>
                 <div className="space-y-2 text-sm text-purple-800">
                   <div className="flex items-start gap-2">
-                    <Icons.gitBranch className="mt-0.5 h-4 w-4 shrink-0" />
+                    <Icons.gitCompare className="mt-0.5 h-4 w-4 shrink-0" />
                     <div>
-                      <strong>Git Worktrees:</strong> Parallel development in 3 separate worktrees 
-                      (main, DRY improvements, QA polish) - enabling multiple AI agents simultaneously
+                      <strong>Git Worktrees:</strong> Parallel development in 3
+                      separate worktrees (main, DRY improvements, QA polish) -
+                      enabling multiple AI agents simultaneously
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <Icons.sparkles className="mt-0.5 h-4 w-4 shrink-0" />
                     <div>
-                      <strong>Multi-Model AI:</strong> Claude Sonnet 4.5 for core dev, GPT-4 for reviews, 
-                      parallel agents in different worktrees without conflicts
+                      <strong>Multi-Model AI:</strong> Claude Sonnet 4.5 for
+                      core dev, GPT-4 for reviews, parallel agents in different
+                      worktrees without conflicts
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <Icons.fileText className="mt-0.5 h-4 w-4 shrink-0" />
                     <div>
-                      <strong>Daily Planning:</strong> Each day had detailed plan docs (DAY_5_PLAN.md, 
-                      DAY_6_CONTENT_HARDENING.md, DAY_7_QA_FRONTEND_IMPROVEMENTS.md) with phased goals
+                      <strong>Daily Planning:</strong> Each day had detailed
+                      plan docs (DAY_5_PLAN.md, DAY_6_CONTENT_HARDENING.md,
+                      DAY_7_QA_FRONTEND_IMPROVEMENTS.md) with phased goals
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <Icons.checkCircle className="mt-0.5 h-4 w-4 shrink-0" />
                     <div>
-                      <strong>Quality Guardrails:</strong> 12 ADRs, pattern audits, red-hat reviews, 
-                      pre-commit hooks for mock data/enterprise compliance, systematic bug fixing
+                      <strong>Quality Guardrails:</strong> 12 ADRs, pattern
+                      audits, red-hat reviews, pre-commit hooks for mock
+                      data/enterprise compliance, systematic bug fixing
                     </div>
                   </div>
                 </div>
@@ -771,7 +831,9 @@ export default function BuiltInPublicPage() {
                 <div className="rounded-lg bg-purple-50 p-3 text-center">
                   <div className="text-2xl font-bold text-purple-600">12</div>
                   <div className="text-xs text-purple-900">ADRs</div>
-                  <div className="text-xs text-gray-500">Architectural decisions</div>
+                  <div className="text-xs text-gray-500">
+                    Architectural decisions
+                  </div>
                 </div>
                 <div className="rounded-lg bg-pink-50 p-3 text-center">
                   <div className="text-2xl font-bold text-pink-600">39</div>
@@ -785,15 +847,20 @@ export default function BuiltInPublicPage() {
           {/* CTA */}
           <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
             <CardContent className="space-y-6 py-12 text-center">
-              <h3 className="text-3xl font-bold">Interested in This Approach?</h3>
+              <h3 className="text-3xl font-bold">
+                Interested in This Approach?
+              </h3>
               <p className="mx-auto max-w-2xl text-lg text-gray-700">
-                <strong>Donnie Laur</strong> - Available for <strong>Engineering Manager</strong>, 
-                <strong> Director of Engineering</strong> roles, or consulting on 
+                <strong>Donnie Laur</strong> - Available for{' '}
+                <strong>Engineering Manager</strong>,
+                <strong> Director of Engineering</strong> roles, or consulting
+                on
                 <strong> AI integration into developer workflows</strong>.
               </p>
               <p className="mx-auto max-w-2xl text-base text-gray-600">
-                Every commit documented. Every architectural decision explained with ADRs.
-                Production-ready code with 620 tests and operational runbooks.
+                Every commit documented. Every architectural decision explained
+                with ADRs. Production-ready code with 620 tests and operational
+                runbooks.
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <Button
@@ -831,8 +898,14 @@ export default function BuiltInPublicPage() {
                   </Link>
                 </Button>
               </div>
-              <p className="mt-6 text-sm text-purple-700 font-medium">
-                Or try the live B2B SaaS platform free at <Link href="/signup" className="underline hover:text-purple-900">engify.ai/signup</Link>
+              <p className="mt-6 text-sm font-medium text-purple-700">
+                Or try the live B2B SaaS platform free at{' '}
+                <Link
+                  href="/signup"
+                  className="underline hover:text-purple-900"
+                >
+                  engify.ai/signup
+                </Link>
               </p>
             </CardContent>
           </Card>

@@ -90,6 +90,7 @@ function auditIcons() {
 
   for (const file of files) {
     if (file === ICONS_FILE) continue; // Skip icons.ts itself
+    if (file.includes('__tests__') || file.includes('.test.')) continue; // Skip test files (use mocks)
 
     const usages = findIconUsages(file);
 
@@ -102,7 +103,8 @@ function auditIcons() {
         allUsages.set(icon, { files: [], count: 0 });
       }
 
-      const usage = allUsages.get(icon)!;
+      const usage = allUsages.get(icon);
+      if (!usage) continue;
       usage.files.push(file);
       usage.count += count;
     }
@@ -113,7 +115,8 @@ function auditIcons() {
     console.log('❌ UNDEFINED ICONS (used but not defined):');
     console.log('─'.repeat(60));
     for (const icon of Array.from(undefinedIcons).sort()) {
-      const usage = allUsages.get(icon)!;
+      const usage = allUsages.get(icon);
+      if (!usage) continue;
       console.log(
         `  ${icon} (${usage.count} usages in ${usage.files.length} files)`
       );

@@ -1,4 +1,3 @@
-
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -18,7 +17,7 @@ export const dynamic = 'force-dynamic';
 /**
  * AI Tools Hub - SEO-optimized comparison page
  * High-intent keywords for affiliate revenue
- * 
+ *
  * Note: Client component due to icon data in arrays
  * SEO: Consider extracting metadata to layout.tsx or using generateMetadata
  */
@@ -50,7 +49,7 @@ export default function ToolsPage() {
     {
       name: 'Windsurf',
       tagline: 'AI-powered development environment',
-      icon: Icons.wind,
+      icon: Icons.zap,
       rating: 4,
       pricing: '$15/mo',
       bestFor: 'Frontend and React development',
@@ -166,7 +165,7 @@ export default function ToolsPage() {
     {
       name: 'Replit AI',
       tagline: 'Code in the browser with AI',
-      icon: Icons.cloud,
+      icon: Icons.globe,
       rating: 4,
       pricing: 'Free / $20/mo Replit Core',
       bestFor: 'Rapid prototyping and learning',
@@ -322,10 +321,10 @@ export default function ToolsPage() {
             </h1>
 
             <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              Real-world reviews from building production SaaS. We tested 10+
-              AI coding tools—Cursor, Windsurf, Replit, Lovable, v0.dev, Warp,
-              and more. Here's what actually works, what doesn't, and which one
-              is right for you.
+              Real-world reviews from building production SaaS. We tested 10+ AI
+              coding tools—Cursor, Windsurf, Replit, Lovable, v0.dev, Warp, and
+              more. Here&apos;s what actually works, what doesn&apos;t, and
+              which one is right for you.
             </p>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
@@ -335,7 +334,7 @@ export default function ToolsPage() {
                 asChild
               >
                 <Link href="#comparison">
-                  <Icons.list className="mr-2 h-4 w-4" />
+                  <Icons.barChart className="mr-2 h-4 w-4" />
                   Compare Tools
                 </Link>
               </Button>
@@ -365,7 +364,7 @@ export default function ToolsPage() {
         </div>
 
         <div className="mb-8">
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex flex-wrap justify-center gap-2">
             <Badge variant="outline">Full IDEs</Badge>
             <Badge variant="outline">AI Builders</Badge>
             <Badge variant="outline">Terminal Tools</Badge>
@@ -377,7 +376,10 @@ export default function ToolsPage() {
           {tools.map((tool) => {
             const Icon = Icons[tool.icon];
             return (
-              <Card key={tool.name} className="border-2 hover:border-primary hover:shadow-lg transition-all">
+              <Card
+                key={tool.name}
+                className="border-2 transition-all hover:border-primary hover:shadow-lg"
+              >
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -386,7 +388,7 @@ export default function ToolsPage() {
                       </div>
                       <div>
                         <CardTitle>{tool.name}</CardTitle>
-                        <div className="flex items-center gap-1 mt-1">
+                        <div className="mt-1 flex items-center gap-1">
                           {[...Array(5)].map((_, i) => (
                             <Icons.star
                               key={i}
@@ -406,20 +408,23 @@ export default function ToolsPage() {
                       </Badge>
                     )}
                   </div>
-                  <CardDescription className="mt-2">{tool.tagline}</CardDescription>
+                  <CardDescription className="mt-2">
+                    {tool.tagline}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <p className="text-sm font-semibold text-muted-foreground">
-                      Pricing: <span className="text-foreground">{tool.pricing}</span>
+                      Pricing:{' '}
+                      <span className="text-foreground">{tool.pricing}</span>
                     </p>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       <strong>Best for:</strong> {tool.bestFor}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-green-600 mb-2">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-green-600">
                       Pros
                     </p>
                     <ul className="space-y-1">
@@ -433,7 +438,7 @@ export default function ToolsPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-red-600 mb-2">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-red-600">
                       Cons
                     </p>
                     <ul className="space-y-1">
@@ -451,9 +456,7 @@ export default function ToolsPage() {
                     variant={tool.affiliate ? 'default' : 'outline'}
                     asChild
                   >
-                    <Link href={`/tools/${tool.slug}`}>
-                      {tool.cta} →
-                    </Link>
+                    <Link href={`/tools/${tool.slug}`}>{tool.cta} →</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -469,23 +472,29 @@ export default function ToolsPage() {
             <Card className="border-2 border-purple-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Icons.award className="h-6 w-6 text-purple-600" />
+                  <Icons.trophy className="h-6 w-6 text-purple-600" />
                   Our Recommendation for 2025
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-lg font-semibold">
-                  <strong className="text-purple-700 dark:text-purple-400">Winner: Cursor</strong> for full-stack
-                  production development
+                  <strong className="text-purple-700 dark:text-purple-400">
+                    Winner: Cursor
+                  </strong>{' '}
+                  for full-stack production development
                 </p>
                 <p className="text-muted-foreground">
-                  After building Engify.ai (1,357 commits in 7 days), <strong>Cursor with Claude Sonnet 4.5</strong> proved
-                  most effective for production work. The native Claude integration, multi-file editing, and codebase awareness
-                  were game-changers for complex refactoring and architecture decisions.
+                  After building Engify.ai (1,357 commits in 7 days),{' '}
+                  <strong>Cursor with Claude Sonnet 4.5</strong> proved most
+                  effective for production work. The native Claude integration,
+                  multi-file editing, and codebase awareness were game-changers
+                  for complex refactoring and architecture decisions.
                 </p>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <p className="mb-2 text-sm font-semibold">Use Cursor when:</p>
+                    <p className="mb-2 text-sm font-semibold">
+                      Use Cursor when:
+                    </p>
                     <ul className="space-y-1 text-sm text-muted-foreground">
                       <li>• Building production SaaS</li>
                       <li>• Refactoring across multiple files</li>
@@ -494,7 +503,9 @@ export default function ToolsPage() {
                     </ul>
                   </div>
                   <div>
-                    <p className="mb-2 text-sm font-semibold">Use Copilot when:</p>
+                    <p className="mb-2 text-sm font-semibold">
+                      Use Copilot when:
+                    </p>
                     <ul className="space-y-1 text-sm text-muted-foreground">
                       <li>• Autocomplete is your main need</li>
                       <li>• Working in VSCode ecosystem</li>
@@ -529,11 +540,21 @@ export default function ToolsPage() {
             <table className="w-full">
               <thead className="bg-muted">
                 <tr>
-                  <th className="p-4 text-left text-sm font-semibold">Feature</th>
-                  <th className="p-4 text-center text-sm font-semibold">Cursor</th>
-                  <th className="p-4 text-center text-sm font-semibold">Windsurf</th>
-                  <th className="p-4 text-center text-sm font-semibold">Copilot</th>
-                  <th className="p-4 text-center text-sm font-semibold">Claude</th>
+                  <th className="p-4 text-left text-sm font-semibold">
+                    Feature
+                  </th>
+                  <th className="p-4 text-center text-sm font-semibold">
+                    Cursor
+                  </th>
+                  <th className="p-4 text-center text-sm font-semibold">
+                    Windsurf
+                  </th>
+                  <th className="p-4 text-center text-sm font-semibold">
+                    Copilot
+                  </th>
+                  <th className="p-4 text-center text-sm font-semibold">
+                    Claude
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -581,29 +602,37 @@ export default function ToolsPage() {
         <div className="container">
           <div className="mx-auto max-w-3xl space-y-8">
             <div className="text-center">
-              <h2 className="mb-4 text-4xl font-bold">Frequently Asked Questions</h2>
+              <h2 className="mb-4 text-4xl font-bold">
+                Frequently Asked Questions
+              </h2>
             </div>
 
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Is Cursor worth $20/month?</CardTitle>
+                  <CardTitle className="text-lg">
+                    Is Cursor worth $20/month?
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Yes, for professional development. If it saves 2 hours/month (at $50/hr = $100), it's 5x ROI.
-                    We saved 20-30% development time on Engify.ai, making it easily worth it.
+                    Yes, for professional development. If it saves 2 hours/month
+                    (at $50/hr = $100), it&apos;s 5x ROI. We saved 20-30%
+                    development time on Engify.ai, making it easily worth it.
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Can I use multiple AI tools together?</CardTitle>
+                  <CardTitle className="text-lg">
+                    Can I use multiple AI tools together?
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Absolutely! We use Cursor for coding, Claude for architecture/planning, and Copilot for quick autocomplete.
+                    Absolutely! We use Cursor for coding, Claude for
+                    architecture/planning, and Copilot for quick autocomplete.
                     Each tool has strengths—use them strategically.
                   </p>
                 </CardContent>
@@ -611,12 +640,16 @@ export default function ToolsPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Which tool is best for beginners?</CardTitle>
+                  <CardTitle className="text-lg">
+                    Which tool is best for beginners?
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    GitHub Copilot. It's the most forgiving, works in any IDE, and the autocomplete helps you learn patterns.
-                    Start there, then upgrade to Cursor when you're building larger projects.
+                    GitHub Copilot. It&apos;s the most forgiving, works in any
+                    IDE, and the autocomplete helps you learn patterns. Start
+                    there, then upgrade to Cursor when you&apos;re building
+                    larger projects.
                   </p>
                 </CardContent>
               </Card>
@@ -656,4 +689,3 @@ export default function ToolsPage() {
     </MainLayout>
   );
 }
-

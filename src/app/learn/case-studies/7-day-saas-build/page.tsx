@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 
 /**
  * Case Study: 7-Day SaaS Build with AI
- * 
+ *
  * SEO-optimized learning content showing real-world AI-augmented development
  */
 export default function CaseStudyPage() {
@@ -66,7 +66,7 @@ export default function CaseStudyPage() {
     },
     {
       name: 'Git Worktrees',
-      icon: Icons.gitBranch,
+      icon: Icons.gitCompare,
       role: 'Parallel Development',
       usage: '3 simultaneous branches without conflicts',
       affiliate: false,
@@ -231,7 +231,10 @@ export default function CaseStudyPage() {
                 className="bg-white text-purple-900 hover:bg-gray-100"
                 asChild
               >
-                <Link href="https://github.com/donlaur/Engify-AI-App" target="_blank">
+                <Link
+                  href="https://github.com/donlaur/Engify-AI-App"
+                  target="_blank"
+                >
                   <Icons.github className="mr-2 h-4 w-4" />
                   View Source Code
                 </Link>
@@ -295,7 +298,9 @@ export default function CaseStudyPage() {
                       className="mt-4"
                       asChild
                     >
-                      <Link href={`/tools/${tool.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                      <Link
+                        href={`/tools/${tool.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
                         Learn More & Get Started →
                       </Link>
                     </Button>
@@ -489,12 +494,11 @@ export default function CaseStudyPage() {
       <section className="container pb-16">
         <Card className="border-2 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950">
           <CardContent className="space-y-6 py-12 text-center">
-            <h2 className="text-3xl font-bold">
-              Want to Build Like This?
-            </h2>
+            <h2 className="text-3xl font-bold">Want to Build Like This?</h2>
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-              Explore our AI tool reviews, workflow guides, and process documentation.
-              Everything you need to implement AI-augmented development in your team.
+              Explore our AI tool reviews, workflow guides, and process
+              documentation. Everything you need to implement AI-augmented
+              development in your team.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Button size="lg" asChild>
@@ -516,5 +520,3 @@ export default function CaseStudyPage() {
     </MainLayout>
   );
 }
-
-
