@@ -172,4 +172,3 @@ module.exports = withSentryConfig(
     automaticVercelMonitors: true,
   }
 );
-# GA CSP fix
