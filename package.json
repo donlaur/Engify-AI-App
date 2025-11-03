@@ -95,6 +95,7 @@
     "@auth/mongodb-adapter": "^3.0.0",
     "@auth/prisma-adapter": "^2.11.1",
     "@aws-sdk/client-cognito-identity-provider": "^3.922.0",
+    "@aws-sdk/client-lambda": "^3.922.0",
     "@aws-sdk/client-secrets-manager": "^3.919.0",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.10.0",
