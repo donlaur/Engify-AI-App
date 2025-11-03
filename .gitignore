@@ -58,6 +58,12 @@ yarn-error.log*
 # Vercel
 .vercel
 
+# Git history cleanup artifacts (git filter-branch, BFG Repo-Cleaner)
+.git-rewrite/
+backup-*.bundle
+*.bundle
+*.bak
+
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
