@@ -334,7 +334,7 @@ export function DetailedRatingModal({
           <Button onClick={handleSubmit} disabled={submitting || rating === 0}>
             {submitting ? (
               <>
-                <Icons.loader className="mr-2 h-4 w-4 animate-spin" />
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 Submitting...
               </>
             ) : (

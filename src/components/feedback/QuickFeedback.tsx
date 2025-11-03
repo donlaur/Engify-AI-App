@@ -151,7 +151,7 @@ export function QuickFeedback({
               onClick={() => handleHelpful(true)}
               disabled={loading || helpfulFeedback !== null}
             >
-              <Icons.thumbsUp className="mr-2 h-4 w-4" />
+              <Icons.like className="mr-2 h-4 w-4" />
               Yes, helpful
             </Button>
             <Button
@@ -160,7 +160,7 @@ export function QuickFeedback({
               onClick={() => handleHelpful(false)}
               disabled={loading || helpfulFeedback !== null}
             >
-              <Icons.thumbsDown className="mr-2 h-4 w-4" />
+              <Icons.dislike className="mr-2 h-4 w-4" />
               Not helpful
             </Button>
           </div>

@@ -9,7 +9,6 @@
 ## The Problem
 
 AI assistants (including Cursor's multi-agent features) can:
-
 - ❌ Ignore existing validation scripts
 - ❌ Create duplicate tooling instead of using existing
 - ❌ Bypass pre-commit hooks with `--no-verify`
@@ -17,7 +16,6 @@ AI assistants (including Cursor's multi-agent features) can:
 - ❌ Break production by not checking tool availability
 
 **Real Example:** Icon audit script (`scripts/development/audit-icons.ts`) existed but wasn't in pre-commit. AI made changes that broke production instead of:
-
 1. Finding the existing script
 2. Adding it to pre-commit
 3. Running it before committing
@@ -44,7 +42,6 @@ ls scripts/*/ | grep -i "<feature-name>"
 ```
 
 **If existing tool found:**
-
 - ✅ USE IT (don't create duplicate)
 - ✅ Extend it if needed
 - ✅ Add to pre-commit if missing
@@ -59,7 +56,6 @@ cat .husky/pre-commit
 ```
 
 **Check:**
-
 - What validations already exist?
 - Is your change covered by existing hook?
 - Should your new validation be added to hook?
@@ -79,7 +75,6 @@ find docs/development/ADR -name "*.md" | xargs grep -l "related-topic"
 ```
 
 **If pattern exists:**
-
 - ✅ FOLLOW IT (don't create new pattern)
 - ❌ DO NOT invent new approach
 
@@ -96,7 +91,6 @@ tsx scripts/development/audit-icons.ts || echo "TOOL FAILED"
 ```
 
 **If tool doesn't work:**
-
 - ✅ FIX IT (don't bypass it)
 - ❌ DO NOT create workaround
 
@@ -188,12 +182,12 @@ Create: `scripts/ai/check-before-change.ts`
 #!/usr/bin/env tsx
 /**
  * Pre-Change Guardrail Checker
- *
+ * 
  * Scans for:
  * 1. Duplicate scripts/tools
  * 2. Missing pre-commit hooks
  * 3. Ignored existing patterns
- *
+ * 
  * Run this BEFORE making changes to catch issues early.
  */
 
@@ -210,14 +204,14 @@ interface CheckResult {
 function findScripts(pattern: string): string[] {
   const scripts: string[] = [];
   const dir = 'scripts';
-
+  
   function scanDir(currentDir: string) {
     try {
       const items = readdirSync(currentDir);
       for (const item of items) {
         const fullPath = join(currentDir, item);
         const stat = statSync(fullPath);
-
+        
         if (stat.isDirectory()) {
           scanDir(fullPath);
         } else if (item.includes(pattern)) {
@@ -228,7 +222,7 @@ function findScripts(pattern: string): string[] {
       // Ignore errors
     }
   }
-
+  
   scanDir(dir);
   return scripts;
 }
@@ -242,25 +236,26 @@ function checkPreCommitHooks(): CheckResult {
 
   try {
     const preCommit = readFileSync('.husky/pre-commit', 'utf-8');
-
+    
     // Check if icon validation is in pre-commit
     if (!preCommit.includes('audit-icons')) {
       result.warnings.push(
         'Icon validation script exists but not in pre-commit hook!'
       );
     }
-
+    
     // Check if enterprise compliance is in pre-commit
     if (!preCommit.includes('check-enterprise-compliance')) {
       result.warnings.push(
         'Enterprise compliance check should be in pre-commit'
       );
     }
+    
   } catch (err) {
     result.errors.push('Could not read .husky/pre-commit');
     result.passed = false;
   }
-
+  
   return result;
 }
 
@@ -273,41 +268,44 @@ function checkForDuplicateScripts(): CheckResult {
 
   // Common patterns that might have duplicates
   const patterns = ['check', 'validate', 'audit', 'lint'];
-
+  
   for (const pattern of patterns) {
     const scripts = findScripts(pattern);
     if (scripts.length > 3) {
       result.warnings.push(
         `Multiple ${pattern} scripts found (${scripts.length}). Might be duplicates:`
       );
-      scripts.forEach((s) => result.warnings.push(`  - ${s}`));
+      scripts.forEach(s => result.warnings.push(`  - ${s}`));
     }
   }
-
+  
   return result;
 }
 
 function main() {
   console.log('🛡️  Running Pre-Change Guardrails...\n');
-
-  const results = [checkPreCommitHooks(), checkForDuplicateScripts()];
-
-  const allPassed = results.every((r) => r.passed);
-  const allWarnings = results.flatMap((r) => r.warnings);
-  const allErrors = results.flatMap((r) => r.errors);
-
+  
+  const results = [
+    checkPreCommitHooks(),
+    checkForDuplicateScripts(),
+  ];
+  
+  const allPassed = results.every(r => r.passed);
+  const allWarnings = results.flatMap(r => r.warnings);
+  const allErrors = results.flatMap(r => r.errors);
+  
   if (allErrors.length > 0) {
     console.log('❌ ERRORS:');
-    allErrors.forEach((e) => console.log(`  ${e}`));
+    allErrors.forEach(e => console.log(`  ${e}`));
     console.log('');
   }
-
+  
   if (allWarnings.length > 0) {
     console.log('⚠️  WARNINGS:');
-    allWarnings.forEach((w) => console.log(`  ${w}`));
+    allWarnings.forEach(w => console.log(`  ${w}`));
     console.log('');
   }
-
+  
   if (allPassed && allErrors.length === 0) {
     console.log('✅ Guardrails check passed');
     process.exit(0);
@@ -344,7 +342,6 @@ echo ""
 ### When AI Needs to Make Changes:
 
 1. **Run guardrail check first:**
-
    ```bash
    tsx scripts/ai/pre-change-check.sh validation icon
    ```
@@ -369,7 +366,6 @@ echo ""
 ## Success Metrics
 
 This guardrail system will prevent:
-
 - ✅ Ignoring existing tooling (icon audit script)
 - ✅ Creating duplicate validations
 - ✅ Bypassing pre-commit hooks silently
@@ -382,3 +378,4 @@ This guardrail system will prevent:
 
 **Status:** Implemented  
 **Next:** Test guardrail system and refine based on results
+
