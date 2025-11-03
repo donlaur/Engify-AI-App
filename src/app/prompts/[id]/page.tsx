@@ -19,7 +19,11 @@ import {
   patternLabels,
   type UserRole,
 } from '@/lib/schemas/prompt';
-import { CopyButton, ShareButton } from '@/components/features/PromptActions';
+import {
+  CopyButton,
+  ShareButton,
+  FavoriteButton,
+} from '@/components/features/PromptActions';
 import { getPromptSlug } from '@/lib/utils/slug';
 import Link from 'next/link';
 
@@ -37,12 +41,16 @@ function enrichPromptDescription(
 ): string {
   const descriptionParts = [prompt.description];
   if (roleLabel) {
-    descriptionParts.push(`Specifically designed for ${roleLabel.toLowerCase()}s.`);
+    descriptionParts.push(
+      `Specifically designed for ${roleLabel.toLowerCase()}s.`
+    );
   }
   if (patternLabel) {
     descriptionParts.push(`Uses the ${patternLabel} pattern.`);
   }
-  descriptionParts.push('Ready to use with ChatGPT, Claude, Gemini, and other AI models.');
+  descriptionParts.push(
+    'Ready to use with ChatGPT, Claude, Gemini, and other AI models.'
+  );
   return descriptionParts.join(' ');
 }
 
@@ -50,7 +58,7 @@ function enrichPromptDescription(
 export async function generateStaticParams() {
   const prompts = await getAllPrompts();
   const params: Array<{ id: string }> = [];
-  
+
   prompts.forEach((prompt) => {
     // Add ID route
     params.push({ id: prompt.id });
@@ -60,7 +68,7 @@ export async function generateStaticParams() {
       params.push({ id: slug });
     }
   });
-  
+
   return params;
 }
 
@@ -87,8 +95,8 @@ export async function generateMetadata({
   // Enrich metadata based on category, role, and pattern
   const categoryLabel = categoryLabels[prompt.category] || prompt.category;
   const roleLabel = prompt.role ? roleLabels[prompt.role as UserRole] : null;
-  const patternLabel = prompt.pattern 
-    ? patternLabels[prompt.pattern as keyof typeof patternLabels] 
+  const patternLabel = prompt.pattern
+    ? patternLabels[prompt.pattern as keyof typeof patternLabels]
     : null;
 
   // Enhanced title with category/role context
@@ -100,7 +108,11 @@ export async function generateMetadata({
   const title = titleParts.join(' ');
 
   // Enhanced description with context
-  const enrichedDescription = enrichPromptDescription(prompt, roleLabel, patternLabel);
+  const enrichedDescription = enrichPromptDescription(
+    prompt,
+    roleLabel,
+    patternLabel
+  );
 
   const slug = getPromptSlug(prompt);
   const url = `${APP_URL}/prompts/${slug}`;
@@ -109,8 +121,16 @@ export async function generateMetadata({
   const keywords = [
     prompt.title,
     categoryLabel,
-    ...(roleLabel ? [roleLabel, `${roleLabel} prompts`, `prompts for ${roleLabel.toLowerCase()}s`] : []),
-    ...(patternLabel ? [patternLabel, `${patternLabel.toLowerCase()} pattern`] : []),
+    ...(roleLabel
+      ? [
+          roleLabel,
+          `${roleLabel} prompts`,
+          `prompts for ${roleLabel.toLowerCase()}s`,
+        ]
+      : []),
+    ...(patternLabel
+      ? [patternLabel, `${patternLabel.toLowerCase()} pattern`]
+      : []),
     `${categoryLabel} prompt`,
     `${categoryLabel} template`,
     'prompt engineering',
@@ -167,23 +187,35 @@ export default async function PromptPage({
   if (!prompt) {
     notFound();
   }
-  
+
   const slug = getPromptSlug(prompt);
 
   // Enhanced JSON-LD structured data with category, role, and pattern
   const categoryLabel = categoryLabels[prompt.category] || prompt.category;
   const roleLabel = prompt.role ? roleLabels[prompt.role as UserRole] : null;
-  const patternLabel = prompt.pattern 
-    ? patternLabels[prompt.pattern as keyof typeof patternLabels] 
+  const patternLabel = prompt.pattern
+    ? patternLabels[prompt.pattern as keyof typeof patternLabels]
     : null;
-  const enrichedDescription = enrichPromptDescription(prompt, roleLabel, patternLabel);
+  const enrichedDescription = enrichPromptDescription(
+    prompt,
+    roleLabel,
+    patternLabel
+  );
 
   // Enhanced keywords
   const keywords = [
     prompt.title,
     categoryLabel,
-    ...(roleLabel ? [roleLabel, `${roleLabel} prompts`, `prompts for ${roleLabel.toLowerCase()}s`] : []),
-    ...(patternLabel ? [patternLabel, `${patternLabel.toLowerCase()} pattern`] : []),
+    ...(roleLabel
+      ? [
+          roleLabel,
+          `${roleLabel} prompts`,
+          `prompts for ${roleLabel.toLowerCase()}s`,
+        ]
+      : []),
+    ...(patternLabel
+      ? [patternLabel, `${patternLabel.toLowerCase()} pattern`]
+      : []),
     `${categoryLabel} prompt`,
     `${categoryLabel} template`,
     'prompt engineering',
@@ -304,14 +336,15 @@ export default async function PromptPage({
             </pre>
           </div>
 
-          {/* Navigation & Share */}
-          <div className="mt-8 flex gap-4">
+          {/* Navigation & Actions */}
+          <div className="mt-8 flex flex-wrap gap-4">
             <Button asChild>
               <Link href="/prompts">
                 <Icons.arrowLeft className="mr-2 h-4 w-4" />
                 Back to Library
               </Link>
             </Button>
+            <FavoriteButton promptId={prompt.id} />
             <ShareButton
               title={prompt.title}
               description={prompt.description}
