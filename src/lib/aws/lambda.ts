@@ -2,6 +2,12 @@ import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 
 const lambdaClient = new LambdaClient({
   region: process.env.AWS_REGION || 'us-east-2',
+  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+    ? {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      }
+    : undefined, // Let SDK use IAM role (for EC2/Lambda/ECS) or default credential chain
 });
 
 export async function invokeLambda(
