@@ -10,7 +10,7 @@ import { OpenAIAdapter } from '../adapters/OpenAIAdapter';
 import { ClaudeAdapter } from '../adapters/ClaudeAdapter';
 import { GeminiAdapter } from '../adapters/GeminiAdapter';
 import { GroqAdapter } from '../adapters/GroqAdapter';
-// ReplicateAdapter removed - not used in registry lookup
+import { ReplicateAdapter } from '../adapters/ReplicateAdapter';
 import { getActiveModels, getModelsByProvider, isModelAllowed } from '@/lib/services/AIModelRegistry';
 import { AIProviderFactory } from './AIProviderFactory';
 
@@ -92,6 +92,10 @@ export class AIProviderFactoryWithRegistry {
    * Create provider with specific model name
    */
   private static createFromModelName(providerName: string, modelName: string): AIProvider {
+    // Replicate: Support any owner/model format
+    if (providerName.startsWith('replicate-')) {
+      return new ReplicateAdapter(modelName); // modelName is already in owner/model format
+    }
     if (providerName.includes('openai')) {
       return new OpenAIAdapter(modelName);
     }

@@ -25,16 +25,28 @@ const MODEL_COSTS_USD_PER_1M_TOKENS: Record<
   'meta/llama-3.1-405b-instruct': { input: 0.59, output: 0.79 },
 };
 
-function parseAllowedModels(): Set<string> {
+function parseAllowedModels(): Set<string> | null {
   const configured = (process.env.REPLICATE_ALLOWED_MODELS ?? '')
     .split(',')
     .map((model) => model.trim())
     .filter(Boolean);
+  
+  // If REPLICATE_ALLOW_ALL=true, allow any model (DB registry will enforce allowlist)
+  if (process.env.REPLICATE_ALLOW_ALL === 'true') {
+    return null; // null means allow all (registry-controlled)
+  }
+  
   return new Set(configured.length > 0 ? configured : DEFAULT_ALLOWED_MODELS);
 }
 
 function ensureModelAllowed(modelId: string): string {
   const allowed = parseAllowedModels();
+  
+  // If allowlist is null, allow all (registry will control via DB)
+  if (allowed === null) {
+    return modelId;
+  }
+  
   if (!allowed.has(modelId)) {
     const message = `Replicate model "${modelId}" is not in allowlist`;
     logger.warn('replicate.model_blocked', { model: modelId });
