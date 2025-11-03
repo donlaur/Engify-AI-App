@@ -10,9 +10,13 @@
  *   tsx scripts/content/generate-article.ts "Mastering AI Prompts" --category="Guide" --tone="beginner"
  */
 
+import { config } from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { ContentPublishingService } from '@/lib/content/content-publishing-pipeline';
+
+// Load environment variables from .env.local
+config({ path: '.env.local' });
 
 interface GenerateOptions {
   topic: string;
