@@ -95,14 +95,7 @@ export function Header({ user }: HeaderProps) {
           >
             Workbench
           </Link>
-          {/* Removed RAG Chat (mock) and Contact (email not ready) from header */}
-          <Link
-            href="/ai-workflow"
-            className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200"
-          >
-            <Icons.sparkles className="h-3 w-3" />
-            AI Workflow
-          </Link>
+          {/* Removed RAG Chat (mock), Contact (email not ready), and AI Workflow (blank page) from header */}
           <Link
             href="/built-in-public"
             className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-200"

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="400" fill="#ffffff"/>
+  
+  <!-- Title -->
+  <text x="400" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#1f2937">
+    Cost Comparison: Pre-commit Hooks Impact
+  </text>
+  
+  <!-- Y-axis labels -->
+  <text x="80" y="100" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">600</text>
+  <text x="80" y="150" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">500</text>
+  <text x="80" y="200" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">400</text>
+  <text x="80" y="250" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">300</text>
+  <text x="80" y="300" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">200</text>
+  <text x="80" y="350" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">100</text>
+  
+  <!-- Before bar (500 credits) - RED -->
+  <rect x="200" y="100" width="120" height="250" fill="#ef4444" rx="4"/>
+  <text x="260" y="85" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#1f2937">
+    500
+  </text>
+  <text x="260" y="375" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f2937">
+    Before Hooks
+  </text>
+  
+  <!-- After bar (100 credits) - GREEN -->
+  <rect x="480" y="300" width="120" height="50" fill="#10b981" rx="4"/>
+  <text x="540" y="285" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#1f2937">
+    100
+  </text>
+  <text x="540" y="375" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#1f2937">
+    After Hooks
+  </text>
+  
+  <!-- Savings badge -->
+  <rect x="620" y="140" width="140" height="60" fill="#10b981" rx="8"/>
+  <text x="690" y="165" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    80% Saved
+  </text>
+  <text x="690" y="185" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#ffffff">
+    400 credits
+  </text>
+  
+  <!-- Y-axis label -->
+  <text x="40" y="230" font-family="Arial, sans-serif" font-size="14" fill="#6b7280" transform="rotate(-90 40 230)">
+    Token Credits Used
+  </text>
+</svg>

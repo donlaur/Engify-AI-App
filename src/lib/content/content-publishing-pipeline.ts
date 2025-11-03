@@ -16,6 +16,26 @@
 
 import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 
+/**
+ * BUSINESS CONTEXT for Content Generation
+ * 
+ * PRIMARY GOALS:
+ * 1. Drive traffic (Google + LinkedIn + Twitter)
+ * 2. B2B sales (training tool for eng departments)  
+ * 3. Personal brand (get hired as Eng Manager/Director)
+ * 
+ * TARGET AUDIENCE:
+ * - Engineering Managers, Directors, CTOs (primary)
+ * - Senior Engineers, Tech Leads (secondary)
+ * - Hiring managers looking for systematic thinkers (tertiary)
+ * 
+ * KEY MESSAGES:
+ * - Systematic AI workflows > speed without guardrails
+ * - Real production examples with metrics (80% cost savings)
+ * - Enterprise practices (RBAC, audit logs, ADRs, pre-commit hooks)
+ * - "I'm up-to-speed and can lead AI adoption"
+ */
+
 export interface ContentPublishingAgent {
   role: string;
   name: string;
