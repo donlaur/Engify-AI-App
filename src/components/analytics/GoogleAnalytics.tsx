@@ -50,11 +50,6 @@ function GoogleAnalyticsTracking() {
 }
 
 export function GoogleAnalytics() {
-  // Only load in production
-  if (process.env.NODE_ENV !== 'production') {
-    return null;
-  }
-
   // Don't render if no valid GA ID
   if (!GA_MEASUREMENT_ID || !GA_MEASUREMENT_ID.startsWith('G-')) {
     console.warn('Google Analytics: No valid NEXT_PUBLIC_GA_MEASUREMENT_ID found');
@@ -80,7 +75,6 @@ export function GoogleAnalytics() {
             gtag('js', new Date());
             gtag('config', '${GA_MEASUREMENT_ID}', {
               page_path: window.location.pathname,
-              send_page_view: false, // We'll track manually via useEffect
             });
           `,
         }}

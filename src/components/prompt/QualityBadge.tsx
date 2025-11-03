@@ -36,7 +36,7 @@ export function QualityBadge({
     if (s >= 4.5) return <Icons.checkCircle className="h-3 w-3" />;
     if (s >= 4) return <Icons.star className="h-3 w-3 fill-current" />;
     if (s >= 3) return <Icons.alertCircle className="h-3 w-3" />;
-    return <Icons.xCircle className="h-3 w-3" />;
+    return <Icons.cancel className="h-3 w-3" />;
   };
 
   const sizeClasses = {

@@ -21,7 +21,7 @@ export function FeatureCard({
   description,
   className,
 }: FeatureCardProps) {
-  const Icon = Icons[icon];
+  const Icon = Icons[icon] || Icons.sparkles; // Fallback to prevent undefined component
 
   return (
     <Card className={cn('transition-shadow hover:shadow-lg', className)}>
