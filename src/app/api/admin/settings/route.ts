@@ -69,7 +69,15 @@ export async function GET(request: NextRequest) {
     ];
 
     // Messaging services status
-    const sendgridHealth = getSendGridEventStatus();
+    let sendgridHealth;
+    try {
+      sendgridHealth = getSendGridEventStatus();
+    } catch (error) {
+      logger.warn('Failed to get SendGrid event status', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      sendgridHealth = { lastEvent: null, lastError: null };
+    }
 
     const messagingStatus = {
       twilio: {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { auditLogService } from '@/lib/services/AuditLogService';
+import { AuditLogFilters } from '@/lib/db/schemas/auditLog';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { logger } from '@/lib/logging/logger';
@@ -95,39 +96,20 @@ export async function GET(request: NextRequest) {
 
     const { page, limit, ...filters } = parsed.data;
 
-    // Convert string IDs to ObjectIds and dates
-    const queryFilters: Record<string, unknown> = {};
-    if (filters.userId) {
-      queryFilters.userId = new ObjectId(filters.userId);
-    }
-    if (filters.organizationId) {
-      queryFilters.organizationId = new ObjectId(filters.organizationId);
-    }
-    if (filters.resourceId) {
-      queryFilters.resourceId = new ObjectId(filters.resourceId);
-    }
-    if (filters.eventType) {
-      queryFilters.eventType = filters.eventType;
-    }
-    if (filters.eventCategory) {
-      queryFilters.eventCategory = filters.eventCategory;
-    }
-    if (filters.resourceType) {
-      queryFilters.resourceType = filters.resourceType;
-    }
-    if (filters.success !== undefined) {
-      queryFilters.success = filters.success;
-    }
-    if (filters.startDate || filters.endDate) {
-      queryFilters.startDate = filters.startDate
-        ? new Date(filters.startDate)
-        : undefined;
-      queryFilters.endDate = filters.endDate
-        ? new Date(filters.endDate)
-        : undefined;
-    }
+    // Convert string IDs to ObjectIds and dates for AuditLogService
+    const serviceFilters: AuditLogFilters = {
+      ...(filters.userId && { userId: new ObjectId(filters.userId) }),
+      ...(filters.organizationId && { organizationId: new ObjectId(filters.organizationId) }),
+      ...(filters.resourceId && { resourceId: new ObjectId(filters.resourceId) }),
+      ...(filters.eventType && { eventType: filters.eventType as AuditLogFilters['eventType'] }),
+      ...(filters.eventCategory && { eventCategory: filters.eventCategory }),
+      ...(filters.resourceType && { resourceType: filters.resourceType }),
+      ...(filters.success !== undefined && { success: filters.success }),
+      ...(filters.startDate && { startDate: new Date(filters.startDate) }),
+      ...(filters.endDate && { endDate: new Date(filters.endDate) }),
+    };
 
-    const result = await auditLogService.query(queryFilters, page, limit);
+    const result = await auditLogService.query(serviceFilters, page, limit);
 
     const totalPages = Math.ceil(result.total / limit);
 
