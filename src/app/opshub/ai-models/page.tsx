@@ -6,24 +6,137 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { AI_MODELS } from '@/lib/config/ai-models';
+import { useToast } from '@/hooks/use-toast';
+import type { AIModel } from '@/lib/db/schemas/ai-model';
+
+interface ModelDisplay extends AIModel {
+  deprecated?: boolean; // For backward compatibility with static config
+}
 
 export default function AIModelsAdminPage() {
-  const [models, setModels] = useState(AI_MODELS);
+  const [models, setModels] = useState<ModelDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'deprecated'>('active');
+  const { toast } = useToast();
+
+  // Load models from database
+  useEffect(() => {
+    loadModels();
+  }, []);
+
+  async function loadModels() {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/admin/ai-models');
+      if (!response.ok) throw new Error('Failed to load models');
+      
+      const data = await response.json();
+      const modelsWithDeprecated = data.models.map((m: AIModel) => ({
+        ...m,
+        deprecated: m.status === 'deprecated' || m.status === 'sunset',
+      }));
+      setModels(modelsWithDeprecated);
+    } catch (error) {
+      console.error('Error loading models:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load AI models',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function syncModels() {
+    try {
+      setSyncing(true);
+      const response = await fetch('/api/admin/ai-models/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: undefined }), // Sync all
+      });
+
+      if (!response.ok) throw new Error('Failed to sync models');
+      
+      const data = await response.json();
+      toast({
+        title: 'Sync Complete',
+        description: `Created ${data.created} models, updated ${data.updated}`,
+      });
+
+      // Reload models
+      await loadModels();
+    } catch (error) {
+      console.error('Error syncing models:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to sync models',
+        variant: 'destructive',
+      });
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function migrateStaticModels() {
+    try {
+      setSyncing(true);
+      const response = await fetch('/api/admin/ai-models/migrate', {
+        method: 'POST',
+      });
+
+      if (!response.ok) throw new Error('Failed to migrate models');
+      
+      const data = await response.json();
+      toast({
+        title: 'Migration Complete',
+        description: `Migrated ${data.created} models from static config`,
+      });
+
+      // Reload models
+      await loadModels();
+    } catch (error) {
+      console.error('Error migrating models:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to migrate models',
+        variant: 'destructive',
+      });
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="container py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <Icons.spinner className="mx-auto mb-4 h-8 w-8 animate-spin" />
+              <p className="text-muted-foreground">Loading AI models...</p>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   const filteredModels = models.filter(model => {
     if (filter === 'all') return true;
-    if (filter === 'active') return !model.deprecated;
-    if (filter === 'deprecated') return model.deprecated;
+    if (filter === 'active') return !model.deprecated && model.isAllowed;
+    if (filter === 'deprecated') return model.deprecated || model.status === 'deprecated';
     return true;
   });
 
   const groupedByProvider = filteredModels.reduce((acc, model) => {
-    if (!acc[model.provider]) acc[model.provider] = [];
-    acc[model.provider].push(model);
+    const provider = model.provider;
+    if (!acc[provider]) acc[provider] = [];
+    acc[provider].push(model);
     return acc;
-  }, {} as Record<string, typeof AI_MODELS>);
+  }, {} as Record<string, ModelDisplay[]>);
 
   return (
     <MainLayout>
@@ -37,10 +150,24 @@ export default function AIModelsAdminPage() {
                 Manage AI provider models and pricing. Keep models up-to-date to avoid API errors.
               </p>
             </div>
-            <Button variant="outline">
-              <Icons.refresh className="mr-2 h-4 w-4" />
-              Check for Updates
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={syncModels}
+                disabled={syncing}
+              >
+                <Icons.refresh className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+                {syncing ? 'Syncing...' : 'Sync from Providers'}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={migrateStaticModels}
+                disabled={syncing}
+              >
+                <Icons.download className="mr-2 h-4 w-4" />
+                Migrate Static Config
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -90,7 +217,11 @@ export default function AIModelsAdminPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xl font-bold">Oct 31, 2025</div>
+              <div className="text-xl font-bold">
+                {models.length > 0 && models[0].lastVerified 
+                  ? new Date(models[0].lastVerified).toLocaleDateString()
+                  : 'Never'}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -188,13 +319,13 @@ export default function AIModelsAdminPage() {
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Input:</span>
                         <span className="font-mono font-semibold">
-                          ${(model.costPer1kInputTokens * 1000).toFixed(2)}/1M
+                          ${(model.inputCostPer1M || model.costPer1kInputTokens * 1000).toFixed(2)}/1M
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Output:</span>
                         <span className="font-mono font-semibold">
-                          ${(model.costPer1kOutputTokens * 1000).toFixed(2)}/1M
+                          ${(model.outputCostPer1M || model.costPer1kOutputTokens * 1000).toFixed(2)}/1M
                         </span>
                       </div>
                     </div>
@@ -230,6 +361,22 @@ export default function AIModelsAdminPage() {
                         Verified: {model.lastVerified}
                       </div>
                     )}
+
+                    {/* Status badges */}
+                    <div className="flex gap-2 flex-wrap">
+                      {model.status === 'active' && model.isAllowed && (
+                        <Badge variant="default" className="text-xs">Active</Badge>
+                      )}
+                      {!model.isAllowed && (
+                        <Badge variant="secondary" className="text-xs">Disabled</Badge>
+                      )}
+                      {model.recommended && (
+                        <Badge variant="outline" className="text-xs">⭐ Recommended</Badge>
+                      )}
+                      {model.tier && (
+                        <Badge variant="outline" className="text-xs capitalize">{model.tier}</Badge>
+                      )}
+                    </div>
 
                     {/* Replacement */}
                     {model.deprecated && model.replacementModel && (
