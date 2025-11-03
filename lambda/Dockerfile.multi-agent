@@ -3,8 +3,21 @@
 
 FROM public.ecr.aws/lambda/python:3.11
 
+# Install build dependencies (needed for tiktoken and other packages)
+RUN yum install -y gcc gcc-c++ && \
+    yum clean all
+
+# Install Rust (needed for tiktoken)
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    export PATH="$HOME/.cargo/bin:$PATH" && \
+    rustc --version
+
+# Upgrade pip first (helps get pre-built wheels)
+RUN pip install --upgrade pip setuptools wheel
+
 # Install dependencies
 COPY lambda/requirements-multi-agent.txt ${LAMBDA_TASK_ROOT}/
+ENV PATH="/root/.cargo/bin:${PATH}"
 RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-multi-agent.txt
 
 # Copy code

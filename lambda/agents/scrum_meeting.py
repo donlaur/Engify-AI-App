@@ -80,25 +80,30 @@ Ask: 'How does this fit our architecture?' 'What are the security implications?'
 Consider: System design, data privacy, scalability, technical debt, architecture patterns."""
 
 # Initialize agents (Beta: all use GPT-4o-mini for cost-effectiveness)
-director = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0.7,
-)
+# Lazy initialization: Create agents only when needed (allows testing without API key)
+def get_director():
+    return ChatOpenAI(
+        model="gpt-4o-mini",
+        temperature=0.7,
+    )
 
-manager = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0.7,
-)
+def get_manager():
+    return ChatOpenAI(
+        model="gpt-4o-mini",
+        temperature=0.7,
+    )
 
-tech_lead = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0.7,
-)
+def get_tech_lead():
+    return ChatOpenAI(
+        model="gpt-4o-mini",
+        temperature=0.7,
+    )
 
-architect = ChatOpenAI(
-    model="gpt-4o-mini",
-    temperature=0.7,
-)
+def get_architect():
+    return ChatOpenAI(
+        model="gpt-4o-mini",
+        temperature=0.7,
+    )
 
 # Node functions for each agent
 def director_turn(state: AIIntegrationState) -> AIIntegrationState:
@@ -108,6 +113,8 @@ def director_turn(state: AIIntegrationState) -> AIIntegrationState:
     
     rag_context = state.get('rag_context', '')
     rag_section = f"\n\n{rag_context}" if rag_context else ""
+    
+    director = get_director()
     
     messages = [
         SystemMessage(content=f"""{DIRECTOR_SYSTEM}
@@ -135,6 +142,8 @@ def manager_turn(state: AIIntegrationState) -> AIIntegrationState:
     rag_context = state.get('rag_context', '')
     rag_section = f"\n\n{rag_context}" if rag_context else ""
     
+    manager = get_manager()
+    
     messages = [
         SystemMessage(content=f"""{MANAGER_SYSTEM}
 
@@ -161,6 +170,8 @@ def tech_lead_turn(state: AIIntegrationState) -> AIIntegrationState:
     rag_context = state.get('rag_context', '')
     rag_section = f"\n\n{rag_context}" if rag_context else ""
     
+    tech_lead = get_tech_lead()
+    
     messages = [
         SystemMessage(content=f"""{TECH_LEAD_SYSTEM}
 
@@ -186,6 +197,8 @@ def architect_turn(state: AIIntegrationState) -> AIIntegrationState:
     
     rag_context = state.get('rag_context', '')
     rag_section = f"\n\n{rag_context}" if rag_context else ""
+    
+    architect = get_architect()
     
     messages = [
         SystemMessage(content=f"""{ARCHITECT_SYSTEM}

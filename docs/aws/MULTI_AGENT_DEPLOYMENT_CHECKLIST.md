@@ -28,19 +28,23 @@ aws ecr create-repository --repository-name engify-ai-integration-workbench --re
 aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin <YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com
 ```
 
-## Step 4: Build Docker Image
+## Step 3: Build Docker Image Locally
+
 ```bash
 # From project root
 docker build -f lambda/Dockerfile.multi-agent -t engify-ai-integration-workbench .
 
-# Tag for ECR
-docker tag engify-ai-integration-workbench:latest <YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com/engify-ai-integration-workbench:latest
+# Or use the build script
+./scripts/docker/build-multi-agent.sh
 ```
 
-## Step 5: Push to ECR
+**Verify build:**
 ```bash
-docker push <YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com/engify-ai-integration-workbench:latest
+# Test imports
+docker run --rm engify-ai-integration-workbench python3 -c "from langgraph.graph import StateGraph; print('✅ Works')"
 ```
+
+## Step 4: Set Up AWS ECR
 
 ## Step 6: Create/Update Lambda Function
 ```bash
