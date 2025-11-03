@@ -35,7 +35,6 @@ describe('GET /api/feedback/rating', () => {
 
   it('returns default values when no aggregates exist', async () => {
     const { getDb } = await import('@/lib/mongodb');
-    const { FEEDBACK_COLLECTIONS } = await import('@/lib/db/schemas/user-feedback');
 
     const mockCollection = {
       findOne: vi.fn().mockResolvedValue(null),
@@ -62,7 +61,6 @@ describe('GET /api/feedback/rating', () => {
 
   it('returns aggregates when they exist', async () => {
     const { getDb } = await import('@/lib/mongodb');
-    const { FEEDBACK_COLLECTIONS } = await import('@/lib/db/schemas/user-feedback');
 
     const mockAggregate = {
       promptId: 'test-prompt-123',
@@ -129,7 +127,6 @@ describe('GET /api/feedback/rating', () => {
 
   it('queries correct collection', async () => {
     const { getDb } = await import('@/lib/mongodb');
-    const { FEEDBACK_COLLECTIONS } = await import('@/lib/db/schemas/user-feedback');
 
     const mockCollection = {
       findOne: vi.fn().mockResolvedValue(null),

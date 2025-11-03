@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getDb } from '@/lib/mongodb';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { auditLog } from '@/lib/logging/audit';
-import { sanitizeText } from '@/lib/security/sanitize';
-import { ObjectId } from 'mongodb';
+import { logger } from '@/lib/logging/logger';
 
 /**
  * Content Management API
@@ -15,13 +13,13 @@ import { ObjectId } from 'mongodb';
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    console.log('🔐 [CMS API] Session:', session?.user?.email, 'Role:', (session?.user as { role?: string} | null)?.role);
+    logger.debug('CMS API session', { email: session?.user?.email, role: (session?.user as { role?: string} | null)?.role });
     
     const role = (session?.user as { role?: string } | null)?.role || 'user';
 
     // RBAC: Only admins can manage content
     if (!['admin', 'super_admin', 'org_admin'].includes(role)) {
-      console.log('❌ [CMS API] Unauthorized - role:', role);
+      logger.warn('CMS API unauthorized', { role });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -29,7 +27,7 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type');
     const category = searchParams.get('category');
     
-    console.log('📊 [CMS API] Fetching content - type:', type, 'category:', category);
+    logger.debug('CMS API fetching content', { type, category });
 
     const db = await getDb();
     const collection = db.collection('learning_content');
@@ -45,7 +43,7 @@ export async function GET(request: NextRequest) {
       .limit(100)
       .toArray();
     
-    console.log('✅ [CMS API] Found', content.length, 'items');
+    logger.debug('CMS API found items', { count: content.length });
 
     return NextResponse.json({
       success: true,
@@ -55,7 +53,7 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('❌ [CMS API] Error fetching content:', error);
+    logger.apiError('/api/admin/content/manage', error, { method: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch content', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
@@ -144,7 +142,7 @@ export async function POST(request: NextRequest) {
       contentId: result.insertedId.toString(),
     });
   } catch (error) {
-    console.error('Error creating content:', error);
+    logger.apiError('/api/admin/content/manage', error, { method: 'POST', action: 'create' });
     return NextResponse.json(
       { error: 'Failed to create content' },
       { status: 500 }
@@ -241,7 +239,7 @@ export async function PUT(request: NextRequest) {
       modified: result.modifiedCount,
     });
   } catch (error) {
-    console.error('Error updating content:', error);
+    logger.apiError('/api/admin/content/manage', error, { method: 'PATCH', action: 'update' });
     return NextResponse.json(
       { error: 'Failed to update content' },
       { status: 500 }
@@ -319,7 +317,7 @@ export async function DELETE(request: NextRequest) {
       deleted: result.deletedCount,
     });
   } catch (error) {
-    console.error('Error deleting content:', error);
+    logger.apiError('/api/admin/content/manage', error, { method: 'DELETE', action: 'delete' });
     return NextResponse.json(
       { error: 'Failed to delete content' },
       { status: 500 }

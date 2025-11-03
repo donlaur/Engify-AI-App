@@ -42,6 +42,26 @@ else
 fi
 echo ""
 
+# 3.25. Run tests for staged test files (NEW - CRITICAL)
+echo "🧪 Running tests for staged files..."
+if [ -n "$STAGED_TEST_FILES" ] && [ "$SKIP_TESTS" != "true" ]; then
+    echo "  Running tests for: $(echo $STAGED_TEST_FILES | tr '\n' ' ')"
+    npm run test:run -- $STAGED_TEST_FILES
+    if [ $? -ne 0 ]; then
+        echo "❌ Tests failed. Fix errors before committing."
+        echo "   To skip tests (not recommended): SKIP_TESTS=true git commit"
+        exit 1
+    fi
+    echo "  ✅ All tests passed"
+else
+    if [ "$SKIP_TESTS" = "true" ]; then
+        echo "  ⚠️  Tests skipped (SKIP_TESTS=true)"
+    else
+        echo "  No test files to run"
+    fi
+fi
+echo ""
+
 # 3.5. Icon validation check (CRITICAL - prevents React error #130)
 echo "🎨 Checking icon usage and validation..."
 STAGED_ICON_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' | grep -v '\.test\.' || true)
@@ -81,6 +101,21 @@ echo "✨ Running linters and formatters..."
 pnpm lint-staged
 if [ $? -ne 0 ]; then
     exit 1
+fi
+echo ""
+
+# 6.5. TypeScript type checking (NEW - CRITICAL)
+echo "🔍 Running TypeScript type check..."
+if [ "$SKIP_TYPE_CHECK" != "true" ]; then
+    npm run typecheck
+    if [ $? -ne 0 ]; then
+        echo "❌ Type errors found. Fix errors before committing."
+        echo "   To skip type check (not recommended): SKIP_TYPE_CHECK=true git commit"
+        exit 1
+    fi
+    echo "  ✅ Type check passed"
+else
+    echo "  ⚠️  Type check skipped (SKIP_TYPE_CHECK=true)"
 fi
 echo ""
 
