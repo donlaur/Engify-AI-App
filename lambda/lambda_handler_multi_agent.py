@@ -12,6 +12,7 @@ Beta-optimized: 5-minute timeout, single invocation, no chunking, RAG-enhanced
 
 import json
 import os
+import asyncio
 from datetime import datetime
 from pymongo import MongoClient
 from agents.scrum_meeting import app
@@ -56,7 +57,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
     Returns:
         Formatted context string with prompts and patterns, or empty string if no DB/search fails
     """
-    if not db:
+    if db is None:
         return ""
     
     context_parts = []
@@ -67,7 +68,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
     
     # Search prompts collection using text index
     try:
-        prompts = list(db.collection('prompts').find(
+        prompts = list(db['prompts'].find(
             {
                 '$text': {'$search': search_query},
                 'isPublic': True,
@@ -99,7 +100,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
         try:
             query_words = search_query.lower().split()[:3]  # First 3 words
             if query_words:
-                prompts = list(db.collection('prompts').find({
+                prompts = list(db['prompts'].find({
                     'isPublic': True,
                     'active': {'$ne': False},
                     '$or': [
@@ -120,7 +121,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
     
     # Search patterns collection
     try:
-        patterns = list(db.collection('patterns').find(
+        patterns = list(db['patterns'].find(
             {
                 '$text': {'$search': search_query}
             },
@@ -144,7 +145,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
         try:
             query_words = search_query.lower().split()[:2]
             if query_words:
-                patterns = list(db.collection('patterns').find({
+                patterns = list(db['patterns'].find({
                     '$or': [
                         {'name': {'$regex': '|'.join(query_words), '$options': 'i'}},
                         {'description': {'$regex': '|'.join(query_words), '$options': 'i'}}
@@ -162,7 +163,15 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
     
     return "\n".join(context_parts) if context_parts else ""
 
-async def handler(event, context):
+def handler(event, context):
+    """
+    Lambda handler wrapper for async handler.
+    Lambda Python runtime doesn't automatically await async handlers,
+    so we wrap it with asyncio.run().
+    """
+    return asyncio.run(async_handler(event, context))
+
+async def async_handler(event, context):
     """
     Lambda handler for engineering leadership discussion prep tool.
     Provides multi-perspective analysis on engineering problems from 4 roles.
@@ -233,14 +242,28 @@ async def handler(event, context):
         # Save to MongoDB if available
         session_id = None
         db = get_db()
-        if db:
+        if db is not None:
             try:
-                session_id = db.ai_integration_sessions.insert_one({
-                    'situation': situation,
-                    'context': context,
-                    'result': result,
-                    'created_at': datetime.utcnow()
-                }).inserted_id
+                session_data = {
+                    "timestamp": datetime.utcnow(),
+                    "situation": situation,
+                    "context": context,
+                    "rag_context": rag_context,
+                    "conversation": {
+                        "director": result.get('director_notes', ''),
+                        "manager": result.get('manager_notes', ''),
+                        "tech_lead": result.get('tech_lead_notes', ''),
+                        "architect": result.get('architect_notes', ''),
+                    },
+                    "summary": {
+                        "recommendations": result.get('recommendations', []),
+                        "implementation_plan": result.get('implementation_plan', []),
+                        "risks_and_mitigations": result.get('risks_and_mitigations', []),
+                    },
+                    "turn_count": result.get('turn_count', 0),
+                }
+                insert_result = db['ai_integration_sessions'].insert_one(session_data)
+                session_id = str(insert_result.inserted_id)
             except Exception as e:
                 print(f"Failed to save session to MongoDB: {e}")
         

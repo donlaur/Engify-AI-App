@@ -1,6 +1,7 @@
 # Engineering Leadership Discussion Multi-Agent Deployment Checklist
 
 ## Prerequisites
+
 - [ ] AWS CLI configured with credentials
 - [ ] Docker installed and running
 - [ ] OpenAI API key available
@@ -8,18 +9,21 @@
 - [ ] AWS ECR access configured
 
 ## Step 1: Install Dependencies Locally (Testing)
+
 ```bash
 cd lambda
 pip install -r requirements-multi-agent.txt
 ```
 
 ## Step 2: Test Locally First
+
 ```bash
 # Test the workflow locally before deploying
 python -c "from agents.scrum_meeting import app; print('Workflow compiled successfully')"
 ```
 
 ## Step 3: Set Up AWS ECR
+
 ```bash
 # Create ECR repository
 aws ecr create-repository --repository-name engify-ai-integration-workbench --region us-east-2
@@ -39,6 +43,7 @@ docker build -f lambda/Dockerfile.multi-agent -t engify-ai-integration-workbench
 ```
 
 **Verify build:**
+
 ```bash
 # Test imports
 docker run --rm engify-ai-integration-workbench python3 -c "from langgraph.graph import StateGraph; print('✅ Works')"
@@ -47,6 +52,7 @@ docker run --rm engify-ai-integration-workbench python3 -c "from langgraph.graph
 ## Step 4: Set Up AWS ECR
 
 ## Step 6: Create/Update Lambda Function
+
 ```bash
 # Create Lambda function (first time)
 aws lambda create-function \
@@ -80,20 +86,70 @@ aws lambda update-function-configuration \
   --region us-east-2
 ```
 
-## Step 7: Set Environment Variables in Next.js
+## Step 7: Set Environment Variables in Lambda
+
+**Option 1: Using Helper Script (Recommended)**
+
+```bash
+# Load environment variables from .env.local
+source <(grep -E 'MONGODB_URI|OPENAI_API_KEY' .env.local | sed 's/^/export /')
+
+# Run the script
+./scripts/aws/set-lambda-env.sh
+```
+
+**Option 2: Manual AWS CLI**
+
+```bash
+# Get values from your environment
+export MONGODB_URI="your-mongodb-uri"
+export OPENAI_API_KEY="your-openai-key"
+
+# Set Lambda environment variables
+aws lambda update-function-configuration \
+  --function-name engify-ai-integration-workbench \
+  --environment Variables="{
+    MONGODB_URI=${MONGODB_URI},
+    OPENAI_API_KEY=${OPENAI_API_KEY}
+  }" \
+  --region us-east-2
+```
+
+**Option 3: Using AWS Secrets Manager (Enterprise)**
+
+```bash
+# Future: Use AWS Secrets Manager for production
+# See docs/aws/AWS_SECRETS_MANAGER_MIGRATION.md
+```
+
+**Verify:**
+
+```bash
+aws lambda get-function-configuration \
+  --function-name engify-ai-integration-workbench \
+  --region us-east-2 \
+  --query 'Environment.Variables' \
+  --output json
+```
+
+## Step 8: Set Environment Variables in Next.js
+
 Add to `.env.local`:
+
 ```
 MULTI_AGENT_LAMBDA_FUNCTION_NAME=engify-ai-integration-workbench
 AWS_REGION=us-east-2
 ```
 
 ## Step 8: Grant Lambda Permissions
+
 - [ ] Lambda execution role has permissions to:
   - Write to CloudWatch Logs
   - Access VPC (if MongoDB is in VPC)
   - Access Secrets Manager (if using secrets)
 
 ## Step 9: Test Lambda Directly
+
 ```bash
 # Test Lambda function
 aws lambda invoke \
@@ -106,6 +162,7 @@ cat response.json
 ```
 
 ## Step 10: Test via Next.js API
+
 ```bash
 # Test API route locally
 curl -X POST http://localhost:3000/api/agents/scrum-meeting \
@@ -114,11 +171,13 @@ curl -X POST http://localhost:3000/api/agents/scrum-meeting \
 ```
 
 ## Step 11: Deploy Frontend
+
 - [ ] Add component to a page (e.g., `/dashboard/agents` or `/workbench`)
 - [ ] Test UI interaction
 - [ ] Verify error handling
 
 ## Step 12: Monitor & Debug
+
 - [ ] Check CloudWatch Logs for Lambda errors
 - [ ] Monitor API response times
 - [ ] Check MongoDB for saved sessions
@@ -128,28 +187,36 @@ curl -X POST http://localhost:3000/api/agents/scrum-meeting \
 ## Common Issues & Fixes
 
 ### Issue: Lambda timeout
+
 - **Fix:** Reduce `max_turns` in `scrum_meeting.py` or increase timeout
 
 ### Issue: Import errors in Lambda
+
 - **Fix:** Ensure all dependencies are in `requirements-multi-agent.txt`
 
 ### Issue: MongoDB connection fails
+
 - **Fix:** Check `MONGODB_URI` env var, verify Lambda VPC settings if MongoDB is in VPC
 
 ### Issue: OpenAI API errors
+
 - **Fix:** Verify `OPENAI_API_KEY` is set correctly
 
 ### Issue: Next.js can't invoke Lambda
+
 - **Fix:** Check IAM permissions, verify `MULTI_AGENT_LAMBDA_FUNCTION_NAME` env var
 
 ### Issue: RAG context not injected
+
 - **Fix:** Verify MongoDB text indexes exist, check `get_rag_context()` function logs
 
 ## Estimated Deployment Time
+
 - First-time setup: 30-60 minutes
 - Updates: 5-10 minutes
 
 ## Testing Checklist
+
 - [ ] Lambda function invokes successfully
 - [ ] All 4 agents respond (check CloudWatch logs)
 - [ ] RAG context retrieved from MongoDB
@@ -158,5 +225,3 @@ curl -X POST http://localhost:3000/api/agents/scrum-meeting \
 - [ ] API route returns correct format
 - [ ] Frontend displays results correctly
 - [ ] Error handling works (invalid situation, rate limits, etc.)
-
-

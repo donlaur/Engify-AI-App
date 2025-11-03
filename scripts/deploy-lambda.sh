@@ -1,17 +1,34 @@
 #!/bin/bash
 
 # AWS Lambda Deployment Script for Engify RAG Service
-# Account: [YOUR_AWS_ACCOUNT_ID]
-# Region: us-east-2 (Ohio)
+# Usage: ./scripts/deploy-lambda.sh
+#
+# Required environment variables:
+#   AWS_REGION (defaults to us-east-2 if not set)
+#
+# Optional: AWS_ACCOUNT_ID (auto-detected from AWS credentials if not set)
+#
+# Security: No hardcoded credentials or account IDs
 
 set -e
 
 FUNCTION_NAME="engify-rag"
-REGION="us-east-2"
-ACCOUNT_ID="${AWS_ACCOUNT_ID}"
+REGION="${AWS_REGION:-us-east-2}"
 ROLE_NAME="engify-lambda-execution-role"
 
-echo "🚀 Deploying Engify RAG service to AWS Lambda..."
+# Get AWS account ID from credentials (more secure than hardcoding)
+if [ -z "$AWS_ACCOUNT_ID" ]; then
+    echo "🔍 Detecting AWS Account ID from credentials..."
+    ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text 2>/dev/null || echo "")
+    if [ -z "$ACCOUNT_ID" ]; then
+        echo "❌ Could not detect AWS Account ID. Please set AWS_ACCOUNT_ID environment variable or configure AWS credentials."
+        exit 1
+    fi
+    echo "✅ Detected AWS Account ID: $ACCOUNT_ID"
+else
+    ACCOUNT_ID="$AWS_ACCOUNT_ID"
+    echo "✅ Using AWS Account ID from environment: $ACCOUNT_ID"
+fi
 
 # Check if AWS CLI is configured
 if ! command -v aws &> /dev/null; then

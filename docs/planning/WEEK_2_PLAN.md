@@ -94,7 +94,7 @@ This plan consolidates unfinished work from:
 - [x] Create Lambda Container Image with LangGraph
 - [x] Define 4 agents (Director of Engineering, Engineering Manager, Tech Lead, Architect) with independent LLM calls
 - [x] Build workflow graph with state management
-- [ ] Add MongoDB state persistence
+- [x] Add MongoDB state persistence
 - [x] Implement 5-minute timeout (perfect for beta)
 - [x] Add RAG context injection (prompts/patterns from library)
 - [ ] Add tool use (Jira API, Slack, MongoDB) - optional for MVP
@@ -103,7 +103,10 @@ This plan consolidates unfinished work from:
 - [x] Update package versions to latest (Nov 2025)
 - [x] Build Docker image successfully
 - [x] Fix lazy agent initialization (testing without API key)
-- [ ] Deploy to AWS Lambda (5-minute timeout)
+- [x] Deploy to AWS Lambda (5-minute timeout)
+- [x] Fix async handler wrapper
+- [x] Fix MongoDB boolean checks
+- [x] Set Lambda environment variables
 - [ ] Test with real engineering leadership discussions (2-5 minutes)
 - [ ] Monitor costs and performance
 - [ ] Document architecture decisions

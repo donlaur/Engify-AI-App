@@ -17,9 +17,10 @@ fi
 echo "✅ Docker is running"
 echo ""
 
-# Build image
+# Build image (for Lambda x86_64 architecture)
 echo "📦 Building Docker image..."
-docker build -f lambda/Dockerfile.multi-agent -t engify-ai-integration-workbench:latest .
+echo "   Platform: linux/amd64 (required for AWS Lambda)"
+docker build --platform linux/amd64 -f lambda/Dockerfile.multi-agent -t engify-ai-integration-workbench:latest .
 
 echo ""
 echo "✅ Build complete!"
@@ -53,6 +54,6 @@ echo "📦 Image ready: engify-ai-integration-workbench:latest"
 echo ""
 echo "Next steps:"
 echo "  1. Tag for ECR: docker tag engify-ai-integration-workbench:latest <ACCOUNT>.dkr.ecr.us-east-2.amazonaws.com/engify-ai-integration-workbench:latest"
-echo "  2. Push to ECR: docker push <ACCOUNT>.dkr.ecr.us-east-2.amazonaws.com/engify-ai-integration-workbench:latest"
-echo "  3. Deploy to Lambda"
+echo "  2. Push to ECR: docker push --platform linux/amd64 <ACCOUNT>.dkr.ecr.us-east-2.amazonaws.com/engify-ai-integration-workbench:latest"
+echo "  3. Deploy to Lambda using scripts/aws/deploy-multi-agent-lambda.sh"
 
