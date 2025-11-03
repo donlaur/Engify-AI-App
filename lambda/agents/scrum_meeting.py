@@ -106,7 +106,7 @@ def get_architect():
     )
 
 # Node functions for each agent
-def director_turn(state: AIIntegrationState) -> AIIntegrationState:
+async def director_turn(state: AIIntegrationState) -> AIIntegrationState:
     """Director of Engineering provides strategic perspective"""
     if state['turn_count'] >= state['max_turns']:
         return state
@@ -126,7 +126,7 @@ Context: {state['context']}"""),
         HumanMessage(content=f"Current topic: {state['current_topic']}. Provide strategic guidance on AI integration. Previous notes: {state['director_notes']}")
     ]
     
-    response = director.invoke(messages)
+    response = await director.ainvoke(messages)
     
     return {
         **state,
@@ -134,7 +134,7 @@ Context: {state['context']}"""),
         "turn_count": state['turn_count'] + 1,
     }
 
-def manager_turn(state: AIIntegrationState) -> AIIntegrationState:
+async def manager_turn(state: AIIntegrationState) -> AIIntegrationState:
     """Engineering Manager provides team adoption perspective"""
     if state['turn_count'] >= state['max_turns']:
         return state
@@ -154,7 +154,7 @@ Context: {state['context']}"""),
         HumanMessage(content=f"Topic: {state['current_topic']}. Discuss team adoption and workflow integration. Previous notes: {state['manager_notes']}. Director said: {state['director_notes'][-500:]}")
     ]
     
-    response = manager.invoke(messages)
+    response = await manager.ainvoke(messages)
     
     return {
         **state,
@@ -162,7 +162,7 @@ Context: {state['context']}"""),
         "turn_count": state['turn_count'] + 1,
     }
 
-def tech_lead_turn(state: AIIntegrationState) -> AIIntegrationState:
+async def tech_lead_turn(state: AIIntegrationState) -> AIIntegrationState:
     """Tech Lead provides technical implementation perspective"""
     if state['turn_count'] >= state['max_turns']:
         return state
@@ -182,7 +182,7 @@ Context: {state['context']}"""),
         HumanMessage(content=f"Topic: {state['current_topic']}. Discuss technical feasibility and tool selection. Previous notes: {state['tech_lead_notes']}. Manager said: {state['manager_notes'][-500:]}")
     ]
     
-    response = tech_lead.invoke(messages)
+    response = await tech_lead.ainvoke(messages)
     
     return {
         **state,
@@ -190,7 +190,7 @@ Context: {state['context']}"""),
         "turn_count": state['turn_count'] + 1,
     }
 
-def architect_turn(state: AIIntegrationState) -> AIIntegrationState:
+async def architect_turn(state: AIIntegrationState) -> AIIntegrationState:
     """Architect provides system design perspective"""
     if state['turn_count'] >= state['max_turns']:
         return state
@@ -210,7 +210,7 @@ Context: {state['context']}"""),
         HumanMessage(content=f"Topic: {state['current_topic']}. Discuss architecture and scalability considerations. Previous notes: {state['architect_notes']}. Tech Lead said: {state['tech_lead_notes'][-500:]}")
     ]
     
-    response = architect.invoke(messages)
+    response = await architect.ainvoke(messages)
     
     # Extract recommendations and risks from architect response
     content = response.content.lower()
