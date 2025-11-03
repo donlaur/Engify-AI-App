@@ -39,10 +39,29 @@ export async function POST(request: NextRequest) {
       result.updated += anthropicResult.updated;
     }
 
-    if (provider === 'google' || !provider) {
+    if (provider === 'google' || !provider || provider === 'all') {
       const googleResult = await syncGoogleModels();
       result.created += googleResult.created;
       result.updated += googleResult.updated;
+    }
+
+    if (provider === 'replicate' || provider === 'all') {
+      // Fetch Replicate models from dedicated endpoint
+      const baseUrl = new URL(request.url);
+      baseUrl.pathname = '/api/admin/ai-models/sync/replicate';
+      const replicateResponse = await fetch(baseUrl.toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': request.headers.get('Cookie') || '',
+        },
+      });
+      
+      if (replicateResponse.ok) {
+        const replicateData = await replicateResponse.json();
+        if (replicateData.created) result.created += replicateData.created;
+        if (replicateData.updated) result.updated += replicateData.updated;
+      }
     }
 
     // Audit log
