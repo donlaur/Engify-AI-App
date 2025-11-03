@@ -83,7 +83,7 @@ export const CONTENT_AGENTS: ContentPublishingAgent[] = [
   {
     role: 'content_generator',
     name: 'Content Generator',
-    model: 'gpt-4-turbo-preview',
+    model: 'gpt-4o',
     provider: 'openai',
     temperature: 0.7,
     maxTokens: 3000,
@@ -122,7 +122,7 @@ Write content that gets developers excited to try something new.`,
     role: 'seo_specialist',
     name: 'SEO Specialist',
     model: 'claude-3-5-sonnet-20241022',
-    provider: 'anthropic',
+    provider: 'claude-sonnet',
     temperature: 0.3,
     maxTokens: 2000,
     systemPrompt: `You are an SEO Specialist focused on making technical content discoverable.
@@ -185,7 +185,7 @@ Balance SEO with readability - never stuff keywords awkwardly.`,
   {
     role: 'human_tone_editor',
     name: 'Human Tone Editor',
-    model: 'gpt-4-turbo-preview',
+    model: 'gpt-4o',
     provider: 'openai',
     temperature: 0.6,
     maxTokens: 2000,
@@ -232,7 +232,7 @@ Make it sound like a real developer wrote this, not an AI.`,
     role: 'learning_expert',
     name: 'Learning & Education Expert',
     model: 'claude-3-5-sonnet-20241022',
-    provider: 'anthropic',
+    provider: 'claude-sonnet',
     temperature: 0.4,
     maxTokens: 2000,
     systemPrompt: `You are a Learning Expert focused on adult education and technical training.
@@ -292,7 +292,7 @@ Remember: If they can't DO something after reading, it's not good enough.`,
   {
     role: 'tech_accuracy_sme',
     name: 'Technical Accuracy SME',
-    model: 'gpt-4-turbo-preview',
+    model: 'gpt-4o',
     provider: 'openai',
     temperature: 0.2,
     maxTokens: 1500,
@@ -349,7 +349,7 @@ Be thorough but practical. Flag serious errors, not nitpicks.`,
     role: 'final_publisher',
     name: 'Final Publisher',
     model: 'claude-3-5-sonnet-20241022',
-    provider: 'anthropic',
+    provider: 'claude-sonnet',
     temperature: 0.2,
     maxTokens: 1500,
     systemPrompt: `You are the Final Publisher - the last check before content goes live.
@@ -514,9 +514,8 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
     const provider = await AIProviderFactory.create(agent.provider, this.organizationId);
 
     const response = await provider.execute({
-      model: agent.model,
+      prompt: prompt,
       systemPrompt: agent.systemPrompt,
-      userPrompt: prompt,
       temperature: agent.temperature,
       maxTokens: agent.maxTokens,
     });
@@ -549,9 +548,8 @@ Provide your review in JSON format as specified in your system prompt.
       const provider = await AIProviderFactory.create(agent.provider, this.organizationId);
 
       const response = await provider.execute({
-        model: agent.model,
+        prompt: reviewPrompt,
         systemPrompt: agent.systemPrompt,
-        userPrompt: reviewPrompt,
         temperature: agent.temperature,
         maxTokens: agent.maxTokens,
         responseFormat: { type: 'json_object' },

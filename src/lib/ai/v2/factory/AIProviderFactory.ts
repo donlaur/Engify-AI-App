@@ -24,11 +24,12 @@ export class AIProviderFactory {
     string,
     () => AIProvider
   >([
-    // OpenAI models
-    ['openai', () => new OpenAIAdapter('gpt-3.5-turbo')],
+    // OpenAI models (updated Nov 2025 - latest versions)
+    ['openai', () => new OpenAIAdapter('gpt-4o')], // Default to latest GPT-4o
     ['openai-mini', () => new OpenAIAdapter('gpt-4o-mini')],
     ['openai-gpt4', () => new OpenAIAdapter('gpt-4')],
-    ['openai-gpt4-turbo', () => new OpenAIAdapter('gpt-4-turbo-preview')],
+    ['openai-gpt4-turbo', () => new OpenAIAdapter('gpt-4o')], // gpt-4-turbo-preview deprecated, use gpt-4o
+    ['openai-gpt4o', () => new OpenAIAdapter('gpt-4o')], // Explicit GPT-4o alias
 
     // Claude models
     ['claude', () => new ClaudeAdapter('claude-3-haiku-20240307')],
