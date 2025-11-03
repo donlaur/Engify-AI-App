@@ -8,7 +8,7 @@
  *       Editor → SME → Final Approval
  */
 
-import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
+import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFactoryWithRegistry';
 
 export interface ContentReviewAgent {
   role: string;
@@ -355,7 +355,7 @@ export class ContentReviewService {
     content: string
   ): Promise<ReviewResult> {
     try {
-      const provider = await AIProviderFactory.create(
+      const provider = await AIProviderFactoryWithRegistry.create(
         agent.provider,
         this.organizationId
       );
@@ -373,12 +373,10 @@ Provide your review in the specified JSON format.
 `;
 
       const response = await provider.execute({
-        model: agent.model,
-        systemPrompt: agent.systemPrompt,
-        userPrompt,
+        prompt: userPrompt,
+        systemPrompt: agent.systemPrompt + '\n\nRespond with valid JSON only, no markdown or code blocks.',
         temperature: agent.temperature,
         maxTokens: 2000,
-        responseFormat: { type: 'json_object' },
       });
 
       // Parse the JSON response
@@ -530,14 +528,10 @@ export async function generateAndReviewArticle(
   // Step 1: Generate initial draft
   console.log('📝 Generating initial draft...');
 
-  const provider = await AIProviderFactory.create('openai', organizationId);
+  const provider = await AIProviderFactoryWithRegistry.create('openai', organizationId);
 
   const draftResponse = await provider.execute({
-    model: 'gpt-4-turbo-preview',
-    systemPrompt: `You are an expert technical writer creating content for Engify.ai, 
-an AI-enabled development platform. Write clear, engaging, technically accurate articles 
-that help developers master AI-assisted development.`,
-    userPrompt: `Write a comprehensive technical article about: ${topic}
+    prompt: `Write a comprehensive technical article about: ${topic}
 
 Requirements:
 - 800-1200 words
