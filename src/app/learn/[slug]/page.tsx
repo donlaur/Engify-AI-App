@@ -179,7 +179,7 @@ export default async function ArticlePage({ params }: PageProps) {
             </p>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
-                <Icons.thumbsUp className="mr-2 h-4 w-4" />
+                <Icons.like className="mr-2 h-4 w-4" />
                 Helpful
               </Button>
               <Button variant="outline" size="sm">

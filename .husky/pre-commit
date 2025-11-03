@@ -4,6 +4,15 @@
 echo "🔒 Running pre-commit checks..."
 echo ""
 
+# 0. AI Guardrails Enforcement (NEW - CRITICAL)
+echo "🛡️  Enforcing AI guardrails..."
+tsx scripts/ai/enforce-guardrails.ts
+if [ $? -ne 0 ]; then
+    echo "❌ Guardrails failed. Review and fix before committing."
+    exit 1
+fi
+echo ""
+
 # 1. Enterprise compliance check (NEW - CRITICAL)
 echo "🏢 Checking enterprise compliance..."
 node scripts/maintenance/check-enterprise-compliance.js
