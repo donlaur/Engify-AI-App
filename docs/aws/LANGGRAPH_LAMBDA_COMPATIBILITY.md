@@ -113,6 +113,7 @@ Package: ZIP deployment (50MB limit, or 10GB with Lambda Container Image)
 ┌─────────────────────────────────────────────────────────┐
 │                    Vercel (Next.js)                     │
 │  Frontend + API Routes (/api/agents/scrum-meeting)     │
+│  Engineering Leadership Discussion Component             │
 └────────────────────┬────────────────────────────────────┘
                      │
                      │ HTTP POST
@@ -213,7 +214,7 @@ pydantic==2.5.0
 
 ### Strategy 1: Chunked Workflows (Recommended)
 
-**Problem:** Scrum meeting might take > 15 minutes  
+**Problem:** Engineering leadership discussion might take > 15 minutes  
 **Solution:** Break into chunks, save state after each
 
 ```python
@@ -242,7 +243,7 @@ async def handler(event, context):
             "status": "in_progress",
             "meeting_id": meeting_id,
             "next_topic": result['next_topic'],
-            "continue_url": f"/api/agents/scrum-meeting/continue/{meeting_id}"
+            "continue_url": f"/api/agents/scrum-meeting/continue/{session_id}"
         }
     else:
         return {
@@ -440,7 +441,7 @@ aws lambda update-function-configuration \
 **Note:** 5-minute timeout is perfect for beta/early release:
 
 - ✅ Simple implementation (no chunking needed)
-- ✅ Scrum meetings typically 2-5 minutes
+- ✅ Engineering leadership discussions typically 2-5 minutes
 - ✅ Sufficient for early users
 - ✅ Can upgrade to 15-minute timeout later if needed
 
@@ -497,7 +498,7 @@ async def handler(event, context):
 
 ### Step 4: Test & Optimize (1-2 hours)
 
-- Test with real scrum meetings (2-5 minutes)
+- Test with real engineering leadership discussions (2-5 minutes)
 - Measure cold start times
 - Optimize package size
 - Monitor costs

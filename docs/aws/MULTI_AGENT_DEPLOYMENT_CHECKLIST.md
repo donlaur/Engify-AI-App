@@ -1,4 +1,4 @@
-# Multi-Agent Workflow Deployment Checklist
+# Engineering Leadership Discussion Multi-Agent Deployment Checklist
 
 ## Prerequisites
 - [ ] AWS CLI configured with credentials
@@ -22,7 +22,7 @@ python -c "from agents.scrum_meeting import app; print('Workflow compiled succes
 ## Step 3: Set Up AWS ECR
 ```bash
 # Create ECR repository
-aws ecr create-repository --repository-name engify-multi-agent --region us-east-2
+aws ecr create-repository --repository-name engify-ai-integration-workbench --region us-east-2
 
 # Get login token
 aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin <YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com
@@ -31,24 +31,24 @@ aws ecr get-login-password --region us-east-2 | docker login --username AWS --pa
 ## Step 4: Build Docker Image
 ```bash
 # From project root
-docker build -f lambda/Dockerfile.multi-agent -t engify-multi-agent .
+docker build -f lambda/Dockerfile.multi-agent -t engify-ai-integration-workbench .
 
 # Tag for ECR
-docker tag engify-multi-agent:latest <YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com/engify-multi-agent:latest
+docker tag engify-ai-integration-workbench:latest <YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com/engify-ai-integration-workbench:latest
 ```
 
 ## Step 5: Push to ECR
 ```bash
-docker push <YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com/engify-multi-agent:latest
+docker push <YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com/engify-ai-integration-workbench:latest
 ```
 
 ## Step 6: Create/Update Lambda Function
 ```bash
 # Create Lambda function (first time)
 aws lambda create-function \
-  --function-name engify-scrum-meeting-agent \
+  --function-name engify-ai-integration-workbench \
   --package-type Image \
-  --code ImageUri=<YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com/engify-multi-agent:latest \
+  --code ImageUri=<YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com/engify-ai-integration-workbench:latest \
   --role arn:aws:iam::<YOUR_ACCOUNT_ID>:role/lambda-execution-role \
   --timeout 300 \
   --memory-size 1024 \
@@ -60,13 +60,13 @@ aws lambda create-function \
 
 # OR update existing function
 aws lambda update-function-code \
-  --function-name engify-scrum-meeting-agent \
-  --image-uri <YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com/engify-multi-agent:latest \
+  --function-name engify-ai-integration-workbench \
+  --image-uri <YOUR_ACCOUNT_ID>.dkr.ecr.us-east-2.amazonaws.com/engify-ai-integration-workbench:latest \
   --region us-east-2
 
 # Update configuration
 aws lambda update-function-configuration \
-  --function-name engify-scrum-meeting-agent \
+  --function-name engify-ai-integration-workbench \
   --timeout 300 \
   --memory-size 1024 \
   --environment Variables="{
@@ -79,7 +79,7 @@ aws lambda update-function-configuration \
 ## Step 7: Set Environment Variables in Next.js
 Add to `.env.local`:
 ```
-MULTI_AGENT_LAMBDA_FUNCTION_NAME=engify-scrum-meeting-agent
+MULTI_AGENT_LAMBDA_FUNCTION_NAME=engify-ai-integration-workbench
 AWS_REGION=us-east-2
 ```
 
@@ -93,8 +93,8 @@ AWS_REGION=us-east-2
 ```bash
 # Test Lambda function
 aws lambda invoke \
-  --function-name engify-scrum-meeting-agent \
-  --payload '{"body": "{\"agenda\": \"Plan sprint goals\"}"}' \
+  --function-name engify-ai-integration-workbench \
+  --payload '{"situation": "How do we integrate AI into our code review process?", "context": "Team of 20 engineers using React/TypeScript"}' \
   --region us-east-2 \
   response.json
 
@@ -106,19 +106,20 @@ cat response.json
 # Test API route locally
 curl -X POST http://localhost:3000/api/agents/scrum-meeting \
   -H "Content-Type: application/json" \
-  -d '{"agenda": "Plan sprint goals"}'
+  -d '{"situation": "How do we integrate AI into our SDLC?", "context": "Engineering team wants to adopt AI coding assistants"}'
 ```
 
 ## Step 11: Deploy Frontend
-- [ ] Add component to a page (e.g., `/dashboard/agents`)
+- [ ] Add component to a page (e.g., `/dashboard/agents` or `/workbench`)
 - [ ] Test UI interaction
 - [ ] Verify error handling
 
 ## Step 12: Monitor & Debug
 - [ ] Check CloudWatch Logs for Lambda errors
 - [ ] Monitor API response times
-- [ ] Check MongoDB for saved meetings
+- [ ] Check MongoDB for saved sessions
 - [ ] Verify rate limiting works
+- [ ] Verify RAG context injection working
 
 ## Common Issues & Fixes
 
@@ -137,6 +138,9 @@ curl -X POST http://localhost:3000/api/agents/scrum-meeting \
 ### Issue: Next.js can't invoke Lambda
 - **Fix:** Check IAM permissions, verify `MULTI_AGENT_LAMBDA_FUNCTION_NAME` env var
 
+### Issue: RAG context not injected
+- **Fix:** Verify MongoDB text indexes exist, check `get_rag_context()` function logs
+
 ## Estimated Deployment Time
 - First-time setup: 30-60 minutes
 - Updates: 5-10 minutes
@@ -144,8 +148,11 @@ curl -X POST http://localhost:3000/api/agents/scrum-meeting \
 ## Testing Checklist
 - [ ] Lambda function invokes successfully
 - [ ] All 4 agents respond (check CloudWatch logs)
+- [ ] RAG context retrieved from MongoDB
+- [ ] Agents reference prompts/patterns in responses
 - [ ] State saves to MongoDB
 - [ ] API route returns correct format
 - [ ] Frontend displays results correctly
-- [ ] Error handling works (invalid agenda, rate limits, etc.)
+- [ ] Error handling works (invalid situation, rate limits, etc.)
+
 

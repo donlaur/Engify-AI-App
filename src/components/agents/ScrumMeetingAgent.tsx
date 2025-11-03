@@ -7,45 +7,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
 
-interface MeetingResult {
-  meeting_id: string | null;
+interface WorkbenchResult {
+  session_id: string | null;
   summary: {
-    action_items: Array<{ title: string; assignee: string }>;
-    blockers: string[];
-    next_sprint_goals: string[];
+    recommendations: Array<{ title?: string; description?: string }>;
+    implementation_plan: string[];
+    risks_and_mitigations: string[];
   };
   conversation: {
-    scrum_master: string;
-    pm: string;
-    po: string;
-    engineer: string;
+    director: string;
+    manager: string;
+    tech_lead: string;
+    architect: string;
   };
   turn_count: number;
 }
 
 export function ScrumMeetingAgent() {
-  const [agenda, setAgenda] = useState('');
-  const [topics, setTopics] = useState<string[]>([]);
-  const [currentTopic, setCurrentTopic] = useState('');
-  const [result, setResult] = useState<MeetingResult | null>(null);
+  const [situation, setSituation] = useState('');
+  const [context, setContext] = useState('');
+  const [result, setResult] = useState<WorkbenchResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  
-  const addTopic = () => {
-    if (currentTopic.trim() && !topics.includes(currentTopic.trim())) {
-      setTopics([...topics, currentTopic.trim()]);
-      setCurrentTopic('');
-    }
-  };
 
-  const removeTopic = (index: number) => {
-    setTopics(topics.filter((_, i) => i !== index));
-  };
-
-  const runMeeting = async () => {
-    if (!agenda.trim()) {
-      setError('Please enter an agenda');
+  const runWorkbench = async () => {
+    if (!situation.trim()) {
+      setError('Please describe the situation or problem');
       return;
     }
 
@@ -58,28 +46,28 @@ export function ScrumMeetingAgent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          agenda: agenda.trim(), 
-          topics: topics.filter(Boolean) 
+          situation: situation.trim(),
+          context: context.trim() || undefined,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to run meeting');
+        throw new Error(errorData.error || 'Failed to run engineering leadership discussion');
       }
 
       const data = await response.json();
       setResult(data);
       
       toast({
-        title: 'Meeting Complete!',
-        description: `Completed ${data.turn_count} turns with 4 agents`,
+        title: 'Analysis Complete!',
+        description: `Got perspectives from 4 engineering leadership roles. Review recommendations below.`,
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
       toast({
-        title: 'Meeting Failed',
+        title: 'Analysis Failed',
         description: errorMessage,
         variant: 'destructive',
       });
@@ -92,81 +80,62 @@ export function ScrumMeetingAgent() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Scrum Meeting Multi-Agent</CardTitle>
+          <CardTitle>Engineering Leadership Prep Tool</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Run a simulated scrum meeting with 4 AI agents (Scrum Master, PM, PO, Engineer)
+            Prepare for engineering leadership meetings, ARB reviews, or engineering+product 
+            discussions. Get multi-perspective analysis on problems before your meeting. 
+            Input a situation, get comprehensive perspectives from Director of Engineering, 
+            Engineering Manager, Tech Lead, and Architect — complete with actionable recommendations 
+            and risk analysis.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="text-sm font-medium mb-2 block">Meeting Agenda</label>
+            <label className="text-sm font-medium mb-2 block">
+              Situation or Problem <span className="text-destructive">*</span>
+            </label>
             <Textarea
-              value={agenda}
-              onChange={(e) => setAgenda(e.target.value)}
-              placeholder="Enter sprint planning agenda..."
+              value={situation}
+              onChange={(e) => setSituation(e.target.value)}
+              placeholder="Example: We need to integrate AI coding assistants into our SDLC. Our team uses React/TypeScript, we have 25 engineers, and we're concerned about code quality and developer experience..."
               rows={6}
               disabled={isRunning}
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Describe the situation, problem, or challenge you're facing. This will be analyzed 
+              from multiple engineering leadership perspectives.
+            </p>
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-2 block">Topics (Optional)</label>
-            <div className="flex gap-2 mb-2">
-              <Textarea
-                value={currentTopic}
-                onChange={(e) => setCurrentTopic(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    addTopic();
-                  }
-                }}
-                placeholder="Add a topic..."
-                rows={2}
-                disabled={isRunning}
-                className="flex-1"
-              />
-              <Button onClick={addTopic} disabled={isRunning || !currentTopic.trim()}>
-                Add
-              </Button>
-            </div>
-            {topics.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {topics.map((topic, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 bg-muted px-3 py-1 rounded-md text-sm"
-                  >
-                    <span>{topic}</span>
-                    <button
-                      onClick={() => removeTopic(i)}
-                      disabled={isRunning}
-                      className="text-muted-foreground hover:text-foreground"
-                      aria-label="Remove topic"
-                    >
-                      <Icons.x className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <label className="text-sm font-medium mb-2 block">Additional Context (Optional)</label>
+            <Textarea
+              value={context}
+              onChange={(e) => setContext(e.target.value)}
+              placeholder="Example: We're a Series B startup, our current code review process takes 2-3 days, and we're evaluating GitHub Copilot vs Cursor..."
+              rows={4}
+              disabled={isRunning}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Add any relevant context about your team, company, constraints, or current state.
+            </p>
           </div>
 
           <Button
-            onClick={runMeeting}
-            disabled={isRunning || !agenda.trim()}
+            onClick={runWorkbench}
+            disabled={isRunning || !situation.trim()}
             className="w-full"
             size="lg"
           >
             {isRunning ? (
               <>
                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                Running meeting... (up to 5 minutes)
+                Analyzing from multiple perspectives... (up to 5 minutes)
               </>
             ) : (
               <>
                 <Icons.play className="mr-2 h-4 w-4" />
-                Start Scrum Meeting
+                Get Multi-Perspective Analysis
               </>
             )}
           </Button>
@@ -183,50 +152,52 @@ export function ScrumMeetingAgent() {
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Meeting Summary</CardTitle>
+              <CardTitle>Multi-Perspective Analysis Results</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Completed {result.turn_count} turns across 4 agents
+                Completed {result.turn_count} turns across 4 engineering leadership roles. 
+                Use these perspectives to prepare for your meeting or ARB review.
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold mb-2">Action Items</h4>
-                {result.summary.action_items.length > 0 ? (
+                <h4 className="font-semibold mb-2">Recommendations</h4>
+                {result.summary.recommendations.length > 0 ? (
                   <ul className="list-disc list-inside space-y-2">
-                    {result.summary.action_items.map((item, i) => (
-                      <li key={i}>
-                        <strong>{item.title}</strong> - {item.assignee}
+                    {result.summary.recommendations.map((rec, i) => (
+                      <li key={i} className="text-sm">
+                        {rec.title && <strong>{rec.title}: </strong>}
+                        {rec.description || JSON.stringify(rec)}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-muted-foreground text-sm">No action items identified</p>
+                  <p className="text-muted-foreground text-sm">No explicit recommendations extracted</p>
                 )}
               </div>
 
               <div>
-                <h4 className="font-semibold mb-2">Blockers</h4>
-                {result.summary.blockers.length > 0 ? (
-                  <ul className="list-disc list-inside space-y-2">
-                    {result.summary.blockers.map((blocker, i) => (
-                      <li key={i}>{blocker}</li>
+                <h4 className="font-semibold mb-2">Implementation Plan</h4>
+                {result.summary.implementation_plan.length > 0 ? (
+                  <ol className="list-decimal list-inside space-y-2">
+                    {result.summary.implementation_plan.map((step, i) => (
+                      <li key={i} className="text-sm">{step}</li>
                     ))}
-                  </ul>
+                  </ol>
                 ) : (
-                  <p className="text-muted-foreground text-sm">No blockers identified</p>
+                  <p className="text-muted-foreground text-sm">No implementation plan extracted</p>
                 )}
               </div>
 
               <div>
-                <h4 className="font-semibold mb-2">Next Sprint Goals</h4>
-                {result.summary.next_sprint_goals.length > 0 ? (
+                <h4 className="font-semibold mb-2">Risks & Mitigations</h4>
+                {result.summary.risks_and_mitigations.length > 0 ? (
                   <ul className="list-disc list-inside space-y-2">
-                    {result.summary.next_sprint_goals.map((goal, i) => (
-                      <li key={i}>{goal}</li>
+                    {result.summary.risks_and_mitigations.map((risk, i) => (
+                      <li key={i} className="text-sm">{risk}</li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-muted-foreground text-sm">No sprint goals identified</p>
+                  <p className="text-muted-foreground text-sm">No risks identified</p>
                 )}
               </div>
             </CardContent>
@@ -234,31 +205,31 @@ export function ScrumMeetingAgent() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Agent Conversation</CardTitle>
+              <CardTitle>Engineering Leadership Discussion</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div>
-                <h4 className="font-semibold mb-2">Scrum Master</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {result.conversation.scrum_master || 'No notes'}
+                <h4 className="font-semibold mb-2">Director of Engineering</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted p-3 rounded">
+                  {result.conversation.director || 'No notes'}
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">Product Manager</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {result.conversation.pm || 'No notes'}
+                <h4 className="font-semibold mb-2">Engineering Manager</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted p-3 rounded">
+                  {result.conversation.manager || 'No notes'}
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">Product Owner</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {result.conversation.po || 'No notes'}
+                <h4 className="font-semibold mb-2">Tech Lead</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted p-3 rounded">
+                  {result.conversation.tech_lead || 'No notes'}
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">Engineer</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {result.conversation.engineer || 'No notes'}
+                <h4 className="font-semibold mb-2">Architect</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted p-3 rounded">
+                  {result.conversation.architect || 'No notes'}
                 </p>
               </div>
             </CardContent>
@@ -268,4 +239,3 @@ export function ScrumMeetingAgent() {
     </div>
   );
 }
-

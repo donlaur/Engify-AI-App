@@ -5,8 +5,19 @@ import { logger } from '@/lib/logging/logger';
 
 /**
  * POST /api/agents/scrum-meeting
- * Run a scrum meeting simulation with 4 multi-agent system
- * Beta: 5-minute timeout, GPT-4o-mini, simple state management
+ * Engineering Leadership Discussion Prep Tool
+ * 
+ * Get multi-perspective analysis on engineering problems from:
+ * - Director of Engineering (strategic, ROI, organizational impact)
+ * - Engineering Manager (team adoption, workflow integration)
+ * - Tech Lead (technical feasibility, tool selection)
+ * - Architect (system architecture, scalability, security)
+ * 
+ * Use Case: Prepare for engineering leadership meetings, ARB reviews, or 
+ * engineering+product leadership discussions by getting comprehensive perspectives 
+ * before the meeting.
+ * 
+ * Beta: 5-minute timeout, GPT-4o-mini, RAG-enhanced with prompt library context
  */
 export async function POST(request: NextRequest) {
   try {
@@ -21,45 +32,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { agenda, topics = [] } = await request.json();
+    const { situation, context = '' } = await request.json();
     
-    if (!agenda || typeof agenda !== 'string' || agenda.trim().length === 0) {
+    if (!situation || typeof situation !== 'string' || situation.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Agenda is required and must be a non-empty string' },
+        { error: 'Situation is required and must be a non-empty string' },
         { status: 400 }
       );
     }
 
     // Invoke Python Lambda (5-minute timeout)
-    const lambdaFunctionName = process.env.MULTI_AGENT_LAMBDA_FUNCTION_NAME || 'engify-scrum-meeting-agent';
+    const lambdaFunctionName = process.env.MULTI_AGENT_LAMBDA_FUNCTION_NAME || 'engify-ai-integration-workbench';
     
-    logger.debug('Invoking Lambda for scrum meeting', {
+    logger.debug('Invoking Lambda for multi-perspective engineering leadership analysis', {
       functionName: lambdaFunctionName,
-      agendaLength: agenda.length,
-      topicsCount: topics.length,
+      situationLength: situation.length,
+      hasContext: !!context,
     });
 
     const result = await invokeLambda(lambdaFunctionName, {
-      agenda: agenda.trim(),
-      topics: Array.isArray(topics) ? topics : [],
+      situation: situation.trim(),
+      context: context.trim(),
     });
 
     return NextResponse.json({
       success: true,
-      meeting_id: result.meeting_id,
+      session_id: result.session_id,
       summary: result.summary,
       conversation: result.conversation,
       turn_count: result.turn_count,
     });
   } catch (error) {
-    logger.apiError('Scrum meeting error', {
+    logger.apiError('Engineering leadership analysis error', {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     });
 
     return NextResponse.json(
       { 
-        error: 'Failed to run scrum meeting', 
+        error: 'Failed to run multi-perspective analysis', 
         details: error instanceof Error ? error.message : 'Unknown error' 
       },
       { status: 500 }

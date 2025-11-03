@@ -110,7 +110,7 @@ const completion = await openai.chat.completions.create({
 
 ```python
 # Similar to LangGraph
-# ~$0.20-0.40 per scrum meeting
+# ~$0.20-0.40 per engineering leadership discussion
 ```
 
 **GitHub Stars:** 11k+
@@ -141,7 +141,7 @@ const completion = await openai.chat.completions.create({
 
 ```python
 # Similar to LangGraph
-# ~$0.20-0.40 per scrum meeting
+# ~$0.20-0.40 per engineering leadership discussion
 ```
 
 **GitHub Stars:** 24k+
@@ -257,13 +257,14 @@ $0.20/meeting."
 
 ---
 
-## Implementation Plan: Scrum Meeting Multi-Agent (Beta-Optimized)
+## Implementation Plan: Engineering Leadership Discussion Multi-Agent (Beta-Optimized)
 
 **Beta Considerations:**
 
-- ✅ 5-minute timeout (perfect for 2-5 minute meetings)
+- ✅ 5-minute timeout (perfect for 2-5 minute discussions)
 - ✅ No chunking needed (simplified implementation)
-- ✅ Single Lambda invocation per meeting
+- ✅ Single Lambda invocation per discussion
+- ✅ RAG-enhanced with prompt library context
 - ✅ Can upgrade to 15-minute timeout post-beta
 
 ---
@@ -466,7 +467,7 @@ db = MongoClient(MONGODB_URI).engify if MONGODB_URI else None
 
 async def handler(event, context):
     """
-    Lambda handler for scrum meeting multi-agent workflow.
+    Lambda handler for engineering leadership discussion multi-agent workflow.
     Beta: 5-minute timeout, single invocation, no chunking.
     """
     try:
@@ -533,7 +534,7 @@ async def handler(event, context):
             'statusCode': 500,
             'body': json.dumps({
                 'error': str(e),
-                'message': 'Failed to run scrum meeting'
+                'message': 'Failed to run engineering leadership discussion'
             })
         }
 ```
@@ -547,7 +548,7 @@ async def handler(event, context):
 ```bash
 # Create Lambda function from container image
 aws lambda create-function \
-  --function-name engify-scrum-meeting-agent \
+  --function-name engify-ai-integration-workbench \
   --package-type Image \
   --code ImageUri=<account>.dkr.ecr.us-east-2.amazonaws.com/engify-multi-agent:latest \
   --role arn:aws:iam::<account>:role/lambda-execution-role \
@@ -561,13 +562,13 @@ aws lambda create-function \
 
 # Or update existing function
 aws lambda update-function-code \
-  --function-name engify-scrum-meeting-agent \
+  --function-name engify-ai-integration-workbench \
   --image-uri <account>.dkr.ecr.us-east-2.amazonaws.com/engify-multi-agent:latest \
   --region us-east-2
 
 # Update configuration (5-minute timeout for beta)
 aws lambda update-function-configuration \
-  --function-name engify-scrum-meeting-agent \
+  --function-name engify-ai-integration-workbench \
   --timeout 300 \
   --memory-size 1024 \
   --region us-east-2
@@ -686,7 +687,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Invoke Python Lambda (5-minute timeout)
-    const result = await invokeLambda('engify-scrum-meeting-agent', {
+    const result = await invokeLambda('engify-ai-integration-workbench', {
       agenda: agenda.trim(),
       topics,
     });
@@ -698,10 +699,10 @@ export async function POST(request: NextRequest) {
       conversation: result.conversation,
     });
   } catch (error) {
-    console.error('Scrum meeting error:', error);
+    console.error('Engineering leadership discussion error:', error);
     return NextResponse.json(
       {
-        error: 'Failed to run scrum meeting',
+        error: 'Failed to run engineering leadership discussion',
         details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
@@ -914,10 +915,10 @@ MongoDB. Reduced meeting prep time by 60%."
 
 ## Cost Comparison
 
-| Approach                         | Cost per Meeting | Monthly (100 meetings) | Resume Value |
-| -------------------------------- | ---------------- | ---------------------- | ------------ |
-| **Simulated (Current)**          | $0.01            | $1                     | ⭐⭐         |
-| **Real Multi-Agent (LangGraph)** | $0.20-0.40       | $20-40                 | ⭐⭐⭐⭐⭐   |
+| Approach                         | Cost per Discussion | Monthly (100 discussions) | Resume Value |
+| -------------------------------- | ------------------- | -------------------------- | ------------ |
+| **Simulated (Current)**          | $0.01               | $1                         | ⭐⭐         |
+| **Real Multi-Agent (LangGraph)** | $0.20-0.40          | $20-40                     | ⭐⭐⭐⭐⭐   |
 | **CrewAI**                       | $0.20-0.40       | $20-40                 | ⭐⭐⭐⭐     |
 | **AutoGen**                      | $0.20-0.40       | $20-40                 | ⭐⭐⭐⭐     |
 
@@ -933,10 +934,11 @@ MongoDB. Reduced meeting prep time by 60%."
    pip install langgraph langchain-openai
    ```
 
-2. **Create Scrum Meeting Agent** (3-4 hours)
-   - Define 4 agents (Scrum Master, PM, PO, Engineer)
+2. **Create Engineering Leadership Discussion Agent** (3-4 hours)
+   - Define 4 agents (Director, Manager, Tech Lead, Architect)
    - Build workflow graph
    - Add state management
+   - Add RAG context injection
 
 3. **Add Tool Use** (2-3 hours)
    - Jira API integration
@@ -953,14 +955,15 @@ MongoDB. Reduced meeting prep time by 60%."
    - Test end-to-end
    - Monitor costs
 
-**Total Time:** 8-12 hours (1-1.5 days) - Simplified for beta!
+**Total Time:** 8-12 hours (1-1.5 days) - Simplified for beta with RAG enhancement!
 
 **Beta Optimizations:**
 
 - ✅ 5-minute timeout (no chunking needed)
-- ✅ Single Lambda invocation per meeting
+- ✅ Single Lambda invocation per discussion
 - ✅ GPT-4o-mini for all agents (cost-effective)
 - ✅ Simple state management (MongoDB)
+- ✅ RAG-enhanced with prompt library context
 - ✅ Can upgrade post-beta if needed
 
 ---
@@ -1004,7 +1007,7 @@ from agents.scrum_meeting import app, ScrumState
 
 @pytest.mark.asyncio
 async def test_scrum_meeting_workflow():
-    """Test scrum meeting workflow with 4 agents"""
+    """Test engineering leadership discussion workflow with 4 agents"""
     initial_state: ScrumState = {
         'agenda': 'Plan sprint goals',
         'topics': ['Feature A', 'Feature B'],
@@ -1141,7 +1144,7 @@ If meetings exceed 5 minutes:
 
 ```
 "Built production multi-agent system using LangGraph deployed on AWS Lambda
-for autonomous agent collaboration. Implemented scrum meeting simulation
+for autonomous agent collaboration. Implemented engineering leadership discussion simulation
 with 4 independent agents (Scrum Master, PM, PO, Engineer) that:
 
 Technical Achievements:

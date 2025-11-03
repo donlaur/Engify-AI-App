@@ -86,21 +86,22 @@ This plan consolidates unfinished work from:
 **Impact:** HIGH - Transforms from "prompt engineering trick" to "production multi-agent system"  
 **Resume Value:** ⭐⭐⭐⭐⭐ (5/5) - Major differentiator
 
-**Goal:** Replace simulated multi-agent with real LangGraph-based multi-agent system for scrum meeting simulation (Scrum Master, PM, PO, Engineer roles).
+**Goal:** Replace simulated multi-agent with real LangGraph-based multi-agent system for engineering leadership discussions / architectural review board meetings on AI integration into SDLC/workflows (Director of Engineering, Engineering Manager, Tech Lead, Architect roles).
 
 **Tasks:**
 
 - [ ] Install LangGraph dependencies in Python Lambda
 - [ ] Create Lambda Container Image with LangGraph
-- [ ] Define 4 agents (Scrum Master, PM, PO, Engineer) with independent LLM calls
+- [ ] Define 4 agents (Director of Engineering, Engineering Manager, Tech Lead, Architect) with independent LLM calls
 - [ ] Build workflow graph with state management
 - [ ] Add MongoDB state persistence
 - [ ] Implement 5-minute timeout (perfect for beta)
+- [ ] Add RAG context injection (prompts/patterns from library)
 - [ ] Add tool use (Jira API, Slack, MongoDB) - optional for MVP
 - [ ] Create Next.js API route (`/api/agents/scrum-meeting`)
-- [ ] Build frontend component for scrum meeting agent
+- [ ] Build frontend component for engineering leadership discussion
 - [ ] Deploy to AWS Lambda (5-minute timeout)
-- [ ] Test with real scrum meetings (2-5 minutes)
+- [ ] Test with real engineering leadership discussions (2-5 minutes)
 - [ ] Monitor costs and performance
 - [ ] Document architecture decisions
 
@@ -109,11 +110,12 @@ This plan consolidates unfinished work from:
 - ✅ Each agent makes independent LLM calls (not simulated)
 - ✅ Agents communicate via state management
 - ✅ State persisted in MongoDB
-- ✅ 5-minute timeout sufficient for beta meetings
+- ✅ 5-minute timeout sufficient for beta discussions
 - ✅ Lambda deployment working
 - ✅ Frontend integration complete
-- ✅ Costs < $0.50 per meeting
-- ✅ Resume-ready: "Production multi-agent system with LangGraph"
+- ✅ Costs < $0.50 per discussion
+- ✅ RAG context injection working (agents reference library)
+- ✅ Resume-ready: "Production multi-agent system with LangGraph for engineering leadership discussions"
 
 **Architecture:**
 
@@ -123,8 +125,8 @@ Next.js Frontend → Next.js API Route → AWS Lambda (LangGraph) → MongoDB
 
 **Cost:**
 
-- Per meeting: $0.20-0.40 (4 agents × 2-3 turns each)
-- Monthly (100 meetings): $20-40
+- Per discussion: $0.20-0.40 (4 agents × 2-3 turns each)
+- Monthly (100 discussions): $20-40
 - Lambda cost: $0.50-5/month
 
 **Implementation Notes:**
@@ -132,12 +134,14 @@ Next.js Frontend → Next.js API Route → AWS Lambda (LangGraph) → MongoDB
 - Simplified for beta: 5-minute timeout, no chunking needed
 - Each agent uses GPT-4o-mini (cost-effective)
 - State stored in MongoDB (stateless Lambda)
+- RAG-enhanced: Agents reference prompts/patterns from library
 - Can upgrade to 15-minute timeout post-beta if needed
 
 **Related Documentation:**
 
 - [Real Multi-Agent Workflows Guide](../development/REAL_MULTI_AGENT_WORKFLOWS.md) - Complete implementation guide
 - [LangGraph Lambda Compatibility](../aws/LANGGRAPH_LAMBDA_COMPATIBILITY.md) - Lambda-specific deployment guide
+- [AI Workbench RAG Integration](../development/AI_WORKBENCH_RAG_INTEGRATION.md) - RAG context injection guide
 
 ---
 
@@ -954,7 +958,7 @@ Next.js Frontend → Next.js API Route → AWS Lambda (LangGraph) → MongoDB
 **Atomic commits after each sub-phase:**
 
 - Phase 1.1: `"feat: add individual prompt pages with SEO metadata"`
-- Phase 1.5: `"feat: implement real multi-agent workflows with LangGraph for scrum meetings"`
+- Phase 1.5: `"feat: implement real multi-agent workflows with LangGraph for engineering leadership discussions on AI integration"`
 - Phase 1.2: `"feat: add favorites integration to dashboard"`
 - Phase 1.3: `"test: add tests for /api/favorites endpoint"`
 - Phase 1.4: `"chore: create MongoDB text indexes in production"`
