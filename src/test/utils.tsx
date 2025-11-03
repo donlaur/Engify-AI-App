@@ -7,6 +7,7 @@
 import { render, RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactElement, ReactNode } from 'react';
+import { SessionProvider } from 'next-auth/react';
 
 /**
  * Custom render function with providers
@@ -18,12 +19,15 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 
 function AllTheProviders({ children }: { children: ReactNode }) {
   return (
-    <>
-      {/* Add providers here as we build them */}
+    <SessionProvider
+      session={null}
+      basePath="/api/auth"
+    >
+      {/* Add other providers here as we build them */}
       {/* <QueryClientProvider client={queryClient}> */}
       {children}
       {/* </QueryClientProvider> */}
-    </>
+    </SessionProvider>
   );
 }
 

@@ -11,16 +11,20 @@ import { ContactForm } from '@/components/forms/ContactForm';
 global.fetch = vi.fn();
 
 // Mock toast
+const mockToast = {
+  success: vi.fn(),
+  error: vi.fn(),
+};
+
 vi.mock('sonner', () => ({
-  toast: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
+  toast: mockToast,
 }));
 
 describe('ContactForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockToast.success.mockClear();
+    mockToast.error.mockClear();
   });
 
   it('should render form fields', () => {
@@ -125,8 +129,7 @@ describe('ContactForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      const { toast } = require('sonner');
-      expect(toast.error).toHaveBeenCalled();
+      expect(mockToast.error).toHaveBeenCalled();
     });
   });
 });

@@ -30,12 +30,12 @@ describe('Footer', () => {
     expect(screen.getByText(new RegExp(`${currentYear}`))).toBeInTheDocument();
   });
 
-  it('should render contact email link', () => {
+  it('should render contact link', () => {
     render(<Footer />);
 
     const contactLink = screen.getByText('Contact');
     expect(contactLink).toBeInTheDocument();
-    expect(contactLink.closest('a')).toHaveAttribute('href', 'mailto:donlaur@engify.ai');
+    expect(contactLink.closest('a')).toHaveAttribute('href', '/contact');
   });
 
   it('should render all product links', () => {
@@ -43,8 +43,9 @@ describe('Footer', () => {
 
     expect(screen.getByText('AI Workbench')).toBeInTheDocument();
     expect(screen.getByText('Patterns')).toBeInTheDocument();
-    expect(screen.getByText('Library')).toBeInTheDocument();
-    expect(screen.getByText('Pricing')).toBeInTheDocument();
+    expect(screen.getByText('Prompt Library')).toBeInTheDocument();
+    // Pricing removed from footer - checking it's not there
+    expect(screen.queryByText('Pricing')).not.toBeInTheDocument();
   });
 
   it('should render social links', () => {
