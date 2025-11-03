@@ -8,13 +8,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Icons } from '@/lib/icons';
 import { Input } from '@/components/ui/input';
 import { PromptCard } from '@/components/features/PromptCard';
 import { EmptyState } from '@/components/features/EmptyState';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import type { Prompt, PromptCategory, UserRole } from '@/lib/schemas/prompt';
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
+import { useFavorites } from '@/hooks/use-favorites';
 
 interface LibraryClientProps {
   initialPrompts: Prompt[];
@@ -34,6 +38,10 @@ export function LibraryClient({
   uniqueCategories,
   uniqueRoles,
 }: LibraryClientProps) {
+  const searchParams = useSearchParams();
+  const filterParam = searchParams.get('filter');
+  const showFavoritesOnly = filterParam === 'favorites';
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<
     PromptCategory | 'all'
@@ -41,9 +49,11 @@ export function LibraryClient({
   const [selectedRole, setSelectedRole] = useState<UserRole | 'all'>('all');
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllRoles, setShowAllRoles] = useState(false);
+  
+  const { favorites, isLoading: favoritesLoading } = useFavorites();
 
   // Filter prompts
-  const filteredPrompts = initialPrompts.filter((prompt) => {
+  let filteredPrompts = initialPrompts.filter((prompt) => {
     const matchesSearch =
       prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       prompt.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -53,6 +63,13 @@ export function LibraryClient({
 
     return matchesSearch && matchesCategory && matchesRole;
   });
+
+  // Apply favorites filter if active
+  if (showFavoritesOnly) {
+    filteredPrompts = filteredPrompts.filter((prompt) =>
+      favorites.includes(prompt.id)
+    );
+  }
 
   // Dynamic filters from DB (already sorted alphabetically from server)
   const allCategories: Array<PromptCategory | 'all'> = [
@@ -76,11 +93,39 @@ export function LibraryClient({
 
   return (
     <>
+      {/* Header with Favorites Filter Indicator */}
+      {showFavoritesOnly && (
+        <div className="mb-6 rounded-lg border bg-primary/10 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Icons.heart className="h-5 w-5 fill-red-600 text-red-600" />
+              <div>
+                <h2 className="font-semibold">My Favorites</h2>
+                <p className="text-sm text-muted-foreground">
+                  {favoritesLoading
+                    ? 'Loading favorites...'
+                    : `${favorites.length} saved ${favorites.length === 1 ? 'prompt' : 'prompts'}`}
+                </p>
+              </div>
+            </div>
+            <Link href="/prompts">
+              <Button variant="outline" size="sm">
+                View All Prompts
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Stats Panel */}
       <div className="mb-6 grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">Total Prompts</div>
-          <div className="text-2xl font-bold">{initialPrompts.length}</div>
+          <div className="text-sm text-muted-foreground">
+            {showFavoritesOnly ? 'Favorite Prompts' : 'Total Prompts'}
+          </div>
+          <div className="text-2xl font-bold">
+            {showFavoritesOnly ? filteredPrompts.length : initialPrompts.length}
+          </div>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <div className="text-sm text-muted-foreground">Categories</div>
@@ -220,7 +265,17 @@ export function LibraryClient({
       </div>
 
       {/* Results */}
-      {filteredPrompts.length > 0 ? (
+      {showFavoritesOnly && favoritesLoading ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse rounded-lg border bg-card p-6">
+              <div className="mb-4 h-4 w-3/4 rounded bg-muted" />
+              <div className="mb-2 h-3 w-full rounded bg-muted" />
+              <div className="h-3 w-2/3 rounded bg-muted" />
+            </div>
+          ))}
+        </div>
+      ) : filteredPrompts.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredPrompts.map((prompt) => (
             <PromptCard
@@ -232,6 +287,18 @@ export function LibraryClient({
             />
           ))}
         </div>
+      ) : showFavoritesOnly ? (
+        <EmptyState
+          icon={Icons.heart}
+          title="No favorites yet"
+          description="Start saving prompts you love to access them quickly"
+          action={{
+            label: 'Browse Prompts',
+            onClick: () => {
+              window.location.href = '/prompts';
+            },
+          }}
+        />
       ) : (
         <EmptyState
           icon={Icons.brain}

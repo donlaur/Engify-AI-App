@@ -1,8 +1,10 @@
 #!/usr/bin/env tsx
 /* eslint-disable no-console */
 /**
- * Ensure Text Indexes for MongoDB Atlas
+ * Ensure Text Indexes for MongoDB Atlas (with cleanup)
  * Creates text indexes on collections for full-text search
+ * 
+ * Handles existing indexes by dropping old ones first
  * 
  * Usage:
  *   tsx scripts/admin/ensure-text-indexes-atlas.ts <MONGODB_URI>
@@ -24,95 +26,115 @@ async function ensureTextIndexes(mongoUri: string) {
     const dbName = db.databaseName;
     console.log(`📦 Database: ${dbName}\n`);
 
-    // 1. Prompts collection - for RAG chat search
-    console.log('Creating text index on prompts collection...');
-    try {
-      await db.collection('prompts').createIndex(
-        {
-          title: 'text',
-          description: 'text',
-          content: 'text',
-          tags: 'text',
-        },
-        {
-          name: 'prompts_text_search',
-          weights: {
-            title: 10,
-            description: 5,
-            content: 3,
-            tags: 2,
-          },
-          default_language: 'english',
-        }
+    // Helper to drop old text indexes and create new one
+    async function ensureTextIndex(
+      collectionName: string,
+      indexName: string,
+      indexDefinition: Record<string, string>,
+      indexOptions: Record<string, unknown>
+    ) {
+      const collection = db.collection(collectionName);
+      
+      // Get all existing indexes
+      const indexes = await collection.indexes();
+      
+      // Find any existing text indexes (MongoDB only allows one per collection)
+      const existingTextIndex = indexes.find(
+        (idx) => idx.textIndexVersion !== undefined
       );
-      console.log('✅ Prompts text index created\n');
-    } catch (error: any) {
-      if (error.code === 85 || error.codeName === 'IndexOptionsConflict') {
-        console.log('ℹ️  Prompts text index already exists (skipping)\n');
-      } else {
-        throw error;
+      
+      if (existingTextIndex) {
+        if (existingTextIndex.name === indexName) {
+          console.log(`ℹ️  ${collectionName}: ${indexName} already exists (skipping)\n`);
+          return;
+        } else {
+          console.log(`⚠️  ${collectionName}: Dropping old text index: ${existingTextIndex.name}`);
+          await collection.dropIndex(existingTextIndex.name);
+          console.log(`✅ Dropped old text index\n`);
+        }
+      }
+      
+      // Create new index
+      try {
+        await collection.createIndex(indexDefinition, {
+          ...indexOptions,
+          name: indexName,
+        });
+        console.log(`✅ ${collectionName}: ${indexName} created\n`);
+      } catch (error: any) {
+        if (error.code === 85 || error.codeName === 'IndexOptionsConflict') {
+          console.log(`ℹ️  ${collectionName}: ${indexName} already exists (skipping)\n`);
+        } else {
+          throw error;
+        }
       }
     }
+
+    // 1. Prompts collection - for RAG chat search
+    console.log('Ensuring text index on prompts collection...');
+    await ensureTextIndex(
+      'prompts',
+      'prompts_text_search',
+      {
+        title: 'text',
+        description: 'text',
+        content: 'text',
+        tags: 'text',
+      },
+      {
+        weights: {
+          title: 10,
+          description: 5,
+          content: 3,
+          tags: 2,
+        },
+        default_language: 'english',
+      }
+    );
 
     // 2. Patterns collection - for pattern search
-    console.log('Creating text index on patterns collection...');
-    try {
-      await db.collection('patterns').createIndex(
-        {
-          title: 'text',
-          description: 'text',
-          useCases: 'text',
-          tags: 'text',
+    console.log('Ensuring text index on patterns collection...');
+    await ensureTextIndex(
+      'patterns',
+      'patterns_text_search',
+      {
+        title: 'text',
+        description: 'text',
+        useCases: 'text',
+        tags: 'text',
+      },
+      {
+        weights: {
+          title: 10,
+          description: 5,
+          useCases: 3,
+          tags: 2,
         },
-        {
-          name: 'patterns_text_search',
-          weights: {
-            title: 10,
-            description: 5,
-            useCases: 3,
-            tags: 2,
-          },
-          default_language: 'english',
-        }
-      );
-      console.log('✅ Patterns text index created\n');
-    } catch (error: any) {
-      if (error.code === 85 || error.codeName === 'IndexOptionsConflict') {
-        console.log('ℹ️  Patterns text index already exists (skipping)\n');
-      } else {
-        throw error;
+        default_language: 'english',
       }
-    }
+    );
 
     // 3. Web content collection - for general search
-    console.log('Creating text index on web_content collection...');
-    try {
-      await db.collection('web_content').createIndex(
-        {
-          title: 'text',
-          content: 'text',
-          excerpt: 'text',
-          tags: 'text',
+    console.log('Ensuring text index on web_content collection...');
+    await ensureTextIndex(
+      'web_content',
+      'web_content_text_search',
+      {
+        title: 'text',
+        content: 'text',
+        excerpt: 'text',
+        tags: 'text',
+      },
+      {
+        weights: {
+          title: 10,
+          excerpt: 5,
+          content: 3,
+          tags: 2,
         },
-        {
-          name: 'web_content_text_search',
-          weights: {
-            title: 10,
-            excerpt: 5,
-            content: 3,
-            tags: 2,
-          },
-          default_language: 'english',
-        }
-      );
-      console.log('✅ Web content text index created\n');
-    } catch (error: any) {
-      if (error.code === 85 || error.codeName === 'IndexOptionsConflict') {
-        console.log('ℹ️  Web content text index already exists (skipping)\n');
-      } else {
-        throw error;
+        default_language: 'english',
       }
-    }
+    );
 
     // List all indexes
     console.log('📋 Current indexes:');
@@ -121,7 +143,8 @@ async function ensureTextIndexes(mongoUri: string) {
       const indexes = await db.collection(collName).indexes();
       console.log(`\n${collName}:`);
       indexes.forEach((index) => {
-        console.log(`  - ${index.name}`);
+        const isTextIndex = index.textIndexVersion !== undefined;
+        console.log(`  ${isTextIndex ? '🔍' : '📌'} ${index.name}`);
       });
     }
 
@@ -147,4 +170,3 @@ if (!mongoUri) {
 }
 
 ensureTextIndexes(mongoUri);
-

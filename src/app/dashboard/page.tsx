@@ -88,16 +88,14 @@ export default function DashboardPage() {
             const promptDetails = await Promise.all(
               data.favorites.slice(0, 5).map(async (promptId: string) => {
                 try {
-                  const promptResponse = await fetch(
-                    `/api/prompts?id=${promptId}`
-                  );
+                  const promptResponse = await fetch(`/api/prompts/${promptId}`);
                   if (promptResponse.ok) {
                     const promptData = await promptResponse.json();
                     return promptData.prompt || null;
                   }
                   return null;
                 } catch (err) {
-                  console.error(`Failed to fetch prompt ${promptId}:`, err);
+                  // Silently fail - don't show error for individual prompt fetch failures
                   return null;
                 }
               })

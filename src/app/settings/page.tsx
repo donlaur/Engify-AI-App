@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Icons } from '@/lib/icons';
+import { useToast } from '@/hooks/use-toast';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
+  const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
@@ -45,13 +47,24 @@ export default function SettingsPage() {
       });
 
       if (response.ok) {
-        // Success feedback (could add a toast here)
-        console.log('Profile updated successfully');
+        toast({
+          title: 'Profile updated',
+          description: 'Your profile has been updated successfully.',
+        });
       } else {
-        console.error('Failed to update profile');
+        const errorData = await response.json().catch(() => ({}));
+        toast({
+          title: 'Failed to update profile',
+          description: errorData.error || 'An error occurred while saving your profile.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
-      console.error('Error saving profile:', error);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsSaving(false);
     }

@@ -111,7 +111,7 @@ export function PatternsClient({ patterns }: PatternsClientProps) {
           setTotalPrompts(data.stats?.prompts || 0);
         }
       } catch (error) {
-        console.error('Failed to fetch stats:', error);
+        // Silently fail - stats are not critical for patterns page
       }
     };
     fetchStats();

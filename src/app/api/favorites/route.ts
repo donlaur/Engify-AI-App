@@ -10,6 +10,7 @@ import { auth } from '@/lib/auth';
 import { getDb } from '@/lib/mongodb';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { auditLog } from '@/lib/logging/audit';
+import { logger } from '@/lib/logging/logger';
 import { z } from 'zod';
 import { ObjectId } from 'mongodb';
 
@@ -57,7 +58,7 @@ export async function GET(_request: NextRequest) {
       count: favorites.length,
     });
   } catch (error) {
-    console.error('GET /api/favorites error:', error);
+    logger.apiError('GET /api/favorites', error, { method: 'GET' });
     return NextResponse.json(
       { error: 'Failed to fetch favorites', favorites: [] },
       { status: 500 }
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('POST /api/favorites error:', error);
+    logger.apiError('POST /api/favorites', error, { method: 'POST' });
     return NextResponse.json(
       { error: 'Failed to add favorite' },
       { status: 500 }
@@ -231,7 +232,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    console.error('DELETE /api/favorites error:', error);
+    logger.apiError('DELETE /api/favorites', error, { method: 'DELETE' });
     return NextResponse.json(
       { error: 'Failed to remove favorite' },
       { status: 500 }

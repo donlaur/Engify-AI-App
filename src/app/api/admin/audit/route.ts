@@ -3,6 +3,9 @@ import { RBACPresets } from '@/lib/middleware/rbac';
 import { auditLogService } from '@/lib/services/AuditLogService';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
+import { logger } from '@/lib/logging/logger';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { auth } from '@/lib/auth';
 
 const QuerySchema = z.object({
   userId: z.string().optional(),
@@ -23,6 +26,26 @@ export async function GET(request: NextRequest) {
   if (r) return r;
 
   try {
+    // Rate limiting for admin routes
+    const session = await auth();
+    const userId = session?.user?.id || 'anonymous';
+    const rateLimitResult = await checkRateLimit(userId, 'authenticated');
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: rateLimitResult.reason || 'Rate limit exceeded',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': '60',
+            'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
+          },
+        }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
 
     const rawParams: Record<string, unknown> = {
@@ -119,6 +142,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    logger.apiError('/api/admin/audit', error, { method: 'GET' });
     return NextResponse.json(
       {
         success: false,
