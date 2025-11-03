@@ -25,15 +25,21 @@ vi.mock('@/lib/config/ai-models', () => ({
   getModelById: vi.fn(() => ({ id: 'gpt-3.5-turbo' })),
 }));
 
-vi.mock('openai', () => ({
-  default: vi.fn(() => ({
-    chat: {
-      completions: {
-        create: vi.fn(),
-      },
+vi.mock('openai', () => {
+  const mockCreate = vi.fn();
+  return {
+    default: class OpenAI {
+      constructor() {
+        // Constructor for OpenAI class
+      }
+      chat = {
+        completions: {
+          create: mockCreate,
+        },
+      };
     },
-  })),
-}));
+  };
+});
 
 describe('POST /api/chat', () => {
   beforeEach(() => {

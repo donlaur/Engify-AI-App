@@ -64,11 +64,17 @@ function findIconUsages(filePath: string): Map<string, number> {
   const content = readFileSync(filePath, 'utf-8');
   const usages = new Map<string, number>();
 
-  // Match Icons.iconName
+  // Match Icons.iconName but exclude JavaScript properties like .length, .constructor, etc.
+  // Use negative lookahead to avoid matching after property accessors
+  const javascriptProperties = new Set(['length', 'constructor', 'toString', 'valueOf', 'prototype']);
   const matches = content.matchAll(/Icons\.(\w+)/g);
 
   for (const match of matches) {
     const iconName = match[1];
+    // Skip JavaScript built-in properties that are false positives
+    if (javascriptProperties.has(iconName)) {
+      continue;
+    }
     usages.set(iconName, (usages.get(iconName) || 0) + 1);
   }
 

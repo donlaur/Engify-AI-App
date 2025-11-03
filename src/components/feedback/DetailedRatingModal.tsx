@@ -17,11 +17,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+// RadioGroup and RadioGroupItem removed - unused
 import { Checkbox } from '@/components/ui/checkbox';
 import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
 import { FeedbackErrorBoundary } from '@/components/ErrorBoundary';
+import { cn } from '@/lib/utils';
 
 interface DetailedRatingModalProps {
   open: boolean;
@@ -34,7 +35,7 @@ export function DetailedRatingModal({
   open,
   onClose,
   promptId,
-  promptTitle,
+  promptTitle: _promptTitle, // Reserved for future use
 }: DetailedRatingModalProps) {
   const { toast } = useToast();
   const [rating, setRating] = useState<number>(0);

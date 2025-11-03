@@ -17,8 +17,8 @@ vi.mock('@/lib/icons', () => ({
   Icons: {
     heart: ({ className }: { className?: string }) => <span data-testid="heart-icon" className={className}>❤️</span>,
     bookmark: ({ className }: { className?: string }) => <span data-testid="bookmark-icon" className={className}>🔖</span>,
-    thumbsUp: ({ className }: { className?: string }) => <span data-testid="thumbs-up-icon" className={className}>👍</span>,
-    thumbsDown: ({ className }: { className?: string }) => <span data-testid="thumbs-down-icon" className={className}>👎</span>,
+    like: ({ className }: { className?: string }) => <span data-testid="like-icon" className={className}>👍</span>,
+    dislike: ({ className }: { className?: string }) => <span data-testid="dislike-icon" className={className}>👎</span>,
   },
 }));
 
@@ -68,7 +68,9 @@ describe('QuickFeedback', () => {
     const heartIcon = screen.getByTestId('heart-icon');
     const likeButton = heartIcon.closest('button');
     expect(likeButton).toBeInTheDocument();
-    fireEvent.click(likeButton!);
+    if (likeButton) {
+      fireEvent.click(likeButton);
+    }
     
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -164,7 +166,9 @@ describe('QuickFeedback', () => {
     const heartIcon = screen.getByTestId('heart-icon');
     const likeButton = heartIcon.closest('button');
     expect(likeButton).toBeInTheDocument();
-    fireEvent.click(likeButton!);
+    if (likeButton) {
+      fireEvent.click(likeButton);
+    }
     
     await waitFor(() => {
       expect(likeButton).toBeDisabled();
@@ -222,7 +226,9 @@ describe('QuickFeedback', () => {
     const heartIcon = screen.getByTestId('heart-icon');
     const likeButton = heartIcon.closest('button');
     expect(likeButton).toBeInTheDocument();
-    fireEvent.click(likeButton!);
+    if (likeButton) {
+      fireEvent.click(likeButton);
+    }
     
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalled();
