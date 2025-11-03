@@ -22,7 +22,7 @@
 
 ```bash
 # ❌ WRONG: Hardcoded account ID
-AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-<YOUR_ACCOUNT_ID>}"
+AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-123456789012}"
 
 # ✅ CORRECT: Auto-detect from credentials
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
@@ -46,7 +46,7 @@ All AWS deployment scripts must:
 
 ### ✅ Fixed: `scripts/aws/deploy-multi-agent-lambda.sh`
 
-- **Before:** Hardcoded `AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-<YOUR_ACCOUNT_ID>}"`
+- **Before:** Hardcoded `AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-123456789012}"`
 - **After:** Auto-detects from `aws sts get-caller-identity`
 - **Status:** Secure ✅
 
