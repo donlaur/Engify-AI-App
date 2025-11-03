@@ -109,6 +109,8 @@ This plan consolidates unfinished work from:
 - [x] Fix async handler wrapper
 - [x] Fix MongoDB boolean checks
 - [x] Set Lambda environment variables
+- [x] Config AWS credentials in Vercel (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`)
+- [ ] Verify production deployment (test endpoint in production)
 - [ ] Test with real engineering leadership discussions (2-5 minutes)
 - [ ] Monitor costs and performance
 - [ ] Document architecture decisions
