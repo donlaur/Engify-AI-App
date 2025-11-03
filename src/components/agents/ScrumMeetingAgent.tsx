@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
+import { trackMultiAgentEvent, trackErrorEvent } from '@/lib/utils/ga-events';
 
 interface WorkbenchResult {
   session_id: string | null;
@@ -31,6 +32,8 @@ export function ScrumMeetingAgent() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const startTimeRef = useRef<number | null>(null);
+
   const runWorkbench = async () => {
     if (!situation.trim()) {
       setError('Please describe the situation or problem');
@@ -40,6 +43,13 @@ export function ScrumMeetingAgent() {
     setIsRunning(true);
     setError(null);
     setResult(null);
+    startTimeRef.current = Date.now();
+    
+    // Track workflow start
+    trackMultiAgentEvent('started', {
+      situation_length: situation.length,
+      context_length: context.length,
+    });
     
     try {
       const response = await fetch('/api/agents/scrum-meeting', {
@@ -59,6 +69,15 @@ export function ScrumMeetingAgent() {
       const data = await response.json();
       setResult(data);
       
+      // Track successful completion
+      const duration = startTimeRef.current ? Date.now() - startTimeRef.current : 0;
+      trackMultiAgentEvent('completed', {
+        situation_length: situation.length,
+        context_length: context.length,
+        turn_count: data.turn_count,
+        duration_ms: duration,
+      });
+      
       toast({
         title: 'Analysis Complete!',
         description: `Got perspectives from 4 engineering leadership roles. Review recommendations below.`,
@@ -66,6 +85,22 @@ export function ScrumMeetingAgent() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMessage);
+      
+      // Track error
+      const duration = startTimeRef.current ? Date.now() - startTimeRef.current : 0;
+      trackMultiAgentEvent('failed', {
+        situation_length: situation.length,
+        context_length: context.length,
+        error: errorMessage,
+        duration_ms: duration,
+      });
+      
+      trackErrorEvent('multi_agent_workflow_failed', {
+        error_message: errorMessage,
+        page: '/workbench/multi-agent',
+        component: 'ScrumMeetingAgent',
+      });
+      
       toast({
         title: 'Analysis Failed',
         description: errorMessage,
@@ -73,6 +108,7 @@ export function ScrumMeetingAgent() {
       });
     } finally {
       setIsRunning(false);
+      startTimeRef.current = null;
     }
   };
   

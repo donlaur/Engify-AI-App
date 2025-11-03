@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Icons } from '@/lib/icons';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,7 @@ import Link from 'next/link';
 import type { Prompt, PromptCategory, UserRole } from '@/lib/schemas/prompt';
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
 import { useFavorites } from '@/hooks/use-favorites';
+import { trackSearchEvent, trackFilterUsage } from '@/lib/utils/ga-events';
 
 interface LibraryClientProps {
   initialPrompts: Prompt[];
@@ -51,6 +52,29 @@ export function LibraryClient({
   const [showAllRoles, setShowAllRoles] = useState(false);
   
   const { favorites, isLoading: favoritesLoading } = useFavorites();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Track search with debounce
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    if (searchQuery.trim()) {
+      searchTimeoutRef.current = setTimeout(() => {
+        trackSearchEvent('search', {
+          query: searchQuery,
+          result_count: filteredPrompts.length,
+        });
+      }, 500);
+    }
+    
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery, filteredPrompts.length]);
 
   // Filter prompts
   let filteredPrompts = initialPrompts.filter((prompt) => {
@@ -166,7 +190,14 @@ export function LibraryClient({
                 key={category}
                 variant={selectedCategory === category ? 'default' : 'outline'}
                 className="cursor-pointer transition-colors hover:bg-primary/10"
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => {
+                  setSelectedCategory(category);
+                  if (category !== 'all') {
+                    trackFilterUsage('category', category, {
+                      result_count: filteredPrompts.length,
+                    });
+                  }
+                }}
               >
                 {category === 'all'
                   ? `All (${initialPrompts.length})`
@@ -211,7 +242,14 @@ export function LibraryClient({
                 key={role}
                 variant={selectedRole === role ? 'default' : 'outline'}
                 className="cursor-pointer transition-colors hover:bg-primary/10"
-                onClick={() => setSelectedRole(role)}
+                onClick={() => {
+                  setSelectedRole(role);
+                  if (role !== 'all') {
+                    trackFilterUsage('role', role, {
+                      result_count: filteredPrompts.length,
+                    });
+                  }
+                }}
               >
                 {role === 'all'
                   ? `All (${initialPrompts.length})`

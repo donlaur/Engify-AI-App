@@ -34,6 +34,7 @@ import {
   roleLabels,
   type UserRole,
 } from '@/lib/schemas/prompt';
+import { trackPromptEvent } from '@/lib/utils/ga-events';
 
 interface PromptCardProps extends Omit<Prompt, 'createdAt' | 'updatedAt'> {
   onView?: () => void;
@@ -52,6 +53,14 @@ export function PromptCard(props: PromptCardProps) {
     try {
       await navigator.clipboard.writeText(content);
       setCopied(true);
+      
+      // Track copy event
+      trackPromptEvent('copy', id, {
+        prompt_title: title,
+        prompt_category: category,
+        prompt_pattern: slug,
+      });
+      
       toast({
         title: 'Copied!',
         description: 'Prompt copied to clipboard',
@@ -92,6 +101,14 @@ export function PromptCard(props: PromptCardProps) {
 
   const handleView = () => {
     setShowModal(true);
+    
+    // Track view event
+    trackPromptEvent('view', id, {
+      prompt_title: title,
+      prompt_category: category,
+      prompt_pattern: slug,
+    });
+    
     if (onView) {
       onView();
     }
@@ -125,12 +142,21 @@ export function PromptCard(props: PromptCardProps) {
                 size="icon"
                 onClick={(e) => {
                   e.stopPropagation();
+                  const wasFavorite = isFavorite(id);
                   toggleFavorite(id);
+                  
+                  // Track favorite event
+                  trackPromptEvent(wasFavorite ? 'unfavorite' : 'favorite', id, {
+                    prompt_title: title,
+                    prompt_category: category,
+                    prompt_pattern: slug,
+                  });
+                  
                   toast({
-                    title: isFavorite(id)
+                    title: wasFavorite
                       ? 'Removed from favorites'
                       : 'Added to favorites',
-                    description: isFavorite(id)
+                    description: wasFavorite
                       ? 'Prompt removed from your favorites'
                       : 'Prompt saved to your favorites',
                   });
