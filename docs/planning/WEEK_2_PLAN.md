@@ -229,20 +229,21 @@ Next.js Frontend → Next.js API Route → AWS Lambda (LangGraph) → MongoDB
 
 ---
 
-### 1.5 Fix Broken OpsHub Admin Routes
+### 1.6 Fix Broken OpsHub Admin Routes
 
+**Status:** ✅ Complete  
 **Problem:** Several admin API routes return 500 errors  
 **Impact:** HIGH - Admin functionality broken  
 **Effort:** 2-3 hours
 
 **Tasks:**
 
-- [ ] Fix `/api/admin/content/review/route.ts` (500 error)
-- [ ] Fix `/api/admin/audit/route.ts` (RBAC issue)
-- [ ] Fix `/api/admin/settings/route.ts` (500 error)
-- [ ] Test all admin routes
-- [ ] Add error handling
-- [ ] Add proper logging
+- [x] Fix `/api/admin/content/review/route.ts` (500 error)
+- [x] Fix `/api/admin/audit/route.ts` (RBAC issue)
+- [x] Fix `/api/admin/settings/route.ts` (500 error)
+- [x] Test all admin routes
+- [x] Add error handling
+- [x] Add proper logging
 
 **Acceptance:**
 
