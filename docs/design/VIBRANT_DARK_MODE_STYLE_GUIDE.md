@@ -137,6 +137,23 @@ The Card component automatically applies the frosted glass effect in dark mode:
 </Button>
 ```
 
+### Code Blocks
+
+Code blocks use a darker background with bright text for optimal readability:
+
+```tsx
+<pre className="whitespace-pre-wrap rounded-lg bg-slate-900 p-4 text-sm font-mono text-slate-100 dark:bg-slate-950 dark:text-slate-50">
+  {codeContent}
+</pre>
+```
+
+**Color Scheme:**
+- **Background:** `bg-slate-900` (light mode) / `bg-slate-950` (dark mode)
+- **Text:** `text-slate-100` (light mode) / `text-slate-50` (dark mode)
+- **Font:** `font-mono` for code readability
+
+This ensures high contrast (WCAG AA compliant) and prevents the "too gray" contrast issue that makes code hard to read on muted backgrounds.
+
 ## Typography Guidelines
 
 ### Headings (H1, H2, H3)

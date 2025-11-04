@@ -160,17 +160,18 @@ Next.js Frontend → Next.js API Route → AWS Lambda (LangGraph) → MongoDB
 
 ### 1.2 Favorites Dashboard Integration
 
+**Status:** ✅ Complete  
 **Problem:** Favorites API works but dashboard doesn't show favorites count/list  
 **Impact:** MEDIUM - Incomplete feature  
 **Effort:** 15-20 minutes
 
 **Tasks:**
 
-- [ ] Add favorites count to dashboard stats
-- [ ] Display "My Favorites" collection/list
-- [ ] Add empty state for zero favorites
-- [ ] Link to individual prompt pages (`/prompts/[id]`)
-- [ ] Add "View All Favorites" link
+- [x] Add favorites count to dashboard stats
+- [x] Display "My Favorites" collection/list
+- [x] Add empty state for zero favorites
+- [x] Link to individual prompt pages (`/prompts/[id]`)
+- [x] Add "View All Favorites" link
 
 **Acceptance:**
 
@@ -185,19 +186,20 @@ Next.js Frontend → Next.js API Route → AWS Lambda (LangGraph) → MongoDB
 
 ### 1.3 Tests for `/api/favorites` Endpoint
 
+**Status:** ✅ Complete  
 **Problem:** Missing tests blocking pre-commit hook  
 **Impact:** HIGH - Enterprise standard violation  
 **Effort:** 30 minutes
 
 **Tasks:**
 
-- [ ] Write unit tests for GET `/api/favorites`
-- [ ] Write unit tests for POST `/api/favorites`
-- [ ] Write unit tests for DELETE `/api/favorites`
-- [ ] Test authentication requirements
-- [ ] Test rate limiting
-- [ ] Test error cases (invalid ID, non-existent prompt)
-- [ ] Test RBAC (authenticated only)
+- [x] Write unit tests for GET `/api/favorites`
+- [x] Write unit tests for POST `/api/favorites`
+- [x] Write unit tests for DELETE `/api/favorites`
+- [x] Test authentication requirements
+- [x] Test rate limiting
+- [x] Test error cases (invalid ID, non-existent prompt)
+- [x] Test RBAC (authenticated only)
 
 **Acceptance:**
 
