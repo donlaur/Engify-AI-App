@@ -9,7 +9,7 @@
 import type { Metadata } from 'next';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { LibraryClient } from '@/components/features/LibraryClient';
-import { getAllPrompts } from '@/lib/prompts/mongodb-prompts';
+import { promptRepository } from '@/lib/db/repositories/ContentService';
 import { getServerStats } from '@/lib/server-stats';
 import { getPromptSlug } from '@/lib/utils/slug';
 
@@ -59,8 +59,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Server Component
 export default async function LibraryPage() {
-  // Fetch prompts from MongoDB (production content)
-  const prompts = await getAllPrompts();
+  // Fetch prompts directly from MongoDB (reliable, no JSON loading issues)
+  const prompts = await promptRepository.getAll();
 
   // Calculate stats from actual prompts (more reliable than cache during active filter rollout)
   const uniqueCategories = [...new Set(prompts.map((p) => p.category).filter(Boolean))]

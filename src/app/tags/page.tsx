@@ -9,13 +9,14 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { getAllPrompts } from '@/lib/prompts/mongodb-prompts';
+import { promptRepository } from '@/lib/db/repositories/ContentService';
 import { getPromptSlug } from '@/lib/utils/slug';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const prompts = await getAllPrompts();
+  // Fetch prompts directly from MongoDB (reliable, no JSON loading issues)
+  const prompts = await promptRepository.getAll();
   const allTags = Array.from(
     new Set(prompts.flatMap((p) => p.tags || []).filter(Boolean))
   );
@@ -53,7 +54,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TagsDictionaryPage() {
-  const prompts = await getAllPrompts();
+  // Fetch prompts directly from MongoDB (reliable, no JSON loading issues)
+  const prompts = await promptRepository.getAll();
   
   // Count tags
   const tagCounts: Record<string, number> = {};
