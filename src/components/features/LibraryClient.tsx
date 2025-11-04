@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Icons } from '@/lib/icons';
 import { Input } from '@/components/ui/input';
@@ -54,6 +54,29 @@ export function LibraryClient({
   const { favorites, isLoading: favoritesLoading } = useFavorites();
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Filter prompts using useMemo to prevent recalculations
+  const filteredPrompts = useMemo(() => {
+    let filtered = initialPrompts.filter((prompt) => {
+      const matchesSearch =
+        prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        prompt.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCategory === 'all' || prompt.category === selectedCategory;
+      const matchesRole = selectedRole === 'all' || prompt.role === selectedRole;
+
+      return matchesSearch && matchesCategory && matchesRole;
+    });
+
+    // Apply favorites filter if active
+    if (showFavoritesOnly) {
+      filtered = filtered.filter((prompt) =>
+        favorites.includes(prompt.id)
+      );
+    }
+
+    return filtered;
+  }, [initialPrompts, searchQuery, selectedCategory, selectedRole, showFavoritesOnly, favorites]);
+  
   // Track search with debounce
   useEffect(() => {
     if (searchTimeoutRef.current) {
@@ -75,25 +98,6 @@ export function LibraryClient({
       }
     };
   }, [searchQuery, filteredPrompts.length]);
-
-  // Filter prompts
-  let filteredPrompts = initialPrompts.filter((prompt) => {
-    const matchesSearch =
-      prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      prompt.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === 'all' || prompt.category === selectedCategory;
-    const matchesRole = selectedRole === 'all' || prompt.role === selectedRole;
-
-    return matchesSearch && matchesCategory && matchesRole;
-  });
-
-  // Apply favorites filter if active
-  if (showFavoritesOnly) {
-    filteredPrompts = filteredPrompts.filter((prompt) =>
-      favorites.includes(prompt.id)
-    );
-  }
 
   // Dynamic filters from DB (already sorted alphabetically from server)
   const allCategories: Array<PromptCategory | 'all'> = [
