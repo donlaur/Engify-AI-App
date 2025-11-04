@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -194,8 +195,8 @@ export function PatternsClient({
                 variant={selectedCategory === cat.value ? 'default' : 'outline'}
                 className={`cursor-pointer transition-colors ${
                   selectedCategory === cat.value
-                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    : 'hover:bg-accent'
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90 font-semibold'
+                    : 'hover:bg-accent hover:text-accent-foreground'
                 }`}
                 onClick={() => setSelectedCategory(cat.value)}
               >
@@ -213,8 +214,8 @@ export function PatternsClient({
                 variant={selectedLevel === level.value ? 'default' : 'outline'}
                 className={`cursor-pointer transition-colors ${
                   selectedLevel === level.value
-                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    : 'hover:bg-accent'
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90 font-semibold'
+                    : 'hover:bg-accent hover:text-accent-foreground'
                 }`}
                 onClick={() => setSelectedLevel(level.value)}
               >
@@ -283,6 +284,17 @@ export function PatternsClient({
                   <Link href={`/patterns/${encodeURIComponent(pattern.id)}`}>
                     Learn More
                     <Icons.arrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="transition-colors hover:bg-primary hover:text-primary-foreground"
+                >
+                  <Link href={`/prompts?pattern=${encodeURIComponent(pattern.id)}`}>
+                    View Prompts
+                    <Icons.externalLink className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>

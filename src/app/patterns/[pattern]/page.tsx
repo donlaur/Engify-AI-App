@@ -21,7 +21,23 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const patternSlug = decodeURIComponent(params.pattern);
-    const pattern = await patternRepository.getById(patternSlug);
+    
+    // Add timeout and better error handling
+    let pattern;
+    try {
+      pattern = await Promise.race([
+        patternRepository.getById(patternSlug),
+        new Promise<null>((_, reject) =>
+          setTimeout(() => reject(new Error('Metadata fetch timeout')), 8000)
+        ),
+      ]);
+    } catch (error) {
+      logger.error('Failed to generate pattern metadata', { error, params });
+      return {
+        title: 'Pattern | Engify.ai',
+        description: 'Explore prompt engineering patterns.',
+      };
+    }
 
     if (!pattern) {
       return {
@@ -52,7 +68,25 @@ export default async function PatternDetailPage({
 }) {
   try {
     const patternSlug = decodeURIComponent(params.pattern);
-    const pattern = await patternRepository.getById(patternSlug);
+    
+    // Add timeout and better error handling for MongoDB connection
+    let pattern;
+    try {
+      pattern = await Promise.race([
+        patternRepository.getById(patternSlug),
+        new Promise<null>((_, reject) =>
+          setTimeout(() => reject(new Error('Pattern fetch timeout')), 10000)
+        ),
+      ]);
+    } catch (dbError) {
+      logger.error('Failed to fetch pattern from database', {
+        error: dbError,
+        patternSlug,
+        params,
+      });
+      // Return 404 instead of throwing - prevents error boundary from showing "mongodb is not defined"
+      notFound();
+    }
 
     if (!pattern) {
       notFound();
