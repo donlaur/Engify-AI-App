@@ -16,7 +16,11 @@ import { getDb } from '@/lib/mongodb';
  * - Priority 0.7: Tags, learn pages
  * - Priority 0.6: About, blog
  * - Priority 0.5: Contact, terms, privacy
+ * 
+ * ISR: Regenerates every hour to pick up new content and slug changes
  */
+
+export const revalidate = 3600; // Revalidate every hour (ISR)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_URL;

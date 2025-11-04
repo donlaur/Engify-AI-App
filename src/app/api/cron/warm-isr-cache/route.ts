@@ -292,6 +292,16 @@ export async function GET(request: NextRequest) {
         // Don't fail entire cron job if JSON generation fails
       }
 
+      // Revalidate sitemap after content changes (JSON regeneration)
+      try {
+        logger.info('Revalidating sitemap...');
+        revalidatePath('/sitemap.xml');
+        logger.info('Sitemap revalidated successfully');
+      } catch (error) {
+        logger.error('Failed to revalidate sitemap', { error });
+        // Don't fail entire cron job if sitemap revalidation fails
+      }
+
       const mainPages = [
         '/',
         '/prompts',
