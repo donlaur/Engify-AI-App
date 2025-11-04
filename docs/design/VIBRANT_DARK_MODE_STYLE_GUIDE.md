@@ -38,10 +38,10 @@ Instead of using a low-saturation navy/black background, we've implemented a **l
 
 | Use Case          | Color Name       | HEX / Gradient                                | Class                                   |
 | :---------------- | :--------------- | :-------------------------------------------- | :-------------------------------------- |
-| **Primary CTA**   | `brand-gradient` | `linear-gradient(to right, #3B82F6, #8B5CF6)` | `.gradient-brand` (blue to purple) |
+| **Primary CTA**   | `brand-gradient` | `linear-gradient(to right, #3B82F6, #8B5CF6)` | `.gradient-brand` (blue to purple)      |
 | **Secondary CTA** | `brand-green`    | `#39FF14`                                     | `.bg-brand-green` / `.text-brand-green` |
-| **Inline Links**  | `link-primary`   | `#60A5FA` (vibrant blue)                       | `.link-primary`                         |
-| **Link Hover**    | `link-hover`     | `#93C5FD` (lighter blue)                       | `.link-primary:hover`                   |
+| **Inline Links**  | `link-primary`   | `#60A5FA` (vibrant blue)                      | `.link-primary`                         |
+| **Link Hover**    | `link-hover`     | `#93C5FD` (lighter blue)                      | `.link-primary:hover`                   |
 | **Tags / Badges** | `tag-blue`       | `#3B82F6`                                     | `brand-blue`                            |
 
 ## Implementation
@@ -129,6 +129,56 @@ The Card component automatically applies the frosted glass effect in dark mode:
 </Badge>
 ```
 
+### Stats Cards
+
+**IMPORTANT:** All stats cards across the site must use the same styling for consistency.
+
+**Standard Pattern:**
+
+```tsx
+import { Card, CardContent } from '@/components/ui/card';
+
+<div className="grid gap-4 md:grid-cols-3">
+  <Card className="surface-frosted">
+    <CardContent className="pt-6">
+      <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
+        {value}
+      </div>
+      <p className="text-tertiary dark:text-tertiary text-xs">{label}</p>
+    </CardContent>
+  </Card>
+</div>;
+```
+
+**Reusable Component:**
+Use the `StatCard` component from `@/components/features/StatCard` for consistency:
+
+```tsx
+import { StatCard } from '@/components/features/StatCard';
+
+<div className="grid gap-4 md:grid-cols-3">
+  <StatCard value={123} label="Total Prompts" />
+  <StatCard value={18} label="Categories" />
+  <StatCard value={10} label="Roles" />
+</div>;
+```
+
+**Required Classes:**
+
+- `Card` with `surface-frosted` class (automatic glass effect in dark mode)
+- Value: `text-primary-light dark:text-primary-light text-2xl font-bold`
+- Label: `text-tertiary dark:text-tertiary text-xs`
+- `CardContent` with `pt-6` padding
+
+**Used In:**
+
+- `/prompts` page (LibraryClient component)
+- `/learn` page
+- `/patterns` page (if stats are displayed)
+- Dashboard (if stats are displayed)
+
+**DRY Principle:** Always use `StatCard` component or match this exact pattern. Do not create custom stat card styling.
+
 ### Buttons
 
 ```tsx
@@ -142,12 +192,13 @@ The Card component automatically applies the frosted glass effect in dark mode:
 Code blocks use a darker background with bright text for optimal readability:
 
 ```tsx
-<pre className="whitespace-pre-wrap rounded-lg bg-slate-900 p-4 text-sm font-mono text-slate-100 dark:bg-slate-950 dark:text-slate-50">
+<pre className="whitespace-pre-wrap rounded-lg bg-slate-900 p-4 font-mono text-sm text-slate-100 dark:bg-slate-950 dark:text-slate-50">
   {codeContent}
 </pre>
 ```
 
 **Color Scheme:**
+
 - **Background:** `bg-slate-900` (light mode) / `bg-slate-950` (dark mode)
 - **Text:** `text-slate-100` (light mode) / `text-slate-50` (dark mode)
 - **Font:** `font-mono` for code readability

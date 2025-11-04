@@ -154,102 +154,103 @@ export function RelatedPrompts({
       }
     >
       <div className="mt-12">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold">
-          {sortBy === 'related'
-            ? 'Related Prompts'
-            : `Most ${sortBy === 'views' ? 'Viewed' : sortBy === 'favorites' ? 'Favorited' : 'Shared'} Prompts`}
-        </h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setSortBy('related')}
-            className={`rounded px-3 py-1 text-sm transition-colors ${
-              sortBy === 'related'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-muted/80'
-            }`}
-          >
-            Related
-          </button>
-          <button
-            onClick={() => setSortBy('views')}
-            className={`rounded px-3 py-1 text-sm transition-colors ${
-              sortBy === 'views'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-muted/80'
-            }`}
-          >
-            Most Viewed
-          </button>
-          <button
-            onClick={() => setSortBy('favorites')}
-            className={`rounded px-3 py-1 text-sm transition-colors ${
-              sortBy === 'favorites'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-muted/80'
-            }`}
-          >
-            Most Favorited
-          </button>
-          <button
-            onClick={() => setSortBy('shares')}
-            className={`rounded px-3 py-1 text-sm transition-colors ${
-              sortBy === 'shares'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-muted/80'
-            }`}
-          >
-            Most Shared
-          </button>
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-bold">
+            {sortBy === 'related'
+              ? 'Related Prompts'
+              : `Most ${sortBy === 'views' ? 'Viewed' : sortBy === 'favorites' ? 'Favorited' : 'Shared'} Prompts`}
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSortBy('related')}
+              className={`rounded px-3 py-1 text-sm transition-colors ${
+                sortBy === 'related'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted hover:bg-muted/80'
+              }`}
+            >
+              Related
+            </button>
+            <button
+              onClick={() => setSortBy('views')}
+              className={`rounded px-3 py-1 text-sm transition-colors ${
+                sortBy === 'views'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted hover:bg-muted/80'
+              }`}
+            >
+              Most Viewed
+            </button>
+            <button
+              onClick={() => setSortBy('favorites')}
+              className={`rounded px-3 py-1 text-sm transition-colors ${
+                sortBy === 'favorites'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted hover:bg-muted/80'
+              }`}
+            >
+              Most Favorited
+            </button>
+            <button
+              onClick={() => setSortBy('shares')}
+              className={`rounded px-3 py-1 text-sm transition-colors ${
+                sortBy === 'shares'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted hover:bg-muted/80'
+              }`}
+            >
+              Most Shared
+            </button>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {isLoadingRelated && sortBy === 'related' ? (
+            <div className="col-span-full text-center text-sm text-muted-foreground">
+              Loading related prompts...
+            </div>
+          ) : displayedPrompts.length === 0 ? (
+            <div className="col-span-full text-center text-sm text-muted-foreground">
+              No related prompts found.
+            </div>
+          ) : (
+            displayedPrompts.map((prompt) => (
+              <Link
+                key={prompt.id}
+                href={`/prompts/${getPromptSlug(prompt)}`}
+                className="surface-frosted surface-frosted-hover dark:surface-frosted dark:hover:surface-frosted-hover group relative rounded-xl border border-border/50 bg-card p-4 transition-all duration-200 hover:border-primary hover:shadow-xl hover:shadow-primary/10"
+              >
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <h3 className="font-semibold transition-colors group-hover:text-white dark:group-hover:text-white">
+                    {prompt.title}
+                  </h3>
+                </div>
+                <p className="text-secondary-light dark:text-secondary-light mb-3 line-clamp-2 text-sm">
+                  {prompt.description}
+                </p>
+                <div className="mb-2 flex flex-wrap gap-1">
+                  <Badge variant="secondary" className="text-xs">
+                    {categoryLabels[prompt.category] || prompt.category}
+                  </Badge>
+                  {prompt.role && (
+                    <Badge variant="outline" className="text-xs">
+                      {roleLabels[prompt.role as UserRole] || prompt.role}
+                    </Badge>
+                  )}
+                </div>
+                <PromptMetrics
+                  promptId={prompt.id}
+                  initialViews={prompt.views || 0}
+                  initialFavorites={
+                    (prompt as { favorites?: number }).favorites || 0
+                  }
+                  initialShares={(prompt as { shares?: number }).shares || 0}
+                />
+              </Link>
+            ))
+          )}
         </div>
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {isLoadingRelated && sortBy === 'related' ? (
-          <div className="col-span-full text-center text-sm text-muted-foreground">
-            Loading related prompts...
-          </div>
-        ) : displayedPrompts.length === 0 ? (
-          <div className="col-span-full text-center text-sm text-muted-foreground">
-            No related prompts found.
-          </div>
-        ) : (
-          displayedPrompts.map((prompt) => (
-            <Link
-              key={prompt.id}
-              href={`/prompts/${getPromptSlug(prompt)}`}
-              className="group relative rounded-xl border border-border/50 bg-card surface-frosted surface-frosted-hover transition-all duration-200 p-4 hover:border-primary hover:shadow-xl hover:shadow-primary/10 dark:surface-frosted dark:hover:surface-frosted-hover"
-            >
-              <div className="mb-2 flex items-start justify-between gap-2">
-                <h3 className="font-semibold transition-colors group-hover:text-white dark:group-hover:text-white">
-                  {prompt.title}
-                </h3>
-              </div>
-              <p className="mb-3 line-clamp-2 text-sm text-secondary-light dark:text-secondary-light">
-                {prompt.description}
-              </p>
-              <div className="mb-2 flex flex-wrap gap-1">
-                <Badge variant="secondary" className="text-xs">
-                  {categoryLabels[prompt.category] || prompt.category}
-                </Badge>
-                {prompt.role && (
-                  <Badge variant="outline" className="text-xs">
-                    {roleLabels[prompt.role as UserRole] || prompt.role}
-                  </Badge>
-                )}
-              </div>
-              <PromptMetrics
-                promptId={prompt.id}
-                initialViews={prompt.views || 0}
-                initialFavorites={
-                  (prompt as { favorites?: number }).favorites || 0
-                }
-                initialShares={(prompt as { shares?: number }).shares || 0}
-              />
-            </Link>
-          ))
-        )}
-      </div>
-    </div>
+    </ErrorBoundary>
   );
 }

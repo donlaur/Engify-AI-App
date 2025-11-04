@@ -1,6 +1,6 @@
 /**
  * Generate Patterns JSON - Reusable Function
- * 
+ *
  * Can be called from API routes or scripts
  */
 
@@ -8,7 +8,6 @@ import { patternRepository } from '@/lib/db/repositories/ContentService';
 import { promptRepository } from '@/lib/db/repositories/ContentService';
 import fs from 'fs/promises';
 import path from 'path';
-import type { Pattern } from '@/lib/db/schemas/pattern';
 
 interface PatternExport {
   id: string;
@@ -61,10 +60,9 @@ export async function generatePatternsJson(): Promise<void> {
     }
   });
 
-  const totalPromptsUsingPatterns = Array.from(promptsByPattern.values()).reduce(
-    (sum, count) => sum + count,
-    0
-  );
+  const totalPromptsUsingPatterns = Array.from(
+    promptsByPattern.values()
+  ).reduce((sum, count) => sum + count, 0);
 
   // Count by category and level
   const byCategory: Record<string, number> = {};
@@ -114,10 +112,9 @@ export async function generatePatternsJson(): Promise<void> {
   const dataDir = path.join(process.cwd(), 'public', 'data');
   await fs.mkdir(dataDir, { recursive: true });
 
-  // Write JSON file
+  // Write JSON file (minified for smaller file size)
   const jsonPath = path.join(dataDir, 'patterns.json');
-  const jsonContent = JSON.stringify(exportData, null, 2);
-  
+  const jsonContent = JSON.stringify(exportData); // Minified (no indentation)
+
   await fs.writeFile(jsonPath, jsonContent, 'utf-8');
 }
-

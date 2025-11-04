@@ -1,6 +1,6 @@
 /**
  * Generate Prompts JSON - Reusable Function
- * 
+ *
  * Can be called from API routes or scripts
  * Similar to patterns JSON generation - pre-builds static JSON for fast loading
  */
@@ -8,7 +8,6 @@
 import { promptRepository } from '@/lib/db/repositories/ContentService';
 import fs from 'fs/promises';
 import path from 'path';
-import type { Prompt } from '@/lib/db/schemas/prompt';
 
 interface PromptExport {
   id: string;
@@ -117,10 +116,9 @@ export async function generatePromptsJson(): Promise<void> {
   const dataDir = path.join(process.cwd(), 'public', 'data');
   await fs.mkdir(dataDir, { recursive: true });
 
-  // Write JSON file
+  // Write JSON file (minified for smaller file size)
   const jsonPath = path.join(dataDir, 'prompts.json');
-  const jsonContent = JSON.stringify(exportData, null, 2);
-  
+  const jsonContent = JSON.stringify(exportData); // Minified (no indentation)
+
   await fs.writeFile(jsonPath, jsonContent, 'utf-8');
 }
-

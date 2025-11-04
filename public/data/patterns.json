@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generatedAt": "2025-11-04T17:57:48.636Z",
+  "generatedAt": "2025-11-04T18:01:56.245Z",
   "totalPatterns": 18,
   "patterns": [
     {
@@ -31,10 +31,7 @@
         "Expecting perfect logic (AI can still make errors)",
         "Forgetting to validate the reasoning yourself"
       ],
-      "relatedPatterns": [
-        "cognitive-verifier",
-        "refinement"
-      ],
+      "relatedPatterns": ["cognitive-verifier", "refinement"],
       "createdAt": "2025-11-04T04:11:22.262Z",
       "updatedAt": "2025-11-04T04:11:22.262Z",
       "promptCount": 5
@@ -152,10 +149,7 @@
         "Not showing enough variety",
         "Making examples too complex"
       ],
-      "relatedPatterns": [
-        "template",
-        "chain-of-thought"
-      ],
+      "relatedPatterns": ["template", "chain-of-thought"],
       "createdAt": "2025-11-04T04:11:22.262Z",
       "updatedAt": "2025-11-04T04:11:22.262Z",
       "promptCount": 0
@@ -188,11 +182,7 @@
         "Forgetting to maintain the persona throughout the conversation",
         "Using conflicting personas in the same prompt"
       ],
-      "relatedPatterns": [
-        "context",
-        "audience-persona",
-        "format"
-      ],
+      "relatedPatterns": ["context", "audience-persona", "format"],
       "createdAt": "2025-11-04T04:11:22.262Z",
       "updatedAt": "2025-11-04T04:11:22.262Z",
       "promptCount": 77
@@ -264,11 +254,7 @@
         "Using for simple tasks where direct instruction works better",
         "Not making it clear this requires multiple interactions"
       ],
-      "relatedPatterns": [
-        "persona",
-        "question-refinement",
-        "chain-of-thought"
-      ],
+      "relatedPatterns": ["persona", "question-refinement", "chain-of-thought"],
       "createdAt": "2025-11-04T04:11:22.262Z",
       "updatedAt": "2025-11-04T04:11:22.262Z",
       "promptCount": 0
@@ -402,11 +388,7 @@
         "Making schemas too complex or ambiguous",
         "Forgetting to handle malformed responses"
       ],
-      "relatedPatterns": [
-        "template",
-        "constraint",
-        "recipe"
-      ],
+      "relatedPatterns": ["template", "constraint", "recipe"],
       "createdAt": "2025-11-04T04:11:22.262Z",
       "updatedAt": "2025-11-04T04:11:22.262Z",
       "promptCount": 0
@@ -439,10 +421,7 @@
         "Rigid templates that don't allow variation",
         "Not providing enough context for filling placeholders"
       ],
-      "relatedPatterns": [
-        "format",
-        "few-shot"
-      ],
+      "relatedPatterns": ["format", "few-shot"],
       "createdAt": "2025-11-04T04:11:22.262Z",
       "updatedAt": "2025-11-04T04:11:22.262Z",
       "promptCount": 19
@@ -472,11 +451,7 @@
       "ITERATIVE": 4,
       "STRUCTURAL": 5
     },
-    "byLevel": {
-      "intermediate": 8,
-      "advanced": 5,
-      "beginner": 5
-    },
+    "byLevel": { "intermediate": 8, "advanced": 5, "beginner": 5 },
     "totalPromptsUsingPatterns": 102
   }
 }

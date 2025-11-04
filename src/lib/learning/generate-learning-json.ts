@@ -1,6 +1,6 @@
 /**
  * Generate Learning Resources JSON - Reusable Function
- * 
+ *
  * Can be called from API routes or scripts
  */
 
@@ -59,21 +59,23 @@ export async function generateLearningResourcesJson(): Promise<void> {
   });
 
   // Transform resources for export
-  const resourcesExport: LearningResourceExport[] = resources.map((resource) => ({
-    id: resource.id,
-    title: resource.title,
-    description: resource.description,
-    content: resource.content,
-    slug: resource.slug,
-    category: resource.category,
-    tags: resource.tags,
-    author: resource.author,
-    publishedAt: resource.publishedAt,
-    updatedAt: resource.updatedAt,
-    views: resource.views,
-    status: resource.status,
-    seo: resource.seo,
-  }));
+  const resourcesExport: LearningResourceExport[] = resources.map(
+    (resource) => ({
+      id: resource.id,
+      title: resource.title,
+      description: resource.description,
+      content: resource.content,
+      slug: resource.slug,
+      category: resource.category,
+      tags: resource.tags,
+      author: resource.author,
+      publishedAt: resource.publishedAt,
+      updatedAt: resource.updatedAt,
+      views: resource.views,
+      status: resource.status,
+      seo: resource.seo,
+    })
+  );
 
   // Build export object
   const exportData: LearningResourcesExport = {
@@ -91,10 +93,9 @@ export async function generateLearningResourcesJson(): Promise<void> {
   const dataDir = path.join(process.cwd(), 'public', 'data');
   await fs.mkdir(dataDir, { recursive: true });
 
-  // Write JSON file
+  // Write JSON file (minified for smaller file size)
   const jsonPath = path.join(dataDir, 'learning.json');
-  const jsonContent = JSON.stringify(exportData, null, 2);
-  
+  const jsonContent = JSON.stringify(exportData); // Minified (no indentation)
+
   await fs.writeFile(jsonPath, jsonContent, 'utf-8');
 }
-

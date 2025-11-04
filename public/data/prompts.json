@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generatedAt": "2025-11-04T17:57:45.219Z",
+  "generatedAt": "2025-11-04T18:01:52.879Z",
   "totalPrompts": 102,
   "prompts": [
     {
@@ -64,12 +64,7 @@
       "role": "engineer",
       "pattern": "template",
       "slug": "react-component-builder-cg-003",
-      "tags": [
-        "react",
-        "frontend",
-        "typescript",
-        "accessibility"
-      ],
+      "tags": ["react", "frontend", "typescript", "accessibility"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -139,12 +134,7 @@
       "role": "engineering-manager",
       "pattern": "template",
       "slug": "architecture-decision-record-adr-doc-001",
-      "tags": [
-        "architecture",
-        "documentation",
-        "adr",
-        "decisions"
-      ],
+      "tags": ["architecture", "documentation", "adr", "decisions"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -188,13 +178,7 @@
       "role": "engineer",
       "pattern": "template",
       "slug": "unit-test-generator-test-001",
-      "tags": [
-        "testing",
-        "unit-tests",
-        "tdd",
-        "engineer",
-        "template"
-      ],
+      "tags": ["testing", "unit-tests", "tdd", "engineer", "template"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -213,12 +197,7 @@
       "role": "qa",
       "pattern": "template",
       "slug": "e2e-test-scenario-builder-test-002",
-      "tags": [
-        "e2e",
-        "testing",
-        "qa",
-        "user-flows"
-      ],
+      "tags": ["e2e", "testing", "qa", "user-flows"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -364,12 +343,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "codebase-navigator-eng-jun-code-navigator",
-      "tags": [
-        "engineer-junior",
-        "codebase",
-        "navigator",
-        "code"
-      ],
+      "tags": ["engineer-junior", "codebase", "navigator", "code"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -438,13 +412,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "pull-request-review-co-pilot-eng-mid-pr-reviewer",
-      "tags": [
-        "engineer-mid-level",
-        "request",
-        "review",
-        "co-pilot",
-        "code"
-      ],
+      "tags": ["engineer-mid-level", "request", "review", "co-pilot", "code"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -515,13 +483,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "architecture-decision-record-adr-drafter-eng-sen-arch-decision-doc",
-      "tags": [
-        "engineer-senior",
-        "architecture",
-        "decision",
-        "record",
-        "adr"
-      ],
+      "tags": ["engineer-senior", "architecture", "decision", "record", "adr"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -565,13 +527,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "system-design-sparring-partner-eng-sen-system-design-sparring",
-      "tags": [
-        "engineer-senior",
-        "system",
-        "design",
-        "sparring",
-        "partner"
-      ],
+      "tags": ["engineer-senior", "system", "design", "sparring", "partner"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -590,13 +546,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "secure-coding-practices-reviewer-eng-senior-secure-coding-reviewer",
-      "tags": [
-        "engineer-senior",
-        "secure",
-        "coding",
-        "practices",
-        "reviewer"
-      ],
+      "tags": ["engineer-senior", "secure", "coding", "practices", "reviewer"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -739,12 +689,7 @@
       "role": "product-manager",
       "pattern": "persona",
       "slug": "pre-meeting-agenda-goal-setter-pm-mid-meeting-facilitator",
-      "tags": [
-        "product-manager-mid-level",
-        "pre-meeting",
-        "agenda",
-        "setter"
-      ],
+      "tags": ["product-manager-mid-level", "pre-meeting", "agenda", "setter"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -787,12 +732,7 @@
       "role": "product-manager",
       "pattern": "persona",
       "slug": "product-vision-memo-drafter-pm-sen-vision-memo",
-      "tags": [
-        "product-manager-senior-lead",
-        "product",
-        "vision",
-        "drafter"
-      ],
+      "tags": ["product-manager-senior-lead", "product", "vision", "drafter"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -811,12 +751,7 @@
       "role": "product-manager",
       "pattern": "persona",
       "slug": "product-strategy-red-team-pm-sen-product-strategy-critique",
-      "tags": [
-        "product-manager-senior-lead",
-        "product",
-        "strategy",
-        "testing"
-      ],
+      "tags": ["product-manager-senior-lead", "product", "strategy", "testing"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -912,12 +847,7 @@
       "role": "scrum-master",
       "pattern": "persona",
       "slug": "retrospective-facilitator-scrum-retro-facilitator",
-      "tags": [
-        "scrum-masters",
-        "retrospective",
-        "facilitator",
-        "team"
-      ],
+      "tags": ["scrum-masters", "retrospective", "facilitator", "team"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -936,12 +866,7 @@
       "role": "scrum-master",
       "pattern": "persona",
       "slug": "impediment-triage-bot-scrum-impediment-triage",
-      "tags": [
-        "scrum-masters",
-        "impediment",
-        "triage",
-        "team"
-      ],
+      "tags": ["scrum-masters", "impediment", "triage", "team"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -960,13 +885,7 @@
       "role": "scrum-master",
       "pattern": "persona",
       "slug": "agile-principles-coach-scrum-agile-coach",
-      "tags": [
-        "scrum-masters",
-        "agile",
-        "principles",
-        "coach",
-        "team"
-      ],
+      "tags": ["scrum-masters", "agile", "principles", "coach", "team"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -985,12 +904,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "heuristic-evaluation-guide-design-jun-heuristic-eval",
-      "tags": [
-        "designer-junior",
-        "heuristic",
-        "evaluation",
-        "guide"
-      ],
+      "tags": ["designer-junior", "heuristic", "evaluation", "guide"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -1009,12 +923,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "user-research-script-generator-design-jun-research-script",
-      "tags": [
-        "designer-junior",
-        "research",
-        "script",
-        "testing"
-      ],
+      "tags": ["designer-junior", "research", "script", "testing"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1033,12 +942,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "ai-powered-mood-board-creator-design-jun-moodboard-ai",
-      "tags": [
-        "designer-junior",
-        "ai-powered",
-        "board",
-        "creator"
-      ],
+      "tags": ["designer-junior", "ai-powered", "board", "creator"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1082,12 +986,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "a-b-test-hypothesis-builder-design-mid-ab-test-hypothesis",
-      "tags": [
-        "designer-mid-level",
-        "hypothesis",
-        "testing",
-        "architecture"
-      ],
+      "tags": ["designer-mid-level", "hypothesis", "testing", "architecture"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1106,12 +1005,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "ai-component-variant-ideator-design-mid-variant-ideator-ai",
-      "tags": [
-        "designer-mid-level",
-        "component",
-        "variant",
-        "ideator"
-      ],
+      "tags": ["designer-mid-level", "component", "variant", "ideator"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1331,12 +1225,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "org-wide-bottleneck-analysis-lead-dir-bottleneck-analysis",
-      "tags": [
-        "leader-director-vp",
-        "org-wide",
-        "bottleneck",
-        "analysis"
-      ],
+      "tags": ["leader-director-vp", "org-wide", "bottleneck", "analysis"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1355,12 +1244,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "r-d-capitalization-narrative-builder-lead-dir-rd-capitalization-narrative",
-      "tags": [
-        "leader-director-vp",
-        "capitalization",
-        "narrative",
-        "team"
-      ],
+      "tags": ["leader-director-vp", "capitalization", "narrative", "team"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1379,13 +1263,7 @@
       "role": "qa",
       "pattern": "persona",
       "slug": "comprehensive-test-case-generator-qa-test-case-generator",
-      "tags": [
-        "qa-engineers",
-        "comprehensive",
-        "testing",
-        "qa",
-        "persona"
-      ],
+      "tags": ["qa-engineers", "comprehensive", "testing", "qa", "persona"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -1404,13 +1282,7 @@
       "role": "qa",
       "pattern": "persona",
       "slug": "test-failure-diagnoser-qa-failure-diagnoser",
-      "tags": [
-        "qa-engineers",
-        "failure",
-        "diagnoser",
-        "debugging",
-        "testing"
-      ],
+      "tags": ["qa-engineers", "failure", "diagnoser", "debugging", "testing"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1454,12 +1326,7 @@
       "role": "qa",
       "pattern": "persona",
       "slug": "dependency-vulnerability-scanner-qa-dependency-vulnerability-scanner",
-      "tags": [
-        "qa-engineers",
-        "dependency",
-        "vulnerability",
-        "scanner"
-      ],
+      "tags": ["qa-engineers", "dependency", "vulnerability", "scanner"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1478,12 +1345,7 @@
       "role": "qa",
       "pattern": "persona",
       "slug": "security-test-case-generator-owasp-top-10-qa-security-test-case-generator",
-      "tags": [
-        "qa-engineers",
-        "security",
-        "owasp",
-        "testing"
-      ],
+      "tags": ["qa-engineers", "security", "owasp", "testing"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1552,12 +1414,7 @@
       "role": "architect",
       "pattern": "persona",
       "slug": "new-technology-evaluation-framework-arch-new-tech-eval",
-      "tags": [
-        "architects",
-        "technology",
-        "evaluation",
-        "framework"
-      ],
+      "tags": ["architects", "technology", "evaluation", "framework"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1576,12 +1433,7 @@
       "role": "devops-sre",
       "pattern": "persona",
       "slug": "on-call-alert-triage-devops-alert-triage",
-      "tags": [
-        "devops-sre",
-        "on-call",
-        "alert",
-        "triage"
-      ],
+      "tags": ["devops-sre", "on-call", "alert", "triage"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -1600,13 +1452,7 @@
       "role": "devops-sre",
       "pattern": "persona",
       "slug": "golden-signals-monitoring-plan-devops-golden-signals",
-      "tags": [
-        "devops-sre",
-        "golden",
-        "signals",
-        "monitoring",
-        "planning"
-      ],
+      "tags": ["devops-sre", "golden", "signals", "monitoring", "planning"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1625,13 +1471,7 @@
       "role": "devops-sre",
       "pattern": "persona",
       "slug": "ci-cd-workflow-generator-devops-cicd-generator",
-      "tags": [
-        "devops-sre",
-        "ci-cd",
-        "workflow",
-        "code-generation",
-        "persona"
-      ],
+      "tags": ["devops-sre", "ci-cd", "workflow", "code-generation", "persona"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1700,12 +1540,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "refactoring-guide-eng-adv-refactor-guide",
-      "tags": [
-        "engineer-advanced",
-        "refactoring",
-        "guide",
-        "code"
-      ],
+      "tags": ["engineer-advanced", "refactoring", "guide", "code"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1826,12 +1661,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "metrics-framework-designer-pm-adv-metrics-framework",
-      "tags": [
-        "product-manager-advanced",
-        "metrics",
-        "framework",
-        "designer"
-      ],
+      "tags": ["product-manager-advanced", "metrics", "framework", "designer"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -1850,12 +1680,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "pricing-strategy-consultant-pm-adv-pricing-strategy",
-      "tags": [
-        "product-manager-advanced",
-        "pricing",
-        "strategy",
-        "consultant"
-      ],
+      "tags": ["product-manager-advanced", "pricing", "strategy", "consultant"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -2025,12 +1850,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "test-strategy-architect-qa-adv-test-strategy",
-      "tags": [
-        "qa-engineer-advanced",
-        "strategy",
-        "architect",
-        "testing"
-      ],
+      "tags": ["qa-engineer-advanced", "strategy", "architect", "testing"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -2074,12 +1894,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "performance-test-designer-qa-adv-performance-test",
-      "tags": [
-        "qa-engineer-advanced",
-        "performance",
-        "designer",
-        "testing"
-      ],
+      "tags": ["qa-engineer-advanced", "performance", "designer", "testing"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -2098,12 +1913,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "security-test-planner-qa-adv-security-test",
-      "tags": [
-        "qa-engineer-advanced",
-        "security",
-        "planner",
-        "testing"
-      ],
+      "tags": ["qa-engineer-advanced", "security", "planner", "testing"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -2147,12 +1957,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "ci-cd-pipeline-designer-devops-adv-ci-cd",
-      "tags": [
-        "devops-sre-advanced",
-        "ci-cd",
-        "pipeline",
-        "designer"
-      ],
+      "tags": ["devops-sre-advanced", "ci-cd", "pipeline", "designer"],
       "isPublic": true,
       "isFeatured": true,
       "active": true,
@@ -2171,12 +1976,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "monitoring-strategy-designer-devops-adv-monitoring",
-      "tags": [
-        "devops-sre-advanced",
-        "monitoring",
-        "strategy",
-        "designer"
-      ],
+      "tags": ["devops-sre-advanced", "monitoring", "strategy", "designer"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,
@@ -2221,12 +2021,7 @@
       "role": "engineer",
       "pattern": "persona",
       "slug": "incident-response-planner-devops-adv-incident",
-      "tags": [
-        "devops-sre-advanced",
-        "incident",
-        "response",
-        "planner"
-      ],
+      "tags": ["devops-sre-advanced", "incident", "response", "planner"],
       "isPublic": true,
       "isFeatured": false,
       "active": true,

@@ -15,6 +15,7 @@ import { PromptCard } from '@/components/features/PromptCard';
 import { EmptyState } from '@/components/features/EmptyState';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import type { Prompt, PromptCategory, UserRole } from '@/lib/schemas/prompt';
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
@@ -44,7 +45,7 @@ export function LibraryClient({
   const searchParams = useSearchParams();
   const filterParam = searchParams.get('filter');
   const showFavoritesOnly = filterParam === 'favorites';
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<
     PromptCategory | 'all'
@@ -52,17 +53,25 @@ export function LibraryClient({
   const [selectedRole, setSelectedRole] = useState<UserRole | 'all'>('all');
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllRoles, setShowAllRoles] = useState(false);
-  const [visiblePromptCount, setVisiblePromptCount] = useState(INITIAL_VISIBLE_PROMPTS);
-  
+  const [visiblePromptCount, setVisiblePromptCount] = useState(
+    INITIAL_VISIBLE_PROMPTS
+  );
+
   const { favorites, isLoading: favoritesLoading } = useFavorites();
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
-  
+
   // Reset visible count when filters change
   useEffect(() => {
     setVisiblePromptCount(INITIAL_VISIBLE_PROMPTS);
-  }, [searchQuery, selectedCategory, selectedRole, showFavoritesOnly, favorites]);
-  
+  }, [
+    searchQuery,
+    selectedCategory,
+    selectedRole,
+    showFavoritesOnly,
+    favorites,
+  ]);
+
   // Filter prompts using useMemo to prevent recalculations
   const filteredPrompts = useMemo(() => {
     let filtered = initialPrompts.filter((prompt) => {
@@ -71,27 +80,33 @@ export function LibraryClient({
         prompt.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory =
         selectedCategory === 'all' || prompt.category === selectedCategory;
-      const matchesRole = selectedRole === 'all' || prompt.role === selectedRole;
+      const matchesRole =
+        selectedRole === 'all' || prompt.role === selectedRole;
 
       return matchesSearch && matchesCategory && matchesRole;
     });
 
     // Apply favorites filter if active
     if (showFavoritesOnly) {
-      filtered = filtered.filter((prompt) =>
-        favorites.includes(prompt.id)
-      );
+      filtered = filtered.filter((prompt) => favorites.includes(prompt.id));
     }
 
     return filtered;
-  }, [initialPrompts, searchQuery, selectedCategory, selectedRole, showFavoritesOnly, favorites]);
-  
+  }, [
+    initialPrompts,
+    searchQuery,
+    selectedCategory,
+    selectedRole,
+    showFavoritesOnly,
+    favorites,
+  ]);
+
   // Track search with debounce
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
-    
+
     if (searchQuery.trim()) {
       searchTimeoutRef.current = setTimeout(() => {
         trackSearchEvent('search', {
@@ -100,31 +115,30 @@ export function LibraryClient({
         });
       }, 500);
     }
-    
+
     return () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
     };
   }, [searchQuery, filteredPrompts.length]);
-  
-  // Get visible prompts (for lazy loading)
+
   // IMPORTANT: For SEO, all prompts are rendered in HTML, but we use CSS to hide/show them
-  const visiblePrompts = useMemo(() => {
-    return filteredPrompts.slice(0, visiblePromptCount);
-  }, [filteredPrompts, visiblePromptCount]);
-  
   const hasMore = visiblePromptCount < filteredPrompts.length;
-  
+
   // Load more prompts function
   const loadMore = useCallback(() => {
-    setVisiblePromptCount((prev) => Math.min(prev + LOAD_MORE_INCREMENT, filteredPrompts.length));
+    setVisiblePromptCount((prev) =>
+      Math.min(prev + LOAD_MORE_INCREMENT, filteredPrompts.length)
+    );
   }, [filteredPrompts.length]);
-  
+
   // Intersection Observer for infinite scroll
   useEffect(() => {
     if (!hasMore || !loadMoreRef.current) return;
-    
+
+    const element = loadMoreRef.current; // Capture ref value for cleanup
+
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
@@ -138,12 +152,12 @@ export function LibraryClient({
         threshold: 0.1,
       }
     );
-    
-    observer.observe(loadMoreRef.current);
-    
+
+    observer.observe(element);
+
     return () => {
-      if (loadMoreRef.current) {
-        observer.unobserve(loadMoreRef.current);
+      if (element) {
+        observer.unobserve(element);
       }
     };
   }, [hasMore, loadMore]);
@@ -160,10 +174,10 @@ export function LibraryClient({
   ];
 
   // Limit visible items with "Show More" functionality
-  const visibleCategories = showAllCategories 
-    ? allCategories 
+  const visibleCategories = showAllCategories
+    ? allCategories
     : allCategories.slice(0, INITIAL_VISIBLE_CATEGORIES);
-  
+
   const visibleRoles = showAllRoles
     ? allRoles
     : allRoles.slice(0, INITIAL_VISIBLE_ROLES);
@@ -196,22 +210,36 @@ export function LibraryClient({
 
       {/* Stats Panel */}
       <div className="mb-6 grid gap-4 md:grid-cols-3">
-        <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">
-            {showFavoritesOnly ? 'Favorite Prompts' : 'Total Prompts'}
-          </div>
-          <div className="text-2xl font-bold">
-            {showFavoritesOnly ? filteredPrompts.length : initialPrompts.length}
-          </div>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">Categories</div>
-          <div className="text-2xl font-bold">{uniqueCategories.length}</div>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <div className="text-sm text-muted-foreground">Roles</div>
-          <div className="text-2xl font-bold">{uniqueRoles.length}</div>
-        </div>
+        <Card className="surface-frosted">
+          <CardContent className="pt-6">
+            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
+              {showFavoritesOnly
+                ? filteredPrompts.length
+                : initialPrompts.length}
+            </div>
+            <p className="text-tertiary dark:text-tertiary text-xs">
+              {showFavoritesOnly ? 'Favorite Prompts' : 'Total Prompts'}
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="surface-frosted">
+          <CardContent className="pt-6">
+            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
+              {uniqueCategories.length}
+            </div>
+            <p className="text-tertiary dark:text-tertiary text-xs">
+              Categories
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="surface-frosted">
+          <CardContent className="pt-6">
+            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
+              {uniqueRoles.length}
+            </div>
+            <p className="text-tertiary dark:text-tertiary text-xs">Roles</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Search and Filters */}
@@ -271,7 +299,9 @@ export function LibraryClient({
                 ) : (
                   <>
                     <Icons.chevronDown className="mr-1 h-3 w-3" />
-                    Show {allCategories.length - INITIAL_VISIBLE_CATEGORIES} More
+                    Show {allCategories.length -
+                      INITIAL_VISIBLE_CATEGORIES}{' '}
+                    More
                   </>
                 )}
               </Badge>
@@ -359,7 +389,10 @@ export function LibraryClient({
       {showFavoritesOnly && favoritesLoading ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse rounded-lg border bg-card p-6">
+            <div
+              key={i}
+              className="animate-pulse rounded-lg border bg-card p-6"
+            >
               <div className="mb-4 h-4 w-3/4 rounded bg-muted" />
               <div className="mb-2 h-3 w-full rounded bg-muted" />
               <div className="h-3 w-2/3 rounded bg-muted" />
@@ -368,7 +401,7 @@ export function LibraryClient({
         </div>
       ) : filteredPrompts.length > 0 ? (
         <>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
+          <div className="grid items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredPrompts.map((prompt, index) => {
               const isVisible = index < visiblePromptCount;
               return (
@@ -388,7 +421,7 @@ export function LibraryClient({
               );
             })}
           </div>
-          
+
           {/* Load More Trigger (invisible element for intersection observer) */}
           {hasMore && (
             <div ref={loadMoreRef} className="mt-8 flex justify-center">
@@ -402,12 +435,13 @@ export function LibraryClient({
                   onClick={loadMore}
                   className="min-w-[200px]"
                 >
-                  Load More ({filteredPrompts.length - visiblePromptCount} remaining)
+                  Load More ({filteredPrompts.length - visiblePromptCount}{' '}
+                  remaining)
                 </Button>
               </div>
             </div>
           )}
-          
+
           {/* Show total count when all loaded */}
           {!hasMore && filteredPrompts.length > INITIAL_VISIBLE_PROMPTS && (
             <div className="mt-8 text-center text-sm text-muted-foreground">
