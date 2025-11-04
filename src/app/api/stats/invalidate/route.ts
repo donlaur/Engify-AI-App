@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
+import { auth } from '@/lib/auth';
 
 /**
  * POST /api/stats/invalidate
@@ -26,16 +27,25 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 }
 
 export async function POST(req: NextRequest) {
-  // Rate limiting (stricter for webhook)
-  const rateLimitResult = await checkRateLimit(req, {
-    maxRequests: 5,
-    windowMs: 60 * 1000, // 1 minute
-  });
+  // Rate limiting - use correct signature: (identifier, tier)
+  const session = await auth();
+  const tier = session?.user ? 'authenticated' : 'anonymous';
+  const identifier = session?.user?.id || getClientIp(req) || 'unknown';
+  
+  const rateLimitResult = await checkRateLimit(identifier, tier);
 
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429 }
+      { error: rateLimitResult.reason || 'Too many requests' },
+      { 
+        status: 429,
+        headers: {
+          'Retry-After': '3600',
+          'X-RateLimit-Limit': tier === 'anonymous' ? '3' : tier === 'authenticated' ? '20' : '200',
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
+        }
+      }
     );
   }
   try {
