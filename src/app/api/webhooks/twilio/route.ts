@@ -162,20 +162,20 @@ async function processSMSStatus(callback: TwilioStatusCallback) {
   // Handle specific statuses
   switch (status) {
     case 'delivered':
-      // eslint-disable-next-line no-console
-      console.log(`SMS delivered: ${messageId}`);
+      logger.debug('SMS delivered', { messageId });
       break;
 
     case 'failed':
     case 'undelivered':
-      // eslint-disable-next-line no-console
-      console.error(`SMS failed: ${messageId}`, callback.ErrorMessage);
+      logger.warn('SMS failed', {
+        messageId,
+        errorMessage: callback.ErrorMessage,
+      });
       // Could trigger notification or retry logic here
       break;
 
     case 'sent':
-      // eslint-disable-next-line no-console
-      console.log(`SMS sent: ${messageId}`);
+      logger.debug('SMS sent', { messageId });
       break;
   }
 }

@@ -27,7 +27,7 @@ export default function ToolsPage() {
       name: 'Cursor',
       tagline: 'The AI-first code editor',
       icon: Icons.code,
-      rating: 5,
+      // Rating removed per ADR-009 (no fake metrics)
       pricing: '$20/mo Pro',
       bestFor: 'Full-stack development with Claude integration',
       pros: [
@@ -50,7 +50,7 @@ export default function ToolsPage() {
       name: 'Windsurf',
       tagline: 'AI-powered development environment',
       icon: Icons.zap,
-      rating: 4,
+      // Rating removed per ADR-009
       pricing: '$15/mo',
       bestFor: 'Frontend and React development',
       pros: [
@@ -73,7 +73,7 @@ export default function ToolsPage() {
       name: 'GitHub Copilot',
       tagline: 'AI pair programmer from GitHub',
       icon: Icons.github,
-      rating: 4,
+      // Rating removed per ADR-009
       pricing: '$10/mo',
       bestFor: 'Autocomplete and inline suggestions',
       pros: [
@@ -97,7 +97,7 @@ export default function ToolsPage() {
       name: 'Claude AI (Direct)',
       tagline: 'Conversational AI for coding',
       icon: Icons.sparkles,
-      rating: 5,
+      // Rating removed per ADR-009
       pricing: '$20/mo Pro',
       bestFor: 'Architecture, planning, and code review',
       pros: [
@@ -120,7 +120,7 @@ export default function ToolsPage() {
       name: 'ChatGPT Code Interpreter',
       tagline: 'GPT-4 with Python execution',
       icon: Icons.terminal,
-      rating: 3,
+      // Rating removed per ADR-009
       pricing: '$20/mo Plus',
       bestFor: 'Data analysis and Python scripts',
       pros: [
@@ -143,7 +143,7 @@ export default function ToolsPage() {
       name: 'Tabnine',
       tagline: 'Privacy-first AI code completion',
       icon: Icons.lock,
-      rating: 3,
+      // Rating removed per ADR-009
       pricing: 'Free / $12/mo Pro',
       bestFor: 'Teams with strict data privacy',
       pros: [
@@ -166,7 +166,7 @@ export default function ToolsPage() {
       name: 'Replit AI',
       tagline: 'Code in the browser with AI',
       icon: Icons.globe,
-      rating: 4,
+      // Rating removed per ADR-009
       pricing: 'Free / $20/mo Replit Core',
       bestFor: 'Rapid prototyping and learning',
       pros: [
@@ -190,7 +190,7 @@ export default function ToolsPage() {
       name: 'Lovable (formerly GPT Engineer)',
       tagline: 'AI app builder from prompts',
       icon: Icons.heart,
-      rating: 4,
+      // Rating removed per ADR-009
       pricing: '$20/mo Pro',
       bestFor: 'No-code/low-code app generation',
       pros: [
@@ -214,7 +214,7 @@ export default function ToolsPage() {
       name: 'Warp Terminal',
       tagline: 'AI-powered terminal',
       icon: Icons.terminal,
-      rating: 4,
+      // Rating removed per ADR-009
       pricing: 'Free / $15/mo Team',
       bestFor: 'DevOps and command-line workflows',
       pros: [
@@ -238,7 +238,7 @@ export default function ToolsPage() {
       name: 'v0.dev by Vercel',
       tagline: 'AI-powered UI generation',
       icon: Icons.zap,
-      rating: 4,
+      // Rating removed per ADR-009
       pricing: 'Free (limited) / Credits system',
       bestFor: 'Frontend UI component generation',
       pros: [
@@ -388,18 +388,7 @@ export default function ToolsPage() {
                       </div>
                       <div>
                         <CardTitle>{tool.name}</CardTitle>
-                        <div className="mt-1 flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Icons.star
-                              key={i}
-                              className={`h-3 w-3 ${
-                                i < tool.rating
-                                  ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
+                        {/* Rating display removed per ADR-009 (no fake metrics) */}
                       </div>
                     </div>
                     {tool.affiliate && (

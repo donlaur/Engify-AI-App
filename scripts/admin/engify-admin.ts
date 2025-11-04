@@ -19,6 +19,12 @@
 import { Command } from 'commander';
 import { getMongoDb } from '@/lib/db/mongodb';
 
+// Note: Consolidated admin tool replacing multiple one-off scripts:
+// - scripts/admin/ensure-text-indexes.ts → db indexes
+// - scripts/admin/ensure-text-indexes-atlas.ts → db indexes --atlas
+// - scripts/admin/quick-reset-password.js → user reset <email>
+// - scripts/admin/fix-password-now.js → user reset <email>
+
 const program = new Command();
 
 program
@@ -292,6 +298,87 @@ userCommand
     }
   });
 
+userCommand
+  .command('reset <email>')
+  .description('Reset user password')
+  .option('-p, --password <password>', 'New password (or set ADMIN_PASSWORD env var)')
+  .option('--create', 'Create user if not exists')
+  .action(async (email: string, options) => {
+    try {
+      const db = await getMongoDb();
+      const bcrypt = require('bcryptjs');
+      
+      const newPassword = options.password || process.env.ADMIN_PASSWORD;
+      if (!newPassword || newPassword.length < 8) {
+        console.error('\n❌ Password required (min 8 chars)');
+        console.error('   Set via: --password <password>');
+        console.error('   OR set ADMIN_PASSWORD environment variable\n');
+        process.exit(1);
+      }
+
+      console.log(`\n🔍 Looking for user: ${email}`);
+      const existingUser = await db.collection('users').findOne({ email });
+
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+      if (existingUser) {
+        console.log('👤 User found - updating password');
+        await db.collection('users').updateOne(
+          { email },
+          {
+            $set: {
+              password: hashedPassword,
+              updatedAt: new Date(),
+            },
+          }
+        );
+        console.log('✅ Password updated');
+      } else if (options.create) {
+        console.log('👤 User not found - creating new user');
+        const { ObjectId } = require('mongodb');
+        await db.collection('users').insertOne({
+          _id: new ObjectId(),
+          email,
+          name: email.split('@')[0],
+          password: hashedPassword,
+          role: 'super_admin',
+          emailVerified: new Date(),
+          image: null,
+          organizationId: null,
+          plan: 'enterprise_premium',
+          stripeCustomerId: null,
+          stripeSubscriptionId: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+        console.log('✅ User created');
+      } else {
+        console.error(`\n❌ User not found: ${email}`);
+        console.error('   Use --create flag to create new user\n');
+        process.exit(1);
+      }
+
+      // Verify password works
+      const updatedUser = await db.collection('users').findOne({ email });
+      const verifyValid = await bcrypt.compare(newPassword, updatedUser.password);
+      
+      if (verifyValid) {
+        console.log('\n✅ Password reset and verified successfully!');
+        console.log(`\n🌐 Login at: https://engify.ai/login`);
+        console.log(`   Email: ${email}`);
+        console.log(`   Password: [the one you set]\n`);
+      } else {
+        console.error('\n❌ Verification failed after update!');
+        process.exit(1);
+      }
+
+      process.exit(0);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      process.exit(1);
+    }
+  });
+
 /**
  * Prompts Commands
  */
@@ -387,35 +474,134 @@ dbCommand
 
 dbCommand
   .command('indexes')
-  .description('Ensure text indexes exist')
-  .action(async () => {
+  .description('Ensure text indexes exist for search')
+  .option('--atlas', 'Use Atlas mode (drops old indexes first)')
+  .action(async (options) => {
     try {
       const db = await getMongoDb();
+      const dbName = db.databaseName;
       
-      console.log('\n🔍 Creating text indexes...\n');
-      
-      // Prompts text index
-      await db.collection('prompts').createIndex(
-        { title: 'text', description: 'text', content: 'text' },
-        { name: 'prompts_text_search' }
+      console.log('\n🔍 Ensuring text indexes for search...\n');
+      console.log(`📦 Database: ${dbName}\n`);
+
+      // Helper function to ensure text index (handles duplicates gracefully)
+      async function ensureTextIndex(
+        collectionName: string,
+        indexName: string,
+        indexDefinition: Record<string, string>,
+        indexOptions: Record<string, unknown>
+      ) {
+        const collection = db.collection(collectionName);
+        
+        try {
+          // In Atlas mode, drop old text indexes first
+          if (options.atlas) {
+            const indexes = await collection.indexes();
+            const existingTextIndex = indexes.find(
+              (idx: any) => idx.textIndexVersion !== undefined
+            );
+            
+            if (existingTextIndex && existingTextIndex.name !== indexName) {
+              console.log(`⚠️  ${collectionName}: Dropping old text index: ${existingTextIndex.name}`);
+              await collection.dropIndex(existingTextIndex.name);
+              console.log(`✅ Dropped old text index\n`);
+            }
+          }
+          
+          // Create index
+          await collection.createIndex(indexDefinition, {
+            ...indexOptions,
+            name: indexName,
+          });
+          console.log(`✅ ${collectionName}: ${indexName} created\n`);
+        } catch (error: any) {
+          if (error.code === 85 || error.codeName === 'IndexOptionsConflict') {
+            console.log(`ℹ️  ${collectionName}: ${indexName} already exists (skipping)\n`);
+          } else {
+            throw error;
+          }
+        }
+      }
+
+      // Prompts collection - for RAG chat search
+      console.log('Ensuring text index on prompts collection...');
+      await ensureTextIndex(
+        'prompts',
+        'prompts_text_search',
+        {
+          title: 'text',
+          description: 'text',
+          content: 'text',
+          tags: 'text',
+        },
+        {
+          weights: {
+            title: 10,
+            description: 5,
+            content: 3,
+            tags: 2,
+          },
+          default_language: 'english',
+        }
       );
-      console.log('✅ Created prompts text index');
-      
-      // Patterns text index
-      await db.collection('patterns').createIndex(
-        { title: 'text', description: 'text', explanation: 'text' },
-        { name: 'patterns_text_search' }
+
+      // Patterns collection - for pattern search
+      console.log('Ensuring text index on patterns collection...');
+      await ensureTextIndex(
+        'patterns',
+        'patterns_text_search',
+        {
+          title: 'text',
+          description: 'text',
+          useCases: 'text',
+          tags: 'text',
+        },
+        {
+          weights: {
+            title: 10,
+            description: 5,
+            useCases: 3,
+            tags: 2,
+          },
+          default_language: 'english',
+        }
       );
-      console.log('✅ Created patterns text index');
-      
-      // Learning content text index
-      await db.collection('learning_content').createIndex(
-        { title: 'text', description: 'text', content: 'text' },
-        { name: 'learning_content_text_search' }
+
+      // Web content collection - for general search
+      console.log('Ensuring text index on web_content collection...');
+      await ensureTextIndex(
+        'web_content',
+        'web_content_text_search',
+        {
+          title: 'text',
+          content: 'text',
+          excerpt: 'text',
+          tags: 'text',
+        },
+        {
+          weights: {
+            title: 10,
+            excerpt: 5,
+            content: 3,
+            tags: 2,
+          },
+          default_language: 'english',
+        }
       );
-      console.log('✅ Created learning content text index');
-      
-      console.log('\n✅ All text indexes created successfully\n');
+
+      // List all indexes
+      console.log('📋 Current indexes:');
+      const collections = ['prompts', 'patterns', 'web_content'];
+      for (const collName of collections) {
+        const indexes = await db.collection(collName).indexes();
+        console.log(`\n${collName}:`);
+        indexes.forEach((index: any) => {
+          const isTextIndex = index.textIndexVersion !== undefined;
+          console.log(`  ${isTextIndex ? '🔍' : '📌'} ${index.name}`);
+        });
+      }
+
+      console.log('\n✅ All text indexes ensured!\n');
       process.exit(0);
     } catch (error) {
       console.error('Error creating indexes:', error);

@@ -165,16 +165,20 @@ export function getToolLink(toolKey: string): string {
  * Track affiliate click for analytics
  */
 export function trackAffiliateClick(toolKey: string) {
-  // TODO: Implement analytics tracking
   if (typeof window !== 'undefined') {
-    // Track with your analytics service
-    console.log(`Affiliate click: ${toolKey}`);
-
+    // TODO: Implement analytics tracking
     // Example: Google Analytics
     // gtag('event', 'affiliate_click', {
     //   tool: toolKey,
     //   url: getToolLink(toolKey)
     // });
+    
+    // Example: Send to API endpoint for server-side logging
+    // fetch('/api/analytics/track', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ event: 'affiliate_click', tool: toolKey })
+    // }).catch(() => {}); // Silent fail - don't block UI
   }
 }
 
@@ -214,28 +218,28 @@ export const partnershipOutreach = [
     company: 'Cursor',
     priority: 'high',
     contact: 'partnerships@cursor.sh', // Find actual contact
-    rating: 4.5,
+    // Rating removed per ADR-009 (no fake metrics)
     traffic: 'High intent - developers actively comparing',
   },
   {
     company: 'Codeium (Windsurf)',
     priority: 'high',
     contact: 'partnerships@codeium.com',
-    rating: 4.8,
+    // Rating removed per ADR-009
     traffic: 'Highest rated - strong conversion potential',
   },
   {
     company: 'Tabnine',
     priority: 'medium',
     contact: 'partnerships@tabnine.com',
-    rating: 3.8,
+    // Rating removed per ADR-009
     traffic: 'Enterprise focus - higher value conversions',
   },
   {
     company: 'Replit',
     priority: 'medium',
     contact: 'partnerships@replit.com',
-    rating: 3.7,
+    // Rating removed per ADR-009
     traffic: 'Education/prototyping segment',
   },
   {

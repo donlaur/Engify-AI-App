@@ -2,6 +2,8 @@
  * Analytics utilities for tracking user behavior
  */
 
+import { logger } from '@/lib/logging/logger';
+
 export interface AnalyticsEvent {
   name: string;
   properties?: Record<string, unknown>;
@@ -10,10 +12,9 @@ export interface AnalyticsEvent {
 }
 
 export function trackEvent(event: AnalyticsEvent): void {
-  // In production, send to analytics service
+  // Log analytics events for debugging/development
   if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console
-    console.log('[Analytics]', event);
+    logger.debug('Analytics event', { event });
   }
   
   // TODO: Integrate with analytics provider (PostHog, Mixpanel, etc.)
