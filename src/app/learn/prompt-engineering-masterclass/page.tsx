@@ -1,10 +1,10 @@
 /**
  * Prompt Engineering Masterclass - Pillar Page
- * 
+ *
  * Target: "prompt engineering training" (1,500+ searches/mo)
  * Audience: Practitioners (Senior Engineers, Tech Leads)
  * Content: 8,000-10,000 words comprehensive guide
- * 
+ *
  * SEO Strategy:
  * - Establish authority on prompt engineering
  * - Link to all pattern pages
@@ -17,7 +17,13 @@ import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { generateCourseSchema, generateFAQSchema } from '@/lib/seo/metadata';
 import { APP_URL } from '@/lib/constants';
@@ -28,7 +34,8 @@ export async function generateMetadata(): Promise<Metadata> {
   // This can't be async in metadata export, so we'll use a default
   // The actual page will fetch stats server-side
   return {
-    title: 'Prompt Engineering Masterclass: Complete Guide for Developers | Engify.ai',
+    title:
+      'Prompt Engineering Masterclass: Complete Guide for Developers | Engify.ai',
     description:
       'Master prompt engineering with this comprehensive guide. Learn proven patterns, advanced techniques, and practical examples. From beginner to expert - the definitive resource for engineering teams.',
     keywords: [
@@ -57,8 +64,8 @@ export async function generateMetadata(): Promise<Metadata> {
         'Master prompt engineering with proven patterns and advanced techniques.',
       creator: '@engifyai',
     },
-};
-
+  };
+}
 // Pattern links for internal linking
 const PATTERN_LINKS = [
   { key: 'chain-of-thought', name: 'Chain of Thought', category: 'Cognitive' },
@@ -67,13 +74,25 @@ const PATTERN_LINKS = [
   { key: 'persona', name: 'Persona Pattern', category: 'Foundational' },
   { key: 'self-consistency', name: 'Self-Consistency', category: 'Iterative' },
   { key: 'tree-of-thoughts', name: 'Tree of Thoughts', category: 'Cognitive' },
-  { key: 'chain-of-verification', name: 'Chain of Verification', category: 'Cognitive' },
+  {
+    key: 'chain-of-verification',
+    name: 'Chain of Verification',
+    category: 'Cognitive',
+  },
   { key: 're-act', name: 'ReAct (Reasoning + Acting)', category: 'Iterative' },
-  { key: 'automatic-few-shot', name: 'Automatic Few-Shot', category: 'Structural' },
+  {
+    key: 'automatic-few-shot',
+    name: 'Automatic Few-Shot',
+    category: 'Structural',
+  },
   { key: 'meta-prompting', name: 'Meta-Prompting', category: 'Advanced' },
   { key: 'socratic-method', name: 'Socratic Method', category: 'Cognitive' },
   { key: 'constitutional-ai', name: 'Constitutional AI', category: 'Advanced' },
-  { key: 'retrieval-augmented', name: 'Retrieval-Augmented Generation (RAG)', category: 'Advanced' },
+  {
+    key: 'retrieval-augmented',
+    name: 'Retrieval-Augmented Generation (RAG)',
+    category: 'Advanced',
+  },
   { key: 'reflection', name: 'Reflection Pattern', category: 'Iterative' },
   { key: 'kernal', name: 'KERNEL Framework', category: 'Framework' },
 ];
@@ -88,7 +107,7 @@ const FAQS = [
   {
     question: 'Why is prompt engineering important for developers?',
     answer:
-      'Prompt engineering is crucial for developers because it enables you to get consistent, high-quality results from AI tools. Well-engineered prompts can reduce debugging time, improve code quality, and unlock more advanced AI capabilities. It\'s the difference between getting generic responses and getting production-ready code.',
+      "Prompt engineering is crucial for developers because it enables you to get consistent, high-quality results from AI tools. Well-engineered prompts can reduce debugging time, improve code quality, and unlock more advanced AI capabilities. It's the difference between getting generic responses and getting production-ready code.",
   },
   {
     question: 'What are the most effective prompt engineering patterns?',
@@ -106,7 +125,8 @@ const FAQS = [
       'Yes, prompt engineering principles work across all major AI models (OpenAI, Anthropic, Google, etc.), but each model has unique strengths. Some patterns work better with certain models - for example, Chain of Thought works exceptionally well with GPT-4, while Claude excels with constitutional AI patterns.',
   },
   {
-    question: 'What is the difference between prompt engineering and fine-tuning?',
+    question:
+      'What is the difference between prompt engineering and fine-tuning?',
     answer:
       'Prompt engineering involves crafting effective instructions without modifying the model, while fine-tuning involves training the model on custom data. Prompt engineering is faster, cheaper, and more accessible, while fine-tuning offers more control but requires significant resources.',
   },
@@ -116,14 +136,13 @@ export default async function PromptEngineeringMasterclassPage() {
   // Fetch dynamic stats
   const stats = await getServerStats();
   const patternCount = stats.patterns?.total || stats.stats?.patterns || 18;
-  
+
   // Generate Course schema
   const courseSchema = generateCourseSchema(
     {
       key: 'prompt-engineering-masterclass',
       title: 'Prompt Engineering Masterclass',
-      description:
-        `The definitive guide to prompt engineering for developers. Master ${patternCount} proven patterns, advanced techniques, and practical examples.`,
+      description: `The definitive guide to prompt engineering for developers. Master ${patternCount} proven patterns, advanced techniques, and practical examples.`,
       benefits: [
         `Master ${patternCount} proven prompt patterns`,
         'Learn advanced techniques',
@@ -189,10 +208,10 @@ export default async function PromptEngineeringMasterclassPage() {
               Prompt Engineering Masterclass: The Complete Guide for Developers
             </h1>
             <p className="text-xl text-muted-foreground">
-              Master the art and science of prompt engineering. This comprehensive
-              guide covers everything from foundational concepts to advanced
-              techniques, helping you become an expert in crafting effective prompts
-              for AI models.
+              Master the art and science of prompt engineering. This
+              comprehensive guide covers everything from foundational concepts
+              to advanced techniques, helping you become an expert in crafting
+              effective prompts for AI models.
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <span>By Engify.ai Team</span>
@@ -208,7 +227,10 @@ export default async function PromptEngineeringMasterclassPage() {
             <h2 className="mb-4 font-semibold">Table of Contents</h2>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#introduction" className="text-primary hover:underline">
+                <a
+                  href="#introduction"
+                  className="text-primary hover:underline"
+                >
                   1. Introduction: What is Prompt Engineering?
                 </a>
               </li>
@@ -238,7 +260,10 @@ export default async function PromptEngineeringMasterclassPage() {
                 </a>
               </li>
               <li>
-                <a href="#best-practices" className="text-primary hover:underline">
+                <a
+                  href="#best-practices"
+                  className="text-primary hover:underline"
+                >
                   7. Best Practices and Common Mistakes
                 </a>
               </li>
@@ -257,42 +282,47 @@ export default async function PromptEngineeringMasterclassPage() {
             </h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p className="lead">
-                Prompt engineering is the discipline of crafting effective inputs
-                (prompts) to guide AI models toward desired outputs. It's part art,
-                part science, and entirely essential for anyone working with modern
-                AI systems.
+                Prompt engineering is the discipline of crafting effective
+                inputs (prompts) to guide AI models toward desired outputs.
+                It&apos;s part art, part science, and entirely essential for
+                anyone working with modern AI systems.
               </p>
               <p>
                 Think of prompt engineering as the difference between asking a
-                colleague "write some code" versus "write a TypeScript function that
-                validates email addresses using regex, handles edge cases, and
-                returns a boolean." The specificity and structure of your request
-                dramatically impacts the quality of the response.
+                colleague &quot;write some code&quot; versus &quot;write a
+                TypeScript function that validates email addresses using regex,
+                handles edge cases, and returns a boolean.&quot; The specificity
+                and structure of your request dramatically impacts the quality
+                of the response.
               </p>
               <p>
-                In the context of software development, prompt engineering enables
-                developers to:
+                In the context of software development, prompt engineering
+                enables developers to:
               </p>
               <ul>
                 <li>
-                  Generate more accurate and production-ready code from AI assistants
+                  Generate more accurate and production-ready code from AI
+                  assistants
                 </li>
                 <li>
                   Reduce iteration cycles and debugging time significantly
                 </li>
                 <li>
-                  Leverage AI for complex reasoning tasks like architecture decisions
+                  Leverage AI for complex reasoning tasks like architecture
+                  decisions
                 </li>
                 <li>
                   Create consistent, maintainable prompts for team-wide use
                 </li>
                 <li>
-                  Integrate AI into every phase of the software development lifecycle
+                  Integrate AI into every phase of the software development
+                  lifecycle
                 </li>
               </ul>
               <p>
-                This masterclass will take you from understanding the fundamentals to
-                mastering advanced techniques used by top engineering teams worldwide.
+                This masterclass will take you from understanding the
+                fundamentals to mastering advanced techniques used by top
+                engineering teams worldwide.
               </p>
             </div>
           </section>
@@ -303,21 +333,20 @@ export default async function PromptEngineeringMasterclassPage() {
               2. Foundational Concepts
             </h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 How AI Models Process Prompts
               </h3>
               <p>
                 Understanding how AI models interpret prompts is crucial for
                 effective prompt engineering. Modern language models like GPT-4,
-                Claude, and Gemini are transformer-based neural networks trained on
-                vast amounts of text data.
+                Claude, and Gemini are transformer-based neural networks trained
+                on vast amounts of text data.
               </p>
-              <p>
-                When you submit a prompt, the model:
-              </p>
+              <p>When you submit a prompt, the model:</p>
               <ol>
                 <li>
-                  <strong>Tokenizes</strong> your input into smaller pieces (tokens)
+                  <strong>Tokenizes</strong> your input into smaller pieces
+                  (tokens)
                 </li>
                 <li>
                   <strong>Embeds</strong> tokens into numerical representations
@@ -326,57 +355,56 @@ export default async function PromptEngineeringMasterclassPage() {
                   <strong>Processes</strong> through multiple transformer layers
                 </li>
                 <li>
-                  <strong>Generates</strong> output tokens based on learned patterns
+                  <strong>Generates</strong> output tokens based on learned
+                  patterns
                 </li>
               </ol>
               <p>
-                The model doesn't "understand" your prompt in the human sense—it
-                predicts the most likely continuation based on patterns seen during
-                training. This is why structure, clarity, and examples matter so
-                much.
+                The model doesn&apos;t &quot;understand&quot; your prompt in the
+                human sense—it predicts the most likely continuation based on
+                patterns seen during training. This is why structure, clarity,
+                and examples matter so much.
               </p>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Core Principles of Effective Prompts
               </h3>
-              <p>
-                Every effective prompt follows these core principles:
-              </p>
+              <p>Every effective prompt follows these core principles:</p>
               <ul>
                 <li>
-                  <strong>Clarity:</strong> Be specific about what you want. Ambiguity
-                  leads to unpredictable results.
+                  <strong>Clarity:</strong> Be specific about what you want.
+                  Ambiguity leads to unpredictable results.
                 </li>
                 <li>
-                  <strong>Context:</strong> Provide relevant background information.
-                  The model needs context to make informed decisions.
+                  <strong>Context:</strong> Provide relevant background
+                  information. The model needs context to make informed
+                  decisions.
                 </li>
                 <li>
                   <strong>Constraints:</strong> Specify boundaries, formats, and
                   limitations. This prevents the model from going off-track.
                 </li>
                 <li>
-                  <strong>Examples:</strong> Show, don't just tell. Examples help the
-                  model understand your exact requirements.
+                  <strong>Examples:</strong> Show, don&apos;t just tell.
+                  Examples help the model understand your exact requirements.
                 </li>
                 <li>
-                  <strong>Iteration:</strong> Refine prompts based on results. The
-                  first prompt is rarely the best one.
+                  <strong>Iteration:</strong> Refine prompts based on results.
+                  The first prompt is rarely the best one.
                 </li>
               </ul>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Token Efficiency and Cost Optimization
               </h3>
               <p>
                 Every token counts—both in terms of cost and processing time. A
-                well-engineered prompt achieves maximum results with minimum tokens.
-                The KERNEL framework, which we'll cover later, achieves 58% token
-                reduction while maintaining 94% success rates.
+                well-engineered prompt achieves maximum results with minimum
+                tokens. The KERNEL framework, which we&apos;ll cover later,
+                achieves 58% token reduction while maintaining 94% success
+                rates.
               </p>
-              <p>
-                Key strategies for token efficiency:
-              </p>
+              <p>Key strategies for token efficiency:</p>
               <ul>
                 <li>Remove redundant instructions</li>
                 <li>Use abbreviations for repeated concepts</li>
@@ -388,20 +416,21 @@ export default async function PromptEngineeringMasterclassPage() {
 
           {/* Proven Patterns */}
           <section id="patterns" className="mb-16 scroll-mt-20">
-            <h2 className="mb-6 text-3xl font-bold">
-              3. Proven Patterns
-            </h2>
+            <h2 className="mb-6 text-3xl font-bold">3. Proven Patterns</h2>
             <p className="mb-8 text-lg text-muted-foreground">
-              These {patternCount} patterns are battle-tested techniques used by top engineering
-              teams. Each pattern solves specific problems and can be combined for
-              even more powerful results.
+              These {patternCount} patterns are battle-tested techniques used by
+              top engineering teams. Each pattern solves specific problems and
+              can be combined for even more powerful results.
             </p>
 
-            <div className="grid gap-6 md:grid-cols-2 mb-12">
+            <div className="mb-12 grid gap-6 md:grid-cols-2">
               {PATTERN_LINKS.map((pattern) => (
-                <Card key={pattern.key} className="hover:border-primary transition-colors">
+                <Card
+                  key={pattern.key}
+                  className="transition-colors hover:border-primary"
+                >
                   <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                       <CardTitle className="text-lg">
                         <Link
                           href={`/patterns/${pattern.key}`}
@@ -415,8 +444,9 @@ export default async function PromptEngineeringMasterclassPage() {
                       </Badge>
                     </div>
                     <CardDescription>
-                      Learn how to apply the {pattern.name.toLowerCase()} pattern in
-                      your prompts. Click to see detailed examples and use cases.
+                      Learn how to apply the {pattern.name.toLowerCase()}{' '}
+                      pattern in your prompts. Click to see detailed examples
+                      and use cases.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -432,12 +462,10 @@ export default async function PromptEngineeringMasterclassPage() {
             </div>
 
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Pattern Categories
               </h3>
-              <p>
-                Patterns are organized into four categories:
-              </p>
+              <p>Patterns are organized into four categories:</p>
               <ul>
                 <li>
                   <strong>Foundational:</strong> Basic patterns every developer
@@ -466,21 +494,19 @@ export default async function PromptEngineeringMasterclassPage() {
 
           {/* Advanced Techniques */}
           <section id="advanced" className="mb-16 scroll-mt-20">
-            <h2 className="mb-6 text-3xl font-bold">
-              4. Advanced Techniques
-            </h2>
+            <h2 className="mb-6 text-3xl font-bold">4. Advanced Techniques</h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Combining Multiple Patterns
               </h3>
               <p>
-                The real power of prompt engineering comes from combining patterns.
-                For example, you can combine:
+                The real power of prompt engineering comes from combining
+                patterns. For example, you can combine:
               </p>
               <ul>
                 <li>
-                  <strong>Persona + Chain of Thought:</strong> Have an expert reason
-                  through a problem step-by-step
+                  <strong>Persona + Chain of Thought:</strong> Have an expert
+                  reason through a problem step-by-step
                 </li>
                 <li>
                   <strong>Few-Shot + Template:</strong> Provide examples in a
@@ -492,20 +518,18 @@ export default async function PromptEngineeringMasterclassPage() {
                 </li>
               </ul>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Model-Specific Optimizations
               </h3>
-              <p>
-                Different AI models have different strengths:
-              </p>
+              <p>Different AI models have different strengths:</p>
               <ul>
                 <li>
-                  <strong>GPT-4:</strong> Excellent at Chain of Thought reasoning,
-                  code generation, and creative tasks
+                  <strong>GPT-4:</strong> Excellent at Chain of Thought
+                  reasoning, code generation, and creative tasks
                 </li>
                 <li>
-                  <strong>Claude:</strong> Strong at long-form content, analysis,
-                  and constitutional AI patterns
+                  <strong>Claude:</strong> Strong at long-form content,
+                  analysis, and constitutional AI patterns
                 </li>
                 <li>
                   <strong>Gemini:</strong> Good at multimodal tasks and
@@ -513,16 +537,16 @@ export default async function PromptEngineeringMasterclassPage() {
                 </li>
               </ul>
               <p>
-                Optimize your prompts based on which model you're using. Test
-                different patterns to find what works best for each model.
+                Optimize your prompts based on which model you&apos;re using.
+                Test different patterns to find what works best for each model.
               </p>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 The KERNEL Framework
               </h3>
               <p>
-                The KERNEL framework is our proprietary approach to enterprise-grade
-                prompt engineering. It stands for:
+                The KERNEL framework is our proprietary approach to
+                enterprise-grade prompt engineering. It stands for:
               </p>
               <ul>
                 <li>
@@ -545,8 +569,8 @@ export default async function PromptEngineeringMasterclassPage() {
                 </li>
               </ul>
               <p>
-                This framework achieves 94% success rates and 58% token reduction.
-                Learn more about{' '}
+                This framework achieves 94% success rates and 58% token
+                reduction. Learn more about{' '}
                 <Link href="/kernel" className="text-primary hover:underline">
                   the KERNEL framework
                 </Link>
@@ -561,15 +585,13 @@ export default async function PromptEngineeringMasterclassPage() {
               5. Practical Examples and Use Cases
             </h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Before and After: Code Generation Example
               </h3>
-              <p>
-                Let's see how prompt engineering transforms results:
-              </p>
+              <p>Let&apos;s see how prompt engineering transforms results:</p>
 
               <div className="my-6 rounded-lg border bg-muted/50 p-4">
-                <h4 className="font-semibold mb-2 text-red-600 dark:text-red-400">
+                <h4 className="mb-2 font-semibold text-red-600 dark:text-red-400">
                   ❌ Weak Prompt
                 </h4>
                 <pre className="text-sm">
@@ -581,10 +603,10 @@ export default async function PromptEngineeringMasterclassPage() {
               </div>
 
               <div className="my-6 rounded-lg border bg-muted/50 p-4">
-                <h4 className="font-semibold mb-2 text-green-600 dark:text-green-400">
+                <h4 className="mb-2 font-semibold text-green-600 dark:text-green-400">
                   ✅ Strong Prompt (Using Persona + Few-Shot + Template)
                 </h4>
-                <pre className="text-sm whitespace-pre-wrap">
+                <pre className="whitespace-pre-wrap text-sm">
                   <code>{`You are a senior TypeScript engineer.
 
 Write a function that validates email addresses.
@@ -604,29 +626,31 @@ Input: "invalid-email"
 Output: false`}</code>
                 </pre>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Result: Production-ready code with proper error handling and types
+                  Result: Production-ready code with proper error handling and
+                  types
                 </p>
               </div>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Real-World Use Cases
               </h3>
               <ul>
                 <li>
-                  <strong>Code Review:</strong> Use Persona + Chain of Thought to
-                  get detailed code reviews from a senior architect perspective
+                  <strong>Code Review:</strong> Use Persona + Chain of Thought
+                  to get detailed code reviews from a senior architect
+                  perspective
                 </li>
                 <li>
-                  <strong>Documentation:</strong> Use Template + Few-Shot to generate
-                  consistent API documentation
+                  <strong>Documentation:</strong> Use Template + Few-Shot to
+                  generate consistent API documentation
                 </li>
                 <li>
-                  <strong>Debugging:</strong> Use Chain of Thought to walk through
-                  error analysis step-by-step
+                  <strong>Debugging:</strong> Use Chain of Thought to walk
+                  through error analysis step-by-step
                 </li>
                 <li>
-                  <strong>Architecture:</strong> Use RAG + Persona to design systems
-                  based on best practices from your knowledge base
+                  <strong>Architecture:</strong> Use RAG + Persona to design
+                  systems based on best practices from your knowledge base
                 </li>
               </ul>
             </div>
@@ -639,11 +663,11 @@ Output: false`}</code>
             </h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p>
-                Prompt engineering isn't just for code generation—it can enhance
-                every phase of software development:
+                Prompt engineering isn&apos;t just for code generation—it can
+                enhance every phase of software development:
               </p>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Planning & Requirements
               </h3>
               <p>
@@ -652,39 +676,36 @@ Output: false`}</code>
                 requirements are written from the right perspective.
               </p>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Design & Architecture
               </h3>
               <p>
                 Leverage Chain of Thought + RAG to design systems based on
-                architectural patterns and best practices. The AI can reason through
-                trade-offs and suggest optimal solutions.
+                architectural patterns and best practices. The AI can reason
+                through trade-offs and suggest optimal solutions.
               </p>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
-                Development
-              </h3>
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">Development</h3>
               <p>
-                This is where prompt engineering shines. Use Few-Shot + Template to
-                generate consistent, production-ready code. Combine with Persona to
-                get code in your team's style.
+                This is where prompt engineering shines. Use Few-Shot + Template
+                to generate consistent, production-ready code. Combine with
+                Persona to get code in your team&apos;s style.
               </p>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
-                Testing
-              </h3>
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">Testing</h3>
               <p>
-                Generate test cases, test data, and even test implementations using
-                prompt engineering. Few-Shot examples ensure tests follow your
-                testing patterns.
+                Generate test cases, test data, and even test implementations
+                using prompt engineering. Few-Shot examples ensure tests follow
+                your testing patterns.
               </p>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Deployment & Operations
               </h3>
               <p>
                 Create deployment scripts, monitoring configurations, and
-                runbooks using structured prompts. Consistency is key in operations.
+                runbooks using structured prompts. Consistency is key in
+                operations.
               </p>
             </div>
           </section>
@@ -695,7 +716,7 @@ Output: false`}</code>
               7. Best Practices and Common Mistakes
             </h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Best Practices
               </h3>
               <ul>
@@ -708,42 +729,42 @@ Output: false`}</code>
                   differently to the same prompt
                 </li>
                 <li>
-                  <strong>Version your prompts:</strong> Track changes and measure
-                  improvements
+                  <strong>Version your prompts:</strong> Track changes and
+                  measure improvements
                 </li>
                 <li>
                   <strong>Use prompt libraries:</strong> Build a repository of
                   proven prompts for your team
                 </li>
                 <li>
-                  <strong>Document patterns:</strong> Explain why you chose specific
-                  patterns so others can learn
+                  <strong>Document patterns:</strong> Explain why you chose
+                  specific patterns so others can learn
                 </li>
               </ul>
 
-              <h3 className="text-2xl font-semibold mt-8 mb-4">
+              <h3 className="mb-4 mt-8 text-2xl font-semibold">
                 Common Mistakes to Avoid
               </h3>
               <ul>
                 <li>
-                  <strong>Vague instructions:</strong> "Write good code" is useless.
-                  Be specific.
+                  <strong>Vague instructions:</strong> &quot;Write good
+                  code&quot; is useless. Be specific.
                 </li>
                 <li>
                   <strong>Ignoring context:</strong> Models need context to make
                   good decisions. Provide it.
                 </li>
                 <li>
-                  <strong>Over-prompting:</strong> Too many constraints can confuse
-                  the model. Find the balance.
+                  <strong>Over-prompting:</strong> Too many constraints can
+                  confuse the model. Find the balance.
                 </li>
                 <li>
                   <strong>Not iterating:</strong> The first prompt is rarely the
                   best. Refine based on results.
                 </li>
                 <li>
-                  <strong>Forgetting error handling:</strong> Always specify how to
-                  handle edge cases and errors.
+                  <strong>Forgetting error handling:</strong> Always specify how
+                  to handle edge cases and errors.
                 </li>
               </ul>
             </div>
@@ -777,7 +798,7 @@ Output: false`}</code>
               Access our full library of 100+ expert prompts, interactive
               workbenches, and team training tools.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button size="lg" asChild>
                 <Link href="/prompts">
                   Browse Prompt Library
@@ -785,9 +806,7 @@ Output: false`}</code>
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/workbench">
-                  Try Interactive Workbench
-                </Link>
+                <Link href="/workbench">Try Interactive Workbench</Link>
               </Button>
             </div>
           </section>
@@ -796,4 +815,3 @@ Output: false`}</code>
     </>
   );
 }
-
