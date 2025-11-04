@@ -3,6 +3,9 @@
  * Monetization through AI tool referrals
  */
 
+import { trackEvent } from '@/lib/utils/analytics';
+import { logger } from '@/lib/logging/logger';
+
 export interface AffiliateLink {
   tool: string;
   baseUrl: string;
@@ -165,10 +168,21 @@ export function getToolLink(toolKey: string): string {
  * Track affiliate click for analytics
  */
 export function trackAffiliateClick(toolKey: string) {
-  // TODO: Implement analytics tracking
   if (typeof window !== 'undefined') {
-    // Track with your analytics service
-    console.log(`Affiliate click: ${toolKey}`);
+    // Track with analytics service
+    trackEvent({
+      name: 'affiliate_click',
+      properties: {
+        tool: toolKey,
+        url: getToolLink(toolKey),
+      },
+    });
+
+    // Log for server-side tracking
+    logger.info('Affiliate click tracked', {
+      tool: toolKey,
+      url: getToolLink(toolKey),
+    });
 
     // Example: Google Analytics
     // gtag('event', 'affiliate_click', {

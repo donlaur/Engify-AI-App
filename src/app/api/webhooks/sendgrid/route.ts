@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { QStashMessageQueue } from '@/lib/messaging/queues/QStashMessageQueue';
 import { auditLog, type AuditAction } from '@/lib/logging/audit';
+import { logger } from '@/lib/logging/logger';
 import type { MessagePriority, IMessage } from '@/lib/messaging/types';
 import {
   createEmailProcessingJob,
@@ -82,26 +83,28 @@ async function processEmailEvent(event: SendGridEvent) {
     case 'bounce':
     case 'dropped':
       // Handle failed emails - maybe notify user
-      if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.warn(`Email failed for ${event.email}:`, event.reason);
-      }
+      logger.warn('Email failed', {
+        email: event.email,
+        reason: event.reason,
+        messageId: event.sg_message_id,
+      });
       break;
 
     case 'click':
       // Track link clicks for analytics
-      if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.log(`Link clicked in email to ${event.email}:`, event.url);
-      }
+      logger.info('Email link clicked', {
+        email: event.email,
+        url: event.url,
+        messageId: event.sg_message_id,
+      });
       break;
 
     case 'open':
       // Track email opens
-      if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.log(`Email opened by ${event.email}`);
-      }
+      logger.info('Email opened', {
+        email: event.email,
+        messageId: event.sg_message_id,
+      });
       break;
   }
 }
@@ -186,13 +189,14 @@ async function processInboundEmail(email: SendGridInboundEmail) {
     },
   });
 
-  // Log queued email (using audit log in production)
-  if (process.env.NODE_ENV !== 'production') {
-    // eslint-disable-next-line no-console
-    console.log(
-      `Queued inbound email from ${email.from} for processing (${processingJob.contentType}, ${processingJob.priority} priority)`
-    );
-  }
+  // Log queued email
+  logger.info('Inbound email queued for processing', {
+    from: email.from,
+    to: email.to,
+    subject: email.subject,
+    contentType: processingJob.contentType,
+    priority: processingJob.priority,
+  });
 }
 
 /**
@@ -210,12 +214,7 @@ function verifyWebhookSignature(
     const publicKey = process.env.SENDGRID_WEBHOOK_PUBLIC_KEY;
 
     if (!publicKey) {
-      if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.warn(
-          'SENDGRID_WEBHOOK_PUBLIC_KEY not set - skipping signature verification'
-        );
-      }
+      logger.warn('SENDGRID_WEBHOOK_PUBLIC_KEY not set - skipping signature verification');
       return true; // Allow in dev, but log warning
     }
 
@@ -276,7 +275,9 @@ export async function POST(request: NextRequest) {
     // SendGrid expects 200 response
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('SendGrid webhook error:', error);
+    logger.apiError('/api/webhooks/sendgrid', error, {
+      method: 'POST',
+    });
 
     // Still return 200 to prevent SendGrid from retrying
     // Log error for investigation
