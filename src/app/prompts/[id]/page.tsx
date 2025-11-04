@@ -307,7 +307,7 @@ export default async function PromptPage({
                 <h2 className="text-lg font-semibold">Prompt Template</h2>
                 <CopyButton content={prompt.content} />
               </div>
-              <pre className="whitespace-pre-wrap rounded-lg bg-muted p-4 text-sm">
+              <pre className="whitespace-pre-wrap rounded-lg bg-slate-900 p-4 text-sm font-mono text-slate-100 dark:bg-slate-950 dark:text-slate-50">
                 {prompt.content}
               </pre>
             </div>

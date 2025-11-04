@@ -135,7 +135,7 @@ export function PromptDetailModal({
             </Button>
           </div>
 
-          <div className="whitespace-pre-wrap rounded-lg border bg-muted/50 p-6 font-mono text-sm text-foreground">
+          <div className="whitespace-pre-wrap rounded-lg border bg-slate-900 p-6 font-mono text-sm text-slate-100 dark:bg-slate-950 dark:text-slate-50">
             {prompt.content}
           </div>
         </div>
