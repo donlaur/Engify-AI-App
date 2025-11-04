@@ -123,10 +123,6 @@ export function PatternsClient({
     <div className="container py-8">
       {/* Header */}
       <div className="mb-8">
-        <Badge variant="secondary" className="mb-4">
-          <Icons.sparkles className="mr-2 h-3 w-3" />
-          Prompt Engineering Patterns
-        </Badge>
         <h1 className="mb-2 text-4xl font-bold">
           {patterns.length} Proven Patterns
         </h1>

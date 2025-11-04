@@ -46,16 +46,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  // Use real article metadata from DB (not hardcoded)
+  const metaTitle = article.seo?.metaTitle || article.title;
+  const metaDescription = article.seo?.metaDescription || article.description || 'Learn about AI and prompt engineering from Engify.ai';
+  
   return {
-    title: article.seo?.metaTitle || `${article.title} | Engify.ai`,
-    description: article.seo?.metaDescription || article.description,
-    keywords: article.seo?.keywords || article.tags,
+    title: `${metaTitle} | Engify.ai`,
+    description: metaDescription,
+    keywords: article.seo?.keywords || article.tags || [],
     openGraph: {
       title: article.title,
-      description: article.description,
+      description: metaDescription,
       type: 'article',
       publishedTime: article.publishedAt?.toISOString(),
       authors: [article.author || 'Engify.ai Team'],
+      images: article.seo?.ogImage ? [{ url: article.seo.ogImage }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: metaDescription,
+      images: article.seo?.ogImage ? [article.seo.ogImage] : undefined,
     },
   };
 }

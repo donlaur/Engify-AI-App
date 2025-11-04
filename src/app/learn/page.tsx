@@ -17,25 +17,40 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { getAllLearningResources } from '@/lib/learning/mongodb-learning';
-import { getDb } from '@/lib/mongodb';
+import { learningResourceRepository } from '@/lib/db/repositories/ContentService';
 import { learningPathways } from '@/data/learning-pathways'; // Still hardcoded for now
 
 export default async function LearnPage() {
   // Fetch learning resources from MongoDB
   const learningResources = await getAllLearningResources();
   
-  // Fetch pathway count from MongoDB (if pathways collection exists)
-  let pathwayCount = learningPathways.length;
-  try {
-    const db = await getDb();
-    const pathways = await db.collection('pathways').find({}).toArray();
-    if (pathways.length > 0) {
-      pathwayCount = pathways.length;
+  // Verify articles exist in DB for pathway links
+  const verifyArticleExists = async (slug: string): Promise<boolean> => {
+    try {
+      const article = await learningResourceRepository.getBySlug(slug);
+      return article !== null;
+    } catch {
+      return false;
     }
-  } catch (error) {
-    // Use hardcoded count if DB lookup fails
-    console.debug('Failed to fetch pathways from DB:', error);
-  }
+  };
+
+  // Check which pathway articles exist
+  const verifiedPathways = await Promise.all(
+    learningPathways.map(async (pathway) => {
+      const verifiedSteps = await Promise.all(
+        pathway.steps.map(async (step) => {
+          if (step.type === 'article') {
+            const exists = await verifyArticleExists(step.targetId);
+            return { ...step, exists };
+          }
+          return { ...step, exists: true };
+        })
+      );
+      return { ...pathway, steps: verifiedSteps };
+    })
+  );
+
+  const pathwayCount = learningPathways.length;
 
   const getStepIcon = (type: string) => {
     switch (type) {
@@ -74,10 +89,6 @@ export default async function LearnPage() {
       <div className="container py-8">
         {/* Header */}
         <div className="mb-8">
-          <Badge variant="secondary" className="mb-4">
-            <Icons.sparkles className="mr-2 h-3 w-3" />
-            Learning Pathways
-          </Badge>
           <h1 className="mb-2 text-4xl font-bold">Guided Learning Paths</h1>
           <p className="text-xl text-muted-foreground">
             Structured pathways to master AI and prompt engineering
@@ -112,7 +123,7 @@ export default async function LearnPage() {
 
         {/* Pathways */}
         <div className="space-y-8">
-          {learningPathways.map((pathway) => (
+          {verifiedPathways.map((pathway) => (
             <Card key={pathway.id} className="overflow-hidden">
               <CardHeader className="bg-primary/5">
                 <div className="flex items-start justify-between">
@@ -131,7 +142,7 @@ export default async function LearnPage() {
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-4">
-                  {pathway.steps.map((step, index) => {
+                  {pathway.steps.map((step: typeof pathway.steps[0] & { exists?: boolean }, index) => {
                     const Icon = getStepIcon(step.type);
                     const isLast = index === pathway.steps.length - 1;
 
@@ -178,16 +189,23 @@ export default async function LearnPage() {
                                   </a>
                                 </Button>
                               ) : (
-                                <Button variant="outline" asChild>
-                                  <Link href={
-                                    step.type === 'workbench' ? '/demo' :
-                                    step.type === 'article' ? `/learn/${step.targetId}` :
-                                    `/prompts/${step.targetId}`
-                                  }>
+                                step.exists ? (
+                                  <Button variant="outline" asChild>
+                                    <Link href={
+                                      step.type === 'workbench' ? '/demo' :
+                                      step.type === 'article' ? `/learn/${step.targetId}` :
+                                      `/prompts/${step.targetId}`
+                                    }>
+                                      <Icon className="mr-2 h-4 w-4" />
+                                      {step.actionText}
+                                    </Link>
+                                  </Button>
+                                ) : (
+                                  <Button variant="outline" disabled>
                                     <Icon className="mr-2 h-4 w-4" />
-                                    {step.actionText}
-                                  </Link>
-                                </Button>
+                                    {step.actionText} (Coming Soon)
+                                  </Button>
+                                )
                               )}
                             </CardContent>
                           </Card>
