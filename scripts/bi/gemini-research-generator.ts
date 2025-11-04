@@ -102,37 +102,56 @@ function buildPromptSuggestionsPrompt(data: unknown): string {
   const analysis = data as Awaited<ReturnType<typeof collectPromptSuggestionsData>>;
   const { patterns, samplePrompts, categories, levels, roles, promptCategories, usedPatterns } = analysis;
 
+  // Build comprehensive "what we have" section
+  const existingPatternsList = patterns.map((p) => 
+    `- **${p.name}** (ID: \`${p.id}\`, Category: ${p.category}, Level: ${p.level})`
+  ).join('\n');
+
+  const existingCategoryList = Array.from(promptCategories).sort().map(c => `- \`${c}\``).join('\n');
+  const existingRoleList = Array.from(roles).sort().map(r => `- \`${r}\``).join('\n');
+  const existingUsedPatternsList = Array.from(usedPatterns).sort().map(p => `- \`${p}\``).join('\n');
+
   return `You are an expert prompt engineering consultant analyzing Engify.ai, an AI training platform for engineering teams.
 
-## Current Site Context
+## CRITICAL: What We ALREADY Have
+
+**DO NOT suggest duplicates of what we already have. Review this section carefully before making suggestions.**
+
+### Existing Patterns (${patterns.length} total):
+${existingPatternsList}
+
+### Existing Prompt Categories (${promptCategories.size} total):
+${existingCategoryList}
+
+### Existing Roles (${roles.size} total):
+${existingRoleList}
+
+### Patterns Already Used in Our Prompts:
+${existingUsedPatternsList.length > 0 ? existingUsedPatternsList : 'None yet'}
+
+### Sample Prompts (${samplePrompts.length} of ${analysis.prompts.length} total):
+${samplePrompts.slice(0, 10).map((p, i) => `${i + 1}. **${p.title}**
+   - Category: \`${p.category}\`
+   - Role: ${p.role ? `\`${p.role}\`` : 'None'}
+   - Pattern: ${p.pattern ? `\`${p.pattern}\`` : 'None'}
+   - Description: ${p.description.substring(0, 80)}...`).join('\n')}
+
+## Site Context
 
 **Mission:** Help developers, engineers, and product managers use AI better through prompt engineering patterns and ready-to-use prompts.
 
-**Current Patterns (${patterns.length}):**
-${patterns.map((p, i) => `${i + 1}. **${p.name}** (${p.category}, ${p.level})
-   - ID: ${p.id}
-   - Description: ${p.description}
-   ${p.useCases ? `- Use Cases: ${p.useCases.slice(0, 3).join(', ')}` : ''}`).join('\n')}
-
-**Pattern Categories:** ${categories.join(', ')}
-**Pattern Levels:** ${levels.join(', ')}
-
-**Current Prompts Sample (${samplePrompts.length} of ${analysis.prompts.length} total):**
-${samplePrompts.map((p, i) => `${i + 1}. **${p.title}**
-   - Category: ${p.category}
-   ${p.role ? `- Role: ${p.role}` : ''}
-   ${p.pattern ? `- Pattern: ${p.pattern}` : ''}
-   - Description: ${p.description.substring(0, 100)}...`).join('\n')}
-
-**Current Prompt Categories:** ${promptCategories.join(', ')}
-**Current Roles:** ${roles.length > 0 ? roles.join(', ') : 'None yet'}
-**Patterns Used in Prompts:** ${usedPatterns.length > 0 ? usedPatterns.join(', ') : 'None yet'}
+**Pattern Categories Available:** ${categories.join(', ')}
+**Pattern Levels Available:** ${levels.join(', ')}
 
 ## Your Task
+
+**IMPORTANT:** Before suggesting anything, verify it doesn't already exist in the lists above. Focus ONLY on genuine gaps.
 
 Analyze the gaps and opportunities in this prompt engineering library. Provide:
 
 ### 1. Suggested New Patterns (5-10)
+**CRITICAL:** Do NOT suggest patterns we already have. Check the "Existing Patterns" list above first.
+
 Research proven prompt engineering patterns from:
 - OpenAI's prompt engineering guide
 - Anthropic's prompt engineering research
@@ -140,41 +159,58 @@ Research proven prompt engineering patterns from:
 - Industry best practices
 
 For each suggested pattern, provide:
-- Name (clear, descriptive)
-- ID (kebab-case, unique)
+- Name (clear, descriptive - must be different from existing patterns)
+- ID (kebab-case, unique - check against existing IDs)
 - Category (FOUNDATIONAL, STRUCTURAL, COGNITIVE, or ITERATIVE)
 - Level (beginner, intermediate, or advanced)
 - Description (1-2 sentences)
-- Reason (why this fills a gap)
+- Reason (why this fills a gap - explain what's missing that this addresses)
 
-Focus on:
-- Patterns we don't have yet
-- Patterns that address different problem types
-- Patterns for different skill levels
-- Industry-standard patterns we're missing
+**Focus ONLY on:**
+- Patterns we DON'T have yet (verify against existing list)
+- Patterns that address different problem types than existing ones
+- Patterns for skill levels we're missing
+- Industry-standard patterns we're genuinely missing
+
+**DO NOT suggest:**
+- Chain-of-Thought (we have it)
+- Any pattern already in our existing list
+- Variations of existing patterns unless they solve distinctly different problems
 
 ### 2. Suggested New Prompts (10-20)
+**CRITICAL:** Check existing categories and roles before suggesting. Only suggest new categories/roles if absolutely necessary.
+
 Identify gaps in our prompt library and suggest prompts that:
-- Cover missing categories
-- Target missing roles (e.g., DevOps, QA, Data Scientist, etc.)
-- Use patterns we have but aren't utilizing
+- Cover missing categories (verify against existing categories list)
+- Target missing roles (check existing roles list - we may already have DevOps, QA, etc.)
+- Use patterns we have but aren't utilizing effectively
 - Address common engineering tasks we're not covering
 - Fill gaps in experience levels (beginner vs advanced)
 
 For each suggested prompt, provide:
 - Title (clear, action-oriented)
 - Description (what it does, why it's useful)
-- Category (from existing or suggest new)
-- Role (target user role - suggest if missing)
+- Category (prefer existing categories - only suggest new if truly necessary)
+- Role (prefer existing roles - only suggest new if we're missing that role entirely)
 - Pattern (which pattern it uses - can be null if none)
 - Level (beginner, intermediate, or advanced)
-- Reason (why this fills a gap)
+- Reason (why this fills a gap - be specific about what's missing)
 
 ### 3. Missing Roles
-List engineering roles we should target but don't have prompts for yet (e.g., DevOps Engineer, QA Engineer, Data Scientist, Site Reliability Engineer, etc.)
+**CRITICAL:** Check the "Existing Roles" list above first. Only list roles we DON'T have.
+
+List engineering roles we should target but don't have prompts for yet. 
+**DO NOT list:** ${Array.from(roles).sort().join(', ')} (we already have these)
+
+Focus on roles like: DevOps Engineer, QA Engineer, Data Scientist, Site Reliability Engineer, Security Engineer, etc. - but ONLY if they're not in our existing roles list.
 
 ### 4. Missing Categories
-List prompt categories we should add but don't have yet (e.g., Testing, Documentation, Code Review, DevOps, Data Analysis, etc.)
+**CRITICAL:** Check the "Existing Prompt Categories" list above first. Only list categories we DON'T have.
+
+List prompt categories we should add but don't have yet.
+**DO NOT list:** ${Array.from(promptCategories).join(', ')} (we already have these)
+
+Only suggest genuinely new categories that would serve different use cases than existing ones.
 
 ### 5. Level Distribution Analysis
 For each category, identify if we're missing beginner, intermediate, or advanced prompts/patterns.
