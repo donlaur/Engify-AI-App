@@ -119,6 +119,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check for duplicates
+    const { checkPromptDuplicate } = await import('@/lib/utils/prompt-duplicate-check');
+    const duplicateCheck = await checkPromptDuplicate({
+      title: body.title,
+      content: body.content,
+      category: body.category,
+      role: body.role,
+      pattern: body.pattern,
+    });
+
+    if (duplicateCheck.isDuplicate) {
+      return NextResponse.json(
+        {
+          error: 'Duplicate prompt detected',
+          duplicates: duplicateCheck.matches,
+        },
+        { status: 409 } // Conflict status code
+      );
+    }
+
     const db = await getMongoDb();
     const collection = db.collection('prompts');
 

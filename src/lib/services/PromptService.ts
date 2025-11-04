@@ -82,6 +82,22 @@ export class PromptService {
       throw new Error('Description must be 1000 characters or less');
     }
 
+    // Check for duplicates before creating
+    const { checkPromptDuplicate } = await import('@/lib/utils/prompt-duplicate-check');
+    const duplicateCheck = await checkPromptDuplicate({
+      title: promptData.title,
+      content: promptData.content,
+      category: promptData.category,
+      role: promptData.role,
+      pattern: promptData.pattern,
+    });
+
+    if (duplicateCheck.isDuplicate) {
+      const duplicateError = new Error('Duplicate prompt detected');
+      (duplicateError as any).duplicateMatches = duplicateCheck.matches;
+      throw duplicateError;
+    }
+
     // Create prompt with defaults
     const newPromptData = {
       title: promptData.title,
