@@ -1,12 +1,20 @@
 import { Metadata } from 'next';
 import { APP_URL } from '@/lib/constants';
 import PatternDetailClient from './pattern-detail-client';
+import {
+  generatePatternMetadata,
+  generateCourseSchema,
+} from '@/lib/seo/metadata';
 
 // Pattern descriptions and metadata
-const PATTERN_INFO: Record<string, { title: string; description: string; icon: string; benefits: string[] }> = {
+const PATTERN_INFO: Record<
+  string,
+  { title: string; description: string; icon: string; benefits: string[] }
+> = {
   'chain-of-thought': {
     title: 'Chain of Thought',
-    description: 'Break down complex problems into step-by-step reasoning processes. This pattern helps AI models show their work and arrive at more accurate conclusions.',
+    description:
+      'Break down complex problems into step-by-step reasoning processes. This pattern helps AI models show their work and arrive at more accurate conclusions.',
     icon: 'link',
     benefits: [
       'Improved reasoning accuracy',
@@ -17,7 +25,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   'few-shot': {
     title: 'Few-Shot Learning',
-    description: 'Provide examples to guide the AI\'s response format and style. This pattern uses 2-5 examples to teach the model what you want.',
+    description:
+      "Provide examples to guide the AI's response format and style. This pattern uses 2-5 examples to teach the model what you want.",
     icon: 'book',
     benefits: [
       'Consistent output format',
@@ -28,7 +37,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   'zero-shot': {
     title: 'Zero-Shot',
-    description: 'Direct instructions without examples. Ideal for simple tasks or when you want maximum creativity.',
+    description:
+      'Direct instructions without examples. Ideal for simple tasks or when you want maximum creativity.',
     icon: 'zap',
     benefits: [
       'Quick to write',
@@ -37,9 +47,10 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
       'Works for novel tasks',
     ],
   },
-  'persona': {
+  persona: {
     title: 'Persona Pattern',
-    description: 'Assign a specific role or expertise to the AI (e.g., "You are a senior software architect"). This shapes the tone, depth, and perspective of responses.',
+    description:
+      'Assign a specific role or expertise to the AI (e.g., "You are a senior software architect"). This shapes the tone, depth, and perspective of responses.',
     icon: 'user',
     benefits: [
       'Expert-level responses',
@@ -50,7 +61,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   'self-consistency': {
     title: 'Self-Consistency',
-    description: 'Generate multiple solutions and choose the most consistent answer. This pattern reduces errors by cross-validating responses.',
+    description:
+      'Generate multiple solutions and choose the most consistent answer. This pattern reduces errors by cross-validating responses.',
     icon: 'check-circle',
     benefits: [
       'Higher accuracy',
@@ -61,7 +73,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   'tree-of-thoughts': {
     title: 'Tree of Thoughts',
-    description: 'Explore multiple reasoning paths simultaneously, then select the best solution. Ideal for complex problem-solving.',
+    description:
+      'Explore multiple reasoning paths simultaneously, then select the best solution. Ideal for complex problem-solving.',
     icon: 'git-branch',
     benefits: [
       'Comprehensive exploration',
@@ -72,7 +85,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   'chain-of-verification': {
     title: 'Chain of Verification',
-    description: 'Verify each step of reasoning before proceeding. This pattern ensures accuracy at each stage.',
+    description:
+      'Verify each step of reasoning before proceeding. This pattern ensures accuracy at each stage.',
     icon: 'shield-check',
     benefits: [
       'Error detection',
@@ -83,7 +97,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   're-act': {
     title: 'ReAct (Reasoning + Acting)',
-    description: 'Combine reasoning with tool use. The AI thinks, acts, observes, and iterates.',
+    description:
+      'Combine reasoning with tool use. The AI thinks, acts, observes, and iterates.',
     icon: 'settings',
     benefits: [
       'Tool integration',
@@ -94,7 +109,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   'automatic-few-shot': {
     title: 'Automatic Few-Shot',
-    description: 'Let the AI select its own examples from context. This pattern adapts examples to the current task.',
+    description:
+      'Let the AI select its own examples from context. This pattern adapts examples to the current task.',
     icon: 'wand-magic',
     benefits: [
       'Adaptive examples',
@@ -105,7 +121,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   'meta-prompting': {
     title: 'Meta-Prompting',
-    description: 'Prompt the AI to improve its own prompts. This pattern creates self-improving systems.',
+    description:
+      'Prompt the AI to improve its own prompts. This pattern creates self-improving systems.',
     icon: 'sparkles',
     benefits: [
       'Self-optimization',
@@ -116,7 +133,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   'socratic-method': {
     title: 'Socratic Method',
-    description: 'Ask probing questions to guide reasoning. This pattern helps the AI think deeper.',
+    description:
+      'Ask probing questions to guide reasoning. This pattern helps the AI think deeper.',
     icon: 'message-circle',
     benefits: [
       'Deeper thinking',
@@ -127,7 +145,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   'constitutional-ai': {
     title: 'Constitutional AI',
-    description: 'Apply principles and constraints to guide AI behavior. This pattern ensures ethical, safe responses.',
+    description:
+      'Apply principles and constraints to guide AI behavior. This pattern ensures ethical, safe responses.',
     icon: 'scale',
     benefits: [
       'Ethical responses',
@@ -138,7 +157,8 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
   'retrieval-augmented': {
     title: 'Retrieval-Augmented Generation (RAG)',
-    description: 'Augment prompts with relevant context from external sources. This pattern improves accuracy with real data.',
+    description:
+      'Augment prompts with relevant context from external sources. This pattern improves accuracy with real data.',
     icon: 'database',
     benefits: [
       'Up-to-date information',
@@ -147,9 +167,10 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
       'Knowledge integration',
     ],
   },
-  'reflection': {
+  reflection: {
     title: 'Reflection Pattern',
-    description: 'Review and refine responses iteratively. This pattern improves quality through self-critique.',
+    description:
+      'Review and refine responses iteratively. This pattern improves quality through self-critique.',
     icon: 'refresh-cw',
     benefits: [
       'Self-improvement',
@@ -158,9 +179,10 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
       'Continuous enhancement',
     ],
   },
-  'kernal': {
+  kernal: {
     title: 'KERNEL Framework',
-    description: 'Knowledge, Examples, Role, Next, Evaluate, Learn - Our comprehensive prompt engineering framework.',
+    description:
+      'Knowledge, Examples, Role, Next, Evaluate, Learn - Our comprehensive prompt engineering framework.',
     icon: 'kernel',
     benefits: [
       'Structured approach',
@@ -171,59 +193,59 @@ const PATTERN_INFO: Record<string, { title: string; description: string; icon: s
   },
 };
 
-export async function generateMetadata({ params }: { params: { pattern: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: { pattern: string };
+}): Promise<Metadata> {
   const pattern = decodeURIComponent(params.pattern);
   const patternInfo = PATTERN_INFO[pattern] || {
-    title: pattern.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    title: pattern
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' '),
     description: `Learn about the ${pattern} prompt engineering pattern and how to use it effectively.`,
     benefits: [],
   };
 
-  const title = `${patternInfo.title} - Prompt Engineering Pattern | Engify.ai`;
-  const description = `${patternInfo.description} Part of the PMI 7 Patterns of AI. Explore ${patternInfo.benefits.length} key benefits and learn how to apply this pattern in your prompts.`;
-  const url = `${APP_URL}/patterns/${encodeURIComponent(pattern)}`;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      title,
-      description,
-      url,
-      type: 'article',
-      siteName: 'Engify.ai',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-    },
-    keywords: [
-      'prompt engineering',
-      'AI patterns',
-      patternInfo.title.toLowerCase(),
-      'prompt patterns',
-      'AI prompt techniques',
-      'PMI patterns',
-      'prompt engineering framework',
-    ],
-  };
+  // Use new programmatic metadata utility
+  return generatePatternMetadata({
+    key: pattern,
+    title: patternInfo.title,
+    description: patternInfo.description,
+    benefits: patternInfo.benefits,
+  });
 }
 
-export default async function PatternDetailPage({ params }: { params: { pattern: string } }) {
+export default async function PatternDetailPage({
+  params,
+}: {
+  params: { pattern: string };
+}) {
   const pattern = decodeURIComponent(params.pattern);
   const patternInfo = PATTERN_INFO[pattern] || {
-    title: pattern.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    title: pattern
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' '),
     description: `Learn about the ${pattern} prompt engineering pattern.`,
     icon: 'zap',
     benefits: [],
   };
 
-  // Generate JSON-LD structured data
-  const jsonLd = {
+  // Generate Course schema for rich results
+  const courseSchema = generateCourseSchema(
+    {
+      key: pattern,
+      title: patternInfo.title,
+      description: patternInfo.description,
+      benefits: patternInfo.benefits,
+    },
+    `${APP_URL}/patterns/${encodeURIComponent(pattern)}`
+  );
+
+  // Also include Article schema for additional SEO
+  const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: patternInfo.title,
@@ -261,9 +283,19 @@ export default async function PatternDetailPage({ params }: { params: { pattern:
 
   return (
     <>
+      {/* Course Schema for rich results */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // SECURITY: JSON-LD is safe - it's JSON.stringify of our own data, no user input
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }}
+      />
+      {/* Article Schema for additional SEO */}
+      <script
+        type="application/ld+json"
+        // SECURITY: JSON-LD is safe - it's JSON.stringify of our own data, no user input
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
       <PatternDetailClient pattern={pattern} patternInfo={patternInfo} />
     </>

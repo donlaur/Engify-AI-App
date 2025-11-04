@@ -26,6 +26,10 @@ import {
 } from '@/components/features/PromptActions';
 import { getPromptSlug } from '@/lib/utils/slug';
 import Link from 'next/link';
+import {
+  generatePromptMetadata,
+  generateHowToSchema,
+} from '@/lib/seo/metadata';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -99,77 +103,8 @@ export async function generateMetadata({
     ? patternLabels[prompt.pattern as keyof typeof patternLabels]
     : null;
 
-  // Enhanced title with category/role context
-  const titleParts = [prompt.title];
-  if (roleLabel) {
-    titleParts.push(`for ${roleLabel}`);
-  }
-  titleParts.push(`| ${categoryLabel} Prompt Template | Engify.ai`);
-  const title = titleParts.join(' ');
-
-  // Enhanced description with context
-  const enrichedDescription = enrichPromptDescription(
-    prompt,
-    roleLabel,
-    patternLabel
-  );
-
-  const slug = getPromptSlug(prompt);
-  const url = `${APP_URL}/prompts/${slug}`;
-
-  // Enhanced keywords array
-  const keywords = [
-    prompt.title,
-    categoryLabel,
-    ...(roleLabel
-      ? [
-          roleLabel,
-          `${roleLabel} prompts`,
-          `prompts for ${roleLabel.toLowerCase()}s`,
-        ]
-      : []),
-    ...(patternLabel
-      ? [patternLabel, `${patternLabel.toLowerCase()} pattern`]
-      : []),
-    `${categoryLabel} prompt`,
-    `${categoryLabel} template`,
-    'prompt engineering',
-    'AI prompt template',
-    'ChatGPT prompt',
-    'Claude prompt',
-    'Gemini prompt',
-    'AI assistant prompt',
-    ...(prompt.tags || []),
-  ].filter(Boolean);
-
-  return {
-    title,
-    description: enrichedDescription,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      title,
-      description: enrichedDescription,
-      url,
-      type: 'article',
-      siteName: 'Engify.ai',
-      article: {
-        publishedTime: prompt.createdAt?.toISOString(),
-        modifiedTime: prompt.updatedAt?.toISOString(),
-        authors: ['Engify.ai'],
-        tags: keywords,
-        section: categoryLabel,
-      },
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description: enrichedDescription,
-      creator: '@engifyai',
-    },
-    keywords,
-  };
+  // Use new programmatic metadata utility
+  return generatePromptMetadata(prompt, categoryLabel, roleLabel, patternLabel);
 }
 
 export default async function PromptPage({
@@ -227,7 +162,16 @@ export default async function PromptPage({
     ...(prompt.tags || []),
   ].filter(Boolean);
 
-  const jsonLd = {
+  // Generate HowTo schema for rich results
+  const howToSchema = generateHowToSchema(
+    prompt,
+    categoryLabel,
+    roleLabel,
+    `${APP_URL}/prompts/${slug}`
+  );
+
+  // Also include Article schema for better SEO
+  const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: prompt.title,
@@ -272,11 +216,19 @@ export default async function PromptPage({
 
   return (
     <>
+      {/* HowTo Schema for rich results */}
       <script
         type="application/ld+json"
         // SECURITY: JSON-LD is safe - it's JSON.stringify of our own data, no user input
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      {/* Article Schema for additional SEO */}
+      <script
+        type="application/ld+json"
+        // SECURITY: JSON-LD is safe - it's JSON.stringify of our own data, no user input
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
       <MainLayout>
         <div className="container py-8">

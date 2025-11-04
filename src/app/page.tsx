@@ -19,6 +19,37 @@ import {
 } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { getStats } from '@/lib/stats-cache';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Engify.ai - AI Training Platform for Engineering Teams',
+  description:
+    'AI training platform for engineering teams. Train developers, engineers, and product managers to use AI effectively with structured learning paths, interactive workbenches, and proven prompt patterns.',
+  keywords: [
+    'AI training platform',
+    'engineering teams',
+    'prompt engineering training',
+    'developer training',
+    'corporate AI training',
+    'AI upskilling',
+    'engineering team training',
+    'AI training for engineers',
+  ],
+  openGraph: {
+    title: 'Engify.ai - AI Training Platform for Engineering Teams',
+    description:
+      'Train developers, engineers, and product managers to use AI effectively. Structured learning paths, interactive workbenches, and proven prompt patterns.',
+    type: 'website',
+    siteName: 'Engify.ai',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Engify.ai - AI Training Platform for Engineering Teams',
+    description:
+      'Train developers, engineers, and product managers to use AI effectively.',
+    creator: '@engifyai',
+  },
+};
 
 const features = [
   {
@@ -122,7 +153,10 @@ export default async function Home() {
             </h1>
 
             <p className="mx-auto max-w-3xl text-2xl font-semibold leading-relaxed text-white sm:text-3xl">
-              Expert prompts, battle-tested patterns, and gamified learning. Transform engineering capabilities across all roles with Engify.ai
+              AI training platform for engineering teams. Train developers,
+              engineers, and product managers to use AI effectively with
+              structured learning paths, interactive workbenches, and proven
+              prompt patterns.
             </p>
 
             <div className="flex justify-center pt-8">
