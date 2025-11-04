@@ -10,6 +10,7 @@ import { onboardingSchema } from '@/lib/schemas/user-profile';
 import { ObjectId } from 'mongodb';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { logger } from '@/lib/logging/logger';
+import { ERROR_MESSAGES } from '@/lib/constants/messages';
 
 export async function POST(req: NextRequest) {
   // RBAC: users:write permission (users can update their own onboarding data)
@@ -52,8 +53,8 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json(
       {
-        error: 'Failed to save onboarding data',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: ERROR_MESSAGES.SAVE_FAILED,
+        message: error instanceof Error ? error.message : ERROR_MESSAGES.SERVER_ERROR,
       },
       { status: 500 }
     );

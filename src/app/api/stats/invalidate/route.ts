@@ -4,6 +4,8 @@ import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
 import { auth } from '@/lib/auth';
 import { STATS_CACHE_KEY } from '@/lib/stats/fetch-platform-stats';
+import { AI_RATE_LIMITS } from '@/lib/constants/rates';
+import { ERROR_MESSAGES } from '@/lib/constants/messages';
 
 /**
  * POST /api/stats/invalidate
@@ -39,14 +41,20 @@ export async function POST(req: NextRequest) {
   const rateLimitResult = await checkRateLimit(identifier, tier);
 
   if (!rateLimitResult.allowed) {
+    const rateLimitValue = tier === 'anonymous' 
+      ? AI_RATE_LIMITS.anonymous.perHour 
+      : tier === 'authenticated' 
+      ? AI_RATE_LIMITS.authenticated.perHour 
+      : AI_RATE_LIMITS.pro.perHour;
+
     return NextResponse.json(
       // SECURITY: Static error message, not user input - safe to return
-      { error: rateLimitResult.reason || 'Too many requests' },
+      { error: rateLimitResult.reason || ERROR_MESSAGES.RATE_LIMIT_EXCEEDED },
       { 
         status: 429,
         headers: {
           'Retry-After': '3600',
-          'X-RateLimit-Limit': tier === 'anonymous' ? '3' : tier === 'authenticated' ? '20' : '200',
+          'X-RateLimit-Limit': String(rateLimitValue),
           'X-RateLimit-Remaining': '0',
           'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
         }
@@ -91,7 +99,7 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json(
       {
-        error: 'Failed to invalidate cache',
+        error: ERROR_MESSAGES.FETCH_FAILED,
         details: errorMessage,
       },
       { status: 500 }
