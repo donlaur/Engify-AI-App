@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getMongoDb } from '@/lib/db/mongodb';
+import { contentService } from '@/lib/db/repositories/ContentService';
 import type { Db } from 'mongodb';
 import { Redis } from '@upstash/redis';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
 import { auth } from '@/lib/auth';
+import { getMongoDb } from '@/lib/db/mongodb';
 
 // Redis cache key and TTL
 const CACHE_KEY = 'site:stats:v1';
@@ -22,10 +23,16 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 /**
  * GET /api/stats
  * Get platform statistics
- * 
+ *
  * Uses Redis cache (1 hour TTL) to reduce MongoDB load
  * QStash webhook can invalidate cache on content changes
  * Rate limited: 10 requests per minute per IP
+ * 
+ * Enterprise Compliance:
+ * - ✅ Rate limiting: Applied via checkRateLimit()
+ * - ✅ No user input: GET endpoint, no request body or query params processed
+ * - ✅ XSS: Not applicable - only returns numeric counts and DB data
+ * - ⚠️ Tests: Existing route, tests should be added in future
  */
 export async function GET(req: NextRequest) {
   // Rate limiting - use correct signature: (identifier, tier)
@@ -78,21 +85,21 @@ export async function GET(req: NextRequest) {
 
       const db = (await Promise.race([dbPromise, timeoutPromise])) as Db;
 
-      // Direct DB access in API routes for performance
-      // Get all counts in parallel for speed
+      // Use unified content service for counts (single source of truth)
+      const [promptCount, patternCount, learningResourceCount] = await Promise.all([
+        contentService.count('prompts'),
+        contentService.count('patterns'),
+        contentService.count('learning'),
+      ]);
+
+      // Still need direct DB access for aggregations (byRole, byCategory)
       const [
-        promptCount,
-        patternCount,
-        learningResourceCount,
         userCount,
         promptsByRole,
         promptsByCategory,
         uniqueCategories,
         uniqueRoles,
       ] = await Promise.all([
-        db.collection('prompts').countDocuments({ active: { $ne: false } }),
-        db.collection('patterns').countDocuments(),
-        db.collection('learning_resources').countDocuments({ status: 'active' }),
         db.collection('users').countDocuments(),
         // Get prompts grouped by role
         db

@@ -1,6 +1,10 @@
 /**
  * Prompt Metrics Component
  * Displays views, favorites, and shares counts for a prompt
+ * 
+ * Enterprise Compliance:
+ * - ⚠️ Error Boundary: Simple display component, error handled via try/catch
+ * - ⚠️ Tests: Should be added in future
  */
 
 'use client';
@@ -42,6 +46,7 @@ export function PromptMetrics({
           }
         }
       } catch (error) {
+        // Silently fail - metrics are not critical
         console.debug('Failed to fetch metrics:', error);
       }
     };
@@ -52,15 +57,15 @@ export function PromptMetrics({
   return (
     <div className="flex gap-4 text-sm text-muted-foreground">
       <div className="flex items-center gap-1">
-        <Icons.Eye className="h-4 w-4" />
+        <Icons.eye className="h-4 w-4" />
         <span>{views.toLocaleString()} views</span>
       </div>
       <div className="flex items-center gap-1">
-        <Icons.Heart className="h-4 w-4" />
+        <Icons.heart className="h-4 w-4" />
         <span>{favorites.toLocaleString()} favorites</span>
       </div>
       <div className="flex items-center gap-1">
-        <Icons.Share2 className="h-4 w-4" />
+        <Icons.share className="h-4 w-4" />
         <span>{shares.toLocaleString()} shares</span>
       </div>
     </div>
