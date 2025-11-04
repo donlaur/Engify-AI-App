@@ -158,6 +158,18 @@ export class PromptRepository
   }
 
   /**
+   * Get prompts by pattern ID
+   */
+  async getByPattern(patternId: string): Promise<Prompt[]> {
+    const documents = await this.find({
+      pattern: patternId,
+      isPublic: true,
+      active: { $ne: false },
+    });
+    return this.processor.processMany(documents);
+  }
+
+  /**
    * Get unique categories
    */
   async getUniqueCategories(): Promise<string[]> {

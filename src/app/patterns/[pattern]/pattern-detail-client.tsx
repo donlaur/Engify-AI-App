@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import Link from 'next/link';
 import type { Pattern } from '@/lib/db/schemas/pattern';
+import { PatternPrompts } from '@/components/features/PatternPrompts';
 
 interface PatternDetailClientProps {
   pattern: Pattern;
@@ -209,6 +210,9 @@ export default function PatternDetailClient({ pattern }: PatternDetailClientProp
           )}
         </div>
 
+        {/* Example Prompts Using This Pattern */}
+        <PatternPrompts patternId={pattern.id} />
+
         {/* Actions */}
         <div className="mt-8 flex gap-4">
           <Button asChild>
@@ -218,9 +222,9 @@ export default function PatternDetailClient({ pattern }: PatternDetailClientProp
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/prompts">
+            <Link href={`/prompts?pattern=${encodeURIComponent(pattern.id)}`}>
               <Icons.library className="mr-2 h-4 w-4" />
-              View Example Prompts
+              View All Prompts Using This Pattern
             </Link>
           </Button>
         </div>

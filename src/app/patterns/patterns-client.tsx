@@ -63,6 +63,8 @@ const levels = [
 interface PatternsClientProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   patterns: any[];
+  promptsByPattern?: Map<string, number>;
+  totalPromptsUsingPatterns?: number;
 }
 
 // Helper function to convert MongoDB pattern to PatternDetail
@@ -92,30 +94,17 @@ function convertToPatternDetail(pattern: any): PatternDetail | null {
   };
 }
 
-export function PatternsClient({ patterns }: PatternsClientProps) {
+export function PatternsClient({ 
+  patterns, 
+  promptsByPattern = new Map(),
+  totalPromptsUsingPatterns = 0 
+}: PatternsClientProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
   const [selectedPatternId, setSelectedPatternId] = useState<string | null>(
     null
   );
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [totalPrompts, setTotalPrompts] = useState(0);
-
-  // Fetch real-time stats from API
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/stats');
-        if (response.ok) {
-          const data = await response.json();
-          setTotalPrompts(data.stats?.prompts || 0);
-        }
-      } catch (error) {
-        // Silently fail - stats are not critical for patterns page
-      }
-    };
-    fetchStats();
-  }, []);
 
   const filteredPatterns = patterns.filter((pattern) => {
     const categoryMatch =
@@ -173,7 +162,7 @@ export function PatternsClient({ patterns }: PatternsClientProps) {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{totalPrompts}</div>
+            <div className="text-2xl font-bold">{totalPromptsUsingPatterns}</div>
             <p className="text-xs text-muted-foreground">Example Prompts</p>
           </CardContent>
         </Card>
@@ -299,7 +288,7 @@ export function PatternsClient({ patterns }: PatternsClientProps) {
             Ready to use these patterns?
           </h3>
           <p className="mb-6 text-muted-foreground">
-            Browse our library of {totalPrompts}+ expert prompts that use these
+            Browse our library of {totalPromptsUsingPatterns > 0 ? `${totalPromptsUsingPatterns}+ ` : ''}expert prompts that use these
             patterns
           </p>
           <Button size="lg" asChild>

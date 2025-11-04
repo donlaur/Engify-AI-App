@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category');
+    const pattern = searchParams.get('pattern');
     const search = searchParams.get('search');
     const limit = parseInt(searchParams.get('limit') || '50');
     const skip = parseInt(searchParams.get('skip') || '0');
@@ -28,6 +29,9 @@ export async function GET(request: NextRequest) {
       };
       if (category && category !== 'all') {
         query.category = category;
+      }
+      if (pattern) {
+        query.pattern = pattern;
       }
       if (search) {
         query.$text = { $search: search };
@@ -61,6 +65,10 @@ export async function GET(request: NextRequest) {
 
       if (category && category !== 'all') {
         filtered = filtered.filter((p) => p.category === category);
+      }
+
+      if (pattern) {
+        filtered = filtered.filter((p) => p.pattern === pattern);
       }
 
       if (search) {
