@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Icons } from '@/lib/icons';
 import { Input } from '@/components/ui/input';
@@ -31,6 +31,8 @@ interface LibraryClientProps {
 
 const INITIAL_VISIBLE_CATEGORIES = 8;
 const INITIAL_VISIBLE_ROLES = 10;
+const INITIAL_VISIBLE_PROMPTS = 18; // Show 18 initially (6 rows x 3 columns)
+const LOAD_MORE_INCREMENT = 18; // Load 18 more at a time
 
 export function LibraryClient({
   initialPrompts,
@@ -50,9 +52,16 @@ export function LibraryClient({
   const [selectedRole, setSelectedRole] = useState<UserRole | 'all'>('all');
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllRoles, setShowAllRoles] = useState(false);
+  const [visiblePromptCount, setVisiblePromptCount] = useState(INITIAL_VISIBLE_PROMPTS);
   
   const { favorites, isLoading: favoritesLoading } = useFavorites();
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisiblePromptCount(INITIAL_VISIBLE_PROMPTS);
+  }, [searchQuery, selectedCategory, selectedRole, showFavoritesOnly, favorites]);
   
   // Filter prompts using useMemo to prevent recalculations
   const filteredPrompts = useMemo(() => {
@@ -77,27 +86,67 @@ export function LibraryClient({
     return filtered;
   }, [initialPrompts, searchQuery, selectedCategory, selectedRole, showFavoritesOnly, favorites]);
   
-  // Track search with debounce
+  // Filter prompts using useMemo to prevent recalculations
+  const filteredPrompts = useMemo(() => {
+    let filtered = initialPrompts.filter((prompt) => {
+      const matchesSearch =
+        prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        prompt.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCategory === 'all' || prompt.category === selectedCategory;
+      const matchesRole = selectedRole === 'all' || prompt.role === selectedRole;
+
+      return matchesSearch && matchesCategory && matchesRole;
+    });
+
+    // Apply favorites filter if active
+    if (showFavoritesOnly) {
+      filtered = filtered.filter((prompt) =>
+        favorites.includes(prompt.id)
+      );
+    }
+
+    return filtered;
+  }, [initialPrompts, searchQuery, selectedCategory, selectedRole, showFavoritesOnly, favorites]);
+  
+  // Get visible prompts (for lazy loading)
+  const visiblePrompts = useMemo(() => {
+    return filteredPrompts.slice(0, visiblePromptCount);
+  }, [filteredPrompts, visiblePromptCount]);
+  
+  const hasMore = visiblePromptCount < filteredPrompts.length;
+  
+  // Load more prompts function
+  const loadMore = useCallback(() => {
+    setVisiblePromptCount((prev) => Math.min(prev + LOAD_MORE_INCREMENT, filteredPrompts.length));
+  }, [filteredPrompts.length]);
+  
+  // Intersection Observer for infinite scroll
   useEffect(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
+    if (!hasMore || !loadMoreRef.current) return;
     
-    if (searchQuery.trim()) {
-      searchTimeoutRef.current = setTimeout(() => {
-        trackSearchEvent('search', {
-          query: searchQuery,
-          result_count: filteredPrompts.length,
-        });
-      }, 500);
-    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          loadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: '200px', // Start loading 200px before reaching the bottom
+        threshold: 0.1,
+      }
+    );
+    
+    observer.observe(loadMoreRef.current);
     
     return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current);
       }
     };
-  }, [searchQuery, filteredPrompts.length]);
+  }, [hasMore, loadMore]);
 
   // Dynamic filters from DB (already sorted alphabetically from server)
   const allCategories: Array<PromptCategory | 'all'> = [
@@ -318,17 +367,45 @@ export function LibraryClient({
           ))}
         </div>
       ) : filteredPrompts.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredPrompts.map((prompt) => (
-            <PromptCard
-              key={prompt.id}
-              {...prompt}
-              // Pass raw role/category - PromptCard will handle display labels
-              role={prompt.role as UserRole | undefined}
-              category={prompt.category as PromptCategory}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {visiblePrompts.map((prompt) => (
+              <PromptCard
+                key={prompt.id}
+                {...prompt}
+                // Pass raw role/category - PromptCard will handle display labels
+                role={prompt.role as UserRole | undefined}
+                category={prompt.category as PromptCategory}
+              />
+            ))}
+          </div>
+          
+          {/* Load More Trigger (invisible element for intersection observer) */}
+          {hasMore && (
+            <div ref={loadMoreRef} className="mt-8 flex justify-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-pulse text-sm text-muted-foreground">
+                  Loading more prompts...
+                </div>
+                {/* Fallback button in case intersection observer doesn't work */}
+                <Button
+                  variant="outline"
+                  onClick={loadMore}
+                  className="min-w-[200px]"
+                >
+                  Load More ({filteredPrompts.length - visiblePromptCount} remaining)
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {/* Show total count when all loaded */}
+          {!hasMore && filteredPrompts.length > INITIAL_VISIBLE_PROMPTS && (
+            <div className="mt-8 text-center text-sm text-muted-foreground">
+              Showing all {filteredPrompts.length} prompts
+            </div>
+          )}
+        </>
       ) : showFavoritesOnly ? (
         <EmptyState
           icon={Icons.heart}
