@@ -15,6 +15,18 @@ const nextConfig = {
   // Experimental features
   experimental: {
     // Add experimental features here as needed
+    // Exclude server-only packages from client bundles
+    // This prevents MongoDB and other server-only packages from being bundled into client-side JavaScript
+    serverComponentsExternalPackages: [
+      'mongodb',
+      'bson',
+      '@mongodb/client-encryption',
+      'mongodb-client-encryption',
+      'kerberos',
+      'snappy',
+      'gcp-metadata',
+      'aws4',
+    ],
   },
   
   // Environment variables available to the browser
@@ -122,9 +134,35 @@ const nextConfig = {
         timers: false,
       };
       
-      // Exclude MongoDB from client bundle
-      config.externals = config.externals || [];
-      config.externals.push('mongodb');
+      // Exclude MongoDB and all related packages from client bundle
+      // Use function to handle both string and regex patterns
+      const originalExternals = config.externals || [];
+      config.externals = [
+        ...(Array.isArray(originalExternals) ? originalExternals : [originalExternals]),
+        function ({ request }, callback) {
+          // Exclude MongoDB and all MongoDB-related packages
+          if (
+            request === 'mongodb' ||
+            request?.startsWith('mongodb/') ||
+            request?.startsWith('@mongodb/') ||
+            request === 'bson' ||
+            request === 'bson-ext' ||
+            request === 'kerberos' ||
+            request === 'mongodb-client-encryption' ||
+            request === 'snappy' ||
+            request === 'gcp-metadata' ||
+            request === 'aws4'
+          ) {
+            return callback(null, `commonjs ${request}`);
+          }
+          callback();
+        },
+      ];
+      
+      // Also exclude MongoDB as a string external for compatibility
+      if (!config.externals.includes('mongodb')) {
+        config.externals.push('mongodb');
+      }
     }
     
     return config;

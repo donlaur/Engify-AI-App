@@ -8,6 +8,11 @@
  * Handles connection pooling and reuse
  *
  * Serverless-friendly: Uses global variable to cache connection across invocations
+ *
+ * IMPORTANT: This file is SERVER-ONLY and must never be imported in client components.
+ * Use 'use server' directive or ensure this is only imported in Server Components/API routes.
+ *
+ * This module is excluded from client bundles via next.config.js webpack externals.
  */
 
 import { MongoClient, Db } from 'mongodb';
@@ -28,7 +33,7 @@ function getMongoUri(): string {
 function getMongoOptions() {
   const uri = getMongoUri();
   const isSrvUri = uri.startsWith('mongodb+srv://');
-  
+
   return {
     maxPoolSize: 1, // FREE TIER: Limit to 1 connection per serverless function
     minPoolSize: 0, // FREE TIER: Don't maintain minimum connections
@@ -112,7 +117,7 @@ function getClientPromise(): Promise<MongoClient> {
   if (!clientPromise) {
     clientPromise = createClientWithRetry();
     globalWithMongo._mongoClientPromise = clientPromise;
-    
+
     // Store client reference for cleanup
     clientPromise.then((client) => {
       globalWithMongo._mongoClient = client;

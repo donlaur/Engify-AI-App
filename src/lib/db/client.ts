@@ -5,7 +5,16 @@
  * All MongoDB connections should use @/lib/mongodb directly.
  *
  * @deprecated Import from @/lib/mongodb instead
+ *
+ * IMPORTANT: This file is SERVER-ONLY and must never be imported in client components.
  */
+
+// Server-only check - prevent MongoDB from being bundled into client-side code
+if (typeof window !== 'undefined') {
+  throw new Error(
+    'MongoDB utilities cannot be used in client-side code. This is a server-only module.'
+  );
+}
 
 export {
   getClient,
