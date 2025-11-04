@@ -72,18 +72,31 @@ export async function loadPromptsFromJson(): Promise<Prompt[]> {
 
 /**
  * Load a single prompt by ID or slug from static JSON
+ * Returns null if not found (caller handles MongoDB fallback)
  */
 export async function loadPromptFromJson(idOrSlug: string): Promise<Prompt | null> {
   try {
     const prompts = await loadPromptsFromJson();
-    return prompts.find(p => 
+    const prompt = prompts.find(p => 
       p.id === idOrSlug || 
       p.slug === idOrSlug ||
       (p.slug && p.slug === idOrSlug)
-    ) || null;
+    );
+    
+    if (prompt) {
+      logger.debug('Found prompt in JSON', { idOrSlug, title: prompt.title });
+      return prompt;
+    }
+    
+    // Not found in JSON - return null (caller will try MongoDB)
+    return null;
   } catch (error) {
-    // Fallback to MongoDB
-    return promptRepository.getById(idOrSlug);
+    // JSON loading failed - throw so caller can handle MongoDB fallback
+    logger.warn('Failed to load prompt from JSON', {
+      idOrSlug,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    throw error;
   }
 }
 

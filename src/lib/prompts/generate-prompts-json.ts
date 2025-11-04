@@ -72,6 +72,7 @@ export async function generatePromptsJson(): Promise<void> {
   });
 
   // Transform prompts for export
+  // CRITICAL: Ensure all metrics default to 0 (no mock data per ADR-009)
   const promptsExport: PromptExport[] = prompts.map((prompt) => ({
     id: prompt.id,
     title: prompt.title,
@@ -88,11 +89,12 @@ export async function generatePromptsJson(): Promise<void> {
     isPublic: prompt.isPublic,
     isFeatured: prompt.isFeatured,
     active: prompt.active,
-    views: prompt.views,
-    favorites: prompt.favorites,
-    shares: prompt.shares,
-    rating: prompt.rating,
-    ratingCount: prompt.ratingCount,
+    // ADR-009: Zero mock data - always default to 0 if undefined/null
+    views: prompt.views ?? 0,
+    favorites: prompt.favorites ?? 0,
+    shares: prompt.shares ?? 0,
+    rating: prompt.rating ?? 0,
+    ratingCount: prompt.ratingCount ?? 0,
     createdAt: prompt.createdAt,
     updatedAt: prompt.updatedAt,
   }));

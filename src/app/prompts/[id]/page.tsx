@@ -19,6 +19,7 @@ import {
   patternLabels,
   type UserRole,
 } from '@/lib/schemas/prompt';
+import { logger } from '@/lib/logging/logger';
 import {
   CopyButton,
   ShareButton,
@@ -83,7 +84,7 @@ export async function generateMetadata({
   params: { id: string };
 }): Promise<Metadata> {
   try {
-    // Try static JSON first (fast, no cold starts), then MongoDB fallback
+    // Try JSON first (fast), then MongoDB fallback (reliable)
     const prompt = await getPromptById(params.id);
 
     if (!prompt) {
@@ -108,6 +109,12 @@ export async function generateMetadata({
       patternLabel
     );
   } catch (error) {
+    // Log error but return fallback metadata
+    logger.warn('Failed to fetch prompt for metadata', {
+      idOrSlug: params.id,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    
     // Fallback metadata if fetch fails
     return {
       title: 'Prompt | Engify.ai',
@@ -122,10 +129,12 @@ export default async function PromptPage({
   params: { id: string };
 }) {
   try {
-    // Try static JSON first (fast, no cold starts), then MongoDB fallback
+    // Try JSON first (fast), then MongoDB fallback (reliable)
+    // MongoDB is primary source for detail pages - more reliable in production
     const prompt = await getPromptById(params.id);
 
     if (!prompt) {
+      logger.warn('Prompt not found', { idOrSlug: params.id });
       notFound();
     }
 
@@ -346,8 +355,14 @@ export default async function PromptPage({
       </>
     );
   } catch (error) {
+    // Log error for debugging
+    logger.error('Failed to fetch prompt', {
+      idOrSlug: params.id,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    
     // If fetch fails, show 404
-    console.error('Failed to fetch prompt:', error);
     notFound();
   }
 }

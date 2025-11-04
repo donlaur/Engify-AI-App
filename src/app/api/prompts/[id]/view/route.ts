@@ -48,14 +48,25 @@ export async function POST(
 
     const db = await getDb();
 
-    // Increment view count
-    const result = await db.collection('prompts').updateOne(
+    // Increment view count - try by id first, then slug
+    let result = await db.collection('prompts').updateOne(
       { id: promptId, active: { $ne: false } },
       {
         $inc: { views: 1 },
         $set: { lastViewedAt: new Date() },
       }
     );
+
+    // If not found by id, try by slug
+    if (result.matchedCount === 0) {
+      result = await db.collection('prompts').updateOne(
+        { slug: promptId, active: { $ne: false } },
+        {
+          $inc: { views: 1 },
+          $set: { lastViewedAt: new Date() },
+        }
+      );
+    }
 
     if (result.matchedCount === 0) {
       return NextResponse.json(
@@ -64,13 +75,11 @@ export async function POST(
       );
     }
 
-    // Get updated view count
-    const prompt = await db
-      .collection('prompts')
-      .findOne(
-        { id: promptId },
-        { projection: { views: 1 } }
-      );
+    // Get updated view count - try by id first, then slug
+    const prompt = await db.collection('prompts').findOne(
+      { $or: [{ id: promptId }, { slug: promptId }] },
+      { projection: { views: 1 } }
+    );
 
     return NextResponse.json({
       success: true,

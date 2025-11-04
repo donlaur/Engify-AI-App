@@ -122,6 +122,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // Increment prompt's favorites count (don't fail if this fails)
+    await db.collection('prompts').updateOne(
+      { id: promptId },
+      { $inc: { favorites: 1 } }
+    ).catch((error) => {
+      // Log but don't fail the request - user favorite was already saved
+      logger.warn('Failed to increment prompt favorites count', {
+        promptId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    });
+
     // Audit log
     await auditLog({
       userId: session.user.id,
@@ -204,6 +216,22 @@ export async function DELETE(request: NextRequest) {
     if (result.matchedCount === 0) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    // Decrement prompt's favorites count (don't fail if this fails)
+    // Ensure favorites never go below 0
+    await db.collection('prompts').updateOne(
+      { 
+        id: promptId,
+        favorites: { $gt: 0 } // Only decrement if favorites > 0
+      },
+      { $inc: { favorites: -1 } }
+    ).catch((error) => {
+      // Log but don't fail the request - user favorite was already removed
+      logger.warn('Failed to decrement prompt favorites count', {
+        promptId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    });
 
     // Audit log
     await auditLog({

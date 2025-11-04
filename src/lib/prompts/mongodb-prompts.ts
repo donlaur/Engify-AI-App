@@ -35,13 +35,34 @@ export async function getAllPrompts(): Promise<Prompt[]> {
  * Fetch a single prompt by ID or slug from static JSON or MongoDB
  * @deprecated Use promptRepository.getById() for direct MongoDB access
  * Use this function for fast static JSON loading with MongoDB fallback
+ * 
+ * STRATEGY: Try JSON first (fast), but MongoDB is the reliable fallback
+ * For detail pages, MongoDB is more reliable in production (Vercel)
  */
 export async function getPromptById(idOrSlug: string): Promise<Prompt | null> {
   try {
-    return await loadPromptFromJson(idOrSlug);
+    // Try JSON first (fast, no cold starts)
+    const prompt = await loadPromptFromJson(idOrSlug);
+    if (prompt) {
+      return prompt;
+    }
   } catch (error) {
-    // Fallback to MongoDB
-    return promptRepository.getById(idOrSlug);
+    // Log but continue to MongoDB fallback
+    logger.debug('JSON lookup failed, trying MongoDB', {
+      idOrSlug,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+
+  // MongoDB fallback (always reliable)
+  try {
+    return await promptRepository.getById(idOrSlug);
+  } catch (error) {
+    logger.error('MongoDB lookup failed for prompt', {
+      idOrSlug,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    return null;
   }
 }
 

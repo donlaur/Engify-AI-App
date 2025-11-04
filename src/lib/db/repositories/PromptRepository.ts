@@ -98,11 +98,12 @@ export class PromptRepository
 
   /**
    * Get prompt by ID or slug
+   * For public pages, shows prompts that are not explicitly private
    */
   async getById(idOrSlug: string): Promise<Prompt | null> {
     const document = await this.findOne({
       $or: [{ id: idOrSlug }, { slug: idOrSlug }, { _id: idOrSlug }],
-      isPublic: true,
+      isPublic: { $ne: false }, // Show if isPublic is true or undefined/null
       active: { $ne: false },
     });
     return document ? this.processor.process(document) : null;
