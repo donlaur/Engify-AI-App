@@ -7,13 +7,14 @@ import { Icons } from '@/lib/icons';
 import Link from 'next/link';
 import type { Pattern } from '@/lib/db/schemas/pattern';
 import { PatternPrompts } from '@/components/features/PatternPrompts';
-import { CrossContentLinks } from '@/components/features/CrossContentLinks';
+import type { ReactNode } from 'react';
 
 interface PatternDetailClientProps {
   pattern: Pattern;
+  children?: ReactNode; // For server-rendered CrossContentLinks
 }
 
-export default function PatternDetailClient({ pattern }: PatternDetailClientProps) {
+export default function PatternDetailClient({ pattern, children }: PatternDetailClientProps) {
   const levelColors = {
     beginner: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
     intermediate: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
@@ -214,12 +215,8 @@ export default function PatternDetailClient({ pattern }: PatternDetailClientProp
         {/* Example Prompts Using This Pattern */}
         <PatternPrompts patternId={pattern.id} />
 
-        {/* Cross-Content Links (Articles & Prompts) */}
-        <CrossContentLinks
-          tags={pattern.tags || []}
-          category={pattern.category}
-          excludeId={pattern.id}
-        />
+        {/* Cross-Content Links (Server Component - passed as children) */}
+        {children}
 
         {/* Actions */}
         <div className="mt-8 flex gap-4">

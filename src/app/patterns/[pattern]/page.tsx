@@ -8,12 +8,12 @@ import {
 } from '@/lib/seo/metadata';
 import { patternRepository } from '@/lib/db/repositories/ContentService';
 import { logger } from '@/lib/logging/logger';
+import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 
 // Use ISR with MongoDB fallback (reliable in production)
 // MongoDB is primary source - JSON is optional fast path
 export const revalidate = 3600; // Revalidate every hour (ISR)
 export const dynamicParams = true; // Allow dynamic params (patterns not pre-generated)
-export const dynamic = 'force-dynamic'; // Force dynamic rendering to avoid DYNAMIC_SERVER_USAGE errors
 
 export async function generateMetadata({
   params,
@@ -128,7 +128,14 @@ export default async function PatternDetailPage({
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
         />
-        <PatternDetailClient pattern={pattern} />
+        <PatternDetailClient pattern={pattern}>
+          {/* Server Component: CrossContentLinks fetches data server-side */}
+          <CrossContentLinks
+            tags={pattern.tags || []}
+            category={pattern.category}
+            excludeId={pattern.id}
+          />
+        </PatternDetailClient>
       </>
     );
   } catch (error) {
