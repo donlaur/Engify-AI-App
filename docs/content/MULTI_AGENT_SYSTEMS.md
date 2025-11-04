@@ -72,7 +72,10 @@ POST /api/multi-agent
 5. Tech Accuracy SME (GPT-4)
    └─> Verify technical correctness
 
-6. Final Publisher (Claude)
+6. Web Designer (Claude)
+   └─> Optimize for web formatting & visual hierarchy
+
+7. Final Publisher (Claude)
    └─> Polish & approve for publication
 ```
 
@@ -118,10 +121,22 @@ POST /api/multi-agent
   - Outdated syntax/APIs
   - Incomplete code
   - Misleading performance claims
-  - Missing error handling
-  - Platform-specific issues
+- Missing error handling
+- Platform-specific issues
 
-#### 6. Final Publisher
+#### 6. Web Designer
+- **Model:** Claude 3.5 Sonnet
+- **Focus:** Web formatting, visual hierarchy, readability
+- **Ensures:**
+  - Proper heading hierarchy (H1 → H2 → H3)
+  - Scannable content (short paragraphs, lists, bold text)
+  - Correct markdown syntax for ReactMarkdown
+  - Mobile-friendly formatting
+  - Visual breaks between sections
+  - Code blocks properly formatted
+  - Consistent spacing and rhythm
+
+#### 7. Final Publisher
 - **Model:** Claude 3.5 Sonnet
 - **Focus:** Final quality gate
 - **Checks:**

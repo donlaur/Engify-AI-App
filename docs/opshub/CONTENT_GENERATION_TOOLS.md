@@ -32,7 +32,7 @@ Articles are saved to `content/drafts/`:
 
 ```
 Content Generator → SEO Specialist → Human Tone Editor → 
-Learning Expert → Tech Accuracy SME → Final Publisher
+Learning Expert → Tech Accuracy SME → Web Designer → Final Publisher
 ```
 
 ### Agents
@@ -42,7 +42,8 @@ Learning Expert → Tech Accuracy SME → Final Publisher
 3. **Human Tone Editor** - Removes AI voice, sounds natural
 4. **Learning Expert** - Ensures actionable & educational
 5. **Tech Accuracy SME** - Verifies technical correctness
-6. **Final Publisher** - Final approval for publication
+6. **Web Designer** - Optimizes for web formatting & visual hierarchy
+7. **Final Publisher** - Final approval for publication
 
 ---
 

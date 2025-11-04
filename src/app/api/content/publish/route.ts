@@ -121,7 +121,8 @@ export async function GET() {
         '3. Human Tone Editor → Make it sound natural',
         '4. Learning Expert → Ensure actionable & educational',
         '5. Tech Accuracy SME → Verify technical correctness',
-        '6. Final Publisher → Polish & approve',
+        '6. Web Designer → Optimize for web formatting & visual hierarchy',
+        '7. Final Publisher → Polish & approve',
       ],
     });
   } catch (error) {

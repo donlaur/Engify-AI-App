@@ -68,14 +68,15 @@ tsx scripts/content/publish-article.ts content/drafts/prompt-engineering-masterc
 
 ## Content Generator Pipeline
 
-The generator uses 6 agents:
+The generator uses 7 agents:
 
 1. **Content Generator (GPT-4)** → Creates initial draft
 2. **SEO Specialist (Claude)** → Optimizes keywords, meta, structure
 3. **Human Tone Editor (GPT-4)** → Removes AI voice, sounds natural
 4. **Learning Expert (Claude)** → Ensures actionable & educational
 5. **Tech Accuracy SME (GPT-4)** → Verifies technical correctness
-6. **Final Publisher (Claude)** → Polish & approve for publication
+6. **Web Designer (Claude)** → Optimizes for web formatting & visual hierarchy
+7. **Final Publisher (Claude)** → Polish & approve for publication
 
 **Output:**
 - SEO-optimized content
