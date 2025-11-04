@@ -67,7 +67,6 @@ function enrichPromptDescription(
 // Pages are cached for 1 hour after first generation
 // This prevents build timeouts completely
 export const revalidate = 3600; // Revalidate every hour (ISR)
-export const dynamic = 'force-dynamic'; // Force dynamic rendering to prevent build timeouts
 
 // CRITICAL: No pre-generation - all pages are fully dynamic (ISR)
 // This prevents build timeouts completely
