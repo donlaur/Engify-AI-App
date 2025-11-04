@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { tagTaxonomy, getAllTags, getTagsByCategory } from '@/lib/tags-taxonomy';
+import { ERROR_MESSAGES } from '@/lib/constants/messages';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching tags:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch tags' },
+      { error: ERROR_MESSAGES.FETCH_FAILED },
       { status: 500 }
     );
   }
