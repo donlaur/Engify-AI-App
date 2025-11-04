@@ -28,7 +28,7 @@ export async function POST(
                      request.ip || 
                      'anonymous';
     
-    const rateLimitResult = await checkRateLimit(clientIP, 'public');
+    const rateLimitResult = await checkRateLimit(clientIP, 'anonymous');
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Too many requests' },

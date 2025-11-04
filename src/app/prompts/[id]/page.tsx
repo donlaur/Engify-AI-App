@@ -24,12 +24,15 @@ import {
   ShareButton,
   FavoriteButton,
 } from '@/components/features/PromptActions';
+import { PromptMetrics } from '@/components/features/PromptMetrics';
+import { RelatedPrompts } from '@/components/features/RelatedPrompts';
 import { getPromptSlug } from '@/lib/utils/slug';
 import Link from 'next/link';
 import {
   generatePromptMetadata,
   generateHowToSchema,
 } from '@/lib/seo/metadata';
+import { PromptPageClient } from '@/components/features/PromptPageClient';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -216,6 +219,9 @@ export default async function PromptPage({
 
   return (
     <>
+      {/* Client component for view tracking */}
+      <PromptPageClient promptId={prompt.id} />
+      
       {/* HowTo Schema for rich results */}
       <script
         type="application/ld+json"
@@ -300,36 +306,28 @@ export default async function PromptPage({
             <ShareButton
               title={prompt.title}
               description={prompt.description}
+              promptId={prompt.id}
             />
           </div>
 
-          {/* Related Prompts */}
-          <div className="mt-12">
-            <h2 className="mb-4 text-2xl font-bold">More Prompts</h2>
-            <div className="grid gap-4 md:grid-cols-3">
-              {prompts
-                .filter(
-                  (p) =>
-                    p.id !== prompt.id &&
-                    (p.category === prompt.category || p.role === prompt.role)
-                )
-                .slice(0, 3)
-                .map((relatedPrompt) => (
-                  <Link
-                    key={relatedPrompt.id}
-                    href={`/prompts/${getPromptSlug(relatedPrompt)}`}
-                    className="rounded-lg border p-4 transition-colors hover:border-primary hover:bg-accent"
-                  >
-                    <h3 className="mb-2 font-semibold">
-                      {relatedPrompt.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {relatedPrompt.description}
-                    </p>
-                  </Link>
-                ))}
-            </div>
+          {/* Metrics */}
+          <div className="mt-6">
+            <PromptMetrics
+              promptId={prompt.id}
+              initialViews={prompt.views || 0}
+            />
           </div>
+
+          {/* Related Prompts with Metrics */}
+          <RelatedPrompts
+            currentPrompt={{
+              id: prompt.id,
+              category: prompt.category,
+              role: prompt.role,
+              tags: prompt.tags,
+            }}
+            allPrompts={prompts}
+          />
         </div>
       </MainLayout>
     </>

@@ -157,7 +157,7 @@ export default function LearnPage() {
                                 <Button variant="outline" asChild>
                                   <Link href={
                                     step.type === 'workbench' ? '/demo' :
-                                    step.type === 'article' ? `/blog/${step.targetId}` :
+                                    step.type === 'article' ? `/learn/${step.targetId}` :
                                     `/prompts/${step.targetId}`
                                   }>
                                     <Icon className="mr-2 h-4 w-4" />
