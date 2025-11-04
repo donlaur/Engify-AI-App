@@ -1,0 +1,660 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-11-04T17:57:51.520Z",
+  "totalResources": 22,
+  "resources": [
+    {
+      "id": "article-enhancing-cursor-2-0-with-workflows-guardrails",
+      "title": "Cursor 2.0 Multi-Agent Workflows: Why You Need Guardrails",
+      "description": "Explore how workflows and guardrails can streamline Cursor 2.0's multi-agent features, reducing chaos and improving efficiency.",
+      "category": "Best Practices",
+      "tags": [
+        "Cursor 2.0",
+        "multi-agent features",
+        "pre-commit hooks",
+        "workflows in coding",
+        "coding efficiency",
+        "software development",
+        "AI-assisted coding"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-11-02T21:03:07.518Z",
+      "updatedAt": "2025-11-02T21:50:06.838Z",
+      "views": 98,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Cursor 2.0 Multi-Agent Workflows: Why You Need Guardrails | Engify.ai",
+        "metaDescription": "Explore how workflows and guardrails can streamline Cursor 2.0's multi-agent features, reducing chaos and improving efficiency.",
+        "keywords": [
+          "Cursor 2.0",
+          "multi-agent features",
+          "pre-commit hooks",
+          "workflows in coding",
+          "coding efficiency",
+          "software development",
+          "AI-assisted coding"
+        ],
+        "slug": "cursor-2-0-multi-agent-workflows",
+        "canonicalUrl": "https://engify.ai/learn/enhancing-cursor-2-0-with-workflows-guardrails",
+        "ogImage": "https://engify.ai/og/enhancing-cursor-2-0-with-workflows-guardrails.png"
+      }
+    },
+    {
+      "id": "ext-google-what-is-pe",
+      "title": "What is Prompt Engineering? - Google Cloud",
+      "description": "Comprehensive introduction to prompt engineering from Google Cloud, covering fundamentals and best practices.",
+      "category": "basics",
+      "tags": [
+        "fundamentals",
+        "google-cloud",
+        "introduction"
+      ],
+      "author": "Google Cloud Team",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "What is Prompt Engineering? - Google Cloud | Engify.ai",
+        "metaDescription": "Comprehensive introduction to prompt engineering from Google Cloud, covering fundamentals and best practices.",
+        "keywords": [
+          "fundamentals",
+          "google-cloud",
+          "introduction"
+        ],
+        "slug": "ext-google-what-is-pe",
+        "canonicalUrl": "https://cloud.google.com/discover/what-is-prompt-engineering?hl=en"
+      }
+    },
+    {
+      "id": "ext-moveo-rag-vs-finetuning",
+      "title": "Fine-Tuning vs RAG vs Prompt Engineering",
+      "description": "Comparison guide helping you choose between fine-tuning, RAG, and prompt engineering for your use case.",
+      "category": "advanced",
+      "tags": [
+        "rag",
+        "fine-tuning",
+        "comparison",
+        "decision-framework"
+      ],
+      "author": "Moveo Team",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Fine-Tuning vs RAG vs Prompt Engineering | Engify.ai",
+        "metaDescription": "Comparison guide helping you choose between fine-tuning, RAG, and prompt engineering for your use case.",
+        "keywords": [
+          "rag",
+          "fine-tuning",
+          "comparison",
+          "decision-framework"
+        ],
+        "slug": "ext-moveo-rag-vs-finetuning",
+        "canonicalUrl": "https://moveo.ai/blog/fine-tuning-rag-or-prompt-engineering"
+      }
+    },
+    {
+      "id": "ext-prompting-guide-rag",
+      "title": "RAG (Retrieval-Augmented Generation) Research",
+      "description": "Academic and practical research on RAG systems, implementation patterns, and best practices.",
+      "category": "advanced",
+      "tags": [
+        "rag",
+        "retrieval",
+        "research",
+        "advanced-techniques"
+      ],
+      "author": "DAIR.AI",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "RAG (Retrieval-Augmented Generation) Research | Engify.ai",
+        "metaDescription": "Academic and practical research on RAG systems, implementation patterns, and best practices.",
+        "keywords": [
+          "rag",
+          "retrieval",
+          "research",
+          "advanced-techniques"
+        ],
+        "slug": "ext-prompting-guide-rag",
+        "canonicalUrl": "https://www.promptingguide.ai/research/rag"
+      }
+    },
+    {
+      "id": "ext-optimizesmart-sql",
+      "title": "AI Prompt Engineering for SQL Generation: 7 Lessons",
+      "description": "Hard-won lessons on using AI to generate SQL queries effectively and safely.",
+      "category": "engineering",
+      "tags": [
+        "sql",
+        "database",
+        "code-generation",
+        "lessons-learned"
+      ],
+      "author": "Himanshu Sharma",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "AI Prompt Engineering for SQL Generation: 7 Lessons | Engify.ai",
+        "metaDescription": "Hard-won lessons on using AI to generate SQL queries effectively and safely.",
+        "keywords": [
+          "sql",
+          "database",
+          "code-generation",
+          "lessons-learned"
+        ],
+        "slug": "ext-optimizesmart-sql",
+        "canonicalUrl": "https://www.optimizesmart.com/ai-prompt-engineering-for-sql-generation-7-lessons-i-learned/"
+      }
+    },
+    {
+      "id": "ext-bizway-data-viz",
+      "title": "ChatGPT Prompts for Data Visualization",
+      "description": "Practical prompts and techniques for creating dashboards and data visualizations using AI.",
+      "category": "patterns",
+      "tags": [
+        "data-visualization",
+        "dashboards",
+        "chatgpt",
+        "prompts",
+        "visual-ai"
+      ],
+      "author": "Bizway Team",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "ChatGPT Prompts for Data Visualization | Engify.ai",
+        "metaDescription": "Practical prompts and techniques for creating dashboards and data visualizations using AI.",
+        "keywords": [
+          "data-visualization",
+          "dashboards",
+          "chatgpt",
+          "prompts",
+          "visual-ai"
+        ],
+        "slug": "ext-bizway-data-viz",
+        "canonicalUrl": "https://www.bizway.io/blog/chatgpt-prompts-for-data-visualization-and-dashboard-creation"
+      }
+    },
+    {
+      "id": "ext-azure-evaluate-ai",
+      "title": "Evaluate Generative AI Apps - Azure AI Foundry",
+      "description": "Microsoft's guide to evaluating and testing generative AI applications in production environments.",
+      "category": "production",
+      "tags": [
+        "evaluation",
+        "testing",
+        "azure",
+        "production",
+        "quality-assurance"
+      ],
+      "author": "Microsoft Azure Team",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Evaluate Generative AI Apps - Azure AI Foundry | Engify.ai",
+        "metaDescription": "Microsoft's guide to evaluating and testing generative AI applications in production environments.",
+        "keywords": [
+          "evaluation",
+          "testing",
+          "azure",
+          "production",
+          "quality-assurance"
+        ],
+        "slug": "ext-azure-evaluate-ai",
+        "canonicalUrl": "https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/evaluate-generative-ai-app"
+      }
+    },
+    {
+      "id": "ext-portkey-low-resource",
+      "title": "Prompt Engineering for Low-Resource Languages",
+      "description": "Learn how to effectively prompt engineer for languages with limited training data and resources.",
+      "category": "advanced",
+      "tags": [
+        "low-resource-languages",
+        "multilingual",
+        "advanced-techniques"
+      ],
+      "author": "Portkey Team",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Prompt Engineering for Low-Resource Languages | Engify.ai",
+        "metaDescription": "Learn how to effectively prompt engineer for languages with limited training data and resources.",
+        "keywords": [
+          "low-resource-languages",
+          "multilingual",
+          "advanced-techniques"
+        ],
+        "slug": "ext-portkey-low-resource",
+        "canonicalUrl": "https://portkey.ai/blog/prompt-engineering-for-low-resource-languages/"
+      }
+    },
+    {
+      "id": "ext-auditboard-ai-platform",
+      "title": "AI Platform for Audit & Risk Management",
+      "description": "Real-world application of AI in audit and compliance workflows, showing practical enterprise use cases.",
+      "category": "production",
+      "tags": [
+        "enterprise",
+        "audit",
+        "compliance",
+        "use-cases"
+      ],
+      "author": "AuditBoard Team",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "AI Platform for Audit & Risk Management | Engify.ai",
+        "metaDescription": "Real-world application of AI in audit and compliance workflows, showing practical enterprise use cases.",
+        "keywords": [
+          "enterprise",
+          "audit",
+          "compliance",
+          "use-cases"
+        ],
+        "slug": "ext-auditboard-ai-platform",
+        "canonicalUrl": "https://auditboard.com/platform/ai"
+      }
+    },
+    {
+      "id": "ext-tableau-ai-pros-cons",
+      "title": "AI Advantages and Disadvantages in Data Analytics",
+      "description": "Balanced perspective on AI benefits and limitations in data visualization and analytics workflows.",
+      "category": "basics",
+      "tags": [
+        "data-analytics",
+        "pros-cons",
+        "tableau",
+        "business-intelligence"
+      ],
+      "author": "Tableau Team",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "AI Advantages and Disadvantages in Data Analytics | Engify.ai",
+        "metaDescription": "Balanced perspective on AI benefits and limitations in data visualization and analytics workflows.",
+        "keywords": [
+          "data-analytics",
+          "pros-cons",
+          "tableau",
+          "business-intelligence"
+        ],
+        "slug": "ext-tableau-ai-pros-cons",
+        "canonicalUrl": "https://www.tableau.com/data-insights/ai/advantages-disadvantages"
+      }
+    },
+    {
+      "id": "ext-luzmo-chatgpt-viz",
+      "title": "ChatGPT for Data Visualization - Complete Guide",
+      "description": "Step-by-step guide to leveraging ChatGPT for creating compelling data visualizations and charts.",
+      "category": "patterns",
+      "tags": [
+        "data-visualization",
+        "chatgpt",
+        "charts",
+        "visual-ai",
+        "analytics"
+      ],
+      "author": "Luzmo Team",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "ChatGPT for Data Visualization - Complete Guide | Engify.ai",
+        "metaDescription": "Step-by-step guide to leveraging ChatGPT for creating compelling data visualizations and charts.",
+        "keywords": [
+          "data-visualization",
+          "chatgpt",
+          "charts",
+          "visual-ai",
+          "analytics"
+        ],
+        "slug": "ext-luzmo-chatgpt-viz",
+        "canonicalUrl": "https://www.luzmo.com/blog/chatgpt-for-data-visualization"
+      }
+    },
+    {
+      "id": "ext-galaxy-sql-prompting",
+      "title": "Prompt Engineering for SQL Generation - Glossary",
+      "description": "Comprehensive glossary and reference guide for SQL generation using prompt engineering techniques.",
+      "category": "engineering",
+      "tags": [
+        "sql",
+        "database",
+        "glossary",
+        "reference"
+      ],
+      "author": "Galaxy Team",
+      "publishedAt": "2025-10-28T03:52:17.047Z",
+      "updatedAt": "2025-10-28T03:52:17.047Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Prompt Engineering for SQL Generation - Glossary | Engify.ai",
+        "metaDescription": "Comprehensive glossary and reference guide for SQL generation using prompt engineering techniques.",
+        "keywords": [
+          "sql",
+          "database",
+          "glossary",
+          "reference"
+        ],
+        "slug": "ext-galaxy-sql-prompting",
+        "canonicalUrl": "https://www.getgalaxy.io/learn/glossary/prompt-engineering-for-sql-generation"
+      }
+    },
+    {
+      "id": "ai-gen-prompt-templates-building-reusable-ai-components",
+      "title": "Prompt Templates: Building Reusable AI Components",
+      "description": "# Prompt Templates: Building Reusable AI Components  Prompt templates are foundational building blocks for scalable AI applications, enabling consistent and mai",
+      "category": "patterns",
+      "tags": [
+        "templates",
+        "patterns",
+        "reusability"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-10-28T03:49:50.768Z",
+      "updatedAt": "2025-10-28T03:49:50.768Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Prompt Templates: Building Reusable AI Components | Engify.ai",
+        "metaDescription": "# Prompt Templates: Building Reusable AI Components  Prompt templates are foundational building blocks for scalable AI applications, enabling consistent and mai",
+        "keywords": [
+          "templates",
+          "patterns",
+          "reusability"
+        ],
+        "slug": "prompt-templates-building-reusable-ai-components",
+        "canonicalUrl": "https://engify.ai/learn/prompt-templates-building-reusable-ai-components",
+        "ogImage": "https://engify.ai/og/prompt-templates-building-reusable-ai-components.png"
+      }
+    },
+    {
+      "id": "ai-gen-llm-evaluation-metrics-measuring-ai-quality",
+      "title": "LLM Evaluation Metrics: Measuring AI Quality",
+      "description": "# LLM Evaluation Metrics: A Comprehensive Guide to Measuring AI Quality  Large Language Model (LLM) evaluation is crucial for understanding model performance, i",
+      "category": "production",
+      "tags": [
+        "evaluation",
+        "metrics",
+        "quality"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-10-28T03:49:50.768Z",
+      "updatedAt": "2025-10-28T03:49:50.768Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "LLM Evaluation Metrics: Measuring AI Quality | Engify.ai",
+        "metaDescription": "# LLM Evaluation Metrics: A Comprehensive Guide to Measuring AI Quality  Large Language Model (LLM) evaluation is crucial for understanding model performance, i",
+        "keywords": [
+          "evaluation",
+          "metrics",
+          "quality"
+        ],
+        "slug": "llm-evaluation-metrics-measuring-ai-quality",
+        "canonicalUrl": "https://engify.ai/learn/llm-evaluation-metrics-measuring-ai-quality",
+        "ogImage": "https://engify.ai/og/llm-evaluation-metrics-measuring-ai-quality.png"
+      }
+    },
+    {
+      "id": "ai-gen-context-window-management-handling-long-documents",
+      "title": "Context Window Management: Handling Long Documents",
+      "description": "# Context Window Management: Handling Long Documents in LLM Applications  Working with large language models (LLMs) requires careful management of context windo",
+      "category": "advanced",
+      "tags": [
+        "context-window",
+        "optimization",
+        "chunking"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-10-28T03:49:50.768Z",
+      "updatedAt": "2025-10-28T03:49:50.768Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Context Window Management: Handling Long Documents | Engify.ai",
+        "metaDescription": "# Context Window Management: Handling Long Documents in LLM Applications  Working with large language models (LLMs) requires careful management of context windo",
+        "keywords": [
+          "context-window",
+          "optimization",
+          "chunking"
+        ],
+        "slug": "context-window-management-handling-long-documents",
+        "canonicalUrl": "https://engify.ai/learn/context-window-management-handling-long-documents",
+        "ogImage": "https://engify.ai/og/context-window-management-handling-long-documents.png"
+      }
+    },
+    {
+      "id": "ai-gen-multi-agent-systems-coordinating-multiple-ai-agents",
+      "title": "Multi-Agent Systems: Coordinating Multiple AI Agents",
+      "description": "# Multi-Agent Systems: Coordinating Multiple AI Agents  Multi-agent systems (MAS) represent a powerful paradigm in artificial intelligence where multiple autono",
+      "category": "advanced",
+      "tags": [
+        "multi-agent",
+        "agents",
+        "orchestration"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-10-28T03:49:50.768Z",
+      "updatedAt": "2025-10-28T03:49:50.768Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Multi-Agent Systems: Coordinating Multiple AI Agents | Engify.ai",
+        "metaDescription": "# Multi-Agent Systems: Coordinating Multiple AI Agents  Multi-agent systems (MAS) represent a powerful paradigm in artificial intelligence where multiple autono",
+        "keywords": [
+          "multi-agent",
+          "agents",
+          "orchestration"
+        ],
+        "slug": "multi-agent-systems-coordinating-multiple-ai-agents",
+        "canonicalUrl": "https://engify.ai/learn/multi-agent-systems-coordinating-multiple-ai-agents",
+        "ogImage": "https://engify.ai/og/multi-agent-systems-coordinating-multiple-ai-agents.png"
+      }
+    },
+    {
+      "id": "ai-gen-prompt-engineering-for-code-review-best-practices",
+      "title": "Prompt Engineering for Code Review: Best Practices",
+      "description": "# Prompt Engineering for Code Review: Leveraging AI to Enhance Quality Assurance  Code review is a critical part of the software development lifecycle, and AI t",
+      "category": "engineering",
+      "tags": [
+        "code-review",
+        "engineering",
+        "best-practices"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-10-28T03:49:50.767Z",
+      "updatedAt": "2025-10-28T03:49:50.767Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Prompt Engineering for Code Review: Best Practices | Engify.ai",
+        "metaDescription": "# Prompt Engineering for Code Review: Leveraging AI to Enhance Quality Assurance  Code review is a critical part of the software development lifecycle, and AI t",
+        "keywords": [
+          "code-review",
+          "engineering",
+          "best-practices"
+        ],
+        "slug": "prompt-engineering-for-code-review-best-practices",
+        "canonicalUrl": "https://engify.ai/learn/prompt-engineering-for-code-review-best-practices",
+        "ogImage": "https://engify.ai/og/prompt-engineering-for-code-review-best-practices.png"
+      }
+    },
+    {
+      "id": "ai-gen-streaming-ai-responses-building-chatgpt-style-ux",
+      "title": "Streaming AI Responses: Building ChatGPT-Style UX",
+      "description": "# Streaming AI Responses: Building ChatGPT-Style UX  In modern AI applications, delivering responses in real-time through streaming has become a crucial UX feat",
+      "category": "production",
+      "tags": [
+        "streaming",
+        "ux",
+        "implementation"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-10-28T03:49:50.767Z",
+      "updatedAt": "2025-10-28T03:49:50.767Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Streaming AI Responses: Building ChatGPT-Style UX | Engify.ai",
+        "metaDescription": "# Streaming AI Responses: Building ChatGPT-Style UX  In modern AI applications, delivering responses in real-time through streaming has become a crucial UX feat",
+        "keywords": [
+          "streaming",
+          "ux",
+          "implementation"
+        ],
+        "slug": "streaming-ai-responses-building-chatgpt-style-ux",
+        "canonicalUrl": "https://engify.ai/learn/streaming-ai-responses-building-chatgpt-style-ux",
+        "ogImage": "https://engify.ai/og/streaming-ai-responses-building-chatgpt-style-ux.png"
+      }
+    },
+    {
+      "id": "ai-gen-zero-shot-vs-few-shot-vs-fine-tuning-when-to-use-each",
+      "title": "Zero-Shot vs Few-Shot vs Fine-Tuning: When to Use Each",
+      "description": "# Zero-Shot vs Few-Shot vs Fine-Tuning: A Technical Comparison Guide  In modern AI development, choosing the right approach for your language model implementati",
+      "category": "basics",
+      "tags": [
+        "zero-shot",
+        "few-shot",
+        "fine-tuning",
+        "comparison"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-10-28T03:49:50.767Z",
+      "updatedAt": "2025-10-28T03:49:50.767Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Zero-Shot vs Few-Shot vs Fine-Tuning: When to Use Each | Engify.ai",
+        "metaDescription": "# Zero-Shot vs Few-Shot vs Fine-Tuning: A Technical Comparison Guide  In modern AI development, choosing the right approach for your language model implementati",
+        "keywords": [
+          "zero-shot",
+          "few-shot",
+          "fine-tuning",
+          "comparison"
+        ],
+        "slug": "zero-shot-vs-few-shot-vs-fine-tuning-when-to-use-each",
+        "canonicalUrl": "https://engify.ai/learn/zero-shot-vs-few-shot-vs-fine-tuning-when-to-use-each",
+        "ogImage": "https://engify.ai/og/zero-shot-vs-few-shot-vs-fine-tuning-when-to-use-each.png"
+      }
+    },
+    {
+      "id": "ai-gen-prompt-injection-attacks-how-to-protect-your-ai-application",
+      "title": "Prompt Injection Attacks: How to Protect Your AI Application",
+      "description": "# Prompt Injection Attacks: How to Protect Your AI Application  Prompt injection attacks have emerged as a critical security concern as more applications integr",
+      "category": "security",
+      "tags": [
+        "security",
+        "prompt-injection",
+        "safety"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-10-28T03:49:50.767Z",
+      "updatedAt": "2025-10-28T03:49:50.767Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Prompt Injection Attacks: How to Protect Your AI Application | Engify.ai",
+        "metaDescription": "# Prompt Injection Attacks: How to Protect Your AI Application  Prompt injection attacks have emerged as a critical security concern as more applications integr",
+        "keywords": [
+          "security",
+          "prompt-injection",
+          "safety"
+        ],
+        "slug": "prompt-injection-attacks-how-to-protect-your-ai-application",
+        "canonicalUrl": "https://engify.ai/learn/prompt-injection-attacks-how-to-protect-your-ai-application",
+        "ogImage": "https://engify.ai/og/prompt-injection-attacks-how-to-protect-your-ai-application.png"
+      }
+    },
+    {
+      "id": "ai-gen-cost-optimization-strategies-for-production-llm-applications",
+      "title": "Cost Optimization Strategies for Production LLM Applications",
+      "description": "# Cost Optimization Strategies for Production LLM Applications  Large Language Models (LLMs) have become essential tools for modern applications, but their cost",
+      "category": "production",
+      "tags": [
+        "cost-optimization",
+        "production",
+        "performance"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-10-28T03:49:50.767Z",
+      "updatedAt": "2025-10-28T03:49:50.767Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Cost Optimization Strategies for Production LLM Applications | Engify.ai",
+        "metaDescription": "# Cost Optimization Strategies for Production LLM Applications  Large Language Models (LLMs) have become essential tools for modern applications, but their cost",
+        "keywords": [
+          "cost-optimization",
+          "production",
+          "performance"
+        ],
+        "slug": "cost-optimization-strategies-for-production-llm-applications",
+        "canonicalUrl": "https://engify.ai/learn/cost-optimization-strategies-for-production-llm-applications",
+        "ogImage": "https://engify.ai/og/cost-optimization-strategies-for-production-llm-applications.png"
+      }
+    },
+    {
+      "id": "ai-gen-building-your-first-rag-application-step-by-step-tutorial",
+      "title": "Building Your First RAG Application: Step-by-Step Tutorial",
+      "description": "# Building Your First RAG Application: A Step-by-Step Tutorial  Retrieval-Augmented Generation (RAG) has emerged as a powerful architecture for creating AI appl",
+      "category": "advanced",
+      "tags": [
+        "rag",
+        "tutorial",
+        "implementation"
+      ],
+      "author": "Engify.ai Team",
+      "publishedAt": "2025-10-28T03:49:50.767Z",
+      "updatedAt": "2025-10-28T03:49:50.767Z",
+      "views": 0,
+      "status": "active",
+      "seo": {
+        "metaTitle": "Building Your First RAG Application: Step-by-Step Tutorial | Engify.ai",
+        "metaDescription": "# Building Your First RAG Application: A Step-by-Step Tutorial  Retrieval-Augmented Generation (RAG) has emerged as a powerful architecture for creating AI appl",
+        "keywords": [
+          "rag",
+          "tutorial",
+          "implementation"
+        ],
+        "slug": "building-your-first-rag-application-step-by-step-tutorial",
+        "canonicalUrl": "https://engify.ai/learn/building-your-first-rag-application-step-by-step-tutorial",
+        "ogImage": "https://engify.ai/og/building-your-first-rag-application-step-by-step-tutorial.png"
+      }
+    }
+  ],
+  "totals": {
+    "byCategory": {
+      "Best Practices": 1,
+      "basics": 3,
+      "advanced": 6,
+      "engineering": 3,
+      "patterns": 3,
+      "production": 5,
+      "security": 1
+    },
+    "byStatus": {
+      "active": 22
+    }
+  }
+}

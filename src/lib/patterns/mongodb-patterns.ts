@@ -1,29 +1,47 @@
 /**
- * MongoDB Pattern Fetching Utilities (DEPRECATED)
- *
- * ⚠️ USE @/lib/db/repositories/PatternRepository INSTEAD
+ * Patterns Data Access Layer
  * 
- * This file is kept for backward compatibility but should be migrated
- * to use the unified repository pattern.
+ * Tries static JSON first (fast, no cold starts)
+ * Falls back to MongoDB if JSON unavailable
  * 
- * @deprecated Use patternRepository from @/lib/db/repositories/ContentService
+ * This solves the cold start problem by using static JSON files
+ * similar to the breeding site's approach
  */
 
+import { loadPatternsFromJson } from './load-patterns-from-json';
 import { patternRepository } from '@/lib/db/repositories/ContentService';
 import type { Pattern } from '@/lib/db/schemas/pattern';
+import { logger } from '@/lib/logging/logger';
 
 /**
- * Fetch all patterns from MongoDB
- * @deprecated Use patternRepository.getAll() instead
+ * Fetch all patterns from static JSON (fast) or MongoDB (fallback)
+ * @deprecated Use patternRepository.getAll() for direct MongoDB access
+ * Use this function for fast static JSON loading with MongoDB fallback
  */
 export async function getAllPatterns(): Promise<Pattern[]> {
-  return patternRepository.getAll();
+  try {
+    // Try static JSON first (fast, no cold starts)
+    return await loadPatternsFromJson();
+  } catch (error) {
+    // Fallback to MongoDB (reliable, always works)
+    logger.debug('Using MongoDB fallback for patterns', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    return patternRepository.getAll();
+  }
 }
 
 /**
- * Fetch a single pattern by ID or name from MongoDB
- * @deprecated Use patternRepository.getById() instead
+ * Fetch a single pattern by ID or name from static JSON or MongoDB
+ * @deprecated Use patternRepository.getById() for direct MongoDB access
+ * Use this function for fast static JSON loading with MongoDB fallback
  */
 export async function getPatternById(idOrName: string): Promise<Pattern | null> {
-  return patternRepository.getById(idOrName);
+  try {
+    const patterns = await loadPatternsFromJson();
+    return patterns.find(p => p.id === idOrName || p.name === idOrName) || null;
+  } catch (error) {
+    // Fallback to MongoDB
+    return patternRepository.getById(idOrName);
+  }
 }

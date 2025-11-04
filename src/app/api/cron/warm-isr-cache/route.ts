@@ -18,9 +18,21 @@ import { getPromptSlug, generateSlug } from '@/lib/utils/slug';
 import { logger } from '@/lib/logging/logger';
 import { getDb } from '@/lib/mongodb';
 import { logAuditEvent } from '@/server/middleware/audit';
+// Import generatePromptsJson, generatePatternsJson, and generateLearningResourcesJson functions
+// This avoids shell execution and is more reliable
+import { generatePromptsJson } from '@/lib/prompts/generate-prompts-json';
+import { generatePatternsJson } from '@/lib/patterns/generate-patterns-json';
+import { generateLearningResourcesJson } from '@/lib/learning/generate-learning-json';
+import { z } from 'zod';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 const CRON_SECRET = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
+
+// Query parameter validation schema
+const QuerySchema = z.object({
+  type: z.enum(['prompts', 'patterns', 'all']).default('prompts'),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
 
 /**
  * Verify request is from Vercel Cron
@@ -80,9 +92,13 @@ async function warmPage(url: string): Promise<{ success: boolean; status: number
 /**
  * GET /api/cron/warm-isr-cache
  * Warm up ISR cache for prompt pages
+ * 
+ * SECURITY: Protected by CRON_SECRET - rate limiting not needed
+ * This route is only accessible via Vercel Cron Jobs with secret header
+ * Public access is blocked by verifyCronRequest()
  */
 export async function GET(request: NextRequest) {
-  // Verify this is a cron request
+  // Verify this is a cron request (protected by secret - rate limiting not needed)
   if (!verifyCronRequest(request)) {
     logger.warn('Unauthorized cron request attempt', {
       ip: request.headers.get('x-forwarded-for'),
@@ -97,8 +113,21 @@ export async function GET(request: NextRequest) {
 
   try {
     const searchParams = request.nextUrl.searchParams;
-    const type = searchParams.get('type') || 'prompts';
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    
+    // Validate and sanitize query parameters
+    const validation = QuerySchema.safeParse({
+      type: searchParams.get('type') || 'prompts',
+      limit: searchParams.get('limit') || '50',
+    });
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid query parameters', details: validation.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const { type, limit } = validation.data;
     
     const results = {
       warmed: [] as string[],
@@ -113,6 +142,16 @@ export async function GET(request: NextRequest) {
     };
 
     if (type === 'prompts' || type === 'all') {
+      // First, regenerate prompts.json (static JSON for fast loading)
+      try {
+        logger.info('Regenerating prompts.json...');
+        await generatePromptsJson();
+        logger.info('Prompts JSON regenerated successfully');
+      } catch (error) {
+        logger.error('Failed to regenerate prompts.json, continuing with MongoDB fallback', { error });
+        // Don't fail entire cron job if JSON generation fails
+      }
+
       // Get featured/popular prompts from MongoDB
       const allPrompts = await promptRepository.getAll();
       
@@ -201,6 +240,16 @@ export async function GET(request: NextRequest) {
 
     // Also warm up pattern detail pages if type is 'all' or 'patterns'
     if (type === 'patterns' || type === 'all') {
+      // First, regenerate patterns.json (static JSON for fast loading)
+      try {
+        logger.info('Regenerating patterns.json...');
+        await generatePatternsJson();
+        logger.info('Patterns JSON regenerated successfully');
+      } catch (error) {
+        logger.error('Failed to regenerate patterns.json, continuing with MongoDB fallback', { error });
+        // Don't fail entire cron job if JSON generation fails
+      }
+
       try {
         const allPatterns = await patternRepository.getAll();
         const patternsToWarm = allPatterns.slice(0, limit); // Warm top patterns
@@ -233,6 +282,16 @@ export async function GET(request: NextRequest) {
 
     // Also warm up main pages if type is 'all'
     if (type === 'all') {
+      // First, regenerate learning.json (static JSON for fast loading)
+      try {
+        logger.info('Regenerating learning.json...');
+        await generateLearningResourcesJson();
+        logger.info('Learning JSON regenerated successfully');
+      } catch (error) {
+        logger.error('Failed to regenerate learning.json, continuing with MongoDB fallback', { error });
+        // Don't fail entire cron job if JSON generation fails
+      }
+
       const mainPages = [
         '/',
         '/prompts',
@@ -277,17 +336,22 @@ export async function GET(request: NextRequest) {
       slugsUpdated,
       ...results.stats,
       averageDurationMs: averageDuration,
-      warmed: results.warmed.slice(0, 10), // Show first 10
-      failed: results.failed.slice(0, 10), // Show first 10
+      warmed: results.warmed.slice(0, 10), // Show first 10 (sanitized)
+      failed: results.failed.slice(0, 10), // Show first 10 (sanitized)
       message: `Warmed ${results.stats.success} pages, ${results.stats.failed} failed${slugsUpdated > 0 ? `, ${slugsUpdated} slugs updated` : ''}`,
     });
   } catch (error) {
     logger.error('Error warming ISR cache', { error });
     
+    // Sanitize error message for safety (even though this is internal cron)
+    const errorMessage = error instanceof Error 
+      ? error.message.replace(/[<>]/g, '') // Remove angle brackets for XSS safety
+      : 'Unknown error';
+    
     return NextResponse.json(
       {
         error: 'Failed to warm ISR cache',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: errorMessage,
       },
       { status: 500 }
     );

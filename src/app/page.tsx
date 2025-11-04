@@ -20,6 +20,7 @@ import {
 import { MainLayout } from '@/components/layout/MainLayout';
 import { getServerStats } from '@/lib/server-stats';
 import type { Metadata } from 'next';
+import { PreloadContentJson } from '@/components/features/PreloadContentJson';
 
 export const metadata: Metadata = {
   title: 'Engify.ai - AI Training Platform for Engineering Teams',
@@ -130,6 +131,7 @@ export default async function Home() {
 
   return (
     <MainLayout>
+      <PreloadContentJson />
       {/* Hero Section - Vibrant Gradient like Vibe Code Careers */}
       <section className="relative overflow-hidden bg-gradient-to-br from-red-500 via-blue-600 via-purple-600 to-teal-500 dark:from-red-600 dark:via-blue-700 dark:via-purple-700 dark:to-teal-600">
         {/* Animated background gradient overlay - BEHIND content, not blocking clicks */}

@@ -16,6 +16,7 @@ import {
   type UserRole,
 } from '@/lib/schemas/prompt';
 import { PromptMetrics } from './PromptMetrics';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 interface RelatedPromptsProps {
   currentPrompt: {
@@ -143,7 +144,16 @@ export function RelatedPrompts({
   const displayedPrompts = sortBy === 'related' ? relatedPrompts : topPrompts;
 
   return (
-    <div className="mt-12">
+    <ErrorBoundary
+      fallback={
+        <div className="mt-12 rounded-lg border bg-muted/50 p-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            Unable to load related prompts. Please refresh the page.
+          </p>
+        </div>
+      }
+    >
+      <div className="mt-12">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-2xl font-bold">
           {sortBy === 'related'
@@ -208,14 +218,14 @@ export function RelatedPrompts({
             <Link
               key={prompt.id}
               href={`/prompts/${getPromptSlug(prompt)}`}
-              className="group rounded-lg border bg-card p-4 transition-all hover:border-primary hover:bg-accent hover:shadow-md"
+              className="group relative rounded-xl border border-border/50 bg-card surface-frosted surface-frosted-hover transition-all duration-200 p-4 hover:border-primary hover:shadow-xl hover:shadow-primary/10 dark:surface-frosted dark:hover:surface-frosted-hover"
             >
               <div className="mb-2 flex items-start justify-between gap-2">
-                <h3 className="font-semibold group-hover:text-primary">
+                <h3 className="font-semibold transition-colors group-hover:text-white dark:group-hover:text-white">
                   {prompt.title}
                 </h3>
               </div>
-              <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
+              <p className="mb-3 line-clamp-2 text-sm text-secondary-light dark:text-secondary-light">
                 {prompt.description}
               </p>
               <div className="mb-2 flex flex-wrap gap-1">

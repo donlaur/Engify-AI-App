@@ -7,12 +7,13 @@ import {
   generateCourseSchema,
 } from '@/lib/seo/metadata';
 import { patternRepository } from '@/lib/db/repositories/ContentService';
+import { loadPatternFromJson } from '@/lib/patterns/load-patterns-from-json';
 import { logger } from '@/lib/logging/logger';
 
-// Mark as dynamic to prevent DYNAMIC_SERVER_USAGE errors
-// MongoDB operations trigger dynamic detection, so we must explicitly mark as dynamic
-export const dynamic = 'force-dynamic';
-export const dynamicParams = true;
+// Use ISR with static JSON (best performance + SEO)
+// Static JSON loads fast (no cold starts), ISR caches HTML (perfect SEO)
+export const revalidate = 3600; // Revalidate every hour (ISR)
+export const dynamicParams = true; // Allow dynamic params (patterns not pre-generated)
 
 export async function generateMetadata({
   params,
@@ -22,21 +23,32 @@ export async function generateMetadata({
   try {
     const patternSlug = decodeURIComponent(params.pattern);
     
-    // Add timeout and better error handling
+    // Try static JSON first (fast, no cold starts), then MongoDB fallback
     let pattern;
     try {
       pattern = await Promise.race([
-        patternRepository.getById(patternSlug),
+        loadPatternFromJson(patternSlug),
         new Promise<null>((_, reject) =>
-          setTimeout(() => reject(new Error('Metadata fetch timeout')), 8000)
+          setTimeout(() => reject(new Error('Pattern fetch timeout')), 8000)
         ),
       ]);
+      
+      // If not found in JSON, try MongoDB
+      if (!pattern) {
+        pattern = await patternRepository.getById(patternSlug);
+      }
     } catch (error) {
       logger.error('Failed to generate pattern metadata', { error, params });
-      return {
-        title: 'Pattern | Engify.ai',
-        description: 'Explore prompt engineering patterns.',
-      };
+      // Fallback to MongoDB
+      try {
+        pattern = await patternRepository.getById(patternSlug);
+      } catch (dbError) {
+        logger.error('MongoDB fallback also failed', { dbError, params });
+        return {
+          title: 'Pattern | Engify.ai',
+          description: 'Explore prompt engineering patterns.',
+        };
+      }
     }
 
     if (!pattern) {
@@ -69,23 +81,32 @@ export default async function PatternDetailPage({
   try {
     const patternSlug = decodeURIComponent(params.pattern);
     
-    // Add timeout and better error handling for MongoDB connection
+    // Try static JSON first (fast, no cold starts), then MongoDB fallback
     let pattern;
     try {
       pattern = await Promise.race([
-        patternRepository.getById(patternSlug),
+        loadPatternFromJson(patternSlug),
         new Promise<null>((_, reject) =>
-          setTimeout(() => reject(new Error('Pattern fetch timeout')), 10000)
+          setTimeout(() => reject(new Error('Pattern fetch timeout')), 8000)
         ),
       ]);
-    } catch (dbError) {
-      logger.error('Failed to fetch pattern from database', {
-        error: dbError,
+      
+      // If not found in JSON, try MongoDB
+      if (!pattern) {
+        pattern = await patternRepository.getById(patternSlug);
+      }
+    } catch (error) {
+      logger.error('Failed to load pattern from JSON, trying MongoDB fallback', {
+        error: error instanceof Error ? error.message : 'Unknown error',
         patternSlug,
-        params,
       });
-      // Return 404 instead of throwing - prevents error boundary from showing "mongodb is not defined"
-      notFound();
+      // Fallback to MongoDB
+      try {
+        pattern = await patternRepository.getById(patternSlug);
+      } catch (dbError) {
+        logger.error('MongoDB fallback also failed', { dbError, patternSlug });
+        notFound();
+      }
     }
 
     if (!pattern) {

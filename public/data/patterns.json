@@ -1,0 +1,482 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-11-04T17:57:48.636Z",
+  "totalPatterns": 18,
+  "patterns": [
+    {
+      "id": "chain-of-thought",
+      "name": "Chain-of-Thought",
+      "category": "COGNITIVE",
+      "level": "intermediate",
+      "description": "Breaks down reasoning into explicit steps",
+      "shortDescription": "Breaks down complex reasoning into explicit steps",
+      "fullDescription": "The Chain of Thought Pattern instructs the AI to show its reasoning process step-by-step before arriving at a conclusion. This dramatically improves accuracy on complex problems and makes the AI's logic transparent and verifiable.",
+      "howItWorks": "You ask the AI to \"think step by step\" or \"show your reasoning\". The AI then breaks down the problem, considers each part, and builds toward a solution incrementally.",
+      "example": "Let's think step by step...",
+      "useCases": [
+        "Complex problems requiring multi-step reasoning",
+        "You need to verify the AI's logic",
+        "Mathematical or logical problems",
+        "Debugging or troubleshooting scenarios"
+      ],
+      "bestPractices": [
+        "Explicitly ask for step-by-step reasoning",
+        "Number the steps if you want specific structure",
+        "Use for complex decisions or calculations",
+        "Combine with persona for expert-level reasoning"
+      ],
+      "commonMistakes": [
+        "Using it for simple questions (overkill)",
+        "Not providing enough context for reasoning",
+        "Expecting perfect logic (AI can still make errors)",
+        "Forgetting to validate the reasoning yourself"
+      ],
+      "relatedPatterns": [
+        "cognitive-verifier",
+        "refinement"
+      ],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 5
+    },
+    {
+      "id": "cognitive-verifier",
+      "name": "Cognitive Verifier",
+      "category": "COGNITIVE",
+      "level": "intermediate",
+      "description": "Asks AI to verify its own reasoning",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "hypothesis-testing",
+      "name": "Hypothesis Testing",
+      "category": "COGNITIVE",
+      "level": "advanced",
+      "description": "Generates multiple plausible explanations",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "rag",
+      "name": "RAG (Retrieval Augmented Generation)",
+      "category": "COGNITIVE",
+      "level": "advanced",
+      "description": "Retrieves information from external knowledge base",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "reverse-engineering",
+      "name": "Reverse Engineering",
+      "category": "COGNITIVE",
+      "level": "advanced",
+      "description": "Deconstructs conclusions to explain reasoning",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "audience-persona",
+      "name": "Audience Persona",
+      "category": "FOUNDATIONAL",
+      "level": "beginner",
+      "description": "Tailors the response for a specific audience level",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 1
+    },
+    {
+      "id": "few-shot",
+      "name": "Few-Shot",
+      "category": "FOUNDATIONAL",
+      "level": "beginner",
+      "description": "Provides examples to guide the AI response format",
+      "shortDescription": "Provides examples to guide the AI's responses",
+      "fullDescription": "The Few-Shot Pattern teaches the AI by example. You provide 2-5 examples of the input-output pairs you want, and the AI learns the pattern to apply to new inputs. This is incredibly powerful for tasks where explaining the rules is harder than showing examples.",
+      "howItWorks": "You structure your prompt with clear examples showing the desired transformation or response style. The AI recognizes the pattern and applies the same logic to new inputs.",
+      "example": "Here are 3 examples of good code reviews...",
+      "useCases": [
+        "The task is easier to show than explain",
+        "You want consistent style or format across outputs",
+        "You need the AI to follow a specific reasoning pattern",
+        "Simple instructions aren't producing the right results"
+      ],
+      "bestPractices": [
+        "Use 2-5 examples (more isn't always better)",
+        "Make examples diverse but clear",
+        "Show edge cases if relevant",
+        "Keep examples concise and focused"
+      ],
+      "commonMistakes": [
+        "Providing too many examples (confuses the pattern)",
+        "Using inconsistent examples",
+        "Not showing enough variety",
+        "Making examples too complex"
+      ],
+      "relatedPatterns": [
+        "template",
+        "chain-of-thought"
+      ],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "persona",
+      "name": "Persona",
+      "category": "FOUNDATIONAL",
+      "level": "beginner",
+      "description": "Instructs the AI to adopt a specific role or expert persona",
+      "shortDescription": "Assigns a specific role or expertise to the AI",
+      "fullDescription": "The Persona Pattern instructs the AI to adopt a specific role, profession, or perspective when generating responses. By defining who the AI should \"be,\" you get responses that match the knowledge, tone, and approach of that persona.",
+      "howItWorks": "You explicitly tell the AI to act as a specific expert (e.g., \"You are a senior software architect\"). The AI then filters its responses through that lens, using appropriate terminology, frameworks, and thinking patterns associated with that role.",
+      "example": "Act as a senior software engineer with 10 years of experience...",
+      "useCases": [
+        "You need domain-specific expertise or terminology",
+        "You want responses tailored to a specific audience",
+        "You need consistent tone and perspective across multiple prompts",
+        "You want the AI to apply specialized frameworks or methodologies"
+      ],
+      "bestPractices": [
+        "Be specific about the expertise level (junior, senior, expert)",
+        "Include relevant context about the persona's background",
+        "Combine with other patterns for better results",
+        "Use consistent personas across related prompts"
+      ],
+      "commonMistakes": [
+        "Being too vague (\"act as an expert\" - expert in what?)",
+        "Choosing personas that don't match your actual need",
+        "Forgetting to maintain the persona throughout the conversation",
+        "Using conflicting personas in the same prompt"
+      ],
+      "relatedPatterns": [
+        "context",
+        "audience-persona",
+        "format"
+      ],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 77
+    },
+    {
+      "id": "zero-shot",
+      "name": "Zero-Shot",
+      "category": "FOUNDATIONAL",
+      "level": "beginner",
+      "description": "Direct instruction without examples",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "critique-improve",
+      "name": "Critique & Improve",
+      "category": "ITERATIVE",
+      "level": "intermediate",
+      "description": "AI critiques and refines its own output",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "flipped-interaction",
+      "name": "Flipped Interaction",
+      "category": "ITERATIVE",
+      "level": "intermediate",
+      "description": "AI takes control of conversation, asking questions to gather sufficient context for complex tasks",
+      "shortDescription": "AI takes control of conversation, asking questions to gather sufficient context for complex tasks",
+      "fullDescription": "The Flipped Interaction pattern instructs the AI to act as an expert diagnostician or requirements-gatherer, taking control of the conversation by asking the user questions one at a time until it has gathered sufficient context to perform a complex task. This solves the \"low-context prompt\" problem by having the AI guide the user through the information-gathering process.",
+      "howItWorks": "You instruct the AI to act as an expert in a specific domain (e.g., \"Act as a senior SRE\") and ask the user questions one by one, rather than expecting the user to provide all context upfront. The AI uses its domain expertise to determine what information is needed and asks for it systematically.",
+      "example": "Act as a senior SRE and ask me questions one by one (e.g., \"kubectl describe pod\", \"kubectl logs\") until you have enough info to diagnose the crash loop.",
+      "useCases": [
+        "Users don't know what information to provide",
+        "Diagnostic or troubleshooting scenarios",
+        "Requirements gathering for complex tasks",
+        "Debugging workflows where step-by-step data collection is needed",
+        "Expert consultations where the AI needs to guide the conversation",
+        "Compliance audits or structured reviews"
+      ],
+      "bestPractices": [
+        "Use a strong persona pattern (expert role)",
+        "Instruct the AI to ask one question at a time",
+        "Have the AI wait for user responses before proceeding",
+        "Use for diagnostic, troubleshooting, or requirements-gathering tasks",
+        "Specify when the AI should stop asking and provide a solution",
+        "Make it clear this is a multi-turn conversation"
+      ],
+      "commonMistakes": [
+        "Not specifying the expert persona clearly",
+        "Allowing the AI to ask all questions at once",
+        "Not defining when to stop asking questions",
+        "Using for simple tasks where direct instruction works better",
+        "Not making it clear this requires multiple interactions"
+      ],
+      "relatedPatterns": [
+        "persona",
+        "question-refinement",
+        "chain-of-thought"
+      ],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "question-refinement",
+      "name": "Question Refinement",
+      "category": "ITERATIVE",
+      "level": "intermediate",
+      "description": "AI asks clarifying questions before responding",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "self-reflection",
+      "name": "Self-Reflection / Internalized Critique",
+      "category": "ITERATIVE",
+      "level": "advanced",
+      "description": "Single-prompt technique where AI generates, reviews, and improves its own response before presenting",
+      "shortDescription": "Single-prompt technique where AI generates, reviews, and improves its own response before presenting",
+      "fullDescription": "The Self-Reflection pattern is a single-prompt technique that instructs the AI to generate a response, then critically review it, identify flaws, and improve it before presenting the final answer. Unlike the iterative Critique & Improve pattern, this happens in a single pass, making it faster and more automatable while producing higher-quality first-pass responses.",
+      "howItWorks": "You structure your prompt to instruct the AI to: (1) Generate an initial response, (2) Critically review its own output for errors, style issues, or improvements, (3) Apply the improvements, and (4) Present only the final, improved version. This internalizes the quality control loop.",
+      "example": "Generate the Python code. Then, perform a self-reflection, checking for bugs, style guide violations, and inefficiencies. Provide only the final, improved code.",
+      "useCases": [
+        "You need high-quality output in a single pass",
+        "Building automated systems where iterative loops are costly",
+        "Code generation where correctness is critical",
+        "Technical documentation that must be accurate",
+        "Any task where self-correction improves quality",
+        "You want to reduce the need for human review"
+      ],
+      "bestPractices": [
+        "Define specific criteria for the self-review (bugs, style, performance)",
+        "Instruct the AI to provide only the final output, not the reflection process",
+        "Use for critical outputs where correctness matters",
+        "Combine with persona pattern for expert-level review",
+        "Specify the improvement areas explicitly",
+        "Use for code, technical documentation, or analytical tasks"
+      ],
+      "commonMistakes": [
+        "Not being specific about what to review",
+        "Asking the AI to show its reflection (adds noise)",
+        "Using for simple tasks where it adds unnecessary overhead",
+        "Not testing if the reflection actually improves quality",
+        "Expecting perfect results (still validate)"
+      ],
+      "relatedPatterns": [
+        "critique-improve",
+        "cognitive-verifier",
+        "chain-of-thought"
+      ],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "kernel",
+      "name": "KERNEL Framework",
+      "category": "STRUCTURAL",
+      "level": "advanced",
+      "description": "Six principles for enterprise-grade prompts",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "recipe",
+      "name": "Recipe",
+      "category": "STRUCTURAL",
+      "level": "intermediate",
+      "description": "Step-by-step instructions for complex tasks",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "example": "First analyze the requirements, then design the solution, finally implement...",
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "structured-output",
+      "name": "Structured Output Generation",
+      "category": "STRUCTURAL",
+      "level": "intermediate",
+      "description": "Forces the AI to output in machine-readable formats (JSON, XML, YAML) for system integration",
+      "shortDescription": "Forces the AI to output in machine-readable formats (JSON, XML, YAML) for system integration",
+      "fullDescription": "The Structured Output Generation pattern instructs the AI to return responses in a specific, machine-readable format such as JSON, XML, or YAML. This is critical for production engineering systems where AI outputs must be programmatically parsed and integrated into automated workflows, databases, or CI/CD pipelines. Unlike conversational prompts, structured outputs enable reliable system integration.",
+      "howItWorks": "You explicitly define the output format using schema definitions (JSON Schema, XML DTD, or YAML structure) and strict instructions to output ONLY the structured data with no additional text. The AI then formats its response according to your specification, making it parseable by other systems.",
+      "example": "Return a list of security vulnerabilities as a JSON array, adhering to this JSON Schema... Do not output any text before or after the JSON.",
+      "useCases": [
+        "You need to integrate AI output into automated systems",
+        "Building APIs that return AI-generated data",
+        "Creating CI/CD pipelines that process AI responses",
+        "Storing AI outputs in databases or data warehouses",
+        "You need consistent, parseable data structures",
+        "Building agentic systems that process AI outputs programmatically"
+      ],
+      "bestPractices": [
+        "Provide explicit schema definitions (JSON Schema, XML DTD)",
+        "Use strict instructions: \"Output ONLY JSON, no text before or after\"",
+        "Validate the output format programmatically",
+        "Use JSON Schema for complex nested structures",
+        "Consider using XML or YAML for domain-specific formats",
+        "Test with edge cases to ensure format consistency",
+        "Handle parsing errors gracefully in your code"
+      ],
+      "commonMistakes": [
+        "Not being explicit enough about format requirements",
+        "Allowing extra text before/after the structured data",
+        "Using formats the AI cannot reliably produce",
+        "Not validating parsed output",
+        "Making schemas too complex or ambiguous",
+        "Forgetting to handle malformed responses"
+      ],
+      "relatedPatterns": [
+        "template",
+        "constraint",
+        "recipe"
+      ],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    },
+    {
+      "id": "template",
+      "name": "Template",
+      "category": "STRUCTURAL",
+      "level": "beginner",
+      "description": "Provides a structured format for the AI to fill in",
+      "shortDescription": "Provides a fill-in-the-blank structure with placeholders",
+      "fullDescription": "The Template Pattern gives the AI a structured outline with placeholders that it fills in based on your input. This ensures consistent structure while allowing flexible content.",
+      "howItWorks": "You provide a template with placeholders (like {feature_name}, {benefit}, etc.) and the AI fills them in with appropriate content based on your context.",
+      "example": "Format your response as: Problem | Solution | Impact",
+      "useCases": [
+        "You need consistent document structure",
+        "Creating standardized outputs (user stories, PRDs, etc.)",
+        "Generating multiple similar items",
+        "Ensuring all required sections are included"
+      ],
+      "bestPractices": [
+        "Use clear, descriptive placeholder names",
+        "Provide context for what should fill each placeholder",
+        "Keep templates simple and focused",
+        "Test with different inputs to ensure flexibility"
+      ],
+      "commonMistakes": [
+        "Too many placeholders (overwhelming)",
+        "Vague placeholder names",
+        "Rigid templates that don't allow variation",
+        "Not providing enough context for filling placeholders"
+      ],
+      "relatedPatterns": [
+        "format",
+        "few-shot"
+      ],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 19
+    },
+    {
+      "id": "visual-separators",
+      "name": "Visual Separators",
+      "category": "STRUCTURAL",
+      "level": "intermediate",
+      "description": "Uses delimiters to organize prompt sections",
+      "shortDescription": null,
+      "fullDescription": null,
+      "howItWorks": null,
+      "useCases": [],
+      "bestPractices": [],
+      "commonMistakes": [],
+      "relatedPatterns": [],
+      "createdAt": "2025-11-04T04:11:22.262Z",
+      "updatedAt": "2025-11-04T04:11:22.262Z",
+      "promptCount": 0
+    }
+  ],
+  "totals": {
+    "byCategory": {
+      "COGNITIVE": 5,
+      "FOUNDATIONAL": 4,
+      "ITERATIVE": 4,
+      "STRUCTURAL": 5
+    },
+    "byLevel": {
+      "intermediate": 8,
+      "advanced": 5,
+      "beginner": 5
+    },
+    "totalPromptsUsingPatterns": 102
+  }
+}

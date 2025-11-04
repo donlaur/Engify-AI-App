@@ -62,21 +62,10 @@ function enrichPromptDescription(
   return descriptionParts.join(' ');
 }
 
-// Use ISR (Incremental Static Regeneration) - fully dynamic
-// All pages generate on-demand when first accessed
-// Pages are cached for 1 hour after first generation
-// This prevents build timeouts completely
+// Use ISR with static JSON (best performance + SEO)
+// Static JSON loads fast (no cold starts), ISR caches HTML (perfect SEO)
 export const revalidate = 3600; // Revalidate every hour (ISR)
-
-// Mark as dynamic to prevent DYNAMIC_SERVER_USAGE errors
-// MongoDB operations trigger dynamic detection, so we must explicitly mark as dynamic
-// Note: This disables ISR caching, but allows pages to render without errors
-// TODO: Consider using API routes for MongoDB operations to enable ISR caching
-export const dynamic = 'force-dynamic';
-
-// Allow dynamic params (prompts not in generateStaticParams)
-// This tells Next.js that pages with unknown slugs should still be generated
-export const dynamicParams = true;
+export const dynamicParams = true; // Allow dynamic params (prompts not pre-generated)
 
 // CRITICAL: No pre-generation - all pages are fully dynamic (ISR)
 // This prevents build timeouts completely
@@ -94,7 +83,7 @@ export async function generateMetadata({
   params: { id: string };
 }): Promise<Metadata> {
   try {
-    // Fetch only the single prompt needed (more efficient than getAllPrompts)
+    // Try static JSON first (fast, no cold starts), then MongoDB fallback
     const prompt = await getPromptById(params.id);
 
     if (!prompt) {
@@ -133,7 +122,7 @@ export default async function PromptPage({
   params: { id: string };
 }) {
   try {
-    // Fetch only the single prompt needed (more efficient than getAllPrompts)
+    // Try static JSON first (fast, no cold starts), then MongoDB fallback
     const prompt = await getPromptById(params.id);
 
     if (!prompt) {
