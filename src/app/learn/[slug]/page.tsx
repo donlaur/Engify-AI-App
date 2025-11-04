@@ -6,6 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { ArticleRenderer } from '@/components/article/ArticleRenderer';
+import { RelatedArticles } from '@/components/features/RelatedArticles';
+import { HubSpokeLinks } from '@/components/features/HubSpokeLinks';
+import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 import { getClient } from '@/lib/mongodb';
 
 interface PageProps {
@@ -227,6 +230,27 @@ export default async function ArticlePage({ params }: PageProps) {
             })} • {article.views || 0} views</p>
           </div>
         </footer>
+
+        {/* Related Articles */}
+        <RelatedArticles
+          currentArticle={{
+            slug: article.seo?.slug || article.slug || params.slug,
+            tags: article.tags,
+            category: article.category,
+            title: article.title,
+          }}
+          limit={6}
+        />
+
+        {/* Hub-and-Spoke Links */}
+        <HubSpokeLinks articleSlug={article.seo?.slug || article.slug || params.slug} />
+
+        {/* Cross-Content Links (Prompts & Patterns) */}
+        <CrossContentLinks
+          tags={article.tags || []}
+          category={article.category}
+          excludeId={article._id || article.id}
+        />
       </article>
 
       {/* Schema.org structured data for SEO */}

@@ -10,14 +10,14 @@ import type { Metadata } from 'next';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { LibraryClient } from '@/components/features/LibraryClient';
 import { getAllPrompts } from '@/lib/prompts/mongodb-prompts';
-import { getStats } from '@/lib/stats-cache';
+import { getServerStats } from '@/lib/server-stats';
 import { getPromptSlug } from '@/lib/utils/slug';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
 // Dynamic SEO Metadata
 export async function generateMetadata(): Promise<Metadata> {
-  const data = await getStats();
+  const data = await getServerStats();
   const promptCount = data.prompts?.total || data.stats?.prompts || 0;
   const categoryCount = data.prompts?.uniqueCategories?.length || 0;
   const roleCount = data.prompts?.uniqueRoles?.length || 0;

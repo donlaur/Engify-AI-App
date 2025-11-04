@@ -19,7 +19,7 @@ interface CachedStats {
 }
 
 const STATIC_FALLBACK = {
-  stats: { prompts: 76, patterns: 23, pathways: 12, users: 0 },
+  stats: { prompts: 76, patterns: 18, pathways: 12, users: 0 },
   categories: [],
 };
 

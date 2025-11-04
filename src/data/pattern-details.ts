@@ -270,6 +270,167 @@ Feature: Search functionality`,
     ],
     relatedPatterns: ['format', 'audience-persona'],
   },
+  {
+    id: 'structured-output',
+    name: 'Structured Output Generation',
+    category: 'Structure/Format',
+    level: 'intermediate',
+    shortDescription:
+      'Forces the AI to output in machine-readable formats (JSON, XML, YAML) for system integration',
+    fullDescription:
+      'The Structured Output Generation pattern instructs the AI to return responses in a specific, machine-readable format such as JSON, XML, or YAML. This is critical for production engineering systems where AI outputs must be programmatically parsed and integrated into automated workflows, databases, or CI/CD pipelines. Unlike conversational prompts, structured outputs enable reliable system integration.',
+    howItWorks:
+      'You explicitly define the output format using schema definitions (JSON Schema, XML DTD, or YAML structure) and strict instructions to output ONLY the structured data with no additional text. The AI then formats its response according to your specification, making it parseable by other systems.',
+    whenToUse: [
+      'You need to integrate AI output into automated systems',
+      'Building APIs that return AI-generated data',
+      'Creating CI/CD pipelines that process AI responses',
+      'Storing AI outputs in databases or data warehouses',
+      'You need consistent, parseable data structures',
+      'Building agentic systems that process AI outputs programmatically',
+    ],
+    example: {
+      before:
+        'Analyze this codebase and list all security vulnerabilities.',
+      after: `Analyze this codebase and return security vulnerabilities as JSON. Output ONLY valid JSON, no text before or after.
+
+Required JSON Schema:
+{
+  "vulnerabilities": [
+    {
+      "severity": "critical|high|medium|low",
+      "type": "string",
+      "location": "file:line",
+      "description": "string",
+      "remediation": "string"
+    }
+  ]
+}
+
+Codebase: [your code here]`,
+      explanation:
+        'The structured JSON output can be directly parsed by a security scanner, stored in a database, or integrated into a CI/CD pipeline for automated vulnerability tracking. The strict format ensures reliable parsing.',
+    },
+    bestPractices: [
+      'Provide explicit schema definitions (JSON Schema, XML DTD)',
+      'Use strict instructions: "Output ONLY JSON, no text before or after"',
+      'Validate the output format programmatically',
+      'Use JSON Schema for complex nested structures',
+      'Consider using XML or YAML for domain-specific formats',
+      'Test with edge cases to ensure format consistency',
+      'Handle parsing errors gracefully in your code',
+    ],
+    commonMistakes: [
+      'Not being explicit enough about format requirements',
+      'Allowing extra text before/after the structured data',
+      'Using formats the AI cannot reliably produce',
+      'Not validating parsed output',
+      'Making schemas too complex or ambiguous',
+      'Forgetting to handle malformed responses',
+    ],
+    relatedPatterns: ['template', 'constraint', 'recipe'],
+  },
+  {
+    id: 'self-reflection',
+    name: 'Self-Reflection / Internalized Critique',
+    category: 'Quality Control',
+    level: 'advanced',
+    shortDescription:
+      'Single-prompt technique where AI generates, reviews, and improves its own response before presenting',
+    fullDescription:
+      'The Self-Reflection pattern is a single-prompt technique that instructs the AI to generate a response, then critically review it, identify flaws, and improve it before presenting the final answer. Unlike the iterative Critique & Improve pattern, this happens in a single pass, making it faster and more automatable while producing higher-quality first-pass responses.',
+    howItWorks:
+      'You structure your prompt to instruct the AI to: (1) Generate an initial response, (2) Critically review its own output for errors, style issues, or improvements, (3) Apply the improvements, and (4) Present only the final, improved version. This internalizes the quality control loop.',
+    whenToUse: [
+      'You need high-quality output in a single pass',
+      'Building automated systems where iterative loops are costly',
+      'Code generation where correctness is critical',
+      'Technical documentation that must be accurate',
+      'Any task where self-correction improves quality',
+      'You want to reduce the need for human review',
+    ],
+    example: {
+      before: 'Write a Python function to parse JSON.',
+      after: `Write a Python function to parse JSON. Follow this process:
+
+1. **Generate Code:** Write the complete function with error handling
+2. **Self-Reflection:** Critically review your code for:
+   - Bugs or logic errors
+   - Style guide violations (PEP 8)
+   - Missing error handling
+   - Edge cases not handled
+   - Performance inefficiencies
+3. **Improve:** Apply all improvements from your reflection
+4. **Output:** Provide ONLY the final, improved code
+
+Do not show your reflection process - only the final code.`,
+      explanation:
+        'This pattern forces the AI to catch its own mistakes before presenting the code, resulting in higher-quality output that requires less human review. The reflection happens internally, so you get a polished result immediately.',
+    },
+    bestPractices: [
+      'Define specific criteria for the self-review (bugs, style, performance)',
+      'Instruct the AI to provide only the final output, not the reflection process',
+      'Use for critical outputs where correctness matters',
+      'Combine with persona pattern for expert-level review',
+      'Specify the improvement areas explicitly',
+      'Use for code, technical documentation, or analytical tasks',
+    ],
+    commonMistakes: [
+      'Not being specific about what to review',
+      'Asking the AI to show its reflection (adds noise)',
+      'Using for simple tasks where it adds unnecessary overhead',
+      'Not testing if the reflection actually improves quality',
+      'Expecting perfect results (still validate)',
+    ],
+    relatedPatterns: ['critique-improve', 'cognitive-verifier', 'chain-of-thought'],
+  },
+  {
+    id: 'flipped-interaction',
+    name: 'Flipped Interaction',
+    category: 'Collaboration',
+    level: 'intermediate',
+    shortDescription:
+      'AI takes control of conversation, asking questions to gather sufficient context for complex tasks',
+    fullDescription:
+      'The Flipped Interaction pattern instructs the AI to act as an expert diagnostician or requirements-gatherer, taking control of the conversation by asking the user questions one at a time until it has gathered sufficient context to perform a complex task. This solves the "low-context prompt" problem by having the AI guide the user through the information-gathering process.',
+    howItWorks:
+      'You instruct the AI to act as an expert in a specific domain (e.g., "Act as a senior SRE") and ask the user questions one by one, rather than expecting the user to provide all context upfront. The AI uses its domain expertise to determine what information is needed and asks for it systematically.',
+    whenToUse: [
+      'Users don\'t know what information to provide',
+      'Diagnostic or troubleshooting scenarios',
+      'Requirements gathering for complex tasks',
+      'Debugging workflows where step-by-step data collection is needed',
+      'Expert consultations where the AI needs to guide the conversation',
+      'Compliance audits or structured reviews',
+    ],
+    example: {
+      before:
+        'Help me debug my Kubernetes pod that\'s in CrashLoopBackOff.',
+      after: `Act as a senior Site Reliability Engineer (SRE) and Kubernetes expert. I have a pod stuck in a 'CrashLoopBackOff' state.
+
+Your role is to ask me questions one at a time to gather information. Do not suggest a solution until you have gathered sufficient information (e.g., describe output, logs, events).
+
+Start by asking me for the output of 'kubectl describe pod <pod_name>'.`,
+      explanation:
+        'Instead of the user guessing what information to provide, the AI acts as the expert and guides them through the diagnostic process step-by-step, ensuring all necessary context is gathered before attempting a solution.',
+    },
+    bestPractices: [
+      'Use a strong persona pattern (expert role)',
+      'Instruct the AI to ask one question at a time',
+      'Have the AI wait for user responses before proceeding',
+      'Use for diagnostic, troubleshooting, or requirements-gathering tasks',
+      'Specify when the AI should stop asking and provide a solution',
+      'Make it clear this is a multi-turn conversation',
+    ],
+    commonMistakes: [
+      'Not specifying the expert persona clearly',
+      'Allowing the AI to ask all questions at once',
+      'Not defining when to stop asking questions',
+      'Using for simple tasks where direct instruction works better',
+      'Not making it clear this requires multiple interactions',
+    ],
+    relatedPatterns: ['persona', 'question-refinement', 'chain-of-thought'],
+  },
 ];
 
 export function getPatternById(id: string): PatternDetail | undefined {

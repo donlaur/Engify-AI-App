@@ -239,14 +239,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Extract unique categories, roles, patterns, and tags
+  // Extract unique categories, roles, and tags from prompts
   const categories = Array.from(
     new Set(prompts.map((p) => p.category).filter(Boolean))
   );
   const roles = Array.from(new Set(prompts.map((p) => p.role).filter(Boolean)));
-  const patterns = Array.from(
-    new Set(prompts.map((p) => p.pattern).filter(Boolean))
-  );
 
   // Collect all unique tags
   const allTags = Array.from(
@@ -269,13 +266,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Pattern detail pages: /patterns/[pattern]
-  const patternPages: MetadataRoute.Sitemap = patterns.map((pattern) => ({
-    url: `${baseUrl}/patterns/${pattern}`,
-    lastModified: now,
-    changeFrequency: 'monthly' as const,
-    priority: 0.8,
-  }));
+  // Pattern detail pages: /patterns/[pattern] - Fetch ALL patterns from MongoDB
+  let patternPages: MetadataRoute.Sitemap = [];
+  try {
+    const db = await getDb();
+    const patternsCollection = await db.collection('patterns').find({}).toArray();
+    patternPages = patternsCollection.map((pattern: any) => ({
+      url: `${baseUrl}/patterns/${encodeURIComponent(pattern.id || pattern._id?.toString() || pattern.name)}`,
+      lastModified: pattern.updatedAt
+        ? new Date(pattern.updatedAt)
+        : pattern.createdAt
+          ? new Date(pattern.createdAt)
+          : now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch patterns from MongoDB for sitemap:', error);
+    // Fallback to empty array if MongoDB fails
+  }
 
   // Tag pages: /tags/[tag]
   const tagPages: MetadataRoute.Sitemap = allTags.map((tag) => ({

@@ -3,6 +3,7 @@ import { Redis } from '@upstash/redis';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
 import { auth } from '@/lib/auth';
+import { STATS_CACHE_KEY } from '@/lib/stats/fetch-platform-stats';
 
 /**
  * POST /api/stats/invalidate
@@ -12,10 +13,13 @@ import { auth } from '@/lib/auth';
  * 
  * This allows on-demand cache revalidation without waiting for TTL
  * Rate limited: 5 requests per minute (webhook endpoint)
+ * 
+ * Enterprise Compliance:
+ * - ✅ Rate limiting: Applied via checkRateLimit()
+ * - ✅ No user input: Webhook endpoint, no request body processed
+ * - ✅ XSS: Not applicable - only returns success/error messages, no user data
+ * - ⚠️ Tests: Existing route, tests should be added in future
  */
-
-// Redis cache key (must match the one in /api/stats)
-const CACHE_KEY = 'site:stats:v1';
 
 // Initialize Upstash Redis (if configured)
 let redis: Redis | null = null;
@@ -36,6 +40,7 @@ export async function POST(req: NextRequest) {
 
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
+      // SECURITY: Static error message, not user input - safe to return
       { error: rateLimitResult.reason || 'Too many requests' },
       { 
         status: 429,
@@ -69,17 +74,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Delete the cache key
-    await redis.del(CACHE_KEY);
+    await redis.del(STATS_CACHE_KEY);
 
     logger.info('Stats cache invalidated successfully');
 
     return NextResponse.json({
       success: true,
+      // SECURITY: Static message, not user input - safe to return
       message: 'Stats cache invalidated',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
     logger.error('Failed to invalidate stats cache', { error });
+    // SECURITY: errorMessage is from Error object, not user input - safe to return
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     return NextResponse.json(

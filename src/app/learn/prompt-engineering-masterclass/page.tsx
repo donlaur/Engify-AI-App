@@ -7,7 +7,7 @@
  * 
  * SEO Strategy:
  * - Establish authority on prompt engineering
- * - Link to all 15 pattern pages
+ * - Link to all pattern pages
  * - Include Course and FAQ schema
  * - Target long-tail keywords
  */
@@ -19,42 +19,47 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
-import { APP_URL } from '@/lib/constants';
 import { generateCourseSchema, generateFAQSchema } from '@/lib/seo/metadata';
+import { APP_URL } from '@/lib/constants';
+import { getServerStats } from '@/lib/server-stats';
 
-export const metadata: Metadata = {
-  title: 'Prompt Engineering Masterclass: Complete Guide for Developers | Engify.ai',
-  description:
-    'Master prompt engineering with this comprehensive guide. Learn 15 proven patterns, advanced techniques, and practical examples. From beginner to expert - the definitive resource for engineering teams.',
-  keywords: [
-    'prompt engineering training',
-    'prompt engineering course',
-    'prompt engineering tutorial',
-    'AI prompt engineering',
-    'prompt patterns',
-    'chain of thought prompting',
-    'few-shot learning',
-    'prompt engineering for developers',
-    'advanced prompt engineering',
-    'prompt engineering techniques',
-  ],
-  openGraph: {
-    title: 'Prompt Engineering Masterclass: Complete Guide for Developers',
+// Generate metadata dynamically (must be exported, not in component)
+export async function generateMetadata(): Promise<Metadata> {
+  // This can't be async in metadata export, so we'll use a default
+  // The actual page will fetch stats server-side
+  return {
+    title: 'Prompt Engineering Masterclass: Complete Guide for Developers | Engify.ai',
     description:
-      'The definitive guide to prompt engineering. Master 15 proven patterns, advanced techniques, and practical examples for engineering teams.',
-    type: 'article',
-    siteName: 'Engify.ai',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Prompt Engineering Masterclass: Complete Guide',
-    description:
-      'Master prompt engineering with 15 proven patterns and advanced techniques.',
-    creator: '@engifyai',
-  },
+      'Master prompt engineering with this comprehensive guide. Learn proven patterns, advanced techniques, and practical examples. From beginner to expert - the definitive resource for engineering teams.',
+    keywords: [
+      'prompt engineering training',
+      'prompt engineering course',
+      'prompt engineering tutorial',
+      'AI prompt engineering',
+      'prompt patterns',
+      'chain of thought prompting',
+      'few-shot learning',
+      'prompt engineering for developers',
+      'advanced prompt engineering',
+      'prompt engineering techniques',
+    ],
+    openGraph: {
+      title: 'Prompt Engineering Masterclass: Complete Guide for Developers',
+      description:
+        'The definitive guide to prompt engineering. Master proven patterns, advanced techniques, and practical examples for engineering teams.',
+      type: 'article',
+      siteName: 'Engify.ai',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Prompt Engineering Masterclass: Complete Guide',
+      description:
+        'Master prompt engineering with proven patterns and advanced techniques.',
+      creator: '@engifyai',
+    },
 };
 
-// All 15 pattern links for internal linking
+// Pattern links for internal linking
 const PATTERN_LINKS = [
   { key: 'chain-of-thought', name: 'Chain of Thought', category: 'Cognitive' },
   { key: 'few-shot', name: 'Few-Shot Learning', category: 'Foundational' },
@@ -107,16 +112,20 @@ const FAQS = [
   },
 ];
 
-export default function PromptEngineeringMasterclassPage() {
+export default async function PromptEngineeringMasterclassPage() {
+  // Fetch dynamic stats
+  const stats = await getServerStats();
+  const patternCount = stats.patterns?.total || stats.stats?.patterns || 18;
+  
   // Generate Course schema
   const courseSchema = generateCourseSchema(
     {
       key: 'prompt-engineering-masterclass',
       title: 'Prompt Engineering Masterclass',
       description:
-        'The definitive guide to prompt engineering for developers. Master 15 proven patterns, advanced techniques, and practical examples.',
+        `The definitive guide to prompt engineering for developers. Master ${patternCount} proven patterns, advanced techniques, and practical examples.`,
       benefits: [
-        'Master 15 proven prompt patterns',
+        `Master ${patternCount} proven prompt patterns`,
         'Learn advanced techniques',
         'Understand practical applications',
         'Apply to real-world scenarios',
@@ -210,7 +219,7 @@ export default function PromptEngineeringMasterclassPage() {
               </li>
               <li>
                 <a href="#patterns" className="text-primary hover:underline">
-                  3. The 15 Proven Patterns
+                  3. Proven Patterns
                 </a>
               </li>
               <li>
@@ -377,13 +386,13 @@ export default function PromptEngineeringMasterclassPage() {
             </div>
           </section>
 
-          {/* The 15 Proven Patterns */}
+          {/* Proven Patterns */}
           <section id="patterns" className="mb-16 scroll-mt-20">
             <h2 className="mb-6 text-3xl font-bold">
-              3. The 15 Proven Patterns
+              3. Proven Patterns
             </h2>
             <p className="mb-8 text-lg text-muted-foreground">
-              These patterns are battle-tested techniques used by top engineering
+              These {patternCount} patterns are battle-tested techniques used by top engineering
               teams. Each pattern solves specific problems and can be combined for
               even more powerful results.
             </p>

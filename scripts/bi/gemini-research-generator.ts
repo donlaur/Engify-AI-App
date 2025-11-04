@@ -228,7 +228,7 @@ Provide your analysis as a clear, actionable markdown document with bulleted lis
 ### 1. Suggested New Patterns
 
 For each suggested pattern, provide a bullet point with:
-- **Pattern Name** (ID: `pattern-id`)
+- **Pattern Name** (ID: pattern-id)
   - Category: COGNITIVE | STRUCTURAL | FOUNDATIONAL | ITERATIVE
   - Level: beginner | intermediate | advanced
   - Description: Brief description of what this pattern does
@@ -365,7 +365,9 @@ async function generateResearch(
   if (model.contextWindow) {
     console.log(`   Context window: ${model.contextWindow.toLocaleString()} tokens`);
   }
-  console.log(`   Status: ${model.status || 'active'}\n`);
+  // Status may not exist on all model types
+  const modelStatus = 'status' in model ? model.status : 'active';
+  console.log(`   Status: ${modelStatus}\n`);
 
   // Initialize adapter
   const gemini = new GeminiAdapter(modelId);

@@ -26,6 +26,7 @@ import {
 } from '@/components/features/PromptActions';
 import { PromptMetrics } from '@/components/features/PromptMetrics';
 import { RelatedPrompts } from '@/components/features/RelatedPrompts';
+import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 import { getPromptSlug } from '@/lib/utils/slug';
 import Link from 'next/link';
 import {
@@ -327,6 +328,13 @@ export default async function PromptPage({
               tags: prompt.tags,
             }}
             allPrompts={prompts}
+          />
+
+          {/* Cross-Content Links (Articles & Patterns) */}
+          <CrossContentLinks
+            tags={prompt.tags || []}
+            category={prompt.category}
+            excludeId={prompt.id}
           />
         </div>
       </MainLayout>

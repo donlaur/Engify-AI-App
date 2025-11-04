@@ -992,6 +992,128 @@ Next.js Frontend → Next.js API Route → AWS Lambda (LangGraph) → MongoDB
 
 ---
 
+## Phase 3 — Production-Readiness Gap: Strategic Library Expansion
+
+**Status:** [ ] Not Started  
+**Priority:** High - Strategic differentiation  
+**Estimated Time:** 20-30 hours  
+**Position:** After Phase 2 (internal linking complete)
+
+**Problem:** Strategic audit (see `docs/strategy/PRODUCTION_READINESS_GAP_AUDIT.md`) identifies critical "Production-Readiness Gap" - library excels at conversational prompts but lacks patterns needed for production-grade engineering systems.
+
+**Impact:** HIGH - Opportunity to differentiate as definitive training platform for engineering organizations  
+**Resume Value:** ⭐⭐⭐⭐⭐ (5/5) - Major strategic differentiator
+
+**Goal:** Close the Production-Readiness Gap by adding advanced patterns and prompts targeting professional engineering teams.
+
+### 3.1 Critical Pattern Additions (Highest Priority)
+
+**Status:** ✅ Complete  
+**Estimated Time:** 6-8 hours
+
+**Tasks:**
+- [x] Add **Structured Output Generation** pattern (CRITICAL GAP)
+  - Pattern for JSON/XML/YAML outputs
+  - Essential for system integration
+  - Add to pattern repository
+  - Create pattern detail page
+  - Add examples and use cases
+- [x] Add **Self-Reflection / Internalized Critique** pattern
+  - Single-prompt quality control
+  - Faster than iterative critique-improve
+  - Add to pattern repository
+  - Create pattern detail page
+- [x] Add **Flipped Interaction** pattern
+  - AI asks questions to gather context
+  - Critical for diagnostic workflows
+  - Add to pattern repository
+  - Create pattern detail page
+
+**Acceptance:**
+- ✅ All 3 patterns added to database (18 total patterns)
+- ✅ Pattern detail pages will be created automatically (via existing pattern detail system)
+- ✅ Examples and use cases included in pattern-details.ts
+- ✅ Linked from prompts library
+
+### 3.2 Advanced Pattern Additions
+
+**Estimated Time:** 4-6 hours
+
+**Tasks:**
+- [ ] Add **Agentic Context Management** pattern
+- [ ] Add **Meta-Language Creation** pattern
+- [ ] Add **Fact-Check List Generation** pattern
+- [ ] Add **Sub-Agent Orchestration** pattern
+
+**Acceptance:**
+- All 4 advanced patterns added
+- Pattern detail pages with examples
+- Integration with existing patterns
+
+### 3.3 Missing Engineering Roles
+
+**Estimated Time:** 4-6 hours
+
+**Tasks:**
+- [ ] Add **Data Engineer** role (distinct from Data Scientist)
+- [ ] Add **DevOps Engineer / SRE** role
+- [ ] Add **SDET / QA Engineer** role
+- [ ] Add **Cloud Architect** role
+- [ ] Add **Security Engineer** (advanced) role
+- [ ] Add **Embedded Systems Engineer** role
+
+**Acceptance:**
+- All 6 roles added to schema
+- Role filters working
+- Role-specific landing pages (if needed)
+
+### 3.4 Missing Categories
+
+**Estimated Time:** 3-4 hours
+
+**Tasks:**
+- [ ] Create **Infrastructure as Code (IaC) Management** category
+- [ ] Create **Advanced Security Operations (SecOps) & Compliance** category
+- [ ] Create **Agentic Coding & Test-Driven Development (TDD)** category
+- [ ] Create **Data Pipeline & ETL/ELT Orchestration** category
+- [ ] Create **Production Observability & Debugging** category
+
+**Acceptance:**
+- All 5 categories added to schema
+- Category filters working
+- Category pages accessible
+
+### 3.5 Production Prompts (15 prompts from audit)
+
+**Estimated Time:** 8-10 hours
+
+**Tasks:**
+- [ ] Add "Generate Secure IaC with Structured Output" prompt
+- [ ] Add "Interactive Kubernetes Pod Debugger" prompt
+- [ ] Add "Generate SDET Test Suite from User Story" prompt
+- [ ] Add "Initialize Project-Aware Context File" prompt
+- [ ] Add "Generate Data Pipeline Script with Custom DSL" prompt
+- [ ] Add "Cloud Service Trade-off Analysis" prompt
+- [ ] Add "Analyze SIEM Alert Logs" prompt
+- [ ] Add "Optimize Embedded C Code" prompt
+- [ ] Add "Refactor Monolithic Class with Sub-Agents" prompt
+- [ ] Add "Generate High-Volume Mock Data" prompt
+- [ ] Add "Generate CI/CD Pipeline" prompt
+- [ ] Add "Generate SRE PromQL Query" prompt
+- [ ] Add "Write OPA Rego Policy" prompt
+- [ ] Add "Conduct Compliance Audit" prompt
+- [ ] Add "Refine Technical Hypothesis" prompt
+
+**Acceptance:**
+- All 15 prompts added to database
+- Prompts use new patterns
+- Prompts target new roles/categories
+- All prompts tested and validated
+
+**Related:** `docs/strategy/PRODUCTION_READINESS_GAP_AUDIT.md`
+
+---
+
 ## Priority Ranking
 
 ### Must-Do (Week 2 Priority)

@@ -64,7 +64,7 @@ export const LIMITS = {
 // TODO: Remove after migrating ChatWidget to use MongoDB stats
 export const siteStats = {
   totalPrompts: 0, // Placeholder - use StatsService for real count
-  totalPatterns: 15,
+  totalPatterns: 18, // Updated: 15 original + 3 new production patterns
   totalUsers: '1K+',
   avgTimeSaved: '2hrs',
 };

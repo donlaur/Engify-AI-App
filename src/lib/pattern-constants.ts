@@ -59,6 +59,13 @@ export const PATTERNS: Pattern[] = [
     level: 'beginner',
   },
   {
+    id: 'structured-output',
+    name: 'Structured Output Generation',
+    category: 'STRUCTURAL',
+    description: 'Forces the AI to output in machine-readable formats (JSON, XML, YAML) for system integration',
+    level: 'intermediate',
+  },
+  {
     id: 'kernel',
     name: 'KERNEL Framework',
     category: 'STRUCTURAL',
@@ -126,10 +133,24 @@ export const PATTERNS: Pattern[] = [
     level: 'intermediate',
   },
   {
+    id: 'self-reflection',
+    name: 'Self-Reflection / Internalized Critique',
+    category: 'ITERATIVE',
+    description: 'Single-prompt technique where AI generates, reviews, and improves its own response before presenting',
+    level: 'advanced',
+  },
+  {
     id: 'question-refinement',
     name: 'Question Refinement',
     category: 'ITERATIVE',
     description: 'AI asks clarifying questions before responding',
+    level: 'intermediate',
+  },
+  {
+    id: 'flipped-interaction',
+    name: 'Flipped Interaction',
+    category: 'ITERATIVE',
+    description: 'AI takes control of conversation, asking questions to gather sufficient context for complex tasks',
     level: 'intermediate',
   },
 ];

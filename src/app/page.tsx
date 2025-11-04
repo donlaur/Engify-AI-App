@@ -18,7 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { getStats } from '@/lib/stats-cache';
+import { getServerStats } from '@/lib/server-stats';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -82,7 +82,7 @@ const features = [
 ];
 
 export default async function Home() {
-  const data = await getStats();
+  const data = await getServerStats();
   const allowSignup = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
 
   // Build stats for display

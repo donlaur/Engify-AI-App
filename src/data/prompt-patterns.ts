@@ -1,6 +1,6 @@
 /**
  * Prompt Engineering Patterns
- * 15 proven patterns for effective AI prompting
+ * 18 proven patterns for effective AI prompting (including production-ready patterns)
  */
 
 export interface PromptPattern {
@@ -112,12 +112,31 @@ export const promptPatterns: PromptPattern[] = [
       'Review your previous response and identify potential improvements...',
   },
   {
+    id: 'self-reflection',
+    name: 'Self-Reflection / Internalized Critique',
+    description: 'Single-prompt technique where AI generates, reviews, and improves its own response before presenting',
+    category: 'Quality',
+    difficulty: 'advanced',
+    example:
+      'Generate the Python code. Then, perform a self-reflection, checking for bugs, style guide violations, and inefficiencies. Provide only the final, improved code.',
+  },
+  {
+    id: 'structured-output',
+    name: 'Structured Output Generation',
+    description: 'Forces the AI to output in machine-readable formats (JSON, XML, YAML) for system integration',
+    category: 'Structure',
+    difficulty: 'intermediate',
+    example:
+      'Return a list of security vulnerabilities as a JSON array, adhering to this JSON Schema... Do not output any text before or after the JSON.',
+  },
+  {
     id: 'flipped-interaction',
     name: 'Flipped Interaction',
-    description: 'Have the AI ask clarifying questions',
+    description: 'AI takes control of conversation, asking questions to gather sufficient context for complex tasks',
     category: 'Collaboration',
-    difficulty: 'advanced',
-    example: 'Ask me questions to better understand the requirements...',
+    difficulty: 'intermediate',
+    example:
+      'Act as a senior SRE and ask me questions one by one (e.g., "kubectl describe pod", "kubectl logs") until you have enough info to diagnose the crash loop.',
   },
   {
     id: 'game-play',

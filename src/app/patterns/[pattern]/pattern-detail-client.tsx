@@ -7,6 +7,7 @@ import { Icons } from '@/lib/icons';
 import Link from 'next/link';
 import type { Pattern } from '@/lib/db/schemas/pattern';
 import { PatternPrompts } from '@/components/features/PatternPrompts';
+import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 
 interface PatternDetailClientProps {
   pattern: Pattern;
@@ -212,6 +213,13 @@ export default function PatternDetailClient({ pattern }: PatternDetailClientProp
 
         {/* Example Prompts Using This Pattern */}
         <PatternPrompts patternId={pattern.id} />
+
+        {/* Cross-Content Links (Articles & Prompts) */}
+        <CrossContentLinks
+          tags={pattern.tags || []}
+          category={pattern.category}
+          excludeId={pattern.id}
+        />
 
         {/* Actions */}
         <div className="mt-8 flex gap-4">
