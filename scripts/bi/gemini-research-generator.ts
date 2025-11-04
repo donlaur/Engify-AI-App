@@ -67,17 +67,19 @@ interface ResearchResult {
 
 /**
  * Prompt Suggestions Research Type
+ * Pulls data directly from MongoDB via ContentService
  */
 async function collectPromptSuggestionsData() {
-  console.log('📊 Collecting prompt suggestions data...\n');
+  console.log('📊 Collecting prompt suggestions data from MongoDB...\n');
 
+  // Query MongoDB directly via repositories
   const [patterns, prompts] = await Promise.all([
     patternRepository.getAll(),
     promptRepository.getAll(),
   ]);
 
-  console.log(`✅ Found ${patterns.length} patterns`);
-  console.log(`✅ Found ${prompts.length} prompts\n`);
+  console.log(`✅ Found ${patterns.length} patterns in MongoDB`);
+  console.log(`✅ Found ${prompts.length} prompts in MongoDB\n`);
 
   const categories = new Set(patterns.map((p) => p.category));
   const levels = new Set(patterns.map((p) => p.level));
@@ -95,6 +97,37 @@ async function collectPromptSuggestionsData() {
     roles: Array.from(roles),
     promptCategories: Array.from(promptCategories),
     usedPatterns: Array.from(usedPatterns),
+  };
+}
+
+/**
+ * PM Prompts Research Data Collector
+ * Specifically analyzes PM prompts from MongoDB
+ */
+async function collectPMPromptsData() {
+  console.log('📊 Collecting PM prompts data from MongoDB...\n');
+
+  // Query MongoDB for PM-specific prompts
+  const allPrompts = await promptRepository.getAll();
+  const pmPrompts = allPrompts.filter((p) => p.role === 'product-manager' || p.role === 'product-owner');
+  
+  const patterns = await patternRepository.getAll();
+  const allCategories = new Set(allPrompts.map((p) => p.category));
+  const pmCategories = new Set(pmPrompts.map((p) => p.category));
+  const pmPatterns = new Set(pmPrompts.map((p) => p.pattern).filter(Boolean));
+
+  console.log(`✅ Found ${pmPrompts.length} PM prompts in MongoDB`);
+  console.log(`✅ Found ${allPrompts.length} total prompts in MongoDB`);
+  console.log(`✅ Found ${patterns.length} patterns in MongoDB\n`);
+
+  return {
+    pmPrompts,
+    allPrompts,
+    patterns,
+    pmCategories: Array.from(pmCategories),
+    allCategories: Array.from(allCategories),
+    pmPatterns: Array.from(pmPatterns),
+    samplePMPrompts: pmPrompts.slice(0, 20),
   };
 }
 
@@ -287,6 +320,160 @@ function formatPromptSuggestionsResponse(response: string): unknown {
 }
 
 /**
+ * Build PM Prompts Research Prompt for Gemini
+ */
+function buildPMPromptsPrompt(data: unknown): string {
+  const analysis = data as Awaited<ReturnType<typeof collectPMPromptsData>>;
+  const { pmPrompts, allPrompts, patterns, pmCategories, allCategories, pmPatterns } = analysis;
+
+  const existingPMList = pmPrompts.map((p, i) => 
+    `${i + 1}. **${p.title}**
+   - Category: \`${p.category}\`
+   - Role: ${p.role || 'None'}
+   - Pattern: ${p.pattern || 'None'}
+   - Description: ${p.description.substring(0, 100)}...`
+  ).join('\n');
+
+  const existingPMCategoriesList = pmCategories.sort().map(c => `- \`${c}\``).join('\n');
+  const existingPMPatternsList = pmPatterns.sort().map(p => `- \`${p}\``).join('\n');
+
+  return `You are an expert product management consultant analyzing an AI training platform for engineering teams.
+
+## Current PM Prompts Inventory
+
+**Total PM Prompts:** ${pmPrompts.length} out of ${allPrompts.length} total prompts
+
+### Existing PM Prompts (${pmPrompts.length} total):
+${existingPMList}
+
+### PM-Specific Categories Used (${pmCategories.length}):
+${existingPMCategoriesList.length > 0 ? existingPMCategoriesList : 'None - PM prompts use general categories'}
+
+### Patterns Used in PM Prompts (${pmPatterns.length}):
+${existingPMPatternsList.length > 0 ? existingPMPatternsList : 'None yet'}
+
+### All Available Categories (${allCategories.length}):
+${Array.from(allCategories).sort().map(c => `- \`${c}\``).join('\n')}
+
+### All Available Patterns (${patterns.length}):
+${patterns.slice(0, 15).map((p) => `- **${p.name}** (\`${p.id}\`, ${p.category}, ${p.level})`).join('\n')}
+${patterns.length > 15 ? `\n... and ${patterns.length - 15} more patterns` : ''}
+
+## Site Context
+
+**Mission:** AI training platform helping developers, engineers, and product managers use AI better through prompt engineering patterns and ready-to-use prompts.
+
+**Current Focus:** Expanding PM prompt library to cover common product management workflows and tasks.
+
+## Your Task
+
+Analyze gaps in our PM prompt library and suggest new prompts that would be valuable for product managers. 
+
+**CRITICAL:** Before suggesting anything, verify it doesn't already exist in the "Existing PM Prompts" list above.
+
+### 1. Suggested New PM Prompts (15-25)
+
+Identify gaps and suggest prompts for product managers that:
+- Cover common PM workflows we're missing
+- Address different PM responsibilities (strategy, execution, stakeholder management, etc.)
+- Use patterns we have but aren't utilizing for PM prompts
+- Fill gaps in PM-specific categories
+- Target different experience levels (associate PM, mid-level PM, senior PM, director)
+
+For each suggested prompt, provide:
+- **Title** (clear, action-oriented)
+- **Description** (what it does, why it's useful for PMs)
+- **Category** (prefer existing categories - only suggest new if truly necessary)
+- **Pattern** (which pattern it uses - can be null if none)
+- **Level** (beginner, intermediate, or advanced)
+- **Use Case** (specific PM scenario where this would be helpful)
+- **Gap Reason** (why this fills a gap - be specific about what's missing)
+
+**Focus Areas:**
+- Product strategy & roadmapping
+- User research & customer insights
+- Feature prioritization & planning
+- Stakeholder communication
+- Metrics & analytics
+- Go-to-market planning
+- Competitive analysis
+- User story creation & requirements
+- Sprint planning & agile workflows
+- Documentation & knowledge sharing
+
+### 2. Missing PM Categories
+
+If we need PM-specific categories beyond what we have, list them:
+- Category name 1: Why it's needed
+- Category name 2: Why it's needed
+
+### 3. Pattern Utilization Analysis
+
+Which patterns are we NOT using for PM prompts that we should be?
+- Pattern name: Why it would be valuable for PMs
+
+### 4. Level Distribution
+
+Analyze if we're missing prompts for different PM experience levels:
+- Associate/Junior PM prompts: X missing
+- Mid-level PM prompts: Y missing  
+- Senior PM prompts: Z missing
+- Director/VP PM prompts: W missing
+
+### 5. Research Insights
+
+Provide 2-3 actionable insights:
+- Insight 1: What this means and how we can use it
+- Insight 2: What this means and how we can use it
+- Insight 3: What this means and how we can use it
+
+## Output Format
+
+Provide your analysis as clear, actionable markdown with bulleted lists. Use this structure:
+
+### 1. Suggested New PM Prompts
+
+For each prompt:
+- **Prompt Title**
+  - Category: category-name
+  - Pattern: pattern-id or "None"
+  - Level: beginner | intermediate | advanced
+  - Description: What this prompt does
+  - Use Case: Specific PM scenario
+  - Gap Reason: Why this fills a gap
+
+### 2. Missing PM Categories
+
+- Category name: Why it's needed
+
+### 3. Pattern Utilization
+
+- Pattern name: Why valuable for PMs
+
+### 4. Level Distribution
+
+- Associate/Junior PM prompts: X missing
+- Mid-level PM prompts: Y missing
+- Senior PM prompts: Z missing
+- Director/VP PM prompts: W missing
+
+### 5. Research Insights
+
+- Insight 1: Actionable insight
+- Insight 2: Actionable insight
+- Insight 3: Actionable insight
+
+**Important:** Use clear markdown formatting. Make it actionable and easy to scan. Do NOT use JSON format.`;
+}
+
+function formatPMPromptsResponse(response: string): unknown {
+  return {
+    markdown: response.trim(),
+    formattedAt: new Date().toISOString(),
+  };
+}
+
+/**
  * Research Type Registry
  */
 const RESEARCH_TYPES: Record<string, ResearchTypeConfig> = {
@@ -296,6 +483,13 @@ const RESEARCH_TYPES: Record<string, ResearchTypeConfig> = {
     dataCollector: collectPromptSuggestionsData,
     promptBuilder: buildPromptSuggestionsPrompt,
     outputFormatter: formatPromptSuggestionsResponse,
+  },
+  'pm-prompts': {
+    name: 'PM Prompts Research',
+    description: 'Analyze gaps in PM prompt library and suggest new PM-specific prompts',
+    dataCollector: collectPMPromptsData,
+    promptBuilder: buildPMPromptsPrompt,
+    outputFormatter: formatPMPromptsResponse,
   },
   // TODO: Add more research types:
   // 'content-gaps': { ... },
