@@ -619,11 +619,21 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
       
       // Use preferred model ID if specified, otherwise use agent.model, otherwise find best match
       const modelId = agent.preferredModelId || agent.model;
-      const dbModel = availableModels.find(m => 
+      let dbModel = availableModels.find(m => 
         m.id === modelId || 
         m.name === modelId ||
         (agent.preferredModelId && m.id.includes(agent.preferredModelId))
       );
+
+      // If exact match not found, try to find best available model for this provider
+      if (!dbModel || dbModel.deprecated) {
+        // Find first available, non-deprecated model for this provider
+        dbModel = availableModels.find(m => !m.deprecated);
+        
+        if (dbModel) {
+          console.log(`   ⚠️  Model ${modelId} not available, using ${dbModel.id} instead`);
+        }
+      }
 
       if (dbModel && !dbModel.deprecated) {
         // Use model from DB - create provider with specific model ID
@@ -701,11 +711,19 @@ Provide your review in JSON format as specified in your system prompt.
 
         const availableModels = await getModelsByProvider(providerType);
         const modelId = agent.preferredModelId || agent.model;
-        const dbModel = availableModels.find(m => 
+        let dbModel = availableModels.find(m => 
           m.id === modelId || 
           m.name === modelId ||
           (agent.preferredModelId && m.id.includes(agent.preferredModelId))
         );
+
+        // If exact match not found, try to find best available model for this provider
+        if (!dbModel || dbModel.deprecated) {
+          dbModel = availableModels.find(m => !m.deprecated);
+          if (dbModel) {
+            console.log(`   ⚠️  Model ${modelId} not available, using ${dbModel.id} instead`);
+          }
+        }
 
         if (dbModel && !dbModel.deprecated) {
           const modelIdToUse = dbModel.id;
