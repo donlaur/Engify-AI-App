@@ -12,7 +12,7 @@ export interface AnalyticsEvent {
 }
 
 export function trackEvent(event: AnalyticsEvent): void {
-  // In production, send to analytics service
+  // Log analytics events for debugging/development
   if (process.env.NODE_ENV === 'development') {
     logger.debug('Analytics event', {
       eventName: event.name,

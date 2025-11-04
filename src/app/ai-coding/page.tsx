@@ -16,7 +16,7 @@ interface AITool {
   strengths: string[];
   weaknesses: string[];
   bestFor: string[];
-  rating: number;
+  // Rating removed per ADR-009 (no fake metrics)
   review: string;
 }
 
@@ -36,7 +36,7 @@ const aiTools: AITool[] = [
       'Requires manual guidance',
     ],
     bestFor: ['Individual developers', 'Quick edits', 'Refactoring'],
-    rating: 4.5,
+    // Rating removed per ADR-009
     review:
       'Best for hands-on coding with AI assistance. Cmd+K is incredibly fast.',
   },
@@ -55,7 +55,7 @@ const aiTools: AITool[] = [
       'Learning curve',
     ],
     bestFor: ['Complex refactoring', 'Multi-file changes', 'Autonomous work'],
-    rating: 4.8,
+    // Rating removed per ADR-009
     review: 'Revolutionary for letting AI handle entire features autonomously.',
   },
   {
@@ -69,7 +69,7 @@ const aiTools: AITool[] = [
     ],
     weaknesses: ['Limited context', 'No multi-file edits', 'Basic chat'],
     bestFor: ['Autocomplete', 'Boilerplate', 'Learning'],
-    rating: 4.0,
+    // Rating removed per ADR-009
     review: 'Solid autocomplete, but limited for complex tasks.',
   },
   {
@@ -78,7 +78,7 @@ const aiTools: AITool[] = [
     strengths: ['Completely free', 'Good autocomplete', 'Multiple IDE support'],
     weaknesses: ['Less accurate than paid tools', 'Limited features', 'Slower'],
     bestFor: ['Budget-conscious', 'Students', 'Basic autocomplete'],
-    rating: 3.5,
+    // Rating removed per ADR-009
     review: 'Great free option, but you get what you pay for.',
   },
   {
@@ -87,7 +87,7 @@ const aiTools: AITool[] = [
     strengths: ['Privacy-focused', 'On-premise options', 'Team training'],
     weaknesses: ['Less powerful than competitors', 'Expensive for teams'],
     bestFor: ['Enterprise', 'Privacy-sensitive', 'Team customization'],
-    rating: 3.8,
+    // Rating removed per ADR-009
     review: 'Best for enterprises with privacy requirements.',
   },
   {
@@ -96,7 +96,7 @@ const aiTools: AITool[] = [
     strengths: ['Full IDE integration', 'Deployment included', 'Collaborative'],
     weaknesses: ['Cloud-only', 'Limited to Replit', 'Not for large projects'],
     bestFor: ['Prototyping', 'Learning', 'Quick projects'],
-    rating: 3.7,
+    // Rating removed per ADR-009
     review: 'Great for quick prototypes and learning.',
   },
 ];
@@ -309,12 +309,7 @@ export default function AICodingPage() {
                       <td className="p-2 font-semibold">{tool.name}</td>
                       <td className="p-2">{tool.pricing}</td>
                       <td className="p-2">
-                        <div className="flex items-center gap-1">
-                          {'⭐'.repeat(Math.floor(tool.rating))}
-                          <span className="ml-1 text-muted-foreground">
-                            {tool.rating}
-                          </span>
-                        </div>
+                        {/* Rating display removed per ADR-009 (no fake metrics) */}
                       </td>
                       <td className="p-2 text-muted-foreground">
                         {tool.bestFor.join(', ')}
@@ -341,12 +336,7 @@ export default function AICodingPage() {
                         {tool.pricing}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1">
-                      {'⭐'.repeat(Math.floor(tool.rating))}
-                      <span className="ml-1 text-sm font-semibold">
-                        {tool.rating}
-                      </span>
-                    </div>
+                    {/* Rating display removed per ADR-009 (no fake metrics) */}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">

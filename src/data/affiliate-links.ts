@@ -4,7 +4,6 @@
  */
 
 import { trackEvent } from '@/lib/utils/analytics';
-import { logger } from '@/lib/logging/logger';
 
 export interface AffiliateLink {
   tool: string;
@@ -178,12 +177,6 @@ export function trackAffiliateClick(toolKey: string) {
       },
     });
 
-    // Log for server-side tracking
-    logger.info('Affiliate click tracked', {
-      tool: toolKey,
-      url: getToolLink(toolKey),
-    });
-
     // Example: Google Analytics
     // gtag('event', 'affiliate_click', {
     //   tool: toolKey,
@@ -228,28 +221,28 @@ export const partnershipOutreach = [
     company: 'Cursor',
     priority: 'high',
     contact: 'partnerships@cursor.sh', // Find actual contact
-    rating: 4.5,
+    // Rating removed per ADR-009 (no fake metrics)
     traffic: 'High intent - developers actively comparing',
   },
   {
     company: 'Codeium (Windsurf)',
     priority: 'high',
     contact: 'partnerships@codeium.com',
-    rating: 4.8,
+    // Rating removed per ADR-009
     traffic: 'Highest rated - strong conversion potential',
   },
   {
     company: 'Tabnine',
     priority: 'medium',
     contact: 'partnerships@tabnine.com',
-    rating: 3.8,
+    // Rating removed per ADR-009
     traffic: 'Enterprise focus - higher value conversions',
   },
   {
     company: 'Replit',
     priority: 'medium',
     contact: 'partnerships@replit.com',
-    rating: 3.7,
+    // Rating removed per ADR-009
     traffic: 'Education/prototyping segment',
   },
   {
