@@ -12,7 +12,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
-import { getAllPrompts } from '@/lib/prompts/mongodb-prompts';
+import { getPromptById } from '@/lib/prompts/mongodb-prompts';
 import {
   categoryLabels,
   roleLabels,
@@ -63,21 +63,32 @@ function enrichPromptDescription(
 }
 
 // Generate static params for all prompts (SSG) - both ID and slug routes
+// OPTIMIZED: Only fetch IDs and slugs, not full prompt data
 export async function generateStaticParams() {
-  const prompts = await getAllPrompts();
-  const params: Array<{ id: string }> = [];
+  try {
+    // Use promptRepository to fetch only IDs efficiently
+    const { promptRepository } = await import(
+      '@/lib/db/repositories/ContentService'
+    );
+    const prompts = await promptRepository.getAll();
+    const params: Array<{ id: string }> = [];
 
-  prompts.forEach((prompt) => {
-    // Add ID route
-    params.push({ id: prompt.id });
-    // Add slug route if slug exists (or generate from title)
-    const slug = getPromptSlug(prompt);
-    if (slug && slug !== prompt.id) {
-      params.push({ id: slug });
-    }
-  });
+    prompts.forEach((prompt) => {
+      // Add ID route
+      params.push({ id: prompt.id });
+      // Add slug route if slug exists (or generate from title)
+      const slug = getPromptSlug(prompt);
+      if (slug && slug !== prompt.id) {
+        params.push({ id: slug });
+      }
+    });
 
-  return params;
+    return params;
+  } catch (error) {
+    // Fallback: return empty array if fetch fails (build will still work)
+    console.error('Failed to generate static params:', error);
+    return [];
+  }
 }
 
 // Dynamic metadata for SEO
@@ -86,12 +97,8 @@ export async function generateMetadata({
 }: {
   params: { id: string };
 }): Promise<Metadata> {
-  const prompts = await getAllPrompts();
-  // Try to find by ID first, then by slug
-  let prompt = prompts.find((p) => p.id === params.id);
-  if (!prompt) {
-    prompt = prompts.find((p) => getPromptSlug(p) === params.id);
-  }
+  // Fetch only the single prompt needed (more efficient than getAllPrompts)
+  const prompt = await getPromptById(params.id);
 
   if (!prompt) {
     return {
@@ -116,16 +123,16 @@ export default async function PromptPage({
 }: {
   params: { id: string };
 }) {
-  const prompts = await getAllPrompts();
-  // Try to find by ID first, then by slug
-  let prompt = prompts.find((p) => p.id === params.id);
-  if (!prompt) {
-    prompt = prompts.find((p) => getPromptSlug(p) === params.id);
-  }
+  // Fetch only the single prompt needed (more efficient than getAllPrompts)
+  const prompt = await getPromptById(params.id);
 
   if (!prompt) {
     notFound();
   }
+
+  // Note: RelatedPrompts now fetches related prompts via API (client-side)
+  // This eliminates the need to fetch all prompts during build, dramatically improving performance
+  // Pass empty array - RelatedPrompts will fetch via API client-side
 
   const slug = getPromptSlug(prompt);
 
@@ -222,7 +229,7 @@ export default async function PromptPage({
     <>
       {/* Client component for view tracking */}
       <PromptPageClient promptId={prompt.id} />
-      
+
       {/* HowTo Schema for rich results */}
       <script
         type="application/ld+json"
@@ -327,7 +334,6 @@ export default async function PromptPage({
               role: prompt.role,
               tags: prompt.tags,
             }}
-            allPrompts={prompts}
           />
 
           {/* Cross-Content Links (Articles & Patterns) */}
