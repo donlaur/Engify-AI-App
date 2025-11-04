@@ -29,6 +29,7 @@ export interface CreatePromptData {
   content: string;
   category: string;
   role?: string;
+  pattern?: string;
   tags?: string[];
   difficulty?: string;
   estimatedTime?: number;

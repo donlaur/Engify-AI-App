@@ -6,39 +6,42 @@ This document describes the new "Vibrant Dark Mode" design system implemented to
 
 ## Design Philosophy
 
-Instead of using a low-saturation navy/black background, we've implemented a **deep, saturated indigo/purple** base that feels intentional and connected to the brand. Key improvements:
+Instead of using a low-saturation navy/black background, we've implemented a **lighter, vibrant blue** base (not navy) that feels energetic and modern. Key improvements:
 
-1. **Readability**: Softer, off-white text colors reduce eye strain (halation)
-2. **Brand Cohesion**: Uses existing brand gradients and vibrant green accents
-3. **Visual Hierarchy**: Frosted glass cards create depth and separate content from background
+1. **Readability**: Lighter background reduces eye strain while maintaining dark mode aesthetic
+2. **Brand Cohesion**: Vibrant blue tones complement brand gradients and vibrant green accents
+3. **Visual Hierarchy**: Frosted glass "ice floating cards" create depth and separate content from background
+4. **Accessibility**: Lighter tones improve contrast while maintaining dark mode benefits
 
 ## Color Palette
 
 ### Backgrounds & Surfaces
 
-| Use Case            | Color Name        | HEX / RGBA                  | CSS Variable                               |
-| :------------------ | :---------------- | :-------------------------- | :----------------------------------------- |
-| **Page Background** | `bg-deep-indigo`  | `#1A182D`                   | `--background`                             |
-| **Content Card**    | `surface-frosted` | `rgba(255, 255, 255, 0.05)` | Applied via `.surface-frosted` class       |
-| **Card Border**     | `border-subtle`   | `rgba(255, 255, 255, 0.1)`  | `--border`                                 |
-| **Hover State**     | `surface-hover`   | `rgba(255, 255, 255, 0.1)`  | Applied via `.surface-frosted-hover:hover` |
+| Use Case            | Color Name        | HEX / RGBA                       | CSS Variable                                               |
+| :------------------ | :---------------- | :------------------------------- | :--------------------------------------------------------- |
+| **Page Background** | `bg-vibrant-blue` | `#1E2A3F` (lighter vibrant blue) | `--background`                                             |
+| **Content Card**    | `surface-frosted` | `rgba(255, 255, 255, 0.08)`      | Applied via `.surface-frosted` class (ice floating effect) |
+| **Card Border**     | `border-subtle`   | `rgba(255, 255, 255, 0.15)`      | `--border`                                                 |
+| **Hover State**     | `surface-hover`   | `rgba(255, 255, 255, 0.12)`      | Applied via `.surface-frosted-hover:hover`                 |
+| **Hover Title**     | `title-hover`     | `#FFFFFF` (bright white)         | Applied via `.group-hover:text-white`                      |
 
 ### Typography
 
-| Use Case        | Color Name       | HEX       | Class                   |
-| :-------------- | :--------------- | :-------- | :---------------------- |
-| **Headings**    | `text-primary`   | `#F0F0F5` | `.text-primary-light`   |
-| **Body Text**   | `text-secondary` | `#C0C0D0` | `.text-secondary-light` |
-| **Subtle Text** | `text-tertiary`  | `#80809A` | `.text-tertiary`        |
+| Use Case         | Color Name       | HEX       | Class                                       |
+| :--------------- | :--------------- | :-------- | :------------------------------------------ |
+| **Headings**     | `text-primary`   | `#F8F9FA` | `.text-primary-light` (brighter white)      |
+| **Body Text**    | `text-secondary` | `#D1D5DB` | `.text-secondary-light` (lighter gray)      |
+| **Subtle Text**  | `text-tertiary`  | `#9CA3AF` | `.text-tertiary`                            |
+| **Hover Titles** | `text-hover`     | `#FFFFFF` | `.group-hover:text-white` (bright on hover) |
 
 ### Interactive & Brand Accents
 
 | Use Case          | Color Name       | HEX / Gradient                                | Class                                   |
 | :---------------- | :--------------- | :-------------------------------------------- | :-------------------------------------- |
-| **Primary CTA**   | `brand-gradient` | `linear-gradient(to right, #9333EA, #EC4899)` | `.gradient-brand`                       |
+| **Primary CTA**   | `brand-gradient` | `linear-gradient(to right, #3B82F6, #8B5CF6)` | `.gradient-brand` (blue to purple) |
 | **Secondary CTA** | `brand-green`    | `#39FF14`                                     | `.bg-brand-green` / `.text-brand-green` |
-| **Inline Links**  | `link-primary`   | `#BE93FD`                                     | `.link-primary`                         |
-| **Link Hover**    | `link-hover`     | `#F472B6`                                     | `.link-primary:hover`                   |
+| **Inline Links**  | `link-primary`   | `#60A5FA` (vibrant blue)                       | `.link-primary`                         |
+| **Link Hover**    | `link-hover`     | `#93C5FD` (lighter blue)                       | `.link-primary:hover`                   |
 | **Tags / Badges** | `tag-blue`       | `#3B82F6`                                     | `brand-blue`                            |
 
 ## Implementation
@@ -49,10 +52,10 @@ The color palette is defined in `src/app/globals.css` under the `.dark` selector
 
 ```css
 .dark {
-  --background: 252 40% 14%; /* Deep indigo-purple #1A182D */
-  --foreground: 240 25% 95%; /* Soft off-white #F0F0F5 */
-  --secondary: 240 20% 75%; /* Body text #C0C0D0 */
-  --muted: 240 15% 55%; /* Tertiary text #80809A */
+  --background: 215 40% 22%; /* Lighter vibrant blue #1E2A3F (not navy) */
+  --foreground: 0 0% 98%; /* Brighter white #F8F9FA */
+  --secondary: 215 20% 85%; /* Lighter body text #D1D5DB */
+  --muted: 215 15% 65%; /* Lighter tertiary text #9CA3AF */
   --brand-green: 120 100% 50%; /* Vibrant green #39FF14 */
   --brand-pink: 330 81% 60%; /* Pink from gradient #F472B6 */
   --brand-blue: 217 91% 60%; /* Tag blue #3B82F6 */
@@ -64,16 +67,22 @@ The color palette is defined in `src/app/globals.css` under the `.dark` selector
 The frosted glass effect is applied via utility classes:
 
 ```css
+/* Ice Floating Cards Effect */
 .dark .surface-frosted {
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(255, 255, 255, 0.08) !important; /* Slightly more opaque */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px); /* Safari support */
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important; /* More visible borders */
 }
 
 .dark .surface-frosted-hover:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.12) !important; /* More visible on hover */
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Fix rollover titles - bright white on hover */
+.dark .group:hover .group-hover\:text-white {
+  color: #ffffff !important; /* Bright white */
 }
 ```
 

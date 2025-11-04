@@ -46,21 +46,22 @@ export function PromptCard(props: PromptCardProps) {
   const { toast } = useToast();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const { id, title, description, content, category, role, slug, onView } = props;
+  const { id, title, description, content, category, role, slug, onView } =
+    props;
   const promptSlug = getPromptSlug({ title, slug });
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(content);
       setCopied(true);
-      
+
       // Track copy event
       trackPromptEvent('copy', id, {
         prompt_title: title,
         prompt_category: category,
         prompt_pattern: slug,
       });
-      
+
       toast({
         title: 'Copied!',
         description: 'Prompt copied to clipboard',
@@ -101,14 +102,14 @@ export function PromptCard(props: PromptCardProps) {
 
   const handleView = () => {
     setShowModal(true);
-    
+
     // Track view event
     trackPromptEvent('view', id, {
       prompt_title: title,
       prompt_category: category,
       prompt_pattern: slug,
     });
-    
+
     if (onView) {
       onView();
     }
@@ -131,7 +132,7 @@ export function PromptCard(props: PromptCardProps) {
                 }
               }}
             >
-              <CardTitle className="text-lg transition-colors group-hover:text-primary">
+              <CardTitle className="text-lg transition-colors group-hover:text-white dark:group-hover:text-white">
                 {title}
               </CardTitle>
               <CardDescription>{description}</CardDescription>
@@ -144,14 +145,18 @@ export function PromptCard(props: PromptCardProps) {
                   e.stopPropagation();
                   const wasFavorite = isFavorite(id);
                   toggleFavorite(id);
-                  
+
                   // Track favorite event
-                  trackPromptEvent(wasFavorite ? 'unfavorite' : 'favorite', id, {
-                    prompt_title: title,
-                    prompt_category: category,
-                    prompt_pattern: slug,
-                  });
-                  
+                  trackPromptEvent(
+                    wasFavorite ? 'unfavorite' : 'favorite',
+                    id,
+                    {
+                      prompt_title: title,
+                      prompt_category: category,
+                      prompt_pattern: slug,
+                    }
+                  );
+
                   toast({
                     title: wasFavorite
                       ? 'Removed from favorites'

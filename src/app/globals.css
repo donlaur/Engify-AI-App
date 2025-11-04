@@ -27,32 +27,32 @@
   }
 
   .dark {
-    /* Vibrant Dark Mode - Deep saturated indigo/purple base */
-    /* Background: Deep indigo #1A182D */
-    --background: 252 40% 14%;        /* Deep indigo-purple #1A182D */
-    --foreground: 240 25% 95%;        /* Soft off-white #F0F0F5 */
+    /* Vibrant Dark Mode - Lighter vibrant blue (not navy) */
+    /* Background: Lighter vibrant blue #1E2A3F */
+    --background: 215 40% 22%;        /* Lighter vibrant blue #1E2A3F (not navy) */
+    --foreground: 0 0% 98%;           /* Brighter white #F8F9FA */
     
-    /* Cards: Frosted glass effect (will be applied via CSS class) */
-    --card: 252 40% 14%;              /* Base card color */
-    --card-foreground: 240 25% 95%;   /* Text-primary for headings */
+    /* Cards: Frosted glass effect (ice floating cards) */
+    --card: 215 40% 22%;              /* Base card color */
+    --card-foreground: 0 0% 98%;      /* Bright white for headings */
     
-    --popover: 252 40% 14%;           
-    --popover-foreground: 240 25% 95%;
+    --popover: 215 40% 22%;           
+    --popover-foreground: 0 0% 98%;
     
-    /* Primary: Brand gradient colors */
-    --primary: 262 83% 58%;           /* Purple from gradient #9333EA */
+    /* Primary: Vibrant blue (shifted from purple) */
+    --primary: 217 91% 60%;           /* Vibrant blue #3B82F6 */
     --primary-foreground: 0 0% 100%;  /* White on primary */
     
-    /* Secondary: Lavender-gray for body text */
-    --secondary: 240 20% 75%;         /* Body text #C0C0D0 */
-    --secondary-foreground: 252 40% 14%;
+    /* Secondary: Lighter gray for body text */
+    --secondary: 215 20% 85%;         /* Lighter body text #D1D5DB */
+    --secondary-foreground: 215 40% 22%;
     
-    /* Muted: Subtle text #80809A */
-    --muted: 240 15% 55%;             /* Tertiary text */
-    --muted-foreground: 240 20% 75%;  /* Slightly brighter for contrast */
+    /* Muted: Lighter tertiary text */
+    --muted: 215 15% 65%;             /* Lighter tertiary #9CA3AF */
+    --muted-foreground: 215 20% 85%;  /* Slightly brighter for contrast */
     
-    /* Accent: Bright purple for links */
-    --accent: 262 70% 75%;            /* Link purple #BE93FD */
+    /* Accent: Vibrant blue for links (not purple) */
+    --accent: 217 80% 75%;            /* Light vibrant blue #60A5FA */
     --accent-foreground: 0 0% 100%;
     
     /* Brand colors */
@@ -63,10 +63,10 @@
     --destructive: 0 84% 60%;         /* Bright red for errors */
     --destructive-foreground: 0 0% 100%;
     
-    /* Borders: Subtle with transparency */
-    --border: 0 0% 100% / 0.1;        /* rgba(255, 255, 255, 0.1) */
-    --input: 0 0% 100% / 0.1;        
-    --ring: 262 83% 58%;              /* Match primary */
+    /* Borders: More visible with transparency */
+    --border: 0 0% 100% / 0.15;       /* rgba(255, 255, 255, 0.15) - more visible */
+    --input: 0 0% 100% / 0.15;        
+    --ring: 217 91% 60%;              /* Match primary blue */
   }
 }
 
@@ -80,17 +80,26 @@
 }
 
 @layer utilities {
-  /* Frosted Glass Card Effect - Only in dark mode */
+  /* Ice Floating Cards Effect - Only in dark mode */
   .dark .surface-frosted {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: rgba(255, 255, 255, 0.08) !important; /* Slightly more opaque */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px); /* Safari support */
-    border-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important; /* More visible borders */
   }
   
   .dark .surface-frosted-hover:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.12) !important; /* More visible on hover */
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  /* Fix rollover titles - bright white on hover */
+  .dark .group:hover .group-hover\:text-white {
+    color: #FFFFFF !important; /* Bright white for visibility */
+  }
+  
+  .dark .group:hover .group-hover\:text-primary {
+    color: #FFFFFF !important; /* Bright white instead of dark */
   }
   
   /* Vibrant Dark Mode Text Colors */
