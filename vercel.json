@@ -1,5 +1,12 @@
 {
-  "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm run build",
-  "framework": "nextjs"
+  "crons": [
+    {
+      "path": "/api/cron/warm-isr-cache?type=prompts&limit=50",
+      "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/cron/warm-isr-cache?type=all&limit=20",
+      "schedule": "0 */6 * * *"
+    }
+  ]
 }
