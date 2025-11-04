@@ -3,9 +3,13 @@
  * 
  * Prevents abuse of OpenAI and Google AI API keys
  * Tracks usage by IP address and user ID
+ * 
+ * Uses centralized constants from src/lib/constants/rates.ts (DRY principle)
  */
 
 import { getDb } from '@/lib/mongodb';
+import { AI_RATE_LIMITS } from '@/lib/constants/rates';
+import { ERROR_MESSAGES, getRateLimitMessage } from '@/lib/constants/messages';
 
 interface RateLimitConfig {
   maxRequestsPerHour: number;
@@ -13,21 +17,22 @@ interface RateLimitConfig {
   maxTokensPerDay: number;
 }
 
+// Map constants to internal format for backward compatibility
 const LIMITS: Record<string, RateLimitConfig> = {
   anonymous: {
-    maxRequestsPerHour: 3,      // Very limited for free users
-    maxRequestsPerDay: 10,       // Enough to test, not abuse
-    maxTokensPerDay: 10000,      // ~5 full conversations
+    maxRequestsPerHour: AI_RATE_LIMITS.anonymous.perHour,
+    maxRequestsPerDay: AI_RATE_LIMITS.anonymous.perDay,
+    maxTokensPerDay: AI_RATE_LIMITS.anonymous.maxTokensPerDay,
   },
   authenticated: {
-    maxRequestsPerHour: 20,      // Signed up users get more
-    maxRequestsPerDay: 100,      // Good for regular use
-    maxTokensPerDay: 100000,     // ~50 conversations
+    maxRequestsPerHour: AI_RATE_LIMITS.authenticated.perHour,
+    maxRequestsPerDay: AI_RATE_LIMITS.authenticated.perDay,
+    maxTokensPerDay: AI_RATE_LIMITS.authenticated.maxTokensPerDay,
   },
   pro: {
-    maxRequestsPerHour: 200,     // Pro users get plenty
-    maxRequestsPerDay: 2000,     // Heavy usage
-    maxTokensPerDay: 1000000,    // ~500 conversations
+    maxRequestsPerHour: AI_RATE_LIMITS.pro.perHour,
+    maxRequestsPerDay: AI_RATE_LIMITS.pro.perDay,
+    maxTokensPerDay: AI_RATE_LIMITS.pro.maxTokensPerDay,
   },
 };
 
@@ -91,31 +96,34 @@ export async function checkRateLimit(
 
     // Check hourly limit
     if (requestsLastHour >= limits.maxRequestsPerHour) {
+      const resetAt = new Date(hourAgo.getTime() + 60 * 60 * 1000);
       return {
         allowed: false,
         remaining: 0,
-        resetAt: new Date(hourAgo.getTime() + 60 * 60 * 1000),
-        reason: `Rate limit exceeded: ${limits.maxRequestsPerHour} requests per hour. Please try again later or sign up for more capacity.`,
+        resetAt,
+        reason: getRateLimitMessage(resetAt),
       };
     }
 
     // Check daily limit
     if (requestsLastDay >= limits.maxRequestsPerDay) {
+      const resetAt = new Date(dayAgo.getTime() + 24 * 60 * 60 * 1000);
       return {
         allowed: false,
         remaining: 0,
-        resetAt: new Date(dayAgo.getTime() + 24 * 60 * 60 * 1000),
-        reason: `Daily limit exceeded: ${limits.maxRequestsPerDay} requests per day. Sign up for free to get more capacity!`,
+        resetAt,
+        reason: ERROR_MESSAGES.DAILY_LIMIT_REACHED,
       };
     }
 
     // Check token limit (if tracked)
     if (usage.tokens >= limits.maxTokensPerDay) {
+      const resetAt = new Date(dayAgo.getTime() + 24 * 60 * 60 * 1000);
       return {
         allowed: false,
         remaining: 0,
-        resetAt: new Date(dayAgo.getTime() + 24 * 60 * 60 * 1000),
-        reason: `Token limit exceeded. Sign up for free to continue!`,
+        resetAt,
+        reason: ERROR_MESSAGES.DAILY_LIMIT_REACHED,
       };
     }
 

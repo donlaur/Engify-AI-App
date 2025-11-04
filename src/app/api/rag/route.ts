@@ -5,6 +5,8 @@ import { RBACPresets } from '@/lib/middleware/rbac';
 import { z } from 'zod';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { auth } from '@/lib/auth';
+import { AI_RATE_LIMITS } from '@/lib/constants/rates';
+import { ERROR_MESSAGES } from '@/lib/constants/messages';
 
 // RAG API route that integrates with Python FastAPI service
 const RAG_API_URL = process.env.RAG_API_URL || 'http://localhost:8000';
@@ -41,17 +43,23 @@ export async function POST(request: NextRequest) {
     
     const rateLimitResult = await checkRateLimit(identifier, tier);
     if (!rateLimitResult.allowed) {
+      const rateLimitValue = tier === 'anonymous' 
+        ? AI_RATE_LIMITS.anonymous.perHour 
+        : tier === 'authenticated' 
+        ? AI_RATE_LIMITS.authenticated.perHour 
+        : AI_RATE_LIMITS.pro.perHour;
+
       return NextResponse.json(
         {
           success: false,
-          error: rateLimitResult.reason || 'Rate limit exceeded',
+          error: rateLimitResult.reason || ERROR_MESSAGES.RATE_LIMIT_EXCEEDED,
           results: [],
         },
         { 
           status: 429,
           headers: {
             'Retry-After': '3600',
-            'X-RateLimit-Limit': '1000',
+            'X-RateLimit-Limit': String(rateLimitValue),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
           }
@@ -104,7 +112,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid request',
+          error: ERROR_MESSAGES.INVALID_INPUT,
           details: error.errors,
           results: [],
         },
@@ -121,9 +129,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'RAG service unavailable',
-          message:
-            'The knowledge base service is currently unavailable. Please try again later.',
+          error: ERROR_MESSAGES.MODEL_UNAVAILABLE,
+          message: ERROR_MESSAGES.MODEL_UNAVAILABLE,
           results: [],
         },
         { status: 503 }
@@ -133,7 +140,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : ERROR_MESSAGES.SERVER_ERROR,
         results: [],
       },
       { status: 500 }
@@ -153,7 +160,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         status: 'unhealthy',
-        error: 'Rate limit exceeded',
+        error: ERROR_MESSAGES.RATE_LIMIT_EXCEEDED,
         timestamp: new Date().toISOString(),
       },
       { 

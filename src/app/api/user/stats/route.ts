@@ -9,6 +9,7 @@ import { getMongoDb } from '@/lib/db/mongodb';
 import { ObjectId } from 'mongodb';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { logger } from '@/lib/logging/logger';
+import { ERROR_MESSAGES } from '@/lib/constants/messages';
 
 export async function GET(request: NextRequest) {
   // RBAC: users:read permission (users can read their own stats)
@@ -81,8 +82,8 @@ export async function GET(request: NextRequest) {
     });
     return NextResponse.json(
       {
-        error: 'Failed to fetch stats',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: ERROR_MESSAGES.FETCH_FAILED,
+        message: error instanceof Error ? error.message : ERROR_MESSAGES.SERVER_ERROR,
       },
       { status: 500 }
     );
