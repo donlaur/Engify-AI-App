@@ -61,7 +61,7 @@ export function ComingSoonTool({ tool }: ComingSoonToolProps) {
                 <div>
                   <p className="font-medium">Backend Integration Required</p>
                   <p className="text-sm text-muted-foreground">
-                    This tool requires MongoDB and Python services to be connected.
+                    This tool requires database and Python services to be connected.
                   </p>
                 </div>
               </>

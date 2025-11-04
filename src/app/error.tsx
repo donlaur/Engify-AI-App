@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
+import { sanitizeErrorMessage } from '@/lib/utils/sanitize-error';
 
 export default function Error({
   error,
@@ -13,8 +14,11 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    // Log full error to console for debugging (server-side only logs)
+    console.error('Error boundary caught:', error);
   }, [error]);
+
+  const safeMessage = sanitizeErrorMessage(error.message || 'An unexpected error occurred');
 
   return (
     <MainLayout>
@@ -22,7 +26,7 @@ export default function Error({
         <Icons.error className="mb-6 h-20 w-20 text-destructive" />
         <h1 className="mb-2 text-4xl font-bold">Something went wrong!</h1>
         <p className="mb-8 text-xl text-muted-foreground">
-          {error.message || 'An unexpected error occurred'}
+          {safeMessage}
         </p>
         <div className="flex gap-4">
           <Button onClick={reset} size="lg">

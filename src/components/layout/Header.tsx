@@ -36,8 +36,8 @@ interface HeaderProps {
 }
 
 const navigationLinks = [
+  { href: '/prompts', label: 'Prompts' },
   { href: '/patterns', label: 'Patterns' },
-  { href: '/prompts', label: 'Library' },
   { href: '/learn', label: 'Learn' },
   { href: '/workbench', label: 'Workbench' },
 ];

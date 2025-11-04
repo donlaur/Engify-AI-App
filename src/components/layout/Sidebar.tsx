@@ -29,8 +29,8 @@ const mainNavigation = [
     icon: Icons.sparkles,
     badge: 'New',
   },
+  { href: '/prompts', label: 'Prompts', icon: Icons.library },
   { href: '/patterns', label: 'Patterns', icon: Icons.book },
-  { href: '/prompts', label: 'Library', icon: Icons.library },
 ];
 
 const secondaryNavigation = [

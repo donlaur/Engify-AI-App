@@ -59,6 +59,44 @@ export class AIToolService extends BaseService<AITool> {
       .toArray();
     return tools as AITool[];
   }
+
+  /**
+   * Upsert tool (create or update)
+   */
+  async upsert(tool: AITool): Promise<AITool> {
+    const collection = await this.getCollection();
+
+    const existing = await collection.findOne({ id: tool.id });
+
+    if (existing) {
+      // Update existing
+      const result = await collection.findOneAndUpdate(
+        { id: tool.id },
+        {
+          $set: {
+            ...tool,
+            updatedAt: new Date(),
+            _id: existing._id,
+          },
+        },
+        { returnDocument: 'after' }
+      );
+      return result as AITool;
+    } else {
+      // Create new
+      const result = await collection.insertOne({
+        ...tool,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as AITool);
+      return {
+        ...tool,
+        _id: result.insertedId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as AITool;
+    }
+  }
 }
 
 // Singleton instance

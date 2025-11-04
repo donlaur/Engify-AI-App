@@ -68,6 +68,60 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
     notes: 'Contact Replit for affiliate program',
   },
 
+  warp: {
+    tool: 'Warp Terminal',
+    baseUrl: 'https://www.warp.dev',
+    referralUrl: undefined, // TODO: Get Warp referral link
+    status: 'requested',
+    commission: 'TBD',
+    notes: 'Contact Warp for affiliate program',
+  },
+
+  lovable: {
+    tool: 'Lovable (GPT Engineer)',
+    baseUrl: 'https://lovable.dev',
+    referralUrl: undefined, // TODO: Get Lovable referral link
+    status: 'requested',
+    commission: 'TBD',
+    notes: 'Contact Lovable for affiliate program',
+  },
+
+  bolt: {
+    tool: 'Bolt.new',
+    baseUrl: 'https://bolt.new',
+    referralUrl: undefined, // TODO: Get Bolt referral link
+    status: 'requested',
+    commission: 'TBD',
+    notes: 'Contact Bolt for affiliate program',
+  },
+
+  v0: {
+    tool: 'v0.dev by Vercel',
+    baseUrl: 'https://v0.dev',
+    referralUrl: undefined, // Vercel doesn't have public affiliate program
+    status: 'pending',
+    commission: 'N/A',
+    notes: 'Vercel product - no affiliate program',
+  },
+
+  claudeCode: {
+    tool: 'Claude Code',
+    baseUrl: 'https://claude.ai/code',
+    referralUrl: undefined, // TODO: Check for Anthropic affiliate program
+    status: 'requested',
+    commission: 'TBD',
+    notes: 'Anthropic Claude Code - check for partnership opportunities',
+  },
+
+  geminiStudio: {
+    tool: 'Gemini AI Studio (Simple Vibe Coder)',
+    baseUrl: 'https://aistudio.google.com',
+    referralUrl: undefined, // TODO: Check for Google affiliate program
+    status: 'requested',
+    commission: 'TBD',
+    notes: 'Google Gemini AI Studio with Simple Vibe Coder - check for partnership opportunities',
+  },
+
   // AI Providers
   openai: {
     tool: 'OpenAI',

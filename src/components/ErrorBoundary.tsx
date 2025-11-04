@@ -8,6 +8,7 @@
 import { Component, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
+import { sanitizeErrorMessage } from '@/lib/utils/sanitize-error';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -61,12 +62,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
 
       // Default fallback UI
+      const safeMessage = sanitizeErrorMessage(
+        this.state.error?.message || 'An unexpected error occurred'
+      );
+
       return (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
           <Icons.alertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
           <h3 className="text-lg font-semibold mb-2">Something went wrong</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            {this.state.error?.message || 'An unexpected error occurred'}
+            {safeMessage}
           </p>
           <Button onClick={this.handleReset} variant="outline" size="sm">
             Try again

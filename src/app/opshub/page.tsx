@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
 import { isAdminMFAEnforced } from '@/lib/env';
 import { ContentManagementCMS } from '@/components/admin/ContentManagementCMS';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 // Temporarily disabled - need to fix API routes
 // import { ContentReviewQueue } from '@/components/admin/ContentReviewQueue';
 // import { UserManagement } from '@/components/admin/UserManagement';
@@ -87,6 +89,19 @@ export default async function OpsHubPage() {
       </div>
 
       <div className="mt-8 grid gap-6">
+        {/* Quick Links */}
+        <section className="rounded-lg border bg-white p-4">
+          <h2 className="mb-3 text-lg font-semibold">Quick Links</h2>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline">
+              <Link href="/opshub/ai-models">AI Models Management</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/opshub/ai-tools">AI Tools Management</Link>
+            </Button>
+          </div>
+        </section>
+
         {/* Temporarily disabled for debugging
         <section className="rounded-lg border bg-white p-4">
           <h2 className="text-lg font-semibold mb-3">User Management</h2>

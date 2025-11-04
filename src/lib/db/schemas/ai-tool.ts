@@ -13,7 +13,16 @@ export const AIToolSchema = z.object({
   tagline: z.string().optional(), // Short description
   description: z.string(), // Full description
   category: z
-    .enum(['ide', 'code-assistant', 'terminal', 'builder', 'other'])
+    .enum([
+      'ide', // Full IDEs: Cursor, Windsurf
+      'code-assistant', // IDE plugins: Copilot, Codeium, Tabnine
+      'ai-terminal', // AI-powered terminals: Warp
+      'builder', // AI app builders: Lovable, Bolt, Replit
+      'ui-generator', // UI component generators: v0.dev
+      'protocol', // Protocols/frameworks: MCP (Model Context Protocol)
+      'framework', // Development frameworks: LangChain, CrewAI
+      'other',
+    ])
     .default('other'),
   pricing: z
     .object({

@@ -46,10 +46,13 @@ export const metadata: Metadata = {
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  ide: 'IDE',
-  'code-assistant': 'Code Assistant',
-  terminal: 'Terminal',
-  builder: 'AI Builder',
+  ide: 'AI IDEs',
+  'code-assistant': 'Code Assistants',
+  'ai-terminal': 'AI Terminals',
+  builder: 'AI Builders',
+  'ui-generator': 'UI Generators',
+  protocol: 'Protocols',
+  framework: 'Frameworks',
   other: 'Other',
 };
 

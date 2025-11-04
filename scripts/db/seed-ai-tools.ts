@@ -198,6 +198,275 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
     tags: ['builder', 'browser', 'education', 'free-tier'],
     icon: 'globe',
   },
+  warp: {
+    name: 'Warp Terminal',
+    tagline: 'AI-powered terminal',
+    description:
+      'Warp is a modern, AI-powered terminal with natural language commands, command history search, and team collaboration features.',
+    category: 'ai-terminal',
+    pricing: {
+      free: true,
+      paid: {
+        monthly: 15,
+        tier: 'Team',
+      },
+    },
+    features: [
+      'AI command suggestions',
+      'Natural language to shell commands',
+      'Modern UI with blocks',
+      'Command history with AI search',
+      'Team collaboration',
+    ],
+    pros: [
+      'Beautiful modern UI',
+      'AI-powered workflow',
+      'Great for DevOps',
+      'Command history search',
+    ],
+    cons: [
+      'macOS only (limited platform support)',
+      'Terminal-focused (not full IDE)',
+      'Some features require subscription',
+    ],
+    rating: 4.0,
+    reviewCount: 0,
+    tags: ['terminal', 'ai-terminal', 'devops', 'macos'],
+    icon: 'terminal',
+  },
+  lovable: {
+    name: 'Lovable',
+    tagline: 'AI app builder from prompts',
+    description:
+      'Lovable (formerly GPT Engineer) builds full React applications from natural language prompts. Generates clean, production-ready code with Tailwind CSS.',
+    category: 'builder',
+    pricing: {
+      free: false,
+      paid: {
+        monthly: 20,
+        tier: 'Pro',
+      },
+    },
+    features: [
+      'Builds full apps from prompts',
+      'React + Tailwind output',
+      'Fast prototyping',
+      'Export to GitHub',
+      'Great for MVPs',
+    ],
+    pros: [
+      'Full app generation',
+      'Clean code output',
+      'Great for MVPs',
+      'GitHub integration',
+    ],
+    cons: [
+      'Less control than traditional IDEs',
+      'Generated code needs cleanup',
+      'Limited customization',
+      'Newer tool (less mature)',
+    ],
+    rating: 4.0,
+    reviewCount: 0,
+    tags: ['builder', 'react', 'mvp', 'no-code'],
+    icon: 'heart',
+  },
+  bolt: {
+    name: 'Bolt.new',
+    tagline: 'AI-powered web app builder',
+    description:
+      'Bolt.new is a fast AI-powered web app builder that creates full-stack applications from simple prompts. Features instant preview and deployment.',
+    category: 'builder',
+    pricing: {
+      free: true,
+      paid: {
+        monthly: 0,
+        tier: 'Free',
+      },
+    },
+    features: [
+      'Instant app generation',
+      'Full-stack applications',
+      'Real-time preview',
+      'One-click deployment',
+      'Fast iteration',
+    ],
+    pros: [
+      'Very fast',
+      'Free tier available',
+      'Good for prototyping',
+      'Easy deployment',
+    ],
+    cons: [
+      'Limited customization',
+      'Newer tool',
+      'Less control than coding',
+      'Platform dependency',
+    ],
+    rating: 3.8,
+    reviewCount: 0,
+    tags: ['builder', 'full-stack', 'free', 'prototyping'],
+    icon: 'zap',
+  },
+  v0: {
+    name: 'v0.dev',
+    tagline: 'AI-powered UI generation',
+    description:
+      'v0.dev by Vercel generates React components with Tailwind CSS and shadcn/ui. Perfect for rapid UI prototyping and component generation.',
+    category: 'ui-generator',
+    pricing: {
+      free: true,
+      paid: {
+        monthly: 0,
+        tier: 'Credits',
+      },
+    },
+    features: [
+      'Generates React components instantly',
+      'Tailwind + shadcn/ui output',
+      'Iterative refinement',
+      'Copy-paste ready code',
+      'Great for UI prototyping',
+    ],
+    pros: [
+      'Excellent UI generation',
+      'Production-ready code',
+      'Free tier available',
+      'Vercel ecosystem',
+    ],
+    cons: [
+      'UI-only (no backend)',
+      'Credit-based pricing',
+      'Can be expensive for heavy use',
+      'Limited to React/Next.js',
+    ],
+    rating: 4.0,
+    reviewCount: 0,
+    tags: ['ui-generator', 'react', 'tailwind', 'vercel'],
+    icon: 'sparkles',
+  },
+  claudeCode: {
+    name: 'Claude Code',
+    tagline: 'AI-powered coding assistant by Anthropic',
+    description:
+      'Claude Code is Anthropic\'s AI-powered coding assistant available for Claude Pro and Max users. Features advanced code understanding, generation, debugging, and refactoring capabilities.',
+    category: 'code-assistant',
+    pricing: {
+      free: false,
+      paid: {
+        monthly: 20,
+        tier: 'Claude Pro',
+      },
+    },
+    features: [
+      'Advanced code understanding',
+      'Multi-language support (Python, JavaScript, Java, Rust, C++)',
+      'Code generation from natural language',
+      'Debugging and bug fixing',
+      'Code refactoring and optimization',
+      'Test generation',
+      'Documentation generation',
+      'Large context window (200K tokens)',
+    ],
+    pros: [
+      'Excellent reasoning ability',
+      'Best for architecture and planning',
+      'Large context window',
+      'Accurate code generation',
+      'Great for code review',
+    ],
+    cons: [
+      'Web-based interface (not IDE integration)',
+      'Manual copy/paste workflow',
+      'No codebase awareness',
+      'Requires Claude Pro subscription',
+      'Less integrated than IDE tools',
+    ],
+    rating: 4.5,
+    reviewCount: 0,
+    tags: ['code-assistant', 'anthropic', 'claude', 'paid', 'web-based'],
+    icon: 'sparkles',
+  },
+  geminiStudio: {
+    name: 'Gemini AI Studio',
+    tagline: 'Build apps from natural language',
+    description:
+      'Gemini AI Studio features Vibe Coding, allowing you to create AI-powered applications by describing your ideas in natural language. Powered by Google\'s Gemini models, it handles setup and configuration automatically.',
+    category: 'builder',
+    pricing: {
+      free: true,
+      paid: {
+        monthly: 0,
+        tier: 'Free',
+      },
+    },
+    features: [
+      'Vibe coding - describe apps in natural language',
+      'Automatic model and API configuration',
+      'Rapid prototyping',
+      'Annotation mode for intuitive modifications',
+      'App Gallery with examples',
+      'I\'m Feeling Lucky button for inspiration',
+      'Powered by Gemini models',
+      'Web-based interface',
+    ],
+    pros: [
+      'Free to use',
+      'No coding knowledge required',
+      'Fast prototyping',
+      'Google ecosystem',
+      'Intuitive interface',
+      'Great for beginners',
+    ],
+    cons: [
+      'Web-based only',
+      'Limited customization',
+      'Newer feature',
+      'Less control than traditional IDEs',
+      'Gemini model limitations',
+    ],
+    rating: 4.0,
+    reviewCount: 0,
+    tags: ['builder', 'google', 'gemini', 'free', 'vibe-coding', 'no-code'],
+    icon: 'zap',
+  },
+  mcp: {
+    name: 'Model Context Protocol',
+    tagline: 'Standard for AI tool integration',
+    description:
+      'Model Context Protocol (MCP) by Anthropic is an open protocol for connecting AI models to external tools and data sources. Enables secure, standardized tool integration.',
+    category: 'protocol',
+    pricing: {
+      free: true,
+      paid: {
+        monthly: 0,
+        tier: 'Open Source',
+      },
+    },
+    features: [
+      'Open protocol standard',
+      'Secure tool integration',
+      'Standardized APIs',
+      'Multi-model support',
+      'Extensible architecture',
+    ],
+    pros: [
+      'Open standard',
+      'Secure by design',
+      'Multi-model support',
+      'Great for tool builders',
+    ],
+    cons: [
+      'Newer protocol',
+      'Learning curve',
+      'Requires implementation',
+      'Smaller ecosystem',
+    ],
+    rating: 4.2,
+    reviewCount: 0,
+    tags: ['protocol', 'framework', 'anthropic', 'integration'],
+    icon: 'puzzle',
+  },
 };
 
 async function seedAITools() {
@@ -278,10 +547,48 @@ async function seedAITools() {
       }
     }
 
+    // Add MCP separately (it's a protocol, not in affiliate links)
+    const mcpDefinition = TOOL_DEFINITIONS.mcp;
+    if (mcpDefinition) {
+      const existingMcp = await aiToolService.findById('mcp');
+      const slug = generateSlug(mcpDefinition.name || 'Model Context Protocol');
+      const mcpTool: AITool = {
+        id: 'mcp',
+        slug,
+        name: mcpDefinition.name || 'Model Context Protocol',
+        tagline: mcpDefinition.tagline,
+        description: mcpDefinition.description || 'Model Context Protocol for AI tool integration',
+        category: mcpDefinition.category || 'protocol',
+        pricing: mcpDefinition.pricing || { free: true },
+        features: mcpDefinition.features || [],
+        pros: mcpDefinition.pros || [],
+        cons: mcpDefinition.cons || [],
+        websiteUrl: 'https://modelcontextprotocol.io',
+        rating: mcpDefinition.rating,
+        reviewCount: mcpDefinition.reviewCount || 0,
+        status: 'active',
+        tags: mcpDefinition.tags || [],
+        icon: mcpDefinition.icon,
+        lastUpdated: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      if (existingMcp) {
+        if (existingMcp._id) {
+          await aiToolService.updateOne(existingMcp._id.toString(), mcpTool);
+          updated++;
+        }
+      } else {
+        await aiToolService.create(mcpTool);
+        created++;
+      }
+    }
+
     console.log(`✨ Seed complete!`);
     console.log(`   - Created: ${created} tools`);
     console.log(`   - Updated: ${updated} tools`);
-    console.log(`   - Total: ${tools.length} tools\n`);
+    console.log(`   - Total: ${tools.length + (mcpDefinition ? 1 : 0)} tools\n`);
   } catch (error) {
     logger.error('Failed to seed AI tools', {
       error: error instanceof Error ? error.message : 'Unknown error',
