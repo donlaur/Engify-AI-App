@@ -9,5 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       disallow: ['/api/', '/dashboard/', '/settings/', '/workbench/'],
     },
     sitemap: `${APP_URL}/sitemap.xml`,
+    // RSS feed is auto-discovered via HTML <link> tag in layout
   };
 }

@@ -107,8 +107,8 @@ function buildPromptSuggestionsPrompt(data: unknown): string {
     `- **${p.name}** (ID: \`${p.id}\`, Category: ${p.category}, Level: ${p.level})`
   ).join('\n');
 
-  const existingCategoryList = Array.from(promptCategories).sort().map(c => `- \`${c}\``).join('\n');
-  const existingRoleList = Array.from(roles).sort().map(r => `- \`${r}\``).join('\n');
+  const existingCategoryList = promptCategories.sort().map(c => `- \`${c}\``).join('\n');
+  const existingRoleList = roles.filter(Boolean).sort().map(r => `- \`${r}\``).join('\n');
   const existingUsedPatternsList = Array.from(usedPatterns).sort().map(p => `- \`${p}\``).join('\n');
 
   return `You are an expert prompt engineering consultant analyzing Engify.ai, an AI training platform for engineering teams.
@@ -120,10 +120,10 @@ function buildPromptSuggestionsPrompt(data: unknown): string {
 ### Existing Patterns (${patterns.length} total):
 ${existingPatternsList}
 
-### Existing Prompt Categories (${promptCategories.size} total):
+### Existing Prompt Categories (${promptCategories.length} total):
 ${existingCategoryList}
 
-### Existing Roles (${roles.size} total):
+### Existing Roles (${roles.filter(Boolean).length} total):
 ${existingRoleList}
 
 ### Patterns Already Used in Our Prompts:
@@ -223,60 +223,67 @@ Share 2-3 insights from current prompt engineering research that could inform ne
 
 ## Output Format
 
-Provide your analysis as a JSON object with this structure:
-{
-  "suggestedPatterns": [
-    {
-      "name": "Pattern Name",
-      "id": "pattern-id",
-      "category": "COGNITIVE",
-      "level": "intermediate",
-      "description": "Brief description",
-      "reason": "Why this fills a gap"
-    }
-  ],
-  "suggestedPrompts": [
-    {
-      "title": "Prompt Title",
-      "description": "What it does",
-      "category": "development",
-      "role": "devops-engineer",
-      "pattern": "pattern-id",
-      "level": "intermediate",
-      "reason": "Why this fills a gap"
-    }
-  ],
-  "missingRoles": ["devops-engineer", "qa-engineer", ...],
-  "missingCategories": ["testing", "documentation", ...],
-  "missingLevels": {
-    "development": { "beginner": 5, "intermediate": 3, "advanced": 2 },
-    ...
-  },
-  "researchInsights": [
-    "Insight 1 about prompt engineering",
-    "Insight 2 about gaps",
-    ...
-  ]
-}
+Provide your analysis as a clear, actionable markdown document with bulleted lists. Use this structure:
 
-Be thorough and creative. Think about what engineering teams actually need to use AI effectively.`;
+### 1. Suggested New Patterns
+
+For each suggested pattern, provide a bullet point with:
+- **Pattern Name** (ID: `pattern-id`)
+  - Category: COGNITIVE | STRUCTURAL | FOUNDATIONAL | ITERATIVE
+  - Level: beginner | intermediate | advanced
+  - Description: Brief description of what this pattern does
+  - Reason: Why this fills a gap (explain what's missing that this addresses)
+
+### 2. Suggested New Prompts
+
+For each suggested prompt, provide a bullet point with:
+- **Prompt Title**
+  - Category: Existing category OR new category name
+  - Role: Existing role OR new role name
+  - Pattern: Pattern ID to use (or "None" if no pattern)
+  - Level: beginner | intermediate | advanced
+  - Description: What this prompt does and why it's useful
+  - Reason: Why this fills a gap (be specific about what's missing)
+
+### 3. Missing Roles
+
+List engineering roles we DON'T have as bullet points:
+- Role name 1
+- Role name 2
+- etc.
+
+### 4. Missing Categories
+
+List prompt categories we DON'T have as bullet points:
+- Category name 1
+- Category name 2
+- etc.
+
+### 5. Level Distribution Analysis
+
+For each category, identify gaps:
+- **Category Name**
+  - Missing beginner prompts: X
+  - Missing intermediate prompts: Y
+  - Missing advanced prompts: Z
+
+### 6. Research Insights
+
+Provide 2-3 actionable insights as bullet points:
+- Insight 1: What this means and how we can use it
+- Insight 2: What this means and how we can use it
+- Insight 3: What this means and how we can use it
+
+**Important:** Use clear markdown formatting with headers, bullet points, and bold text for emphasis. Make it actionable and easy to scan. Do NOT use JSON format.`;
 }
 
 function formatPromptSuggestionsResponse(response: string): unknown {
-  // Try to extract JSON from markdown code blocks if present
-  let jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
-  if (!jsonMatch) {
-    jsonMatch = response.match(/```\s*([\s\S]*?)\s*```/);
-  }
-  
-  const jsonContent = jsonMatch ? jsonMatch[1] : response.trim();
-  
-  try {
-    return JSON.parse(jsonContent);
-  } catch (error) {
-    console.warn('⚠️  Failed to parse JSON response, returning raw response');
-    return { rawResponse: response, parseError: String(error) };
-  }
+  // Return markdown response as-is (no JSON parsing needed)
+  // The response is already in markdown format with actionable bulleted lists
+  return {
+    markdown: response.trim(),
+    formattedAt: new Date().toISOString(),
+  };
 }
 
 /**
@@ -302,12 +309,14 @@ const RESEARCH_TYPES: Record<string, ResearchTypeConfig> = {
 async function getGeminiModel() {
   const geminiModels = await getModelsByProvider('google');
   
-  const activeModels = geminiModels.filter(m => 
-    m.status !== 'deprecated' && 
-    m.status !== 'sunset' && 
-    !m.deprecated &&
-    m.isAllowed !== false
-  );
+  const activeModels = geminiModels.filter(m => {
+    // Handle both StaticAIModel and AIModel types
+    if ('status' in m) {
+      return m.status !== 'deprecated' && m.status !== 'sunset' && m.isAllowed !== false;
+    }
+    // For StaticAIModel (from config), check deprecated field
+    return !m.deprecated;
+  });
 
   if (activeModels.length === 0) {
     throw new Error('No valid Gemini models found in registry. Please sync models first.');
@@ -329,7 +338,7 @@ async function getGeminiModel() {
  */
 async function generateResearch(
   researchType: string,
-  options: Record<string, string> = {}
+  _options: Record<string, string> = {}
 ): Promise<ResearchResult> {
   const config = RESEARCH_TYPES[researchType];
   
@@ -365,7 +374,7 @@ async function generateResearch(
   console.log('💭 Generating research (this may take a minute)...\n');
   console.log('⚠️  Note: If you hit rate limits, wait a few minutes and try again.\n');
   
-  let response;
+  let response: { content: string; cost?: { input: number; output: number; total: number }; latency?: number } | undefined;
   let retries = 3;
   let delay = 5000;
   
@@ -395,6 +404,10 @@ async function generateResearch(
         throw error;
       }
     }
+  }
+
+  if (!response) {
+    throw new Error('Failed to get response from Gemini');
   }
 
   // Format response
@@ -458,41 +471,21 @@ function displayResults(result: ResearchResult, researchType: string) {
 
   // Type-specific display logic
   if (researchType === 'prompt-suggestions') {
-    const data = result.data as any;
+    const data = result.data as { markdown?: string; formattedAt?: string };
     
-    if (data.suggestedPatterns) {
-      console.log('\n📋 SUGGESTED PATTERNS:\n');
-      data.suggestedPatterns.forEach((pattern: any, i: number) => {
-        console.log(`${i + 1}. ${pattern.name} (${pattern.category}, ${pattern.level})`);
-        console.log(`   ID: ${pattern.id}`);
-        console.log(`   Description: ${pattern.description}`);
-        console.log(`   Reason: ${pattern.reason}\n`);
-      });
-    }
-
-    if (data.suggestedPrompts) {
-      console.log('\n📝 SUGGESTED PROMPTS:\n');
-      data.suggestedPrompts.forEach((prompt: any, i: number) => {
-        console.log(`${i + 1}. ${prompt.title}`);
-        console.log(`   Category: ${prompt.category} | Role: ${prompt.role || 'Any'} | Level: ${prompt.level}`);
-        console.log(`   Pattern: ${prompt.pattern || 'None'}`);
-        console.log(`   Description: ${prompt.description}`);
-        console.log(`   Reason: ${prompt.reason}\n`);
-      });
-    }
-
-    if (data.missingRoles) {
-      console.log('\n👥 MISSING ROLES:\n');
-      data.missingRoles.forEach((role: string) => {
-        console.log(`- ${role}`);
-      });
-    }
-
-    if (data.missingCategories) {
-      console.log('\n📂 MISSING CATEGORIES:\n');
-      data.missingCategories.forEach((category: string) => {
-        console.log(`- ${category}`);
-      });
+    // Display markdown response directly (much cleaner and actionable)
+    if (data.markdown) {
+      console.log('\n📋 RESEARCH RESULTS (Markdown Format):\n');
+      console.log('='.repeat(80));
+      console.log(data.markdown);
+      console.log('='.repeat(80));
+      console.log('\n💡 Tip: Copy the markdown above to use in your documentation or planning.');
+    } else {
+      // Fallback: show raw response if markdown not found
+      console.log('\n📋 RAW RESEARCH RESULTS:\n');
+      console.log('='.repeat(80));
+      console.log(result.rawResponse || 'No response received');
+      console.log('='.repeat(80));
     }
   }
 
