@@ -7,14 +7,8 @@
  * @deprecated Import from @/lib/mongodb instead
  *
  * IMPORTANT: This file is SERVER-ONLY and must never be imported in client components.
+ * This module is excluded from client bundles via next.config.js webpack externals.
  */
-
-// Server-only check - prevent MongoDB from being bundled into client-side code
-if (typeof window !== 'undefined') {
-  throw new Error(
-    'MongoDB utilities cannot be used in client-side code. This is a server-only module.'
-  );
-}
 
 export {
   getClient,

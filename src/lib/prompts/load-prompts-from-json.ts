@@ -36,42 +36,44 @@ const MAX_AGE_MS = 3600000; // 1 hour - consider JSON stale after this
  */
 export async function loadPromptsFromJson(): Promise<Prompt[]> {
   try {
-    // Use fetch (works in both static generation and runtime)
-    // For static generation, Next.js will inline the JSON
-    // For runtime, it fetches from the public directory
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : 'http://localhost:3000';
-
-    const response = await fetch(`${baseUrl}${JSON_FILE_URL}`, {
-      cache: 'no-store', // Always fetch fresh
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch JSON: ${response.status}`);
+    // For server-side rendering, use filesystem access (faster, no network call)
+    // For client-side, skip JSON loading and use MongoDB directly
+    if (typeof window === 'undefined') {
+      // Server-side: use filesystem
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const jsonPath = path.join(process.cwd(), 'public', 'data', 'prompts.json');
+      
+      try {
+        const fileContent = await fs.readFile(jsonPath, 'utf-8');
+        const data: PromptsJsonData = JSON.parse(fileContent);
+        
+        // Check if JSON is stale (older than 1 hour)
+        const generatedAt = new Date(data.generatedAt);
+        const ageMs = Date.now() - generatedAt.getTime();
+        
+        if (ageMs > MAX_AGE_MS) {
+          logger.warn('Prompts JSON is stale, falling back to MongoDB', {
+            ageHours: (ageMs / 3600000).toFixed(2),
+          });
+          throw new Error('JSON is stale');
+        }
+        
+        logger.debug('Loaded prompts from static JSON', {
+          count: data.prompts.length,
+          generatedAt: data.generatedAt,
+        });
+        
+        return data.prompts;
+      } catch (fsError) {
+        // File doesn't exist or can't be read - fall through to MongoDB
+        throw new Error(`Failed to read JSON file: ${fsError instanceof Error ? fsError.message : 'Unknown error'}`);
+      }
     }
 
-    const data: PromptsJsonData = await response.json();
-
-    // Check if JSON is stale (older than 1 hour)
-    const generatedAt = new Date(data.generatedAt);
-    const ageMs = Date.now() - generatedAt.getTime();
-
-    if (ageMs > MAX_AGE_MS) {
-      logger.warn('Prompts JSON is stale, falling back to MongoDB', {
-        ageHours: (ageMs / 3600000).toFixed(2),
-      });
-      // Fall through to MongoDB fallback
-      throw new Error('JSON is stale');
-    }
-
-    logger.debug('Loaded prompts from static JSON', {
-      count: data.prompts.length,
-      generatedAt: data.generatedAt,
-    });
-
-    return data.prompts;
+    // Client-side: skip JSON loading, use MongoDB directly
+    // JSON loading from client-side requires fetch which can have auth issues
+    throw new Error('Client-side JSON loading disabled - use MongoDB');
   } catch (error) {
     // Fallback to MongoDB if JSON unavailable
     logger.warn('Failed to load prompts from JSON, using MongoDB fallback', {

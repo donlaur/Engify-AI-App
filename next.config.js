@@ -155,14 +155,36 @@ const nextConfig = {
           ) {
             return callback(null, `commonjs ${request}`);
           }
+          
+          // Exclude Node.js built-in modules that use require()
+          if (
+            request === 'fs' ||
+            request === 'fs/promises' ||
+            request === 'path' ||
+            request === 'util' ||
+            request === 'stream' ||
+            request === 'buffer' ||
+            request === 'events' ||
+            request === 'url' ||
+            request === 'querystring' ||
+            request === 'os' ||
+            request === 'module' ||
+            request === 'perf_hooks'
+          ) {
+            return callback(null, `commonjs ${request}`);
+          }
+          
           callback();
         },
       ];
       
-      // Also exclude MongoDB as a string external for compatibility
-      if (!config.externals.includes('mongodb')) {
-        config.externals.push('mongodb');
-      }
+      // Also exclude MongoDB and Node.js modules as string externals for compatibility
+      const stringExternals = ['mongodb', 'fs', 'path', 'util'];
+      stringExternals.forEach((ext) => {
+        if (!config.externals.includes(ext)) {
+          config.externals.push(ext);
+        }
+      });
     }
     
     return config;

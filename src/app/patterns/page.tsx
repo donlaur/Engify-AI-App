@@ -1,11 +1,11 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PatternsClient } from './patterns-client';
-import { getAllPatterns } from '@/lib/patterns/mongodb-patterns';
+import { patternRepository } from '@/lib/db/repositories/ContentService';
 import { promptRepository } from '@/lib/db/repositories/ContentService';
 
 export default async function PatternsPage() {
-  // Fetch patterns from MongoDB
-  const patterns = await getAllPatterns();
+  // Fetch patterns directly from MongoDB (reliable, no JSON loading issues)
+  const patterns = await patternRepository.getAll();
   
   // Fetch all prompts to count by pattern
   const allPrompts = await promptRepository.getAll();
