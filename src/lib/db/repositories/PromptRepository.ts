@@ -1,6 +1,6 @@
 /**
  * Prompt Repository
- * 
+ *
  * Retrieval: Raw MongoDB documents
  * Processing: Transform to Prompt schema
  * Formatting: Shape for UI/API
@@ -86,6 +86,7 @@ export class PromptRepository
 
   /**
    * Get all active, public prompts
+   * Query timeout: 15 seconds (handled by BaseRepository.find)
    */
   async getAll(): Promise<Prompt[]> {
     const documents = await this.find({

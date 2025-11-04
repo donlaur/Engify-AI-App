@@ -231,8 +231,10 @@ export function RelatedPrompts({
               <PromptMetrics
                 promptId={prompt.id}
                 initialViews={prompt.views || 0}
-                initialFavorites={prompt.favorites || 0}
-                initialShares={prompt.shares || 0}
+                initialFavorites={
+                  (prompt as { favorites?: number }).favorites || 0
+                }
+                initialShares={(prompt as { shares?: number }).shares || 0}
               />
             </Link>
           ))

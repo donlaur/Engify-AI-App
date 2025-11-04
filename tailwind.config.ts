@@ -50,12 +50,18 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        // Vibrant Dark Mode brand colors
+        brand: {
+          green: 'hsl(var(--brand-green))',
+          pink: 'hsl(var(--brand-pink))',
+          blue: 'hsl(var(--brand-blue))',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
-        xl: 'calc(var(--radius) + 4px)',  /* 12px for modern cards */
+        xl: 'calc(var(--radius) + 4px)' /* 12px for modern cards */,
       },
       keyframes: {
         'accordion-down': {
@@ -90,8 +96,10 @@ const config: Config = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'gradient-primary': 'linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(262 83% 58%) 100%)',
-        'gradient-hero': 'linear-gradient(180deg, hsl(222 47% 11%) 0%, hsl(217 33% 20%) 100%)',
+        'gradient-primary':
+          'linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(262 83% 58%) 100%)',
+        'gradient-hero':
+          'linear-gradient(180deg, hsl(222 47% 11%) 0%, hsl(217 33% 20%) 100%)',
       },
     },
   },

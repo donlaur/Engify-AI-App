@@ -27,26 +27,46 @@
   }
 
   .dark {
-    /* Lighter, more readable dark theme */
-    --background: 222 47% 11%;        /* Lighter navy background #1A2332 */
-    --foreground: 210 40% 98%;        /* Bright white text */
-    --card: 222 40% 15%;              /* Slightly lighter cards #212A3A */
-    --card-foreground: 210 40% 98%;   
-    --popover: 222 40% 15%;           
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;           /* Vibrant blue #3B82F6 */
-    --primary-foreground: 0 0% 100%;  /* Pure white on primary */
-    --secondary: 217 33% 20%;         /* Muted blue-grey */
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 20%;             
-    --muted-foreground: 215 20% 70%;  /* Higher contrast muted text */
-    --accent: 262 83% 58%;            /* Purple accent #8B5CF6 */
-    --accent-foreground: 210 40% 98%;
+    /* Vibrant Dark Mode - Deep saturated indigo/purple base */
+    /* Background: Deep indigo #1A182D */
+    --background: 252 40% 14%;        /* Deep indigo-purple #1A182D */
+    --foreground: 240 25% 95%;        /* Soft off-white #F0F0F5 */
+    
+    /* Cards: Frosted glass effect (will be applied via CSS class) */
+    --card: 252 40% 14%;              /* Base card color */
+    --card-foreground: 240 25% 95%;   /* Text-primary for headings */
+    
+    --popover: 252 40% 14%;           
+    --popover-foreground: 240 25% 95%;
+    
+    /* Primary: Brand gradient colors */
+    --primary: 262 83% 58%;           /* Purple from gradient #9333EA */
+    --primary-foreground: 0 0% 100%;  /* White on primary */
+    
+    /* Secondary: Lavender-gray for body text */
+    --secondary: 240 20% 75%;         /* Body text #C0C0D0 */
+    --secondary-foreground: 252 40% 14%;
+    
+    /* Muted: Subtle text #80809A */
+    --muted: 240 15% 55%;             /* Tertiary text */
+    --muted-foreground: 240 20% 75%;  /* Slightly brighter for contrast */
+    
+    /* Accent: Bright purple for links */
+    --accent: 262 70% 75%;            /* Link purple #BE93FD */
+    --accent-foreground: 0 0% 100%;
+    
+    /* Brand colors */
+    --brand-green: 120 100% 50%;       /* Vibrant green #39FF14 */
+    --brand-pink: 330 81% 60%;        /* Pink from gradient #F472B6 */
+    --brand-blue: 217 91% 60%;         /* Tag blue #3B82F6 */
+    
     --destructive: 0 84% 60%;         /* Bright red for errors */
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 22%;            /* Subtle borders */
-    --input: 217 33% 22%;             
-    --ring: 217 91% 60%;              /* Match primary */
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders: Subtle with transparency */
+    --border: 0 0% 100% / 0.1;        /* rgba(255, 255, 255, 0.1) */
+    --input: 0 0% 100% / 0.1;        
+    --ring: 262 83% 58%;              /* Match primary */
   }
 }
 
@@ -56,5 +76,56 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Frosted Glass Card Effect - Only in dark mode */
+  .dark .surface-frosted {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); /* Safari support */
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .dark .surface-frosted-hover:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  /* Vibrant Dark Mode Text Colors */
+  .text-primary-light {
+    color: #F0F0F5; /* text-primary */
+  }
+  
+  .text-secondary-light {
+    color: #C0C0D0; /* text-secondary */
+  }
+  
+  .text-tertiary {
+    color: #80809A; /* text-tertiary */
+  }
+  
+  /* Brand Link Colors */
+  .link-primary {
+    color: #BE93FD; /* link-primary */
+  }
+  
+  .link-primary:hover {
+    color: #F472B6; /* link-hover */
+  }
+  
+  /* Brand Gradient */
+  .gradient-brand {
+    background: linear-gradient(to right, #9333EA, #EC4899);
+  }
+  
+  /* Brand Green */
+  .bg-brand-green {
+    background-color: #39FF14;
+  }
+  
+  .text-brand-green {
+    color: #39FF14;
   }
 }

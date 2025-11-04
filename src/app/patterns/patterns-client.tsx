@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -47,16 +47,23 @@ const categories = [
 
 const levels = [
   { name: 'All Levels', value: 'all' },
-  { name: 'Beginner', value: 'beginner', color: 'bg-green-100 text-green-800' },
+  {
+    name: 'Beginner',
+    value: 'beginner',
+    color:
+      'bg-brand-green/20 text-brand-green border-brand-green/30 dark:bg-brand-green/20 dark:text-brand-green dark:border-brand-green/30',
+  },
   {
     name: 'Intermediate',
     value: 'intermediate',
-    color: 'bg-blue-100 text-blue-800',
+    color:
+      'bg-brand-blue/20 text-brand-blue border-brand-blue/30 dark:bg-brand-blue/20 dark:text-brand-blue dark:border-brand-blue/30',
   },
   {
     name: 'Advanced',
     value: 'advanced',
-    color: 'bg-purple-100 text-purple-800',
+    color:
+      'bg-primary/20 text-primary border-primary/30 dark:bg-primary/20 dark:text-primary dark:border-primary/30',
   },
 ];
 
@@ -94,14 +101,14 @@ function convertToPatternDetail(pattern: any): PatternDetail | null {
   };
 }
 
-export function PatternsClient({ 
-  patterns, 
-  promptsByPattern = new Map(),
-  totalPromptsUsingPatterns = 0 
+export function PatternsClient({
+  patterns,
+  promptsByPattern: _promptsByPattern = new Map(),
+  totalPromptsUsingPatterns = 0,
 }: PatternsClientProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
-  const [selectedPatternId, setSelectedPatternId] = useState<string | null>(
+  const [_selectedPatternId, _setSelectedPatternId] = useState<string | null>(
     null
   );
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -123,10 +130,10 @@ export function PatternsClient({
     <div className="container py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="mb-2 text-4xl font-bold">
+        <h1 className="text-primary-light dark:text-primary-light mb-2 text-4xl font-bold">
           {patterns.length} Proven Patterns
         </h1>
-        <p className="text-xl text-muted-foreground">
+        <p className="text-secondary-light dark:text-secondary-light text-xl">
           Master prompt engineering with battle-tested patterns from industry
           leaders
         </p>
@@ -136,30 +143,42 @@ export function PatternsClient({
       <div className="mb-8 grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{patterns.length}</div>
-            <p className="text-xs text-muted-foreground">Total Patterns</p>
+            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
+              {patterns.length}
+            </div>
+            <p className="text-tertiary dark:text-tertiary text-xs">
+              Total Patterns
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">
+            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
               {new Set(patterns.map((p) => p.category)).size}
             </div>
-            <p className="text-xs text-muted-foreground">Categories</p>
+            <p className="text-tertiary dark:text-tertiary text-xs">
+              Categories
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">
+            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
               {new Set(patterns.map((p) => p.level)).size}
             </div>
-            <p className="text-xs text-muted-foreground">Skill Levels</p>
+            <p className="text-tertiary dark:text-tertiary text-xs">
+              Skill Levels
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{totalPromptsUsingPatterns}</div>
-            <p className="text-xs text-muted-foreground">Example Prompts</p>
+            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
+              {totalPromptsUsingPatterns}
+            </div>
+            <p className="text-tertiary dark:text-tertiary text-xs">
+              Example Prompts
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -214,8 +233,13 @@ export function PatternsClient({
                       <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{pattern.name}</CardTitle>
-                      <Badge variant="outline" className="mt-1 text-xs">
+                      <CardTitle className="text-primary-light dark:text-primary-light text-lg">
+                        {pattern.name}
+                      </CardTitle>
+                      <Badge
+                        variant="outline"
+                        className="mt-1 border-brand-blue text-xs text-brand-blue dark:border-brand-blue dark:text-brand-blue"
+                      >
                         {pattern.category}
                       </Badge>
                     </div>
@@ -224,29 +248,30 @@ export function PatternsClient({
                     {pattern.level}
                   </Badge>
                 </div>
-                <CardDescription className="mt-3">
+                <CardDescription className="text-secondary-light dark:text-secondary-light mt-3 leading-relaxed">
                   {pattern.description}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  asChild
+                <Link
+                  href={`/patterns/${encodeURIComponent(pattern.id)}`}
+                  className="link-primary dark:link-primary group flex w-full items-center justify-center text-base font-medium"
                 >
-                  <Link href={`/patterns/${encodeURIComponent(pattern.id)}`}>
-                    Learn More
-                    <Icons.arrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+                  Learn More
+                  <Icons.arrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </CardContent>
               <CardContent className="space-y-4">
                 {/* Example */}
                 {pattern.example && (
                   <div>
-                    <p className="mb-2 text-sm font-medium">Example:</p>
-                    <div className="rounded-md bg-muted p-3">
-                      <code className="text-xs">{pattern.example}</code>
+                    <p className="text-tertiary dark:text-tertiary mb-2 text-sm font-medium">
+                      Example:
+                    </p>
+                    <div className="rounded-md border border-border/50 bg-muted/50 p-3">
+                      <code className="text-secondary-light dark:text-secondary-light text-xs">
+                        {pattern.example}
+                      </code>
                     </div>
                   </div>
                 )}
@@ -254,7 +279,9 @@ export function PatternsClient({
                 {/* Use Cases */}
                 {pattern.useCases && pattern.useCases.length > 0 && (
                   <div>
-                    <p className="mb-2 text-sm font-medium">Use Cases:</p>
+                    <p className="text-tertiary dark:text-tertiary mb-2 text-sm font-medium">
+                      Use Cases:
+                    </p>
                     <div className="flex flex-wrap gap-1">
                       {pattern.useCases
                         .slice(0, 3)
@@ -262,7 +289,7 @@ export function PatternsClient({
                           <Badge
                             key={idx}
                             variant="secondary"
-                            className="text-xs"
+                            className="border-brand-blue/30 bg-brand-blue/20 text-xs text-brand-blue dark:border-brand-blue/30 dark:bg-brand-blue/20 dark:text-brand-blue"
                           >
                             {useCase}
                           </Badge>
@@ -277,17 +304,24 @@ export function PatternsClient({
       </div>
 
       {/* CTA */}
-      <Card className="mt-12 border-primary/20 bg-primary/5">
+      <Card className="dark:surface-frosted mt-12 border-primary/20 bg-primary/5">
         <CardContent className="py-8 text-center">
           <Icons.book className="mx-auto mb-4 h-12 w-12 text-primary" />
-          <h3 className="mb-2 text-2xl font-bold">
+          <h3 className="text-primary-light dark:text-primary-light mb-2 text-2xl font-bold">
             Ready to use these patterns?
           </h3>
-          <p className="mb-6 text-muted-foreground">
-            Browse our library of {totalPromptsUsingPatterns > 0 ? `${totalPromptsUsingPatterns}+ ` : ''}expert prompts that use these
-            patterns
+          <p className="text-secondary-light dark:text-secondary-light mb-6">
+            Browse our library of{' '}
+            {totalPromptsUsingPatterns > 0
+              ? `${totalPromptsUsingPatterns}+ `
+              : ''}
+            expert prompts that use these patterns
           </p>
-          <Button size="lg" asChild>
+          <Button
+            size="lg"
+            className="gradient-brand text-white hover:opacity-90"
+            asChild
+          >
             <Link href="/prompts">
               <Icons.arrowRight className="mr-2 h-4 w-4" />
               Browse Prompt Library
@@ -297,10 +331,10 @@ export function PatternsClient({
       </Card>
 
       {/* Pattern Detail Drawer */}
-      {selectedPatternId && (
+      {_selectedPatternId && (
         <PatternDetailDrawer
           pattern={convertToPatternDetail(
-            patterns.find((p) => p.id === selectedPatternId) || {}
+            patterns.find((p) => p.id === _selectedPatternId) || {}
           )}
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}

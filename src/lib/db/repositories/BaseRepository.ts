@@ -1,19 +1,19 @@
 /**
  * Unified Content Repository System
- * 
+ *
  * DRY principle: Single source of truth for content retrieval
  * All content types (prompts, patterns, learning resources) use this base
- * 
+ *
  * Architecture:
  * - BaseRepository: MongoDB connection & common operations
  * - ContentRepository: Content-specific retrieval logic
  * - ContentService: Business logic & formatting
- * 
+ *
  * Separation of Concerns:
  * 1. Retrieval: Raw data from MongoDB
  * 2. Processing: Transform, filter, enrich
  * 3. Formatting: Shape for UI/API consumption
- * 
+ *
  * Enterprise Compliance:
  * - Uses singleton MongoDB connection from @/lib/mongodb
  * - Proper error handling with logger
@@ -57,9 +57,11 @@ export abstract class BaseRepository<T> {
   /**
    * Find documents with optional filter and options
    * Returns ALL fields from MongoDB (no projection)
-   * 
+   *
    * CRITICAL: This ensures all DB fields are available for processing
    * No field filtering - repositories handle field selection in processors
+   *
+   * Query timeout: 15 seconds (for getAll operations)
    */
   protected async find(
     filter: Filter<T> = {},
@@ -68,10 +70,17 @@ export abstract class BaseRepository<T> {
     try {
       const collection = await this.getCollection();
       // Remove any projection to ensure ALL fields are returned
-      const { projection, ...restOptions } = options || {};
-      return collection.find(filter, restOptions as FindOptions<T>).toArray();
+      const { projection: _projection, ...restOptions } = options || {};
+      // Add query timeout to prevent build timeouts
+      const queryOptions = {
+        ...restOptions,
+        maxTimeMS: 15000, // 15 second timeout for queries that return multiple docs
+      } as FindOptions<T>;
+      return collection.find(filter, queryOptions).toArray();
     } catch (error) {
-      logger.error(`Error finding documents in ${this.collectionName}`, { error });
+      logger.error(`Error finding documents in ${this.collectionName}`, {
+        error,
+      });
       throw error;
     }
   }
@@ -79,9 +88,11 @@ export abstract class BaseRepository<T> {
   /**
    * Find single document
    * Returns ALL fields from MongoDB (no projection)
-   * 
+   *
    * CRITICAL: This ensures all DB fields are available for processing
    * No field filtering - repositories handle field selection in processors
+   *
+   * Query timeout: 10 seconds (critical for build performance)
    */
   protected async findOne(
     filter: Filter<T>,
@@ -90,10 +101,17 @@ export abstract class BaseRepository<T> {
     try {
       const collection = await this.getCollection();
       // Remove any projection to ensure ALL fields are returned
-      const { projection, ...restOptions } = options || {};
-      return collection.findOne(filter, restOptions as FindOptions<T>);
+      const { projection: _projection, ...restOptions } = options || {};
+      // Add query timeout to prevent build timeouts
+      const queryOptions = {
+        ...restOptions,
+        maxTimeMS: 10000, // 10 second timeout
+      } as FindOptions<T>;
+      return collection.findOne(filter, queryOptions);
     } catch (error) {
-      logger.error(`Error finding document in ${this.collectionName}`, { error });
+      logger.error(`Error finding document in ${this.collectionName}`, {
+        error,
+      });
       throw error;
     }
   }
@@ -106,7 +124,9 @@ export abstract class BaseRepository<T> {
       const collection = await this.getCollection();
       return collection.countDocuments(filter);
     } catch (error) {
-      logger.error(`Error counting documents in ${this.collectionName}`, { error });
+      logger.error(`Error counting documents in ${this.collectionName}`, {
+        error,
+      });
       return 0; // Return 0 on error to prevent app crashes
     }
   }
