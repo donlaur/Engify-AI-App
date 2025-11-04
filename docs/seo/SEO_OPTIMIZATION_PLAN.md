@@ -236,12 +236,198 @@ Based on research:
 
 ## Related Documentation
 
+### Internal SEO Documentation
+- **[SEO Content Strategy](../content/SEO_CONTENT_STRATEGY.md)** - Case studies & tool reviews SEO, affiliate revenue strategy, keyword targeting
+- **[Learning Content Audit - SEO Section](../content/LEARNING_CONTENT_AUDIT.md#seo-optimization-plan)** - Learning content SEO requirements, content structure, technical SEO
+- **[Content Strategy](../content/CONTENT_STRATEGY.md)** - General content principles, SEO optimization guidelines
+- **[Lighthouse Audit Guide](../performance/LIGHTHOUSE_AUDIT_GUIDE.md)** - SEO score tracking, structured data validation
+
+### External Resources
 - [Next.js Metadata API](https://nextjs.org/docs/app/building-your-application/optimizing/metadata)
 - [Schema.org Structured Data](https://schema.org/)
 - [Google Search Central](https://developers.google.com/search/docs)
 
 ---
 
+## Previous SEO Strategies & Learnings
+
+### From SEO Content Strategy (Case Studies & Tool Reviews)
+
+**Target Keywords (High Volume, High Intent):**
+- "build SaaS with AI" (1,300 searches/mo)
+- "AI augmented development" (890 searches/mo)
+- "Cursor IDE tutorial" (2,400 searches/mo)
+- "best AI coding assistant 2025" (8,900 searches/mo) 🔥🔥
+- "GitHub Copilot alternative" (5,400 searches/mo)
+
+**Content SEO Requirements:**
+- ✅ Meta titles optimized (< 60 characters)
+- ✅ Meta descriptions compelling (< 160 characters)
+- ✅ H1 tags with primary keyword
+- ✅ H2 tags with secondary keywords
+- ✅ Long-form content (2,000+ words)
+- ✅ Keyword density (1-2%)
+- ✅ LSI keywords included
+- ✅ FAQs with natural questions
+- ✅ Tables and lists for featured snippets
+
+**Implementation Status:** ✅ Done for case study and tools pages
+
+---
+
+### From Learning Content Audit (SEO Requirements)
+
+**Keyword Research Needed:**
+- High-volume keywords
+- Long-tail opportunities
+- Question-based queries
+- Competitor gaps
+
+**Tools to Use:**
+- Ahrefs
+- SEMrush
+- Google Keyword Planner
+- Answer the Public
+
+**Article SEO Interface:**
+```typescript
+interface ArticleSEO {
+  title: string;              // 50-60 chars, keyword-rich
+  metaDescription: string;    // 150-160 chars, compelling
+  slug: string;               // URL-friendly, keyword-rich
+  canonicalUrl: string;       // Avoid duplicate content
+  keywords: string[];         // Primary + secondary keywords
+  openGraph: {
+    title: string;
+    description: string;
+    image: string;            // 1200x630px
+    type: 'article';
+  };
+  twitter: {
+    card: 'summary_large_image';
+    title: string;
+    description: string;
+    image: string;
+  };
+  schema: {
+    '@type': 'Article';
+    headline: string;
+    author: string;
+    datePublished: string;
+    dateModified: string;
+    image: string;
+    articleBody: string;
+  };
+}
+```
+
+**Content Structure Requirements:**
+- H1 (title, one per page)
+- H2 (main sections)
+- H3 (subsections)
+- Introduction (hook + value prop)
+- Table of contents (for long articles)
+- Code examples (syntax highlighted)
+- Images/diagrams (with alt text)
+- Internal links (3-5 per article)
+- External links (authoritative sources)
+- Call-to-action
+- Related articles
+- Author bio
+- Social share buttons
+
+**Technical SEO Requirements:**
+- Sitemap.xml (auto-generated) ✅
+- Robots.txt ✅
+- RSS feed ⚠️ Needed
+- Structured data (JSON-LD) ⚠️ Partial
+- Fast loading (< 2s) ✅
+- Mobile-friendly ✅
+- HTTPS ✅
+- Clean URLs (no query params) ✅
+
+---
+
+### From Content Strategy (SEO Principles)
+
+**SEO-Optimized Content Must:**
+- Target high-intent keywords
+- Include Schema.org markup
+- Have internal linking strategy
+- Use shareable headlines
+
+**SEO Focus Areas:**
+- "multi-agent AI workflows"
+- "AI development best practices"
+- "enterprise AI guardrails"
+- "how to set up pre-commit hooks"
+- "AI code review best practices"
+- "multi-agent development tutorial"
+
+**Every Article Must Include:**
+- SEO keywords in title, first paragraph, headings
+- Real metrics from production (specific numbers)
+- Call-to-action for target audience
+- Schema.org markup for Google
+
+---
+
+## Consolidated SEO Checklist
+
+### Before Publishing Any Page
+
+**Content Quality:**
+- [ ] 500-1500 words (minimum for articles)
+- [ ] Clear introduction (problem + solution)
+- [ ] 3-5 main sections with H2 headers
+- [ ] Code examples (if technical)
+- [ ] Real-world examples
+- [ ] Actionable takeaways
+- [ ] No AI-generated feel (human voice)
+- [ ] Proofread (no typos)
+- [ ] Fact-checked (accurate information)
+
+**SEO:**
+- [ ] Target keyword in title
+- [ ] Target keyword in first 100 words
+- [ ] Meta description (150-160 chars, unique per page)
+- [ ] Alt text for all images
+- [ ] Internal links (3-5)
+- [ ] External links (2-3 authoritative)
+- [ ] Schema markup (JSON-LD)
+- [ ] Open Graph tags
+- [ ] Twitter card tags
+- [ ] Canonical URL set
+
+**User Experience:**
+- [ ] Table of contents (if >1000 words)
+- [ ] Reading time estimate
+- [ ] Related articles
+- [ ] Call-to-action
+- [ ] Share buttons
+- [ ] Mobile-friendly
+- [ ] Fast loading (<2s)
+
+---
+
+## Integration Notes
+
+**Key Takeaways from Previous Plans:**
+
+1. **SEO Content Strategy** focuses on monetization via affiliate links - keep this separate but reference it
+2. **Learning Content Audit** has detailed SEO requirements for articles - use these as templates
+3. **Content Strategy** has general SEO principles - apply to all content types
+
+**Action Items:**
+- ✅ Create tags dictionary page (done)
+- ✅ Make sitemap dynamic (done)
+- ⏭️ Implement RSS feed (from Learning Content Audit)
+- ⏭️ Add keyword research workflow (from Learning Content Audit)
+- ⏭️ Create SEO utility functions (this plan)
+- ⏭️ Ensure all pages follow consolidated checklist
+
+---
+
 **Status:** Ready for implementation  
-**Estimated Time:** 8-12 hours for full implementation
+**Estimated Time:** 8-12 hours for full implementation (Phase 1 complete, Phase 2-6 remaining)
 
