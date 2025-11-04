@@ -10,13 +10,14 @@
  *   tsx scripts/content/generate-article.ts "Mastering AI Prompts" --category="Guide" --tone="beginner"
  */
 
+// IMPORTANT: Load environment variables FIRST before any imports
+// This prevents MongoDB from throwing errors during module load
 import { config } from 'dotenv';
+config({ path: '.env.local' });
+
 import fs from 'fs';
 import path from 'path';
 import { ContentPublishingService } from '@/lib/content/content-publishing-pipeline';
-
-// Load environment variables from .env.local
-config({ path: '.env.local' });
 
 interface GenerateOptions {
   topic: string;

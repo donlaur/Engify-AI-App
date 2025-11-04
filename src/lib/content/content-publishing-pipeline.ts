@@ -379,13 +379,13 @@ Web Formatting Checklist:
    - Add visual breaks (---) between major sections
 
 4. **Markdown Syntax** (for ReactMarkdown):
-   - ✅ Proper code blocks: \`\`\`language\ncode\n\`\`\`
-   - ✅ Inline code: \`code\`
-   - ✅ Lists: Use `-` for bullets, `1.` for numbered
-   - ✅ Links: `[text](url)` format
-   - ✅ Images: `![alt text](image-url)` with descriptive alt
+   - ✅ Proper code blocks: three backticks with language
+   - ✅ Inline code: single backticks
+   - ✅ Lists: Use dash for bullets, numbers for numbered lists
+   - ✅ Links: bracket and parenthesis format
+   - ✅ Images: exclamation bracket with alt text
    - ✅ Tables: Use pipe syntax for complex data
-   - ✅ Blockquotes: `> Quote text` for callouts
+   - ✅ Blockquotes: greater than symbol for callouts
 
 5. **Mobile-Friendly**:
    - Short paragraphs (easier to read on mobile)
