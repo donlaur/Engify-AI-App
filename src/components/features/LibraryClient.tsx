@@ -86,28 +86,27 @@ export function LibraryClient({
     return filtered;
   }, [initialPrompts, searchQuery, selectedCategory, selectedRole, showFavoritesOnly, favorites]);
   
-  // Filter prompts using useMemo to prevent recalculations
-  const filteredPrompts = useMemo(() => {
-    let filtered = initialPrompts.filter((prompt) => {
-      const matchesSearch =
-        prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prompt.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory =
-        selectedCategory === 'all' || prompt.category === selectedCategory;
-      const matchesRole = selectedRole === 'all' || prompt.role === selectedRole;
-
-      return matchesSearch && matchesCategory && matchesRole;
-    });
-
-    // Apply favorites filter if active
-    if (showFavoritesOnly) {
-      filtered = filtered.filter((prompt) =>
-        favorites.includes(prompt.id)
-      );
+  // Track search with debounce
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
     }
-
-    return filtered;
-  }, [initialPrompts, searchQuery, selectedCategory, selectedRole, showFavoritesOnly, favorites]);
+    
+    if (searchQuery.trim()) {
+      searchTimeoutRef.current = setTimeout(() => {
+        trackSearchEvent('search', {
+          query: searchQuery,
+          result_count: filteredPrompts.length,
+        });
+      }, 500);
+    }
+    
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery, filteredPrompts.length]);
   
   // Get visible prompts (for lazy loading)
   const visiblePrompts = useMemo(() => {
