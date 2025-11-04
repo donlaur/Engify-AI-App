@@ -124,14 +124,14 @@ export default async function LearnPage() {
         {/* Pathways */}
         <div className="space-y-8">
           {verifiedPathways.map((pathway) => (
-            <Card key={pathway.id} className="overflow-hidden">
+            <Card key={pathway.id} className="group relative overflow-hidden rounded-xl border border-border/50 bg-card surface-frosted surface-frosted-hover transition-all duration-200 hover:border-primary hover:shadow-xl hover:shadow-primary/10 dark:surface-frosted dark:hover:surface-frosted-hover">
               <CardHeader className="bg-primary/5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="mb-2 text-2xl">
+                    <CardTitle className="mb-2 text-2xl text-primary-light dark:text-primary-light">
                       {pathway.title}
                     </CardTitle>
-                    <CardDescription className="text-base">
+                    <CardDescription className="text-base text-secondary-light dark:text-secondary-light">
                       {pathway.description}
                     </CardDescription>
                   </div>
@@ -163,14 +163,14 @@ export default async function LearnPage() {
                           </div>
 
                           {/* Step Content */}
-                          <Card className="flex-1">
+                          <Card className="flex-1 group relative rounded-xl border border-border/50 bg-card surface-frosted surface-frosted-hover transition-all duration-200 hover:border-primary hover:shadow-xl hover:shadow-primary/10 dark:surface-frosted dark:hover:surface-frosted-hover">
                             <CardHeader>
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
-                                  <CardTitle className="mb-2 text-lg">
+                                  <CardTitle className="mb-2 text-lg text-primary-light dark:text-primary-light">
                                     {step.title}
                                   </CardTitle>
-                                  <CardDescription>
+                                  <CardDescription className="text-secondary-light dark:text-secondary-light">
                                     {step.description}
                                   </CardDescription>
                                 </div>

@@ -7,28 +7,42 @@ import {
   generateCourseSchema,
 } from '@/lib/seo/metadata';
 import { patternRepository } from '@/lib/db/repositories/ContentService';
+import { logger } from '@/lib/logging/logger';
+
+// Mark as dynamic to prevent DYNAMIC_SERVER_USAGE errors
+// MongoDB operations trigger dynamic detection, so we must explicitly mark as dynamic
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
 
 export async function generateMetadata({
   params,
 }: {
   params: { pattern: string };
 }): Promise<Metadata> {
-  const patternSlug = decodeURIComponent(params.pattern);
-  const pattern = await patternRepository.getById(patternSlug);
+  try {
+    const patternSlug = decodeURIComponent(params.pattern);
+    const pattern = await patternRepository.getById(patternSlug);
 
-  if (!pattern) {
+    if (!pattern) {
+      return {
+        title: 'Pattern Not Found | Engify.ai',
+        description: 'The requested pattern could not be found.',
+      };
+    }
+
+    return generatePatternMetadata({
+      key: pattern.id,
+      title: pattern.name,
+      description: pattern.description,
+      benefits: pattern.bestPractices || [],
+    });
+  } catch (error) {
+    logger.error('Failed to generate pattern metadata', { error, params });
     return {
-      title: 'Pattern Not Found | Engify.ai',
-      description: 'The requested pattern could not be found.',
+      title: 'Pattern | Engify.ai',
+      description: 'Explore prompt engineering patterns.',
     };
   }
-
-  return generatePatternMetadata({
-    key: pattern.id,
-    title: pattern.name,
-    description: pattern.description,
-    benefits: pattern.bestPractices || [],
-  });
 }
 
 export default async function PatternDetailPage({
@@ -36,12 +50,13 @@ export default async function PatternDetailPage({
 }: {
   params: { pattern: string };
 }) {
-  const patternSlug = decodeURIComponent(params.pattern);
-  const pattern = await patternRepository.getById(patternSlug);
+  try {
+    const patternSlug = decodeURIComponent(params.pattern);
+    const pattern = await patternRepository.getById(patternSlug);
 
-  if (!pattern) {
-    notFound();
-  }
+    if (!pattern) {
+      notFound();
+    }
 
   // Generate Course schema for rich results
   const courseSchema = generateCourseSchema(
@@ -110,4 +125,8 @@ export default async function PatternDetailPage({
       <PatternDetailClient pattern={pattern} />
     </>
   );
+  } catch (error) {
+    logger.error('Failed to load pattern detail page', { error, params });
+    throw error; // Let Next.js error boundary handle it
+  }
 }

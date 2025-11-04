@@ -192,7 +192,11 @@ export function PatternsClient({
               <Badge
                 key={cat.value}
                 variant={selectedCategory === cat.value ? 'default' : 'outline'}
-                className="cursor-pointer"
+                className={`cursor-pointer transition-colors ${
+                  selectedCategory === cat.value
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'hover:bg-accent'
+                }`}
                 onClick={() => setSelectedCategory(cat.value)}
               >
                 {cat.name}
@@ -207,7 +211,11 @@ export function PatternsClient({
               <Badge
                 key={level.value}
                 variant={selectedLevel === level.value ? 'default' : 'outline'}
-                className="cursor-pointer"
+                className={`cursor-pointer transition-colors ${
+                  selectedLevel === level.value
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'hover:bg-accent'
+                }`}
                 onClick={() => setSelectedLevel(level.value)}
               >
                 {level.name}
@@ -218,86 +226,66 @@ export function PatternsClient({
       </div>
 
       {/* Patterns Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
         {filteredPatterns.map((pattern) => {
           const Icon = iconMap[pattern.id] || iconMap.default;
           return (
             <Card
               key={pattern.id}
-              className="transition-shadow hover:shadow-lg"
+              className="group relative flex h-full flex-col rounded-xl border border-border/50 bg-card surface-frosted surface-frosted-hover transition-all duration-200 hover:border-primary hover:shadow-xl hover:shadow-primary/10 dark:surface-frosted dark:hover:surface-frosted-hover"
             >
-              <CardHeader>
-                <div className="mb-2 flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-primary/10 p-2">
-                      <Icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-primary-light dark:text-primary-light text-lg">
-                        {pattern.name}
-                      </CardTitle>
-                      <Badge
-                        variant="outline"
-                        className="mt-1 border-brand-blue text-xs text-brand-blue dark:border-brand-blue dark:text-brand-blue"
-                      >
-                        {pattern.category}
-                      </Badge>
-                    </div>
+              <CardHeader className="flex-1">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 space-y-1">
+                    <CardTitle className="text-lg transition-colors group-hover:text-white dark:group-hover:text-white">
+                      {pattern.name}
+                    </CardTitle>
+                    <CardDescription className="text-secondary-light dark:text-secondary-light leading-relaxed">
+                      {pattern.description}
+                    </CardDescription>
                   </div>
                   <Badge className={getLevelColor(pattern.level)}>
                     {pattern.level}
                   </Badge>
                 </div>
-                <CardDescription className="text-secondary-light dark:text-secondary-light mt-3 leading-relaxed">
-                  {pattern.description}
-                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <Link
-                  href={`/patterns/${encodeURIComponent(pattern.id)}`}
-                  className="link-primary dark:link-primary group flex w-full items-center justify-center text-base font-medium"
+              <CardContent className="flex-shrink-0 space-y-3">
+                <Badge
+                  variant="outline"
+                  className="border-brand-blue/30 bg-brand-blue/20 text-xs text-brand-blue dark:border-brand-blue/30 dark:bg-brand-blue/20 dark:text-brand-blue"
                 >
-                  Learn More
-                  <Icons.arrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </CardContent>
-              <CardContent className="space-y-4">
-                {/* Example */}
-                {pattern.example && (
-                  <div>
-                    <p className="text-tertiary dark:text-tertiary mb-2 text-sm font-medium">
-                      Example:
-                    </p>
-                    <div className="rounded-md border border-border/50 bg-muted/50 p-3">
-                      <code className="text-secondary-light dark:text-secondary-light text-xs">
-                        {pattern.example}
-                      </code>
-                    </div>
-                  </div>
-                )}
-
+                  {pattern.category}
+                </Badge>
                 {/* Use Cases */}
                 {pattern.useCases && pattern.useCases.length > 0 && (
-                  <div>
-                    <p className="text-tertiary dark:text-tertiary mb-2 text-sm font-medium">
-                      Use Cases:
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {pattern.useCases
-                        .slice(0, 3)
-                        .map((useCase: string, idx: number) => (
-                          <Badge
-                            key={idx}
-                            variant="secondary"
-                            className="border-brand-blue/30 bg-brand-blue/20 text-xs text-brand-blue dark:border-brand-blue/30 dark:bg-brand-blue/20 dark:text-brand-blue"
-                          >
-                            {useCase}
-                          </Badge>
-                        ))}
-                    </div>
+                  <div className="flex flex-wrap gap-1">
+                    {pattern.useCases
+                      .slice(0, 3)
+                      .map((useCase: string, idx: number) => (
+                        <Badge
+                          key={idx}
+                          variant="secondary"
+                          className="border-brand-blue/30 bg-brand-blue/20 text-xs text-brand-blue dark:border-brand-blue/30 dark:bg-brand-blue/20 dark:text-brand-blue"
+                        >
+                          {useCase}
+                        </Badge>
+                      ))}
                   </div>
                 )}
               </CardContent>
+              <CardFooter className="flex flex-shrink-0 items-center justify-between gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="transition-colors hover:bg-primary hover:text-primary-foreground"
+                >
+                  <Link href={`/patterns/${encodeURIComponent(pattern.id)}`}>
+                    Learn More
+                    <Icons.arrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardFooter>
             </Card>
           );
         })}
