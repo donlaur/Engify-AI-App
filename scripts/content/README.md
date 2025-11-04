@@ -11,6 +11,7 @@ Enterprise-grade content generation and publishing tools for Engify.ai.
 Universal article publisher for learning resources.
 
 **Usage:**
+
 ```bash
 # Publish new article
 tsx scripts/content/publish-article.ts content/drafts/my-article.md
@@ -26,6 +27,7 @@ tsx scripts/content/publish-article.ts content/drafts/my-article.md --draft
 ```
 
 **Required Frontmatter:**
+
 ```yaml
 ---
 title: "Your Article Title"
@@ -40,6 +42,7 @@ level: "intermediate" (optional: beginner|intermediate|advanced)
 ```
 
 **Features:**
+
 - ✅ Automatic slug generation
 - ✅ Markdown → HTML conversion
 - ✅ Automatic read time calculation
@@ -57,6 +60,7 @@ level: "intermediate" (optional: beginner|intermediate|advanced)
 6-agent pipeline for generating SEO-rich, human-sounding articles.
 
 **Agents:**
+
 1. Content Generator (GPT-4 Turbo)
 2. SEO Specialist (keyword optimization)
 3. Human Tone Editor (removes AI patterns)
@@ -65,6 +69,7 @@ level: "intermediate" (optional: beginner|intermediate|advanced)
 6. Final Publisher (format & metadata)
 
 **Usage:**
+
 ```bash
 # See docs/content/MULTI_AGENT_SYSTEMS.md
 tsx scripts/content/generate-article.ts "Topic Here"
@@ -75,11 +80,13 @@ tsx scripts/content/generate-article.ts "Topic Here"
 3-agent editorial review system for existing content.
 
 **Agents:**
+
 1. Content Editor (flow & readability)
 2. Visual Designer (image suggestions)
 3. Actionability Expert (practical tips)
 
 **Usage:**
+
 ```bash
 tsx scripts/content/review-and-improve-article.ts
 ```
@@ -93,11 +100,13 @@ tsx scripts/content/review-and-improve-article.ts
 Guide for creating article images with templates.
 
 **Usage:**
+
 ```bash
 tsx scripts/content/generate-article-images.ts
 ```
 
 **Outputs:**
+
 - DALL-E prompts
 - Excalidraw templates
 - Carbon.now.sh instructions
@@ -112,9 +121,56 @@ tsx scripts/content/generate-article-images.ts
 Bulk import of articles and playbooks.
 
 **Usage:**
+
 ```bash
 tsx scripts/data/import-content-bulk.ts
 ```
+
+### `generate-ai-model-pages.ts` ✨ NEW
+
+Batch generator for AI model content pages using multi-agent pipeline.
+
+**Usage:**
+
+```bash
+# Generate all AI models (GPT-5, Claude 4.5, Gemini 2.5, etc.)
+tsx scripts/content/generate-ai-model-pages.ts
+
+# Generate specific model
+tsx scripts/content/generate-ai-model-pages.ts --model=gpt-5
+```
+
+**Features:**
+
+- Priority-based generation (high urgency first)
+- SEO-optimized frontmatter
+- Multi-agent quality review
+- Automatic metadata generation
+
+**Output:** `content/ai-models/[slug].md`
+
+### `generate-ai-tool-pages.ts` ✨ NEW
+
+Batch generator for AI developer tool content pages.
+
+**Usage:**
+
+```bash
+# Generate all AI tools (Cursor, Copilot, Windsurf, etc.)
+tsx scripts/content/generate-ai-tool-pages.ts
+
+# Generate specific tool
+tsx scripts/content/generate-ai-tool-pages.ts --tool=cursor
+```
+
+**Features:**
+
+- Market share data integration
+- Comparison-ready content
+- Developer-focused tone
+- Pricing analysis
+
+**Output:** `content/ai-tools/[slug].md`
 
 ---
 
@@ -166,27 +222,31 @@ tsx scripts/data/import-content-bulk.ts
 ## 🚀 Quick Start
 
 **1. Write Article:**
+
 ```markdown
 ---
-title: "My Article Title"
-description: "Brief description"
-keywords: ["tag1", "tag2"]
+title: 'My Article Title'
+description: 'Brief description'
+keywords: ['tag1', 'tag2']
 ---
 
 Your content here...
 ```
 
 **2. Generate Images (optional):**
+
 ```bash
 tsx scripts/content/generate-article-images.ts
 ```
 
 **3. Publish:**
+
 ```bash
 tsx scripts/content/publish-article.ts content/drafts/my-article.md --featured
 ```
 
 **4. Verify:**
+
 ```
 https://engify.ai/learn/my-article-title
 ```
@@ -210,4 +270,3 @@ https://engify.ai/learn/my-article-title
 
 **Last Updated:** November 2, 2025  
 **Maintainer:** Engify.ai Team
-
