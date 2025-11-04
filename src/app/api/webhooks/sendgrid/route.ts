@@ -86,21 +86,24 @@ async function processEmailEvent(event: SendGridEvent) {
       logger.warn('Email failed', {
         email: event.email,
         reason: event.reason,
+        messageId: event.sg_message_id,
       });
       break;
 
     case 'click':
       // Track link clicks for analytics
-      logger.debug('Email link clicked', {
+      logger.info('Email link clicked', {
         email: event.email,
         url: event.url,
+        messageId: event.sg_message_id,
       });
       break;
 
     case 'open':
       // Track email opens
-      logger.debug('Email opened', {
+      logger.info('Email opened', {
         email: event.email,
+        messageId: event.sg_message_id,
       });
       break;
   }
@@ -186,9 +189,11 @@ async function processInboundEmail(email: SendGridInboundEmail) {
     },
   });
 
-  // Log queued email (using audit log in production)
-  logger.debug('Queued inbound email', {
+  // Log queued email
+  logger.info('Inbound email queued for processing', {
     from: email.from,
+    to: email.to,
+    subject: email.subject,
     contentType: processingJob.contentType,
     priority: processingJob.priority,
   });
@@ -209,9 +214,7 @@ function verifyWebhookSignature(
     const publicKey = process.env.SENDGRID_WEBHOOK_PUBLIC_KEY;
 
     if (!publicKey) {
-      logger.warn(
-        'SENDGRID_WEBHOOK_PUBLIC_KEY not set - skipping signature verification'
-      );
+      logger.warn('SENDGRID_WEBHOOK_PUBLIC_KEY not set - skipping signature verification');
       return true; // Allow in dev, but log warning
     }
 

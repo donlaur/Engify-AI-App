@@ -162,20 +162,31 @@ async function processSMSStatus(callback: TwilioStatusCallback) {
   // Handle specific statuses
   switch (status) {
     case 'delivered':
-      logger.debug('SMS delivered', { messageId });
+      logger.info('SMS delivered', {
+        messageId,
+        to: callback.To,
+        from: callback.From,
+      });
       break;
 
     case 'failed':
     case 'undelivered':
-      logger.warn('SMS failed', {
+      logger.error('SMS failed', {
         messageId,
+        to: callback.To,
+        from: callback.From,
+        errorCode: callback.ErrorCode,
         errorMessage: callback.ErrorMessage,
       });
       // Could trigger notification or retry logic here
       break;
 
     case 'sent':
-      logger.debug('SMS sent', { messageId });
+      logger.info('SMS sent', {
+        messageId,
+        to: callback.To,
+        from: callback.From,
+      });
       break;
   }
 }

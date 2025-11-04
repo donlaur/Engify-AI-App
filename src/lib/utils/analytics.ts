@@ -14,7 +14,11 @@ export interface AnalyticsEvent {
 export function trackEvent(event: AnalyticsEvent): void {
   // Log analytics events for debugging/development
   if (process.env.NODE_ENV === 'development') {
-    logger.debug('Analytics event', { event });
+    logger.debug('Analytics event', {
+      eventName: event.name,
+      properties: event.properties,
+      userId: event.userId,
+    });
   }
   
   // TODO: Integrate with analytics provider (PostHog, Mixpanel, etc.)

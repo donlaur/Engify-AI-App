@@ -1,11 +1,15 @@
 /**
  * Simple Rate Limiter for Feedback APIs
  * Per-minute rate limiting (simpler than AI API rate limiting)
+ * 
+ * Uses centralized constants from src/lib/constants/rates.ts (DRY principle)
  */
 
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { auth } from '@/lib/auth';
+import { FEEDBACK_RATE_LIMITS } from '@/lib/constants/rates';
+import { ERROR_MESSAGES, getRateLimitMessage } from '@/lib/constants/messages';
 
 interface FeedbackRateLimitResult {
   allowed: boolean;
@@ -13,11 +17,6 @@ interface FeedbackRateLimitResult {
   resetAt: Date;
   reason?: string;
 }
-
-const FEEDBACK_RATE_LIMITS = {
-  anonymous: 10,    // 10 requests per minute
-  authenticated: 100, // 100 requests per minute
-} as const;
 
 /**
  * Check rate limit for feedback API
@@ -29,7 +28,7 @@ export async function checkFeedbackRateLimit(
   try {
     const session = await auth();
     const tier = session?.user ? 'authenticated' : 'anonymous';
-    const limit = FEEDBACK_RATE_LIMITS[tier];
+    const limit = FEEDBACK_RATE_LIMITS[tier].perMinute;
     
     // Use IP address as identifier for anonymous, user ID for authenticated
     const identifier = session?.user?.id || getClientIP(request);
@@ -76,7 +75,7 @@ export async function checkFeedbackRateLimit(
         allowed: false,
         remaining: 0,
         resetAt,
-        reason: `Rate limit exceeded: ${limit} requests per minute. Please try again later.`,
+        reason: getRateLimitMessage(resetAt),
       };
     }
     
