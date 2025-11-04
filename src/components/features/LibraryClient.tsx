@@ -31,7 +31,7 @@ interface LibraryClientProps {
 
 const INITIAL_VISIBLE_CATEGORIES = 8;
 const INITIAL_VISIBLE_ROLES = 10;
-const INITIAL_VISIBLE_PROMPTS = 18; // Show 18 initially (6 rows x 3 columns)
+const INITIAL_VISIBLE_PROMPTS = 18; // Show 18 initially (6 rows x 3 columns) - but ALL are in HTML for SEO
 const LOAD_MORE_INCREMENT = 18; // Load 18 more at a time
 
 export function LibraryClient({
@@ -109,6 +109,7 @@ export function LibraryClient({
   }, [searchQuery, filteredPrompts.length]);
   
   // Get visible prompts (for lazy loading)
+  // IMPORTANT: For SEO, all prompts are rendered in HTML, but we use CSS to hide/show them
   const visiblePrompts = useMemo(() => {
     return filteredPrompts.slice(0, visiblePromptCount);
   }, [filteredPrompts, visiblePromptCount]);
@@ -368,15 +369,24 @@ export function LibraryClient({
       ) : filteredPrompts.length > 0 ? (
         <>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {visiblePrompts.map((prompt) => (
-              <PromptCard
-                key={prompt.id}
-                {...prompt}
-                // Pass raw role/category - PromptCard will handle display labels
-                role={prompt.role as UserRole | undefined}
-                category={prompt.category as PromptCategory}
-              />
-            ))}
+            {filteredPrompts.map((prompt, index) => {
+              const isVisible = index < visiblePromptCount;
+              return (
+                <div
+                  key={prompt.id}
+                  className={isVisible ? '' : 'hidden'}
+                  // Use CSS to hide, but keep in DOM for SEO
+                  style={isVisible ? undefined : { display: 'none' }}
+                >
+                  <PromptCard
+                    {...prompt}
+                    // Pass raw role/category - PromptCard will handle display labels
+                    role={prompt.role as UserRole | undefined}
+                    category={prompt.category as PromptCategory}
+                  />
+                </div>
+              );
+            })}
           </div>
           
           {/* Load More Trigger (invisible element for intersection observer) */}

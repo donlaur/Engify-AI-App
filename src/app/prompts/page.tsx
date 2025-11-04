@@ -87,7 +87,7 @@ export default async function LibraryPage() {
 
   const totalPrompts = prompts.length;
 
-  // Generate JSON-LD structured data for SEO
+  // Generate JSON-LD structured data for SEO - include ALL prompts
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -97,7 +97,7 @@ export default async function LibraryPage() {
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: totalPrompts,
-      itemListElement: prompts.slice(0, 10).map((prompt, index) => ({
+      itemListElement: prompts.map((prompt, index) => ({
         '@type': 'ListItem',
         position: index + 1,
         item: {
