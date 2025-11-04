@@ -46,6 +46,8 @@ export interface UpdatePromptData {
   content?: string;
   category?: string;
   role?: string;
+  pattern?: string;
+  slug?: string; // Allow updating slug
   tags?: string[];
   difficulty?: string;
   estimatedTime?: number;

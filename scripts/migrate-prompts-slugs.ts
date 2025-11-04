@@ -1,12 +1,21 @@
+#!/usr/bin/env tsx
+
 /**
  * Migration Script: Backfill Prompts with Slugs
- * 
+ *
  * This script:
  * 1. Fetches all prompts from MongoDB
  * 2. Generates slugs for prompts missing slugs
  * 3. Updates prompt documents with slug field
  * 4. Ensures slugs are unique (handles duplicates)
+ *
+ * Usage:
+ *   tsx scripts/migrate-prompts-slugs.ts
  */
+
+// IMPORTANT: Load environment variables FIRST before any imports
+import { config } from 'dotenv';
+config({ path: '.env.local' });
 
 import { getDb } from '@/lib/mongodb';
 import { generateSlug } from '@/lib/utils/slug';
@@ -90,4 +99,3 @@ migratePromptsSlugs()
     console.error('❌ Migration script failed:', error);
     process.exit(1);
   });
-

@@ -212,6 +212,7 @@ export function PromptCard(props: PromptCardProps) {
               </Button>
             </div>
           </div>
+        </CardHeader>
         <CardContent className="flex-shrink-0 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">
@@ -224,7 +225,7 @@ export function PromptCard(props: PromptCardProps) {
             )}
           </div>
         </CardContent>
-        <CardFooter className="flex-shrink-0 flex items-center justify-between gap-2">
+        <CardFooter className="flex flex-shrink-0 items-center justify-between gap-2">
           <Button
             variant="ghost"
             size="sm"
