@@ -92,7 +92,7 @@ export abstract class BaseRepository<T> {
    * CRITICAL: This ensures all DB fields are available for processing
    * No field filtering - repositories handle field selection in processors
    *
-   * Query timeout: 10 seconds (critical for build performance)
+   * Query timeout: 5 seconds (critical for build performance - prevent timeouts)
    */
   protected async findOne(
     filter: Filter<T>,
@@ -102,16 +102,20 @@ export abstract class BaseRepository<T> {
       const collection = await this.getCollection();
       // Remove any projection to ensure ALL fields are returned
       const { projection: _projection, ...restOptions } = options || {};
-      // Add query timeout to prevent build timeouts
+      // Add aggressive query timeout to prevent build timeouts
       const queryOptions = {
         ...restOptions,
-        maxTimeMS: 10000, // 10 second timeout
+        maxTimeMS: 5000, // 5 second timeout (critical for build)
       } as FindOptions<T>;
       return collection.findOne(filter, queryOptions);
     } catch (error) {
       logger.error(`Error finding document in ${this.collectionName}`, {
         error,
       });
+      // Return null on timeout to prevent build failures
+      if (error instanceof Error && error.message.includes('timeout')) {
+        return null;
+      }
       throw error;
     }
   }

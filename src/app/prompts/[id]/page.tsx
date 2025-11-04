@@ -62,41 +62,20 @@ function enrichPromptDescription(
   return descriptionParts.join(' ');
 }
 
-// Use ISR (Incremental Static Regeneration) instead of full SSG
-// This prevents build timeouts by generating pages on-demand
+// Use ISR (Incremental Static Regeneration) - fully dynamic
+// All pages generate on-demand when first accessed
 // Pages are cached for 1 hour after first generation
+// This prevents build timeouts completely
 export const revalidate = 3600; // Revalidate every hour (ISR)
+export const dynamic = 'force-dynamic'; // Force dynamic rendering to prevent build timeouts
 
-// Generate static params for ONLY top 10 featured prompts (prevents build timeouts)
-// All other prompts will be generated on-demand via ISR
-// CRITICAL: Minimal pre-generation to ensure build completes successfully
+// CRITICAL: No pre-generation - all pages are fully dynamic (ISR)
+// This prevents build timeouts completely
+// Pages generate on-demand when first accessed, then cache for 1 hour
 export async function generateStaticParams() {
-  try {
-    // Use promptRepository to fetch only IDs efficiently
-    const { promptRepository } = await import(
-      '@/lib/db/repositories/ContentService'
-    );
-
-    // CRITICAL: Only pre-generate TOP 10 featured prompts (ID only, no slugs)
-    // This minimizes build time while ensuring featured content is pre-rendered
-    const prompts = await promptRepository.getAll();
-
-    // Get only featured prompts, sorted by views, limit to 10
-    const featuredPrompts = prompts
-      .filter((p) => p.isFeatured === true)
-      .sort((a, b) => (b.views || 0) - (a.views || 0))
-      .slice(0, 10); // Only top 10 featured prompts
-
-    // Return ONLY ID routes (no slug routes to minimize build time)
-    return featuredPrompts.map((prompt) => ({
-      id: prompt.id,
-    }));
-  } catch (error) {
-    // Fallback: return empty array if fetch fails (build will still work)
-    // Pages will be generated on-demand via ISR
-    console.error('Failed to generate static params:', error);
-    return [];
-  }
+  // Return empty array - all prompts generate on-demand via ISR
+  // This ensures build completes quickly without timeouts
+  return [];
 }
 
 // Dynamic metadata for SEO
