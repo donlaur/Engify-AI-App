@@ -97,26 +97,28 @@ export default async function LearnPage() {
 
         {/* Stats */}
         <div className="mb-8 grid gap-4 md:grid-cols-3">
-          <Card>
+          <Card className="surface-frosted">
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold">
+              <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
                 {pathwayCount}
               </div>
-              <p className="text-xs text-muted-foreground">Learning Pathways</p>
+              <p className="text-tertiary dark:text-tertiary text-xs">Learning Pathways</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="surface-frosted">
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold">
+              <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
                 {totalSteps}
               </div>
-              <p className="text-xs text-muted-foreground">Total Steps</p>
+              <p className="text-tertiary dark:text-tertiary text-xs">Total Steps</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="surface-frosted">
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold">{learningResources.length}</div>
-              <p className="text-xs text-muted-foreground">Learning Articles</p>
+              <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
+                {learningResources.length}
+              </div>
+              <p className="text-tertiary dark:text-tertiary text-xs">Learning Articles</p>
             </CardContent>
           </Card>
         </div>
