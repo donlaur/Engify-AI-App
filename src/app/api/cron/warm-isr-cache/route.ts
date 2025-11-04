@@ -14,8 +14,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { promptRepository } from '@/lib/db/repositories/ContentService';
-import { getPromptSlug } from '@/lib/utils/slug';
+import { getPromptSlug, generateSlug } from '@/lib/utils/slug';
 import { logger } from '@/lib/logging/logger';
+import { getDb } from '@/lib/mongodb';
+import { logAuditEvent } from '@/server/middleware/audit';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 const CRON_SECRET = process.env.CRON_SECRET || process.env.VERCEL_CRON_SECRET;
@@ -101,6 +103,7 @@ export async function GET(request: NextRequest) {
     const results = {
       warmed: [] as string[],
       failed: [] as string[],
+      slugsUpdated: 0,
       stats: {
         total: 0,
         success: 0,
@@ -112,6 +115,53 @@ export async function GET(request: NextRequest) {
     if (type === 'prompts' || type === 'all') {
       // Get featured/popular prompts from MongoDB
       const allPrompts = await promptRepository.getAll();
+      
+      // Verify and update slugs for prompts missing them
+      let slugsUpdated = 0;
+      const db = await getDb();
+      const collection = db.collection('prompts');
+      
+      for (const prompt of allPrompts) {
+        const expectedSlug = getPromptSlug(prompt);
+        
+        // If prompt has no slug or slug doesn't match expected, update it
+        if (!prompt.slug || prompt.slug !== expectedSlug) {
+          try {
+            await collection.updateOne(
+              { id: prompt.id },
+              {
+                $set: {
+                  slug: expectedSlug,
+                  updatedAt: new Date(),
+                },
+              }
+            );
+            slugsUpdated++;
+            logger.debug(`Updated slug for prompt ${prompt.id}: ${expectedSlug}`);
+            
+            // Audit log: Slug update via cron
+            await logAuditEvent({
+              eventType: 'admin.content.updated',
+              userId: 'system',
+              metadata: {
+                promptId: prompt.id,
+                action: 'slug_update',
+                source: 'isr_cache_warming',
+                oldSlug: prompt.slug || null,
+                newSlug: expectedSlug,
+              },
+            });
+          } catch (error) {
+            logger.error(`Failed to update slug for prompt ${prompt.id}`, { error });
+          }
+        }
+      }
+      
+      if (slugsUpdated > 0) {
+        logger.info(`Updated ${slugsUpdated} prompt slugs during cache warming`);
+      }
+      
+      results.slugsUpdated = slugsUpdated;
       
       // Sort by featured and views, take top prompts
       const promptsToWarm = allPrompts
@@ -192,11 +242,12 @@ export async function GET(request: NextRequest) {
       success: true,
       type,
       limit,
+      slugsUpdated,
       ...results.stats,
       averageDurationMs: averageDuration,
       warmed: results.warmed.slice(0, 10), // Show first 10
       failed: results.failed.slice(0, 10), // Show first 10
-      message: `Warmed ${results.stats.success} pages, ${results.stats.failed} failed`,
+      message: `Warmed ${results.stats.success} pages, ${results.stats.failed} failed${slugsUpdated > 0 ? `, ${slugsUpdated} slugs updated` : ''}`,
     });
   } catch (error) {
     logger.error('Error warming ISR cache', { error });

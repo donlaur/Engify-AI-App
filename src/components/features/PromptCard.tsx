@@ -117,8 +117,8 @@ export function PromptCard(props: PromptCardProps) {
 
   return (
     <>
-      <Card className="group relative rounded-xl transition-all duration-200 hover:border-primary hover:shadow-xl hover:shadow-primary/10">
-        <CardHeader>
+      <Card className="group relative flex h-full flex-col rounded-xl transition-all duration-200 hover:border-primary hover:shadow-xl hover:shadow-primary/10">
+        <CardHeader className="flex-1">
           <div className="flex items-start justify-between">
             <Link
               href={`/prompts/${promptSlug}`}
@@ -212,8 +212,7 @@ export function PromptCard(props: PromptCardProps) {
               </Button>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="flex-shrink-0 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">
               {categoryLabels[category] || category}
@@ -225,12 +224,12 @@ export function PromptCard(props: PromptCardProps) {
             )}
           </div>
         </CardContent>
-        <CardFooter className="flex items-center justify-between">
+        <CardFooter className="flex-shrink-0 flex items-center justify-between gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleView}
-            className="transition-colors group-hover:bg-primary group-hover:text-primary-foreground"
+            className="transition-colors hover:bg-primary hover:text-primary-foreground"
           >
             Quick View
             <Icons.arrowRight className="ml-2 h-4 w-4" />
@@ -239,7 +238,7 @@ export function PromptCard(props: PromptCardProps) {
             variant="outline"
             size="sm"
             asChild
-            className="transition-colors group-hover:bg-primary group-hover:text-primary-foreground"
+            className="transition-colors hover:bg-primary hover:text-primary-foreground"
           >
             <Link href={`/prompts/${promptSlug}`}>
               View Page

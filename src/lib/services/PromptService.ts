@@ -30,6 +30,7 @@ export interface CreatePromptData {
   category: string;
   role?: string;
   pattern?: string;
+  slug?: string; // Optional - will be generated if not provided
   tags?: string[];
   difficulty?: string;
   estimatedTime?: number;
@@ -99,13 +100,19 @@ export class PromptService {
       throw duplicateError;
     }
 
+    // Generate slug from title if not provided
+    const { generateSlug } = await import('@/lib/utils/slug');
+    const slug = promptData.slug || generateSlug(promptData.title);
+
     // Create prompt with defaults
     const newPromptData = {
       title: promptData.title,
+      slug, // Store slug in database
       description: promptData.description || '',
       content: promptData.content,
       category: promptData.category,
       role: promptData.role || null,
+      pattern: promptData.pattern || null,
       tags: promptData.tags || [],
       difficulty: promptData.difficulty || 'beginner',
       estimatedTime: promptData.estimatedTime || null,
@@ -166,9 +173,16 @@ export class PromptService {
       throw new Error('Description must be 1000 characters or less');
     }
 
+    // Regenerate slug if title changed
+    const updateData = { ...promptData };
+    if (promptData.title && existingPrompt.title !== promptData.title) {
+      const { generateSlug } = await import('@/lib/utils/slug');
+      updateData.slug = generateSlug(promptData.title);
+    }
+
     return await this.promptRepository.update(
       id,
-      promptData as unknown as Partial<Prompt>
+      updateData as unknown as Partial<Prompt>
     );
   }
 

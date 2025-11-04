@@ -205,6 +205,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Get all prompts for dynamic routes from MongoDB
   let prompts: Array<{
     id: string;
+    slug?: string;
+    title?: string;
     category?: string;
     role?: string;
     pattern?: string;
@@ -218,6 +220,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const promptsCollection = await db.collection('prompts').find({}).toArray();
     prompts = promptsCollection.map((p: any) => ({
       id: p.id || p._id?.toString(),
+      slug: p.slug, // Include slug from database
+      title: p.title, // Include title for slug generation fallback
       category: p.category,
       role: p.role,
       pattern: p.pattern,

@@ -368,7 +368,7 @@ export function LibraryClient({
         </div>
       ) : filteredPrompts.length > 0 ? (
         <>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
             {filteredPrompts.map((prompt, index) => {
               const isVisible = index < visiblePromptCount;
               return (
