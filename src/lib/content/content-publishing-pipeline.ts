@@ -16,6 +16,7 @@
  */
 
 import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFactoryWithRegistry';
+import { getModelsByProvider, getModel } from '@/lib/services/AIModelRegistry';
 
 /**
  * BUSINESS CONTEXT for Content Generation
@@ -40,8 +41,9 @@ import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFac
 export interface ContentPublishingAgent {
   role: string;
   name: string;
-  model: string;
-  provider: string; // Allow provider names like 'claude-sonnet'
+  model: string; // Model ID from DB (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022')
+  provider: string; // Provider name (e.g., 'openai', 'claude-sonnet')
+  preferredModelId?: string; // Optional: specific model ID preference (falls back to DB query)
   systemPrompt: string;
   temperature: number;
   maxTokens: number;
@@ -599,11 +601,63 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
 
   /**
    * Run a single agent to generate or review content
+   * Uses models from database registry, falls back to provider defaults
    */
   private async runAgent(agent: ContentPublishingAgent, prompt: string): Promise<string> {
-    const provider = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+    // Try to get model from DB registry first
+    let providerInstance;
+    
+    try {
+      // Query DB for available models by provider
+      const providerType = agent.provider.includes('openai') ? 'openai' :
+                           agent.provider.includes('claude') ? 'anthropic' :
+                           agent.provider.includes('gemini') ? 'google' :
+                           agent.provider.includes('groq') ? 'groq' :
+                           'openai';
 
-    const response = await provider.execute({
+      const availableModels = await getModelsByProvider(providerType);
+      
+      // Use preferred model ID if specified, otherwise use agent.model, otherwise find best match
+      const modelId = agent.preferredModelId || agent.model;
+      const dbModel = availableModels.find(m => 
+        m.id === modelId || 
+        m.name === modelId ||
+        (agent.preferredModelId && m.id.includes(agent.preferredModelId))
+      );
+
+      if (dbModel && !dbModel.deprecated) {
+        // Use model from DB - create provider with specific model ID
+        const modelIdToUse = dbModel.id;
+        console.log(`   📌 Using DB model: ${modelIdToUse} for ${agent.name}`);
+        
+        // Create provider with specific model ID
+        if (providerType === 'openai') {
+          const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+          providerInstance = new OpenAIAdapter(modelIdToUse);
+        } else if (providerType === 'anthropic') {
+          const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
+          providerInstance = new ClaudeAdapter(modelIdToUse);
+        } else if (providerType === 'google') {
+          const { GeminiAdapter } = await import('@/lib/ai/v2/adapters/GeminiAdapter');
+          providerInstance = new GeminiAdapter(modelIdToUse);
+        } else if (providerType === 'groq') {
+          const { GroqAdapter } = await import('@/lib/ai/v2/adapters/GroqAdapter');
+          providerInstance = new GroqAdapter(modelIdToUse);
+        } else {
+          // Fallback to factory
+          providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+        }
+      } else {
+        // Fallback to factory method (uses DB registry or hardcoded defaults)
+        providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+      }
+    } catch (error) {
+      console.warn(`   ⚠️  Failed to query DB for models, using factory fallback:`, error);
+      // Fallback to factory method
+      providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+    }
+
+    const response = await providerInstance.execute({
       prompt: prompt,
       systemPrompt: agent.systemPrompt,
       temperature: agent.temperature,
@@ -635,7 +689,50 @@ Provide your review in JSON format as specified in your system prompt.
 `;
 
     try {
-      const provider = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+      // Use same DB-aware provider creation as runAgent
+      let providerInstance;
+      
+      try {
+        const providerType = agent.provider.includes('openai') ? 'openai' :
+                             agent.provider.includes('claude') ? 'anthropic' :
+                             agent.provider.includes('gemini') ? 'google' :
+                             agent.provider.includes('groq') ? 'groq' :
+                             'openai';
+
+        const availableModels = await getModelsByProvider(providerType);
+        const modelId = agent.preferredModelId || agent.model;
+        const dbModel = availableModels.find(m => 
+          m.id === modelId || 
+          m.name === modelId ||
+          (agent.preferredModelId && m.id.includes(agent.preferredModelId))
+        );
+
+        if (dbModel && !dbModel.deprecated) {
+          const modelIdToUse = dbModel.id;
+          
+          if (providerType === 'openai') {
+            const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+            providerInstance = new OpenAIAdapter(modelIdToUse);
+          } else if (providerType === 'anthropic') {
+            const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
+            providerInstance = new ClaudeAdapter(modelIdToUse);
+          } else if (providerType === 'google') {
+            const { GeminiAdapter } = await import('@/lib/ai/v2/adapters/GeminiAdapter');
+            providerInstance = new GeminiAdapter(modelIdToUse);
+          } else if (providerType === 'groq') {
+            const { GroqAdapter } = await import('@/lib/ai/v2/adapters/GroqAdapter');
+            providerInstance = new GroqAdapter(modelIdToUse);
+          } else {
+            providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+          }
+        } else {
+          providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+        }
+      } catch (error) {
+        providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+      }
+
+      const provider = providerInstance;
 
       // Note: JSON mode handled by adapter, not in request interface
       const response = await provider.execute({
