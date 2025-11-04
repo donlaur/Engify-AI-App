@@ -153,10 +153,7 @@ export default async function Home() {
             </h1>
 
             <p className="mx-auto max-w-3xl text-2xl font-semibold leading-relaxed text-white sm:text-3xl">
-              AI training platform for engineering teams. Train developers,
-              engineers, and product managers to use AI effectively with
-              structured learning paths, interactive workbenches, and proven
-              prompt patterns.
+              AI training platform for engineering teams. Train developers, engineers, and product managers to use AI effectively.
             </p>
 
             <div className="flex justify-center pt-8">
