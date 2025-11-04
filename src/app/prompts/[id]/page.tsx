@@ -67,8 +67,9 @@ function enrichPromptDescription(
 // Pages are cached for 1 hour after first generation
 export const revalidate = 3600; // Revalidate every hour (ISR)
 
-// Generate static params for TOP prompts only (prevents build timeouts)
-// Other prompts will be generated on-demand via ISR
+// Generate static params for ONLY top 10 featured prompts (prevents build timeouts)
+// All other prompts will be generated on-demand via ISR
+// CRITICAL: Minimal pre-generation to ensure build completes successfully
 export async function generateStaticParams() {
   try {
     // Use promptRepository to fetch only IDs efficiently
@@ -76,34 +77,20 @@ export async function generateStaticParams() {
       '@/lib/db/repositories/ContentService'
     );
 
-    // CRITICAL: Only pre-generate featured/popular prompts (limit to 50)
-    // This prevents build timeouts while still pre-generating important pages
+    // CRITICAL: Only pre-generate TOP 10 featured prompts (ID only, no slugs)
+    // This minimizes build time while ensuring featured content is pre-rendered
     const prompts = await promptRepository.getAll();
 
-    // Sort by featured and views, take top 50
-    const topPrompts = prompts
-      .sort((a, b) => {
-        // Featured first
-        if (a.isFeatured && !b.isFeatured) return -1;
-        if (!a.isFeatured && b.isFeatured) return 1;
-        // Then by views
-        return (b.views || 0) - (a.views || 0);
-      })
-      .slice(0, 50); // Only pre-generate top 50 prompts
+    // Get only featured prompts, sorted by views, limit to 10
+    const featuredPrompts = prompts
+      .filter((p) => p.isFeatured === true)
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 10); // Only top 10 featured prompts
 
-    const params: Array<{ id: string }> = [];
-
-    topPrompts.forEach((prompt) => {
-      // Add ID route
-      params.push({ id: prompt.id });
-      // Add slug route if slug exists (or generate from title)
-      const slug = getPromptSlug(prompt);
-      if (slug && slug !== prompt.id) {
-        params.push({ id: slug });
-      }
-    });
-
-    return params;
+    // Return ONLY ID routes (no slug routes to minimize build time)
+    return featuredPrompts.map((prompt) => ({
+      id: prompt.id,
+    }));
   } catch (error) {
     // Fallback: return empty array if fetch fails (build will still work)
     // Pages will be generated on-demand via ISR
