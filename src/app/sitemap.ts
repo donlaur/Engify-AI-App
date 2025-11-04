@@ -67,6 +67,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/workbench/multi-agent`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/tags`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/audit`,
       lastModified: now,
       changeFrequency: 'monthly',
@@ -255,45 +267,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  // Learning content pages (examples)
-  const learnPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/learn/prompt-engineering-101`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/learn/ai-patterns`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/learn/kernel-framework`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/learn/chain-of-thought`,
-      lastModified: now,
-      changeFrequency: 'monthly',
+  // Learning content pages - Fetch dynamically from MongoDB
+  let learnPages: MetadataRoute.Sitemap = [];
+  try {
+    const db = await getDb();
+    const learningResources = await db
+      .collection('learning_resources')
+      .find({
+        status: 'active',
+        'seo.slug': { $exists: true, $ne: null },
+      })
+      .project({
+        'seo.slug': 1,
+        updatedAt: 1,
+        publishedAt: 1,
+      })
+      .toArray();
+
+    learnPages = learningResources.map((resource: any) => ({
+      url: `${baseUrl}/learn/${resource.seo.slug}`,
+      lastModified: resource.updatedAt
+        ? new Date(resource.updatedAt)
+        : resource.publishedAt
+          ? new Date(resource.publishedAt)
+          : now,
+      changeFrequency: 'monthly' as const,
       priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/learn/few-shot-learning`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/learn/prompt-optimization`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-  ];
+    }));
+  } catch (error) {
+    console.error('Failed to fetch learning resources for sitemap:', error);
+    // Fallback to empty array if MongoDB fails
+  }
 
   // Combine all URLs
   const allPages = [
