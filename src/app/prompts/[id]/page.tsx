@@ -68,6 +68,10 @@ function enrichPromptDescription(
 // This prevents build timeouts completely
 export const revalidate = 3600; // Revalidate every hour (ISR)
 
+// Mark as dynamic to prevent DYNAMIC_SERVER_USAGE errors
+// Since we're using ISR with empty generateStaticParams, we need to explicitly mark as dynamic
+export const dynamic = 'force-dynamic';
+
 // CRITICAL: No pre-generation - all pages are fully dynamic (ISR)
 // This prevents build timeouts completely
 // Pages generate on-demand when first accessed, then cache for 1 hour
