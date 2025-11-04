@@ -153,31 +153,41 @@ Based on research:
 
 ## Unique Meta Description Strategy
 
-### Template Approach
+### Template Approach (Training-Focused)
 
 **Prompts:**
 ```
-"[Prompt Title] - [Category] prompt template for [Role]. [Brief description]. [Value prop]. Ready to use with ChatGPT, Claude, Gemini."
+"[Prompt Title] - [Category] prompt template for [Role]. Learn how to use this prompt effectively. [Brief description]. Part of Engify.ai's AI training platform for engineering teams."
 ```
 
 **Patterns:**
 ```
-"[Pattern Name] - Learn this prompt engineering pattern used by [X] prompts. [Key benefits]. Part of the PMI 7 Patterns framework."
+"[Pattern Name] - Learn this prompt engineering pattern used by [X] prompts. Master [pattern] for better AI results. Part of Engify.ai's training program for engineers."
 ```
 
 **Tags:**
 ```
-"Browse [X] prompts tagged with '[Tag]'. [Tag description]. Find prompts for [use case] and improve your prompt engineering skills."
+"Browse [X] prompts tagged with '[Tag]'. [Tag description]. Learn prompt engineering skills for [use case]. Free training resources for engineering teams."
 ```
 
 **Workbench:**
 ```
-"[Tool Name] - [What it does]. [Key features]. [Use case]. Free beta tool for engineering teams."
+"[Tool Name] - [What it does]. Train your team on [key features]. [Use case]. Free training tool for engineering teams learning AI."
 ```
 
 **Learning:**
 ```
-"[Article Title] - [Learning level] guide to [topic]. [Duration]. [Key takeaways]. Part of Engify.ai's prompt engineering education platform."
+"[Article Title] - [Learning level] training guide to [topic]. [Duration]. [Key takeaways]. Learn AI skills with Engify.ai's training platform for engineering teams."
+```
+
+**Homepage:**
+```
+"Engify.ai - AI training platform for engineering teams. Train developers, engineers, and product managers to use AI effectively. Free prompt engineering training, patterns, and learning resources."
+```
+
+**Training Pages:**
+```
+"AI Training for Engineering Teams - Help your developers master prompt engineering. Corporate training programs, structured learning pathways, and proven AI workflows for engineering departments."
 ```
 
 ---
@@ -249,16 +259,47 @@ Based on research:
 
 ---
 
+## Strategic Positioning Update
+
+**Date:** November 3, 2025  
+**Focus Shift:** From "SaaS built by AI" → **"AI training platform for engineering teams"**
+
+### New Primary Focus
+
+**Positioning:** Engify.ai is a **B2B training platform** that helps engineering companies and their teams learn to use AI better and more effectively.
+
+**Target Audience:**
+- **Primary:** Engineering Managers, Directors of Engineering, CTOs (buyers for team training)
+- **Secondary:** Individual engineers, developers, product managers (end users)
+- **Tertiary:** Corporate engineering teams (enterprise customers)
+
+**Value Proposition:** 
+- Help engineers and engineering teams master AI prompt engineering
+- Train developers, engineers, and product folks to use AI more effectively
+- Corporate training programs for engineering departments
+- Structured learning pathways for AI adoption
+
+---
+
 ## Previous SEO Strategies & Learnings
 
 ### From SEO Content Strategy (Case Studies & Tool Reviews)
 
-**Target Keywords (High Volume, High Intent):**
-- "build SaaS with AI" (1,300 searches/mo)
-- "AI augmented development" (890 searches/mo)
-- "Cursor IDE tutorial" (2,400 searches/mo)
-- "best AI coding assistant 2025" (8,900 searches/mo) 🔥🔥
-- "GitHub Copilot alternative" (5,400 searches/mo)
+**Note:** Case study content may reference "building SaaS with AI" but should be repositioned to emphasize **training and learning** rather than showcasing the build itself.
+
+**Reframed Target Keywords (Training-Focused):**
+- "AI training for engineers" (estimated 2,000+ searches/mo)
+- "prompt engineering training" (estimated 1,500+ searches/mo)
+- "enterprise AI adoption training" (estimated 1,200+ searches/mo)
+- "AI coding assistant training" (estimated 800+ searches/mo)
+- "how to train developers on AI" (estimated 600+ searches/mo)
+- "corporate AI training programs" (estimated 500+ searches/mo)
+- "AI upskilling for engineering teams" (estimated 400+ searches/mo)
+
+**Original Keywords (Keep for Tool Reviews):**
+- "best AI coding assistant 2025" (8,900 searches/mo) 🔥🔥 - Keep for `/tools` page
+- "Cursor IDE tutorial" (2,400 searches/mo) - Reframe as "Cursor training for engineers"
+- "GitHub Copilot alternative" (5,400 searches/mo) - Keep for comparison content
 
 **Content SEO Requirements:**
 - ✅ Meta titles optimized (< 60 characters)
@@ -271,7 +312,7 @@ Based on research:
 - ✅ FAQs with natural questions
 - ✅ Tables and lists for featured snippets
 
-**Implementation Status:** ✅ Done for case study and tools pages
+**Implementation Status:** ✅ Done for case study and tools pages (needs repositioning)
 
 ---
 
@@ -351,12 +392,22 @@ interface ArticleSEO {
 ### From Content Strategy (SEO Principles)
 
 **SEO-Optimized Content Must:**
-- Target high-intent keywords
+- Target high-intent keywords focused on **training and education**
 - Include Schema.org markup
 - Have internal linking strategy
 - Use shareable headlines
 
-**SEO Focus Areas:**
+**New SEO Focus Areas (Training-Focused):**
+- "AI training for engineering teams"
+- "prompt engineering training programs"
+- "corporate AI adoption training"
+- "how to train developers on AI"
+- "enterprise AI training platform"
+- "AI upskilling for engineers"
+- "engineering team AI training"
+- "multi-agent workflow training"
+
+**Supporting SEO Keywords (Technical Content):**
 - "multi-agent AI workflows"
 - "AI development best practices"
 - "enterprise AI guardrails"
@@ -366,8 +417,9 @@ interface ArticleSEO {
 
 **Every Article Must Include:**
 - SEO keywords in title, first paragraph, headings
+- **Training/education angle** - How does this help teams learn?
 - Real metrics from production (specific numbers)
-- Call-to-action for target audience
+- Call-to-action for target audience (training platform signup)
 - Schema.org markup for Google
 
 ---
@@ -410,6 +462,35 @@ interface ArticleSEO {
 
 ---
 
+## Content Repositioning Checklist
+
+### Pages That Need Repositioning
+
+**High Priority:**
+- [ ] `/learn/case-studies/7-day-saas-build` - Reframe from "building SaaS" to "training example" or "learning resource"
+- [ ] `/tools` - Keep tool reviews but add "training" angle
+- [ ] Homepage (`/`) - Emphasize training platform, not building showcase
+- [ ] `/ai-workflow` - Position as training resource, not showcase
+
+**Medium Priority:**
+- [ ] Individual prompt pages - Add training context
+- [ ] Pattern pages - Emphasize learning/mastery
+- [ ] Workbench pages - Position as training tools
+
+**Action Items:**
+- ✅ Create tags dictionary page (done)
+- ✅ Make sitemap dynamic (done)
+- ⏭️ Update meta descriptions to training focus
+- ⏭️ Reframe case study content
+- ⏭️ Update homepage messaging
+- ⏭️ Add training keywords to all pages
+- ⏭️ Implement RSS feed (from Learning Content Audit)
+- ⏭️ Add keyword research workflow (from Learning Content Audit)
+- ⏭️ Create SEO utility functions (this plan)
+- ⏭️ Ensure all pages follow consolidated checklist
+
+---
+
 ## Integration Notes
 
 **Key Takeaways from Previous Plans:**
@@ -417,14 +498,12 @@ interface ArticleSEO {
 1. **SEO Content Strategy** focuses on monetization via affiliate links - keep this separate but reference it
 2. **Learning Content Audit** has detailed SEO requirements for articles - use these as templates
 3. **Content Strategy** has general SEO principles - apply to all content types
+4. **Strategic Repositioning** - Shift from "built by AI" showcase to "AI training platform" focus
 
-**Action Items:**
-- ✅ Create tags dictionary page (done)
-- ✅ Make sitemap dynamic (done)
-- ⏭️ Implement RSS feed (from Learning Content Audit)
-- ⏭️ Add keyword research workflow (from Learning Content Audit)
-- ⏭️ Create SEO utility functions (this plan)
-- ⏭️ Ensure all pages follow consolidated checklist
+**New Strategic Focus:**
+- **Primary:** Help engineering companies train their teams
+- **Secondary:** Individual engineers learning AI skills
+- **Tertiary:** Corporate training programs
 
 ---
 
