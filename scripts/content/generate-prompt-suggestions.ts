@@ -15,6 +15,7 @@ config({ path: '.env.local' });
 
 import { patternRepository, promptRepository } from '@/lib/db/repositories/ContentService';
 import { GeminiAdapter } from '@/lib/ai/v2/adapters/GeminiAdapter';
+import { getModelsByProvider } from '@/lib/services/AIModelRegistry';
 
 interface AnalysisResult {
   suggestedPatterns: Array<{
@@ -212,14 +213,44 @@ async function generateSuggestions() {
     console.log('📝 Building analysis prompt for Gemini...\n');
     const geminiPrompt = buildGeminiPrompt(analysis);
 
-    // Initialize Gemini adapter
-    // Note: Gemini 1.5 models are sunset - use 2.0 experimental models
-    console.log('🔮 Connecting to Gemini...\n');
-    const gemini = new GeminiAdapter('gemini-2.0-flash-exp');
+    // Get valid Gemini model from database registry
+    console.log('🔮 Finding valid Gemini model from registry...\n');
+    const geminiModels = await getModelsByProvider('google');
+    
+    // Filter for active, non-deprecated models
+    const activeModels = geminiModels.filter(m => 
+      m.status !== 'deprecated' && 
+      m.status !== 'sunset' && 
+      !m.deprecated &&
+      m.isAllowed !== false
+    );
+
+    if (activeModels.length === 0) {
+      throw new Error('No valid Gemini models found in registry. Please sync models first.');
+    }
+
+    // Prefer models with "flash" or "exp" in name (free tier), fallback to first available
+    const preferredModel = activeModels.find(m => 
+      m.id.includes('flash') || m.id.includes('exp')
+    ) || activeModels[0];
+
+    const modelId = preferredModel.id;
+    console.log(`✅ Using model: ${preferredModel.name || modelId}`);
+    if (preferredModel.contextWindow) {
+      console.log(`   Context window: ${preferredModel.contextWindow.toLocaleString()} tokens`);
+    }
+    console.log(`   Status: ${preferredModel.status || 'active'}\n`);
+
+    // Initialize Gemini adapter with model from registry
+    const gemini = new GeminiAdapter(modelId);
 
     // Generate suggestions with retry logic for rate limits
     console.log('💭 Generating suggestions (this may take a minute)...\n');
     console.log('⚠️  Note: If you hit rate limits, wait a few minutes and try again.\n');
+    console.log(`📊 Model info: ${preferredModel.name || modelId}`);
+    if (preferredModel.contextWindow) {
+      console.log(`   Context window: ${preferredModel.contextWindow.toLocaleString()} tokens\n`);
+    }
     
     let response;
     let retries = 3;
