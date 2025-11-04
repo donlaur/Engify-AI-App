@@ -13,7 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { promptRepository } from '@/lib/db/repositories/ContentService';
+import { promptRepository, patternRepository } from '@/lib/db/repositories/ContentService';
 import { getPromptSlug, generateSlug } from '@/lib/utils/slug';
 import { logger } from '@/lib/logging/logger';
 import { getDb } from '@/lib/mongodb';
@@ -196,6 +196,38 @@ export async function GET(request: NextRequest) {
         
         // Small delay between requests to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+
+    // Also warm up pattern detail pages if type is 'all' or 'patterns'
+    if (type === 'patterns' || type === 'all') {
+      try {
+        const allPatterns = await patternRepository.getAll();
+        const patternsToWarm = allPatterns.slice(0, limit); // Warm top patterns
+        
+        logger.info(`Warming ${patternsToWarm.length} pattern detail pages`);
+        
+        for (const pattern of patternsToWarm) {
+          const url = `${APP_URL}/patterns/${encodeURIComponent(pattern.id)}`;
+          const result = await warmPage(url);
+          results.stats.total++;
+          
+          if (result.success) {
+            results.stats.success++;
+            results.warmed.push(url);
+          } else {
+            results.stats.failed++;
+            results.failed.push(url);
+          }
+          
+          results.stats.totalDuration += result.duration;
+          
+          // Small delay between requests
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      } catch (error) {
+        logger.error('Failed to warm pattern pages', { error });
+        // Don't fail entire cron job if pattern warming fails
       }
     }
 
