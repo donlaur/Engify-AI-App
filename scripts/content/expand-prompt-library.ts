@@ -547,20 +547,17 @@ async function saveNewPromptsToDatabase(prompts: GeneratedPrompt[], db: any, dry
 
   console.log(`\n💾 SAVING ${prompts.length} NEW PROMPTS TO DATABASE\n`);
   
-  // Generate slugs helper
-  function generateSlug(title: string, id: string): string {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .substring(0, 100) + `-${id}`;
+  // Generate slugs helper - CLEAN slugs (no IDs)
+  function generateSlug(title: string): string {
+    const { generateSlug: generateCleanSlug } = require('@/lib/utils/slug');
+    return generateCleanSlug(title);
   }
   
   const promptsToSave = prompts.map(p => {
     const id = `generated-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     return {
       id,
-      slug: generateSlug(p.title, id),
+      slug: generateSlug(p.title), // Clean slug, no ID
       title: p.title,
       description: p.description,
       content: p.content,

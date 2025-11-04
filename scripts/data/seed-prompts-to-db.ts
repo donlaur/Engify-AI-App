@@ -6,15 +6,10 @@
 import { MongoClient } from 'mongodb';
 import { getSeedPromptsWithTimestamps } from '../src/data/seed-prompts';
 
-// Generate SEO-friendly slug from title
-function generateSlug(title: string, id: string): string {
-  return (
-    title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .substring(0, 60) + `-${id}`
-  );
+// Generate SEO-friendly slug from title (CLEAN - no IDs)
+function generateSlug(title: string): string {
+  const { generateSlug: generateCleanSlug } = require('@/lib/utils/slug');
+  return generateCleanSlug(title);
 }
 
 async function seedDatabase() {
@@ -66,7 +61,7 @@ async function seedDatabase() {
     // Add slugs to each prompt
     const promptsWithSlugs = prompts.map((prompt) => ({
       ...prompt,
-      slug: generateSlug(prompt.title, prompt.id),
+      slug: generateSlug(prompt.title), // Clean slug, no ID
       createdAt: new Date(),
       updatedAt: new Date(),
     }));

@@ -103,13 +103,19 @@ export class PromptService {
     }
 
     // Generate slug from title if not provided
-    const { generateSlug } = await import('@/lib/utils/slug');
-    const slug = promptData.slug || generateSlug(promptData.title);
+    // IMPORTANT: Do NOT append ID - slugs should be clean and SEO-friendly
+    const { generateSlug, generateUniqueSlug } = await import('@/lib/utils/slug');
+    
+    // Check for existing slugs to ensure uniqueness
+    const existingPrompts = await this.promptRepository.findAll();
+    const existingSlugs = new Set(existingPrompts.map(p => p.slug).filter(Boolean) as string[]);
+    
+    const slug = promptData.slug || generateUniqueSlug(promptData.title, existingSlugs);
 
     // Create prompt with defaults
     const newPromptData = {
       title: promptData.title,
-      slug, // Store slug in database
+      slug, // Store clean slug (no ID)
       description: promptData.description || '',
       content: promptData.content,
       category: promptData.category,
@@ -175,11 +181,21 @@ export class PromptService {
       throw new Error('Description must be 1000 characters or less');
     }
 
-    // Regenerate slug if title changed
+    // Regenerate slug if title changed (clean slug, no ID)
     const updateData = { ...promptData };
     if (promptData.title && existingPrompt.title !== promptData.title) {
-      const { generateSlug } = await import('@/lib/utils/slug');
-      updateData.slug = generateSlug(promptData.title);
+      const { generateSlug, generateUniqueSlug } = await import('@/lib/utils/slug');
+      
+      // Check for existing slugs to ensure uniqueness
+      const allPrompts = await this.promptRepository.findAll();
+      const existingSlugs = new Set(
+        allPrompts
+          .filter(p => p.id !== id) // Exclude current prompt
+          .map(p => p.slug)
+          .filter(Boolean) as string[]
+      );
+      
+      updateData.slug = generateUniqueSlug(promptData.title, existingSlugs);
     }
 
     return await this.promptRepository.update(

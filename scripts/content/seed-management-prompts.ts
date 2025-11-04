@@ -37,12 +37,9 @@ function generateId(prefix: string, index: number): string {
   return `${prefix}-${String(index + 1).padStart(3, '0')}`;
 }
 
-function generateSlug(title: string, id: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .substring(0, 100) + `-${id}`;
+function generateSlug(title: string): string {
+  const { generateSlug: generateCleanSlug } = require('@/lib/utils/slug');
+  return generateCleanSlug(title);
 }
 
 function convertToPromptFormat(prompt: ManagementPrompt, id: string): any {
@@ -55,7 +52,7 @@ function convertToPromptFormat(prompt: ManagementPrompt, id: string): any {
   
   return {
     id,
-    slug: generateSlug(prompt.title, id),
+    slug: generateSlug(prompt.title), // Clean slug, no ID
     title: prompt.title,
     description: prompt.description,
     content: prompt.content,
