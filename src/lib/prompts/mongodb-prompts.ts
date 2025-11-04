@@ -1,14 +1,14 @@
 /**
  * Prompts Data Access Layer
- * 
+ *
  * Tries static JSON first (fast, no cold starts)
  * Falls back to MongoDB if JSON unavailable
- * 
+ *
  * This solves the cold start problem by using static JSON files
  * similar to the breeding site's approach
  */
 
-import { loadPromptsFromJson, loadPromptFromJson } from './load-prompts-from-json';
+import { loadPromptsFromJson } from './load-prompts-from-json';
 import { promptRepository } from '@/lib/db/repositories/ContentService';
 import type { Prompt } from '@/lib/schemas/prompt';
 import { logger } from '@/lib/logging/logger';
@@ -32,29 +32,15 @@ export async function getAllPrompts(): Promise<Prompt[]> {
 }
 
 /**
- * Fetch a single prompt by ID or slug from static JSON or MongoDB
- * @deprecated Use promptRepository.getById() for direct MongoDB access
- * Use this function for fast static JSON loading with MongoDB fallback
- * 
- * STRATEGY: Try JSON first (fast), but MongoDB is the reliable fallback
- * For detail pages, MongoDB is more reliable in production (Vercel)
+ * Fetch a single prompt by ID or slug from MongoDB directly
+ * For detail pages, we skip JSON loading to avoid DYNAMIC_SERVER_USAGE errors
+ * MongoDB is reliable and works in all environments (static gen, ISR, runtime)
+ *
+ * STRATEGY: MongoDB only for detail pages (reliable, no static generation issues)
  */
 export async function getPromptById(idOrSlug: string): Promise<Prompt | null> {
-  try {
-    // Try JSON first (fast, no cold starts)
-    const prompt = await loadPromptFromJson(idOrSlug);
-    if (prompt) {
-      return prompt;
-    }
-  } catch (error) {
-    // Log but continue to MongoDB fallback
-    logger.debug('JSON lookup failed, trying MongoDB', {
-      idOrSlug,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-
-  // MongoDB fallback (always reliable)
+  // For detail pages, use MongoDB directly to avoid DYNAMIC_SERVER_USAGE
+  // JSON loading causes issues during static generation/ISR
   try {
     return await promptRepository.getById(idOrSlug);
   } catch (error) {
@@ -75,7 +61,7 @@ export async function getPromptsByCategory(
 ): Promise<Prompt[]> {
   try {
     const prompts = await loadPromptsFromJson();
-    return prompts.filter(p => p.category === category);
+    return prompts.filter((p) => p.category === category);
   } catch (error) {
     // Fallback to MongoDB
     return promptRepository.getByCategory(category);
@@ -89,7 +75,7 @@ export async function getPromptsByCategory(
 export async function getPromptsByRole(role: string): Promise<Prompt[]> {
   try {
     const prompts = await loadPromptsFromJson();
-    return prompts.filter(p => p.role === role);
+    return prompts.filter((p) => p.role === role);
   } catch (error) {
     // Fallback to MongoDB
     return promptRepository.getByRole(role);

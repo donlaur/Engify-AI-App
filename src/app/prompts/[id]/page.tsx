@@ -63,10 +63,11 @@ function enrichPromptDescription(
   return descriptionParts.join(' ');
 }
 
-// Use ISR with static JSON (best performance + SEO)
-// Static JSON loads fast (no cold starts), ISR caches HTML (perfect SEO)
+// Use ISR with MongoDB fallback (reliable in production)
+// MongoDB is primary source - JSON is optional fast path
 export const revalidate = 3600; // Revalidate every hour (ISR)
 export const dynamicParams = true; // Allow dynamic params (prompts not pre-generated)
+export const dynamic = 'force-dynamic'; // Force dynamic rendering to avoid DYNAMIC_SERVER_USAGE errors
 
 // CRITICAL: No pre-generation - all pages are fully dynamic (ISR)
 // This prevents build timeouts completely
@@ -114,7 +115,7 @@ export async function generateMetadata({
       idOrSlug: params.id,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
-    
+
     // Fallback metadata if fetch fails
     return {
       title: 'Prompt | Engify.ai',
@@ -305,7 +306,7 @@ export default async function PromptPage({
                 <h2 className="text-lg font-semibold">Prompt Template</h2>
                 <CopyButton content={prompt.content} />
               </div>
-              <pre className="whitespace-pre-wrap rounded-lg bg-slate-900 p-4 text-sm font-mono text-slate-100 dark:bg-slate-950 dark:text-slate-50">
+              <pre className="whitespace-pre-wrap rounded-lg bg-slate-900 p-4 font-mono text-sm text-slate-100 dark:bg-slate-950 dark:text-slate-50">
                 {prompt.content}
               </pre>
             </div>
@@ -361,7 +362,7 @@ export default async function PromptPage({
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
     });
-    
+
     // If fetch fails, show 404
     notFound();
   }

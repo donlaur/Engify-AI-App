@@ -1,13 +1,12 @@
 /**
  * AI Model Service
- * 
+ *
  * Manages AI model registry in MongoDB
  * Provides CRUD operations and sync functionality
  */
 
 import { BaseService } from './BaseService';
 import { AIModelSchema, AIModel } from '@/lib/db/schemas/ai-model';
-import { ObjectId } from 'mongodb';
 
 export class AIModelService extends BaseService<AIModel> {
   constructor() {
@@ -15,11 +14,22 @@ export class AIModelService extends BaseService<AIModel> {
   }
 
   /**
-   * Find model by ID (custom ID, not MongoDB _id)
+   * Find model by ID or slug (custom ID, not MongoDB _id)
    */
-  async findById(id: string): Promise<AIModel | null> {
+  async findById(idOrSlug: string): Promise<AIModel | null> {
     const collection = await this.getCollection();
-    const model = await collection.findOne({ id });
+    const model = await collection.findOne({
+      $or: [{ id: idOrSlug }, { slug: idOrSlug }],
+    });
+    return model as AIModel | null;
+  }
+
+  /**
+   * Find model by slug
+   */
+  async findBySlug(slug: string): Promise<AIModel | null> {
+    const collection = await this.getCollection();
+    const model = await collection.findOne({ slug });
     return model as AIModel | null;
   }
 
@@ -106,20 +116,20 @@ export class AIModelService extends BaseService<AIModel> {
    */
   async upsert(model: AIModel): Promise<AIModel> {
     const collection = await this.getCollection();
-    
+
     const existing = await collection.findOne({ id: model.id });
-    
+
     if (existing) {
       // Update existing
       const result = await collection.findOneAndUpdate(
         { id: model.id },
-        { 
-          $set: { 
-            ...model, 
+        {
+          $set: {
+            ...model,
             updatedAt: new Date(),
             // Preserve _id if exists
             _id: existing._id,
-          } 
+          },
         },
         { returnDocument: 'after' }
       );
@@ -131,7 +141,7 @@ export class AIModelService extends BaseService<AIModel> {
         createdAt: new Date(),
         updatedAt: new Date(),
       } as AIModel);
-      
+
       return {
         ...model,
         _id: result.insertedId.toString(),
@@ -142,23 +152,25 @@ export class AIModelService extends BaseService<AIModel> {
   /**
    * Bulk upsert models (for provider sync)
    */
-  async bulkUpsert(models: AIModel[]): Promise<{ created: number; updated: number }> {
+  async bulkUpsert(
+    models: AIModel[]
+  ): Promise<{ created: number; updated: number }> {
     const collection = await this.getCollection();
     let created = 0;
     let updated = 0;
 
     for (const model of models) {
       const existing = await collection.findOne({ id: model.id });
-      
+
       if (existing) {
         await collection.updateOne(
           { id: model.id },
-          { 
-            $set: { 
+          {
+            $set: {
               ...model,
               updatedAt: new Date(),
               _id: existing._id,
-            } 
+            },
           }
         );
         updated++;
@@ -178,4 +190,3 @@ export class AIModelService extends BaseService<AIModel> {
 
 // Singleton instance
 export const aiModelService = new AIModelService();
-

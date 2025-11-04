@@ -16,7 +16,7 @@ import { getDb } from '@/lib/mongodb';
  * - Priority 0.7: Tags, learn pages
  * - Priority 0.6: About, blog
  * - Priority 0.5: Contact, terms, privacy
- * 
+ *
  * ISR: Regenerates every hour to pick up new content and slug changes
  */
 
@@ -278,7 +278,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let patternPages: MetadataRoute.Sitemap = [];
   try {
     const db = await getDb();
-    const patternsCollection = await db.collection('patterns').find({}).toArray();
+    const patternsCollection = await db
+      .collection('patterns')
+      .find({})
+      .toArray();
     patternPages = patternsCollection.map((pattern: any) => ({
       url: `${baseUrl}/patterns/${encodeURIComponent(pattern.id || pattern._id?.toString() || pattern.name)}`,
       lastModified: pattern.updatedAt
@@ -334,6 +337,98 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Fallback to empty array if MongoDB fails
   }
 
+  // AI Models & Tools pages - SEO-optimized content
+  let aiModelPages: MetadataRoute.Sitemap = [];
+  let aiToolPages: MetadataRoute.Sitemap = [];
+  try {
+    const db = await getDb();
+
+    // AI Models hub and individual pages
+    const aiModels = await db
+      .collection('ai_models')
+      .find({
+        isAllowed: { $ne: false },
+        slug: { $exists: true, $ne: null },
+      })
+      .project({
+        slug: 1,
+        updatedAt: 1,
+        lastVerified: 1,
+      })
+      .toArray();
+
+    // Add hub page
+    aiModelPages.push({
+      url: `${baseUrl}/learn/ai-models`,
+      lastModified: now,
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    });
+
+    // Add deprecated/EOL page
+    aiModelPages.push({
+      url: `${baseUrl}/learn/ai-models/deprecated`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    });
+
+    // Add individual model pages
+    aiModelPages = [
+      ...aiModelPages,
+      ...aiModels.map((model: any) => ({
+        url: `${baseUrl}/learn/ai-models/${model.slug}`,
+        lastModified: model.updatedAt
+          ? new Date(model.updatedAt)
+          : model.lastVerified
+            ? new Date(model.lastVerified)
+            : now,
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      })),
+    ];
+
+    // AI Tools hub and individual pages
+    const aiTools = await db
+      .collection('ai_tools')
+      .find({
+        status: 'active',
+        slug: { $exists: true, $ne: null },
+      })
+      .project({
+        slug: 1,
+        updatedAt: 1,
+        lastUpdated: 1,
+      })
+      .toArray();
+
+    // Add hub page
+    aiToolPages.push({
+      url: `${baseUrl}/learn/ai-tools`,
+      lastModified: now,
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    });
+
+    // Add individual tool pages
+    aiToolPages = [
+      ...aiToolPages,
+      ...aiTools.map((tool: any) => ({
+        url: `${baseUrl}/learn/ai-tools/${tool.slug}`,
+        lastModified: tool.updatedAt
+          ? new Date(tool.updatedAt)
+          : tool.lastUpdated
+            ? new Date(tool.lastUpdated)
+            : now,
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      })),
+    ];
+  } catch (error) {
+    console.error('Failed to fetch AI models/tools for sitemap:', error);
+    // Fallback to empty arrays if MongoDB fails
+  }
+
   // Combine all URLs
   const allPages = [
     ...staticPages,
@@ -345,6 +440,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...patternPages,
     ...tagPages,
     ...learnPages,
+    ...aiModelPages,
+    ...aiToolPages,
   ];
 
   // Sitemap generated with allPages.length URLs

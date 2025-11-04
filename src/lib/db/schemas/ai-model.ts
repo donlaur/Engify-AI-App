@@ -8,7 +8,17 @@ import { z } from 'zod';
 export const AIModelSchema = z.object({
   _id: z.string().optional(),
   id: z.string(), // Unique identifier: matches config (e.g., 'gpt-4o', 'claude-3-5-sonnet-20241022')
-  provider: z.enum(['openai', 'anthropic', 'google', 'groq', 'replicate', 'perplexity', 'together', 'mistral']),
+  slug: z.string().optional(), // URL-friendly slug for SEO (e.g., 'gpt-4o', 'claude-3-5-sonnet')
+  provider: z.enum([
+    'openai',
+    'anthropic',
+    'google',
+    'groq',
+    'replicate',
+    'perplexity',
+    'together',
+    'mistral',
+  ]),
   name: z.string(), // Actual model name used in API: 'gpt-4o'
   displayName: z.string(), // Human-readable: 'GPT-4o'
   status: z.enum(['active', 'deprecated', 'sunset']).default('active'),
@@ -58,4 +68,3 @@ export const ModelUpdateSchema = z.object({
 });
 
 export type ModelUpdate = z.infer<typeof ModelUpdateSchema>;
-
