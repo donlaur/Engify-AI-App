@@ -106,6 +106,11 @@
 - Submit to dev.to, Hacker News
 
 **SEO Focus:**
+- "AI training for engineering teams"
+- "prompt engineering training programs"
+- "corporate AI adoption training"
+- "how to train developers on AI"
+- "enterprise AI training platform"
 - "multi-agent AI workflows"
 - "AI development best practices"
 - "enterprise AI guardrails"
