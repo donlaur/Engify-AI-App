@@ -1,271 +1,231 @@
-import { Metadata } from 'next';
-import { APP_URL } from '@/lib/constants';
-import PatternDetailClient from './pattern-detail-client';
+'use client';
 
-// Pattern descriptions and metadata
-const PATTERN_INFO: Record<string, { title: string; description: string; icon: string; benefits: string[] }> = {
-  'chain-of-thought': {
-    title: 'Chain of Thought',
-    description: 'Break down complex problems into step-by-step reasoning processes. This pattern helps AI models show their work and arrive at more accurate conclusions.',
-    icon: 'link',
-    benefits: [
-      'Improved reasoning accuracy',
-      'Transparent problem-solving',
-      'Better handling of complex logic',
-      'Easier to debug and refine',
-    ],
-  },
-  'few-shot': {
-    title: 'Few-Shot Learning',
-    description: 'Provide examples to guide the AI\'s response format and style. This pattern uses 2-5 examples to teach the model what you want.',
-    icon: 'book',
-    benefits: [
-      'Consistent output format',
-      'Faster training without fine-tuning',
-      'Clear expectations set',
-      'Adaptable to various tasks',
-    ],
-  },
-  'zero-shot': {
-    title: 'Zero-Shot',
-    description: 'Direct instructions without examples. Ideal for simple tasks or when you want maximum creativity.',
-    icon: 'zap',
-    benefits: [
-      'Quick to write',
-      'Maximum flexibility',
-      'No example bias',
-      'Works for novel tasks',
-    ],
-  },
-  'persona': {
-    title: 'Persona Pattern',
-    description: 'Assign a specific role or expertise to the AI (e.g., "You are a senior software architect"). This shapes the tone, depth, and perspective of responses.',
-    icon: 'user',
-    benefits: [
-      'Expert-level responses',
-      'Role-appropriate tone',
-      'Context-aware answers',
-      'Professional communication',
-    ],
-  },
-  'self-consistency': {
-    title: 'Self-Consistency',
-    description: 'Generate multiple solutions and choose the most consistent answer. This pattern reduces errors by cross-validating responses.',
-    icon: 'check-circle',
-    benefits: [
-      'Higher accuracy',
-      'Error reduction',
-      'Reliable results',
-      'Quality assurance',
-    ],
-  },
-  'tree-of-thoughts': {
-    title: 'Tree of Thoughts',
-    description: 'Explore multiple reasoning paths simultaneously, then select the best solution. Ideal for complex problem-solving.',
-    icon: 'git-branch',
-    benefits: [
-      'Comprehensive exploration',
-      'Better decision-making',
-      'Handles uncertainty',
-      'Optimal path selection',
-    ],
-  },
-  'chain-of-verification': {
-    title: 'Chain of Verification',
-    description: 'Verify each step of reasoning before proceeding. This pattern ensures accuracy at each stage.',
-    icon: 'shield-check',
-    benefits: [
-      'Error detection',
-      'Step-by-step validation',
-      'Higher confidence',
-      'Quality control',
-    ],
-  },
-  're-act': {
-    title: 'ReAct (Reasoning + Acting)',
-    description: 'Combine reasoning with tool use. The AI thinks, acts, observes, and iterates.',
-    icon: 'settings',
-    benefits: [
-      'Tool integration',
-      'Iterative improvement',
-      'Real-world problem solving',
-      'Dynamic adaptation',
-    ],
-  },
-  'automatic-few-shot': {
-    title: 'Automatic Few-Shot',
-    description: 'Let the AI select its own examples from context. This pattern adapts examples to the current task.',
-    icon: 'wand-magic',
-    benefits: [
-      'Adaptive examples',
-      'Context-aware',
-      'Reduced manual work',
-      'Task-specific guidance',
-    ],
-  },
-  'meta-prompting': {
-    title: 'Meta-Prompting',
-    description: 'Prompt the AI to improve its own prompts. This pattern creates self-improving systems.',
-    icon: 'sparkles',
-    benefits: [
-      'Self-optimization',
-      'Continuous improvement',
-      'Adaptive prompts',
-      'Reduced manual tuning',
-    ],
-  },
-  'socratic-method': {
-    title: 'Socratic Method',
-    description: 'Ask probing questions to guide reasoning. This pattern helps the AI think deeper.',
-    icon: 'message-circle',
-    benefits: [
-      'Deeper thinking',
-      'Critical reasoning',
-      'Self-reflection',
-      'Better insights',
-    ],
-  },
-  'constitutional-ai': {
-    title: 'Constitutional AI',
-    description: 'Apply principles and constraints to guide AI behavior. This pattern ensures ethical, safe responses.',
-    icon: 'scale',
-    benefits: [
-      'Ethical responses',
-      'Safety constraints',
-      'Controlled behavior',
-      'Principle-based',
-    ],
-  },
-  'retrieval-augmented': {
-    title: 'Retrieval-Augmented Generation (RAG)',
-    description: 'Augment prompts with relevant context from external sources. This pattern improves accuracy with real data.',
-    icon: 'database',
-    benefits: [
-      'Up-to-date information',
-      'Accurate facts',
-      'Context-aware',
-      'Knowledge integration',
-    ],
-  },
-  'reflection': {
-    title: 'Reflection Pattern',
-    description: 'Review and refine responses iteratively. This pattern improves quality through self-critique.',
-    icon: 'refresh-cw',
-    benefits: [
-      'Self-improvement',
-      'Quality refinement',
-      'Error correction',
-      'Continuous enhancement',
-    ],
-  },
-  'kernal': {
-    title: 'KERNEL Framework',
-    description: 'Knowledge, Examples, Role, Next, Evaluate, Learn - Our comprehensive prompt engineering framework.',
-    icon: 'kernel',
-    benefits: [
-      'Structured approach',
-      '94% success rate',
-      'Research-backed',
-      'Comprehensive methodology',
-    ],
-  },
-};
+import { MainLayout } from '@/components/layout/MainLayout';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Icons } from '@/lib/icons';
+import Link from 'next/link';
+import type { Pattern } from '@/lib/db/schemas/pattern';
 
-export async function generateMetadata({ params }: { params: { pattern: string } }): Promise<Metadata> {
-  const pattern = decodeURIComponent(params.pattern);
-  const patternInfo = PATTERN_INFO[pattern] || {
-    title: pattern.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-    description: `Learn about the ${pattern} prompt engineering pattern and how to use it effectively.`,
-    benefits: [],
-  };
-
-  const title = `${patternInfo.title} - Prompt Engineering Pattern | Engify.ai`;
-  const description = `${patternInfo.description} Part of the PMI 7 Patterns of AI. Explore ${patternInfo.benefits.length} key benefits and learn how to apply this pattern in your prompts.`;
-  const url = `${APP_URL}/patterns/${encodeURIComponent(pattern)}`;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      title,
-      description,
-      url,
-      type: 'article',
-      siteName: 'Engify.ai',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-    },
-    keywords: [
-      'prompt engineering',
-      'AI patterns',
-      patternInfo.title.toLowerCase(),
-      'prompt patterns',
-      'AI prompt techniques',
-      'PMI patterns',
-      'prompt engineering framework',
-    ],
-  };
+interface PatternDetailClientProps {
+  pattern: Pattern;
 }
 
-export default async function PatternDetailPage({ params }: { params: { pattern: string } }) {
-  const pattern = decodeURIComponent(params.pattern);
-  const patternInfo = PATTERN_INFO[pattern] || {
-    title: pattern.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-    description: `Learn about the ${pattern} prompt engineering pattern.`,
-    icon: 'zap',
-    benefits: [],
+export default function PatternDetailClient({ pattern }: PatternDetailClientProps) {
+  const levelColors = {
+    beginner: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    intermediate: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    advanced: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
   };
 
-  // Generate JSON-LD structured data
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: patternInfo.title,
-    description: patternInfo.description,
-    url: `${APP_URL}/patterns/${encodeURIComponent(pattern)}`,
-    author: {
-      '@type': 'Organization',
-      name: 'Engify.ai',
-      url: APP_URL,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'Engify.ai',
-      logo: {
-        '@type': 'ImageObject',
-        url: `${APP_URL}/logo.png`,
-      },
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `${APP_URL}/patterns/${encodeURIComponent(pattern)}`,
-    },
-    about: {
-      '@type': 'Thing',
-      name: 'Prompt Engineering',
-      description: 'The practice of crafting effective prompts for AI models',
-    },
-    keywords: [
-      'prompt engineering',
-      'AI patterns',
-      patternInfo.title.toLowerCase(),
-      'prompt patterns',
-    ].join(', '),
-  };
+  // Convert pattern example to before/after format if needed
+  const example = typeof pattern.example === 'string'
+    ? { before: '', after: pattern.example, explanation: '' }
+    : pattern.example || { before: '', after: '', explanation: '' };
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <PatternDetailClient pattern={pattern} patternInfo={patternInfo} />
-    </>
+    <MainLayout>
+      <div className="container py-8">
+        {/* Breadcrumbs */}
+        <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
+          <Link href="/" className="hover:text-primary">
+            Home
+          </Link>
+          <Icons.chevronRight className="h-4 w-4" />
+          <Link href="/patterns" className="hover:text-primary">
+            Patterns
+          </Link>
+          <Icons.chevronRight className="h-4 w-4" />
+          <span className="text-foreground">{pattern.name}</span>
+        </nav>
+
+        {/* Header */}
+        <div className="mb-8">
+          <div className="mb-4 flex items-start justify-between">
+            <div>
+              <h1 className="mb-2 text-4xl font-bold">{pattern.name}</h1>
+              <p className="text-xl text-muted-foreground">
+                {pattern.description}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Badge className={levelColors[pattern.level]}>
+                {pattern.level}
+              </Badge>
+              <Badge variant="outline">{pattern.category}</Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Content Sections */}
+        <div className="space-y-8">
+          {/* Full Description */}
+          {(pattern.fullDescription || pattern.description) && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
+                <Icons.info className="h-6 w-6 text-blue-600" />
+                What Is This Pattern?
+              </h2>
+              <p className="leading-relaxed text-muted-foreground">
+                {pattern.fullDescription || pattern.description}
+              </p>
+            </section>
+          )}
+
+          {/* How It Works */}
+          {pattern.howItWorks && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
+                <Icons.settings className="h-6 w-6 text-purple-600" />
+                How It Works
+              </h2>
+              <p className="leading-relaxed text-muted-foreground">
+                {pattern.howItWorks}
+              </p>
+            </section>
+          )}
+
+          {/* Use Cases */}
+          {pattern.useCases && pattern.useCases.length > 0 && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
+                <Icons.check className="h-6 w-6 text-green-600" />
+                When To Use This Pattern
+              </h2>
+              <ul className="space-y-2">
+                {pattern.useCases.map((useCase, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <Icons.arrowRight className="mt-1 h-4 w-4 flex-shrink-0 text-green-600" />
+                    <span className="text-muted-foreground">{useCase}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Example */}
+          {example.after && (
+            <section className="rounded-lg border bg-gradient-to-br from-gray-50 to-gray-100 p-6 dark:from-gray-900 dark:to-gray-800">
+              <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
+                <Icons.code className="h-6 w-6 text-orange-600" />
+                Example
+              </h2>
+
+              <div className="space-y-4">
+                {example.before && (
+                  <div>
+                    <div className="mb-2 flex items-center gap-2">
+                      <Badge variant="destructive" className="text-xs">
+                        ❌ Before (Weak)
+                      </Badge>
+                    </div>
+                    <div className="rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950">
+                      <code className="text-sm text-red-900 dark:text-red-100">
+                        {example.before}
+                      </code>
+                    </div>
+                  </div>
+                )}
+
+                {/* After */}
+                <div>
+                  <div className="mb-2 flex items-center gap-2">
+                    <Badge className="bg-green-600 text-xs">
+                      ✅ After (Strong)
+                    </Badge>
+                  </div>
+                  <div className="rounded-md border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
+                    <code className="whitespace-pre-wrap text-sm text-green-900 dark:text-green-100">
+                      {example.after}
+                    </code>
+                  </div>
+                </div>
+
+                {/* Explanation */}
+                {example.explanation && (
+                  <div className="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
+                    <p className="text-sm text-blue-900 dark:text-blue-100">
+                      <strong>Why this works:</strong> {example.explanation}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* Best Practices */}
+          {pattern.bestPractices && pattern.bestPractices.length > 0 && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
+                <Icons.sparkles className="h-6 w-6 text-yellow-600" />
+                Best Practices
+              </h2>
+              <ul className="space-y-2">
+                {pattern.bestPractices.map((practice, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <Icons.check className="mt-1 h-4 w-4 flex-shrink-0 text-green-600" />
+                    <span className="text-muted-foreground">{practice}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Common Mistakes */}
+          {pattern.commonMistakes && pattern.commonMistakes.length > 0 && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
+                <Icons.alertTriangle className="h-6 w-6 text-red-600" />
+                Common Mistakes to Avoid
+              </h2>
+              <ul className="space-y-2">
+                {pattern.commonMistakes.map((mistake, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <Icons.x className="mt-1 h-4 w-4 flex-shrink-0 text-red-600" />
+                    <span className="text-muted-foreground">{mistake}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Related Patterns */}
+          {pattern.relatedPatterns && pattern.relatedPatterns.length > 0 && (
+            <section>
+              <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
+                <Icons.link className="h-6 w-6 text-blue-600" />
+                Related Patterns
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {pattern.relatedPatterns.map((relatedId) => (
+                  <Link key={relatedId} href={`/patterns/${encodeURIComponent(relatedId)}`}>
+                    <Badge variant="secondary" className="cursor-pointer hover:bg-primary/10">
+                      {relatedId}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="mt-8 flex gap-4">
+          <Button asChild>
+            <Link href="/patterns">
+              <Icons.arrowLeft className="mr-2 h-4 w-4" />
+              Back to Patterns
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/prompts">
+              <Icons.library className="mr-2 h-4 w-4" />
+              View Example Prompts
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </MainLayout>
   );
 }
+

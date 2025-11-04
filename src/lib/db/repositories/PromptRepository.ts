@@ -33,6 +33,8 @@ interface PromptDocument {
   };
   createdAt?: Date;
   updatedAt?: Date;
+  // Include ALL possible fields from MongoDB
+  [key: string]: unknown;
 }
 
 /**

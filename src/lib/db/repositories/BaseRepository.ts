@@ -56,6 +56,10 @@ export abstract class BaseRepository<T> {
 
   /**
    * Find documents with optional filter and options
+   * Returns ALL fields from MongoDB (no projection)
+   * 
+   * CRITICAL: This ensures all DB fields are available for processing
+   * No field filtering - repositories handle field selection in processors
    */
   protected async find(
     filter: Filter<T> = {},
@@ -63,7 +67,9 @@ export abstract class BaseRepository<T> {
   ): Promise<T[]> {
     try {
       const collection = await this.getCollection();
-      return collection.find(filter, options).toArray();
+      // Remove any projection to ensure ALL fields are returned
+      const { projection, ...restOptions } = options || {};
+      return collection.find(filter, restOptions as FindOptions<T>).toArray();
     } catch (error) {
       logger.error(`Error finding documents in ${this.collectionName}`, { error });
       throw error;
@@ -72,6 +78,10 @@ export abstract class BaseRepository<T> {
 
   /**
    * Find single document
+   * Returns ALL fields from MongoDB (no projection)
+   * 
+   * CRITICAL: This ensures all DB fields are available for processing
+   * No field filtering - repositories handle field selection in processors
    */
   protected async findOne(
     filter: Filter<T>,
@@ -79,7 +89,9 @@ export abstract class BaseRepository<T> {
   ): Promise<T | null> {
     try {
       const collection = await this.getCollection();
-      return collection.findOne(filter, options);
+      // Remove any projection to ensure ALL fields are returned
+      const { projection, ...restOptions } = options || {};
+      return collection.findOne(filter, restOptions as FindOptions<T>);
     } catch (error) {
       logger.error(`Error finding document in ${this.collectionName}`, { error });
       throw error;

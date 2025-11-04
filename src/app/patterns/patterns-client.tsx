@@ -247,15 +247,12 @@ export function PatternsClient({ patterns }: PatternsClientProps) {
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setSelectedPatternId(pattern.id);
-                    setIsDrawerOpen(true);
-                  }}
+                  asChild
                 >
-                  Learn More
-                  <Icons.arrowRight className="ml-2 h-4 w-4" />
+                  <Link href={`/patterns/${encodeURIComponent(pattern.id)}`}>
+                    Learn More
+                    <Icons.arrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
               </CardContent>
               <CardContent className="space-y-4">

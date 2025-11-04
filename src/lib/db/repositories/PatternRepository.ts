@@ -17,7 +17,7 @@ interface PatternDocument {
   category: 'FOUNDATIONAL' | 'STRUCTURAL' | 'COGNITIVE' | 'ITERATIVE';
   level: 'beginner' | 'intermediate' | 'advanced';
   description: string;
-  example?: string;
+  example?: string | { before: string; after: string; explanation: string };
   useCases?: string[];
   relatedPatterns?: string[];
   icon?: string;
@@ -28,6 +28,8 @@ interface PatternDocument {
   commonMistakes?: string[];
   createdAt?: Date;
   updatedAt?: Date;
+  // Include ALL possible fields from MongoDB
+  [key: string]: unknown;
 }
 
 /**
@@ -42,7 +44,7 @@ class PatternProcessor implements ContentProcessor<PatternDocument, Pattern> {
       category: raw.category,
       level: raw.level,
       description: raw.description,
-      example: raw.example,
+      example: raw.example || undefined,
       useCases: raw.useCases || [],
       relatedPatterns: raw.relatedPatterns || [],
       icon: raw.icon,

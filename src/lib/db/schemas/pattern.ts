@@ -12,7 +12,14 @@ export const PatternSchema = z.object({
   category: z.enum(['FOUNDATIONAL', 'STRUCTURAL', 'COGNITIVE', 'ITERATIVE']),
   level: z.enum(['beginner', 'intermediate', 'advanced']),
   description: z.string(),
-  example: z.string().optional(),
+  example: z.union([
+    z.string(),
+    z.object({
+      before: z.string(),
+      after: z.string(),
+      explanation: z.string(),
+    }),
+  ]).optional(),
   useCases: z.array(z.string()).optional(),
   relatedPatterns: z.array(z.string()).optional(),
   icon: z.string().optional(),
