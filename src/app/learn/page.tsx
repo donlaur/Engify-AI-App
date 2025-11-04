@@ -1,4 +1,8 @@
-'use client';
+/**
+ * Learn Page - Server Component
+ * Fetches learning resources and pathways from MongoDB
+ * Displays guided learning paths and articles
+ */
 
 import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -12,9 +16,27 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
-import { learningPathways } from '@/data/learning-pathways';
+import { getAllLearningResources } from '@/lib/learning/mongodb-learning';
+import { getDb } from '@/lib/mongodb';
+import { learningPathways } from '@/data/learning-pathways'; // Still hardcoded for now
 
-export default function LearnPage() {
+export default async function LearnPage() {
+  // Fetch learning resources from MongoDB
+  const learningResources = await getAllLearningResources();
+  
+  // Fetch pathway count from MongoDB (if pathways collection exists)
+  let pathwayCount = learningPathways.length;
+  try {
+    const db = await getDb();
+    const pathways = await db.collection('pathways').find({}).toArray();
+    if (pathways.length > 0) {
+      pathwayCount = pathways.length;
+    }
+  } catch (error) {
+    // Use hardcoded count if DB lookup fails
+    console.debug('Failed to fetch pathways from DB:', error);
+  }
+
   const getStepIcon = (type: string) => {
     switch (type) {
       case 'article':
@@ -45,6 +67,8 @@ export default function LearnPage() {
     }
   };
 
+  const totalSteps = learningPathways.reduce((acc, p) => acc + p.steps.length, 0);
+
   return (
     <MainLayout>
       <div className="container py-8">
@@ -65,7 +89,7 @@ export default function LearnPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">
-                {learningPathways.length}
+                {pathwayCount}
               </div>
               <p className="text-xs text-muted-foreground">Learning Pathways</p>
             </CardContent>
@@ -73,15 +97,15 @@ export default function LearnPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">
-                {learningPathways.reduce((acc, p) => acc + p.steps.length, 0)}
+                {totalSteps}
               </div>
               <p className="text-xs text-muted-foreground">Total Steps</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold">Free</div>
-              <p className="text-xs text-muted-foreground">All Pathways</p>
+              <div className="text-2xl font-bold">{learningResources.length}</div>
+              <p className="text-xs text-muted-foreground">Learning Articles</p>
             </CardContent>
           </Card>
         </div>

@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
       const [
         promptCount,
         patternCount,
-        pathwayCount,
+        learningResourceCount,
         userCount,
         promptsByRole,
         promptsByCategory,
@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
       ] = await Promise.all([
         db.collection('prompts').countDocuments({ active: { $ne: false } }),
         db.collection('patterns').countDocuments(),
-        db.collection('pathways').countDocuments(),
+        db.collection('learning_resources').countDocuments({ status: 'active' }),
         db.collection('users').countDocuments(),
         // Get prompts grouped by role
         db
@@ -122,7 +122,8 @@ export async function GET(req: NextRequest) {
         stats: {
           prompts: promptCount,
           patterns: patternCount,
-          pathways: pathwayCount,
+          learningResources: learningResourceCount,
+          pathways: learningResourceCount, // For backward compatibility
           users: userCount,
         },
         prompts: {
@@ -148,6 +149,9 @@ export async function GET(req: NextRequest) {
         },
         patterns: {
           total: patternCount,
+        },
+        learningResources: {
+          total: learningResourceCount,
         },
         lastUpdated: new Date().toISOString(),
         source: 'mongodb',
