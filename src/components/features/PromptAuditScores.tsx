@@ -61,16 +61,43 @@ const USER_FOCUSED_CATEGORIES: Record<string, { label: string; description: stri
 // Internal/admin metrics (hidden from public view)
 const ADMIN_METRICS = ['seoEnrichment', 'accessibility', 'performance'];
 
+// Weights must match audit script calculation (scripts/content/audit-prompts-patterns.ts)
+// These are the actual weights used to calculate overallScore
 const categoryWeights: Record<keyof AuditScores['categoryScores'], number> = {
-  engineeringUsefulness: 0.25,
-  caseStudyQuality: 0.15,
-  completeness: 0.15,
-  seoEnrichment: 0.10,
-  enterpriseReadiness: 0.15,
-  securityCompliance: 0.10,
-  accessibility: 0.05,
-  performance: 0.05,
+  completeness: 0.30,              // #1 Priority: Has major things for each area
+  engineeringUsefulness: 0.25,     // #2 Priority: Works, solid, gives decent first result
+  seoEnrichment: 0.20,             // #3 Priority: Good SEO
+  caseStudyQuality: 0.10,          // #4 Priority: Shows good value (via case studies)
+  enterpriseReadiness: 0.05,        // Reduced weight
+  securityCompliance: 0.05,         // Reduced weight
+  accessibility: 0.03,             // Reduced weight
+  performance: 0.02,                // Reduced weight
 };
+
+// Calculate expected overall score from visible categories only
+// Note: Actual overallScore may include baseScoreBonus from audit script
+function calculateExpectedScore(categoryScores: AuditScores['categoryScores'], visibleOnly: boolean = false): number {
+  if (visibleOnly) {
+    // Only calculate from visible categories
+    const visibleKeys = Object.keys(USER_FOCUSED_CATEGORIES) as Array<keyof AuditScores['categoryScores']>;
+    let weightedSum = 0;
+    let totalWeight = 0;
+    
+    visibleKeys.forEach(key => {
+      const weight = categoryWeights[key];
+      const score = categoryScores[key];
+      weightedSum += score * weight;
+      totalWeight += weight;
+    });
+    
+    return totalWeight > 0 ? weightedSum / totalWeight : 0;
+  }
+  
+  // Calculate from all categories (matches audit script)
+  return Object.entries(categoryScores).reduce((sum, [key, score]) => {
+    return sum + (score * categoryWeights[key as keyof AuditScores['categoryScores']]);
+  }, 0);
+}
 
 export function PromptAuditScores({ 
   promptId,
@@ -178,6 +205,25 @@ export function PromptAuditScores({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Show explanation if there's a significant discrepancy */}
+              {(() => {
+                const expectedScore = calculateExpectedScore(auditScores.categoryScores, true);
+                const scoreDiff = Math.abs(auditScores.overallScore - expectedScore);
+                if (scoreDiff > 0.5) {
+                  return (
+                    <div className="mb-4 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+                      <p className="font-medium text-foreground mb-1">About the Overall Score</p>
+                      <p>
+                        The overall score includes all quality factors (including SEO and other technical metrics) 
+                        plus additional bonuses for well-structured prompts. The breakdown below shows the visible 
+                        categories which contribute to the overall assessment.
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+              
               {Object.entries(auditScores.categoryScores)
                 .filter(([key]) => !ADMIN_METRICS.includes(key)) // Hide admin metrics
                 .map(([key, score]) => {

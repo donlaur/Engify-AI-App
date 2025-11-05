@@ -75,6 +75,8 @@ function enrichPromptDescription(
 export const revalidate = 3600; // Revalidate every hour (ISR)
 export const dynamicParams = true; // Allow dynamic params (prompts not pre-generated)
 export const dynamic = 'force-dynamic'; // Force dynamic rendering to avoid DYNAMIC_SERVER_USAGE errors
+// NOTE: force-dynamic prevents ISR caching but ensures slugs work correctly (prevents 404s)
+// This was added after slug issues - do not remove without careful testing
 
 // CRITICAL: No pre-generation - all pages are fully dynamic (ISR)
 // This prevents build timeouts completely
