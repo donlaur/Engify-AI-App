@@ -822,17 +822,33 @@ export class PromptPatternAuditor {
       // Non-text models (image/video) are automatically filtered out
       let modelId = agent.model;
       
-      // Try to resolve from database first (getModelIdFromRegistry filters out non-text models)
-      // It also prefers verified/working models (recent lastVerified date)
-      const resolvedId = await getModelIdFromRegistry(agent.provider, agent.model);
-      if (resolvedId) {
-        modelId = resolvedId;
-        resolvedModelId = resolvedId; // Store for error handling
-        console.log(`   📋 Using model from DB: ${modelId} (${agent.provider})`);
+      // Only resolve from DB if provider is NOT explicitly set to a specific model
+      // If agent.model is already a specific model ID (not a generic keyword), use it directly
+      // This prevents DB resolution from overriding explicit model choices
+      const isGenericKeyword = agent.model === 'google' || 
+                               agent.model === 'gemini' || 
+                               agent.model === 'claude' ||
+                               agent.model === 'openai' ||
+                               agent.model.includes('flash') && !agent.model.includes('gpt');
+      
+      if (isGenericKeyword) {
+        // Try to resolve from database first (getModelIdFromRegistry filters out non-text models)
+        // It also prefers verified/working models (recent lastVerified date)
+        const resolvedId = await getModelIdFromRegistry(agent.provider, agent.model);
+        if (resolvedId) {
+          modelId = resolvedId;
+          resolvedModelId = resolvedId; // Store for error handling
+          console.log(`   📋 Using model from DB: ${modelId} (${agent.provider})`);
+        } else {
+          // Fallback to hardcoded model ID if DB lookup fails
+          console.log(`   ⚠️  DB lookup failed, using hardcoded: ${agent.model}`);
+          modelId = agent.model;
+        }
       } else {
-        // Fallback to hardcoded model ID if DB lookup fails
-        console.log(`   ⚠️  DB lookup failed, using hardcoded: ${agent.model}`);
+        // Use the explicit model ID directly (no DB resolution needed)
         modelId = agent.model;
+        resolvedModelId = agent.model;
+        console.log(`   ✅ Using preferred model: ${modelId} (${agent.provider})`);
       }
       
       // Get model's supported parameters from DB (or use defaults)
@@ -1079,43 +1095,50 @@ export class PromptPatternAuditor {
         );
       }
 
-      // Check for quota/rate limit errors (429) - switch to alternative provider immediately
+      // Check for quota/rate limit errors (429) - switch to PAID providers immediately
+      // Strategy: Free tier (Gemini) → Paid providers (OpenAI, Replicate/Claude)
       if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('rate limit') || errorMessage.includes('Too Many Requests')) {
-        console.warn(`⚠️  Quota/rate limit exceeded for ${agent.name} (${agent.provider}), switching to alternative...`);
+        console.warn(`⚠️  Quota/rate limit exceeded for ${agent.name} (${agent.provider}), switching to paid provider...`);
         
-        // For Gemini quota errors, use GPT-4o-mini or Claude Haiku as cheap alternatives
-        if (agent.provider === 'google') {
+        // For ANY provider with quota issues, switch to paid OpenAI/Claude
+        // Priority: GPT-4o-mini (cheap) → Claude Haiku (fast) → GPT-4o (reliable)
+        const fallbackModels = [
+          { provider: 'openai', model: 'gpt-4o-mini', name: 'GPT-4o-mini (cheap)' },
+          { provider: 'anthropic', model: 'claude-3-haiku-20240307', name: 'Claude Haiku (fast)' },
+          { provider: 'openai', model: 'gpt-4o', name: 'GPT-4o (reliable)' },
+        ];
+        
+        for (const fallback of fallbackModels) {
           try {
-            console.log(`   🔄 Switching to GPT-4o-mini (cheap alternative)...`);
-            const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
-            const fallbackAdapter = new OpenAIAdapter('gpt-4o-mini');
+            console.log(`   🔄 Trying ${fallback.name} (paid provider)...`);
+            
+            let fallbackAdapter;
+            if (fallback.provider === 'openai') {
+              const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+              fallbackAdapter = new OpenAIAdapter(fallback.model);
+            } else if (fallback.provider === 'anthropic') {
+              const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
+              fallbackAdapter = new ClaudeAdapter(fallback.model);
+            } else {
+              continue; // Skip unknown providers
+            }
+            
             const response = await fallbackAdapter.execute({
               prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
               temperature: agent.temperature,
               maxTokens: agent.maxTokens,
             });
-            console.log(`   ✅ Switched to GPT-4o-mini successfully`);
+            console.log(`   ✅ Switched to ${fallback.name} successfully`);
             return response.content;
           } catch (fallbackError) {
-            // Try Claude Haiku as last resort
-            try {
-              console.log(`   🔄 Trying Claude Haiku as alternative...`);
-              const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
-              const claudeAdapter = new ClaudeAdapter('claude-3-haiku-20240307');
-              const response = await claudeAdapter.execute({
-                prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
-                temperature: agent.temperature,
-                maxTokens: agent.maxTokens,
-              });
-              console.log(`   ✅ Switched to Claude Haiku successfully`);
-              return response.content;
-            } catch (claudeError) {
-              console.warn(`   ⚠️  All alternatives failed, continuing with degraded audit`);
-              // Return empty/placeholder so audit can continue
-              return `[Agent ${agent.name} skipped due to quota limits - audit may be incomplete]`;
-            }
+            // Try next fallback
+            continue;
           }
         }
+        
+        // All fallbacks failed - return degraded result
+        console.warn(`   ⚠️  All paid provider fallbacks failed, continuing with degraded audit`);
+        return `[Agent ${agent.name} skipped due to quota limits - audit may be incomplete]`;
       }
 
       // Check for model availability errors - try fallback
@@ -1160,32 +1183,23 @@ export class PromptPatternAuditor {
             fallbackModel = 'claude-3-haiku-20240307'; // Use Claude 3 Haiku as fallback
           }
         } else if (agent.provider === 'google') {
-          // Gemini fallback: query DB for alternative models
-          // BUT: if we got a 429/quota error, don't try another Gemini model - use OpenAI/Claude instead
+          // Gemini fallback: ALWAYS switch to paid providers (OpenAI/Claude) when errors occur
+          // Free tier Gemini is rate-limited, use paid alternatives
           if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('rate limit')) {
-            // Quota exceeded - use OpenAI/Claude instead
+            // Quota exceeded - use paid OpenAI/Claude instead
             fallbackModel = 'gpt-4o-mini'; // Cheap OpenAI alternative
             fallbackProviderType = 'openai'; // Switch to OpenAI provider
-            console.log(`   🔄 Gemini quota exceeded, switching to GPT-4o-mini instead`);
+            console.log(`   🔄 Gemini quota exceeded, switching to GPT-4o-mini (paid provider)`);
+          } else if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+            // Model not found - also switch to paid provider (don't try another Gemini)
+            fallbackModel = 'gpt-4o-mini';
+            fallbackProviderType = 'openai';
+            console.log(`   🔄 Gemini model not found, switching to GPT-4o-mini (paid provider)`);
           } else {
-            // Model not found (404) - try alternative Gemini model
-            try {
-              const { getModelsByProvider } = await import('@/lib/services/AIModelRegistry');
-              const googleModels = await getModelsByProvider('google');
-              // Try to find a cheaper/faster alternative (flash-lite before pro)
-              const alternative = googleModels.find(m => 
-                m.id.includes('flash-lite') && ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
-              ) || googleModels.find(m => 
-                m.id.includes('flash') && ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
-              ) || googleModels.find(m => 
-                ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
-              );
-              if (alternative) {
-                fallbackModel = alternative.id;
-              }
-            } catch (fallbackError) {
-              console.warn('   ⚠️  Failed to query DB for Gemini fallback:', fallbackError);
-            }
+            // Other errors - switch to paid provider
+            fallbackModel = 'gpt-4o-mini';
+            fallbackProviderType = 'openai';
+            console.log(`   🔄 Gemini error, switching to GPT-4o-mini (paid provider)`);
           }
         } else if (agent.provider === 'openai') {
           // OpenAI fallback: try gpt-4o-mini if gpt-4o fails
