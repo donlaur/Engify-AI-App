@@ -155,6 +155,95 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
     
     // If preferred model specified and exists, use it (must be active)
     if (preferredModel) {
+      // Handle generic keywords that mean "find latest recommended model"
+      const normalizedPreferred = preferredModel.toLowerCase();
+      
+      // Google/Gemini keywords: find latest recommended Gemini Flash
+      if (normalizedPreferred === 'google' || 
+          normalizedPreferred.includes('gemini') && normalizedPreferred.includes('flash')) {
+        // Find latest recommended Gemini Flash model
+        const geminiFlash = models.find(m => {
+          const status = ('status' in m ? m.status : 'active');
+          const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
+          const isRecommended = ('recommended' in m ? (m as any).recommended : false);
+          const modelId = (m.id || '').toLowerCase();
+          
+          // Must be active, allowed, and include "flash" in ID
+          return status === 'active' && 
+                 isAllowed !== false && 
+                 modelId.includes('flash') &&
+                 isRecommended; // Prefer recommended models
+        }) || models.find(m => {
+          // Fallback: any active Gemini Flash model
+          const status = ('status' in m ? m.status : 'active');
+          const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
+          const modelId = (m.id || '').toLowerCase();
+          
+          return status === 'active' && 
+                 isAllowed !== false && 
+                 modelId.includes('flash');
+        });
+        
+        if (geminiFlash) {
+          console.log(`   ✅ Using preferred model: ${geminiFlash.id} (${provider} - resolved from "${preferredModel}")`);
+          return geminiFlash.id;
+        }
+      }
+      
+      // Claude keywords: find latest recommended Claude model
+      if (normalizedPreferred.includes('claude')) {
+        // Try to match specific Claude version if specified
+        if (normalizedPreferred.includes('haiku')) {
+          const claudeHaiku = models.find(m => {
+            const status = ('status' in m ? m.status : 'active');
+            const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
+            const modelId = (m.id || '').toLowerCase();
+            
+            return status === 'active' && 
+                   isAllowed !== false && 
+                   modelId.includes('haiku');
+          });
+          
+          if (claudeHaiku) {
+            console.log(`   ✅ Using preferred model: ${claudeHaiku.id} (${provider} - resolved from "${preferredModel}")`);
+            return claudeHaiku.id;
+          }
+        } else if (normalizedPreferred.includes('sonnet')) {
+          // Try Sonnet first, fallback to Haiku if not available
+          const claudeSonnet = models.find(m => {
+            const status = ('status' in m ? m.status : 'active');
+            const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
+            const modelId = (m.id || '').toLowerCase();
+            
+            return status === 'active' && 
+                   isAllowed !== false && 
+                   modelId.includes('sonnet');
+          });
+          
+          if (claudeSonnet) {
+            console.log(`   ✅ Using preferred model: ${claudeSonnet.id} (${provider} - resolved from "${preferredModel}")`);
+            return claudeSonnet.id;
+          } else {
+            // Fallback to Haiku if Sonnet not available
+            const claudeHaiku = models.find(m => {
+              const status = ('status' in m ? m.status : 'active');
+              const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
+              const modelId = (m.id || '').toLowerCase();
+              
+              return status === 'active' && 
+                     isAllowed !== false && 
+                     modelId.includes('haiku');
+            });
+            
+            if (claudeHaiku) {
+              console.log(`   ⚠️  Preferred model "${preferredModel}" not available, using alternative: ${claudeHaiku.id}`);
+              return claudeHaiku.id;
+            }
+          }
+        }
+      }
+      
+      // Try exact match first (for specific model IDs)
       const preferred = models.find(m => {
         const status = ('status' in m ? m.status : 'active');
         const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
@@ -2448,6 +2537,7 @@ async function auditPromptsAndPatterns(options: {
     if (category || role) {
       console.log(`   (Filtered by: ${[category, role].filter(Boolean).join(', ')})`);
     }
+    console.log('   📋 Will only audit prompts with <= 1 audit (skip prompts with 2+ audits)');
     console.log('');
 
     // Check for fast mode flag
@@ -2469,6 +2559,15 @@ async function auditPromptsAndPatterns(options: {
         { sort: { auditVersion: -1 } }
       );
       
+      // Skip prompts that have more than 1 audit (we only want to audit prompts with <= 1 audit)
+      // This allows us to generate fresh audits for prompts that haven't been audited much
+      const currentAuditVersion = existingAudit?.auditVersion || 0;
+      if (currentAuditVersion > 1) {
+        console.log(`[${i + 1}/${prompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Audit Version ${currentAuditVersion} - already audited multiple times)`);
+        skippedCount++;
+        continue;
+      }
+      
       // Skip prompts that have been improved (currentRevision > 1)
       // We only audit prompts at revision 1 (not yet improved)
       // Audit version tracks audit count (can be multiple audits per revision)
@@ -2481,9 +2580,11 @@ async function auditPromptsAndPatterns(options: {
       }
       
       console.log(`[${i + 1}/${prompts.length}] Auditing: ${prompt.title || prompt.id || 'Untitled'}`);
-      const auditCount = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
+      const auditCount = currentAuditVersion + 1;
       if (existingAudit) {
         console.log(`   (Audit #${auditCount} for Revision ${promptRevision})`);
+      } else {
+        console.log(`   (First audit for Revision ${promptRevision})`);
       }
       
       try {
@@ -2534,7 +2635,7 @@ async function auditPromptsAndPatterns(options: {
     
     console.log(`\n✅ Completed auditing ${results.length} prompts`);
     if (skippedCount > 0) {
-      console.log(`⏭️  Skipped ${skippedCount} prompts (already at revision > 1)`);
+      console.log(`⏭️  Skipped ${skippedCount} prompts (${skippedCount > 0 ? 'already audited multiple times or ' : ''}already at revision > 1)`);
     }
   }
 
