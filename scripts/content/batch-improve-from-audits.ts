@@ -419,9 +419,11 @@ Format as JSON:
                 improvements.push(`Added ${seoData.keywords.length} keywords`);
                 stats.keywordsAdded++;
               }
+            } catch (error) {
+              console.error(`   ❌ Error generating SEO: ${error}`);
             }
           } catch (error) {
-            console.error(`   ❌ Error generating SEO: ${error}`);
+            console.error(`   ❌ Error in SEO generation: ${error}`);
           }
         } else {
           improvements.push('Would fix SEO (slug, meta, keywords)');
@@ -500,9 +502,11 @@ Format as JSON array:
                 improvements.push(`Added ${caseStudies.length} case studies`);
                 stats.caseStudiesAdded++;
               }
+            } catch (error) {
+              console.error(`   ❌ Error generating case studies: ${error}`);
             }
           } catch (error) {
-            console.error(`   ❌ Error generating case studies: ${error}`);
+            console.error(`   ❌ Error in case study generation: ${error}`);
           }
         } else {
           improvements.push('Would add case studies');
