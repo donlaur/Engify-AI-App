@@ -390,7 +390,7 @@ Provide:
   {
     role: 'engineering_reviewer',
     name: 'Engineering Functionality Reviewer',
-    model: 'claude-3-5-sonnet-20241022', // Claude - excellent for engineering/coding tasks
+    model: 'claude-3-5-haiku-20241022', // Claude - excellent for engineering/coding tasks (using Haiku since Sonnet returns 404)
     provider: 'anthropic',
     temperature: 0.4,
     maxTokens: 1500,
@@ -518,7 +518,7 @@ Provide:
   {
     role: 'prompt_engineering_sme',
     name: 'Prompt Engineering SME',
-    model: 'claude-3-5-sonnet-20241022', // Claude - best for prompt engineering and CS expertise
+    model: 'claude-3-5-haiku-20241022', // Claude - best for prompt engineering and CS expertise (using Haiku since Sonnet returns 404)
     provider: 'anthropic',
     temperature: 0.3,
     maxTokens: 2000,
@@ -575,7 +575,7 @@ Provide:
   {
     role: 'prompt_execution_tester',
     name: 'Prompt Execution Tester',
-    model: 'claude-3-5-sonnet-20241022', // Claude - excellent for code execution and testing
+    model: 'claude-3-5-haiku-20241022', // Claude - excellent for code execution and testing (using Haiku since Sonnet returns 404)
     provider: 'anthropic',
     temperature: 0.7, // Use same temperature as typical user
     maxTokens: 2000,
@@ -1004,7 +1004,9 @@ export class PromptPatternAuditor {
         if (agent.provider.includes('claude')) {
           // Claude Sonnet fallback: try Haiku if Sonnet fails
           if (agent.model.includes('claude-3-5-sonnet')) {
-            fallbackModel = 'claude-3-haiku-20240307'; // Use Haiku as fallback
+            fallbackModel = 'claude-3-5-haiku-20241022'; // Use Claude 3.5 Haiku as fallback (same generation)
+          } else if (agent.model.includes('claude-3-sonnet')) {
+            fallbackModel = 'claude-3-haiku-20240307'; // Use Claude 3 Haiku as fallback
           }
         } else if (agent.provider === 'google') {
           // Gemini fallback: query DB for alternative models
