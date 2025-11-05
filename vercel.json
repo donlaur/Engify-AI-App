@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/revalidate-sitemap",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/update-text-indexes?check-only=true",
+      "schedule": "0 2 * * *"
     }
   ]
 }
