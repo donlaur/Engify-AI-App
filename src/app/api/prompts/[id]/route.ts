@@ -48,11 +48,34 @@ export async function GET(
       }
 
       if (prompt) {
-        // Increment view count
-        await collection.updateOne(
-          { _id: prompt._id },
-          { $inc: { views: 1 } }
-        );
+        // Check if prompt requires authentication
+        const session = await auth();
+        const isAuthenticated = !!session?.user;
+
+        // If prompt requires auth and user is not authenticated
+        if (prompt.requiresAuth && !isAuthenticated) {
+          return NextResponse.json(
+            { error: 'Authentication required', requiresAuth: true },
+            { status: 401 }
+          );
+        }
+
+        // If prompt is premium, check subscription (future: implement subscription check)
+        // For now, allow authenticated users to view premium prompts
+        if (prompt.isPremium && !isAuthenticated) {
+          return NextResponse.json(
+            { error: 'Premium subscription required', isPremium: true },
+            { status: 403 }
+          );
+        }
+
+        // Increment view count (only if not premium or user is authenticated)
+        if (!prompt.isPremium || isAuthenticated) {
+          await collection.updateOne(
+            { _id: prompt._id },
+            { $inc: { views: 1 } }
+          );
+        }
 
         return NextResponse.json({ prompt, source: 'mongodb' });
       }
@@ -108,16 +131,51 @@ export async function PATCH(
     const db = await getMongoDb();
     const collection = db.collection('prompts');
 
+    // Find existing prompt
+    const existingPrompt = await collection.findOne({
+      $or: [
+        { id },
+        { slug: id },
+        { _id: new ObjectId(id) },
+      ],
+    });
+
+    if (!existingPrompt) {
+      return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
+    }
+
+    // Get current revision number
+    const currentRevision = existingPrompt.currentRevision || 1;
+    const newRevision = currentRevision + 1;
+
+    // Create revision before updating
+    const { createRevision } = await import('@/lib/db/schemas/prompt-revision');
+    const revision = createRevision(
+      existingPrompt.id || existingPrompt._id.toString(),
+      existingPrompt,
+      { ...existingPrompt, ...body },
+      session.user.id,
+      body.changeReason || 'Prompt updated'
+    );
+
+    // Save revision
+    await db.collection('prompt_revisions').insertOne({
+      ...revision,
+      revisionNumber: newRevision,
+      createdAt: new Date(),
+    });
+
+    // Update prompt with new revision info
     const result = await collection.updateOne(
-      // User- and org-scoped update: restrict to documents owned by the user in their org
       {
-        _id: new ObjectId(id),
-        userId: session.user.id,
-        organizationId: session.user.organizationId,
+        _id: existingPrompt._id,
       },
       {
         $set: {
           ...body,
+          currentRevision: newRevision,
+          lastRevisedBy: session.user.id,
+          lastRevisedAt: new Date(),
           updatedAt: new Date(),
         },
       }
@@ -127,7 +185,10 @@ export async function PATCH(
       return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true,
+      revision: newRevision,
+    });
   } catch (error) {
     logger.apiError('/api/prompts/[id]', error, { method: 'PATCH' });
     return NextResponse.json(

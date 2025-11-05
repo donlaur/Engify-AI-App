@@ -16,7 +16,10 @@ import { z } from 'zod';
 // GET: List all models
 export async function GET(request: NextRequest) {
   const r = await RBACPresets.requireSuperAdmin()(request);
-  if (r) return r;
+  if (r) {
+    console.error('❌ [AI-MODELS-API] RBAC check failed:', r.status);
+    return r;
+  }
 
   try {
     const { searchParams } = new URL(request.url);
@@ -36,6 +39,8 @@ export async function GET(request: NextRequest) {
       models = await aiModelService.find({});
     }
 
+    console.log(`✅ [AI-MODELS-API] Found ${models.length} models in database`);
+
     return NextResponse.json({
       success: true,
       models: models.map((model) => ({
@@ -44,9 +49,12 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('Error fetching AI models:', error);
+    console.error('❌ [AI-MODELS-API] Error fetching AI models:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch models' },
+      { 
+        error: 'Failed to fetch models',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

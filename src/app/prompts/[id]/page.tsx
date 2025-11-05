@@ -34,7 +34,12 @@ import {
   generatePromptMetadata,
   generateHowToSchema,
 } from '@/lib/seo/metadata';
-import { PromptPageClient } from '@/components/features/PromptPageClient';
+import { PromptEnrichment } from '@/components/features/PromptEnrichment';
+import { PromptAuditScores } from '@/components/features/PromptAuditScores';
+import { PromptRevisions } from '@/components/features/PromptRevisions';
+import { PremiumPromptLock } from '@/components/features/PremiumPromptLock';
+import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -138,6 +143,20 @@ export default async function PromptPage({
       logger.warn('Prompt not found', { idOrSlug: params.id });
       notFound();
     }
+
+    // Check if prompt requires authentication or is premium
+    const session = await auth();
+    const isAuthenticated = !!session?.user;
+
+    // If prompt requires auth and user is not authenticated, redirect to login
+    if (prompt.requiresAuth && !isAuthenticated) {
+      redirect(`/login?redirect=/prompts/${params.id}`);
+    }
+
+    // If prompt is premium and user is not authenticated, show upgrade message
+    // (For now, we'll allow viewing but mark it as premium for future implementation)
+    const isPremium = prompt.isPremium === true;
+    const canViewPremium = isAuthenticated; // Future: Check subscription status
 
     // Note: RelatedPrompts now fetches related prompts via API (client-side)
     // This eliminates the need to fetch all prompts during build, dramatically improving performance
@@ -255,6 +274,13 @@ export default async function PromptPage({
         />
         <MainLayout>
           <div className="container py-8">
+            {/* Premium Lock - Show if premium and not authenticated */}
+            {isPremium && !canViewPremium && (
+              <div className="mb-8">
+                <PremiumPromptLock promptTitle={prompt.title} />
+              </div>
+            )}
+
             {/* Breadcrumbs */}
             <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
               <Link href="/" className="hover:text-primary">
@@ -326,6 +352,25 @@ export default async function PromptPage({
                 promptId={prompt.id}
               />
             </div>
+
+            {/* Enrichment Details - Case Studies, Best Time to Use, Recommended Models, etc. */}
+            <PromptEnrichment
+              caseStudies={prompt.caseStudies}
+              bestTimeToUse={prompt.bestTimeToUse}
+              recommendedModel={prompt.recommendedModel}
+              useCases={prompt.useCases}
+              examples={prompt.examples}
+              bestPractices={prompt.bestPractices}
+              whenNotToUse={prompt.whenNotToUse}
+              difficulty={prompt.difficulty}
+              estimatedTime={prompt.estimatedTime}
+            />
+
+            {/* Audit Scores - Fetch client-side */}
+            <PromptAuditScores promptId={prompt.id} />
+
+            {/* Revision History */}
+            <PromptRevisions promptId={prompt.id} />
 
             {/* Metrics */}
             <div className="mt-6">

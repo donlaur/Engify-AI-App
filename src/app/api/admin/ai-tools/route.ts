@@ -16,7 +16,10 @@ import { z } from 'zod';
 // GET: List all tools
 export async function GET(request: NextRequest) {
   const r = await RBACPresets.requireSuperAdmin()(request);
-  if (r) return r;
+  if (r) {
+    console.error('❌ [AI-TOOLS-API] RBAC check failed:', r.status);
+    return r;
+  }
 
   try {
     const { searchParams } = new URL(request.url);
@@ -33,6 +36,8 @@ export async function GET(request: NextRequest) {
       tools = await aiToolService.find({});
     }
 
+    console.log(`✅ [AI-TOOLS-API] Found ${tools.length} tools in database`);
+
     return NextResponse.json({
       success: true,
       tools: tools.map((tool) => ({
@@ -41,9 +46,12 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error('Error fetching AI tools:', error);
+    console.error('❌ [AI-TOOLS-API] Error fetching AI tools:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch tools' },
+      { 
+        error: 'Failed to fetch tools',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

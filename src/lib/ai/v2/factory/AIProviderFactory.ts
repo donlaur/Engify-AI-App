@@ -35,7 +35,7 @@ export class AIProviderFactory {
     // Claude models
     ['claude', () => new ClaudeAdapter('claude-3-haiku-20240307')],
     ['claude-haiku', () => new ClaudeAdapter('claude-3-haiku-20240307')],
-    ['claude-sonnet', () => new ClaudeAdapter('claude-3-5-sonnet-20241022')],
+    ['claude-sonnet', () => new ClaudeAdapter('claude-3-5-sonnet-20241022')], // Use working version
     ['claude-opus', () => new ClaudeAdapter('claude-3-opus-20240229')],
 
     // Gemini models (VERIFIED Oct 31, 2025 - 1.5 models SUNSET!)
@@ -53,6 +53,10 @@ export class AIProviderFactory {
 
     // Replicate (scaffold) — fast LLM placeholder, swap model when finalized
     ['replicate-flash', () => new ReplicateAdapter('gemini-2.5-flash')],
+    // Replicate provider aliases
+    ['replicate', () => new ReplicateAdapter('openai/gpt-5')], // Default to GPT-5 via Replicate
+    ['replicate-gpt5', () => new ReplicateAdapter('openai/gpt-5')],
+    ['replicate-claude', () => new ReplicateAdapter('anthropic/claude-4.5-haiku')],
   ]);
 
   /**

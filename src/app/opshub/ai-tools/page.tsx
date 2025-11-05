@@ -60,15 +60,29 @@ export default function AIToolsAdminPage() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/ai-tools');
-      if (!response.ok) throw new Error('Failed to load tools');
-
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('API Error:', errorData);
+        throw new Error(errorData.error || `Failed to load tools: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setTools(data.tools || []);
+      
+      // Handle both success wrapper and direct array
+      const toolsArray = data.tools || data || [];
+      
+      setTools(toolsArray);
+      
+      if (toolsArray.length === 0) {
+        console.warn('No tools found in database. Tools may need to be migrated or synced.');
+      }
     } catch (error) {
       console.error('Error loading tools:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load AI tools';
       toast({
         title: 'Error',
-        description: 'Failed to load AI tools',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -330,16 +344,45 @@ export default function AIToolsAdminPage() {
           </Button>
         </div>
 
-        {/* Tools by Category */}
-        {Object.entries(groupedByCategory).map(([category, categoryTools]) => (
-          <div key={category} className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-              {CATEGORY_LABELS[category] || category}
-              <Badge variant="secondary">{categoryTools.length} tools</Badge>
-            </h2>
+        {/* Empty State */}
+        {tools.length === 0 && (
+          <Card className="mb-8 border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                <Icons.info className="h-5 w-5" />
+                No Tools Found
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-blue-600 dark:text-blue-300">
+                No AI tools found in the database. To get started:
+              </p>
+              <ol className="list-decimal list-inside space-y-2 text-sm text-blue-600 dark:text-blue-300">
+                <li>Click <strong>"Add Tool"</strong> to manually add a new tool</li>
+                <li>Or check if tools need to be migrated from static config</li>
+              </ol>
+              <div className="flex gap-2 mt-4">
+                <Button onClick={() => setIsDialogOpen(true)}>
+                  <Icons.plus className="mr-2 h-4 w-4" />
+                  Add Tool
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {categoryTools.map((tool) => (
+        {/* Tools by Category */}
+        {Object.entries(groupedByCategory).length > 0 && (
+          <>
+            {Object.entries(groupedByCategory).map(([category, categoryTools]) => (
+              <div key={category} className="mb-8">
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  {CATEGORY_LABELS[category] || category}
+                  <Badge variant="secondary">{categoryTools.length} tools</Badge>
+                </h2>
+
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {categoryTools.map((tool) => (
                 <Card key={tool.id} className={tool.status === 'deprecated' ? 'opacity-60' : ''}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -442,8 +485,10 @@ export default function AIToolsAdminPage() {
             </div>
           </div>
         ))}
+          </>
+        )}
 
-        {filteredTools.length === 0 && (
+        {filteredTools.length === 0 && tools.length > 0 && (
           <Card>
             <CardContent className="py-12 text-center">
               <Icons.info className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />

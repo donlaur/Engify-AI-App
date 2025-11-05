@@ -90,8 +90,8 @@ export class OpenAIAdapter implements AIProvider {
       totalTokens: response.usage?.total_tokens || 0,
     };
 
-    // Calculate cost based on model
-    const cost = this.calculateCost(usage, this.model);
+    // Calculate cost from database
+    const cost = await this.calculateCost(usage, this.model);
 
     return {
       content: response.choices[0]?.message?.content || '',
@@ -104,32 +104,13 @@ export class OpenAIAdapter implements AIProvider {
   }
 
   /**
-   * Calculate cost based on token usage and model
-   * Pricing as of October 2024
+   * Calculate cost based on token usage using database pricing
    */
-  private calculateCost(
+  private async calculateCost(
     usage: { promptTokens: number; completionTokens: number },
     model: string
   ) {
-    let inputCostPer1M = 0.5; // Default: GPT-3.5-turbo
-    let outputCostPer1M = 1.5;
-
-    // Adjust pricing based on model
-    if (model.includes('gpt-4')) {
-      inputCostPer1M = 30.0;
-      outputCostPer1M = 60.0;
-    } else if (model.includes('gpt-3.5')) {
-      inputCostPer1M = 0.5;
-      outputCostPer1M = 1.5;
-    }
-
-    const input = (usage.promptTokens / 1000000) * inputCostPer1M;
-    const output = (usage.completionTokens / 1000000) * outputCostPer1M;
-
-    return {
-      input,
-      output,
-      total: input + output,
-    };
+    const { calculateCostFromDB } = await import('@/lib/ai/utils/model-cost');
+    return await calculateCostFromDB(model, usage.promptTokens, usage.completionTokens);
   }
 }

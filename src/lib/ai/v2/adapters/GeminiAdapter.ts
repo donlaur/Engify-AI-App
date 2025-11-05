@@ -94,8 +94,8 @@ export class GeminiAdapter implements AIProvider {
       totalTokens: promptTokens + completionTokens,
     };
 
-    // Calculate cost based on model
-    const cost = this.calculateCost(usage, this.model);
+    // Calculate cost from database
+    const cost = await this.calculateCost(usage, this.model);
 
     return {
       content: text,
@@ -115,35 +115,13 @@ export class GeminiAdapter implements AIProvider {
   }
 
   /**
-   * Calculate cost based on token usage and model
-   * Pricing as of October 2024
+   * Calculate cost based on token usage using database pricing
    */
-  private calculateCost(
+  private async calculateCost(
     usage: { promptTokens: number; completionTokens: number },
     model: string
   ) {
-    let inputCostPer1M = 0.125; // Default: Gemini Pro
-    let outputCostPer1M = 0.375;
-
-    // Adjust pricing based on model
-    if (model.includes('ultra')) {
-      inputCostPer1M = 0.5;
-      outputCostPer1M = 1.5;
-    } else if (model.includes('pro')) {
-      inputCostPer1M = 0.125;
-      outputCostPer1M = 0.375;
-    } else if (model.includes('flash')) {
-      inputCostPer1M = 0.075;
-      outputCostPer1M = 0.3;
-    }
-
-    const input = (usage.promptTokens / 1000000) * inputCostPer1M;
-    const output = (usage.completionTokens / 1000000) * outputCostPer1M;
-
-    return {
-      input,
-      output,
-      total: input + output,
-    };
+    const { calculateCostFromDB } = await import('@/lib/ai/utils/model-cost');
+    return await calculateCostFromDB(model, usage.promptTokens, usage.completionTokens);
   }
 }

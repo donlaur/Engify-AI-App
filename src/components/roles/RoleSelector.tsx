@@ -31,6 +31,18 @@ const roles = [
     href: '/for-engineers',
   },
   {
+    id: 'architects',
+    label: 'Architects',
+    icon: Icons.layers,
+    href: '/for-architects',
+  },
+  {
+    id: 'devops-sre',
+    label: 'DevOps/SRE',
+    icon: Icons.server,
+    href: '/for-devops-sre',
+  },
+  {
     id: 'designers',
     label: 'Designers',
     icon: Icons.palette,
@@ -42,7 +54,19 @@ const roles = [
     icon: Icons.target,
     href: '/for-pms',
   },
+  {
+    id: 'product-owners',
+    label: 'Product Owners',
+    icon: Icons.folder,
+    href: '/for-product-owners',
+  },
   { id: 'qa', label: 'QA Engineers', icon: Icons.check, href: '/for-qa' },
+  {
+    id: 'scrum-masters',
+    label: 'Scrum Masters',
+    icon: Icons.calendar,
+    href: '/for-scrum-masters',
+  },
 ];
 
 export function RoleSelector() {

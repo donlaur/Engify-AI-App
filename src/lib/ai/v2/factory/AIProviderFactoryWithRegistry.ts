@@ -26,7 +26,7 @@ const PROVIDER_TO_MODEL_ID: Record<string, string> = {
   'openai-gpt4o': 'gpt-4o',
   'claude': 'claude-3-haiku-20240307',
   'claude-haiku': 'claude-3-haiku-20240307',
-  'claude-sonnet': 'claude-3-5-sonnet-20241022',
+  'claude-sonnet': 'claude-3-5-sonnet-20241022', // Use working version
   'claude-opus': 'claude-3-opus-20240229',
   'gemini': 'gemini-2.0-flash-exp',
   'gemini-pro': 'gemini-2.0-flash-exp',
@@ -36,14 +36,17 @@ const PROVIDER_TO_MODEL_ID: Record<string, string> = {
   'groq-llama3-8b': 'llama3-8b-8192',
   'groq-llama3-70b': 'llama3-70b-8192',
   'groq-mixtral': 'mixtral-8x7b-32768',
-  // Replicate: Special handling - providerName like 'replicate-owner/model' 
-  // will extract 'owner/model' as the model ID
+  // Replicate models - use owner/model format
+  'replicate': 'openai/gpt-5',
+  'replicate-gpt5': 'openai/gpt-5',
+  'replicate-claude': 'anthropic/claude-4.5-haiku',
 };
 
 /**
- * Get model name from registry by provider name
+ * Get model ID from registry by provider name
+ * Returns the model ID (e.g., 'claude-3-5-sonnet-20250219'), not the display name
  */
-async function getModelNameFromRegistry(providerName: string): Promise<string | null> {
+async function getModelIdFromRegistry(providerName: string): Promise<string | null> {
   try {
     // Check if model is allowed
     const modelId = PROVIDER_TO_MODEL_ID[providerName];
@@ -57,12 +60,14 @@ async function getModelNameFromRegistry(providerName: string): Promise<string | 
                      providerName.includes('claude') ? 'anthropic' :
                      providerName.includes('gemini') ? 'google' :
                      providerName.includes('groq') ? 'groq' :
+                     providerName.includes('replicate') ? 'replicate' :
                      'openai';
 
     const models = await getModelsByProvider(provider);
     const model = models.find(m => m.id === modelId);
     
-    return model ? model.name : null;
+    // Return the model ID (not name) - adapters need the ID (e.g., 'claude-3-5-sonnet-20250219')
+    return model ? model.id : null;
   } catch (error) {
     console.warn(`[AIProviderFactory] Failed to query registry for ${providerName}:`, error);
     return null;
@@ -78,12 +83,12 @@ export class AIProviderFactoryWithRegistry {
    * Falls back to hardcoded defaults if registry unavailable
    */
   static async create(providerName: string, _organizationId?: string): Promise<AIProvider> {
-    // Try to get model name from registry
-    const modelName = await getModelNameFromRegistry(providerName);
+    // Try to get model ID from registry
+    const modelId = await getModelIdFromRegistry(providerName);
     
-    if (modelName) {
-      // Use model from registry
-      return this.createFromModelName(providerName, modelName);
+    if (modelId) {
+      // Use model ID from registry
+      return this.createFromModelId(providerName, modelId);
     }
 
     // Fallback to original factory (hardcoded defaults)
@@ -91,28 +96,27 @@ export class AIProviderFactoryWithRegistry {
   }
 
   /**
-   * Create provider with specific model name
+   * Create provider with specific model ID
    */
-  private static createFromModelName(providerName: string, modelName: string): AIProvider {
+  private static createFromModelId(providerName: string, modelId: string): AIProvider {
     // Replicate: Support any owner/model format
     if (providerName.startsWith('replicate-')) {
-      return new ReplicateAdapter(modelName); // modelName is already in owner/model format
+      return new ReplicateAdapter(modelId); // modelId is already in owner/model format
     }
     if (providerName.includes('openai')) {
-      return new OpenAIAdapter(modelName);
+      return new OpenAIAdapter(modelId);
+    } else if (providerName.includes('claude')) {
+      return new ClaudeAdapter(modelId);
+    } else if (providerName.includes('gemini')) {
+      return new GeminiAdapter(modelId);
+    } else if (providerName.includes('groq')) {
+      return new GroqAdapter(modelId);
+    } else if (providerName.includes('replicate')) {
+      return new ReplicateAdapter(modelId);
+    } else {
+      // Fallback to factory
+      return AIProviderFactory.create(providerName);
     }
-    if (providerName.includes('claude')) {
-      return new ClaudeAdapter(modelName);
-    }
-    if (providerName.includes('gemini')) {
-      return new GeminiAdapter(modelName);
-    }
-    if (providerName.includes('groq')) {
-      return new GroqAdapter(modelName);
-    }
-
-    // Fallback to original factory
-    return AIProviderFactory.create(providerName);
   }
 
   /**

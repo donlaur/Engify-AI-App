@@ -29,19 +29,34 @@ export default function AIModelsAdminPage() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/ai-models');
-      if (!response.ok) throw new Error('Failed to load models');
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('API Error:', errorData);
+        throw new Error(errorData.error || `Failed to load models: ${response.status}`);
+      }
       
       const data = await response.json();
-      const modelsWithDeprecated = data.models.map((m: AIModel) => ({
+      
+      // Handle both success wrapper and direct array
+      const modelsArray = data.models || data || [];
+      
+      const modelsWithDeprecated = modelsArray.map((m: AIModel) => ({
         ...m,
         deprecated: m.status === 'deprecated' || m.status === 'sunset',
       }));
+      
       setModels(modelsWithDeprecated);
+      
+      if (modelsArray.length === 0) {
+        console.warn('No models found in database. Try syncing from providers or migrating static config.');
+      }
     } catch (error) {
       console.error('Error loading models:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load AI models';
       toast({
         title: 'Error',
-        description: 'Failed to load AI models',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -226,30 +241,63 @@ export default function AIModelsAdminPage() {
           </Card>
         </div>
 
+        {/* Empty State */}
+        {models.length === 0 && (
+          <Card className="mb-8 border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                <Icons.info className="h-5 w-5" />
+                No Models Found
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-blue-600 dark:text-blue-300">
+                No AI models found in the database. To get started:
+              </p>
+              <ol className="list-decimal list-inside space-y-2 text-sm text-blue-600 dark:text-blue-300">
+                <li>Click <strong>"Migrate Static Config"</strong> to import models from <code>src/lib/config/ai-models.ts</code></li>
+                <li>Or click <strong>"Sync from Providers"</strong> to fetch the latest models from provider APIs</li>
+              </ol>
+              <div className="flex gap-2 mt-4">
+                <Button onClick={migrateStaticModels} disabled={syncing}>
+                  <Icons.download className="mr-2 h-4 w-4" />
+                  Migrate Static Config
+                </Button>
+                <Button variant="outline" onClick={syncModels} disabled={syncing}>
+                  <Icons.refresh className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+                  Sync from Providers
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Filter */}
-        <div className="flex gap-2 mb-6">
-          <Button
-            variant={filter === 'all' ? 'default' : 'outline'}
-            onClick={() => setFilter('all')}
-            size="sm"
-          >
-            All Models ({models.length})
-          </Button>
-          <Button
-            variant={filter === 'active' ? 'default' : 'outline'}
-            onClick={() => setFilter('active')}
-            size="sm"
-          >
-            Active ({models.filter(m => !m.deprecated).length})
-          </Button>
-          <Button
-            variant={filter === 'deprecated' ? 'default' : 'outline'}
-            onClick={() => setFilter('deprecated')}
-            size="sm"
-          >
-            Deprecated ({models.filter(m => m.deprecated).length})
-          </Button>
-        </div>
+        {models.length > 0 && (
+          <div className="flex gap-2 mb-6">
+            <Button
+              variant={filter === 'all' ? 'default' : 'outline'}
+              onClick={() => setFilter('all')}
+              size="sm"
+            >
+              All Models ({models.length})
+            </Button>
+            <Button
+              variant={filter === 'active' ? 'default' : 'outline'}
+              onClick={() => setFilter('active')}
+              size="sm"
+            >
+              Active ({models.filter(m => !m.deprecated).length})
+            </Button>
+            <Button
+              variant={filter === 'deprecated' ? 'default' : 'outline'}
+              onClick={() => setFilter('deprecated')}
+              size="sm"
+            >
+              Deprecated ({models.filter(m => m.deprecated).length})
+            </Button>
+          </div>
+        )}
 
         {/* Important Notice */}
         <Card className="mb-8 border-orange-200 bg-orange-50/50 dark:border-orange-900 dark:bg-orange-950/20">

@@ -85,8 +85,8 @@ export class GroqAdapter implements AIProvider {
       totalTokens: response.usage?.total_tokens || 0,
     };
 
-    // Calculate cost based on model
-    const cost = this.calculateCost(usage, this.model);
+    // Calculate cost from database
+    const cost = await this.calculateCost(usage, this.model);
 
     return {
       content: response.choices[0]?.message?.content || '',
@@ -99,39 +99,13 @@ export class GroqAdapter implements AIProvider {
   }
 
   /**
-   * Calculate cost based on token usage and model
-   * Pricing as of October 2024
-   * Note: Groq pricing is very competitive
+   * Calculate cost based on token usage using database pricing
    */
-  private calculateCost(
+  private async calculateCost(
     usage: { promptTokens: number; completionTokens: number },
     model: string
   ) {
-    let inputCostPer1M = 0.05; // Default: Llama models
-    let outputCostPer1M = 0.1;
-
-    // Adjust pricing based on model
-    if (model.includes('llama3-70b')) {
-      inputCostPer1M = 0.59;
-      outputCostPer1M = 0.79;
-    } else if (model.includes('llama3-8b')) {
-      inputCostPer1M = 0.05;
-      outputCostPer1M = 0.1;
-    } else if (model.includes('mixtral')) {
-      inputCostPer1M = 0.24;
-      outputCostPer1M = 0.24;
-    } else if (model.includes('gemma')) {
-      inputCostPer1M = 0.1;
-      outputCostPer1M = 0.1;
-    }
-
-    const input = (usage.promptTokens / 1000000) * inputCostPer1M;
-    const output = (usage.completionTokens / 1000000) * outputCostPer1M;
-
-    return {
-      input,
-      output,
-      total: input + output,
-    };
+    const { calculateCostFromDB } = await import('@/lib/ai/utils/model-cost');
+    return await calculateCostFromDB(model, usage.promptTokens, usage.completionTokens);
   }
 }

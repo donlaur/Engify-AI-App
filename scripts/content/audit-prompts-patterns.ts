@@ -1,0 +1,1839 @@
+#!/usr/bin/env tsx
+/**
+ * Audit & Verify Prompts & Patterns with Comprehensive Grading Rubric
+ * 
+ * Reviews all existing prompts and patterns using multi-agent system
+ * with comprehensive grading rubric across 8 categories:
+ * - Engineering Usefulness
+ * - Case Study Quality
+ * - Completeness
+ * - SEO Enrichment
+ * - Enterprise Readiness
+ * - Security & Compliance
+ * - Accessibility
+ * - Performance
+ * 
+ * Usage:
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=patterns
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=both --limit=10
+ */
+
+// IMPORTANT: Load environment variables FIRST before any imports
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+
+import { getMongoDb } from '@/lib/db/mongodb';
+import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFactoryWithRegistry';
+import { generateSlug } from '@/lib/utils/slug';
+
+interface AuditResult {
+  id: string;
+  type: 'prompt' | 'pattern';
+  title: string;
+  overallScore: number;
+  categoryScores: {
+    engineeringUsefulness: number;
+    caseStudyQuality: number;
+    completeness: number;
+    seoEnrichment: number;
+    enterpriseReadiness: number;
+    securityCompliance: number;
+    accessibility: number;
+    performance: number;
+  };
+  issues: string[];
+  recommendations: string[];
+  missingElements: string[];
+  needsFix: boolean;
+  agentReviews: Record<string, string>;
+}
+
+interface AuditAgent {
+  role: string;
+  name: string;
+  model: string;
+  provider: string;
+  systemPrompt: string;
+  temperature: number;
+  maxTokens: number;
+}
+
+// Audit Agents - Focused on reviewing existing content
+const AUDIT_AGENTS: AuditAgent[] = [
+  {
+    role: 'engineering_reviewer',
+    name: 'Engineering Team Reviewer',
+    model: 'anthropic/claude-4.5-haiku', // Via Replicate
+    provider: 'replicate',
+    temperature: 0.4,
+    maxTokens: 1500,
+    systemPrompt: `You are an Engineering Team Reviewer specializing in evaluating prompts and patterns for engineering teams.
+
+Your focus:
+- Ensure prompts/patterns are optimized for engineering workflows
+- Check that use cases are relevant to software engineers, architects, and tech leads
+- Verify technical accuracy and practicality
+- Assess if content solves real engineering problems
+- Evaluate clarity and actionability for engineering teams
+
+Review checklist:
+1. **Engineering Optimization**: Is this optimized for engineering workflows?
+2. **Use Cases**: Are use cases relevant to engineers/architects/tech leads?
+3. **Technical Accuracy**: Is the technical content accurate?
+4. **Practicality**: Does it solve real engineering problems?
+5. **Clarity**: Is it clear and actionable for engineering teams?
+
+Provide:
+- Score (1-10) for engineering optimization
+- Specific issues found
+- Recommendations for improvement`,
+  },
+  {
+    role: 'product_reviewer',
+    name: 'Product Team Reviewer',
+    model: 'openai/gpt-5', // Via Replicate - best for product analysis
+    provider: 'replicate',
+    temperature: 0.4,
+    maxTokens: 1500,
+    systemPrompt: `You are a Product Team Reviewer specializing in evaluating prompts and patterns for product teams.
+
+Your focus:
+- Ensure prompts/patterns are optimized for product management workflows
+- Check that use cases are relevant to PMs, product designers, and product strategists
+- Verify content addresses product management challenges
+- Assess if content helps with product strategy, roadmaps, user research, etc.
+- Evaluate value for product teams
+
+Review checklist:
+1. **Product Optimization**: Is this optimized for product management workflows?
+2. **Use Cases**: Are use cases relevant to PMs/product designers?
+3. **Product Relevance**: Does it address product management challenges?
+4. **Value**: Does it provide value for product teams?
+5. **Accessibility**: Is it accessible to non-technical product team members?
+
+Provide:
+- Score (1-10) for product optimization
+- Specific issues found
+- Recommendations for improvement`,
+  },
+  {
+    role: 'roles_use_cases_reviewer',
+    name: 'Roles & Use Cases Reviewer',
+    model: 'anthropic/claude-4.5-haiku', // Via Replicate
+    provider: 'replicate',
+    temperature: 0.4,
+    maxTokens: 1500,
+    systemPrompt: `You are a Roles & Use Cases Reviewer who ensures prompts/patterns have proper role assignments and use cases.
+
+Your focus:
+- Verify that roles are properly assigned (engineer, manager, PM, designer, etc.)
+- Check that use cases are realistic and relevant
+- Ensure use cases cover different scenarios
+- Validate that role assignments match the content
+- Assess if use cases are comprehensive enough
+
+Review checklist:
+1. **Role Assignment**: Are roles properly assigned and appropriate?
+2. **Use Cases**: Are use cases present, realistic, and relevant?
+3. **Comprehensiveness**: Do use cases cover different scenarios?
+4. **Alignment**: Do roles match the content and use cases?
+5. **Completeness**: Are all relevant roles and use cases covered?
+
+Provide:
+- Score (1-10) for roles and use cases
+- Missing roles or use cases
+- Recommendations for improvement`,
+  },
+  {
+    role: 'seo_enrichment_reviewer',
+    name: 'SEO Enrichment Reviewer',
+    model: 'openai/gpt-5', // Via Replicate - best for product analysis
+    provider: 'replicate',
+    temperature: 0.3,
+    maxTokens: 1500,
+    systemPrompt: `You are an SEO Enrichment Reviewer who checks if prompts/patterns are properly optimized for SEO.
+
+Your focus:
+- Check if titles are SEO-optimized (50-60 chars, keyword-rich)
+- Verify meta descriptions are present and optimized (150-160 chars)
+- Ensure slugs are SEO-friendly (short, descriptive, keyword-rich)
+- Check if keywords/tags are relevant and comprehensive
+- Verify content structure supports SEO (headings, tags, etc.)
+
+Review checklist:
+1. **Title**: Is title SEO-optimized (50-60 chars, keyword-rich)?
+2. **Description**: Is meta description present and optimized (150-160 chars)?
+3. **Slug**: Is slug SEO-friendly (short, descriptive, keyword-rich)?
+4. **Keywords/Tags**: Are keywords/tags relevant and comprehensive?
+5. **Structure**: Does content structure support SEO?
+
+Provide:
+- Score (1-10) for SEO enrichment
+- Missing SEO elements
+- Recommendations for SEO optimization`,
+  },
+  {
+    role: 'enterprise_saas_expert',
+    name: 'Enterprise SaaS Expert',
+    model: 'anthropic/claude-4.5-haiku', // Via Replicate
+    provider: 'replicate',
+    temperature: 0.4,
+    maxTokens: 2000,
+    systemPrompt: `You are an Enterprise SaaS Expert specializing in B2B SaaS products, enterprise sales, and SaaS best practices.
+
+Your expertise:
+- Enterprise SaaS architecture and patterns
+- B2B sales and enterprise customer needs
+- SaaS metrics and KPIs (MRR, ARR, CAC, LTV, churn)
+- Enterprise feature requirements
+- Multi-tenant SaaS architectures
+- Enterprise onboarding and adoption
+- SaaS pricing models and packaging
+- Enterprise integration requirements (SSO, APIs, webhooks)
+
+Your role in prompt/pattern review:
+1. **Enterprise SaaS Fit**: Ensure prompts/patterns address enterprise SaaS needs
+2. **Use Cases**: Validate use cases are relevant to SaaS companies
+3. **Enterprise Features**: Check for enterprise-grade features (SSO, RBAC, audit logs, etc.)
+4. **Integration**: Consider SaaS integration requirements
+5. **Adoption**: Ensure content supports enterprise adoption
+6. **Value Proposition**: Verify clear value proposition for enterprise customers
+
+Review checklist:
+- Addresses enterprise SaaS needs
+- Use cases relevant to SaaS companies
+- Enterprise-grade features considered
+- SaaS integration requirements addressed
+- Supports enterprise adoption
+- Clear value proposition for enterprise customers
+
+Provide enterprise SaaS readiness scores and recommendations.`,
+  },
+  {
+    role: 'grading_rubric_expert',
+    name: 'Grading Rubric Expert',
+    model: 'openai/gpt-5', // Via Replicate - best for product analysis
+    provider: 'replicate',
+    temperature: 0.2,
+    maxTokens: 2500,
+    systemPrompt: `You are a Grading Rubric Expert who evaluates prompts and patterns using a comprehensive rubric.
+
+GRADING RUBRIC:
+
+1. **Engineering Usefulness (1-10)**
+   - Does this solve real engineering problems?
+   - Is it practical and actionable for engineers?
+   - Does it align with engineering workflows?
+   - Is it technically accurate?
+   - Can engineers use this immediately?
+
+2. **Case Study Quality (1-10)**
+   - Are case studies present and relevant?
+   - Do case studies demonstrate real-world application?
+   - Are case studies diverse (different scenarios)?
+   - Are case studies detailed enough?
+   - Do case studies show measurable outcomes?
+
+3. **Completeness (1-10)**
+   - Are all required fields present?
+   - Is content complete (not missing sections)?
+   - Is enrichment data present (examples, best practices, etc.)?
+   - Are there empty or placeholder fields?
+   - Is data quality acceptable?
+
+4. **SEO Enrichment (1-10)**
+   - Is title SEO-optimized (50-60 chars, keyword-rich)?
+   - Is meta description present and optimized (150-160 chars)?
+   - Is slug SEO-friendly (short, descriptive, keyword-rich)?
+   - Are keywords/tags relevant and comprehensive?
+   - Does content structure support SEO?
+
+5. **Enterprise Readiness (1-10)**
+   - Suitable for enterprise environments?
+   - Compliance considerations addressed (SOC 2, GDPR, etc.)?
+   - Enterprise security standards addressed?
+   - Scalable and maintainable?
+   - Enterprise integration considerations?
+
+6. **Security & Compliance (1-10)**
+   - OWASP Top 10 compliance?
+   - Input validation and sanitization?
+   - Secure authentication/authorization patterns?
+   - Security headers and protections?
+   - Threat modeling considered?
+
+7. **Accessibility (1-10)**
+   - WCAG 2.1 Level AA considerations?
+   - Screen reader compatibility?
+   - Keyboard navigation support?
+   - Color contrast requirements?
+   - ARIA attributes and semantic HTML?
+
+8. **Performance (1-10)**
+   - Core Web Vitals considerations?
+   - Performance optimization opportunities?
+   - Caching strategies considered?
+   - Query optimization recommendations?
+   - Scalability considerations?
+
+For each category, provide:
+- Score (1-10) with justification
+- Specific issues found
+- Recommendations for improvement
+- Missing elements
+
+CRITICAL: Format your response as VALID JSON (no markdown code blocks, just pure JSON):
+{
+  "engineeringUsefulness": { "score": 8, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "caseStudyQuality": { "score": 6, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "completeness": { "score": 7, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "seoEnrichment": { "score": 5, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "enterpriseReadiness": { "score": 8, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "securityCompliance": { "score": 7, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "accessibility": { "score": 6, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "performance": { "score": 7, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] }
+}`,
+  },
+  {
+    role: 'enterprise_reviewer',
+    name: 'Enterprise Reviewer (Red Hat Lens)',
+    model: 'anthropic/claude-4.5-haiku', // Via Replicate
+    provider: 'replicate',
+    temperature: 0.4,
+    maxTokens: 1500,
+    systemPrompt: `You are an Enterprise Reviewer with a Red Hat lens, specializing in enterprise software, compliance, and enterprise-grade solutions.
+
+Your focus:
+- Ensure prompts/patterns are suitable for enterprise environments
+- Check for compliance considerations (SOC 2, GDPR, FedRAMP, etc.)
+- Verify enterprise security standards are addressed
+- Assess scalability and maintainability for enterprise use
+- Consider enterprise integration requirements
+
+Review checklist:
+1. **Enterprise Readiness**: Is this suitable for enterprise environments?
+2. **Compliance**: Are compliance requirements considered?
+3. **Security**: Are enterprise security standards addressed?
+4. **Scalability**: Will this scale to enterprise needs?
+5. **Integration**: Are enterprise integration requirements considered?
+
+Provide:
+- Score (1-10) for enterprise readiness
+- Compliance considerations
+- Recommendations for enterprise optimization`,
+  },
+  {
+    role: 'web_security_reviewer',
+    name: 'Web Security Reviewer',
+    model: 'openai/gpt-5', // Via Replicate - best for product analysis
+    provider: 'replicate',
+    temperature: 0.3,
+    maxTokens: 1500,
+    systemPrompt: `You are a Web Security Reviewer specializing in OWASP Top 10, web application security, and secure coding practices.
+
+Your focus:
+- Identify security vulnerabilities and risks
+- Check against OWASP Top 10
+- Verify security best practices are followed
+- Assess input validation and sanitization
+- Review authentication/authorization patterns
+- Consider threat modeling and risk assessment
+
+Review checklist:
+1. **OWASP Compliance**: Does this follow OWASP Top 10 best practices?
+2. **Input Validation**: Is proper input validation and sanitization present?
+3. **Authentication**: Are secure authentication/authorization patterns used?
+4. **Security Headers**: Are security headers and protections considered?
+5. **Threat Modeling**: Have security threats been considered?
+
+Provide:
+- Score (1-10) for security
+- Security vulnerabilities identified
+- Recommendations for security improvements`,
+  },
+  {
+    role: 'compliance_reviewer',
+    name: 'Compliance Reviewer',
+    model: 'openai/gpt-5', // Via Replicate - best for product analysis
+    provider: 'replicate',
+    temperature: 0.3,
+    maxTokens: 1500,
+    systemPrompt: `You are a Compliance Reviewer specializing in SOC 2, GDPR, FedRAMP, and other regulatory compliance requirements.
+
+Your focus:
+- Check SOC 2 compliance considerations
+- Verify GDPR data privacy protections
+- Assess audit logging requirements
+- Review access controls and RBAC
+- Consider data retention and deletion policies
+- Validate compliance documentation
+
+Review checklist:
+1. **SOC 2**: Are SOC 2 compliance considerations addressed?
+2. **GDPR**: Are GDPR data privacy protections considered?
+3. **Audit Logging**: Are audit logging requirements met?
+4. **Access Controls**: Are proper access controls and RBAC in place?
+5. **Data Retention**: Are data retention and deletion policies considered?
+
+Provide:
+- Score (1-10) for compliance
+- Compliance gaps identified
+- Recommendations for compliance improvements`,
+  },
+  {
+    role: 'completeness_reviewer',
+    name: 'Completeness Reviewer',
+    model: 'openai/gpt-5', // Via Replicate - best for product analysis
+    provider: 'replicate',
+    temperature: 0.3,
+    maxTokens: 1500,
+    systemPrompt: `You are a Completeness Reviewer who checks if prompts/patterns have all required fields and enrichment.
+
+Your focus:
+- Check if all required fields are present
+- Verify content is complete and not missing sections
+- Ensure enrichment data is present (for patterns: examples, best practices, etc.)
+- Check for empty or placeholder content
+- Validate data quality
+
+Review checklist:
+1. **Required Fields**: Are all required fields present?
+2. **Content Completeness**: Is content complete or missing sections?
+3. **Enrichment**: Is enrichment data present (examples, best practices, etc.)?
+4. **Empty Fields**: Are there empty or placeholder fields?
+5. **Data Quality**: Is the data quality acceptable?
+
+Provide:
+- Score (1-10) for completeness
+- Missing fields or sections
+- Recommendations for completion`,
+  },
+];
+
+export class PromptPatternAuditor {
+  private organizationId: string;
+
+  constructor(organizationId: string = 'system') {
+    this.organizationId = organizationId;
+  }
+
+  /**
+   * Run a single audit agent
+   */
+  private async runAgent(
+    agent: AuditAgent,
+    prompt: string
+  ): Promise<string> {
+    try {
+      // For Replicate, create adapter directly with model ID
+      if (agent.provider === 'replicate') {
+        const { ReplicateAdapter } = await import('@/lib/ai/v2/adapters/ReplicateAdapter');
+        const provider = new ReplicateAdapter(agent.model);
+        const response = await provider.execute({
+          prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+          temperature: agent.temperature,
+          maxTokens: agent.maxTokens,
+        });
+        return response.content;
+      }
+      
+      // Use AIProviderFactoryWithRegistry which handles model lookup from DB
+      const provider = await AIProviderFactoryWithRegistry.create(
+        agent.provider,
+        this.organizationId
+      );
+
+      const response = await provider.execute({
+        prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+        temperature: agent.temperature,
+        maxTokens: agent.maxTokens,
+      });
+
+      return response.content;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Check for API key errors
+      if (errorMessage.includes('API key') || errorMessage.includes('api_key') || errorMessage.includes('authentication') || errorMessage.includes('401')) {
+        const providerName = agent.provider.includes('openai') ? 'OPENAI' :
+                           agent.provider.includes('claude') ? 'ANTHROPIC' :
+                           agent.provider.includes('gemini') ? 'GOOGLE' :
+                           agent.provider.includes('groq') ? 'GROQ' :
+                           agent.provider.includes('replicate') ? 'REPLICATE' :
+                           'AI';
+        throw new Error(
+          `❌ API key error for ${agent.name} (${agent.provider}): ${errorMessage}\n` +
+          `Please check your .env.local file for ${providerName}_API_KEY`
+        );
+      }
+
+      // Check for model availability errors - try fallback
+      if (errorMessage.includes('model') || errorMessage.includes('not found') || errorMessage.includes('404')) {
+        console.warn(`⚠️  Model "${agent.model}" not available for ${agent.name}, trying fallback...`);
+        
+        // Try using a working fallback model for the same provider
+        let fallbackModel: string | null = null;
+        if (agent.provider.includes('claude')) {
+          // Claude Sonnet fallback: try Haiku if Sonnet fails
+          if (agent.model.includes('claude-3-5-sonnet')) {
+            fallbackModel = 'claude-3-haiku-20240307'; // Use Haiku as fallback
+          }
+        } else if (agent.provider.includes('replicate')) {
+          // Replicate fallback: try Claude Haiku if other models fail
+          if (agent.model.includes('gpt-5')) {
+            fallbackModel = 'anthropic/claude-4.5-haiku';
+          } else if (agent.model.includes('claude-4.5')) {
+            fallbackModel = 'meta/llama-3.1-405b-instruct'; // Last resort
+          }
+        }
+        
+        if (fallbackModel) {
+          try {
+            console.log(`   🔄 Trying fallback model: ${fallbackModel}`);
+            const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
+            const fallbackProvider = agent.provider === 'replicate' 
+              ? AIProviderFactory.create('replicate') // Use replicate provider
+              : AIProviderFactory.create(agent.provider);
+            // Create adapter with fallback model directly
+            const providerType = agent.provider.includes('openai') ? 'openai' :
+                               agent.provider.includes('claude') ? 'anthropic' :
+                               agent.provider.includes('gemini') ? 'google' :
+                               agent.provider.includes('groq') ? 'groq' :
+                               agent.provider.includes('replicate') ? 'replicate' :
+                               'openai';
+            
+            let fallbackAdapter;
+            if (providerType === 'openai') {
+              const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+              fallbackAdapter = new OpenAIAdapter(fallbackModel);
+            } else if (providerType === 'anthropic') {
+              const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
+              fallbackAdapter = new ClaudeAdapter(fallbackModel);
+            } else if (providerType === 'replicate') {
+              const { ReplicateAdapter } = await import('@/lib/ai/v2/adapters/ReplicateAdapter');
+              fallbackAdapter = new ReplicateAdapter(fallbackModel); // Use fallback model directly
+            } else {
+              // Use factory for other providers
+              fallbackAdapter = fallbackProvider;
+            }
+            
+            const response = await fallbackAdapter.execute({
+              prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+              temperature: agent.temperature,
+              maxTokens: agent.maxTokens,
+            });
+            console.log(`   ✅ Fallback model ${fallbackModel} succeeded`);
+            return response.content;
+          } catch (fallbackError) {
+            console.warn(`   ❌ Fallback model ${fallbackModel} also failed`);
+          }
+        }
+        
+        // Last resort: try using AIProviderFactory directly (uses static config fallback)
+        try {
+          const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
+          const fallbackProvider = agent.provider === 'replicate' 
+            ? AIProviderFactory.create('replicate') // Use replicate provider
+            : AIProviderFactory.create(agent.provider);
+          const response = await fallbackProvider.execute({
+            prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+            temperature: agent.temperature,
+            maxTokens: agent.maxTokens,
+          });
+          return response.content;
+        } catch (fallbackError) {
+          throw new Error(
+            `❌ Model error for ${agent.name} (${agent.provider}): ${errorMessage}\n` +
+            `Fallback also failed. Please check if the model "${agent.model}" is available in the database registry or static config.`
+          );
+        }
+      }
+
+      // Generic error
+      throw new Error(
+        `❌ Error running ${agent.name} (${agent.provider}): ${errorMessage}`
+      );
+    }
+  }
+
+  /**
+   * Infer role from content/use cases if not explicitly set
+   */
+  inferRoleFromContent(item: any): string | null {
+    const content = JSON.stringify(item).toLowerCase();
+    const roleKeywords: Record<string, string[]> = {
+      'engineer': ['code', 'debug', 'programming', 'developer', 'software engineer'],
+      'engineering-manager': ['team', 'sprint', 'manager', 'leadership', 'review'],
+      'product-manager': ['product', 'feature', 'roadmap', 'strategy', 'user story'],
+      'product-owner': ['backlog', 'user story', 'sprint', 'stakeholder'],
+      'qa': ['test', 'testing', 'quality', 'bug', 'qa'],
+      'architect': ['architecture', 'system design', 'scalability', 'technical decision'],
+      'devops-sre': ['deploy', 'infrastructure', 'ci/cd', 'monitoring', 'sre'],
+      'scrum-master': ['scrum', 'sprint', 'ceremony', 'agile', 'facilitation'],
+      'designer': ['design', 'ui', 'ux', 'user experience', 'prototype'],
+      'director': ['strategy', 'executive', 'cto', 'vp', 'organization'],
+    };
+
+    for (const [role, keywords] of Object.entries(roleKeywords)) {
+      if (keywords.some(keyword => content.includes(keyword))) {
+        return role;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Parse JSON from rubric expert response
+   */
+  private parseRubricJSON(content: string): any {
+    try {
+      // Try to extract JSON from markdown code blocks
+      const jsonBlockMatch = content.match(/```json\s*([\s\S]*?)```/);
+      if (jsonBlockMatch) {
+        return JSON.parse(jsonBlockMatch[1]);
+      }
+
+      // Try to extract JSON without markdown
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+
+      return null;
+    } catch (error) {
+      console.warn('⚠️  Could not parse rubric JSON:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Create a role-specific reviewer agent dynamically based on the target role
+   */
+  createRoleSpecificReviewer(role: string): AuditAgent | null {
+    const roleInfo = this.getRoleInfo(role);
+    if (!roleInfo) return null;
+
+    return {
+      role: `role_specific_reviewer_${role.replace(/-/g, '_')}`,
+      name: `${roleInfo.title} Specialist Reviewer`,
+      model: 'openai/gpt-5', // Via Replicate
+      provider: 'replicate',
+      temperature: 0.4,
+      maxTokens: 1500,
+      systemPrompt: `You are a ${roleInfo.title} Specialist Reviewer who evaluates prompts and patterns specifically for ${roleInfo.title.toLowerCase()}.
+
+Your expertise:
+${roleInfo.description}
+
+Key focus areas for ${roleInfo.title.toLowerCase()}:
+${roleInfo.keyFocusAreas.map(area => `- ${area}`).join('\n')}
+
+Typical challenges for ${roleInfo.title.toLowerCase()}:
+${roleInfo.typicalChallenges.map(challenge => `- ${challenge}`).join('\n')}
+
+Your review checklist:
+1. **Role Relevance**: Is this prompt/pattern specifically relevant to ${roleInfo.title.toLowerCase()}?
+2. **Use Cases**: Do use cases match real-world scenarios for ${roleInfo.title.toLowerCase()}?
+3. **Terminology**: Is the language and terminology appropriate for ${roleInfo.title.toLowerCase()}?
+4. **Practicality**: Does this solve real problems that ${roleInfo.title.toLowerCase()} face?
+5. **Accessibility**: Is it accessible and understandable for ${roleInfo.title.toLowerCase()}?
+6. **Value**: Does this provide meaningful value for ${roleInfo.title.toLowerCase()}?
+
+Provide:
+- Score (1-10) for role-specific optimization
+- Specific issues related to ${roleInfo.title.toLowerCase()} needs
+- Recommendations for improving relevance to ${roleInfo.title.toLowerCase()}
+- Missing elements that would make this more valuable for ${roleInfo.title.toLowerCase()}`,
+    };
+  }
+
+  /**
+   * Get role information for role-specific reviewers
+   */
+  getRoleInfo(role: string): {
+    title: string;
+    description: string;
+    keyFocusAreas: string[];
+    typicalChallenges: string[];
+  } | null {
+    const roleInfoMap: Record<string, {
+      title: string;
+      description: string;
+      keyFocusAreas: string[];
+      typicalChallenges: string[];
+    }> = {
+      'engineer': {
+        title: 'Engineers',
+        description: 'Technical professionals who write code, debug issues, build features, and maintain systems.',
+        keyFocusAreas: [
+          'Code generation and review',
+          'Debugging and troubleshooting',
+          'Architecture and design',
+          'Performance optimization',
+          'Testing and quality assurance',
+        ],
+        typicalChallenges: [
+          'Writing efficient, maintainable code',
+          'Debugging complex issues',
+          'Understanding legacy codebases',
+          'Learning new technologies quickly',
+          'Balancing speed with quality',
+        ],
+      },
+      'engineering-manager': {
+        title: 'Engineering Managers',
+        description: 'Leaders who manage engineering teams, drive technical strategy, and ensure team productivity.',
+        keyFocusAreas: [
+          'Team leadership and management',
+          'Technical strategy and planning',
+          'Sprint planning and execution',
+          'Performance reviews and career development',
+          'Cross-functional collaboration',
+        ],
+        typicalChallenges: [
+          'Balancing team velocity with quality',
+          'Code review bottlenecks',
+          'Technical debt management',
+          'Team onboarding and retention',
+          'Stakeholder communication',
+        ],
+      },
+      'product-manager': {
+        title: 'Product Managers',
+        description: 'Product leaders who define product strategy, prioritize features, and drive product decisions.',
+        keyFocusAreas: [
+          'Product strategy and vision',
+          'Feature prioritization',
+          'User research and analysis',
+          'Roadmap planning',
+          'Stakeholder communication',
+        ],
+        typicalChallenges: [
+          'Balancing competing priorities',
+          'Synthesizing user feedback',
+          'Making data-driven decisions',
+          'Communicating strategy effectively',
+          'Managing product complexity',
+        ],
+      },
+      'product-owner': {
+        title: 'Product Owners',
+        description: 'Agile product leaders who manage backlogs, define user stories, and ensure product delivery.',
+        keyFocusAreas: [
+          'Backlog management',
+          'User story creation and refinement',
+          'Sprint planning',
+          'Stakeholder alignment',
+          'Product definition',
+        ],
+        typicalChallenges: [
+          'Prioritizing backlog items',
+          'Writing clear user stories',
+          'Managing changing requirements',
+          'Balancing stakeholder needs',
+          'Ensuring sprint success',
+        ],
+      },
+      'qa': {
+        title: 'QA Engineers',
+        description: 'Quality assurance professionals who ensure software quality through testing and automation.',
+        keyFocusAreas: [
+          'Test case generation',
+          'Bug triage and prioritization',
+          'Test automation',
+          'Quality metrics',
+          'Regression testing',
+        ],
+        typicalChallenges: [
+          'Writing comprehensive test cases',
+          'Identifying edge cases',
+          'Balancing manual and automated testing',
+          'Tracking quality metrics',
+          'Preventing regressions',
+        ],
+      },
+      'architect': {
+        title: 'Software Architects',
+        description: 'Technical leaders who design system architecture, make technology decisions, and ensure scalability.',
+        keyFocusAreas: [
+          'System design',
+          'Architecture decisions',
+          'Technology evaluation',
+          'Scalability planning',
+          'Integration architecture',
+        ],
+        typicalChallenges: [
+          'Balancing complexity with simplicity',
+          'Making long-term technology decisions',
+          'Designing for scale',
+          'Documenting architecture',
+          'Balancing technical debt',
+        ],
+      },
+      'devops-sre': {
+        title: 'DevOps & SRE',
+        description: 'Infrastructure and reliability engineers who manage deployments, monitoring, and system reliability.',
+        keyFocusAreas: [
+          'Infrastructure as Code',
+          'CI/CD pipelines',
+          'Monitoring and alerting',
+          'Incident response',
+          'Performance optimization',
+        ],
+        typicalChallenges: [
+          'Managing complex deployments',
+          'Ensuring system reliability',
+          'Scaling infrastructure',
+          'Incident response',
+          'Cost optimization',
+        ],
+      },
+      'scrum-master': {
+        title: 'Scrum Masters',
+        description: 'Agile facilitators who ensure team effectiveness, remove impediments, and facilitate Scrum ceremonies.',
+        keyFocusAreas: [
+          'Sprint facilitation',
+          'Team coaching',
+          'Impediment removal',
+          'Process improvement',
+          'Stakeholder communication',
+        ],
+        typicalChallenges: [
+          'Facilitating effective ceremonies',
+          'Removing team impediments',
+          'Improving team velocity',
+          'Managing team dynamics',
+          'Ensuring Scrum adherence',
+        ],
+      },
+      'designer': {
+        title: 'Designers',
+        description: 'UI/UX designers who create user experiences, design systems, and ensure design quality.',
+        keyFocusAreas: [
+          'User research',
+          'Design systems',
+          'User experience design',
+          'Design handoff',
+          'Design accessibility',
+        ],
+        typicalChallenges: [
+          'Understanding user needs',
+          'Creating accessible designs',
+          'Design system consistency',
+          'Design-to-development handoff',
+          'Measuring design impact',
+        ],
+      },
+      'director': {
+        title: 'Directors & C-Level',
+        description: 'Executive leaders who make strategic decisions, drive organizational change, and ensure business success.',
+        keyFocusAreas: [
+          'Strategic planning',
+          'Organizational leadership',
+          'Technology investment decisions',
+          'Budget and resource allocation',
+          'Executive communication',
+        ],
+        typicalChallenges: [
+          'Making strategic technology decisions',
+          'Balancing short-term and long-term goals',
+          'Communicating technical concepts to non-technical stakeholders',
+          'Driving organizational change',
+          'Measuring ROI and impact',
+        ],
+      },
+      'c-level': {
+        title: 'C-Level Executives',
+        description: 'C-suite executives including CTOs, VPs, and executives who make high-level technology and organizational decisions.',
+        keyFocusAreas: [
+          'Strategic technology decisions',
+          'Organizational strategy',
+          'Technology investment',
+          'Executive communication',
+          'Business impact',
+        ],
+        typicalChallenges: [
+          'Strategic technology planning',
+          'Technology ROI analysis',
+          'Organizational transformation',
+          'Competitive advantage',
+          'Executive reporting',
+        ],
+      },
+    };
+
+    return roleInfoMap[role] || null;
+  }
+
+  /**
+   * Get pattern information for pattern-specific review
+   */
+  private getPatternInfo(patternId: string): {
+    name: string;
+    description: string;
+    bestPractices: string[];
+    commonMistakes: string[];
+    whenToUse: string[];
+  } | null {
+    const patternInfoMap: Record<string, {
+      name: string;
+      description: string;
+      bestPractices: string[];
+      commonMistakes: string[];
+      whenToUse: string[];
+    }> = {
+      'persona': {
+        name: 'Persona Pattern',
+        description: 'Assigns a specific role or expertise to the AI',
+        bestPractices: [
+          'Be specific about the expertise level (junior, senior, expert)',
+          "Include relevant context about the persona's background",
+          'Combine with other patterns for better results',
+          'Use consistent personas across related prompts',
+        ],
+        commonMistakes: [
+          'Being too vague ("act as an expert" - expert in what?)',
+          "Choosing personas that don't match your actual need",
+          'Forgetting to maintain the persona throughout the conversation',
+          'Using conflicting personas in the same prompt',
+        ],
+        whenToUse: [
+          'You need domain-specific expertise or terminology',
+          'You want responses tailored to a specific audience',
+          'You need consistent tone and perspective across multiple prompts',
+        ],
+      },
+      'chain-of-thought': {
+        name: 'Chain-of-Thought Pattern',
+        description: 'Breaks down reasoning into explicit steps',
+        bestPractices: [
+          'Use clear step markers (Step 1, Step 2, etc.)',
+          'Ask for intermediate conclusions',
+          'Ensure each step builds logically on the previous',
+          'Request verification at each step',
+        ],
+        commonMistakes: [
+          'Not providing enough structure for the reasoning steps',
+          'Asking for too many steps (becomes verbose)',
+          'Not asking for verification of reasoning',
+          'Missing the connection between steps',
+        ],
+        whenToUse: [
+          'Complex problems requiring multi-step reasoning',
+          'You need to understand the AI\'s thinking process',
+          'Debugging or troubleshooting scenarios',
+        ],
+      },
+      'few-shot': {
+        name: 'Few-Shot Learning Pattern',
+        description: 'Provides examples to guide the AI response format',
+        bestPractices: [
+          'Provide 2-5 high-quality examples',
+          'Ensure examples are diverse but consistent',
+          'Make examples representative of desired output',
+          'Include edge cases in examples',
+        ],
+        commonMistakes: [
+          'Providing too few examples (less than 2)',
+          'Examples that contradict each other',
+          'Examples that don\'t match the desired output format',
+          'Using low-quality examples',
+        ],
+        whenToUse: [
+          'You need consistent output format',
+          'Complex tasks where examples clarify expectations',
+          'When pattern recognition is important',
+        ],
+      },
+      'template': {
+        name: 'Template Pattern',
+        description: 'Provides a structured format for the AI to fill in',
+        bestPractices: [
+          'Provide a clear template structure',
+          'Include placeholder text or examples',
+          'Specify required vs optional fields',
+          'Make the template easy to parse',
+        ],
+        commonMistakes: [
+          'Template too rigid (doesn\'t allow flexibility)',
+          'Missing required fields in template',
+          'Unclear placeholder text',
+          'Template doesn\'t match actual use case',
+        ],
+        whenToUse: [
+          'You need consistent structured output',
+          'Form-like data collection',
+          'Standardized reporting formats',
+        ],
+      },
+      'cognitive-verifier': {
+        name: 'Cognitive Verifier Pattern',
+        description: 'Asks AI to verify its own reasoning',
+        bestPractices: [
+          'Ask for specific verification steps',
+          'Request evidence for each claim',
+          'Require identification of assumptions',
+          'Ask for validation of conclusions',
+        ],
+        commonMistakes: [
+          'Not providing clear verification criteria',
+          'Skipping verification steps',
+          'Accepting unverified conclusions',
+          'Not asking for evidence',
+        ],
+        whenToUse: [
+          'High-stakes decisions requiring verification',
+          'Complex analysis where accuracy matters',
+          'When you need to catch reasoning errors',
+        ],
+      },
+      'hypothesis-testing': {
+        name: 'Hypothesis Testing Pattern',
+        description: 'Generates multiple plausible explanations',
+        bestPractices: [
+          'Generate 3-5 diverse hypotheses',
+          'For each hypothesis, identify supporting and refuting evidence',
+          'Evaluate hypotheses systematically',
+          'Choose the best-fitting hypothesis',
+        ],
+        commonMistakes: [
+          'Too few hypotheses (misses alternatives)',
+          'Not evaluating evidence properly',
+          'Jumping to conclusions without testing',
+          'Ignoring refuting evidence',
+        ],
+        whenToUse: [
+          'Problem-solving with multiple possible causes',
+          'Root cause analysis',
+          'Scientific method applications',
+        ],
+      },
+      'rag': {
+        name: 'RAG (Retrieval Augmented Generation)',
+        description: 'Retrieves information from external knowledge base',
+        bestPractices: [
+          'Clearly specify what knowledge base to use',
+          'Provide retrieval instructions',
+          'Ask AI to cite sources',
+          'Verify retrieved information relevance',
+        ],
+        commonMistakes: [
+          'Not specifying knowledge base source',
+          'Missing citation requirements',
+          'Not verifying retrieved information',
+          'Using outdated or irrelevant sources',
+        ],
+        whenToUse: [
+          'Need to access external knowledge',
+          'Domain-specific information retrieval',
+          'Context-aware responses',
+        ],
+      },
+      'audience-persona': {
+        name: 'Audience Persona Pattern',
+        description: 'Tailors the response for a specific audience level',
+        bestPractices: [
+          'Clearly define audience characteristics',
+          'Specify knowledge level (beginner, intermediate, expert)',
+          'Include audience context and needs',
+          'Adapt language and examples for audience',
+        ],
+        commonMistakes: [
+          'Not specifying audience clearly',
+          'Using wrong level of technical detail',
+          'Ignoring audience needs',
+          'Mixing audience levels',
+        ],
+        whenToUse: [
+          'Different audiences need different explanations',
+          'Educational content',
+          'Documentation for different skill levels',
+        ],
+      },
+      'structured-output': {
+        name: 'Structured Output Generation',
+        description: 'Forces the AI to output in machine-readable formats',
+        bestPractices: [
+          'Provide clear schema or structure',
+          'Specify required vs optional fields',
+          'Include validation rules',
+          'Test with edge cases',
+        ],
+        commonMistakes: [
+          'Schema too complex',
+          'Missing validation rules',
+          'Not handling errors properly',
+          'Schema doesn\'t match actual needs',
+        ],
+        whenToUse: [
+          'System integration needs',
+          'Programmatic processing',
+          'API responses',
+        ],
+      },
+    };
+
+    return patternInfoMap[patternId] || null;
+  }
+
+  /**
+   * Create a pattern-specific reviewer agent
+   */
+  createPatternSpecificReviewer(patternId: string): AuditAgent | null {
+    const patternInfo = this.getPatternInfo(patternId);
+    if (!patternInfo) return null;
+
+    return {
+      role: `pattern_specific_reviewer_${patternId.replace(/-/g, '_')}`,
+      name: `${patternInfo.name} Specialist Reviewer`,
+      model: 'openai/gpt-5', // Via Replicate
+      provider: 'replicate',
+      temperature: 0.4,
+      maxTokens: 1500,
+      systemPrompt: `You are a ${patternInfo.name} Specialist Reviewer who evaluates prompts specifically using the ${patternInfo.name}.
+
+PATTERN DESCRIPTION:
+${patternInfo.description}
+
+WHEN TO USE THIS PATTERN:
+${patternInfo.whenToUse.map(use => `- ${use}`).join('\n')}
+
+BEST PRACTICES FOR ${patternInfo.name.toUpperCase()}:
+${patternInfo.bestPractices.map(practice => `- ${practice}`).join('\n')}
+
+COMMON MISTAKES TO AVOID:
+${patternInfo.commonMistakes.map(mistake => `- ${mistake}`).join('\n')}
+
+Your review checklist for ${patternInfo.name}:
+1. **Pattern Implementation**: Is this prompt correctly implementing the ${patternInfo.name}?
+2. **Best Practices**: Does it follow the best practices for ${patternInfo.name}?
+3. **Common Mistakes**: Are there any common mistakes present?
+4. **Pattern Effectiveness**: Is this pattern the right choice for the use case?
+5. **Pattern Optimization**: How can the ${patternInfo.name} implementation be improved?
+6. **Missing Elements**: What's missing from the ${patternInfo.name} implementation?
+7. **Pattern Combination**: Could this be improved by combining with other patterns?
+
+Provide:
+- Score (1-10) for ${patternInfo.name} optimization
+- Specific issues related to ${patternInfo.name} implementation
+- Recommendations for improving ${patternInfo.name} usage
+- Missing elements that would make this a better ${patternInfo.name} prompt`,
+    };
+  }
+
+  /**
+   * Audit a single prompt
+   */
+  async auditPrompt(prompt: any): Promise<AuditResult> {
+    const promptText = `
+TITLE: ${prompt.title || 'N/A'}
+DESCRIPTION: ${prompt.description || 'N/A'}
+CATEGORY: ${prompt.category || 'N/A'}
+ROLE: ${prompt.role || 'N/A'}
+PATTERN: ${prompt.pattern || 'N/A'}
+TAGS: ${Array.isArray(prompt.tags) ? prompt.tags.join(', ') : 'N/A'}
+CONTENT: ${prompt.content ? prompt.content.substring(0, 2000) : 'N/A'}
+SLUG: ${prompt.slug || 'N/A'}
+CASE STUDIES: ${prompt.caseStudies ? JSON.stringify(prompt.caseStudies).substring(0, 1500) : 'N/A'}
+EXAMPLES: ${prompt.examples ? JSON.stringify(prompt.examples).substring(0, 1000) : 'N/A'}
+USE CASES: ${Array.isArray(prompt.useCases) ? prompt.useCases.join(', ') : 'N/A'}
+BEST TIME TO USE: ${Array.isArray(prompt.bestTimeToUse) ? prompt.bestTimeToUse.join(', ') : (prompt.bestTimeToUse || 'N/A')}
+RECOMMENDED MODELS: ${prompt.recommendedModel ? JSON.stringify(prompt.recommendedModel).substring(0, 1000) : 'N/A'}
+BEST PRACTICES: ${Array.isArray(prompt.bestPractices) ? prompt.bestPractices.join(', ') : 'N/A'}
+WHEN NOT TO USE: ${Array.isArray(prompt.whenNotToUse) ? prompt.whenNotToUse.join(', ') : 'N/A'}
+DIFFICULTY: ${prompt.difficulty || 'N/A'}
+ESTIMATED TIME: ${prompt.estimatedTime || 'N/A'}
+`;
+
+    const agentReviews: Record<string, string> = {};
+    const issues: string[] = [];
+    const recommendations: string[] = [];
+    const missingElements: string[] = [];
+    let categoryScores = {
+      engineeringUsefulness: 0,
+      caseStudyQuality: 0,
+      completeness: 0,
+      seoEnrichment: 0,
+      enterpriseReadiness: 0,
+      securityCompliance: 0,
+      accessibility: 0,
+      performance: 0,
+    };
+
+    // Step 1: Use Grading Rubric Expert for comprehensive evaluation
+    const rubricAgent = AUDIT_AGENTS.find((a) => a.role === 'grading_rubric_expert');
+    if (rubricAgent) {
+      try {
+        const rubricPrompt = `Evaluate this prompt using the comprehensive grading rubric:\n\n${promptText}\n\nProvide JSON response with scores for all 8 categories.`;
+        const rubricReview = await this.runAgent(rubricAgent, rubricPrompt);
+        agentReviews['grading_rubric'] = rubricReview;
+
+        // Parse JSON from rubric review
+        const rubricData = this.parseRubricJSON(rubricReview);
+        if (rubricData) {
+          // Extract scores and aggregate issues/recommendations
+          categoryScores.engineeringUsefulness = rubricData.engineeringUsefulness?.score || 0;
+          categoryScores.caseStudyQuality = rubricData.caseStudyQuality?.score || 0;
+          categoryScores.completeness = rubricData.completeness?.score || 0;
+          categoryScores.seoEnrichment = rubricData.seoEnrichment?.score || 0;
+          categoryScores.enterpriseReadiness = rubricData.enterpriseReadiness?.score || 0;
+          categoryScores.securityCompliance = rubricData.securityCompliance?.score || 0;
+          categoryScores.accessibility = rubricData.accessibility?.score || 0;
+          categoryScores.performance = rubricData.performance?.score || 0;
+
+          // Aggregate issues and recommendations
+          Object.values(rubricData).forEach((category: any) => {
+            if (category?.issues) issues.push(...category.issues);
+            if (category?.recommendations) recommendations.push(...category.recommendations);
+            if (category?.missing) missingElements.push(...category.missing);
+          });
+        } else {
+          // Fallback: extract scores from text
+          Object.keys(categoryScores).forEach((key) => {
+            const scoreMatch = rubricReview.match(new RegExp(`${key}[:\s]+(\\d+(?:\\.\\d+)?)`, 'i'));
+            if (scoreMatch) {
+              (categoryScores as any)[key] = parseFloat(scoreMatch[1]);
+            }
+          });
+        }
+      } catch (error) {
+        console.error(`❌ Error running Grading Rubric Expert:`, error);
+        agentReviews['grading_rubric'] = `Error: ${error instanceof Error ? error.message : String(error)}`;
+      }
+    }
+
+    // Step 2: Add role-specific reviewer if role is present
+    let roleSpecificAgent: AuditAgent | null = null;
+    if (prompt.role) {
+      roleSpecificAgent = this.createRoleSpecificReviewer(prompt.role);
+      if (roleSpecificAgent) {
+        try {
+          const roleReviewPrompt = `Review this prompt specifically for ${roleSpecificAgent.name}:\n\n${promptText}\n\nFocus on how well this prompt serves ${prompt.role} professionals. Provide score (1-10), role-specific issues, and recommendations.`;
+          const roleReview = await this.runAgent(roleSpecificAgent, roleReviewPrompt);
+          agentReviews[roleSpecificAgent.role] = roleReview;
+
+          // Extract score
+          const scoreMatch = roleReview.match(/score[:\s]+(\d+(?:\.\d+)?)/i);
+          if (scoreMatch) {
+            // Role-specific score can influence engineering usefulness or completeness
+            const roleScore = parseFloat(scoreMatch[1]);
+            if (categoryScores.engineeringUsefulness === 0 || roleScore < categoryScores.engineeringUsefulness) {
+              categoryScores.engineeringUsefulness = roleScore;
+            }
+          }
+
+          // Extract role-specific issues
+          const issuesMatch = roleReview.match(/issues?[:\s]*\n([\s\S]+?)(?:\n\n|recommendations|$)/i);
+          if (issuesMatch) {
+            const issueList = issuesMatch[1]
+              .split('\n')
+              .map((line) => line.trim())
+              .filter((line) => line.length > 0 && !line.match(/^[-*•]\s*$/));
+            issues.push(...issueList.map(issue => `[${prompt.role}] ${issue}`));
+          }
+
+          // Extract role-specific recommendations
+          const recMatch = roleReview.match(/recommendations?[:\s]*\n([\s\S]+?)$/i);
+          if (recMatch) {
+            const recList = recMatch[1]
+              .split('\n')
+              .map((line) => line.trim())
+              .filter((line) => line.length > 0 && !line.match(/^[-*•]\s*$/));
+            recommendations.push(...recList.map(rec => `[${prompt.role}] ${rec}`));
+          }
+        } catch (error) {
+          console.error(`❌ Error running ${roleSpecificAgent.name}:`, error);
+          agentReviews[roleSpecificAgent.role] = `Error: ${error instanceof Error ? error.message : String(error)}`;
+        }
+      }
+    }
+
+    // Step 2.5: Add pattern-specific reviewer if pattern is present
+    let patternSpecificAgent: AuditAgent | null = null;
+    if (prompt.pattern) {
+      patternSpecificAgent = this.createPatternSpecificReviewer(prompt.pattern);
+      if (patternSpecificAgent) {
+        try {
+          const patternReviewPrompt = `Review this prompt specifically for ${patternSpecificAgent.name}:\n\n${promptText}\n\nFocus on how well this prompt implements the ${prompt.pattern} pattern. Provide score (1-10), pattern-specific issues, and recommendations.`;
+          const patternReview = await this.runAgent(patternSpecificAgent, patternReviewPrompt);
+          agentReviews[patternSpecificAgent.role] = patternReview;
+
+          // Extract score
+          const scoreMatch = patternReview.match(/score[:\s]+(\d+(?:\.\d+)?)/i);
+          if (scoreMatch) {
+            // Pattern-specific score can influence completeness or engineering usefulness
+            const patternScore = parseFloat(scoreMatch[1]);
+            if (categoryScores.completeness === 0 || patternScore < categoryScores.completeness) {
+              categoryScores.completeness = patternScore;
+            }
+          }
+
+          // Extract pattern-specific issues
+          const issuesMatch = patternReview.match(/issues?[:\s]*\n([\s\S]+?)(?:\n\n|recommendations|$)/i);
+          if (issuesMatch) {
+            const issueList = issuesMatch[1]
+              .split('\n')
+              .map((line) => line.trim())
+              .filter((line) => line.length > 0 && !line.match(/^[-*•]\s*$/));
+            issues.push(...issueList.map(issue => `[${prompt.pattern}] ${issue}`));
+          }
+
+          // Extract pattern-specific recommendations
+          const recMatch = patternReview.match(/recommendations?[:\s]*\n([\s\S]+?)$/i);
+          if (recMatch) {
+            const recList = recMatch[1]
+              .split('\n')
+              .map((line) => line.trim())
+              .filter((line) => line.length > 0 && !line.match(/^[-*•]\s*$/));
+            recommendations.push(...recList.map(rec => `[${prompt.pattern}] ${rec}`));
+          }
+
+          // Extract missing elements
+          const missingMatch = patternReview.match(/missing[:\s]*\n([\s\S]+?)(?:\n\n|$)/i);
+          if (missingMatch) {
+            const missingList = missingMatch[1]
+              .split('\n')
+              .map((line) => line.trim())
+              .filter((line) => line.length > 0 && !line.match(/^[-*•]\s*$/));
+            missingElements.push(...missingList.map(elem => `[${prompt.pattern}] ${elem}`));
+          }
+        } catch (error) {
+          console.error(`❌ Error running ${patternSpecificAgent.name}:`, error);
+          agentReviews[patternSpecificAgent.role] = `Error: ${error instanceof Error ? error.message : String(error)}`;
+        }
+      }
+    }
+
+    // Step 3: Run other specialized agents for additional insights
+    const otherAgents = AUDIT_AGENTS.filter((a) => a.role !== 'grading_rubric_expert');
+    for (const agent of otherAgents) {
+      try {
+        const reviewPrompt = `Review this prompt:\n\n${promptText}\n\nProvide your review with score (1-10), issues, and recommendations.`;
+        const review = await this.runAgent(agent, reviewPrompt);
+        agentReviews[agent.role] = review;
+
+        // Extract score
+        const scoreMatch = review.match(/score[:\s]+(\d+(?:\.\d+)?)/i);
+        if (scoreMatch) {
+          // Update relevant category score if this agent specializes in it and score is 0
+          if (agent.role === 'engineering_reviewer' && categoryScores.engineeringUsefulness === 0) {
+            categoryScores.engineeringUsefulness = parseFloat(scoreMatch[1]);
+          } else if (agent.role === 'enterprise_reviewer' && categoryScores.enterpriseReadiness === 0) {
+            categoryScores.enterpriseReadiness = parseFloat(scoreMatch[1]);
+          } else if (agent.role === 'web_security_reviewer' && categoryScores.securityCompliance === 0) {
+            categoryScores.securityCompliance = parseFloat(scoreMatch[1]);
+          } else if (agent.role === 'seo_enrichment_reviewer' && categoryScores.seoEnrichment === 0) {
+            categoryScores.seoEnrichment = parseFloat(scoreMatch[1]);
+          } else if (agent.role === 'completeness_reviewer' && categoryScores.completeness === 0) {
+            categoryScores.completeness = parseFloat(scoreMatch[1]);
+          }
+        }
+
+        // Extract issues
+        const issuesMatch = review.match(/issues?[:\s]*\n([\s\S]+?)(?:\n\n|recommendations|$)/i);
+        if (issuesMatch) {
+          const issueList = issuesMatch[1]
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0 && !line.match(/^[-*•]\s*$/));
+          issues.push(...issueList);
+        }
+
+        // Extract recommendations
+        const recMatch = review.match(/recommendations?[:\s]*\n([\s\S]+?)$/i);
+        if (recMatch) {
+          const recList = recMatch[1]
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0 && !line.match(/^[-*•]\s*$/));
+          recommendations.push(...recList);
+        }
+      } catch (error) {
+        console.error(`❌ Error running ${agent.name}:`, error);
+        agentReviews[agent.role] = `Error: ${error instanceof Error ? error.message : String(error)}`;
+      }
+    }
+
+    // Calculate overall score (weighted average)
+    const weights = {
+      engineeringUsefulness: 0.25, // Highest weight - core value
+      caseStudyQuality: 0.15,
+      completeness: 0.15,
+      seoEnrichment: 0.10,
+      enterpriseReadiness: 0.15,
+      securityCompliance: 0.10,
+      accessibility: 0.05,
+      performance: 0.05,
+    };
+
+    const overallScore = Object.entries(categoryScores).reduce((sum, [key, score]) => {
+      return sum + (score * (weights as any)[key]);
+    }, 0);
+
+    // Check for missing fields
+    if (!prompt.slug) {
+      issues.push('Missing slug');
+      missingElements.push('slug');
+    }
+    if (!prompt.description || prompt.description.length < 50) {
+      issues.push('Description too short or missing');
+      missingElements.push('description');
+    }
+    if (!prompt.tags || !Array.isArray(prompt.tags) || prompt.tags.length === 0) {
+      issues.push('Missing or empty tags');
+      missingElements.push('tags');
+    }
+    if (!prompt.role) {
+      issues.push('Missing role');
+      missingElements.push('role');
+    }
+    if (!prompt.pattern) {
+      issues.push('Missing pattern');
+      missingElements.push('pattern');
+    }
+    if (!prompt.content || prompt.content.length < 100) {
+      issues.push('Content too short or missing');
+      missingElements.push('content');
+    }
+    if (!prompt.caseStudies || !Array.isArray(prompt.caseStudies) || prompt.caseStudies.length === 0) {
+      issues.push('Missing case studies');
+      missingElements.push('caseStudies');
+    }
+    if (!prompt.bestTimeToUse || (typeof prompt.bestTimeToUse === 'string' && prompt.bestTimeToUse.trim().length === 0) || (Array.isArray(prompt.bestTimeToUse) && prompt.bestTimeToUse.length === 0)) {
+      issues.push('Missing "best time to use" guidance');
+      missingElements.push('bestTimeToUse');
+    }
+    if (!prompt.recommendedModel || (typeof prompt.recommendedModel === 'string' && prompt.recommendedModel.trim().length === 0) || (Array.isArray(prompt.recommendedModel) && prompt.recommendedModel.length === 0)) {
+      issues.push('Missing recommended AI model suggestions');
+      missingElements.push('recommendedModel');
+    }
+
+    return {
+      id: prompt.id || prompt._id?.toString() || 'unknown',
+      type: 'prompt',
+      title: prompt.title || 'Untitled',
+      overallScore: Math.round(overallScore * 10) / 10,
+      categoryScores,
+      issues: [...new Set(issues)],
+      recommendations: [...new Set(recommendations)],
+      missingElements: [...new Set(missingElements)],
+      needsFix: overallScore < 7.0 || issues.length > 0 || missingElements.length > 0,
+      agentReviews,
+    };
+  }
+
+  /**
+   * Audit a single pattern
+   */
+  async auditPattern(pattern: any): Promise<AuditResult> {
+    const patternText = `
+NAME: ${pattern.name || 'N/A'}
+CATEGORY: ${pattern.category || 'N/A'}
+LEVEL: ${pattern.level || 'N/A'}
+DESCRIPTION: ${pattern.shortDescription || pattern.description || 'N/A'}
+FULL DESCRIPTION: ${pattern.fullDescription || 'N/A'}
+HOW IT WORKS: ${pattern.howItWorks || 'N/A'}
+WHEN TO USE: ${Array.isArray(pattern.whenToUse) ? pattern.whenToUse.join(', ') : 'N/A'}
+EXAMPLE: ${pattern.example ? JSON.stringify(pattern.example).substring(0, 1000) : 'N/A'}
+BEST PRACTICES: ${Array.isArray(pattern.bestPractices) ? pattern.bestPractices.join(', ') : 'N/A'}
+COMMON MISTAKES: ${Array.isArray(pattern.commonMistakes) ? pattern.commonMistakes.join(', ') : 'N/A'}
+RELATED PATTERNS: ${Array.isArray(pattern.relatedPatterns) ? pattern.relatedPatterns.join(', ') : 'N/A'}
+CASE STUDIES: ${pattern.caseStudies ? JSON.stringify(pattern.caseStudies).substring(0, 500) : 'N/A'}
+USE CASES: ${Array.isArray(pattern.useCases) ? pattern.useCases.join(', ') : 'N/A'}
+`;
+
+    const agentReviews: Record<string, string> = {};
+    const issues: string[] = [];
+    const recommendations: string[] = [];
+    const missingElements: string[] = [];
+    let categoryScores = {
+      engineeringUsefulness: 0,
+      caseStudyQuality: 0,
+      completeness: 0,
+      seoEnrichment: 0,
+      enterpriseReadiness: 0,
+      securityCompliance: 0,
+      accessibility: 0,
+      performance: 0,
+    };
+
+    // Step 1: Use Grading Rubric Expert for comprehensive evaluation
+    const rubricAgent = AUDIT_AGENTS.find((a) => a.role === 'grading_rubric_expert');
+    if (rubricAgent) {
+      try {
+        const rubricPrompt = `Evaluate this pattern using the comprehensive grading rubric:\n\n${patternText}\n\nProvide JSON response with scores for all 8 categories.`;
+        const rubricReview = await this.runAgent(rubricAgent, rubricPrompt);
+        agentReviews['grading_rubric'] = rubricReview;
+
+        // Parse JSON from rubric review
+        const rubricData = this.parseRubricJSON(rubricReview);
+        if (rubricData) {
+          // Extract scores and aggregate issues/recommendations
+          categoryScores.engineeringUsefulness = rubricData.engineeringUsefulness?.score || 0;
+          categoryScores.caseStudyQuality = rubricData.caseStudyQuality?.score || 0;
+          categoryScores.completeness = rubricData.completeness?.score || 0;
+          categoryScores.seoEnrichment = rubricData.seoEnrichment?.score || 0;
+          categoryScores.enterpriseReadiness = rubricData.enterpriseReadiness?.score || 0;
+          categoryScores.securityCompliance = rubricData.securityCompliance?.score || 0;
+          categoryScores.accessibility = rubricData.accessibility?.score || 0;
+          categoryScores.performance = rubricData.performance?.score || 0;
+
+          // Aggregate issues and recommendations
+          Object.values(rubricData).forEach((category: any) => {
+            if (category?.issues) issues.push(...category.issues);
+            if (category?.recommendations) recommendations.push(...category.recommendations);
+            if (category?.missing) missingElements.push(...category.missing);
+          });
+        } else {
+          // Fallback: extract scores from text
+          Object.keys(categoryScores).forEach((key) => {
+            const scoreMatch = rubricReview.match(new RegExp(`${key}[:\s]+(\\d+(?:\\.\\d+)?)`, 'i'));
+            if (scoreMatch) {
+              (categoryScores as any)[key] = parseFloat(scoreMatch[1]);
+            }
+          });
+        }
+      } catch (error) {
+        console.error(`❌ Error running Grading Rubric Expert:`, error);
+        agentReviews['grading_rubric'] = `Error: ${error instanceof Error ? error.message : String(error)}`;
+      }
+    }
+
+    // Step 2: Run other specialized agents
+    const otherAgents = AUDIT_AGENTS.filter((a) => a.role !== 'grading_rubric_expert');
+    for (const agent of otherAgents) {
+      try {
+        const reviewPrompt = `Review this pattern:\n\n${patternText}\n\nProvide your review with score (1-10), issues, and recommendations.`;
+        const review = await this.runAgent(agent, reviewPrompt);
+        agentReviews[agent.role] = review;
+
+        // Extract score and update relevant category
+        const scoreMatch = review.match(/score[:\s]+(\d+(?:\.\d+)?)/i);
+        if (scoreMatch) {
+          if (agent.role === 'engineering_reviewer' && categoryScores.engineeringUsefulness === 0) {
+            categoryScores.engineeringUsefulness = parseFloat(scoreMatch[1]);
+          } else if (agent.role === 'enterprise_reviewer' && categoryScores.enterpriseReadiness === 0) {
+            categoryScores.enterpriseReadiness = parseFloat(scoreMatch[1]);
+          } else if (agent.role === 'web_security_reviewer' && categoryScores.securityCompliance === 0) {
+            categoryScores.securityCompliance = parseFloat(scoreMatch[1]);
+          } else if (agent.role === 'seo_enrichment_reviewer' && categoryScores.seoEnrichment === 0) {
+            categoryScores.seoEnrichment = parseFloat(scoreMatch[1]);
+          } else if (agent.role === 'completeness_reviewer' && categoryScores.completeness === 0) {
+            categoryScores.completeness = parseFloat(scoreMatch[1]);
+          }
+        }
+
+        // Extract issues and recommendations
+        const issuesMatch = review.match(/issues?[:\s]*\n([\s\S]+?)(?:\n\n|recommendations|$)/i);
+        if (issuesMatch) {
+          const issueList = issuesMatch[1]
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0 && !line.match(/^[-*•]\s*$/));
+          issues.push(...issueList);
+        }
+
+        const recMatch = review.match(/recommendations?[:\s]*\n([\s\S]+?)$/i);
+        if (recMatch) {
+          const recList = recMatch[1]
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0 && !line.match(/^[-*•]\s*$/));
+          recommendations.push(...recList);
+        }
+      } catch (error) {
+        console.error(`❌ Error running ${agent.name}:`, error);
+        agentReviews[agent.role] = `Error: ${error instanceof Error ? error.message : String(error)}`;
+      }
+    }
+
+    // Calculate overall score (weighted average)
+    const weights = {
+      engineeringUsefulness: 0.25,
+      caseStudyQuality: 0.15,
+      completeness: 0.15,
+      seoEnrichment: 0.10,
+      enterpriseReadiness: 0.15,
+      securityCompliance: 0.10,
+      accessibility: 0.05,
+      performance: 0.05,
+    };
+
+    const overallScore = Object.entries(categoryScores).reduce((sum, [key, score]) => {
+      return sum + (score * (weights as any)[key]);
+    }, 0);
+
+    // Check for missing fields
+    if (!pattern.shortDescription) {
+      issues.push('Missing shortDescription');
+      missingElements.push('shortDescription');
+    }
+    if (!pattern.fullDescription) {
+      issues.push('Missing fullDescription');
+      missingElements.push('fullDescription');
+    }
+    if (!pattern.howItWorks) {
+      issues.push('Missing howItWorks');
+      missingElements.push('howItWorks');
+    }
+    if (!pattern.whenToUse || !Array.isArray(pattern.whenToUse) || pattern.whenToUse.length === 0) {
+      issues.push('Missing or empty whenToUse');
+      missingElements.push('whenToUse');
+    }
+    if (!pattern.example) {
+      issues.push('Missing example');
+      missingElements.push('example');
+    }
+    if (!pattern.bestPractices || !Array.isArray(pattern.bestPractices) || pattern.bestPractices.length === 0) {
+      issues.push('Missing or empty bestPractices');
+      missingElements.push('bestPractices');
+    }
+    if (!pattern.commonMistakes || !Array.isArray(pattern.commonMistakes) || pattern.commonMistakes.length === 0) {
+      issues.push('Missing or empty commonMistakes');
+      missingElements.push('commonMistakes');
+    }
+    if (!pattern.caseStudies || !Array.isArray(pattern.caseStudies) || pattern.caseStudies.length === 0) {
+      issues.push('Missing case studies');
+      missingElements.push('caseStudies');
+    }
+
+    return {
+      id: pattern.id || pattern._id?.toString() || 'unknown',
+      type: 'pattern',
+      title: pattern.name || 'Untitled',
+      overallScore: Math.round(overallScore * 10) / 10,
+      categoryScores,
+      issues: [...new Set(issues)],
+      recommendations: [...new Set(recommendations)],
+      missingElements: [...new Set(missingElements)],
+      needsFix: overallScore < 7.0 || issues.length > 0 || missingElements.length > 0,
+      agentReviews,
+    };
+  }
+}
+
+/**
+ * Main audit function
+ */
+async function auditPromptsAndPatterns(options: {
+  type: 'prompts' | 'patterns' | 'both';
+  fix?: boolean;
+  limit?: number;
+}) {
+  const { type, fix = false, limit } = options;
+
+  console.log('╔════════════════════════════════════════════════════════════╗');
+  console.log('║  Prompt & Pattern Audit System with Grading Rubric      ║');
+  console.log('╚════════════════════════════════════════════════════════════╝');
+  console.log('');
+  console.log(`📊 Type: ${type}`);
+  console.log(`🔧 Auto-fix: ${fix ? 'Yes' : 'No'}`);
+  if (limit) console.log(`🔢 Limit: ${limit}`);
+  console.log('');
+  console.log('⏳ This will take several minutes...');
+  console.log('');
+
+  // Check API keys
+  const requiredKeys = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'];
+  const missingKeys = requiredKeys.filter(key => !process.env[key]);
+  if (missingKeys.length > 0) {
+    console.error('❌ Missing required API keys:', missingKeys.join(', '));
+    console.error('Please add them to your .env.local file');
+    process.exit(1);
+  }
+
+  const db = await getMongoDb();
+  const auditor = new PromptPatternAuditor('system');
+  const results: AuditResult[] = [];
+
+  // Audit prompts
+  if (type === 'prompts' || type === 'both') {
+    console.log('📝 Auditing prompts...\n');
+    const promptsCollection = db.collection('prompts');
+    const prompts = await promptsCollection.find({}).limit(limit || 1000).toArray();
+
+    console.log(`Found ${prompts.length} prompts to audit\n`);
+
+    for (let i = 0; i < prompts.length; i++) {
+      const prompt = prompts[i];
+      console.log(`[${i + 1}/${prompts.length}] Auditing: ${prompt.title || prompt.id || 'Untitled'}`);
+      
+      try {
+        const result = await auditor.auditPrompt(prompt);
+        results.push(result);
+        
+        const status = result.needsFix ? '⚠️' : '✅';
+        console.log(`   ${status} Overall: ${result.overallScore.toFixed(1)}/10 | Eng: ${result.categoryScores.engineeringUsefulness.toFixed(1)} | Cases: ${result.categoryScores.caseStudyQuality.toFixed(1)}`);
+        console.log(`      Issues: ${result.issues.length} | Missing: ${result.missingElements.length}`);
+        
+        if (fix && result.needsFix) {
+          console.log(`   🔧 Auto-fixing...`);
+          // TODO: Implement auto-fix logic
+        }
+      } catch (error) {
+        console.error(`   ❌ Error auditing prompt:`, error);
+      }
+    }
+  }
+
+  // Audit patterns
+  if (type === 'patterns' || type === 'both') {
+    console.log('\n🔷 Auditing patterns...\n');
+    const patternsCollection = db.collection('patterns');
+    const patterns = await patternsCollection.find({}).limit(limit || 1000).toArray();
+
+    console.log(`Found ${patterns.length} patterns to audit\n`);
+
+    for (let i = 0; i < patterns.length; i++) {
+      const pattern = patterns[i];
+      console.log(`[${i + 1}/${patterns.length}] Auditing: ${pattern.name || pattern.id || 'Untitled'}`);
+      
+      try {
+        const result = await auditor.auditPattern(pattern);
+        results.push(result);
+        
+        const status = result.needsFix ? '⚠️' : '✅';
+        console.log(`   ${status} Overall: ${result.overallScore.toFixed(1)}/10 | Eng: ${result.categoryScores.engineeringUsefulness.toFixed(1)} | Cases: ${result.categoryScores.caseStudyQuality.toFixed(1)}`);
+        console.log(`      Issues: ${result.issues.length} | Missing: ${result.missingElements.length}`);
+        
+        if (fix && result.needsFix) {
+          console.log(`   🔧 Auto-fixing...`);
+          // TODO: Implement auto-fix logic
+        }
+      } catch (error) {
+        console.error(`   ❌ Error auditing pattern:`, error);
+      }
+    }
+  }
+
+  // Generate report
+  console.log('\n═══════════════════════════════════════════════════════════');
+  console.log('📊 AUDIT SUMMARY');
+  console.log('═══════════════════════════════════════════════════════════\n');
+
+  const total = results.length;
+  const needsFix = results.filter((r) => r.needsFix).length;
+  const avgScore = results.reduce((sum, r) => sum + r.overallScore, 0) / total || 0;
+
+  // Calculate average scores per category
+  const categoryAverages: Record<string, number> = {};
+  if (results.length > 0) {
+    Object.keys(results[0].categoryScores).forEach((category) => {
+      const avg = results.reduce((sum, r) => sum + ((r.categoryScores as any)[category] || 0), 0) / total;
+      categoryAverages[category] = Math.round(avg * 10) / 10;
+    });
+  }
+
+  console.log(`Total Audited: ${total}`);
+  console.log(`Needs Fix: ${needsFix} (${((needsFix / total) * 100).toFixed(1)}%)`);
+  console.log(`Average Overall Score: ${avgScore.toFixed(1)}/10`);
+  console.log('');
+  console.log('📊 Category Averages:');
+  Object.entries(categoryAverages).forEach(([category, score]) => {
+    const bar = '█'.repeat(Math.floor(score));
+    const empty = '░'.repeat(10 - Math.floor(score));
+    console.log(`   ${category.padEnd(25)} ${score.toFixed(1)}/10 ${bar}${empty}`);
+  });
+  console.log('');
+
+  // Show items needing fixes
+  if (needsFix > 0) {
+    console.log('⚠️  Items Needing Fixes:\n');
+    results
+      .filter((r) => r.needsFix)
+      .slice(0, 10)
+      .forEach((r) => {
+        console.log(`  ${r.type === 'prompt' ? '📝' : '🔷'} ${r.title}`);
+        console.log(`     Overall Score: ${r.overallScore.toFixed(1)}/10`);
+        console.log(`     Top Issues: ${r.issues.slice(0, 3).join(', ')}`);
+        console.log(`     Missing: ${r.missingElements.slice(0, 3).join(', ')}`);
+        console.log('');
+      });
+
+    if (needsFix > 10) {
+      console.log(`  ... and ${needsFix - 10} more\n`);
+    }
+  }
+
+  // Show items with low scores in specific categories
+  console.log('📉 Low Scoring Categories:\n');
+  Object.entries(categoryAverages)
+    .filter(([, score]) => score < 7.0)
+    .sort(([, a], [, b]) => a - b)
+    .forEach(([category, score]) => {
+      const lowItems = results.filter((r) => ((r.categoryScores as any)[category] || 0) < 7.0).length;
+      console.log(`   ${category.padEnd(25)} ${score.toFixed(1)}/10 (${lowItems} items need improvement)`);
+    });
+  console.log('');
+
+  // Save report
+  const fs = require('fs');
+  const path = require('path');
+  const reportPath = path.join(process.cwd(), 'content', 'audit-report.json');
+  const reportDir = path.dirname(reportPath);
+  
+  if (!fs.existsSync(reportDir)) {
+    fs.mkdirSync(reportDir, { recursive: true });
+  }
+
+  fs.writeFileSync(
+    reportPath,
+    JSON.stringify(
+      {
+        timestamp: new Date().toISOString(),
+        summary: {
+          total,
+          needsFix,
+          avgScore,
+          categoryAverages,
+        },
+        results,
+      },
+      null,
+      2
+    )
+  );
+
+  console.log(`💾 Report saved to: ${reportPath}`);
+  console.log('\n═══════════════════════════════════════════════════════════');
+}
+
+// Parse CLI arguments
+function parseArgs(): { type: 'prompts' | 'patterns' | 'both'; fix?: boolean; limit?: number } {
+  const args = process.argv.slice(2);
+
+  let type: 'prompts' | 'patterns' | 'both' = 'both';
+  let fix = false;
+  let limit: number | undefined;
+
+  for (const arg of args) {
+    if (arg.startsWith('--type=')) {
+      const typeValue = arg.split('=')[1];
+      if (['prompts', 'patterns', 'both'].includes(typeValue)) {
+        type = typeValue as 'prompts' | 'patterns' | 'both';
+      }
+    } else if (arg === '--fix') {
+      fix = true;
+    } else if (arg.startsWith('--limit=')) {
+      limit = parseInt(arg.split('=')[1]) || undefined;
+    }
+  }
+
+  return { type, fix, limit };
+}
+
+// Main execution
+async function main() {
+  const options = parseArgs();
+  await auditPromptsAndPatterns(options);
+}
+
+// Main execution - only run if this file is executed directly
+if (require.main === module) {
+  main().catch((error) => {
+    console.error('Fatal error:', error);
+    process.exit(1);
+  });
+}

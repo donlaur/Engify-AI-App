@@ -1,6 +1,9 @@
 /**
  * Seed MongoDB with all prompts
- * Run with: npx tsx scripts/seed-prompts-to-db.ts
+ * Run with: pnpm tsx scripts/data/seed-prompts-to-db.ts
+ * 
+ * CRITICAL: This script uses UPSERT, never deletes existing prompts!
+ * Preserves user-created content and only updates/inserts seed prompts.
  */
 
 import { getMongoDb } from '@/lib/db/mongodb';
@@ -24,6 +27,10 @@ async function seedDatabase() {
 
     console.log(`📊 Found ${prompts.length} prompts to seed`);
 
+    // Check existing prompts count
+    const existingCount = await promptsCollection.countDocuments({});
+    console.log(`📊 Found ${existingCount} existing prompts in database`);
+
     // Add slugs to each prompt
     const promptsWithSlugs = prompts.map((prompt) => ({
       ...prompt,
@@ -32,12 +39,8 @@ async function seedDatabase() {
       updatedAt: new Date(),
     }));
 
-    // Check existing prompts count
-    const existingCount = await promptsCollection.countDocuments({});
-    console.log(`📊 Found ${existingCount} existing prompts in database`);
-
     // Upsert prompts (update if exists by id, insert if new)
-    // This preserves existing prompts and only adds/updates the ones from seed file
+    // CRITICAL: Never delete existing prompts - preserve user-created content!
     let inserted = 0;
     let updated = 0;
     

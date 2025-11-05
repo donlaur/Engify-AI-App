@@ -62,59 +62,85 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="mb-4 flex items-center justify-center">
-            <Icons.sparkles className="h-8 w-8 text-blue-600" />
+            <Icons.sparkles className="h-8 w-8 text-blue-600 dark:text-blue-400" />
           </div>
-          <CardTitle className="text-center text-2xl">Welcome back</CardTitle>
-          <CardDescription className="text-center">
+          <CardTitle className="text-center text-2xl text-gray-900 dark:text-white">
+            Welcome back
+          </CardTitle>
+          <CardDescription className="text-center text-gray-600 dark:text-gray-300">
             Sign in to your Engify.ai account
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-gray-700 dark:text-gray-200">
+                Email
+              </Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
+                aria-invalid={error ? 'true' : 'false'}
+                aria-describedby={error ? 'email-error' : undefined}
+                className="bg-white dark:bg-gray-800"
               />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-gray-700 dark:text-gray-200">
+                  Password
+                </Label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Forgot password?
                 </Link>
               </div>
               <Input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                aria-invalid={error ? 'true' : 'false'}
+                aria-describedby={error ? 'password-error' : undefined}
+                className="bg-white dark:bg-gray-800"
               />
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-600">
-                <Icons.alertTriangle className="h-4 w-4" />
-                {error}
+              <div
+                id="form-error"
+                role="alert"
+                aria-live="polite"
+                className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
+              >
+                <Icons.alertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>{error}</span>
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || !email || !password}
+              aria-busy={isLoading}
+            >
               {isLoading ? (
                 <>
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                   Signing in...
                 </>
               ) : (
@@ -124,11 +150,11 @@ export default function LoginPage() {
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <div className="text-center text-sm text-gray-700 dark:text-gray-300">
+          <div className="text-center text-sm text-gray-600 dark:text-gray-400">
             Don&apos;t have an account?{' '}
             <Link
               href="/signup"
-              className="font-medium text-blue-600 hover:underline"
+              className="font-medium text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
             >
               Sign up
             </Link>

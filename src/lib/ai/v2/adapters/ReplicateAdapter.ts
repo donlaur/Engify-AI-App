@@ -10,6 +10,8 @@ const DEFAULT_ALLOWED_MODELS = [
   'gemini-2.5-flash',
   'google/gemini-2.0-flash-exp',
   'meta/llama-3.1-405b-instruct',
+  'openai/gpt-5',
+  'anthropic/claude-4.5-haiku',
 ];
 
 const MAX_RETRIES = Number(process.env.REPLICATE_MAX_RETRIES ?? '2');
@@ -23,6 +25,8 @@ const MODEL_COSTS_USD_PER_1M_TOKENS: Record<
   'gemini-2.5-flash': { input: 0.075, output: 0.3 },
   'google/gemini-2.0-flash-exp': { input: 0.075, output: 0.3 },
   'meta/llama-3.1-405b-instruct': { input: 0.59, output: 0.79 },
+  'openai/gpt-5': { input: 0.0025, output: 0.01 }, // Estimated based on GPT-4o pricing
+  'anthropic/claude-4.5-haiku': { input: 0.00025, output: 0.00125 },
 };
 
 function parseAllowedModels(): Set<string> | null {
@@ -42,13 +46,14 @@ function parseAllowedModels(): Set<string> | null {
 function ensureModelAllowed(modelId: string): string {
   const allowed = parseAllowedModels();
   
-  // If allowlist is null, allow all (registry will control via DB)
-  if (allowed === null) {
+  // If allowlist is null or REPLICATE_ALLOW_ALL=true, allow all models
+  if (allowed === null || process.env.REPLICATE_ALLOW_ALL === 'true') {
     return modelId;
   }
   
+  // Check if model is in allowlist
   if (!allowed.has(modelId)) {
-    const message = `Replicate model "${modelId}" is not in allowlist`;
+    const message = `Replicate model "${modelId}" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS`;
     logger.warn('replicate.model_blocked', { model: modelId });
     throw new Error(message);
   }

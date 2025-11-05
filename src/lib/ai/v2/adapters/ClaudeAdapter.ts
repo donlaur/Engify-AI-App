@@ -80,8 +80,8 @@ export class ClaudeAdapter implements AIProvider {
       totalTokens: response.usage.input_tokens + response.usage.output_tokens,
     };
 
-    // Calculate cost based on model
-    const cost = this.calculateCost(usage, this.model);
+    // Calculate cost from database
+    const cost = await this.calculateCost(usage, this.model);
 
     return {
       content: text,
@@ -94,35 +94,13 @@ export class ClaudeAdapter implements AIProvider {
   }
 
   /**
-   * Calculate cost based on token usage and model
-   * Pricing as of October 2024
+   * Calculate cost based on token usage using database pricing
    */
-  private calculateCost(
+  private async calculateCost(
     usage: { promptTokens: number; completionTokens: number },
     model: string
   ) {
-    let inputCostPer1M = 0.25; // Default: Haiku
-    let outputCostPer1M = 1.25;
-
-    // Adjust pricing based on model
-    if (model.includes('opus')) {
-      inputCostPer1M = 15.0;
-      outputCostPer1M = 75.0;
-    } else if (model.includes('sonnet')) {
-      inputCostPer1M = 3.0;
-      outputCostPer1M = 15.0;
-    } else if (model.includes('haiku')) {
-      inputCostPer1M = 0.25;
-      outputCostPer1M = 1.25;
-    }
-
-    const input = (usage.promptTokens / 1000000) * inputCostPer1M;
-    const output = (usage.completionTokens / 1000000) * outputCostPer1M;
-
-    return {
-      input,
-      output,
-      total: input + output,
-    };
+    const { calculateCostFromDB } = await import('@/lib/ai/utils/model-cost');
+    return await calculateCostFromDB(model, usage.promptTokens, usage.completionTokens);
   }
 }

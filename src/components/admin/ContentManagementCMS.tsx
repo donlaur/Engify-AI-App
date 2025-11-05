@@ -279,8 +279,8 @@ Return enhanced markdown content.`;
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-2xl font-bold">Content Management</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Content Management</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Manage learning content, patterns, and prompts
           </p>
         </div>
@@ -294,38 +294,38 @@ Return enhanced markdown content.`;
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Total Items</CardDescription>
-            <CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
+            <CardDescription className="text-xs text-gray-600 dark:text-gray-400">Total Items</CardDescription>
+            <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription className="text-xs">AI Questions</CardDescription>
-            <CardTitle className="text-4xl font-bold">
+            <CardDescription className="text-xs text-gray-600 dark:text-gray-400">AI Questions</CardDescription>
+            <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100">
               {stats.ai_adoption_question}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Stories</CardDescription>
-            <CardTitle className="text-4xl font-bold">
+            <CardDescription className="text-xs text-gray-600 dark:text-gray-400">Stories</CardDescription>
+            <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100">
               {stats.learning_story}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Case Studies</CardDescription>
-            <CardTitle className="text-4xl font-bold">
+            <CardDescription className="text-xs text-gray-600 dark:text-gray-400">Case Studies</CardDescription>
+            <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100">
               {stats.case_study}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Frameworks</CardDescription>
-            <CardTitle className="text-4xl font-bold">
+            <CardDescription className="text-xs text-gray-600 dark:text-gray-400">Frameworks</CardDescription>
+            <CardTitle className="text-4xl font-bold text-gray-900 dark:text-gray-100">
               {stats.framework_guide}
             </CardTitle>
           </CardHeader>
@@ -359,8 +359,8 @@ Return enhanced markdown content.`;
       {/* Content Table */}
       <Card className="bg-white dark:bg-gray-900">
         <CardHeader>
-          <CardTitle>Content Items</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-gray-900 dark:text-gray-100">Content Items</CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-400">
             {filteredContent.length} items
             {searchTerm && ` matching "${searchTerm}"`}
           </CardDescription>
@@ -371,7 +371,7 @@ Return enhanced markdown content.`;
               <Icons.spinner className="h-6 w-6 animate-spin" />
             </div>
           ) : filteredContent.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
+            <div className="py-8 text-center text-gray-600 dark:text-gray-400">
               No content found
             </div>
           ) : (
@@ -379,14 +379,14 @@ Return enhanced markdown content.`;
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50 dark:bg-gray-800">
-                    <TableHead className="w-[300px] font-semibold">
+                    <TableHead className="w-[300px] font-semibold text-gray-900 dark:text-gray-100">
                       Title
                     </TableHead>
-                    <TableHead className="font-semibold">Type</TableHead>
-                    <TableHead className="font-semibold">Category</TableHead>
-                    <TableHead className="font-semibold">Tags</TableHead>
-                    <TableHead className="font-semibold">Updated</TableHead>
-                    <TableHead className="text-right font-semibold">
+                    <TableHead className="font-semibold text-gray-900 dark:text-gray-100">Type</TableHead>
+                    <TableHead className="font-semibold text-gray-900 dark:text-gray-100">Category</TableHead>
+                    <TableHead className="font-semibold text-gray-900 dark:text-gray-100">Tags</TableHead>
+                    <TableHead className="font-semibold text-gray-900 dark:text-gray-100">Updated</TableHead>
+                    <TableHead className="text-right font-semibold text-gray-900 dark:text-gray-100">
                       Actions
                     </TableHead>
                   </TableRow>
@@ -395,25 +395,25 @@ Return enhanced markdown content.`;
                   {filteredContent.map((item) => (
                     <TableRow
                       key={item._id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
                     >
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium text-gray-900 dark:text-gray-100">
                         <button
                           onClick={() => handlePreview(item)}
-                          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+                          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400 dark:text-gray-100"
                         >
                           {item.title}
                         </button>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-100">
                         <Badge variant="outline" className="font-normal">
                           {item.type}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-gray-600 dark:text-gray-400">
+                      <TableCell className="text-gray-700 dark:text-gray-300">
                         {item.category || '-'}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-gray-900 dark:text-gray-100">
                         <div className="flex flex-wrap gap-1">
                           {item.tags.slice(0, 2).map((tag, i) => (
                             <Badge
@@ -431,7 +431,7 @@ Return enhanced markdown content.`;
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-gray-600 dark:text-gray-400">
+                      <TableCell className="text-sm text-gray-700 dark:text-gray-300">
                         {new Date(item.updatedAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
@@ -440,7 +440,7 @@ Return enhanced markdown content.`;
                             size="sm"
                             variant="ghost"
                             onClick={() => handleEdit(item)}
-                            className="hover:bg-blue-50 dark:hover:bg-blue-900"
+                            className="hover:bg-blue-50 dark:hover:bg-blue-900/50 text-gray-700 dark:text-gray-300"
                           >
                             <Icons.edit className="h-4 w-4" />
                           </Button>
@@ -448,7 +448,7 @@ Return enhanced markdown content.`;
                             size="sm"
                             variant="ghost"
                             onClick={() => handleDelete(item._id)}
-                            className="hover:bg-red-50 dark:hover:bg-red-900"
+                            className="hover:bg-red-50 dark:hover:bg-red-900/50 text-gray-700 dark:text-gray-300"
                           >
                             <Icons.delete className="h-4 w-4 text-red-600 dark:text-red-400" />
                           </Button>

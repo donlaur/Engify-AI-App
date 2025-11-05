@@ -111,6 +111,16 @@ export const PromptSchema = z.object({
   qualityScore: QualityRubricSchema.optional(), // Admin quality review
   source: z.enum(['seed', 'ai-generated', 'user-submitted']).optional(), // Track origin
   organizationId: z.string().optional(), // Multi-tenant support
+  
+  // Freemium fields
+  isPremium: z.boolean().default(false), // Premium content behind firewall
+  isPublic: z.boolean().default(true), // Public or private
+  requiresAuth: z.boolean().default(false), // Requires authentication to view
+  
+  // Revision tracking
+  currentRevision: z.number().int().min(1).default(1), // Current revision number
+  lastRevisedBy: z.string().optional(), // User who last revised
+  lastRevisedAt: z.date().optional(), // When last revised
 });
 
 export const CreatePromptSchema = PromptSchema.omit({

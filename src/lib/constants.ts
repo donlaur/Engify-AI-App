@@ -36,9 +36,13 @@ export const ROLE_ROUTES = {
   directors: '/for-directors',
   managers: '/for-managers',
   engineers: '/for-engineers',
+  architects: '/for-architects',
+  devopsSre: '/for-devops-sre',
   designers: '/for-designers',
   pms: '/for-pms',
+  productOwners: '/for-product-owners',
   qa: '/for-qa',
+  scrumMasters: '/for-scrum-masters',
 } as const;
 
 export const API_ROUTES = {
