@@ -78,7 +78,30 @@ tsx scripts/admin/ensure-text-indexes.ts
 tsx scripts/admin/rebuild-text-indexes-enriched.ts
 ```
 
-## Benefits
+## Limitations & Known Issues
+
+### MongoDB Text Index Limitations
+
+**Important:** MongoDB text indexes have limitations with nested objects:
+
+- ✅ **Arrays of strings** (`whyUse`, `useCases`, `bestPractices`, `tags`) - Fully indexed
+- ✅ **String fields** (`whatIs`, `metaDescription`) - Fully indexed  
+- ⚠️ **Arrays of objects** (`caseStudies`, `examples`) - **Partially indexed**
+
+**What this means:**
+- MongoDB text indexes will index the top-level structure of arrays of objects
+- Content inside nested objects (e.g., `caseStudies[0].scenario`, `examples[0].input`) may not be fully searchable
+- RAG search will still find prompts based on other fields, but nested content in case studies/examples won't contribute to search relevance
+
+**Workaround:**
+- Consider flattening nested content when indexing (future enhancement)
+- Or use vector embeddings for semantic search of nested content (future enhancement)
+
+**Current Behavior:**
+- Text index is created successfully
+- Search works for string fields and arrays of strings
+- Nested object content has limited searchability
+- This is acceptable for current use case - other fields provide sufficient search coverage
 
 1. **Better Search Results**: RAG can now find prompts based on:
    - Real-world case studies

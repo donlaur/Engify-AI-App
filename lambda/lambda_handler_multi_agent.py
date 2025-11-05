@@ -89,6 +89,8 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                 'useCases': 1,
                 'bestPractices': 1,
                 'seoKeywords': 1,
+                'caseStudiesText': 1,  # Flattened text field
+                'examplesText': 1,  # Flattened text field
             }
         ).sort([('score', {'$meta': 'textScore'})]).limit(5))
         
@@ -139,12 +141,28 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                 
                 context_parts.append(base_context)
     except Exception as e:
-        print(f"Prompt search error: {e}")
+        error_msg = str(e).lower()
+        # Check if error is related to text index (index missing, being rebuilt, etc.)
+        is_index_error = (
+            'text index' in error_msg or
+            'no text index' in error_msg or
+            'index not found' in error_msg or
+            'canonical index' in error_msg or
+            'error code 27' in error_msg or  # MongoDB error code for index not found
+            'errno 27' in error_msg
+        )
+        
+        if is_index_error:
+            print(f"Text index unavailable (may be rebuilding), using fallback search: {e}")
+        else:
+            print(f"Prompt search error: {e}")
+        
         # Fallback: Try regex search if text index fails (includes enriched fields)
         try:
             query_words = search_query.lower().split()[:3]  # First 3 words
             if query_words:
                 regex_pattern = '|'.join(query_words)
+                # Enhanced fallback search includes flattened text fields
                 prompts = list(db['prompts'].find({
                     'isPublic': True,
                     'active': {'$ne': False},
@@ -153,6 +171,8 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                         {'description': {'$regex': regex_pattern, '$options': 'i'}},
                         {'whatIs': {'$regex': regex_pattern, '$options': 'i'}},
                         {'useCases': {'$regex': regex_pattern, '$options': 'i'}},
+                        {'caseStudiesText': {'$regex': regex_pattern, '$options': 'i'}},  # Flattened case studies
+                        {'examplesText': {'$regex': regex_pattern, '$options': 'i'}},  # Flattened examples
                         {'tags': {'$in': query_words}},
                         {'seoKeywords': {'$in': query_words}}
                     ]
