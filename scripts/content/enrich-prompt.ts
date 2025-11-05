@@ -232,6 +232,58 @@ Format as JSON array:
     }
   }
 
+  // Generate "What is" and "Why Use" explanations
+  let whatIs = prompt.whatIs;
+  let whyUse = prompt.whyUse || [];
+  
+  if (!whatIs || !whyUse || whyUse.length === 0) {
+    console.log('📖 Generating "What is" and "Why Use" explanations...');
+    const explanationPrompt = `Generate educational content for this prompt:
+
+TITLE: ${prompt.title}
+DESCRIPTION: ${prompt.description}
+CONTENT: ${prompt.content.substring(0, 500)}...
+CATEGORY: ${prompt.category}
+
+Requirements:
+1. "What is" section: A clear, comprehensive explanation (2-3 sentences) of what ${prompt.title} is, written for SEO and user education. Explain the concept clearly.
+
+2. "Why Use" section: Generate 6-8 specific reasons why someone would use ${prompt.title}. Focus on practical benefits and real-world value.
+
+Format as JSON:
+{
+  "whatIs": "Clear explanation of what this concept is...",
+  "whyUse": [
+    "Reason 1",
+    "Reason 2",
+    ...
+  ]
+}`;
+
+    try {
+      const response = await provider.execute({
+        prompt: explanationPrompt,
+        temperature: 0.7,
+        maxTokens: 1500,
+      });
+      
+      // Extract JSON from response
+      const jsonMatch = response.content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const explanationData = JSON.parse(jsonMatch[0]);
+        if (explanationData.whatIs) {
+          whatIs = explanationData.whatIs;
+        }
+        if (explanationData.whyUse && Array.isArray(explanationData.whyUse)) {
+          whyUse = explanationData.whyUse;
+        }
+        console.log(`   ✅ Generated "What is" and ${whyUse.length} "Why Use" reasons`);
+      }
+    } catch (error) {
+      console.warn('   ⚠️  Failed to generate explanations:', error);
+    }
+  }
+
   // Generate recommended models
   let recommendedModel = prompt.recommendedModel || [];
   if (!recommendedModel || recommendedModel.length === 0) {
@@ -283,6 +335,8 @@ Format as JSON array:
     useCases: useCases.length > 0 ? useCases : prompt.useCases,
     bestTimeToUse: bestTimeToUse.length > 0 ? bestTimeToUse : prompt.bestTimeToUse,
     recommendedModel: recommendedModel.length > 0 ? recommendedModel : prompt.recommendedModel,
+    whatIs: whatIs || prompt.whatIs,
+    whyUse: whyUse.length > 0 ? whyUse : prompt.whyUse,
     updatedAt: new Date(),
     // Add meta description if missing
     metaDescription: prompt.metaDescription || prompt.description.substring(0, 160),
@@ -301,6 +355,8 @@ Format as JSON array:
   if (useCases.length > 0) console.log(`   📝 ${useCases.length} use cases`);
   if (bestTimeToUse.length > 0) console.log(`   ⏰ ${bestTimeToUse.length} "best time to use" scenarios`);
   if (recommendedModel.length > 0) console.log(`   🤖 ${recommendedModel.length} recommended models`);
+  if (whatIs) console.log(`   📖 "What is" explanation`);
+  if (whyUse.length > 0) console.log(`   ❓ ${whyUse.length} "Why Use" reasons`);
   console.log(`\n📄 Updated prompt saved to database!\n`);
 
   return enrichedPrompt;

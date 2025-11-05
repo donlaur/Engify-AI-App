@@ -121,6 +121,10 @@ export const PromptSchema = z.object({
   currentRevision: z.number().int().min(1).default(1), // Current revision number
   lastRevisedBy: z.string().optional(), // User who last revised
   lastRevisedAt: z.date().optional(), // When last revised
+  
+  // SEO & Educational Content
+  whatIs: z.string().optional(), // Explanation of what the concept is
+  whyUse: z.array(z.string()).optional(), // Array of reasons why someone would use this
 });
 
 export const CreatePromptSchema = PromptSchema.omit({

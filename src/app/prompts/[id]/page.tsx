@@ -323,6 +323,8 @@ export default async function PromptPage({
               title={prompt.title}
               category={prompt.category}
               description={prompt.description}
+              whatIs={prompt.whatIs}
+              whyUse={prompt.whyUse}
             />
 
             {/* Prompt Content */}

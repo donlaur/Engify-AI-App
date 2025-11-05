@@ -12,6 +12,8 @@ interface PromptContextExplanationProps {
   title: string;
   category: string;
   description?: string;
+  whatIs?: string; // From database
+  whyUse?: string[]; // From database
 }
 
 /**
@@ -116,8 +118,22 @@ export function PromptContextExplanation({
   title,
   category,
   description,
+  whatIs: dbWhatIs,
+  whyUse: dbWhyUse,
 }: PromptContextExplanationProps) {
-  const context = getContextExplanation(title, category);
+  // Use database fields if available, otherwise fallback to hardcoded logic
+  let context: { whatIs: string; whyUse: string[] } | null = null;
+  
+  if (dbWhatIs && dbWhyUse && dbWhyUse.length > 0) {
+    // Use database content
+    context = {
+      whatIs: dbWhatIs,
+      whyUse: dbWhyUse,
+    };
+  } else {
+    // Fallback to hardcoded logic
+    context = getContextExplanation(title, category);
+  }
   
   if (!context) {
     return null; // Don't show if no context available
