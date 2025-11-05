@@ -280,3 +280,4 @@ export function getDbRoleFromSlug(slug: string): string {
 **Last Updated:** November 5, 2025  
 **Status:** 📋 Planning Phase  
 **Recommendation:** Use `/for-{role}` pattern (Option 1)
+

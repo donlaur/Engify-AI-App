@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
 const nextConfig = {
   reactStrictMode: true,
   
@@ -119,6 +120,12 @@ const nextConfig = {
   
   // Webpack configuration
   webpack: (config, { isServer }) => {
+    // Allow importing from scripts directory (for API routes)
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@/scripts': path.join(__dirname, 'scripts'),
+    };
+    
     // Fix for MongoDB in client-side builds
     if (!isServer) {
       config.resolve.fallback = {

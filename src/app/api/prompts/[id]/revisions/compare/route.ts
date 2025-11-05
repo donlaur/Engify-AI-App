@@ -155,3 +155,4 @@ function calculateDifferences(snapshot1: any, snapshot2: any) {
   return differences;
 }
 
+

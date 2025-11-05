@@ -8,11 +8,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { auth } from '@/lib/auth';
 
-// Dynamic import to avoid build-time issues with scripts
+// Dynamic import using webpack alias configured in next.config.js
 async function getAuditor() {
-  // Import the auditor from scripts directory
-  const auditModule = await import('../../../../scripts/content/audit-prompts-patterns');
-  return auditModule.PromptPatternAuditor;
+  try {
+    // Use the webpack alias configured in next.config.js
+    const auditModule = await import('@/scripts/content/audit-prompts-patterns');
+    return auditModule.PromptPatternAuditor;
+  } catch (error) {
+    console.error('Error importing auditor:', error);
+    throw new Error(`Failed to import audit module: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 export async function GET(
