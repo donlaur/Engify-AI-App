@@ -236,9 +236,9 @@ CRITICAL: Format your response as VALID JSON (no markdown code blocks, just pure
   {
     role: 'completeness_reviewer',
     name: 'Completeness Reviewer',
-    model: 'gpt-4o', // Direct OpenAI - Priority #1
-    provider: 'openai',
-    temperature: 0.4,
+    model: 'google', // Will resolve to recommended Gemini model from DB (fast & cheap)
+    provider: 'google',
+    temperature: 0.3,
     maxTokens: 1500,
     systemPrompt: `You are a Completeness Reviewer who checks if prompts/patterns have all required fields and enrichment.
 
