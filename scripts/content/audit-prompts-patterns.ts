@@ -16,6 +16,7 @@
  * Usage:
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --fast  # Skip execution testing (faster)
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --quick # Quick mode: only 3 core agents (fastest)
  *   tsx scripts/content/audit-prompts-patterns.ts --type=patterns
  *   tsx scripts/content/audit-prompts-patterns.ts --type=both --limit=10
  * 
@@ -193,9 +194,15 @@ SPECIAL ATTENTION:
 
 For each category, provide:
 - Score (1-10) with justification
-- Specific issues found
-- Recommendations for improvement
-- Missing elements
+- Specific issues found (be concrete and specific)
+- ACTIONABLE recommendations with examples, specific fixes, or step-by-step improvements
+- Missing elements (what exactly is missing, not just that something is missing)
+
+CRITICAL REQUIREMENTS FOR RECOMMENDATIONS:
+- Each recommendation must be ACTIONABLE (can be implemented directly)
+- Include specific examples, code snippets, or exact replacements where applicable
+- Provide "what to do" not just "what's wrong"
+- For issues, include: WHAT (specific problem), WHY (impact), HOW (specific fix), EXAMPLE (before/after if applicable)
 
 CRITICAL: Format your response as VALID JSON (no markdown code blocks, just pure JSON):
 {
@@ -232,10 +239,24 @@ Review checklist:
 4. **Empty Fields**: Are there empty or placeholder fields?
 5. **Data Quality**: Is the data quality acceptable?
 
+CRITICAL: Provide ACTIONABLE suggestions with specific content to add.
+
+For each missing element, provide:
+- What exactly is missing (be specific)
+- Why it's important for completeness
+- Specific content suggestions or examples to add
+- Format/structure for the missing content
+
+Example format:
+MISSING: "Case studies section is empty"
+WHY: "Case studies demonstrate real-world value and help users understand use cases"
+WHAT TO ADD: "Add 2-3 case studies like: [provide specific example case study structure]"
+EXAMPLE: "Case Study 1: [Title] - Context: [specific], Challenge: [specific], Solution: [specific], Outcome: [specific]"
+
 Provide:
 - Score (1-10) for completeness
-- Missing fields or sections
-- Recommendations for completion`,
+- Missing fields or sections with specific examples to add
+- Actionable recommendations with content suggestions`,
   },
   {
     role: 'engineering_reviewer',
@@ -261,10 +282,24 @@ Review checklist:
 4. **Clarity**: Is it clear, human-readable, not verbose or AI-generated?
 5. **Actionability**: Can engineers use this immediately?
 
+CRITICAL: Provide ACTIONABLE suggestions with specific examples.
+
+For each issue found, provide:
+- What exactly is wrong (be specific)
+- Why it's a problem
+- How to fix it (specific steps or code examples)
+- Example of improved version if applicable
+
+Example format:
+ISSUE: "Prompt lacks context about input format"
+WHY: "Engineers won't know what format to provide"
+HOW TO FIX: "Add a section 'Input Format' with example: 'Input: [provide your code snippet here]'"
+EXAMPLE: "Here's the improved version: [show specific improvement]"
+
 Provide:
 - Score (1-10) for engineering functionality
 - Specific issues found (especially clarity and one-shot usability)
-- Recommendations for improvement`,
+- Actionable recommendations with concrete examples and fixes`,
   },
   {
     role: 'seo_enrichment_reviewer',
@@ -289,10 +324,25 @@ Review checklist:
 4. **Keywords/Tags**: Are keywords/tags relevant and comprehensive?
 5. **Structure**: Does content structure support SEO?
 
+CRITICAL: Provide ACTIONABLE SEO improvements with specific replacements.
+
+For each SEO issue, provide:
+- Current value and what's wrong with it
+- Specific improved version to use
+- Why the improvement helps SEO
+- Target keywords to include
+
+Example format:
+ISSUE: "Slug is 'prompt-1' - not descriptive or keyword-rich"
+CURRENT: "prompt-1"
+IMPROVED: "code-review-best-practices-checklist"
+WHY: "Includes target keywords 'code-review' and 'best-practices' which users search for"
+KEYWORDS: ["code review", "best practices", "checklist", "software engineering"]
+
 Provide:
 - Score (1-10) for SEO enrichment
-- Missing SEO elements
-- Recommendations for SEO optimization`,
+- Missing SEO elements with specific replacements
+- Actionable recommendations with exact improved versions`,
   },
   {
     role: 'roles_use_cases_reviewer',
@@ -317,10 +367,24 @@ Review checklist:
 4. **Alignment**: Do roles match the content and use cases?
 5. **Value**: Do use cases clearly demonstrate the prompt's value?
 
+CRITICAL: Provide ACTIONABLE suggestions with specific examples.
+
+For each issue, provide:
+- What's missing or wrong (be specific)
+- Why it matters for users
+- Specific use cases or roles to add with examples
+- Format for how to structure them
+
+Example format:
+MISSING: "No use cases for junior engineers"
+WHY: "Different experience levels need different use cases"
+WHAT TO ADD: "Add use case: 'Junior engineers can use this to [specific scenario]'"
+EXAMPLE: "Use Case: 'Onboarding new team members - Use this prompt to [specific action] when [specific context]'"
+
 Provide:
 - Score (1-10) for roles and use cases
-- Missing roles or use cases
-- Recommendations for improvement`,
+- Missing roles or use cases with specific examples to add
+- Actionable recommendations with concrete use case examples`,
   },
   {
     role: 'prompt_engineering_sme',
@@ -358,11 +422,26 @@ Review checklist:
 6. **Optimization**: Is the prompt optimized for the target AI model?
 7. **Best Practices**: Does it follow prompt engineering best practices?
 
+CRITICAL: Provide ACTIONABLE, SPECIFIC improvements with examples.
+
+For each issue, provide:
+1. **WHAT**: Exactly what's wrong (specific line/section if applicable)
+2. **WHY**: Why it's a problem from a prompt engineering/CS perspective
+3. **HOW**: Specific steps to fix it with code/content examples
+4. **EXAMPLE**: Show before/after with improved version
+
+Example format:
+ISSUE: "Instructions are ambiguous - 'improve the code' is too vague"
+WHY: "AI models need specific criteria (e.g., 'reduce complexity', 'add error handling')"
+HOW TO FIX: "Replace with: 'Improve the code by: 1) Reducing cyclomatic complexity to < 10, 2) Adding error handling for edge cases, 3) Adding type hints'"
+BEFORE: "Improve this code: [code]"
+AFTER: "Improve this code by reducing complexity and adding error handling: [same code]"
+
 Provide:
 - Score (1-10) for prompt engineering quality
-- Technical issues from a CS/AI perspective
-- Recommendations for prompt engineering improvements
-- Missing elements that would improve prompt quality`,
+- Technical issues from a CS/AI perspective with specific fixes
+- Actionable recommendations with before/after examples
+- Missing elements that would improve prompt quality with specific additions`,
   },
   {
     role: 'prompt_execution_tester',
@@ -440,11 +519,34 @@ export class PromptPatternAuditor {
   private organizationId: string;
   private skipExecutionTest: boolean; // Skip slow execution testing for faster audits
   private useCache: boolean; // Enable Redis caching
+  private quickMode: boolean; // Quick mode: only run 3 core agents
 
-  constructor(organizationId: string = 'system', options?: { skipExecutionTest?: boolean; useCache?: boolean }) {
+  constructor(organizationId: string = 'system', options?: { skipExecutionTest?: boolean; useCache?: boolean; quickMode?: boolean }) {
     this.organizationId = organizationId;
     this.skipExecutionTest = options?.skipExecutionTest ?? false;
     this.useCache = options?.useCache ?? true; // Enable caching by default
+    this.quickMode = options?.quickMode ?? false; // Quick mode disabled by default
+  }
+
+  /**
+   * Get agents to run based on mode
+   */
+  private getAgentsToRun(): AuditAgent[] {
+    if (this.quickMode) {
+      // Quick mode: Only run 3 core agents (Priority 1, 2, 3)
+      return AUDIT_AGENTS.filter(agent => 
+        agent.role === 'grading_rubric_expert' || // Essential for scoring
+        agent.role === 'completeness_reviewer' || // Priority #1
+        agent.role === 'engineering_reviewer'     // Priority #2
+      );
+    }
+    
+    // Full mode: Return all agents except execution tester if skipped
+    if (this.skipExecutionTest) {
+      return AUDIT_AGENTS.filter(agent => agent.role !== 'prompt_execution_tester');
+    }
+    
+    return AUDIT_AGENTS;
   }
 
   /**
@@ -1334,8 +1436,11 @@ ESTIMATED TIME: ${prompt.estimatedTime || 'N/A'}
       performance: 0,
     };
 
+    // Get agents to run based on mode
+    const agentsToRun = this.getAgentsToRun();
+    
     // Step 1: Use Grading Rubric Expert for comprehensive evaluation
-    const rubricAgent = AUDIT_AGENTS.find((a) => a.role === 'grading_rubric_expert');
+    const rubricAgent = agentsToRun.find((a) => a.role === 'grading_rubric_expert');
     if (rubricAgent) {
       try {
         // Check cache for rubric score first
@@ -1508,8 +1613,8 @@ ESTIMATED TIME: ${prompt.estimatedTime || 'N/A'}
     }
 
     // Step 3: Run Prompt Execution Tester - actually execute the prompt (SKIP if fast mode)
-    if (!this.skipExecutionTest) {
-      const executionTesterAgent = AUDIT_AGENTS.find((a) => a.role === 'prompt_execution_tester');
+    if (!this.skipExecutionTest && !this.quickMode) {
+      const executionTesterAgent = agentsToRun.find((a) => a.role === 'prompt_execution_tester');
       if (executionTesterAgent) {
       try {
         // Actually execute the prompt to test quality
@@ -1576,7 +1681,7 @@ Provide:
     }
 
     // Step 4: Run other specialized agents for additional insights
-    const otherAgents = AUDIT_AGENTS.filter((a) => 
+    const otherAgents = agentsToRun.filter((a) => 
       a.role !== 'grading_rubric_expert' && 
       a.role !== 'prompt_execution_tester' // Already handled above
     );
@@ -1796,8 +1901,11 @@ USE CASES: ${Array.isArray(pattern.useCases) ? pattern.useCases.join(', ') : 'N/
       performance: 0,
     };
 
+    // Get agents to run based on mode
+    const agentsToRun = this.getAgentsToRun();
+    
     // Step 1: Use Grading Rubric Expert for comprehensive evaluation
-    const rubricAgent = AUDIT_AGENTS.find((a) => a.role === 'grading_rubric_expert');
+    const rubricAgent = agentsToRun.find((a) => a.role === 'grading_rubric_expert');
     if (rubricAgent) {
       try {
         const rubricPrompt = `Evaluate this pattern using the comprehensive grading rubric:\n\n${patternText}\n\nProvide JSON response with scores for all 8 categories.`;
@@ -1987,9 +2095,11 @@ async function auditPromptsAndPatterns(options: {
   // Check for fast mode flag
   const fastMode = process.argv.includes('--fast') || process.argv.includes('-f');
   const noCache = process.argv.includes('--no-cache'); // Disable caching if needed
+  const quickMode = process.argv.includes('--quick') || process.argv.includes('-q'); // Quick mode: only 3 agents
   const auditor = new PromptPatternAuditor('system', { 
     skipExecutionTest: fastMode,
     useCache: !noCache && !!redisCache, // Enable cache if Redis available and not disabled
+    quickMode: quickMode, // Quick mode: only run 3 core agents
   });
   const results: AuditResult[] = [];
   
@@ -2009,6 +2119,9 @@ async function auditPromptsAndPatterns(options: {
     const fastMode = process.argv.includes('--fast') || process.argv.includes('-f');
     if (fastMode) {
       console.log('⚡ FAST MODE: Skipping execution testing for faster audits\n');
+    }
+    if (quickMode) {
+      console.log('⚡⚡ QUICK MODE: Running only 3 core agents (Grading Rubric, Completeness, Engineering)\n');
     }
 
     for (let i = 0; i < prompts.length; i++) {

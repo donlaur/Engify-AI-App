@@ -17,7 +17,20 @@ async function auditSinglePrompt(promptId: string) {
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
   const db = await getMongoDb();
-  const auditor = new PromptPatternAuditor('system');
+  
+  // Check for quick mode flag
+  const quickMode = process.argv.includes('--quick') || process.argv.includes('-q');
+  const fastMode = process.argv.includes('--fast') || process.argv.includes('-f');
+  
+  const auditor = new PromptPatternAuditor('system', { 
+    quickMode: quickMode,
+    skipExecutionTest: fastMode || quickMode, // Skip execution test in quick mode
+    useCache: true,
+  });
+  
+  if (quickMode) {
+    console.log('⚡⚡ QUICK MODE: Running only 3 core agents\n');
+  }
 
   // Find the prompt
   console.log(`📋 Looking for prompt: ${promptId}`);
@@ -57,6 +70,36 @@ async function auditSinglePrompt(promptId: string) {
   console.log(`   Security & Compliance: ${auditResult.categoryScores.securityCompliance.toFixed(1)}/10`);
   console.log(`   Accessibility: ${auditResult.categoryScores.accessibility.toFixed(1)}/10`);
   console.log(`   Performance: ${auditResult.categoryScores.performance.toFixed(1)}/10\n`);
+
+  // Save to database with versioning
+  const existingAudit = await db.collection('prompt_audit_results').findOne(
+    { promptId: prompt.id },
+    { sort: { auditVersion: -1 } }
+  );
+
+  const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
+  const auditDate = new Date();
+
+  await db.collection('prompt_audit_results').insertOne({
+    promptId: prompt.id,
+    promptTitle: prompt.title,
+    auditVersion,
+    auditDate,
+    overallScore: auditResult.overallScore,
+    categoryScores: auditResult.categoryScores,
+    agentReviews: auditResult.agentReviews,
+    issues: auditResult.issues,
+    recommendations: auditResult.recommendations,
+    missingElements: auditResult.missingElements,
+    needsFix: auditResult.needsFix,
+    auditedAt: auditDate,
+    auditedBy: 'system',
+    createdAt: auditDate,
+    updatedAt: auditDate,
+  });
+
+  console.log(`\n💾 Saved to database (Version ${auditVersion})`);
+  console.log(`   Date: ${auditDate.toISOString()}\n`);
 
   if (auditResult.issues.length > 0) {
     console.log('⚠️  Issues Found:');

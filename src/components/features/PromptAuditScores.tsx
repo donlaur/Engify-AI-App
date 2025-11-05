@@ -1,7 +1,7 @@
 /**
  * Prompt Audit Scores Component
- * Displays quality scores in a positive, SEO-focused manner
- * Designed for public-facing prompt pages
+ * Displays quality scores in a user-focused manner
+ * Only shows metrics relevant to end users (hides admin/internal metrics)
  */
 
 'use client';
@@ -32,16 +32,32 @@ interface PromptAuditScoresProps {
   promptId: string;
 }
 
-const categoryLabels: Record<keyof AuditScores['categoryScores'], string> = {
-  engineeringUsefulness: 'Engineering Usefulness',
-  caseStudyQuality: 'Case Study Quality',
-  completeness: 'Completeness',
-  seoEnrichment: 'SEO Enrichment',
-  enterpriseReadiness: 'Enterprise Readiness',
-  securityCompliance: 'Security & Compliance',
-  accessibility: 'Accessibility',
-  performance: 'Performance',
+// User-focused category labels (only show metrics users care about)
+const USER_FOCUSED_CATEGORIES: Record<string, { label: string; description: string }> = {
+  engineeringUsefulness: {
+    label: 'Ready to Use',
+    description: 'How well this prompt works out of the box'
+  },
+  completeness: {
+    label: 'Completeness',
+    description: 'Includes all necessary information and examples'
+  },
+  caseStudyQuality: {
+    label: 'Real-World Examples',
+    description: 'Practical examples showing how to use this prompt'
+  },
+  enterpriseReadiness: {
+    label: 'Enterprise Ready',
+    description: 'Suitable for professional and team use'
+  },
+  securityCompliance: {
+    label: 'Security & Privacy',
+    description: 'Follows security best practices'
+  },
 };
+
+// Internal/admin metrics (hidden from public view)
+const ADMIN_METRICS = ['seoEnrichment', 'accessibility', 'performance'];
 
 const categoryWeights: Record<keyof AuditScores['categoryScores'], number> = {
   engineeringUsefulness: 0.25,
@@ -96,7 +112,7 @@ export function PromptAuditScores({
         <div className="mb-6">
           <h2 className="text-2xl font-bold">Quality Assessment</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Comprehensive evaluation across multiple quality dimensions
+            How this prompt measures up on key quality indicators
           </p>
         </div>
 
@@ -113,7 +129,7 @@ export function PromptAuditScores({
               </Badge>
             </CardTitle>
             <CardDescription>
-              Comprehensive quality assessment across 8 categories
+              How well this prompt performs across key quality areas
               {auditScores.auditVersion && (
                 <span className="ml-2 text-xs text-muted-foreground">
                   • Version {auditScores.auditVersion}
@@ -132,42 +148,47 @@ export function PromptAuditScores({
           </CardContent>
         </Card>
 
-        {/* Category Scores - Neutral Display */}
+        {/* Category Scores - User-Focused Display */}
         <Card>
           <CardHeader>
-            <CardTitle>Quality Dimensions</CardTitle>
+            <CardTitle>Quality Breakdown</CardTitle>
             <CardDescription>
-              Breakdown of quality assessment across key areas
+              What makes this prompt high quality and useful
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {Object.entries(auditScores.categoryScores).map(([key, score]) => {
-              const categoryKey = key as keyof AuditScores['categoryScores'];
-              const weight = categoryWeights[categoryKey];
-              return (
-                <div key={key}>
-                  <div className="mb-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {categoryLabels[categoryKey]}
-                      </span>
-                      <Badge variant="outline" className="text-xs">
-                        {Math.round(weight * 100)}%
-                      </Badge>
+            {Object.entries(auditScores.categoryScores)
+              .filter(([key]) => !ADMIN_METRICS.includes(key)) // Hide admin metrics
+              .map(([key, score]) => {
+                const categoryKey = key as keyof typeof USER_FOCUSED_CATEGORIES;
+                const category = USER_FOCUSED_CATEGORIES[categoryKey];
+                if (!category) return null;
+                
+                const weight = categoryWeights[key as keyof AuditScores['categoryScores']];
+                return (
+                  <div key={key}>
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium">
+                          {category.label}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {category.description}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-foreground">
+                          {score.toFixed(1)}/10
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-foreground">
-                        {score.toFixed(1)}/10
-                      </span>
-                    </div>
+                    <Progress 
+                      value={score * 10} 
+                      className="h-2"
+                    />
                   </div>
-                  <Progress 
-                    value={score * 10} 
-                    className="h-2"
-                  />
-                </div>
-              );
-            })}
+                );
+              })}
           </CardContent>
         </Card>
       </div>
