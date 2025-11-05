@@ -680,12 +680,14 @@ export class PromptPatternAuditor {
       // This ensures we use the latest text-to-text models from the database
       // Non-text models (image/video) are automatically filtered out
       let modelId = agent.model;
+      let resolvedModelId: string | null = null; // Track resolved ID for error handling
       
       // Try to resolve from database first (getModelIdFromRegistry filters out non-text models)
       // It also prefers verified/working models (recent lastVerified date)
-      const resolvedModelId = await getModelIdFromRegistry(agent.provider, agent.model);
-      if (resolvedModelId) {
-        modelId = resolvedModelId;
+      const resolvedId = await getModelIdFromRegistry(agent.provider, agent.model);
+      if (resolvedId) {
+        modelId = resolvedId;
+        resolvedModelId = resolvedId; // Store for error handling
         console.log(`   📋 Using model from DB: ${modelId} (${agent.provider})`);
         
         // Mark model as verified after successful use (if it worked)
