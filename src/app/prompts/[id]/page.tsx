@@ -41,6 +41,7 @@ import { PremiumPromptLock } from '@/components/features/PremiumPromptLock';
 import { PromptTrust, PromptSEOFeatures, PromptPremiumCTA } from '@/components/features/PromptTrust';
 import { PromptPageClient } from '@/components/features/PromptPageClient';
 import { PromptContextExplanation } from '@/components/features/PromptContextExplanation';
+import { PromptParameters } from '@/components/features/PromptParameters';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -343,6 +344,14 @@ export default async function PromptPage({
                 {prompt.content}
               </pre>
             </div>
+
+            {/* Interactive Parameters - Leading Questions */}
+            {prompt.parameters && prompt.parameters.length > 0 && (
+              <PromptParameters
+                parameters={prompt.parameters}
+                promptContent={prompt.content}
+              />
+            )}
 
             {/* Trust & Social Proof */}
             <PromptTrust

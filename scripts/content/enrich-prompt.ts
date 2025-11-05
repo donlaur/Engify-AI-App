@@ -345,6 +345,74 @@ Format as JSON array:
     }
   }
 
+  // Generate interactive parameters/leading questions
+  let parameters = prompt.parameters || [];
+  if (!parameters || parameters.length === 0) {
+    console.log('🔧 Generating interactive parameters...');
+    const parametersPrompt = `Generate interactive parameters/leading questions for this prompt:
+
+TITLE: ${prompt.title}
+DESCRIPTION: ${prompt.description}
+CATEGORY: ${prompt.category}
+CONTENT: ${prompt.content.substring(0, 500)}...
+
+Requirements:
+- Identify what inputs/users need to provide before using this prompt
+- For code review prompts: programming language, security focus, bug reduction focus
+- For other prompts: identify key variables that need customization
+- Create clear, helpful questions that guide users
+- Use appropriate input types (text, select, textarea, multiselect)
+- Include examples to guide users
+
+Format as JSON array:
+[
+  {
+    "id": "programming_language",
+    "label": "Programming Language",
+    "type": "select",
+    "required": true,
+    "options": ["JavaScript", "TypeScript", "Python", "Java", "Go", "Rust", "C++", "Other"],
+    "description": "Select the programming language for the code review",
+    "example": "JavaScript"
+  },
+  {
+    "id": "focus_areas",
+    "label": "Top Concerns",
+    "type": "multiselect",
+    "required": false,
+    "options": ["Security", "Performance", "Bug Reduction", "Code Quality", "Best Practices"],
+    "description": "Select the main areas you want the review to focus on",
+    "example": "Security, Bug Reduction"
+  }
+]
+
+Focus on:
+- What information is needed to make this prompt accurate?
+- What customization options would help users?
+- What parameters would make this prompt more useful?
+- Be specific and actionable`;
+
+    try {
+      const response = await provider.execute({
+        prompt: parametersPrompt,
+        temperature: 0.7,
+        maxTokens: 2000,
+      });
+      
+      const jsonMatch = response.content.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        parameters = JSON.parse(jsonMatch[0]);
+        console.log(`   ✅ Generated ${parameters.length} parameters`);
+        
+        // Update prompt content to include placeholders for parameters
+        // This allows the PromptParameters component to replace {{id}} with actual values
+        // Note: This is optional - prompts can work without placeholders
+      }
+    } catch (error) {
+      console.warn('   ⚠️  Failed to generate parameters:', error);
+    }
+  }
+
   // Update prompt with enriched data
   const enrichedPrompt = {
     ...prompt,
@@ -356,6 +424,7 @@ Format as JSON array:
     recommendedModel: recommendedModel.length > 0 ? recommendedModel : prompt.recommendedModel,
     whatIs: whatIs || prompt.whatIs,
     whyUse: whyUse.length > 0 ? whyUse : prompt.whyUse,
+    parameters: parameters.length > 0 ? parameters : prompt.parameters,
     updatedAt: new Date(),
     // Add meta description if missing
     metaDescription: prompt.metaDescription || prompt.description.substring(0, 160),

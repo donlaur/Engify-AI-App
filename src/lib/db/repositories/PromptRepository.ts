@@ -63,6 +63,17 @@ class PromptProcessor implements ContentProcessor<PromptDocument, Prompt> {
       active: raw.active !== false,
       whatIs: raw.whatIs as string | undefined,
       whyUse: raw.whyUse as string[] | undefined,
+      parameters: raw.parameters as Array<{
+        id: string;
+        label: string;
+        type: 'text' | 'select' | 'textarea' | 'checkbox' | 'multiselect';
+        placeholder?: string;
+        required?: boolean;
+        options?: string[];
+        description?: string;
+        example?: string;
+        defaultValue?: string;
+      }> | undefined,
     };
   }
 

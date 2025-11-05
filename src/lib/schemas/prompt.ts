@@ -178,6 +178,19 @@ export const PromptSchema = z.object({
   ]).optional(), // Estimated time to complete
   
   verified: z.boolean().default(false).optional(), // Verified by admin/team
+  
+  // Interactive Parameters - Leading questions to collect inputs before using prompt
+  parameters: z.array(z.object({
+    id: z.string(), // Unique identifier (e.g., "programming_language", "security_focus")
+    label: z.string(), // Display label (e.g., "Programming Language")
+    type: z.enum(['text', 'select', 'textarea', 'checkbox', 'multiselect']), // Input type
+    placeholder: z.string().optional(), // Placeholder text
+    required: z.boolean().default(false), // Is this parameter required?
+    options: z.array(z.string()).optional(), // Options for select/checkbox/multiselect
+    description: z.string().optional(), // Help text explaining what's needed
+    example: z.string().optional(), // Example value to guide users
+    defaultValue: z.string().optional(), // Default value if any
+  })).optional(), // Questions/parameters users need to provide before using prompt
 });
 
 export const CreatePromptSchema = PromptSchema.omit({
