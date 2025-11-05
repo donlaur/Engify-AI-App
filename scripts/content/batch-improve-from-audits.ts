@@ -64,9 +64,13 @@ async function analyzeAuditPatterns(db: any): Promise<{
     // Analyze issues
     if (audit.issues && Array.isArray(audit.issues)) {
       for (const issue of audit.issues) {
-        const normalized = issue.toLowerCase().trim();
+        // Handle both string and object formats
+        const issueText = typeof issue === 'string' ? issue : (issue?.text || issue?.message || String(issue));
+        if (!issueText || typeof issueText !== 'string') continue;
+        
+        const normalized = issueText.toLowerCase().trim();
         if (!issueMap.has(normalized)) {
-          issueMap.set(normalized, { frequency: 0, prompts: [], category: categorizeIssue(issue) });
+          issueMap.set(normalized, { frequency: 0, prompts: [], category: categorizeIssue(issueText) });
         }
         const entry = issueMap.get(normalized)!;
         entry.frequency++;
@@ -77,9 +81,13 @@ async function analyzeAuditPatterns(db: any): Promise<{
     // Analyze recommendations
     if (audit.recommendations && Array.isArray(audit.recommendations)) {
       for (const rec of audit.recommendations) {
-        const normalized = rec.toLowerCase().trim();
+        // Handle both string and object formats
+        const recText = typeof rec === 'string' ? rec : (rec?.text || rec?.message || String(rec));
+        if (!recText || typeof recText !== 'string') continue;
+        
+        const normalized = recText.toLowerCase().trim();
         if (!recommendationMap.has(normalized)) {
-          recommendationMap.set(normalized, { frequency: 0, prompts: [], category: categorizeRecommendation(rec) });
+          recommendationMap.set(normalized, { frequency: 0, prompts: [], category: categorizeRecommendation(recText) });
         }
         const entry = recommendationMap.get(normalized)!;
         entry.frequency++;
@@ -90,9 +98,13 @@ async function analyzeAuditPatterns(db: any): Promise<{
     // Analyze missing elements
     if (audit.missingElements && Array.isArray(audit.missingElements)) {
       for (const missing of audit.missingElements) {
-        const normalized = missing.toLowerCase().trim();
+        // Handle both string and object formats
+        const missingText = typeof missing === 'string' ? missing : (missing?.text || missing?.message || String(missing));
+        if (!missingText || typeof missingText !== 'string') continue;
+        
+        const normalized = missingText.toLowerCase().trim();
         if (!missingElementMap.has(normalized)) {
-          missingElementMap.set(normalized, { frequency: 0, prompts: [], category: categorizeMissing(missing) });
+          missingElementMap.set(normalized, { frequency: 0, prompts: [], category: categorizeMissing(missingText) });
         }
         const entry = missingElementMap.get(normalized)!;
         entry.frequency++;
@@ -317,17 +329,27 @@ async function applyImprovements(
 
     // 1. Fix SEO issues
     if (audit.categoryScores?.seoEnrichment < 7) {
-      const needsSlug = audit.issues?.some((i: string) => 
-        i.toLowerCase().includes('slug') || i.toLowerCase().includes('seo-friendly')
-      ) || audit.missingElements?.some((m: string) => 
-        m.toLowerCase().includes('slug') || m.toLowerCase().includes('seo')
-      );
+      const needsSlug = audit.issues?.some((i: any) => {
+        const issueText = typeof i === 'string' ? i : (i?.text || i?.message || String(i));
+        const lower = issueText?.toLowerCase() || '';
+        return lower.includes('slug') || lower.includes('seo-friendly');
+      }) || audit.missingElements?.some((m: any) => {
+        const missingText = typeof m === 'string' ? m : (m?.text || m?.message || String(m));
+        const lower = missingText?.toLowerCase() || '';
+        return lower.includes('slug') || lower.includes('seo');
+      });
 
       const needsMeta = !prompt.metaDescription || 
-        audit.issues?.some((i: string) => i.toLowerCase().includes('meta description'));
+        audit.issues?.some((i: any) => {
+          const issueText = typeof i === 'string' ? i : (i?.text || i?.message || String(i));
+          return issueText?.toLowerCase().includes('meta description');
+        });
 
       const needsKeywords = !prompt.seoKeywords || prompt.seoKeywords.length === 0 ||
-        audit.issues?.some((i: string) => i.toLowerCase().includes('keyword'));
+        audit.issues?.some((i: any) => {
+          const issueText = typeof i === 'string' ? i : (i?.text || i?.message || String(i));
+          return issueText?.toLowerCase().includes('keyword');
+        });
 
       if (needsSlug || needsMeta || needsKeywords) {
         console.log(`   🔍 Fixing SEO issues...`);
@@ -393,8 +415,14 @@ Format as JSON:
     // 2. Add case studies if missing or low quality
     if (audit.categoryScores?.caseStudyQuality < 7) {
       const needsCaseStudies = !prompt.caseStudies || prompt.caseStudies.length === 0 ||
-        audit.issues?.some((i: string) => i.toLowerCase().includes('case study')) ||
-        audit.missingElements?.some((m: string) => m.toLowerCase().includes('case study'));
+        audit.issues?.some((i: any) => {
+          const issueText = typeof i === 'string' ? i : (i?.text || i?.message || String(i));
+          return issueText?.toLowerCase().includes('case study');
+        }) ||
+        audit.missingElements?.some((m: any) => {
+          const missingText = typeof m === 'string' ? m : (m?.text || m?.message || String(m));
+          return missingText?.toLowerCase().includes('case study');
+        });
 
       if (needsCaseStudies) {
         console.log(`   📚 Adding case studies...`);
@@ -450,9 +478,11 @@ Format as JSON array:
 
     // 3. Improve completeness
     if (audit.categoryScores?.completeness < 7) {
-      const needsCompleteness = audit.issues?.some((i: string) => 
-        i.toLowerCase().includes('complete') || i.toLowerCase().includes('missing')
-      ) || audit.missingElements?.length > 0;
+      const needsCompleteness = audit.issues?.some((i: any) => {
+        const issueText = typeof i === 'string' ? i : (i?.text || i?.message || String(i));
+        const lower = issueText?.toLowerCase() || '';
+        return lower.includes('complete') || lower.includes('missing');
+      }) || audit.missingElements?.length > 0;
 
       if (needsCompleteness) {
         console.log(`   ✅ Improving completeness...`);
