@@ -38,6 +38,9 @@ import { trackPromptEvent } from '@/lib/utils/ga-events';
 
 interface PromptCardProps extends Omit<Prompt, 'createdAt' | 'updatedAt'> {
   onView?: () => void;
+  updatedAt?: Date;
+  lastRevisedAt?: Date;
+  currentRevision?: number;
 }
 
 export function PromptCard(props: PromptCardProps) {
@@ -46,9 +49,15 @@ export function PromptCard(props: PromptCardProps) {
   const { toast } = useToast();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const { id, title, description, content, category, role, slug, onView } =
+  const { id, title, description, content, category, role, slug, onView, updatedAt, lastRevisedAt, currentRevision } =
     props;
   const promptSlug = getPromptSlug({ title, slug });
+
+  // Determine if prompt was recently updated (within last 7 days)
+  const lastUpdateDate = updatedAt || lastRevisedAt;
+  const isRecentlyUpdated = lastUpdateDate 
+    ? (Date.now() - new Date(lastUpdateDate).getTime()) < 7 * 24 * 60 * 60 * 1000
+    : false;
 
   const handleCopy = async () => {
     try {
@@ -221,6 +230,17 @@ export function PromptCard(props: PromptCardProps) {
             {role && (
               <Badge variant="outline">
                 {roleLabels[role as UserRole] || role}
+              </Badge>
+            )}
+            {isRecentlyUpdated && (
+              <Badge variant="default" className="bg-green-600 hover:bg-green-700">
+                <Icons.clock className="mr-1 h-3 w-3" />
+                Recently Updated
+              </Badge>
+            )}
+            {currentRevision && currentRevision > 1 && (
+              <Badge variant="outline" className="text-xs">
+                v{currentRevision}
               </Badge>
             )}
           </div>

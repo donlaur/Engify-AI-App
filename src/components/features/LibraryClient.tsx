@@ -16,6 +16,13 @@ import { EmptyState } from '@/components/features/EmptyState';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import Link from 'next/link';
 import type { Prompt, PromptCategory, UserRole } from '@/lib/schemas/prompt';
 import { categoryLabels, roleLabels } from '@/lib/schemas/prompt';
@@ -29,6 +36,8 @@ interface LibraryClientProps {
   uniqueCategories: string[];
   uniqueRoles: string[];
 }
+
+type SortOption = 'alphabetical' | 'last-modified' | 'version' | 'category';
 
 const INITIAL_VISIBLE_CATEGORIES = 8;
 const INITIAL_VISIBLE_ROLES = 10;
@@ -53,6 +62,7 @@ export function LibraryClient({
   const [selectedRole, setSelectedRole] = useState<UserRole | 'all'>('all');
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllRoles, setShowAllRoles] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('alphabetical');
   const [visiblePromptCount, setVisiblePromptCount] = useState(
     INITIAL_VISIBLE_PROMPTS
   );
@@ -70,6 +80,7 @@ export function LibraryClient({
     selectedRole,
     showFavoritesOnly,
     favorites,
+    sortBy,
   ]);
 
   // Filter prompts using useMemo to prevent recalculations
@@ -91,7 +102,34 @@ export function LibraryClient({
       filtered = filtered.filter((prompt) => favorites.includes(prompt.id));
     }
 
-    return filtered;
+    // Sort prompts based on selected sort option
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'alphabetical':
+          return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+        
+        case 'last-modified':
+          const aDate = a.updatedAt || a.lastRevisedAt || a.createdAt || new Date(0);
+          const bDate = b.updatedAt || b.lastRevisedAt || b.createdAt || new Date(0);
+          return bDate.getTime() - aDate.getTime(); // Newest first
+        
+        case 'version':
+          const aVersion = a.currentRevision || 1;
+          const bVersion = b.currentRevision || 1;
+          return bVersion - aVersion; // Higher version first
+        
+        case 'category':
+          // First sort by category, then alphabetically within category
+          const categoryCompare = (a.category || '').localeCompare(b.category || '');
+          if (categoryCompare !== 0) return categoryCompare;
+          return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+        
+        default:
+          return 0;
+      }
+    });
+
+    return sorted;
   }, [
     initialPrompts,
     searchQuery,
@@ -99,6 +137,7 @@ export function LibraryClient({
     selectedRole,
     showFavoritesOnly,
     favorites,
+    sortBy,
   ]);
 
   // Track search with debounce
@@ -369,20 +408,40 @@ export function LibraryClient({
             ? `Showing all ${filteredPrompts.length} prompts`
             : `Showing ${filteredPrompts.length} of ${initialPrompts.length} prompts`}
         </p>
-        {(searchQuery ||
-          selectedCategory !== 'all' ||
-          selectedRole !== 'all') && (
-          <button
-            onClick={() => {
-              setSearchQuery('');
-              setSelectedCategory('all');
-              setSelectedRole('all');
-            }}
-            className="text-sm text-primary hover:underline"
-          >
-            Clear all filters
-          </button>
-        )}
+        <div className="flex items-center gap-4">
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="sort-select" className="text-sm text-muted-foreground">
+              Sort:
+            </label>
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+              <SelectTrigger id="sort-select" className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="alphabetical">Alphabetical</SelectItem>
+                <SelectItem value="last-modified">Last Modified</SelectItem>
+                <SelectItem value="version">Version Number</SelectItem>
+                <SelectItem value="category">By Category</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {(searchQuery ||
+            selectedCategory !== 'all' ||
+            selectedRole !== 'all') && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCategory('all');
+                setSelectedRole('all');
+              }}
+              className="text-sm text-primary hover:underline"
+            >
+              Clear all filters
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Results */}

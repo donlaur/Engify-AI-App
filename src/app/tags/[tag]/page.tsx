@@ -3,6 +3,11 @@ import { notFound } from 'next/navigation';
 import { APP_URL } from '@/lib/constants';
 import TagPageClient from './tag-page-client';
 import { getMongoDb } from '@/lib/db/mongodb';
+import {
+  decodeTagFromUrl,
+  getTagVariations,
+  isValidTagUrl,
+} from '@/lib/utils/tag-encoding';
 
 async function getPromptsByTag(tag: string) {
   try {
@@ -48,26 +53,44 @@ async function getPromptsByTag(tag: string) {
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   try {
-    const tag = decodeURIComponent(params.tag);
-    
-    // Normalize tag for display
-    const normalizedTag = tag.replace(/\//g, '-');
-    const displayTag = normalizedTag
-      .split('-')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    // Validate tag URL format
+    if (!isValidTagUrl(params.tag)) {
+      return {
+        title: 'Invalid Tag | Engify.ai',
+        description: 'The requested tag URL is invalid.',
+      };
+    }
 
-    // Get prompts with this tag (try both original and normalized)
-    const taggedPrompts = await getPromptsByTag(tag);
-    const normalizedPrompts = tag !== normalizedTag ? await getPromptsByTag(normalizedTag) : [];
-    const allPrompts = [...taggedPrompts, ...normalizedPrompts];
+    // Decode and normalize tag from URL
+    const { decoded, normalized } = decodeTagFromUrl(params.tag);
+    
+    // Get all tag variations for database lookup
+    const tagVariations = getTagVariations(params.tag);
+    
+    // Try to find prompts with any of the tag variations
+    const allPrompts = [];
+    for (const tagVar of tagVariations) {
+      const prompts = await getPromptsByTag(tagVar);
+      allPrompts.push(...prompts);
+    }
+    
+    // Remove duplicates based on prompt ID
     const uniquePrompts = Array.from(
       new Map(allPrompts.map(p => [p.id, p])).values()
     );
 
+    // Normalize tag for display (title case)
+    const displayTag = normalized
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+
     const title = `${displayTag} - Prompt Engineering Prompts | Engify.ai`;
     const description = `Explore ${uniquePrompts.length} prompt${uniquePrompts.length !== 1 ? 's' : ''} tagged with "${displayTag}". Find prompts for ${displayTag.toLowerCase()} and improve your prompt engineering skills.`;
-    const url = `${APP_URL}/tags/${encodeURIComponent(tag)}`;
+    
+    // Use normalized tag for canonical URL (consistent, URL-safe)
+    const normalizedUrlTag = encodeURIComponent(normalized);
+    const url = `${APP_URL}/tags/${normalizedUrlTag}`;
 
   return {
     title,
@@ -107,35 +130,44 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
 
 export default async function TagPage({ params }: { params: { tag: string } }) {
   try {
-    const tag = decodeURIComponent(params.tag);
-    
-    // Normalize tag: replace slashes with hyphens for URL compatibility
-    // Tags like "CI/CD integration" become "CI-CD integration"
-    const normalizedTag = tag.replace(/\//g, '-');
-    
-    const displayTag = normalizedTag
-      .split('-')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    // Validate tag URL format
+    if (!isValidTagUrl(params.tag)) {
+      console.warn('Invalid tag URL format', { tag: params.tag });
+      notFound();
+    }
 
-    // Get prompts with this tag from MongoDB
-    // Try both the original tag and normalized version
-    const taggedPrompts = await getPromptsByTag(tag);
-    const normalizedPrompts = tag !== normalizedTag ? await getPromptsByTag(normalizedTag) : [];
-    const allPrompts = [...taggedPrompts, ...normalizedPrompts];
+    // Decode and normalize tag from URL
+    const { decoded, normalized } = decodeTagFromUrl(params.tag);
+    
+    // Get all tag variations for database lookup
+    const tagVariations = getTagVariations(params.tag);
+    
+    // Try to find prompts with any of the tag variations
+    const allPrompts = [];
+    for (const tagVar of tagVariations) {
+      const prompts = await getPromptsByTag(tagVar);
+      allPrompts.push(...prompts);
+    }
     
     // Remove duplicates based on prompt ID
     const uniquePrompts = Array.from(
       new Map(allPrompts.map(p => [p.id, p])).values()
     );
 
+    // Normalize tag for display (title case)
+    const displayTag = normalized
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+
     // Generate JSON-LD structured data
+    const normalizedUrlTag = encodeURIComponent(normalized);
     const jsonLd = {
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
       name: `${displayTag} Prompts`,
       description: `A collection of ${uniquePrompts.length} prompt engineering prompts tagged with "${displayTag}"`,
-      url: `${APP_URL}/tags/${encodeURIComponent(tag)}`,
+      url: `${APP_URL}/tags/${normalizedUrlTag}`,
       mainEntity: {
         '@type': 'ItemList',
         numberOfItems: uniquePrompts.length,
@@ -146,7 +178,7 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
           '@type': 'Article',
           name: prompt.title,
           description: prompt.description,
-          url: `${APP_URL}/library/${prompt.id || prompt.slug}`,
+          url: `${APP_URL}/prompts/${prompt.id || prompt.slug}`,
         },
       })),
     },
@@ -162,7 +194,7 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <TagPageClient tag={tag} displayTag={displayTag} taggedPrompts={uniquePrompts} />
+      <TagPageClient tag={decoded} displayTag={displayTag} taggedPrompts={uniquePrompts} />
     </>
   );
   } catch (error) {

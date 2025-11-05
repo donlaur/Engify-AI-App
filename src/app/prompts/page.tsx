@@ -62,15 +62,20 @@ export default async function LibraryPage() {
   // Fetch prompts directly from MongoDB (reliable, no JSON loading issues)
   const prompts = await promptRepository.getAll();
 
+  // Sort prompts alphabetically by default (server-side)
+  const sortedPrompts = [...prompts].sort((a, b) => 
+    a.title.localeCompare(b.title, undefined, { sensitivity: 'base' })
+  );
+
   // Calculate stats from actual prompts (more reliable than cache during active filter rollout)
-  const uniqueCategories = [...new Set(prompts.map((p) => p.category).filter(Boolean))]
+  const uniqueCategories = [...new Set(sortedPrompts.map((p) => p.category).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b)); // Alphabetical sort
   
-  const uniqueRoles = [...new Set(prompts.map((p) => p.role).filter(Boolean))]
+  const uniqueRoles = [...new Set(sortedPrompts.map((p) => p.role).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b)); // Alphabetical sort
 
   // Calculate category counts from actual prompts
-  const categoryStats = prompts.reduce((acc, prompt) => {
+  const categoryStats = sortedPrompts.reduce((acc, prompt) => {
     if (prompt.category) {
       acc[prompt.category] = (acc[prompt.category] || 0) + 1;
     }
@@ -78,14 +83,14 @@ export default async function LibraryPage() {
   }, {} as Record<string, number>);
 
   // Calculate role counts from actual prompts
-  const roleStats = prompts.reduce((acc, prompt) => {
+  const roleStats = sortedPrompts.reduce((acc, prompt) => {
     if (prompt.role) {
       acc[prompt.role] = (acc[prompt.role] || 0) + 1;
     }
     return acc;
   }, {} as Record<string, number>);
 
-  const totalPrompts = prompts.length;
+  const totalPrompts = sortedPrompts.length;
 
   // Generate JSON-LD structured data for SEO - include ALL prompts
   const jsonLd = {
@@ -97,7 +102,7 @@ export default async function LibraryPage() {
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: totalPrompts,
-      itemListElement: prompts.map((prompt, index) => ({
+      itemListElement: sortedPrompts.map((prompt, index) => ({
         '@type': 'ListItem',
         position: index + 1,
         item: {
@@ -131,7 +136,7 @@ export default async function LibraryPage() {
 
           {/* Client-side filtering component */}
           <LibraryClient
-            initialPrompts={prompts as never}
+            initialPrompts={sortedPrompts as never}
             categoryStats={categoryStats}
             roleStats={roleStats}
             uniqueCategories={uniqueCategories}

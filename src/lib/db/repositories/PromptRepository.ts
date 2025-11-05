@@ -61,6 +61,8 @@ class PromptProcessor implements ContentProcessor<PromptDocument, Prompt> {
       updatedAt: raw.updatedAt || new Date(),
       isPublic: raw.isPublic !== false,
       active: raw.active !== false,
+      currentRevision: raw.currentRevision as number | undefined,
+      lastRevisedAt: raw.lastRevisedAt as Date | undefined,
       whatIs: raw.whatIs as string | undefined,
       whyUse: raw.whyUse as string[] | undefined,
       parameters: raw.parameters as Array<{

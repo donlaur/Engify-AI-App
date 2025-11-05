@@ -244,25 +244,47 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { getPromptSlug } = await import('@/lib/utils/slug');
   const promptPages: MetadataRoute.Sitemap = prompts
     .map((prompt) => {
-      const slug = getPromptSlug(prompt);
-      // Skip prompts with invalid slugs - use ID as fallback or skip
-      if (!slug || slug === 'untitled' || slug === prompt.id) {
-        // Use ID as fallback for prompts without proper slugs
-        return {
-          url: `${baseUrl}/prompts/${prompt.id}`,
-          lastModified: new Date(prompt.updatedAt || prompt.createdAt),
-          changeFrequency: 'monthly' as const,
-          priority: 0.7,
-        };
+      // Skip prompts without valid ID
+      if (!prompt.id) {
+        return null;
       }
+
+      const slug = getPromptSlug(prompt);
+      
+      // Validate slug: must exist, not be empty, not be 'untitled', and not match ID
+      // If slug is invalid, we can either skip it or use ID as fallback
+      const isValidSlug = slug && 
+        slug !== '' && 
+        slug !== 'untitled' && 
+        slug !== prompt.id;
+
+      if (!isValidSlug) {
+        // Use ID as fallback only if ID is valid and different from 'untitled'
+        if (prompt.id && prompt.id !== 'untitled' && !prompt.id.includes('generated-')) {
+          return {
+            url: `${baseUrl}/prompts/${encodeURIComponent(prompt.id)}`,
+            lastModified: prompt.updatedAt || prompt.createdAt || now,
+            changeFrequency: 'monthly' as const,
+            priority: 0.7,
+          };
+        }
+        // Skip prompts with invalid slugs and invalid IDs
+        return null;
+      }
+
       return {
         url: `${baseUrl}/prompts/${encodeURIComponent(slug)}`,
-        lastModified: new Date(prompt.updatedAt || prompt.createdAt),
+        lastModified: prompt.updatedAt || prompt.createdAt || now,
         changeFrequency: 'monthly' as const,
         priority: 0.7,
       };
     })
-    .filter((page) => page.url && !page.url.includes('/untitled')); // Remove any untitled URLs
+    .filter((page): page is MetadataRoute.Sitemap[0] => 
+      page !== null && 
+      page.url && 
+      !page.url.includes('/untitled') &&
+      !page.url.includes('generated-')
+    ); // Remove null entries and invalid URLs
 
   // Extract unique categories, roles, and tags from prompts
   const categories = Array.from(

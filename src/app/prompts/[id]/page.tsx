@@ -164,16 +164,12 @@ export default async function PromptPage({
     const isPremium = prompt.isPremium === true;
     const canViewPremium = true; // All prompts are free now - allow viewing
 
-    // Note: RelatedPrompts now fetches related prompts via API (client-side)
-    // This eliminates the need to fetch all prompts during build, dramatically improving performance
-    // Pass empty array - RelatedPrompts will fetch via API client-side
+    // Note: Redirect logic moved to middleware for better performance (301 redirects)
+    // Middleware handles redirects before page render, reducing server load
+    // The redirect logic here is kept as a fallback but should rarely execute
 
     const slug = getPromptSlug(prompt);
 
-    // Redirect to canonical slug if URL doesn't match (SEO best practice)
-    // This handles slug changes gracefully: old slugs → new slugs, IDs → slugs
-    // Only redirect if we're not already on the canonical slug AND slug is valid
-    
     // Validate slug before redirecting to prevent redirect loops and invalid URLs
     const isValidSlug = slug && 
                         slug !== 'untitled' && 
@@ -185,13 +181,15 @@ export default async function PromptPage({
                         !slug.endsWith('-') && // No trailing hyphen
                         !slug.includes('--'); // No consecutive hyphens
 
+    // Fallback redirect (middleware should handle this, but keep as safety net)
     if (params.id !== slug && isValidSlug) {
       // Additional validation: ensure slug forms a valid URL path
       try {
         const testUrl = new URL(`/prompts/${slug}`, APP_URL);
         // Verify the path component matches our slug (no encoding issues)
         if (testUrl.pathname === `/prompts/${slug}`) {
-          // Slug is valid - redirect to canonical slug
+          // Slug is valid - redirect to canonical slug (301 permanent redirect)
+          // Note: This should rarely execute as middleware handles redirects
           const { redirect } = await import('next/navigation');
           redirect(`/prompts/${encodeURIComponent(slug)}`);
         } else {
