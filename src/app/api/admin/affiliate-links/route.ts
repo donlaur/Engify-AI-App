@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import { auth } from '@/lib/auth';
 import { getDb } from '@/lib/mongodb';
 import {
@@ -236,7 +237,7 @@ export async function DELETE(request: NextRequest) {
       type === 'link' ? 'affiliate_config' : 'partnership_outreach';
 
     // SECURITY: This query is intentionally system-wide - admin data only
-    const result = await db.collection(collectionName).deleteOne({ _id: id });
+    const result = await db.collection(collectionName).deleteOne({ _id: new ObjectId(id) });
 
     // Audit logging
     await auditLog({
