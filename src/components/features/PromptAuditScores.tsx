@@ -2,6 +2,7 @@
  * Prompt Audit Scores Component
  * Displays quality scores in a user-focused manner
  * Only shows metrics relevant to end users (hides admin/internal metrics)
+ * Quality Breakdown is collapsible (hidden by default, especially when scores are low)
  */
 
 'use client';
@@ -11,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { Icons } from '@/lib/icons';
 
 interface AuditScores {
   auditVersion?: number;
@@ -75,6 +77,7 @@ export function PromptAuditScores({
 }: PromptAuditScoresProps) {
   const [auditScores, setAuditScores] = useState<AuditScores | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBreakdownExpanded, setIsBreakdownExpanded] = useState(false);
 
   useEffect(() => {
     const fetchAuditScores = async () => {
@@ -84,6 +87,8 @@ export function PromptAuditScores({
           const data = await response.json();
           if (data.hasAudit && data.auditResult) {
             setAuditScores(data.auditResult);
+            // Auto-expand if score is high (>= 7), otherwise collapsed by default
+            setIsBreakdownExpanded(data.auditResult.overallScore >= 7);
           }
         }
       } catch (error) {
@@ -116,26 +121,41 @@ export function PromptAuditScores({
           </p>
         </div>
 
-        {/* Quality Score - Positive Display */}
+        {/* Quality Score - Clickable to expand breakdown */}
         <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Quality Score
-              <Badge 
-                variant={auditScores.overallScore >= 8 ? 'default' : auditScores.overallScore >= 6 ? 'secondary' : 'outline'}
-                className="text-lg"
-              >
-                {auditScores.overallScore.toFixed(1)}/10
-              </Badge>
-            </CardTitle>
+          <CardHeader 
+            className="cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setIsBreakdownExpanded(!isBreakdownExpanded)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
+                  Quality Score
+                  <Badge 
+                    variant={auditScores.overallScore >= 8 ? 'default' : auditScores.overallScore >= 6 ? 'secondary' : 'outline'}
+                    className="text-lg"
+                  >
+                    {auditScores.overallScore.toFixed(1)}/10
+                  </Badge>
+                </CardTitle>
+              </div>
+              <div className="flex items-center gap-3">
+                {auditScores.auditVersion && (
+                  <span className="text-xs text-muted-foreground">
+                    Version {auditScores.auditVersion}
+                    {auditScores.auditDate && (
+                      <span> • {new Date(auditScores.auditDate).toLocaleDateString()}</span>
+                    )}
+                  </span>
+                )}
+                <Icons.chevronDown className={`h-4 w-4 transition-transform ${isBreakdownExpanded ? 'rotate-180' : ''}`} />
+              </div>
+            </div>
             <CardDescription>
               How well this prompt performs across key quality areas
-              {auditScores.auditVersion && (
+              {!isBreakdownExpanded && (
                 <span className="ml-2 text-xs text-muted-foreground">
-                  • Version {auditScores.auditVersion}
-                  {auditScores.auditDate && (
-                    <span> • {new Date(auditScores.auditDate).toLocaleDateString()}</span>
-                  )}
+                  • Click to view breakdown
                 </span>
               )}
             </CardDescription>
@@ -148,49 +168,51 @@ export function PromptAuditScores({
           </CardContent>
         </Card>
 
-        {/* Category Scores - User-Focused Display */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quality Breakdown</CardTitle>
-            <CardDescription>
-              What makes this prompt high quality and useful
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {Object.entries(auditScores.categoryScores)
-              .filter(([key]) => !ADMIN_METRICS.includes(key)) // Hide admin metrics
-              .map(([key, score]) => {
-                const categoryKey = key as keyof typeof USER_FOCUSED_CATEGORIES;
-                const category = USER_FOCUSED_CATEGORIES[categoryKey];
-                if (!category) return null;
-                
-                const weight = categoryWeights[key as keyof AuditScores['categoryScores']];
-                return (
-                  <div key={key}>
-                    <div className="mb-2 flex items-center justify-between">
-                      <div className="flex flex-col gap-1">
-                        <span className="font-medium">
-                          {category.label}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {category.description}
-                        </span>
+        {/* Category Scores - Collapsible Breakdown */}
+        {isBreakdownExpanded && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Quality Breakdown</CardTitle>
+              <CardDescription>
+                What makes this prompt high quality and useful
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {Object.entries(auditScores.categoryScores)
+                .filter(([key]) => !ADMIN_METRICS.includes(key)) // Hide admin metrics
+                .map(([key, score]) => {
+                  const categoryKey = key as keyof typeof USER_FOCUSED_CATEGORIES;
+                  const category = USER_FOCUSED_CATEGORIES[categoryKey];
+                  if (!category) return null;
+                  
+                  const weight = categoryWeights[key as keyof AuditScores['categoryScores']];
+                  return (
+                    <div key={key}>
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-medium">
+                            {category.label}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {category.description}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-foreground">
+                            {score.toFixed(1)}/10
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-foreground">
-                          {score.toFixed(1)}/10
-                        </span>
-                      </div>
+                      <Progress 
+                        value={score * 10} 
+                        className="h-2"
+                      />
                     </div>
-                    <Progress 
-                      value={score * 10} 
-                      className="h-2"
-                    />
-                  </div>
-                );
-              })}
-          </CardContent>
-        </Card>
+                  );
+                })}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </section>
   );
