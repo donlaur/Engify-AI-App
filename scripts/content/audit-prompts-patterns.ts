@@ -682,6 +682,24 @@ export class PromptPatternAuditor {
           }
         }
         
+        // Mark model as verified after successful use
+        if (resolvedModelId) {
+          try {
+            const db = await getMongoDb();
+            await db.collection('ai_models').updateOne(
+              { id: resolvedModelId },
+              { 
+                $set: { 
+                  lastVerified: new Date(),
+                  updatedAt: new Date(),
+                }
+              }
+            );
+          } catch (error) {
+            // Verification update failed - continue anyway
+          }
+        }
+        
         return response.content;
       }
       
