@@ -630,11 +630,13 @@ Format as JSON:
           { 
             $set: {
               ...updates,
+              currentRevision: promptRevision + 1, // Increment revision (1 → 2)
               updatedAt: new Date(),
             }
           }
         );
         console.log(`   ✅ Applied: ${improvements.join(', ')}`);
+        console.log(`   📌 Revision updated: ${promptRevision} → ${promptRevision + 1}`);
         stats.seoFixed += updates.slug || updates.metaDescription || updates.seoKeywords ? 1 : 0;
       }
     } else {
