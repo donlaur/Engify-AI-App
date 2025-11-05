@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Rate limiting for public API
     const clientIp =
       request.headers.get('x-forwarded-for')?.split(',')[0] ||
-      request.ip ||
+      request.headers.get('x-real-ip') ||
       'unknown';
     const rateLimitResult = await checkRateLimit(clientIp, 'anonymous');
     if (!rateLimitResult.allowed) {

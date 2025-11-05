@@ -46,12 +46,13 @@ export async function GET(_request: NextRequest) {
 
     // Audit log
     await logAuditEvent({
-      eventType: AuditEventType.enum['admin.prompt_audit.performed'],
+      eventType: AuditEventType.enum['admin.settings.changed'],
       userId: session.user.id,
       action: 'career_recommendations_fetched',
       metadata: {
         count: recommendations.length,
       },
+      ipAddress: _request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown',
       success: true,
     });
 

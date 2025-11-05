@@ -25,7 +25,7 @@ export async function POST(
     // Rate limiting: 30 views per minute per IP (generous for browsing)
     // Note: Views are public action, no auth required
     const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                     request.ip || 
+                     request.headers.get('x-real-ip') ||
                      'anonymous';
     
     const rateLimitResult = await checkRateLimit(clientIP, 'anonymous');
