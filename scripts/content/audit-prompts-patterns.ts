@@ -1786,25 +1786,25 @@ Provide:
       return sum + (score * (weights as any)[key]);
     }, 0);
 
-    // Base score adjustment: More lenient for first versions
+    // Base score adjustment: Balanced for first versions (not too lenient, not too strict)
     // This ensures functional prompts score appropriately for initial versions
     let baseScoreBonus = 0;
     const hasBasicContent = prompt.title && prompt.description && prompt.content && prompt.content.length >= 100;
     const hasCategory = prompt.category;
     const hasEnrichment = prompt.caseStudies?.length > 0 || prompt.examples?.length > 0 || prompt.useCases?.length > 0;
     
-    // More generous base bonus for first versions
+    // Balanced base bonus for first versions
     if (hasBasicContent && hasCategory) {
-      baseScoreBonus = 1.5; // Increased from 0.5 - functional prompts get better base score
+      baseScoreBonus = 1.0; // Reduced from 1.5 - still helps but not excessive
       if (hasEnrichment) {
-        baseScoreBonus = 2.5; // Increased from 1.0 - enriched prompts get significant boost
+        baseScoreBonus = 1.8; // Reduced from 2.5 - rewards enrichment but keeps it realistic
       }
     }
     
-    // Additional bonus: If prompt works functionally (has content), add small bonus
-    // This helps first versions score better
+    // Additional bonus: If prompt works functionally (has substantial content), add small bonus
+    // This helps first versions score better without being too generous
     if (hasBasicContent && prompt.content.length >= 200) {
-      baseScoreBonus += 0.5; // Additional bonus for substantial content
+      baseScoreBonus += 0.3; // Reduced from 0.5 - smaller bonus for substantial content
     }
     
     overallScore = Math.min(10, overallScore + baseScoreBonus);
