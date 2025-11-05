@@ -321,8 +321,17 @@ async function applyImprovements(
     const prompt = promptsWithAudits[i];
     const audit = promptAudits.get(prompt.id);
 
+    // Skip prompts that have already been improved (revision > 1)
+    // Focus on baseline prompts (revision 1) to upgrade them to version 2
+    const promptRevision = prompt.currentRevision || 1;
+    if (promptRevision > 1) {
+      console.log(`\n[${i + 1}/${promptsWithAudits.length}] ⏭️  Skipping: ${prompt.title || prompt.id} (Revision ${promptRevision} - already improved)`);
+      continue;
+    }
+
     console.log(`\n[${i + 1}/${promptsWithAudits.length}] 📝 ${prompt.title || prompt.id}`);
     console.log(`   Current Score: ${audit.overallScore}/10`);
+    console.log(`   Revision: ${promptRevision} → Will upgrade to ${promptRevision + 1}`);
 
     const improvements: string[] = [];
     const updates: any = {};
