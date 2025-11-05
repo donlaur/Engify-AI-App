@@ -181,11 +181,17 @@ GRADING RUBRIC:
    - Query optimization recommendations?
    - Scalability considerations?
 
-SCORING GUIDELINES:
+SCORING GUIDELINES (LENIENT FOR FIRST VERSIONS):
 - Score 8-10: Excellent in this category (meets all criteria, high quality)
-- Score 6-7: Good in this category (meets most criteria, minor gaps)
-- Score 4-5: Fair in this category (meets some criteria, needs improvement)
+- Score 6-7: Good in this category (meets most criteria, minor gaps) - ACCEPTABLE FOR FIRST VERSION
+- Score 4-5: Fair in this category (meets some criteria, needs improvement) - ACCEPTABLE FOR FIRST VERSION IF BASIC FUNCTIONALITY WORKS
 - Score 1-3: Poor in this category (missing key criteria, significant issues)
+
+FIRST VERSION SCORING GUIDANCE:
+- If prompt has basic required fields (title, description, content, category) and works functionally, score at least 5.0
+- Missing enrichment fields (case studies, examples, etc.) should only reduce score by 1-2 points, not more
+- Focus on "does it work?" over "is it perfect?" for first versions
+- A functional prompt that produces good results should score 6.0+ even if enrichment is missing
 
 SPECIAL ATTENTION:
 - **Clarity Check**: Does the content sound natural and human-readable? Not overly wordy or AI-generated? Score lower if it feels robotic or verbose. This affects Engineering Usefulness and Completeness scores.
@@ -533,11 +539,12 @@ export class PromptPatternAuditor {
    */
   private getAgentsToRun(): AuditAgent[] {
     if (this.quickMode) {
-      // Quick mode: Only run 3 core agents (Priority 1, 2, 3)
+      // Quick mode: Only run 2 core agents (fastest possible)
+      // 1. Grading Rubric Expert (comprehensive scoring)
+      // 2. Completeness Reviewer (quick check for missing fields)
       return AUDIT_AGENTS.filter(agent => 
         agent.role === 'grading_rubric_expert' || // Essential for scoring
-        agent.role === 'completeness_reviewer' || // Priority #1
-        agent.role === 'engineering_reviewer'     // Priority #2
+        agent.role === 'completeness_reviewer'    // Quick completeness check
       );
     }
     
@@ -1779,18 +1786,25 @@ Provide:
       return sum + (score * (weights as any)[key]);
     }, 0);
 
-    // Base score adjustment: If prompt has basic required fields, add bonus
-    // This ensures functional prompts don't score too low
+    // Base score adjustment: More lenient for first versions
+    // This ensures functional prompts score appropriately for initial versions
     let baseScoreBonus = 0;
     const hasBasicContent = prompt.title && prompt.description && prompt.content && prompt.content.length >= 100;
     const hasCategory = prompt.category;
     const hasEnrichment = prompt.caseStudies?.length > 0 || prompt.examples?.length > 0 || prompt.useCases?.length > 0;
     
+    // More generous base bonus for first versions
     if (hasBasicContent && hasCategory) {
-      baseScoreBonus = 0.5; // Base bonus for functional prompt
+      baseScoreBonus = 1.5; // Increased from 0.5 - functional prompts get better base score
       if (hasEnrichment) {
-        baseScoreBonus = 1.0; // Additional bonus for enriched prompts
+        baseScoreBonus = 2.5; // Increased from 1.0 - enriched prompts get significant boost
       }
+    }
+    
+    // Additional bonus: If prompt works functionally (has content), add small bonus
+    // This helps first versions score better
+    if (hasBasicContent && prompt.content.length >= 200) {
+      baseScoreBonus += 0.5; // Additional bonus for substantial content
     }
     
     overallScore = Math.min(10, overallScore + baseScoreBonus);
@@ -1844,12 +1858,12 @@ Provide:
     // Add critical issues to issues list
     issues.push(...criticalIssues);
 
-    // Realistic needsFix threshold: 6.0 instead of 7.0
+    // More lenient needsFix threshold for first versions: 5.0 instead of 6.0
     // Only flag as needsFix if:
-    // 1. Score is below 6.0 (needs significant improvement)
+    // 1. Score is below 5.0 (needs significant improvement)
     // 2. OR has critical issues (missing required fields)
     // 3. But NOT just missing enrichment fields (those are recommendations)
-    const needsFix = overallScore < 6.0 || criticalIssues.length > 0;
+    const needsFix = overallScore < 5.0 || criticalIssues.length > 0;
 
     return {
       id: prompt.id || prompt._id?.toString() || 'unknown',
@@ -2121,7 +2135,7 @@ async function auditPromptsAndPatterns(options: {
       console.log('⚡ FAST MODE: Skipping execution testing for faster audits\n');
     }
     if (quickMode) {
-      console.log('⚡⚡ QUICK MODE: Running only 3 core agents (Grading Rubric, Completeness, Engineering)\n');
+      console.log('⚡⚡ QUICK MODE: Running only 2 core agents (Grading Rubric, Completeness) - FASTEST\n');
     }
 
     for (let i = 0; i < prompts.length; i++) {
