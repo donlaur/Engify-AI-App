@@ -422,10 +422,11 @@ async function applyImprovements(
     const promptId = prompt.id || prompt.slug || prompt._id?.toString();
 
     // Skip prompts that have already been improved (revision > 1)
-    // Focus on baseline prompts (revision 1) to upgrade them to version 2
+    // Focus on prompts at revision 2 or below to upgrade them to version 3
+    // Process prompts at revision 1 or 2 (allows re-improving version 2 prompts)
     const promptRevision = prompt.currentRevision || 1;
-    if (promptRevision > 1) {
-      console.log(`\n[${i + 1}/${promptsWithAudits.length}] ⏭️  Skipping: ${prompt.title || prompt.id} (Revision ${promptRevision} - already improved)`);
+    if (promptRevision > 2) {
+      console.log(`\n[${i + 1}/${promptsWithAudits.length}] ⏭️  Skipping: ${prompt.title || prompt.id} (Revision ${promptRevision} - already at version 3+)`);
       continue;
     }
 

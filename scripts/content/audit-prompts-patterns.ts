@@ -28,8 +28,8 @@
  * Categories: code-generation, debugging, documentation, testing, refactoring, architecture, learning, general
  * Roles: engineer, product-manager, engineering-manager, architect, designer, qa, devops-sre, scrum-master, product-owner, c-level
  * 
- * Target Version: Defaults to 2. Only audits prompts with auditVersion < targetVersion.
- *   Example: --target-version=2 will audit prompts at version 1 or below (bringing them to version 2)
+ * Target Version: Defaults to 3. Only audits prompts with auditVersion < targetVersion.
+ *   Example: --target-version=3 will audit prompts at version 2 or below (bringing them to version 3)
  * 
  * NOTE: This script ONLY does SCORING. It saves audit results to prompt_audit_results collection.
  * To apply improvements, use: pnpm tsx scripts/content/enrich-prompt.ts --id=<prompt-id>
@@ -2597,7 +2597,7 @@ async function auditPromptsAndPatterns(options: {
   role?: string;
   targetVersion?: number;
 }) {
-  const { type, fix = false, limit, category, role, targetVersion = 2 } = options;
+  const { type, fix = false, limit, category, role, targetVersion = 3 } = options;
 
   console.log('╔════════════════════════════════════════════════════════════╗');
   console.log('║  Prompt & Pattern Audit System with Grading Rubric      ║');
@@ -3043,7 +3043,7 @@ function parseArgs(): { type: 'prompts' | 'patterns' | 'both'; fix?: boolean; li
   let limit: number | undefined;
   let category: string | undefined;
   let role: string | undefined;
-  let targetVersion: number = 2; // Default to version 2
+  let targetVersion: number = 3; // Default to version 3
 
   for (const arg of args) {
     if (arg.startsWith('--type=')) {

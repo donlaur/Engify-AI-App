@@ -1,8 +1,9 @@
 #!/usr/bin/env tsx
 /**
- * Batch Enrich All Version 1 Prompts
+ * Batch Enrich All Version 1 & 2 Prompts
  * 
- * Finds all prompts with audit version 1 and enriches them
+ * Finds all prompts with currentRevision <= 2 and enriches them
+ * Processes prompts at revision 1 or 2 to upgrade them to version 3
  * Only processes prompts that haven't been enriched yet
  */
 
@@ -133,8 +134,8 @@ async function enrichPromptWithAI(promptId: string) {
   // Only enrich prompts at revision 1 (not yet improved)
   // Check prompt revision, not audit version
   const promptRevision = prompt.currentRevision || 1;
-  if (promptRevision > 1) {
-    return { skipped: true, reason: `Prompt revision ${promptRevision}, not revision 1` };
+  if (promptRevision > 2) {
+    return { skipped: true, reason: `Prompt revision ${promptRevision}, not revision 1 or 2` };
   }
 
   const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
@@ -406,6 +407,7 @@ Focus on:
     whatIs: whatIs || prompt.whatIs,
     whyUse: whyUse.length > 0 ? whyUse : prompt.whyUse,
     parameters: parameters.length > 0 ? parameters : prompt.parameters,
+    currentRevision: promptRevision + 1, // Increment revision (1→2 or 2→3)
     updatedAt: new Date(),
   };
 
@@ -419,7 +421,7 @@ Focus on:
 
 async function enrichAllVersion1Prompts() {
   console.log('╔════════════════════════════════════════════════════════════╗');
-  console.log('║  Batch Enrich All Version 1 Prompts                    ║');
+  console.log('║  Batch Enrich Version 1 & 2 Prompts (→ Version 3)     ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
   const db = await getMongoDb();
@@ -427,17 +429,17 @@ async function enrichAllVersion1Prompts() {
   // Find prompts with revision 1 (not yet improved)
   // We want to enrich prompts that haven't been improved yet
   const prompts = await db.collection('prompts').find({
-    currentRevision: { $lte: 1 } // Only revision 1 or less
+    currentRevision: { $lte: 2 } // Only revision 1 or 2 (upgrade to version 3)
   }).toArray();
   
   if (prompts.length === 0) {
-    console.log('✅ No prompts found at revision 1');
+    console.log('✅ No prompts found at revision 1 or 2');
     console.log('   All prompts have been enriched\n');
     await db.client.close();
     process.exit(0);
   }
 
-  console.log(`📋 Found ${prompts.length} prompts at revision 1\n`);
+  console.log(`📋 Found ${prompts.length} prompts at revision 1 or 2 (will upgrade to version 3)\n`);
   console.log('🚀 Starting batch enrichment...\n');
 
   const results = {
@@ -462,7 +464,8 @@ async function enrichAllVersion1Prompts() {
         console.log(`   ℹ️  ${result.reason}\n`);
       } else if (result.success) {
         results.success++;
-        console.log(`   ✅ Enrichment complete\n`);
+        const newRevision = (prompt.currentRevision || 1) + 1;
+        console.log(`   ✅ Enrichment complete (Revision: ${prompt.currentRevision || 1} → ${newRevision})\n`);
       }
     } catch (error) {
       results.failed++;
