@@ -83,25 +83,32 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
     const { getModelsByProvider } = await import('@/lib/services/AIModelRegistry');
     const allModels = await getModelsByProvider(provider);
     
-    // Filter to only text-to-text models (skip image/video/audio)
-    // AND exclude deprecated/sunset models
+    // Filter to only ACTIVE, ALLOWED, text-to-text models (skip image/video/audio)
+    // CRITICAL: Must explicitly check status === 'active' and isAllowed === true
     const models = allModels.filter((m: any) => {
-      // Skip deprecated or sunset models
+      // MUST be active (explicit check, not just "not deprecated")
       const status = ('status' in m ? m.status : 'active');
+      if (status !== 'active') {
+        return false; // Reject if not explicitly active
+      }
+      
+      // MUST be allowed for use
+      if ('isAllowed' in m && m.isAllowed === false) {
+        return false; // Reject if explicitly not allowed
+      }
+      
+      // Skip deprecated or sunset models (safety check)
       if (status === 'deprecated' || status === 'sunset') {
         return false;
       }
       
-      // Skip models not allowed for text-to-text (wrong type)
-      if ('isAllowed' in m && m.isAllowed === false) {
-        const tags = m.tags || [];
-        if (tags.includes('audio-only') || tags.includes('realtime-only') || tags.includes('unsuitable-for-text')) {
-          return false;
-        }
+      // Skip models marked as unsuitable for text-to-text
+      const tags = m.tags || [];
+      if (tags.includes('audio-only') || tags.includes('realtime-only') || tags.includes('unsuitable-for-text')) {
+        return false;
       }
       
       const capabilities = m.capabilities || [];
-      const tags = m.tags || [];
       const modelId = (m.id || '').toLowerCase();
       
       // Must have 'text' capability
@@ -142,6 +149,7 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
     });
     
     if (models.length === 0) {
+      console.log(`   ⚠️  No active, allowed, text-to-text models found for ${provider}`);
       return null; // No text-to-text models found, will use factory default
     }
     
@@ -149,20 +157,28 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
     if (preferredModel) {
       const preferred = models.find(m => {
         const status = ('status' in m ? m.status : 'active');
-        return m.id === preferredModel && status === 'active';
+        const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
+        return m.id === preferredModel && status === 'active' && isAllowed !== false;
       });
-      if (preferred) return preferred.id;
+      if (preferred) {
+        console.log(`   ✅ Using preferred model: ${preferred.id} (${provider})`);
+        return preferred.id;
+      } else {
+        console.log(`   ⚠️  Preferred model "${preferredModel}" not found or not active/allowed, using best available`);
+      }
     }
     
     // Sort by: verified status (recent lastVerified) > recommended > active status
     const sortedModels = models.sort((a: any, b: any) => {
+      // Only consider active models (already filtered above, but double-check)
       const aStatus = ('status' in a ? a.status : 'active');
       const bStatus = ('status' in b ? b.status : 'active');
+      const aAllowed = ('isAllowed' in a ? a.isAllowed : true);
+      const bAllowed = ('isAllowed' in b ? b.isAllowed : true);
       
-      // Only consider active models
-      if (aStatus !== 'active' || bStatus !== 'active') {
-        return aStatus === 'active' ? -1 : 1;
-      }
+      // Safety check: prioritize active + allowed models
+      if (aStatus !== 'active' || aAllowed === false) return 1;
+      if (bStatus !== 'active' || bAllowed === false) return -1;
       
       const aVerified = a.lastVerified ? new Date(a.lastVerified).getTime() : 0;
       const bVerified = b.lastVerified ? new Date(b.lastVerified).getTime() : 0;
@@ -180,9 +196,19 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
       return 0;
     });
     
-    // Use first sorted model (must be active)
-    const bestModel = sortedModels.find(m => ('status' in m ? m.status : 'active') === 'active');
-    return bestModel ? bestModel.id : null;
+    // Use first sorted model (must be active and allowed - already filtered above)
+    const bestModel = sortedModels.find(m => {
+      const status = ('status' in m ? m.status : 'active');
+      const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
+      return status === 'active' && isAllowed !== false;
+    });
+    
+    if (bestModel) {
+      console.log(`   ✅ Selected model: ${bestModel.id} (${provider}, ${bestModel.recommended ? 'recommended' : 'active'})`);
+      return bestModel.id;
+    }
+    
+    return null;
   } catch (error) {
     console.warn(`[Audit] Failed to query DB for ${provider} models:`, error);
     return null; // Will use factory default
