@@ -22,7 +22,6 @@ export async function POST(request: NextRequest) {
     const identifier =
       session?.user?.id ||
       request.headers.get('x-forwarded-for')?.split(',')[0] ||
-      request.ip ||
       'unknown';
 
     const rateLimitResult = await checkRateLimit(identifier, tier);
