@@ -4,8 +4,12 @@
  * Designed for SEO and user education
  */
 
+'use client';
+
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 
 interface PromptContextExplanationProps {
@@ -121,6 +125,8 @@ export function PromptContextExplanation({
   whatIs: dbWhatIs,
   whyUse: dbWhyUse,
 }: PromptContextExplanationProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
   // Use database fields if available, otherwise fallback to hardcoded logic
   let context: { whatIs: string; whyUse: string[] } | null = null;
   
@@ -138,6 +144,12 @@ export function PromptContextExplanation({
   if (!context) {
     return null; // Don't show if no context available
   }
+
+  // Show first 4 items by default, rest when expanded
+  const visibleCount = 4;
+  const visibleReasons = context.whyUse.slice(0, visibleCount);
+  const hiddenReasons = context.whyUse.slice(visibleCount);
+  const hasMore = hiddenReasons.length > 0;
 
   return (
     <div className="mt-8 space-y-6">
@@ -175,11 +187,19 @@ export function PromptContextExplanation({
             )}
             
             {/* Responsive grid: 2 columns on md+, 1 column on mobile */}
-            {/* Show top 4-5 most important reasons for better UX */}
+            {/* Show first 4 items (even number) */}
             {context.whyUse.length > 0 && (
               <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                {context.whyUse.slice(0, 5).map((reason, i) => (
+                {visibleReasons.map((reason, i) => (
                   <li key={i} className="flex items-start gap-3">
+                    <Icons.check className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+                    <span className="text-base leading-relaxed">{reason}</span>
+                  </li>
+                ))}
+                
+                {/* Show remaining items when expanded */}
+                {isExpanded && hiddenReasons.map((reason, i) => (
+                  <li key={visibleCount + i} className="flex items-start gap-3">
                     <Icons.check className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
                     <span className="text-base leading-relaxed">{reason}</span>
                   </li>
@@ -187,11 +207,28 @@ export function PromptContextExplanation({
               </ul>
             )}
             
-            {/* Show count if there are more reasons */}
-            {context.whyUse.length > 5 && (
-              <p className="mt-4 text-sm text-muted-foreground">
-                And {context.whyUse.length - 5} more benefit{context.whyUse.length - 5 > 1 ? 's' : ''}...
-              </p>
+            {/* Show More / Show Less button */}
+            {hasMore && (
+              <div className="mt-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="w-full md:w-auto"
+                >
+                  {isExpanded ? (
+                    <>
+                      Show Less
+                      <Icons.chevronUp className="ml-2 h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      Show {hiddenReasons.length} More Benefit{hiddenReasons.length > 1 ? 's' : ''}
+                      <Icons.chevronDown className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
