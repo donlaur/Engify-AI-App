@@ -381,9 +381,26 @@ Format as JSON:
               maxTokens: 500,
             });
 
-            const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-              const seoData = JSON.parse(jsonMatch[0]);
+            // Try to extract JSON from response (handle markdown code blocks and trailing commas)
+            let jsonText = response.content;
+            
+            // Try to extract from markdown code blocks first
+            const codeBlockMatch = response.content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+            if (codeBlockMatch) {
+              jsonText = codeBlockMatch[1];
+            } else {
+              // Try to extract JSON object directly
+              const jsonMatch = response.content.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                jsonText = jsonMatch[0];
+              }
+            }
+            
+            // Fix common JSON issues (trailing commas)
+            jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
+            
+            try {
+              const seoData = JSON.parse(jsonText);
               
               if (seoData.slug && needsSlug) {
                 updates.slug = seoData.slug;
@@ -458,9 +475,26 @@ Format as JSON array:
               maxTokens: 1500,
             });
 
-            const jsonMatch = response.content.match(/\[[\s\S]*\]/);
-            if (jsonMatch) {
-              const caseStudies = JSON.parse(jsonMatch[0]);
+            // Try to extract JSON from response (handle markdown code blocks and trailing commas)
+            let jsonText = response.content;
+            
+            // Try to extract from markdown code blocks first
+            const codeBlockMatch = response.content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/);
+            if (codeBlockMatch) {
+              jsonText = codeBlockMatch[1];
+            } else {
+              // Try to extract JSON array directly
+              const jsonMatch = response.content.match(/\[[\s\S]*\]/);
+              if (jsonMatch) {
+                jsonText = jsonMatch[0];
+              }
+            }
+            
+            // Fix common JSON issues (trailing commas)
+            jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
+            
+            try {
+              const caseStudies = JSON.parse(jsonText);
               if (Array.isArray(caseStudies) && caseStudies.length > 0) {
                 updates.caseStudies = caseStudies;
                 improvements.push(`Added ${caseStudies.length} case studies`);
@@ -518,9 +552,27 @@ Format as JSON:
                 maxTokens: 1500,
               });
 
-              const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-              if (jsonMatch) {
-                const completenessData = JSON.parse(jsonMatch[0]);
+              // Try to extract JSON from response (handle markdown code blocks)
+              let jsonText = response.content;
+              
+              // Try to extract from markdown code blocks first
+              const codeBlockMatch = response.content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+              if (codeBlockMatch) {
+                jsonText = codeBlockMatch[1];
+              } else {
+                // Try to extract JSON object directly
+                const jsonMatch = response.content.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                  jsonText = jsonMatch[0];
+                }
+              }
+              
+              // Try to fix common JSON issues (trailing commas, unclosed strings)
+              jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
+              jsonText = jsonText.replace(/,(\s*$)/gm, ''); // Remove trailing commas at end of lines
+              
+              try {
+                const completenessData = JSON.parse(jsonText);
                 
                 if (completenessData.examples && missingExamples) {
                   updates.examples = completenessData.examples;
@@ -540,6 +592,10 @@ Format as JSON:
                 if (Object.keys(updates).length > 0) {
                   stats.completenessImproved++;
                 }
+              } catch (parseError) {
+                console.error(`   ❌ Error parsing JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+                console.error(`   Raw response preview: ${response.content.substring(0, 300)}...`);
+                // Continue without updating completeness data
               }
             } catch (error) {
               console.error(`   ❌ Error improving completeness: ${error}`);

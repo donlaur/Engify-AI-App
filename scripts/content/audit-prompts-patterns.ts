@@ -158,12 +158,26 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
       const preferred = models.find(m => {
         const status = ('status' in m ? m.status : 'active');
         const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
+        // CRITICAL: Must match exactly AND be active AND allowed
         return m.id === preferredModel && status === 'active' && isAllowed !== false;
       });
       if (preferred) {
         console.log(`   ✅ Using preferred model: ${preferred.id} (${provider})`);
         return preferred.id;
       } else {
+        // If preferred model not found or deprecated, try to find alternative from same family
+        if (preferredModel.includes('claude-3-5-sonnet')) {
+          // Try Haiku instead if Sonnet not available
+          const haikuAlternative = models.find(m => 
+            m.id.includes('claude-3-5-haiku') && 
+            ('status' in m ? m.status === 'active' : true) &&
+            ('isAllowed' in m ? m.isAllowed !== false : true)
+          );
+          if (haikuAlternative) {
+            console.log(`   ⚠️  Preferred model "${preferredModel}" not available, using alternative: ${haikuAlternative.id}`);
+            return haikuAlternative.id;
+          }
+        }
         console.log(`   ⚠️  Preferred model "${preferredModel}" not found or not active/allowed, using best available`);
       }
     }
