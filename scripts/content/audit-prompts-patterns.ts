@@ -702,8 +702,8 @@ export class PromptPatternAuditor {
       const supportedParams = modelRecord?.supportedParameters || {};
       
       // Determine safe parameters to use based on model's known limitations
-      let temperature = agent.temperature;
-      let maxTokens = agent.maxTokens;
+      let temperature: number | undefined = agent.temperature;
+      let maxTokens: number | undefined = agent.maxTokens;
       
       // Check if model has temperature restrictions
       if (supportedParams.temperature) {
@@ -716,8 +716,8 @@ export class PromptPatternAuditor {
           } else if (supportedParams.temperature.max !== undefined) {
             temperature = Math.min(agent.temperature, supportedParams.temperature.max);
           }
-          if (supportedParams.temperature.min !== undefined) {
-            temperature = Math.max(temperature || 0, supportedParams.temperature.min);
+          if (supportedParams.temperature.min !== undefined && temperature !== undefined) {
+            temperature = Math.max(temperature, supportedParams.temperature.min);
           }
         }
       }
@@ -733,8 +733,8 @@ export class PromptPatternAuditor {
           } else if (supportedParams.maxTokens.max !== undefined) {
             maxTokens = Math.min(agent.maxTokens, supportedParams.maxTokens.max);
           }
-          if (supportedParams.maxTokens.min !== undefined) {
-            maxTokens = Math.max(maxTokens || 0, supportedParams.maxTokens.min);
+          if (supportedParams.maxTokens.min !== undefined && maxTokens !== undefined) {
+            maxTokens = Math.max(maxTokens, supportedParams.maxTokens.min);
           }
         }
       }
