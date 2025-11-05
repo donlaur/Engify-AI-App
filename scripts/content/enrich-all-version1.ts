@@ -137,13 +137,25 @@ Format as JSON array of strings`;
 
   // Generate "What is" and "Why Use" explanations if missing
   if (!whatIs || !whyUse || whyUse.length === 0) {
+    // Check if whatIs is just the title or too short - regenerate if so
+    const isWhatIsJustTitle = whatIs && (
+      whatIs.trim() === prompt.title.trim() ||
+      whatIs.trim().toLowerCase() === prompt.title.trim().toLowerCase() ||
+      whatIs.length < 50 // Too short to be a proper explanation
+    );
+    
+    if (!whatIs || isWhatIsJustTitle || !whyUse || whyUse.length === 0) {
     try {
       const explanationPrompt = `Generate educational content for this prompt:
 TITLE: ${prompt.title}
 DESCRIPTION: ${prompt.description}
 CONTENT: ${prompt.content.substring(0, 500)}...
 CATEGORY: ${prompt.category}
-Format as JSON: { "whatIs": "...", "whyUse": ["reason1", "reason2", ...] }`;
+Requirements:
+1. "What is" section: Write a comprehensive explanation (3-5 sentences) that explains what ${prompt.title} is. Do NOT just repeat the title. Explain the concept, its purpose, and how it works. Write for SEO and user education. Be specific and informative.
+2. "Why Use" section: Generate 6-8 specific reasons why someone would use ${prompt.title}. Focus on practical benefits and real-world value.
+IMPORTANT: The "What is" response must be a full explanation, not just the title repeated. Minimum 3 sentences explaining the concept.
+Format as JSON: { "whatIs": "Full explanation (3-5 sentences, not just the title)...", "whyUse": ["reason1", "reason2", ...] }`;
       const response = await provider.execute({ prompt: explanationPrompt, temperature: 0.7, maxTokens: 1500 });
       const jsonMatch = response.content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {

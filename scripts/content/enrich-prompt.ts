@@ -243,7 +243,14 @@ Format as JSON array:
   let whatIs = prompt.whatIs;
   let whyUse = prompt.whyUse || [];
   
-  if (!whatIs || !whyUse || whyUse.length === 0) {
+  // Check if whatIs is just the title or too short - regenerate if so
+  const isWhatIsJustTitle = whatIs && (
+    whatIs.trim() === prompt.title.trim() ||
+    whatIs.trim().toLowerCase() === prompt.title.trim().toLowerCase() ||
+    whatIs.length < 50 // Too short to be a proper explanation
+  );
+  
+  if (!whatIs || isWhatIsJustTitle || !whyUse || whyUse.length === 0) {
     console.log('📖 Generating "What is" and "Why Use" explanations...');
     const explanationPrompt = `Generate educational content for this prompt:
 
@@ -253,13 +260,15 @@ CONTENT: ${prompt.content.substring(0, 500)}...
 CATEGORY: ${prompt.category}
 
 Requirements:
-1. "What is" section: A clear, comprehensive explanation (2-3 sentences) of what ${prompt.title} is, written for SEO and user education. Explain the concept clearly.
+1. "What is" section: Write a comprehensive explanation (3-5 sentences) that explains what ${prompt.title} is. Do NOT just repeat the title. Explain the concept, its purpose, and how it works. Write for SEO and user education. Be specific and informative.
 
 2. "Why Use" section: Generate 6-8 specific reasons why someone would use ${prompt.title}. Focus on practical benefits and real-world value.
 
+IMPORTANT: The "What is" response must be a full explanation, not just the title repeated. Minimum 3 sentences explaining the concept.
+
 Format as JSON:
 {
-  "whatIs": "Clear explanation of what this concept is...",
+  "whatIs": "Full explanation of what this concept is (3-5 sentences, not just the title)...",
   "whyUse": [
     "Reason 1",
     "Reason 2",
