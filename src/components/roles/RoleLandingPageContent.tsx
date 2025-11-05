@@ -16,6 +16,7 @@ import { getMongoDb } from '@/lib/db/mongodb';
 import { getDbRoleFromSlug, getRoleInfo } from '@/lib/utils/role-mapping';
 import { APP_URL } from '@/lib/constants';
 import { ROLE_CONTENT } from '@/lib/data/role-content';
+import { fetchPlatformStats } from '@/lib/stats/fetch-platform-stats';
 
 interface RoleLandingPageProps {
   slug: string;
@@ -142,6 +143,20 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
   const prompts = await getPromptsByRole(dbRole);
   const patterns = await getPatternsByRole(dbRole);
   
+  // Get dynamic counts from stats API (not hardcoded)
+  let promptCount = prompts.length;
+  let patternCount = patterns.length;
+  try {
+    const stats = await fetchPlatformStats();
+    // Use stats for more accurate counts (includes cache)
+    promptCount = stats.prompts?.byRole?.[dbRole] || prompts.length;
+    // Count unique patterns for this role
+    patternCount = patterns.length;
+  } catch (error) {
+    // Fallback to direct counts if stats fail
+    console.warn('Failed to fetch stats, using direct counts:', error);
+  }
+  
   const featuredPrompts = prompts.filter((p) => p.isFeatured || p.qualityScore >= 8.0).slice(0, 8);
   const topPrompts = prompts.slice(0, 8);
   const displayPrompts = featuredPrompts.length > 0 ? featuredPrompts : topPrompts;
@@ -217,11 +232,11 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Badge variant="secondary" className="border-white/20 bg-white/10 text-white px-4 py-2">
-                {prompts.length} Prompts
+                {promptCount} Prompts
               </Badge>
-              {patterns.length > 0 && (
+              {patternCount > 0 && (
                 <Badge variant="secondary" className="border-white/20 bg-white/10 text-white px-4 py-2">
-                  {patterns.length} Patterns
+                  {patternCount} Patterns
                 </Badge>
               )}
             </div>
@@ -237,28 +252,28 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
       {/* What the Role Does */}
       {roleContent && (
-        <section className="container py-20">
+        <section className="container py-20 bg-white">
           <div className="mx-auto max-w-4xl">
             <div className="mb-12 text-center">
-              <h2 className="mb-4 text-4xl font-bold">What Does a {roleContent.coreRole.title} Do?</h2>
+              <h2 className="mb-4 text-4xl font-bold text-gray-900">What Does a {roleContent.coreRole.title} Do?</h2>
               <p className="text-xl text-gray-600">
                 Understanding the role and its impact
               </p>
             </div>
             
-            <Card className="mb-8">
+            <Card className="mb-8 border-gray-200 bg-white shadow-sm">
               <CardContent className="pt-6">
-                <p className="mb-6 text-lg leading-relaxed text-gray-700">
+                <p className="mb-6 text-lg leading-relaxed text-gray-800">
                   {roleContent.coreRole.description}
                 </p>
                 
                 <div className="mt-6">
-                  <h3 className="mb-4 text-xl font-semibold">Key Responsibilities:</h3>
+                  <h3 className="mb-4 text-xl font-semibold text-gray-900">Key Responsibilities:</h3>
                   <ul className="space-y-3">
                     {roleContent.coreRole.keyResponsibilities.map((resp, idx) => (
                       <li key={idx} className="flex items-start gap-3">
                         <Icons.checkCircle className="mt-1 h-5 w-5 shrink-0 text-blue-600" />
-                        <span className="text-gray-700">{resp}</span>
+                        <span className="text-gray-800">{resp}</span>
                       </li>
                     ))}
                   </ul>
@@ -282,30 +297,30 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
                 </p>
               </div>
 
-              <Card className="mb-8 border-2 border-blue-200">
+              <Card className="mb-8 border-2 border-blue-200 bg-white shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-2xl">When You Say "Act as a {roleContent.coreRole.title}"</CardTitle>
+                  <CardTitle className="text-2xl text-gray-900">When You Say "Act as a {roleContent.coreRole.title}"</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <p className="text-lg leading-relaxed text-gray-700">
+                  <p className="text-lg leading-relaxed text-gray-800">
                     {roleContent.howAIHelps.explanation}
                   </p>
 
-                  <div className="rounded-lg bg-white p-6 shadow-sm">
+                  <div className="rounded-lg bg-gray-50 p-6 border border-gray-200">
                     <h4 className="mb-3 font-semibold text-gray-900">Key Benefits:</h4>
                     <ul className="space-y-2">
                       {roleContent.howAIHelps.keyBenefits.map((benefit, idx) => (
                         <li key={idx} className="flex items-start gap-3">
                           <Icons.lightbulb className="mt-1 h-5 w-5 shrink-0 text-yellow-500" />
-                          <span className="text-gray-700">{benefit}</span>
+                          <span className="text-gray-800">{benefit}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="rounded-lg bg-blue-50 p-6">
-                    <h4 className="mb-2 font-semibold text-gray-900">Real Example:</h4>
-                    <p className="text-gray-700 italic">{roleContent.howAIHelps.example}</p>
+                  <div className="rounded-lg bg-blue-50 p-6 border border-blue-200">
+                    <h4 className="mb-2 font-semibold text-blue-900">Real Example:</h4>
+                    <p className="text-blue-800 italic">{roleContent.howAIHelps.example}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -316,11 +331,11 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
       {/* Daily Tasks */}
       {roleContent && roleContent.dailyTasks.length > 0 && (
-        <section className="container py-20">
+        <section className="container py-20 bg-white">
           <div className="mx-auto max-w-4xl">
             <div className="mb-12 text-center">
               <Icons.target className="mx-auto mb-4 h-12 w-12 text-blue-600" />
-              <h2 className="mb-4 text-4xl font-bold">Daily Tasks</h2>
+              <h2 className="mb-4 text-4xl font-bold text-gray-900">Daily Tasks</h2>
               <p className="text-xl text-gray-600">
                 What {roleContent.coreRole.title.toLowerCase()} do every day
               </p>
@@ -328,13 +343,13 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
             <div className="grid gap-4 md:grid-cols-2">
               {roleContent.dailyTasks.map((task, idx) => (
-                <Card key={idx} className="border-l-4 border-l-blue-600">
+                <Card key={idx} className="border-l-4 border-l-blue-600 bg-white shadow-sm border-gray-200">
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-3">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
                         {idx + 1}
                       </span>
-                      <p className="text-gray-700">{task}</p>
+                      <p className="text-gray-800">{task}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -351,7 +366,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
             <div className="mx-auto max-w-5xl">
               <div className="mb-12 text-center">
                 <Icons.users className="mx-auto mb-4 h-12 w-12 text-blue-600" />
-                <h2 className="mb-4 text-4xl font-bold">Common Problems & AI Solutions</h2>
+                <h2 className="mb-4 text-4xl font-bold text-gray-900">Common Problems & AI Solutions</h2>
                 <p className="text-xl text-gray-600">
                   How AI prompt engineering solves real challenges
                 </p>
@@ -359,22 +374,22 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
               <div className="space-y-8">
                 {roleContent.commonProblems.map((problem, idx) => (
-                  <Card key={idx} className="border-2 hover:border-blue-200 transition-colors">
+                  <Card key={idx} className="border-2 border-gray-200 hover:border-blue-300 transition-colors bg-white shadow-sm">
                     <CardHeader>
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <CardTitle className="mb-2 text-xl">{problem.title}</CardTitle>
-                          <CardDescription className="text-base">
+                          <CardTitle className="mb-2 text-xl text-gray-900">{problem.title}</CardTitle>
+                          <CardDescription className="text-base text-gray-700">
                             {problem.description}
                           </CardDescription>
                         </div>
-                        <Badge variant="secondary" className="shrink-0">
+                        <Badge variant="secondary" className="shrink-0 bg-gray-100 text-gray-700 border-gray-300">
                           Problem #{idx + 1}
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="rounded-lg bg-blue-50 p-4">
+                      <div className="rounded-lg bg-blue-50 p-4 border border-blue-200">
                         <h4 className="mb-2 font-semibold text-blue-900">AI Solution:</h4>
                         <p className="text-blue-800">{problem.aiSolution}</p>
                       </div>
@@ -388,7 +403,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
                                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
                                   {stepIdx + 1}
                                 </span>
-                                <span className="text-gray-700">{step}</span>
+                                <span className="text-gray-800">{step}</span>
                               </li>
                             ))}
                           </ol>
@@ -396,7 +411,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
                       )}
 
                       {problem.example && (
-                        <div className="rounded-lg bg-green-50 p-4">
+                        <div className="rounded-lg bg-green-50 p-4 border border-green-200">
                           <h4 className="mb-2 font-semibold text-green-900">Example:</h4>
                           <p className="text-green-800 italic">{problem.example}</p>
                         </div>
@@ -412,11 +427,11 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
       {/* Use Cases */}
       {roleContent && roleContent.useCases.length > 0 && (
-        <section className="container py-20">
+        <section className="container py-20 bg-white">
           <div className="mx-auto max-w-4xl">
             <div className="mb-12 text-center">
               <Icons.code className="mx-auto mb-4 h-12 w-12 text-blue-600" />
-              <h2 className="mb-4 text-4xl font-bold">Use Cases</h2>
+              <h2 className="mb-4 text-4xl font-bold text-gray-900">Use Cases</h2>
               <p className="text-xl text-gray-600">
                 Real-world applications of AI for {roleContent.coreRole.title.toLowerCase()}
               </p>
@@ -424,11 +439,11 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
             <div className="grid gap-4 md:grid-cols-2">
               {roleContent.useCases.map((useCase, idx) => (
-                <Card key={idx} className="group hover:shadow-lg transition-shadow">
+                <Card key={idx} className="group hover:shadow-lg transition-shadow bg-white border-gray-200 shadow-sm">
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-3">
                       <Icons.checkCircle className="mt-1 h-5 w-5 shrink-0 text-green-600" />
-                      <p className="text-gray-700">{useCase}</p>
+                      <p className="text-gray-800">{useCase}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -445,7 +460,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
             <div className="mx-auto max-w-4xl">
               <div className="mb-12 text-center">
                 <Icons.lightbulb className="mx-auto mb-4 h-12 w-12 text-purple-600" />
-                <h2 className="mb-4 text-4xl font-bold">Real-Life Examples</h2>
+                <h2 className="mb-4 text-4xl font-bold text-gray-900">Real-Life Examples</h2>
                 <p className="text-xl text-gray-600">
                   How professionals are using AI to improve their work
                 </p>
@@ -453,13 +468,13 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
               <div className="space-y-6">
                 {roleContent.realLifeExamples.map((example, idx) => (
-                  <Card key={idx} className="border-l-4 border-l-purple-600">
+                  <Card key={idx} className="border-l-4 border-l-purple-600 bg-white shadow-sm border-gray-200">
                     <CardContent className="pt-6">
                       <div className="flex items-start gap-4">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100 text-lg font-bold text-purple-600">
                           {idx + 1}
                         </div>
-                        <p className="text-lg text-gray-700">{example}</p>
+                        <p className="text-lg text-gray-800">{example}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -472,11 +487,11 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
       {/* AI Prompt Patterns */}
       {roleContent && roleContent.aiPromptPatterns.length > 0 && (
-        <section className="container py-20">
+        <section className="container py-20 bg-white">
           <div className="mx-auto max-w-4xl">
             <div className="mb-12 text-center">
               <Icons.zap className="mx-auto mb-4 h-12 w-12 text-yellow-500" />
-              <h2 className="mb-4 text-4xl font-bold">AI Prompt Patterns</h2>
+              <h2 className="mb-4 text-4xl font-bold text-gray-900">AI Prompt Patterns</h2>
               <p className="text-xl text-gray-600">
                 Specialized prompt patterns for {roleContent.coreRole.title.toLowerCase()}
               </p>
@@ -484,7 +499,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {roleContent.aiPromptPatterns.map((pattern, idx) => (
-                <Card key={idx} className="border-2 border-yellow-200 hover:border-yellow-400 transition-colors">
+                <Card key={idx} className="border-2 border-yellow-200 hover:border-yellow-400 transition-colors bg-white shadow-sm">
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3">
                       <Icons.zap className="h-5 w-5 text-yellow-600" />
@@ -509,10 +524,10 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
       {/* Featured Prompts */}
       {displayPrompts.length > 0 && (
-        <section className="container py-20">
+        <section className="container py-20 bg-white">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
-              <h2 className="mb-4 text-4xl font-bold">Featured Prompts</h2>
+              <h2 className="mb-4 text-4xl font-bold text-gray-900">Featured Prompts</h2>
               <p className="text-xl text-gray-600">
                 Top prompts for {roleInfo.title.toLowerCase()}
               </p>
@@ -522,40 +537,40 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
               {displayPrompts.map((prompt) => (
                 <Card
                   key={prompt.id}
-                  className="group border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-2xl"
+                  className="group border-2 border-gray-200 transition-all duration-300 hover:border-blue-300 hover:shadow-lg bg-white shadow-sm"
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-lg line-clamp-2">
+                      <CardTitle className="text-lg line-clamp-2 text-gray-900">
                         {prompt.title}
                       </CardTitle>
                       {prompt.isFeatured && (
-                        <Badge variant="default" className="shrink-0">
+                        <Badge variant="default" className="shrink-0 bg-purple-600">
                           <Icons.star className="h-3 w-3" />
                         </Badge>
                       )}
                     </div>
-                    <CardDescription className="line-clamp-2">
+                    <CardDescription className="line-clamp-2 text-gray-600">
                       {prompt.description}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">{prompt.category}</Badge>
+                      <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-300">{prompt.category}</Badge>
                       {prompt.pattern && (
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="border-gray-300 text-gray-700">
                           <Icons.zap className="mr-1 h-3 w-3" />
                           {prompt.pattern}
                         </Badge>
                       )}
                       {prompt.qualityScore >= 8.0 && (
-                        <Badge variant="default" className="bg-green-600">
+                        <Badge variant="default" className="bg-green-600 text-white">
                           {prompt.qualityScore.toFixed(1)}
                         </Badge>
                       )}
                     </div>
-                    <Button variant="outline" className="w-full" asChild>
-                      <Link href={`/prompts/${prompt.id}`}>
+                    <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50" asChild>
+                      <Link href={`/prompts/${prompt.slug || prompt.id}`}>
                         View Prompt
                         <Icons.arrowRight className="ml-2 h-4 w-4" />
                       </Link>
@@ -569,7 +584,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
               <div className="mt-8 text-center">
                 <Button size="lg" variant="outline" asChild>
                   <Link href={`/prompts/role/${dbRole}`}>
-                    View All {prompts.length} Prompts
+                    View All {promptCount} Prompts
                     <Icons.arrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -584,7 +599,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
         <section className="container py-20 bg-gray-50">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
-              <h2 className="mb-4 text-4xl font-bold">Recommended Patterns</h2>
+              <h2 className="mb-4 text-4xl font-bold text-gray-900">Recommended Patterns</h2>
               <p className="text-xl text-gray-600">
                 Patterns most useful for {roleInfo.title.toLowerCase()}
               </p>
@@ -594,17 +609,17 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
               {patterns.map((pattern) => (
                 <Card
                   key={pattern.id}
-                  className="group border-2 transition-all duration-300 hover:border-blue-200 hover:shadow-2xl"
+                  className="group border-2 border-gray-200 transition-all duration-300 hover:border-blue-300 hover:shadow-lg bg-white shadow-sm"
                 >
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-gray-900">
                       <Icons.zap className="h-5 w-5 text-blue-600" />
                       {pattern.name}
                     </CardTitle>
-                    <CardDescription>{pattern.description}</CardDescription>
+                    <CardDescription className="text-gray-600">{pattern.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button variant="outline" className="w-full" asChild>
+                    <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50" asChild>
                       <Link href={`/patterns/${pattern.id}`}>
                         Learn More
                         <Icons.arrowRight className="ml-2 h-4 w-4" />
@@ -637,12 +652,12 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
       )}
 
       {/* CTA */}
-      <section className="container py-20">
-        <Card className="mx-auto max-w-3xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+      <section className="container py-20 bg-white">
+        <Card className="mx-auto max-w-3xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 shadow-lg">
           <CardContent className="space-y-6 py-12 text-center">
             <IconComponent className="mx-auto h-16 w-16 text-blue-600" />
-            <h2 className="text-4xl font-bold">Ready to Level Up?</h2>
-            <p className="mx-auto max-w-2xl text-xl text-gray-600">
+            <h2 className="text-4xl font-bold text-gray-900">Ready to Level Up?</h2>
+            <p className="mx-auto max-w-2xl text-xl text-gray-700">
               Join {roleInfo.title.toLowerCase()} using AI to work smarter and ship faster.
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">

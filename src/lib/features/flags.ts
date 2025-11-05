@@ -17,6 +17,9 @@ export const LEARNING_PATHWAYS = false;
 export const TEAM_WORKSPACE = false;
 export const ADMIN_DASHBOARD = false;
 
+// Premium Features - Feature Flags
+export const PROMPT_CUSTOMIZATION = process.env.NEXT_PUBLIC_ENABLE_PROMPT_CUSTOMIZATION === 'true' || false; // Disabled by default, enable via env var
+
 // Feature flag type for type safety
 export type FeatureFlag = keyof typeof features;
 
@@ -30,6 +33,7 @@ export const features = {
   learningPathways: LEARNING_PATHWAYS,
   teamWorkspace: TEAM_WORKSPACE,
   adminDashboard: ADMIN_DASHBOARD,
+  promptCustomization: PROMPT_CUSTOMIZATION,
 } as const;
 
 /**

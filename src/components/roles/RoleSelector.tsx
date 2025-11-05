@@ -73,10 +73,10 @@ export function RoleSelector() {
   const pathname = usePathname();
 
   return (
-    <div className="border-b bg-white">
+    <div className="border-b border-gray-200 bg-white">
       <div className="container">
         <div className="flex items-center gap-2 overflow-x-auto py-4">
-          <span className="whitespace-nowrap text-sm font-medium text-gray-600">
+          <span className="whitespace-nowrap text-sm font-medium text-gray-700">
             View for:
           </span>
           <div className="flex gap-2">
@@ -90,7 +90,9 @@ export function RoleSelector() {
                     variant={isActive ? 'default' : 'outline'}
                     className={cn(
                       'cursor-pointer whitespace-nowrap transition-all hover:scale-105',
-                      isActive && 'bg-gradient-to-r from-purple-600 to-pink-600'
+                      isActive 
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-purple-600 shadow-sm' 
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700'
                     )}
                   >
                     <Icon className="mr-1 h-3 w-3" />

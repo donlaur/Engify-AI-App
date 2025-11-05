@@ -401,11 +401,13 @@ GRADING RUBRIC:
    - Enterprise integration considerations?
 
 6. **Security & Compliance (1-10)** - Lower Priority (5% weight)
-   - OWASP Top 10 compliance?
-   - Input validation and sanitization?
-   - Secure authentication/authorization patterns?
-   - Security headers and protections?
-   - Threat modeling considered?
+   - Does the prompt encourage secure coding practices?
+   - For code generation prompts: Does it generate secure code (parameterized queries, input validation, no hardcoded secrets)?
+   - Does it warn about common security pitfalls (SQL injection, XSS, authentication issues)?
+   - Does it avoid prompting for insecure patterns (hardcoded credentials, weak encryption, etc.)?
+   - Does it include security considerations or best practices?
+   - For security-sensitive prompts: Does it emphasize proper validation and sanitization?
+   - Note: Prompts themselves don't need OWASP compliance or security headers - evaluate whether the prompt GUIDES users to write secure code.
 
 7. **Accessibility (1-10)** - Lower Priority (3% weight)
    - WCAG 2.1 Level AA considerations?
@@ -426,6 +428,14 @@ SCORING GUIDELINES (LENIENT FOR FIRST VERSIONS):
 - Score 6-7: Good in this category (meets most criteria, minor gaps) - ACCEPTABLE FOR FIRST VERSION
 - Score 4-5: Fair in this category (meets some criteria, needs improvement) - ACCEPTABLE FOR FIRST VERSION IF BASIC FUNCTIONALITY WORKS
 - Score 1-3: Poor in this category (missing key criteria, significant issues)
+
+SECURITY SCORING GUIDANCE (SPECIFIC TO PROMPTS):
+- Score 8-10: Prompt actively encourages secure practices, includes security warnings, generates secure code patterns
+- Score 6-7: Prompt doesn't encourage insecure patterns, handles security appropriately for its purpose
+- Score 5-6: Prompt is neutral on security (not security-focused but doesn't encourage insecure patterns) - DEFAULT FOR NON-SECURITY PROMPTS
+- Score 4-5: Prompt could benefit from security considerations but isn't actively insecure
+- Score 1-3: Prompt encourages insecure patterns (hardcoded secrets, SQL injection, etc.) - ONLY PENALIZE ACTUAL SECURITY ISSUES
+- IMPORTANT: Most prompts are NOT security-focused. Give them a score of 5-6 by default if they don't encourage insecure patterns. Only score lower if the prompt actively teaches insecure practices.
 
 FIRST VERSION SCORING GUIDANCE:
 - If prompt has basic required fields (title, description, content, category) and works functionally, score at least 5.0

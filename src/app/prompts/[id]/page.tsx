@@ -21,10 +21,10 @@ import {
 } from '@/lib/schemas/prompt';
 import { logger } from '@/lib/logging/logger';
 import {
-  CopyButton,
   ShareButton,
   FavoriteButton,
 } from '@/components/features/PromptActions';
+import { PromptParameters } from '@/components/features/PromptParameters';
 import { PromptMetrics } from '@/components/features/PromptMetrics';
 import { RelatedPrompts } from '@/components/features/RelatedPrompts';
 import { CrossContentLinks } from '@/components/features/CrossContentLinks';
@@ -41,7 +41,7 @@ import { PremiumPromptLock } from '@/components/features/PremiumPromptLock';
 import { PromptTrust, PromptSEOFeatures, PromptPremiumCTA } from '@/components/features/PromptTrust';
 import { PromptPageClient } from '@/components/features/PromptPageClient';
 import { PromptContextExplanation } from '@/components/features/PromptContextExplanation';
-import { PromptParameters } from '@/components/features/PromptParameters';
+import { PromptCustomizer } from '@/components/features/PromptCustomizer';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -364,10 +364,20 @@ export default async function PromptPage({
 
             {/* Header */}
             <div className="mb-8">
-              <h1 className="mb-4 text-4xl font-bold">{prompt.title}</h1>
-              <p className="mb-6 text-xl text-muted-foreground">
-                {prompt.description}
-              </p>
+              <div className="mb-4 flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h1 className="mb-4 text-4xl font-bold">{prompt.title}</h1>
+                  <p className="mb-6 text-xl text-muted-foreground">
+                    {prompt.description}
+                  </p>
+                </div>
+                {/* Version Badge - Show current revision */}
+                {prompt.currentRevision && prompt.currentRevision > 1 && (
+                  <Badge variant="outline" className="shrink-0 text-sm">
+                    v{prompt.currentRevision}
+                  </Badge>
+                )}
+              </div>
 
               {/* Last Modified Date - SEO & User Value */}
               {(prompt.lastRevisedAt || prompt.updatedAt) && (
@@ -416,16 +426,12 @@ export default async function PromptPage({
               whyUse={prompt.whyUse}
             />
 
-            {/* Prompt Content */}
-            <div className="rounded-lg border bg-card p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Prompt Template</h2>
-                <CopyButton content={prompt.content} />
-              </div>
-              <pre className="whitespace-pre-wrap rounded-lg bg-slate-900 p-4 font-mono text-sm text-slate-100 dark:bg-slate-950 dark:text-slate-50">
-                {prompt.content}
-              </pre>
-            </div>
+            {/* Prompt Content - Use Customizer (handles feature flag internally) */}
+            <PromptCustomizer
+              promptId={prompt.id}
+              promptTitle={prompt.title}
+              originalContent={prompt.content}
+            />
 
             {/* Interactive Parameters - Leading Questions */}
             {prompt.parameters && prompt.parameters.length > 0 && (

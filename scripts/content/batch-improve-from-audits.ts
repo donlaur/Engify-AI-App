@@ -59,6 +59,116 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   });
 }
 
+// Track Gemini quota exhaustion (in-memory + Redis for persistence)
+// Works even if Redis isn't available locally (uses in-memory flag)
+const GEMINI_QUOTA_LOCK_KEY = 'gemini:quota:exhausted';
+const GEMINI_QUOTA_LOCK_TTL = 24 * 60 * 60; // 24 hours (daily quota reset)
+
+// Check if Gemini is already locked out
+async function isGeminiLockedOut(): Promise<boolean> {
+  // Check Redis first (persists across script runs, works with Upstash in production)
+  if (redisCache) {
+    try {
+      const locked = await redisCache.get(GEMINI_QUOTA_LOCK_KEY);
+      if (locked === 'true') {
+        return true;
+      }
+    } catch (error) {
+      // Redis check failed (may not be available locally) - continue to in-memory check
+    }
+  }
+  // Check in-memory flag (for current script execution - works without Redis)
+  return geminiQuotaExhausted;
+}
+
+// Mark Gemini as locked out
+async function markGeminiLockedOut(): Promise<void> {
+  geminiQuotaExhausted = true; // In-memory flag (always works)
+  if (redisCache) {
+    try {
+      // Store in Redis with 24-hour TTL (daily quota reset)
+      // This persists across script runs if Redis is available (Upstash in production)
+      await redisCache.setex(GEMINI_QUOTA_LOCK_KEY, GEMINI_QUOTA_LOCK_TTL, 'true');
+      console.log(`   🔒 Gemini quota exhausted - locked out for 24 hours (persisted to Redis)`);
+    } catch (error) {
+      // Redis write failed (may not be available locally) - in-memory flag still set
+      console.log(`   🔒 Gemini quota exhausted - locked out for current script execution (Redis unavailable)`);
+    }
+  } else {
+    console.log(`   🔒 Gemini quota exhausted - locked out for current script execution (no Redis)`);
+  }
+}
+
+// In-memory flag for current script execution (works without Redis)
+let geminiQuotaExhausted = false;
+
+/**
+ * Extract JSON from response content (handles markdown code blocks)
+ */
+function extractJSONFromResponse(content: string, arrayMode: boolean = false): string {
+  let jsonText = content;
+  
+  // Try to extract from markdown code blocks first (use greedy matching to get full block)
+  const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+  if (codeBlockMatch) {
+    jsonText = codeBlockMatch[1];
+  } else if (arrayMode) {
+    // For arrays, try to extract array from code blocks
+    const arrayBlockMatch = content.match(/```(?:json)?\s*(\[[\s\S]*\])\s*```/);
+    if (arrayBlockMatch) {
+      jsonText = arrayBlockMatch[1];
+    } else {
+      // Try to extract JSON array directly
+      const jsonMatch = content.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[0];
+      }
+    }
+  } else {
+    // Try to extract JSON object directly
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+  }
+  
+  return jsonText;
+}
+
+/**
+ * Parse JSON safely with repair and fallback extraction
+ */
+function parseJSONSafely(jsonText: string): any {
+  // Repair common JSON issues
+  // 1. Remove trailing commas before closing brackets/braces
+  jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
+  jsonText = jsonText.replace(/,(\s*$)/gm, '');
+  
+  // 2. Fix incomplete string literals (common issue with truncated responses)
+  jsonText = jsonText.replace(/"([^"]*?)\.\.\.[^"]*$/gm, '"$1"'); // Remove trailing "..."
+  
+  // 3. Try to close incomplete arrays/objects
+  const openBraces = (jsonText.match(/\{/g) || []).length;
+  const closeBraces = (jsonText.match(/\}/g) || []).length;
+  const openBrackets = (jsonText.match(/\[/g) || []).length;
+  const closeBrackets = (jsonText.match(/\]/g) || []).length;
+  
+  // Close incomplete structures
+  if (openBrackets > closeBrackets) {
+    jsonText += ']'.repeat(openBrackets - closeBrackets);
+  }
+  if (openBraces > closeBraces) {
+    jsonText += '}'.repeat(openBraces - closeBraces);
+  }
+  
+  try {
+    return JSON.parse(jsonText);
+  } catch (error) {
+    // If still failing, return null (caller can handle fallback)
+    return null;
+  }
+}
+
 // Lock keys and TTLs
 const LOCK_KEYS = {
   improveLock: (promptId: string) => `improve:lock:${promptId}`, // Lock for prompt modifications
@@ -101,6 +211,12 @@ async function executeWithFallback(
     
     // Check for quota/rate limit errors (429) - switch to Replicate immediately
     if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('rate limit') || errorMessage.includes('Too Many Requests')) {
+      // Check if this is a Gemini quota error - mark as locked out
+      if (provider.constructor.name === 'GeminiAdapter' || errorMessage.includes('Gemini') || errorMessage.includes('gemini')) {
+        await markGeminiLockedOut();
+        console.warn(`   ⚠️  Gemini quota exhausted - will skip Gemini for remaining requests`);
+      }
+      
       console.warn(`   ⚠️  Quota/rate limit exceeded for ${taskName}, switching to Replicate...`);
       
       // Check if Replicate is configured
@@ -392,10 +508,21 @@ async function applyImprovements(
   // SEO improvements → Gemini Flash (if available and reliable) or GPT-4o-mini (if Gemini skipped/unavailable)
   // Case studies → GPT-4o (creative, detailed content)
   // Completeness → GPT-4o (balanced quality)
-  // Note: If Gemini hits quota limits, will automatically switch to OpenAI (paid providers)
-  const seoProvider = useGemini 
-    ? new GeminiAdapter('gemini-2.0-flash-exp') // Fast & cheap for SEO (will fallback if quota exceeded)
-    : new OpenAIAdapter('gpt-4o-mini'); // Use OpenAI directly if Gemini skipped/unavailable
+  // Note: Check lockout dynamically per prompt (can change during execution)
+  // Initialize with OpenAI - will check lockout before each SEO request
+  let seoProvider: any = new OpenAIAdapter('gpt-4o-mini'); // Default fallback
+  
+  // Check initial lockout status
+  const initialLockout = await isGeminiLockedOut();
+  if (useGemini && !initialLockout) {
+    seoProvider = new GeminiAdapter('gemini-2.0-flash-exp');
+    console.log(`   💡 Using Gemini Flash for SEO (will auto-fallback to Replicate if quota exceeded)\n`);
+  } else if (initialLockout) {
+    console.log(`   ⚠️  Gemini quota exhausted (locked out) - using OpenAI GPT-4o-mini for SEO\n`);
+  } else {
+    console.log(`   📝 Note: Using OpenAI GPT-4o-mini for SEO improvements (Gemini skipped)\n`);
+  }
+  
   const contentProvider = new OpenAIAdapter('gpt-4o'); // Best quality for creative content
   const completenessProvider = new OpenAIAdapter('gpt-4o'); // Balanced for examples/use cases
 
@@ -567,8 +694,20 @@ async function applyImprovements(
       
       // Log which models will be used for which improvements
       if (needsSEO) {
-        if (useGemini) {
+        // Check lockout dynamically (can change during script execution)
+        const geminiLockedOut = await isGeminiLockedOut();
+        if (useGemini && !geminiLockedOut) {
           console.log(`   🔍 SEO improvements → Using: Gemini Flash (auto-fallback to Replicate from DB if quota exceeded)`);
+          // Update provider if not already Gemini (check happens dynamically)
+          if (seoProvider.constructor.name !== 'GeminiAdapter') {
+            seoProvider = new GeminiAdapter('gemini-2.0-flash-exp');
+          }
+        } else if (geminiLockedOut) {
+          console.log(`   🔍 SEO improvements → Using: OpenAI GPT-4o-mini (Gemini quota exhausted - locked out)`);
+          // Update provider if still Gemini (lockout happened during execution)
+          if (seoProvider.constructor.name === 'GeminiAdapter') {
+            seoProvider = new OpenAIAdapter('gpt-4o-mini');
+          }
         } else {
           console.log(`   🔍 SEO improvements → Using: GPT-4o-mini (Gemini skipped - using reliable OpenAI)`);
         }
@@ -638,26 +777,11 @@ Format as JSON:
               db
             );
 
-            // Try to extract JSON from response (handle markdown code blocks and trailing commas)
-            let jsonText = response.content;
+            // Extract and parse JSON from response (handles markdown code blocks)
+            const jsonText = extractJSONFromResponse(response.content, false);
+            const seoData = parseJSONSafely(jsonText);
             
-            // Try to extract from markdown code blocks first
-            const codeBlockMatch = response.content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
-            if (codeBlockMatch) {
-              jsonText = codeBlockMatch[1];
-            } else {
-              // Try to extract JSON object directly
-              const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-              if (jsonMatch) {
-                jsonText = jsonMatch[0];
-              }
-            }
-            
-            // Fix common JSON issues (trailing commas)
-            jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
-            
-            try {
-              const seoData = JSON.parse(jsonText);
+            if (seoData) {
               
               if (seoData.slug && needsSlug) {
                 // Validate slug uniqueness before saving
@@ -709,8 +833,9 @@ Format as JSON:
                 improvements.push(`Added ${seoData.keywords.length} keywords`);
                 stats.keywordsAdded++;
               }
-            } catch (error) {
-              console.error(`   ❌ Error generating SEO: ${error}`);
+            } else {
+              console.error(`   ❌ Error generating SEO: Could not extract valid JSON from response`);
+              console.error(`   Response preview: ${response.content.substring(0, 200)}...`);
             }
           } catch (error) {
             console.error(`   ❌ Error in SEO generation: ${error}`);
@@ -772,33 +897,17 @@ Format as JSON array:
               db
             );
 
-            // Try to extract JSON from response (handle markdown code blocks and trailing commas)
-            let jsonText = response.content;
+            // Extract and parse JSON from response (handles markdown code blocks)
+            const jsonText = extractJSONFromResponse(response.content, true); // Array mode
+            const caseStudies = parseJSONSafely(jsonText);
             
-            // Try to extract from markdown code blocks first
-            const codeBlockMatch = response.content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/);
-            if (codeBlockMatch) {
-              jsonText = codeBlockMatch[1];
+            if (caseStudies && Array.isArray(caseStudies) && caseStudies.length > 0) {
+              updates.caseStudies = caseStudies;
+              improvements.push(`Added ${caseStudies.length} case studies`);
+              stats.caseStudiesAdded++;
             } else {
-              // Try to extract JSON array directly
-              const jsonMatch = response.content.match(/\[[\s\S]*\]/);
-              if (jsonMatch) {
-                jsonText = jsonMatch[0];
-              }
-            }
-            
-            // Fix common JSON issues (trailing commas)
-            jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
-            
-            try {
-              const caseStudies = JSON.parse(jsonText);
-              if (Array.isArray(caseStudies) && caseStudies.length > 0) {
-                updates.caseStudies = caseStudies;
-                improvements.push(`Added ${caseStudies.length} case studies`);
-                stats.caseStudiesAdded++;
-              }
-            } catch (error) {
-              console.error(`   ❌ Error generating case studies: ${error}`);
+              console.error(`   ❌ Error generating case studies: Could not extract valid JSON array from response`);
+              console.error(`   Response preview: ${response.content.substring(0, 200)}...`);
             }
           } catch (error) {
             console.error(`   ❌ Error in case study generation: ${error}`);
@@ -858,58 +967,11 @@ Format as JSON (keep strings short to avoid truncation):
                 db
               );
 
-              // Try to extract JSON from response (handle markdown code blocks)
-              let jsonText = response.content;
+              // Extract and parse JSON from response (handles markdown code blocks)
+              const jsonText = extractJSONFromResponse(response.content, false);
+              const completenessData = parseJSONSafely(jsonText);
               
-              // Try to extract from markdown code blocks first (use greedy matching to get full block)
-              const codeBlockMatch = response.content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
-              if (codeBlockMatch) {
-                jsonText = codeBlockMatch[1];
-              } else {
-                // Try to extract JSON object directly (use greedy to get full object)
-                const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                  jsonText = jsonMatch[0];
-                }
-              }
-              
-              // Repair common JSON issues
-              // 1. Remove trailing commas before closing brackets/braces
-              jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
-              jsonText = jsonText.replace(/,(\s*$)/gm, '');
-              
-              // 2. Fix incomplete string literals in arrays (common issue with truncated responses)
-              // If we have an incomplete string like "text...", try to close it
-              jsonText = jsonText.replace(/"([^"]*?)\.\.\.[^"]*$/gm, '"$1"'); // Remove trailing "..."
-              // Close unclosed strings at end of line (lines ending with quote but no closing quote)
-              jsonText = jsonText.replace(/"([^"]+)(?:\n|$)/gm, (match, content) => {
-                // If this looks like an incomplete string (ends with line break or end of text), close it
-                if (!match.endsWith('"')) {
-                  return `"${content}"`;
-                }
-                return match;
-              });
-              
-              // 3. Try to close incomplete arrays/objects
-              // Count open vs closed brackets
-              const openBraces = (jsonText.match(/\{/g) || []).length;
-              const closeBraces = (jsonText.match(/\}/g) || []).length;
-              const openBrackets = (jsonText.match(/\[/g) || []).length;
-              const closeBrackets = (jsonText.match(/\]/g) || []).length;
-              
-              // Close incomplete structures
-              if (openBrackets > closeBrackets) {
-                jsonText += ']'.repeat(openBrackets - closeBrackets);
-              }
-              if (openBraces > closeBraces) {
-                jsonText += '}'.repeat(openBraces - closeBraces);
-              }
-              
-              // 4. Remove incomplete last array element if JSON is still invalid
-              // This handles cases where response was cut off mid-string
-              try {
-                const completenessData = JSON.parse(jsonText);
-                
+              if (completenessData) {
                 if (completenessData.examples && missingExamples) {
                   updates.examples = completenessData.examples;
                   improvements.push(`Added ${completenessData.examples.length} examples`);
@@ -928,8 +990,8 @@ Format as JSON (keep strings short to avoid truncation):
                 if (Object.keys(updates).length > 0) {
                   stats.completenessImproved++;
                 }
-              } catch (parseError) {
-                // If still failing, try to extract partial data by parsing each array separately
+              } else {
+                // If JSON parsing failed, try to extract partial data
                 console.warn(`   ⚠️  JSON parsing failed, attempting partial extraction...`);
                 
                 try {
@@ -1010,12 +1072,11 @@ Format as JSON (keep strings short to avoid truncation):
                     stats.completenessImproved++;
                     console.log(`   ✅ Extracted partial data from incomplete JSON`);
                   } else {
-                    console.error(`   ❌ Error parsing JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+                    console.error(`   ❌ Error parsing JSON: Could not extract any data`);
                     console.error(`   Raw response preview: ${response.content.substring(0, 500)}...`);
                   }
                 } catch (fallbackError) {
-                  console.error(`   ❌ Error parsing JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
-                  console.error(`   Fallback extraction also failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`);
+                  console.error(`   ❌ Fallback extraction also failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`);
                   console.error(`   Raw response preview: ${response.content.substring(0, 500)}...`);
                 }
               }
