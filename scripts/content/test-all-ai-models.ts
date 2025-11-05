@@ -286,6 +286,22 @@ async function main() {
       if (result.auditFeedback?.recommendations && result.auditFeedback.recommendations.length > 0) {
         console.log(`   💡 Recommendations: ${result.auditFeedback.recommendations.slice(0, 2).join('; ')}`);
       }
+      
+      // Mark model as verified/working in database
+      try {
+        await db.collection('ai_models').updateOne(
+          { id: model.id },
+          { 
+            $set: { 
+              lastVerified: new Date(),
+              updatedAt: new Date(),
+            }
+          }
+        );
+        console.log(`   💾 Marked as verified in database`);
+      } catch (error) {
+        console.log(`   ⚠️  Failed to update verification status: ${error instanceof Error ? error.message : String(error)}`);
+      }
     } else {
       console.log(`   ❌ Error: ${result.error}`);
     }

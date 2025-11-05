@@ -75,6 +75,7 @@ interface AuditAgent {
 /**
  * Get a valid text-to-text model ID from database registry for a provider
  * Filters out image/video/audio models to avoid wasting tokens
+ * Prefers verified/working models (recent lastVerified date)
  * Falls back to provider name if DB unavailable (will use factory default)
  */
 async function getModelIdFromRegistry(provider: string, preferredModel?: string): Promise<string | null> {
@@ -122,13 +123,30 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
       if (preferred) return preferred.id;
     }
     
-    // Use recommended model, or first active model
-    const recommended = models.find(m => ('recommended' in m ? (m as any).recommended : false) && ('status' in m ? m.status === 'active' : true));
-    if (recommended) return recommended.id;
+    // Sort by: verified status (recent lastVerified) > recommended > active status
+    const sortedModels = models.sort((a: any, b: any) => {
+      const aVerified = a.lastVerified ? new Date(a.lastVerified).getTime() : 0;
+      const bVerified = b.lastVerified ? new Date(b.lastVerified).getTime() : 0;
+      const aRecommended = ('recommended' in a ? (a as any).recommended : false) ? 1 : 0;
+      const bRecommended = ('recommended' in b ? (b as any).recommended : false) ? 1 : 0;
+      const aActive = ('status' in a ? a.status === 'active' : true) ? 1 : 0;
+      const bActive = ('status' in b ? b.status === 'active' : true) ? 1 : 0;
+      
+      // Prefer verified models (most recent first)
+      if (aVerified !== bVerified) {
+        return bVerified - aVerified;
+      }
+      // Then prefer recommended
+      if (aRecommended !== bRecommended) {
+        return bRecommended - aRecommended;
+      }
+      // Then prefer active
+      return bActive - aActive;
+    });
     
-    // Fallback to first active model
-    const firstActive = models.find(m => 'status' in m ? m.status === 'active' : true);
-    return firstActive ? firstActive.id : null;
+    // Use first sorted model (most verified/recommended/active)
+    const bestModel = sortedModels.find(m => ('status' in m ? m.status === 'active' : true));
+    return bestModel ? bestModel.id : null;
   } catch (error) {
     console.warn(`[Audit] Failed to query DB for ${provider} models:`, error);
     return null; // Will use factory default
@@ -628,10 +646,14 @@ export class PromptPatternAuditor {
       let modelId = agent.model;
       
       // Try to resolve from database first (getModelIdFromRegistry filters out non-text models)
+      // It also prefers verified/working models (recent lastVerified date)
       const resolvedModelId = await getModelIdFromRegistry(agent.provider, agent.model);
       if (resolvedModelId) {
         modelId = resolvedModelId;
         console.log(`   📋 Using model from DB: ${modelId} (${agent.provider})`);
+        
+        // Mark model as verified after successful use (if it worked)
+        // We'll update this after the API call succeeds
       } else {
         // Fallback to hardcoded model ID if DB lookup fails
         console.log(`   ⚠️  DB lookup failed, using hardcoded: ${agent.model}`);
@@ -666,7 +688,7 @@ export class PromptPatternAuditor {
       // For Anthropic Claude, use ClaudeAdapter directly
       if (agent.provider === 'anthropic') {
         const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
-        const provider = new ClaudeAdapter(agent.model);
+        const provider = new ClaudeAdapter(modelId);
         const response = await provider.execute({
           prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
           temperature: agent.temperature,
@@ -682,6 +704,24 @@ export class PromptPatternAuditor {
           } catch (error) {
             // Cache write failed - continue anyway
             console.log(`   ⚠️  Cache write failed for ${agent.role}`);
+          }
+        }
+        
+        // Mark model as verified after successful use
+        if (resolvedModelId) {
+          try {
+            const db = await getMongoDb();
+            await db.collection('ai_models').updateOne(
+              { id: resolvedModelId },
+              { 
+                $set: { 
+                  lastVerified: new Date(),
+                  updatedAt: new Date(),
+                }
+              }
+            );
+          } catch (error) {
+            // Verification update failed - continue anyway
           }
         }
         
@@ -707,6 +747,24 @@ export class PromptPatternAuditor {
           } catch (error) {
             // Cache write failed - continue anyway
             console.log(`   ⚠️  Cache write failed for ${agent.role}`);
+          }
+        }
+        
+        // Mark model as verified after successful use
+        if (resolvedModelId) {
+          try {
+            const db = await getMongoDb();
+            await db.collection('ai_models').updateOne(
+              { id: resolvedModelId },
+              { 
+                $set: { 
+                  lastVerified: new Date(),
+                  updatedAt: new Date(),
+                }
+              }
+            );
+          } catch (error) {
+            // Verification update failed - continue anyway
           }
         }
         
@@ -746,6 +804,24 @@ export class PromptPatternAuditor {
         } catch (error) {
           // Cache write failed - continue anyway
           console.log(`   ⚠️  Cache write failed for ${agent.role}`);
+        }
+      }
+
+      // Mark model as verified after successful use (if we resolved from DB)
+      if (resolvedModelId) {
+        try {
+          const db = await getMongoDb();
+          await db.collection('ai_models').updateOne(
+            { id: resolvedModelId },
+            { 
+              $set: { 
+                lastVerified: new Date(),
+                updatedAt: new Date(),
+              }
+            }
+          );
+        } catch (error) {
+          // Verification update failed - continue anyway
         }
       }
 
