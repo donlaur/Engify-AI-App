@@ -24,8 +24,11 @@ export async function GET(
   { params }: { params: { teamId: string } }
 ) {
   // Authentication required
-  const { user, error: authError } = await requireAuth(request);
-  if (authError) return authError;
+  const authResult = await requireAuth(request);
+  if ('error' in authResult) {
+    return authResult.error;
+  }
+  const { user } = authResult;
 
   // Role check: manager, director, or higher
   const allowedRoles = ['manager', 'director', 'enterprise_admin', 'super_admin'];
@@ -37,13 +40,9 @@ export async function GET(
   }
 
   // Rate limiting: 60 requests per minute (higher for team details)
-  const rateLimitResult = await checkRateLimit(
-    request,
-    'manager-team',
-    60,
-    60
-  );
-  if (!rateLimitResult.success) {
+  const identifier = user.id;
+  const rateLimitResult = await checkRateLimit(identifier, 'authenticated');
+  if (!rateLimitResult.allowed) {
     return NextResponse.json(
       { error: 'Rate limit exceeded' },
       { status: 429 }

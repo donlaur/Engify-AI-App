@@ -14,10 +14,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { promptRepository, patternRepository } from '@/lib/db/repositories/ContentService';
-import { getPromptSlug, generateSlug } from '@/lib/utils/slug';
+import { getPromptSlug } from '@/lib/utils/slug';
 import { logger } from '@/lib/logging/logger';
 import { getDb } from '@/lib/mongodb';
 import { logAuditEvent } from '@/server/middleware/audit';
+import { AuditEventType } from '@/lib/db/schemas/auditLog';
 // Import generatePromptsJson, generatePatternsJson, and generateLearningResourcesJson functions
 // This avoids shell execution and is more reliable
 import { generatePromptsJson } from '@/lib/prompts/generate-prompts-json';
@@ -180,15 +181,17 @@ export async function GET(request: NextRequest) {
             
             // Audit log: Slug update via cron
             await logAuditEvent({
-              eventType: 'admin.content.updated',
+              eventType: AuditEventType.enum['admin.settings.changed'],
               userId: 'system',
+              action: 'slug_update',
               metadata: {
                 promptId: prompt.id,
-                action: 'slug_update',
                 source: 'isr_cache_warming',
                 oldSlug: prompt.slug || null,
                 newSlug: expectedSlug,
               },
+              ipAddress: 'system',
+              success: true,
             });
           } catch (error) {
             logger.error(`Failed to update slug for prompt ${prompt.id}`, { error });
@@ -340,15 +343,14 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({
-      success: true,
       type,
       limit,
-      slugsUpdated,
+      slugsUpdated: results.slugsUpdated,
       ...results.stats,
       averageDurationMs: averageDuration,
       warmed: results.warmed.slice(0, 10), // Show first 10 (sanitized)
       failed: results.failed.slice(0, 10), // Show first 10 (sanitized)
-      message: `Warmed ${results.stats.success} pages, ${results.stats.failed} failed${slugsUpdated > 0 ? `, ${slugsUpdated} slugs updated` : ''}`,
+      message: `Warmed ${results.stats.success} pages, ${results.stats.failed} failed${results.slugsUpdated > 0 ? `, ${results.slugsUpdated} slugs updated` : ''}`,
     });
   } catch (error) {
     logger.error('Error warming ISR cache', { error });

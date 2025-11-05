@@ -20,8 +20,11 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   // Authentication required
-  const { user, error: authError } = await requireAuth(request);
-  if (authError) return authError;
+  const authResult = await requireAuth(request);
+  if ('error' in authResult) {
+    return authResult.error;
+  }
+  const { user } = authResult;
 
   // Role check: manager, director, or higher
   const allowedRoles = ['manager', 'director', 'enterprise_admin', 'super_admin'];
@@ -33,13 +36,9 @@ export async function GET(request: NextRequest) {
   }
 
   // Rate limiting: 30 requests per minute
-  const rateLimitResult = await checkRateLimit(
-    request,
-    'manager-dashboard',
-    30,
-    60
-  );
-  if (!rateLimitResult.success) {
+  const identifier = user.id;
+  const rateLimitResult = await checkRateLimit(identifier, 'authenticated');
+  if (!rateLimitResult.allowed) {
     return NextResponse.json(
       { error: 'Rate limit exceeded' },
       { status: 429 }
@@ -47,7 +46,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const managerId = user._id.toString();
+    const managerId = user.id;
 
     const overview = await managerDashboardService.getTeamOverview(managerId);
     const firstTeam = overview && overview.length > 0 ? overview[0] : null;
