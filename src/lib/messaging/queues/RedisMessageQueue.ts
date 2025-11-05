@@ -486,7 +486,7 @@ export class RedisMessageQueue implements IMessageQueue {
       logger.error('Message moved to dead letter queue', {
         queue: this.name,
         messageId: message.id,
-        error: error instanceof Error ? error.message : String(error),
+        error,
       });
     }
   }
