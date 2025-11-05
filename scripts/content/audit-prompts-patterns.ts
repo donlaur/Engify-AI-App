@@ -460,8 +460,8 @@ CRITICAL: Format your response as VALID JSON (no markdown code blocks, just pure
   {
     role: 'completeness_reviewer',
     name: 'Completeness Reviewer',
-    model: 'google', // Will resolve to recommended Gemini model from DB (fast & cheap)
-    provider: 'google',
+    model: 'gpt-4o-mini', // Changed from Google to avoid quota limits - fast & cheap OpenAI model
+    provider: 'openai',
     temperature: 0.3,
     maxTokens: 1500,
     systemPrompt: `You are a Completeness Reviewer who checks if prompts/patterns have all required fields and enrichment.
@@ -545,8 +545,8 @@ Provide:
   {
     role: 'seo_enrichment_reviewer',
     name: 'SEO Enrichment Reviewer',
-    model: 'google', // Will resolve to recommended Gemini model from DB (fast & cheap for SEO)
-    provider: 'google',
+    model: 'gpt-4o-mini', // Changed from Google to avoid quota limits - fast & cheap OpenAI model
+    provider: 'openai',
     temperature: 0.3,
     maxTokens: 1500,
     systemPrompt: `You are an SEO Enrichment Reviewer who checks if prompts/patterns are properly optimized for SEO.
@@ -1079,6 +1079,45 @@ export class PromptPatternAuditor {
         );
       }
 
+      // Check for quota/rate limit errors (429) - switch to alternative provider immediately
+      if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('rate limit') || errorMessage.includes('Too Many Requests')) {
+        console.warn(`⚠️  Quota/rate limit exceeded for ${agent.name} (${agent.provider}), switching to alternative...`);
+        
+        // For Gemini quota errors, use GPT-4o-mini or Claude Haiku as cheap alternatives
+        if (agent.provider === 'google') {
+          try {
+            console.log(`   🔄 Switching to GPT-4o-mini (cheap alternative)...`);
+            const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+            const fallbackAdapter = new OpenAIAdapter('gpt-4o-mini');
+            const response = await fallbackAdapter.execute({
+              prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+              temperature: agent.temperature,
+              maxTokens: agent.maxTokens,
+            });
+            console.log(`   ✅ Switched to GPT-4o-mini successfully`);
+            return response.content;
+          } catch (fallbackError) {
+            // Try Claude Haiku as last resort
+            try {
+              console.log(`   🔄 Trying Claude Haiku as alternative...`);
+              const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
+              const claudeAdapter = new ClaudeAdapter('claude-3-haiku-20240307');
+              const response = await claudeAdapter.execute({
+                prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+                temperature: agent.temperature,
+                maxTokens: agent.maxTokens,
+              });
+              console.log(`   ✅ Switched to Claude Haiku successfully`);
+              return response.content;
+            } catch (claudeError) {
+              console.warn(`   ⚠️  All alternatives failed, continuing with degraded audit`);
+              // Return empty/placeholder so audit can continue
+              return `[Agent ${agent.name} skipped due to quota limits - audit may be incomplete]`;
+            }
+          }
+        }
+      }
+
       // Check for model availability errors - try fallback
       if (errorMessage.includes('model') || errorMessage.includes('not found') || errorMessage.includes('404') || errorMessage.includes('not in allowlist') || errorMessage.includes('blocked') || errorMessage.includes('not_found_error')) {
         console.warn(`⚠️  Model "${agent.model}" not available for ${agent.name}, trying fallback...`);
@@ -1122,22 +1161,31 @@ export class PromptPatternAuditor {
           }
         } else if (agent.provider === 'google') {
           // Gemini fallback: query DB for alternative models
-          try {
-            const { getModelsByProvider } = await import('@/lib/services/AIModelRegistry');
-            const googleModels = await getModelsByProvider('google');
-            // Try to find a cheaper/faster alternative (flash-lite before pro)
-            const alternative = googleModels.find(m => 
-              m.id.includes('flash-lite') && ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
-            ) || googleModels.find(m => 
-              m.id.includes('flash') && ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
-            ) || googleModels.find(m => 
-              ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
-            );
-            if (alternative) {
-              fallbackModel = alternative.id;
+          // BUT: if we got a 429/quota error, don't try another Gemini model - use OpenAI/Claude instead
+          if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('rate limit')) {
+            // Quota exceeded - use OpenAI/Claude instead
+            fallbackModel = 'gpt-4o-mini'; // Cheap OpenAI alternative
+            fallbackProviderType = 'openai'; // Switch to OpenAI provider
+            console.log(`   🔄 Gemini quota exceeded, switching to GPT-4o-mini instead`);
+          } else {
+            // Model not found (404) - try alternative Gemini model
+            try {
+              const { getModelsByProvider } = await import('@/lib/services/AIModelRegistry');
+              const googleModels = await getModelsByProvider('google');
+              // Try to find a cheaper/faster alternative (flash-lite before pro)
+              const alternative = googleModels.find(m => 
+                m.id.includes('flash-lite') && ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
+              ) || googleModels.find(m => 
+                m.id.includes('flash') && ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
+              ) || googleModels.find(m => 
+                ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
+              );
+              if (alternative) {
+                fallbackModel = alternative.id;
+              }
+            } catch (fallbackError) {
+              console.warn('   ⚠️  Failed to query DB for Gemini fallback:', fallbackError);
             }
-          } catch (fallbackError) {
-            console.warn('   ⚠️  Failed to query DB for Gemini fallback:', fallbackError);
           }
         } else if (agent.provider === 'openai') {
           // OpenAI fallback: try gpt-4o-mini if gpt-4o fails
