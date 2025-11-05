@@ -15,6 +15,7 @@ config({ path: '.env.local' });
 
 import { getMongoDb } from '@/lib/db/mongodb';
 import { OpenAIAdapter } from '@/lib/ai/v2/adapters/OpenAIAdapter';
+import { GeminiAdapter } from '@/lib/ai/v2/adapters/GeminiAdapter';
 
 interface AuditPattern {
   issue: string;
@@ -200,7 +201,13 @@ async function applyImprovements(
     slugsOptimized: 0,
   };
 
-  const provider = new OpenAIAdapter('gpt-4o');
+  // Use different models for different improvement tasks (optimized for cost/quality)
+  // SEO improvements → Gemini Flash (fast, cheap, good for structured data)
+  // Case studies → GPT-4o (creative, detailed content)
+  // Completeness → GPT-4o (balanced quality)
+  const seoProvider = new GeminiAdapter('gemini-2.0-flash-exp'); // Fast & cheap for SEO
+  const contentProvider = new OpenAIAdapter('gpt-4o'); // Best quality for creative content
+  const completenessProvider = new OpenAIAdapter('gpt-4o'); // Balanced for examples/use cases
 
   // Get prompts that need improvement
   const prompts = await db.collection('prompts').find({}).limit(limit || 1000).toArray();
@@ -332,6 +339,17 @@ async function applyImprovements(
     console.log(`\n[${i + 1}/${promptsWithAudits.length}] 📝 ${prompt.title || prompt.id}`);
     console.log(`   Current Score: ${audit.overallScore}/10`);
     console.log(`   Revision: ${promptRevision} → Will upgrade to ${promptRevision + 1}`);
+    
+    // Determine which model to use based on what needs improvement (from audit recommendations)
+    // Check audit recommendations for model suggestions
+    const needsSEO = audit.categoryScores?.seoEnrichment < 7;
+    const needsCaseStudies = audit.categoryScores?.caseStudyQuality < 7;
+    const needsCompleteness = audit.categoryScores?.completeness < 7;
+    
+    // Log which models will be used for which improvements
+    if (needsSEO) console.log(`   🔍 SEO improvements → Using: Gemini Flash (fast & cheap)`);
+    if (needsCaseStudies) console.log(`   📚 Case studies → Using: GPT-4o (creative quality)`);
+    if (needsCompleteness) console.log(`   ✅ Completeness → Using: GPT-4o (balanced quality)`);
 
     const improvements: string[] = [];
     const updates: any = {};
@@ -384,7 +402,7 @@ Format as JSON:
   "keywords": ["keyword1", "keyword2", ...]
 }`;
 
-            const response = await provider.execute({
+            const response = await seoProvider.execute({
               prompt: seoPrompt,
               temperature: 0.3,
               maxTokens: 500,
@@ -480,7 +498,7 @@ Format as JSON array:
   ...
 ]`;
 
-            const response = await provider.execute({
+            const response = await contentProvider.execute({
               prompt: caseStudyPrompt,
               temperature: 0.7,
               maxTokens: 1500,
@@ -559,7 +577,7 @@ Format as JSON:
   ${missingBestPractices ? '"bestPractices": ["practice 1", ...]' : ''}
 }`;
 
-              const response = await provider.execute({
+              const response = await completenessProvider.execute({
                 prompt: completenessPrompt,
                 temperature: 0.7,
                 maxTokens: 1500,
