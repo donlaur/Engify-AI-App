@@ -8,6 +8,7 @@
  *   pnpm tsx scripts/content/batch-improve-from-audits.ts --limit=20
  *   pnpm tsx scripts/content/batch-improve-from-audits.ts --dry-run
  *   pnpm tsx scripts/content/batch-improve-from-audits.ts --audit-first  # Audit prompts without audits first
+ *   pnpm tsx scripts/content/batch-improve-from-audits.ts --skip-gemini  # Skip Gemini, use OpenAI GPT-4o-mini for SEO (avoids quota issues)
  */
 
 import { config } from 'dotenv';
@@ -16,6 +17,7 @@ config({ path: '.env.local' });
 import { getMongoDb } from '@/lib/db/mongodb';
 import { OpenAIAdapter } from '@/lib/ai/v2/adapters/OpenAIAdapter';
 import { GeminiAdapter } from '@/lib/ai/v2/adapters/GeminiAdapter';
+import { ReplicateAdapter } from '@/lib/ai/v2/adapters/ReplicateAdapter';
 import { Redis } from '@upstash/redis';
 import path from 'path';
 
@@ -24,17 +26,28 @@ import path from 'path';
 const envPath = path.resolve(process.cwd(), '.env.local');
 console.log(`📁 Loading environment from: ${envPath}`);
 
+// Check Gemini API key availability - skip Gemini if key is missing or unreliable
 const googleKey = process.env.GOOGLE_API_KEY || process.env.GOOGLE_AI_API_KEY;
-if (googleKey) {
+const hasGeminiKey = !!googleKey && googleKey.trim().length > 0;
+
+// Check for skip-gemini flag (allows manually skipping Gemini even if key exists)
+const skipGeminiFlag = process.argv.includes('--skip-gemini') || process.argv.includes('--no-gemini');
+const useGemini = hasGeminiKey && !skipGeminiFlag;
+
+if (useGemini) {
   const maskedKey = googleKey.length > 12 
     ? `${googleKey.substring(0, 8)}...${googleKey.substring(googleKey.length - 4)}`
     : '***masked***';
   console.log(`✅ Gemini API key found: ${maskedKey} (from ${process.env.GOOGLE_API_KEY ? 'GOOGLE_API_KEY' : 'GOOGLE_AI_API_KEY'})`);
-  console.log(`   💡 If you're hitting quota limits, the script will auto-fallback to OpenAI\n`);
+  console.log(`   💡 Using Gemini Flash for SEO improvements (will auto-fallback to Replicate if quota exceeded)\n`);
 } else {
-  console.warn(`⚠️  No Gemini API key found in GOOGLE_API_KEY or GOOGLE_AI_API_KEY`);
-  console.warn(`   Make sure your key is in: ${envPath}`);
-  console.warn(`   Script will use OpenAI fallback for all requests\n`);
+  if (skipGeminiFlag) {
+    console.log(`⏭️  Skipping Gemini (--skip-gemini flag set)`);
+  } else {
+    console.warn(`⚠️  No Gemini API key found in GOOGLE_API_KEY or GOOGLE_AI_API_KEY`);
+    console.warn(`   Make sure your key is in: ${envPath}`);
+  }
+  console.log(`   ✅ Using OpenAI GPT-4o-mini for SEO improvements (reliable, no quota issues)\n`);
 }
 
 // Redis for distributed locking (prevent concurrent modifications)
@@ -73,23 +86,113 @@ interface ImprovementStats {
 
 /**
  * Execute AI request with automatic fallback on quota/rate limit errors
- * Falls back to paid providers (OpenAI, Claude) if free tier (Gemini) hits quota
+ * Falls back to Replicate (from database) when Gemini hits quota limits
  */
 async function executeWithFallback(
   provider: any,
   request: { prompt: string; temperature?: number; maxTokens?: number },
-  taskName: string
+  taskName: string,
+  db?: any
 ): Promise<{ content: string }> {
   try {
     return await provider.execute(request);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     
-    // Check for quota/rate limit errors (429) - switch to PAID providers immediately
+    // Check for quota/rate limit errors (429) - switch to Replicate immediately
     if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('rate limit') || errorMessage.includes('Too Many Requests')) {
-      console.warn(`   ⚠️  Quota/rate limit exceeded for ${taskName}, switching to paid provider...`);
+      console.warn(`   ⚠️  Quota/rate limit exceeded for ${taskName}, switching to Replicate...`);
       
-      // Priority: GPT-4o-mini (cheap) → Claude Haiku (fast) → GPT-4o (reliable)
+      // Check if Replicate is configured
+      const replicateToken = process.env.REPLICATE_API_TOKEN;
+      
+      if (replicateToken && db) {
+        try {
+          // Get Replicate models from database (active, text-to-text only)
+          const { getModelsByProvider } = await import('@/lib/services/AIModelRegistry');
+          const replicateModels = await getModelsByProvider('replicate');
+          
+          // Filter to active, allowed, text-to-text models
+          const activeModels = replicateModels.filter((m: any) => {
+            const status = ('status' in m ? m.status : 'active');
+            if (status !== 'active') return false;
+            if ('isAllowed' in m && m.isAllowed === false) return false;
+            
+            const capabilities = m.capabilities || [];
+            if (!capabilities.includes('text')) return false;
+            
+            return true; // Accept all active text models
+          });
+          
+          console.log(`   📊 Found ${replicateModels.length} Replicate models in DB, ${activeModels.length} are active text-to-text models`);
+          
+          // Sort: prefer Gemini models, then by lastVerified, then by recommended
+          activeModels.sort((a: any, b: any) => {
+            const aId = (a.id || '').toLowerCase();
+            const bId = (b.id || '').toLowerCase();
+            const aIsGemini = aId.includes('gemini');
+            const bIsGemini = bId.includes('gemini');
+            
+            // Prefer Gemini models first
+            if (aIsGemini && !bIsGemini) return -1;
+            if (!aIsGemini && bIsGemini) return 1;
+            
+            // Then by lastVerified (most recent first)
+            const aVerified = a.lastVerified ? new Date(a.lastVerified).getTime() : 0;
+            const bVerified = b.lastVerified ? new Date(b.lastVerified).getTime() : 0;
+            if (aVerified !== bVerified) return bVerified - aVerified;
+            
+            // Then by recommended
+            if (a.recommended && !b.recommended) return -1;
+            if (!a.recommended && b.recommended) return 1;
+            
+            return 0;
+          });
+          
+          if (activeModels.length > 0) {
+            const replicateModel = activeModels[0];
+            const modelId = replicateModel.id;
+            console.log(`   🔄 Trying Replicate/${modelId} (from database)...`);
+            
+            const fallbackAdapter = new ReplicateAdapter(modelId);
+            const response = await fallbackAdapter.execute(request);
+            
+            // Mark model as verified after successful use
+            try {
+              await db.collection('ai_models').updateOne(
+                { id: modelId },
+                { 
+                  $set: { 
+                    lastVerified: new Date(),
+                    updatedAt: new Date(),
+                  }
+                }
+              );
+            } catch (dbError) {
+              // Verification update failed - continue anyway
+            }
+            
+            console.log(`   ✅ Switched to Replicate/${modelId} successfully`);
+            return response;
+          } else {
+            console.warn(`   ⚠️  No active Replicate models found in database (found ${replicateModels.length} total)`);
+            console.warn(`   💡 Tip: Sync Replicate models first via API endpoint: POST /api/admin/ai-models/sync/replicate`);
+            console.warn(`   ⚠️  Trying OpenAI fallback...`);
+          }
+        } catch (replicateError) {
+          console.warn(`   ⚠️  Replicate failed: ${replicateError instanceof Error ? replicateError.message : String(replicateError)}`);
+          console.warn(`   ⚠️  Trying OpenAI fallback...`);
+          // Fall through to OpenAI fallback
+        }
+      } else {
+        if (!replicateToken) {
+          console.warn(`   ⚠️  Replicate not configured (REPLICATE_API_TOKEN missing), trying OpenAI fallback...`);
+        } else if (!db) {
+          console.warn(`   ⚠️  Database not available for model lookup, trying OpenAI fallback...`);
+        }
+      }
+      
+      // OpenAI fallback if Replicate fails or not configured
       const fallbackModels = [
         { provider: 'openai', model: 'gpt-4o-mini', name: 'GPT-4o-mini (cheap)' },
         { provider: 'openai', model: 'gpt-4o', name: 'GPT-4o (reliable)' },
@@ -97,15 +200,8 @@ async function executeWithFallback(
       
       for (const fallback of fallbackModels) {
         try {
-          console.log(`   🔄 Trying ${fallback.name} (paid provider)...`);
-          
-          let fallbackAdapter;
-          if (fallback.provider === 'openai') {
-            fallbackAdapter = new OpenAIAdapter(fallback.model);
-          } else {
-            continue; // Skip unknown providers
-          }
-          
+          console.log(`   🔄 Trying ${fallback.name} (OpenAI fallback)...`);
+          const fallbackAdapter = new OpenAIAdapter(fallback.model);
           const response = await fallbackAdapter.execute(request);
           console.log(`   ✅ Switched to ${fallback.name} successfully`);
           return response;
@@ -116,7 +212,7 @@ async function executeWithFallback(
       }
       
       // All fallbacks failed
-      throw new Error(`All providers exhausted for ${taskName}: ${errorMessage}`);
+      throw new Error(`All fallback providers failed. Last error: ${errorMessage}`);
     }
     
     // Re-throw non-quota errors
@@ -293,11 +389,13 @@ async function applyImprovements(
   };
 
   // Use different models for different improvement tasks (optimized for cost/quality)
-  // SEO improvements → Gemini Flash (fast, cheap, good for structured data) with auto-fallback to GPT-4o-mini
+  // SEO improvements → Gemini Flash (if available and reliable) or GPT-4o-mini (if Gemini skipped/unavailable)
   // Case studies → GPT-4o (creative, detailed content)
   // Completeness → GPT-4o (balanced quality)
   // Note: If Gemini hits quota limits, will automatically switch to OpenAI (paid providers)
-  const seoProvider = new GeminiAdapter('gemini-2.0-flash-exp'); // Fast & cheap for SEO (will fallback if quota exceeded)
+  const seoProvider = useGemini 
+    ? new GeminiAdapter('gemini-2.0-flash-exp') // Fast & cheap for SEO (will fallback if quota exceeded)
+    : new OpenAIAdapter('gpt-4o-mini'); // Use OpenAI directly if Gemini skipped/unavailable
   const contentProvider = new OpenAIAdapter('gpt-4o'); // Best quality for creative content
   const completenessProvider = new OpenAIAdapter('gpt-4o'); // Balanced for examples/use cases
 
@@ -468,7 +566,13 @@ async function applyImprovements(
       const needsCompleteness = audit.categoryScores?.completeness < 7;
       
       // Log which models will be used for which improvements
-      if (needsSEO) console.log(`   🔍 SEO improvements → Using: Gemini Flash (auto-fallback to GPT-4o-mini if quota exceeded)`);
+      if (needsSEO) {
+        if (useGemini) {
+          console.log(`   🔍 SEO improvements → Using: Gemini Flash (auto-fallback to Replicate from DB if quota exceeded)`);
+        } else {
+          console.log(`   🔍 SEO improvements → Using: GPT-4o-mini (Gemini skipped - using reliable OpenAI)`);
+        }
+      }
       if (needsCaseStudies) console.log(`   📚 Case studies → Using: GPT-4o (creative quality)`);
       if (needsCompleteness) console.log(`   ✅ Completeness → Using: GPT-4o (balanced quality)`);
 
@@ -530,7 +634,8 @@ Format as JSON:
                 temperature: 0.3,
                 maxTokens: 500,
               },
-              'SEO'
+              'SEO',
+              db
             );
 
             // Try to extract JSON from response (handle markdown code blocks and trailing commas)
@@ -663,7 +768,8 @@ Format as JSON array:
                 temperature: 0.7,
                 maxTokens: 1500,
               },
-              'Case Studies'
+              'Case Studies',
+              db
             );
 
             // Try to extract JSON from response (handle markdown code blocks and trailing commas)
@@ -748,7 +854,8 @@ Format as JSON (keep strings short to avoid truncation):
                   temperature: 0.7,
                   maxTokens: 2000, // Increased from 1500 to handle longer responses
                 },
-                'Completeness'
+                'Completeness',
+                db
               );
 
               // Try to extract JSON from response (handle markdown code blocks)

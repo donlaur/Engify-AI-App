@@ -7,7 +7,7 @@ import { logger } from '@/lib/logging/logger';
 import { executeWithProviderHarness } from '../utils/provider-harness';
 
 const DEFAULT_ALLOWED_MODELS = [
-  'gemini-2.5-flash',
+  'google/gemini-2.5-flash', // Updated with correct prefix
   'google/gemini-2.0-flash-exp',
   'meta/llama-3.1-405b-instruct',
   'openai/gpt-5',
@@ -23,7 +23,7 @@ const MODEL_COSTS_USD_PER_1M_TOKENS: Record<
   string,
   { input: number; output: number }
 > = {
-  'gemini-2.5-flash': { input: 0.075, output: 0.3 },
+  'google/gemini-2.5-flash': { input: 2.50, output: 2.50 }, // $2.50 per million tokens (confirmed from Replicate pricing)
   'google/gemini-2.0-flash-exp': { input: 0.075, output: 0.3 },
   'meta/llama-3.1-405b-instruct': { input: 0.59, output: 0.79 },
   'openai/gpt-5': { input: 0.0025, output: 0.01 }, // Estimated based on GPT-4o pricing

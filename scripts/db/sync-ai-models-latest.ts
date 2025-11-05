@@ -156,6 +156,55 @@ async function syncAIModels() {
   totalUpdated += googleResult.updated;
   console.log(`   ✅ Google: ${googleResult.created} created, ${googleResult.updated} updated\n`);
 
+  // Sync Replicate models
+  console.log('📊 Syncing Replicate models...');
+  const replicateModels = [
+    // LLMs - OpenAI Models
+    { id: 'openai/gpt-5', displayName: 'GPT-5', category: 'llm' as const, costPer1kInput: 0.0025, costPer1kOutput: 0.01 },
+    { id: 'openai/gpt-5-nano', displayName: 'GPT-5 Nano', category: 'llm' as const, costPer1kInput: 0.001, costPer1kOutput: 0.004 },
+    { id: 'openai/gpt-4o', displayName: 'GPT-4o', category: 'llm' as const, costPer1kInput: 0.005, costPer1kOutput: 0.015 },
+    { id: 'openai/gpt-4o-mini', displayName: 'GPT-4o Mini', category: 'llm' as const, costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
+    { id: 'openai/gpt-4.1', displayName: 'GPT-4.1', category: 'llm' as const, costPer1kInput: 0.008, costPer1kOutput: 0.024 },
+    { id: 'openai/gpt-4.1-mini', displayName: 'GPT-4.1 Mini', category: 'llm' as const, costPer1kInput: 0.0002, costPer1kOutput: 0.0008 },
+    { id: 'openai/gpt-4.1-nano', displayName: 'GPT-4.1 Nano', category: 'llm' as const, costPer1kInput: 0.0001, costPer1kOutput: 0.0004 },
+    // LLMs - Anthropic Models
+    { id: 'anthropic/claude-4.5-haiku', displayName: 'Claude 4.5 Haiku', category: 'llm' as const, costPer1kInput: 0.00025, costPer1kOutput: 0.00125 },
+    { id: 'anthropic/claude-4-sonnet', displayName: 'Claude 4 Sonnet', category: 'llm' as const, costPer1kInput: 0.003, costPer1kOutput: 0.015 },
+    // LLMs - Google Models
+    { id: 'google/gemini-2.5-flash', displayName: 'Gemini 2.5 Flash', category: 'llm' as const, costPer1kInput: 0.0025, costPer1kOutput: 0.0025 },
+    { id: 'google/gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash Experimental', category: 'llm' as const, costPer1kInput: 0, costPer1kOutput: 0 },
+    // LLMs - Meta Models
+    { id: 'meta/llama-3.1-405b-instruct', displayName: 'Llama 3.1 405B Instruct', category: 'llm' as const, costPer1kInput: 0.00059, costPer1kOutput: 0.00079 },
+  ];
+
+  const replicateDbModels = replicateModels.map((m) => ({
+    id: m.id,
+    provider: 'replicate' as const,
+    name: m.id,
+    displayName: m.displayName,
+    status: 'active' as const,
+    capabilities: m.category === 'llm' ? ['text', 'code'] : [],
+    contextWindow: m.category === 'llm' ? 128000 : 0,
+    maxOutputTokens: m.category === 'llm' ? 8192 : undefined,
+    costPer1kInputTokens: m.costPer1kInput || 0.01,
+    costPer1kOutputTokens: m.costPer1kOutput || 0,
+    inputCostPer1M: (m.costPer1kInput || 0.01) * 1000,
+    outputCostPer1M: (m.costPer1kOutput || 0) * 1000,
+    supportsStreaming: m.category === 'llm',
+    supportsJSON: m.category === 'llm',
+    supportsVision: false,
+    recommended: m.id.includes('gpt-5') || m.id.includes('claude-4.5') || m.id.includes('gemini-2.5-flash'),
+    tier: m.costPer1kInput === 0 ? 'free' as const : 'affordable' as const,
+    isAllowed: true,
+    tags: ['replicate', m.category],
+    lastVerified: new Date(),
+  }));
+
+  const replicateResult = await aiModelService.bulkUpsert(replicateDbModels);
+  totalCreated += replicateResult.created;
+  totalUpdated += replicateResult.updated;
+  console.log(`   ✅ Replicate: ${replicateResult.created} created, ${replicateResult.updated} updated\n`);
+
   // Summary
   console.log('═══════════════════════════════════════════════════════════');
   console.log('📊 Sync Summary');

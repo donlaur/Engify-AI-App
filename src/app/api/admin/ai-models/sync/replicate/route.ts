@@ -21,7 +21,7 @@ const POPULAR_REPLICATE_MODELS: Array<{
   costPer1kInput?: number;
   costPer1kOutput?: number;
 }> = [
-  // LLMs
+  // LLMs - OpenAI Models
   {
     id: 'openai/gpt-5',
     displayName: 'GPT-5',
@@ -30,6 +30,50 @@ const POPULAR_REPLICATE_MODELS: Array<{
     costPer1kOutput: 0.01,
   },
   {
+    id: 'openai/gpt-5-nano',
+    displayName: 'GPT-5 Nano',
+    category: 'llm',
+    costPer1kInput: 0.001, // Estimated (cheaper than GPT-5)
+    costPer1kOutput: 0.004,
+  },
+  {
+    id: 'openai/gpt-4o',
+    displayName: 'GPT-4o',
+    category: 'llm',
+    costPer1kInput: 0.005, // Estimated
+    costPer1kOutput: 0.015,
+  },
+  {
+    id: 'openai/gpt-4o-mini',
+    displayName: 'GPT-4o Mini',
+    category: 'llm',
+    costPer1kInput: 0.00015, // Estimated
+    costPer1kOutput: 0.0006,
+  },
+  {
+    id: 'openai/gpt-4.1',
+    displayName: 'GPT-4.1',
+    category: 'llm',
+    costPer1kInput: 0.008, // Estimated
+    costPer1kOutput: 0.024,
+  },
+  {
+    id: 'openai/gpt-4.1-mini',
+    displayName: 'GPT-4.1 Mini',
+    category: 'llm',
+    costPer1kInput: 0.0002, // Estimated
+    costPer1kOutput: 0.0008,
+  },
+  {
+    id: 'openai/gpt-4.1-nano',
+    displayName: 'GPT-4.1 Nano',
+    category: 'llm',
+    costPer1kInput: 0.0001, // Estimated (cheapest)
+    costPer1kOutput: 0.0004,
+  },
+  
+  // LLMs - Anthropic Models
+  {
     id: 'anthropic/claude-4.5-haiku',
     displayName: 'Claude 4.5 Haiku',
     category: 'llm',
@@ -37,11 +81,20 @@ const POPULAR_REPLICATE_MODELS: Array<{
     costPer1kOutput: 0.00125,
   },
   {
-    id: 'meta/llama-3.1-405b-instruct',
-    displayName: 'Llama 3.1 405B Instruct',
+    id: 'anthropic/claude-4-sonnet',
+    displayName: 'Claude 4 Sonnet',
     category: 'llm',
-    costPer1kInput: 0.00059,
-    costPer1kOutput: 0.00079,
+    costPer1kInput: 0.003, // Estimated
+    costPer1kOutput: 0.015,
+  },
+  
+  // LLMs - Google Models
+  {
+    id: 'google/gemini-2.5-flash',
+    displayName: 'Gemini 2.5 Flash',
+    category: 'llm',
+    costPer1kInput: 0.0025, // $2.50 per million = $0.0025 per 1k
+    costPer1kOutput: 0.0025, // $2.50 per million = $0.0025 per 1k
   },
   {
     id: 'google/gemini-2.0-flash-exp',
@@ -49,6 +102,15 @@ const POPULAR_REPLICATE_MODELS: Array<{
     category: 'llm',
     costPer1kInput: 0, // Free during experimental
     costPer1kOutput: 0,
+  },
+  
+  // LLMs - Meta Models
+  {
+    id: 'meta/llama-3.1-405b-instruct',
+    displayName: 'Llama 3.1 405B Instruct',
+    category: 'llm',
+    costPer1kInput: 0.00059,
+    costPer1kOutput: 0.00079,
   },
   
   // Image Generation
@@ -127,7 +189,10 @@ export async function POST(request: NextRequest) {
       supportsStreaming: m.category === 'llm',
       supportsJSON: m.category === 'llm',
       supportsVision: m.category === 'image' || m.category === 'video',
-      recommended: m.id.includes('gpt-5') || m.id.includes('claude-4.5') || m.id.includes('flux-1.1'),
+      recommended: m.id.includes('gpt-5') || 
+                   m.id.includes('claude-4.5') || 
+                   m.id.includes('gemini-2.5-flash') || // Latest Gemini model
+                   m.id.includes('flux-1.1'),
       tier: m.costPer1kInput === 0 ? 'free' as const : 'affordable' as const,
       isAllowed: true,
       tags: [m.category, 'replicate'],
