@@ -204,7 +204,8 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
     });
     
     if (bestModel) {
-      console.log(`   ✅ Selected model: ${bestModel.id} (${provider}, ${bestModel.recommended ? 'recommended' : 'active'})`);
+      const isRecommended = ('recommended' in bestModel ? (bestModel as any).recommended : false);
+      console.log(`   ✅ Selected model: ${bestModel.id} (${provider}, ${isRecommended ? 'recommended' : 'active'})`);
       return bestModel.id;
     }
     
