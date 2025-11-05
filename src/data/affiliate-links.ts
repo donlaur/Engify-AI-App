@@ -167,14 +167,19 @@ export function getToolLink(toolKey: string): string {
 export function trackAffiliateClick(toolKey: string) {
   // TODO: Implement analytics tracking
   if (typeof window !== 'undefined') {
-    // Track with your analytics service
-    console.log(`Affiliate click: ${toolKey}`);
-
+    // Client-side tracking - use browser analytics
     // Example: Google Analytics
     // gtag('event', 'affiliate_click', {
     //   tool: toolKey,
     //   url: getToolLink(toolKey)
     // });
+    
+    // Note: Client-side console.log is acceptable for development debugging
+    // In production, this should use actual analytics service (gtag, posthog, etc.)
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.log(`Affiliate click: ${toolKey}`);
+    }
   }
 }
 
