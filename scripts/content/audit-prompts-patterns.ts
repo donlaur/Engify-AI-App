@@ -1297,6 +1297,7 @@ Provide:
   /**
    * Audit a single prompt
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async auditPrompt(prompt: any): Promise<AuditResult> {
     const promptText = `
 TITLE: ${prompt.title || 'N/A'}
@@ -1761,6 +1762,7 @@ Provide:
   /**
    * Audit a single pattern
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async auditPattern(pattern: any): Promise<AuditResult> {
     const patternText = `
 NAME: ${pattern.name || 'N/A'}
