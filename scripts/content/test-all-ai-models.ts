@@ -143,45 +143,66 @@ async function main() {
   const args = process.argv.slice(2);
   const providerFilter = args.find(arg => arg.startsWith('--provider='))?.split('=')[1];
   const promptIdArg = args.find(arg => arg.startsWith('--prompt-id='))?.split('=')[1];
+  const promptsCountArg = args.find(arg => arg.startsWith('--prompts='))?.split('=')[1];
+  const promptsCount = promptsCountArg ? parseInt(promptsCountArg, 10) : 1; // Default: test on 1 prompt
 
   console.log('╔════════════════════════════════════════════════════════════╗');
-  console.log('║  AI Model Test Suite - Real Prompt Audit                 ║');
+  console.log('║  AI Model Test Suite - Full Prompt Audits                ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
   const db = await getMongoDb();
 
-  // Get a test prompt
-  let testPrompt: any;
+  // Get test prompt(s)
+  let testPrompts: any[] = [];
+  
   if (promptIdArg) {
-    testPrompt = await db.collection('prompts').findOne({
+    // Specific prompt requested
+    const prompt = await db.collection('prompts').findOne({
       $or: [
         { id: promptIdArg },
         { slug: promptIdArg },
         { _id: promptIdArg },
       ],
     });
-    if (!testPrompt) {
+    if (!prompt) {
       console.log(`❌ Prompt not found: ${promptIdArg}`);
       await db.client.close();
       process.exit(1);
     }
-    console.log(`📝 Using prompt: "${testPrompt.title}" (${testPrompt.id})\n`);
-  } else {
-    // Get first prompt at revision 1 (not yet improved)
-    testPrompt = await db.collection('prompts').findOne({
-      currentRevision: { $lte: 1 },
-    });
-    if (!testPrompt) {
-      // Fallback to any prompt
-      testPrompt = await db.collection('prompts').findOne({});
-    }
-    if (!testPrompt) {
+    testPrompts = [prompt];
+    console.log(`📝 Using prompt: "${prompt.title}" (${prompt.id})\n`);
+  } else if (promptsCount > 1) {
+    // Get multiple prompts for testing
+    testPrompts = await db.collection('prompts')
+      .find({})
+      .limit(promptsCount)
+      .toArray();
+    
+    if (testPrompts.length === 0) {
       console.log('❌ No prompts found in database');
       await db.client.close();
       process.exit(1);
     }
-    console.log(`📝 Using prompt: "${testPrompt.title}" (${testPrompt.id})`);
-    console.log(`   Use --prompt-id=<id> to test with a specific prompt\n`);
+    console.log(`📝 Testing on ${testPrompts.length} prompts:`);
+    testPrompts.forEach((p, i) => {
+      console.log(`   ${i + 1}. ${p.title} (${p.id})`);
+    });
+    console.log('');
+  } else {
+    // Default: Get first prompt at revision 1 (not yet improved)
+    const prompt = await db.collection('prompts').findOne({
+      currentRevision: { $lte: 1 },
+    }) || await db.collection('prompts').findOne({});
+    
+    if (!prompt) {
+      console.log('❌ No prompts found in database');
+      await db.client.close();
+      process.exit(1);
+    }
+    testPrompts = [prompt];
+    console.log(`📝 Using prompt: "${prompt.title}" (${prompt.id})`);
+    console.log(`   Use --prompt-id=<id> to test specific prompt`);
+    console.log(`   Use --prompts=N to test on N different prompts\n`);
   }
 
   // Get all active models from database (exclude deprecated/sunset)
@@ -284,30 +305,39 @@ async function main() {
     console.log(`   Only testing ${models.length} active text-to-text models\n`);
   }
 
-  console.log(`📊 Testing ${models.length} text-to-text models with real prompt audit\n`);
+  console.log(`📊 Testing ${models.length} text-to-text models with full prompt audits\n`);
+  console.log(`📝 Testing on ${testPrompts.length} prompt(s)\n`);
   console.log('🚀 Starting tests...\n');
+  console.log('💡 All audit results will be saved to prompt_audit_results collection');
+  console.log('   You can use these results with batch-improve-from-audits.ts\n');
 
   const results: TestResult[] = [];
 
-  // Test each model
+  // Test each model on each prompt
   for (let i = 0; i < models.length; i++) {
     const model = models[i];
+    
+    // Test on first prompt (or all prompts if multiple)
+    const testPrompt = testPrompts[0]; // For now, test on first prompt (can extend to all)
+    
     console.log(`[${i + 1}/${models.length}] Testing: ${model.displayName || model.id}`);
     console.log(`   Provider: ${model.provider} | ID: ${model.id}`);
+    console.log(`   Prompt: "${testPrompt.title}" (${testPrompt.id})`);
 
-    const result = await testModelWithPrompt(model, testPrompt);
+    const result = await testModelWithFullAudit(model, testPrompt);
     results.push(result);
 
     if (result.status === 'success') {
-      console.log(`   ✅ Success (${result.latencyMs}ms, ${result.tokensUsed} tokens)`);
-      if (result.auditFeedback?.score) {
-        console.log(`   📊 Score: ${result.auditFeedback.score}/10`);
-      }
-      if (result.auditFeedback?.issues && result.auditFeedback.issues.length > 0) {
-        console.log(`   ⚠️  Issues: ${result.auditFeedback.issues.slice(0, 2).join('; ')}`);
-      }
-      if (result.auditFeedback?.recommendations && result.auditFeedback.recommendations.length > 0) {
-        console.log(`   💡 Recommendations: ${result.auditFeedback.recommendations.slice(0, 2).join('; ')}`);
+      console.log(`   ✅ Success (${result.latencyMs}ms)`);
+      if (result.auditResult) {
+        console.log(`   📊 Score: ${result.auditResult.overallScore}/10`);
+        console.log(`   📋 Saved to DB (Audit Version ${result.auditVersion})`);
+        if (result.auditResult.issues && result.auditResult.issues.length > 0) {
+          console.log(`   ⚠️  Issues: ${result.auditResult.issues.slice(0, 2).join('; ')}`);
+        }
+        if (result.auditResult.recommendations && result.auditResult.recommendations.length > 0) {
+          console.log(`   💡 Recommendations: ${result.auditResult.recommendations.slice(0, 2).join('; ')}`);
+        }
       }
       
       // Mark model as verified/working in database
@@ -321,7 +351,7 @@ async function main() {
             }
           }
         );
-        console.log(`   💾 Marked as verified in database`);
+        console.log(`   💾 Model marked as verified`);
       } catch (error) {
         console.log(`   ⚠️  Failed to update verification status: ${error instanceof Error ? error.message : String(error)}`);
       }
