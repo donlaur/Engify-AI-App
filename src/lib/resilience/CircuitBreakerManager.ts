@@ -14,6 +14,7 @@ import {
   ICircuitBreakerEventHandler,
 } from './types';
 import { CircuitBreaker } from './CircuitBreaker';
+import { logger } from '@/lib/logging/logger';
 
 /**
  * Circuit Breaker Manager Implementation
@@ -43,7 +44,7 @@ export class CircuitBreakerManager implements ICircuitBreakerManager {
 
     this.circuits.set(config.name, circuit);
     
-    console.log(`Created circuit breaker '${config.name}'`);
+    logger.debug('Circuit breaker created', { name: config.name });
     return circuit;
   }
 
@@ -60,7 +61,7 @@ export class CircuitBreakerManager implements ICircuitBreakerManager {
   removeCircuit(name: string): boolean {
     const removed = this.circuits.delete(name);
     if (removed) {
-      console.log(`Removed circuit breaker '${name}'`);
+      logger.debug('Circuit breaker removed', { name });
     }
     return removed;
   }
@@ -79,7 +80,7 @@ export class CircuitBreakerManager implements ICircuitBreakerManager {
     this.circuits.forEach(circuit => {
       circuit.reset();
     });
-    console.log('Reset all circuit breakers');
+    logger.debug('All circuit breakers reset');
   }
 
   /**
@@ -157,7 +158,7 @@ export class CircuitBreakerManager implements ICircuitBreakerManager {
     this.circuits.forEach(circuit => {
       circuit.forceOpen();
     });
-    console.log('Forced open all circuit breakers');
+    logger.warn('All circuit breakers forced open');
   }
 
   /**
@@ -167,7 +168,7 @@ export class CircuitBreakerManager implements ICircuitBreakerManager {
     this.circuits.forEach(circuit => {
       circuit.forceClose();
     });
-    console.log('Forced close all circuit breakers');
+    logger.info('All circuit breakers forced close');
   }
 
   /**
@@ -319,6 +320,8 @@ export class CircuitBreakerManager implements ICircuitBreakerManager {
       this.createCircuit(config);
     });
     
-    console.log('Initialized default circuit breakers');
+    logger.info('Initialized default circuit breakers', { 
+      count: Object.keys(defaultConfigs).length 
+    });
   }
 }

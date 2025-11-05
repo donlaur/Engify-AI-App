@@ -6,6 +6,7 @@
  */
 
 import Redis from 'ioredis';
+import { logger } from '@/lib/logging/logger';
 import {
   IMessageQueue,
   IMessage,
@@ -400,7 +401,10 @@ export class RedisMessageQueue implements IMessageQueue {
         await this.processMessage(message);
       }
     } catch (error) {
-      console.error('Error processing messages:', error);
+      logger.error('Error processing messages', { 
+        queue: this.name,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -414,7 +418,11 @@ export class RedisMessageQueue implements IMessageQueue {
       // Find appropriate handler
       const handler = this.findHandler(message);
       if (!handler) {
-        console.warn(`No handler found for message type: ${message.type}`);
+        logger.warn('No handler found for message type', { 
+          queue: this.name,
+          messageType: message.type,
+          messageId: message.id,
+        });
         return;
       }
 
@@ -475,9 +483,11 @@ export class RedisMessageQueue implements IMessageQueue {
       await this.updateQueueStats('dead_letter');
 
       // TODO: Implement dead letter queue
-      console.error(
-        `Message ${message.id} moved to dead letter queue: ${error}`
-      );
+      logger.error('Message moved to dead letter queue', {
+        queue: this.name,
+        messageId: message.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -618,15 +628,18 @@ export class RedisMessageQueue implements IMessageQueue {
    */
   private setupErrorHandling(): void {
     this.redis.on('error', (error) => {
-      console.error('Redis connection error:', error);
+      logger.error('Redis connection error', { 
+        queue: this.name,
+        error: error instanceof Error ? error.message : String(error),
+      });
     });
 
     this.redis.on('connect', () => {
-      console.log(`Connected to Redis for queue: ${this.name}`);
+      logger.info('Redis connected', { queue: this.name });
     });
 
     this.redis.on('disconnect', () => {
-      console.log(`Disconnected from Redis for queue: ${this.name}`);
+      logger.warn('Redis disconnected', { queue: this.name });
     });
   }
 
