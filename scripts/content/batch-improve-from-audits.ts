@@ -299,7 +299,7 @@ async function applyImprovements(
   }
 
   // Filter to only prompts with audits
-  const promptsWithAudits = prompts.filter(p => promptAudits.has(p.id));
+  const promptsWithAudits = prompts.filter((p: any) => promptAudits.has(p.id));
   
   if (promptsWithAudits.length === 0) {
     console.log('⚠️  No prompts with audits found. Run audits first or use --audit-first flag.');
