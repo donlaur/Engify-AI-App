@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { careerRecommendationService } from '@/lib/services/CareerRecommendationService';
-import { AuditEventType } from '@/lib/db/schemas/auditLog';
+import { AuditEventTypeEnum } from '@/lib/db/schemas/auditLog';
 import { logAuditEvent } from '@/server/middleware/audit';
 
 export async function GET(_request: NextRequest) {
@@ -46,7 +46,7 @@ export async function GET(_request: NextRequest) {
 
     // Audit log
     await logAuditEvent({
-      eventType: AuditEventType.enum['admin.settings.changed'],
+      eventType: 'admin.settings.changed' as AuditEventTypeEnum,
       userId: session.user.id,
       action: 'career_recommendations_fetched',
       metadata: {
