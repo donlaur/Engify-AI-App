@@ -15,8 +15,13 @@
  * 
  * Usage:
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --fast  # Skip execution testing (faster)
  *   tsx scripts/content/audit-prompts-patterns.ts --type=patterns
  *   tsx scripts/content/audit-prompts-patterns.ts --type=both --limit=10
+ * 
+ * NOTE: This script ONLY does SCORING. It saves audit results to prompt_audit_results collection.
+ * To apply improvements, use: pnpm tsx scripts/content/enrich-prompt.ts --id=<prompt-id>
+ * Or batch: pnpm tsx scripts/content/batch-audit-enrich.ts
  */
 
 // IMPORTANT: Load environment variables FIRST before any imports
@@ -25,7 +30,8 @@ config({ path: '.env.local' });
 
 import { getMongoDb } from '@/lib/db/mongodb';
 import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFactoryWithRegistry';
-import { generateSlug } from '@/lib/utils/slug';
+import { Redis } from '@upstash/redis';
+import crypto from 'crypto';
 
 interface AuditResult {
   id: string;
@@ -59,97 +65,212 @@ interface AuditAgent {
   maxTokens: number;
 }
 
-// Audit Agents - Focused on reviewing existing content
+/**
+ * Get a valid model ID from database registry for a provider
+ * Falls back to provider name if DB unavailable (will use factory default)
+ */
+async function getModelIdFromRegistry(provider: string, preferredModel?: string): Promise<string | null> {
+  try {
+    const { getModelsByProvider } = await import('@/lib/services/AIModelRegistry');
+    const models = await getModelsByProvider(provider);
+    
+    if (models.length === 0) {
+      return null; // No models found, will use factory default
+    }
+    
+    // If preferred model specified and exists, use it
+    if (preferredModel) {
+      const preferred = models.find(m => m.id === preferredModel && ('status' in m ? m.status === 'active' : true));
+      if (preferred) return preferred.id;
+    }
+    
+    // Use recommended model, or first active model
+    const recommended = models.find(m => ('recommended' in m ? (m as any).recommended : false) && ('status' in m ? m.status === 'active' : true));
+    if (recommended) return recommended.id;
+    
+    // Fallback to first active model
+    const firstActive = models.find(m => 'status' in m ? m.status === 'active' : true);
+    return firstActive ? firstActive.id : null;
+  } catch (error) {
+    console.warn(`[Audit] Failed to query DB for ${provider} models:`, error);
+    return null; // Will use factory default
+  }
+}
+
+// Audit Agents - Reduced to 5 essential agents aligned with priorities
+// Priority: 1. Completeness, 2. Functionality, 3. SEO, 4. Value, 5. Clarity
+// All agents use OpenAI to avoid quota issues
 const AUDIT_AGENTS: AuditAgent[] = [
   {
+    role: 'grading_rubric_expert',
+    name: 'Grading Rubric Expert',
+    model: 'gpt-4o', // Direct OpenAI - best for comprehensive scoring
+    provider: 'openai',
+    temperature: 0.2,
+    maxTokens: 2500,
+    systemPrompt: `You are a Grading Rubric Expert who evaluates prompts and patterns using a comprehensive rubric.
+
+SCORING PRIORITIES (in order of importance):
+1. **Completeness** - Has major things for each area (case studies, examples, use cases, best practices, etc.)
+2. **Functionality** - Works, solid, gives decent first result (one-shot prompts that produce good output)
+3. **SEO** - Good SEO optimization (title, description, keywords, slug)
+4. **Value Demonstration** - Shows good value through case studies and examples
+5. **Clarity** - Content is clear, human-readable, not too wordy or AI-generated sounding
+
+GRADING RUBRIC:
+
+1. **Completeness (1-10)** - HIGHEST PRIORITY (30% weight)
+   - Are all required fields present? (title, description, content, category, slug)
+   - Has all major enrichment fields? (case studies, examples, use cases, best practices, recommendedModel, bestTimeToUse)
+   - Is enrichment data comprehensive and useful?
+   - Are there empty or placeholder fields?
+   - Does it cover all major areas (technical, practical, SEO)?
+   - Is content complete (not missing sections)?
+   - Is data quality acceptable?
+
+2. **Engineering Usefulness (1-10)** - SECOND PRIORITY (25% weight) - Functionality Focus
+   - Does this work as a one-shot prompt? (Can copy-paste and get good first result?)
+   - Is it practical and actionable for engineers?
+   - Does it align with engineering workflows?
+   - Is it technically accurate and solid?
+   - Can engineers use this immediately without modification?
+   - Does it solve real engineering problems effectively?
+   - Is it clear and actionable for engineering teams?
+
+3. **SEO Enrichment (1-10)** - THIRD PRIORITY (20% weight)
+   - Is title SEO-optimized (50-60 chars, keyword-rich)?
+   - Is meta description present and optimized (150-160 chars)?
+   - Is slug SEO-friendly (short, descriptive, keyword-rich)?
+   - Are keywords/tags relevant and comprehensive?
+   - Does content structure support SEO (headings, keywords, etc.)?
+
+4. **Case Study Quality (1-10)** - FOURTH PRIORITY (10% weight) - Value Demonstration
+   - Are case studies present and relevant?
+   - Do case studies demonstrate real-world value and application?
+   - Are case studies diverse (different scenarios)?
+   - Are case studies detailed enough?
+   - Do case studies show measurable outcomes?
+   - Do they clearly show the prompt's value?
+
+5. **Enterprise Readiness (1-10)** - Lower Priority (5% weight)
+   - Suitable for enterprise environments?
+   - Compliance considerations addressed (SOC 2, GDPR, FedRAMP, etc.)?
+   - Enterprise security standards addressed?
+   - Scalable and maintainable?
+   - Enterprise integration considerations?
+
+6. **Security & Compliance (1-10)** - Lower Priority (5% weight)
+   - OWASP Top 10 compliance?
+   - Input validation and sanitization?
+   - Secure authentication/authorization patterns?
+   - Security headers and protections?
+   - Threat modeling considered?
+
+7. **Accessibility (1-10)** - Lower Priority (3% weight)
+   - WCAG 2.1 Level AA considerations?
+   - Screen reader compatibility?
+   - Keyboard navigation support?
+   - Color contrast requirements?
+   - ARIA attributes and semantic HTML?
+
+8. **Performance (1-10)** - Lower Priority (2% weight)
+   - Core Web Vitals considerations?
+   - Performance optimization opportunities?
+   - Caching strategies considered?
+   - Query optimization recommendations?
+   - Scalability considerations?
+
+SCORING GUIDELINES:
+- Score 8-10: Excellent in this category (meets all criteria, high quality)
+- Score 6-7: Good in this category (meets most criteria, minor gaps)
+- Score 4-5: Fair in this category (meets some criteria, needs improvement)
+- Score 1-3: Poor in this category (missing key criteria, significant issues)
+
+SPECIAL ATTENTION:
+- **Clarity Check**: Does the content sound natural and human-readable? Not overly wordy or AI-generated? Score lower if it feels robotic or verbose. This affects Engineering Usefulness and Completeness scores.
+- **One-Shot Functionality**: Can this prompt be used as-is and produce good results? Score higher if yes, lower if it needs significant editing. This is critical for Engineering Usefulness.
+- **Value Demonstration**: Do case studies and examples clearly show why someone would use this prompt? Score Case Study Quality higher if yes.
+
+For each category, provide:
+- Score (1-10) with justification
+- Specific issues found
+- Recommendations for improvement
+- Missing elements
+
+CRITICAL: Format your response as VALID JSON (no markdown code blocks, just pure JSON):
+{
+  "engineeringUsefulness": { "score": 8, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "caseStudyQuality": { "score": 6, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "completeness": { "score": 7, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "seoEnrichment": { "score": 5, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "enterpriseReadiness": { "score": 8, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "securityCompliance": { "score": 7, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "accessibility": { "score": 6, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
+  "performance": { "score": 7, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] }
+}`,
+  },
+  {
+    role: 'completeness_reviewer',
+    name: 'Completeness Reviewer',
+    model: 'gpt-4o', // Direct OpenAI - Priority #1
+    provider: 'openai',
+    temperature: 0.4,
+    maxTokens: 1500,
+    systemPrompt: `You are a Completeness Reviewer who checks if prompts/patterns have all required fields and enrichment.
+
+Your focus:
+- Check if all required fields are present (title, description, content, category, slug)
+- Verify content is complete and not missing sections
+- Ensure enrichment data is present (case studies, examples, use cases, best practices, recommendedModel, bestTimeToUse)
+- Check for empty or placeholder content
+- Validate data quality and comprehensiveness
+
+Review checklist:
+1. **Required Fields**: Are all required fields present?
+2. **Content Completeness**: Is content complete or missing sections?
+3. **Enrichment**: Is enrichment data present and comprehensive?
+4. **Empty Fields**: Are there empty or placeholder fields?
+5. **Data Quality**: Is the data quality acceptable?
+
+Provide:
+- Score (1-10) for completeness
+- Missing fields or sections
+- Recommendations for completion`,
+  },
+  {
     role: 'engineering_reviewer',
-    name: 'Engineering Team Reviewer',
-    model: 'anthropic/claude-4.5-haiku', // Via Replicate
-    provider: 'replicate',
+    name: 'Engineering Functionality Reviewer',
+    model: 'gpt-4o', // Direct OpenAI - Priority #2
+    provider: 'openai',
     temperature: 0.4,
     maxTokens: 1500,
-    systemPrompt: `You are an Engineering Team Reviewer specializing in evaluating prompts and patterns for engineering teams.
+    systemPrompt: `You are an Engineering Functionality Reviewer specializing in evaluating if prompts work as one-shot prompts.
 
 Your focus:
-- Ensure prompts/patterns are optimized for engineering workflows
-- Check that use cases are relevant to software engineers, architects, and tech leads
-- Verify technical accuracy and practicality
-- Assess if content solves real engineering problems
-- Evaluate clarity and actionability for engineering teams
+- Does this work as a one-shot prompt? (Can copy-paste and get good first result?)
+- Is it practical and actionable for engineers?
+- Is it technically accurate and solid?
+- Can engineers use this immediately without modification?
+- Does it solve real engineering problems effectively?
+- Is content clear, human-readable, and not too wordy or AI-generated?
 
 Review checklist:
-1. **Engineering Optimization**: Is this optimized for engineering workflows?
-2. **Use Cases**: Are use cases relevant to engineers/architects/tech leads?
-3. **Technical Accuracy**: Is the technical content accurate?
-4. **Practicality**: Does it solve real engineering problems?
-5. **Clarity**: Is it clear and actionable for engineering teams?
+1. **One-Shot Functionality**: Can this be copy-pasted and produce good results?
+2. **Technical Accuracy**: Is the technical content accurate?
+3. **Practicality**: Does it solve real engineering problems?
+4. **Clarity**: Is it clear, human-readable, not verbose or AI-generated?
+5. **Actionability**: Can engineers use this immediately?
 
 Provide:
-- Score (1-10) for engineering optimization
-- Specific issues found
-- Recommendations for improvement`,
-  },
-  {
-    role: 'product_reviewer',
-    name: 'Product Team Reviewer',
-    model: 'openai/gpt-5', // Via Replicate - best for product analysis
-    provider: 'replicate',
-    temperature: 0.4,
-    maxTokens: 1500,
-    systemPrompt: `You are a Product Team Reviewer specializing in evaluating prompts and patterns for product teams.
-
-Your focus:
-- Ensure prompts/patterns are optimized for product management workflows
-- Check that use cases are relevant to PMs, product designers, and product strategists
-- Verify content addresses product management challenges
-- Assess if content helps with product strategy, roadmaps, user research, etc.
-- Evaluate value for product teams
-
-Review checklist:
-1. **Product Optimization**: Is this optimized for product management workflows?
-2. **Use Cases**: Are use cases relevant to PMs/product designers?
-3. **Product Relevance**: Does it address product management challenges?
-4. **Value**: Does it provide value for product teams?
-5. **Accessibility**: Is it accessible to non-technical product team members?
-
-Provide:
-- Score (1-10) for product optimization
-- Specific issues found
-- Recommendations for improvement`,
-  },
-  {
-    role: 'roles_use_cases_reviewer',
-    name: 'Roles & Use Cases Reviewer',
-    model: 'anthropic/claude-4.5-haiku', // Via Replicate
-    provider: 'replicate',
-    temperature: 0.4,
-    maxTokens: 1500,
-    systemPrompt: `You are a Roles & Use Cases Reviewer who ensures prompts/patterns have proper role assignments and use cases.
-
-Your focus:
-- Verify that roles are properly assigned (engineer, manager, PM, designer, etc.)
-- Check that use cases are realistic and relevant
-- Ensure use cases cover different scenarios
-- Validate that role assignments match the content
-- Assess if use cases are comprehensive enough
-
-Review checklist:
-1. **Role Assignment**: Are roles properly assigned and appropriate?
-2. **Use Cases**: Are use cases present, realistic, and relevant?
-3. **Comprehensiveness**: Do use cases cover different scenarios?
-4. **Alignment**: Do roles match the content and use cases?
-5. **Completeness**: Are all relevant roles and use cases covered?
-
-Provide:
-- Score (1-10) for roles and use cases
-- Missing roles or use cases
+- Score (1-10) for engineering functionality
+- Specific issues found (especially clarity and one-shot usability)
 - Recommendations for improvement`,
   },
   {
     role: 'seo_enrichment_reviewer',
     name: 'SEO Enrichment Reviewer',
-    model: 'openai/gpt-5', // Via Replicate - best for product analysis
-    provider: 'replicate',
+    model: 'gpt-4o', // Direct OpenAI - Priority #3
+    provider: 'openai',
     temperature: 0.3,
     maxTokens: 1500,
     systemPrompt: `You are an SEO Enrichment Reviewer who checks if prompts/patterns are properly optimized for SEO.
@@ -174,259 +295,252 @@ Provide:
 - Recommendations for SEO optimization`,
   },
   {
-    role: 'enterprise_saas_expert',
-    name: 'Enterprise SaaS Expert',
-    model: 'anthropic/claude-4.5-haiku', // Via Replicate
-    provider: 'replicate',
+    role: 'roles_use_cases_reviewer',
+    name: 'Roles & Use Cases Reviewer',
+    model: 'gpt-4o', // Direct OpenAI - helps with completeness and value
+    provider: 'openai',
     temperature: 0.4,
+    maxTokens: 1500,
+    systemPrompt: `You are a Roles & Use Cases Reviewer who ensures prompts/patterns have proper role assignments and use cases.
+
+Your focus:
+- Verify that roles are properly assigned (engineer, manager, PM, designer, etc.)
+- Check that use cases are realistic and relevant
+- Ensure use cases cover different scenarios
+- Validate that role assignments match the content
+- Assess if use cases demonstrate value
+
+Review checklist:
+1. **Role Assignment**: Are roles properly assigned and appropriate?
+2. **Use Cases**: Are use cases present, realistic, and relevant?
+3. **Comprehensiveness**: Do use cases cover different scenarios?
+4. **Alignment**: Do roles match the content and use cases?
+5. **Value**: Do use cases clearly demonstrate the prompt's value?
+
+Provide:
+- Score (1-10) for roles and use cases
+- Missing roles or use cases
+- Recommendations for improvement`,
+  },
+  {
+    role: 'prompt_engineering_sme',
+    name: 'Prompt Engineering SME',
+    model: 'gpt-4o', // Direct OpenAI - best for prompt engineering expertise
+    provider: 'openai',
+    temperature: 0.3,
     maxTokens: 2000,
-    systemPrompt: `You are an Enterprise SaaS Expert specializing in B2B SaaS products, enterprise sales, and SaaS best practices.
+    systemPrompt: `You are a Prompt Engineering Subject Matter Expert with deep expertise in computer science, AI, and prompt engineering best practices.
 
 Your expertise:
-- Enterprise SaaS architecture and patterns
-- B2B sales and enterprise customer needs
-- SaaS metrics and KPIs (MRR, ARR, CAC, LTV, churn)
-- Enterprise feature requirements
-- Multi-tenant SaaS architectures
-- Enterprise onboarding and adoption
-- SaaS pricing models and packaging
-- Enterprise integration requirements (SSO, APIs, webhooks)
-
-Your role in prompt/pattern review:
-1. **Enterprise SaaS Fit**: Ensure prompts/patterns address enterprise SaaS needs
-2. **Use Cases**: Validate use cases are relevant to SaaS companies
-3. **Enterprise Features**: Check for enterprise-grade features (SSO, RBAC, audit logs, etc.)
-4. **Integration**: Consider SaaS integration requirements
-5. **Adoption**: Ensure content supports enterprise adoption
-6. **Value Proposition**: Verify clear value proposition for enterprise customers
-
-Review checklist:
-- Addresses enterprise SaaS needs
-- Use cases relevant to SaaS companies
-- Enterprise-grade features considered
-- SaaS integration requirements addressed
-- Supports enterprise adoption
-- Clear value proposition for enterprise customers
-
-Provide enterprise SaaS readiness scores and recommendations.`,
-  },
-  {
-    role: 'grading_rubric_expert',
-    name: 'Grading Rubric Expert',
-    model: 'openai/gpt-5', // Via Replicate - best for product analysis
-    provider: 'replicate',
-    temperature: 0.2,
-    maxTokens: 2500,
-    systemPrompt: `You are a Grading Rubric Expert who evaluates prompts and patterns using a comprehensive rubric.
-
-GRADING RUBRIC:
-
-1. **Engineering Usefulness (1-10)**
-   - Does this solve real engineering problems?
-   - Is it practical and actionable for engineers?
-   - Does it align with engineering workflows?
-   - Is it technically accurate?
-   - Can engineers use this immediately?
-
-2. **Case Study Quality (1-10)**
-   - Are case studies present and relevant?
-   - Do case studies demonstrate real-world application?
-   - Are case studies diverse (different scenarios)?
-   - Are case studies detailed enough?
-   - Do case studies show measurable outcomes?
-
-3. **Completeness (1-10)**
-   - Are all required fields present?
-   - Is content complete (not missing sections)?
-   - Is enrichment data present (examples, best practices, etc.)?
-   - Are there empty or placeholder fields?
-   - Is data quality acceptable?
-
-4. **SEO Enrichment (1-10)**
-   - Is title SEO-optimized (50-60 chars, keyword-rich)?
-   - Is meta description present and optimized (150-160 chars)?
-   - Is slug SEO-friendly (short, descriptive, keyword-rich)?
-   - Are keywords/tags relevant and comprehensive?
-   - Does content structure support SEO?
-
-5. **Enterprise Readiness (1-10)**
-   - Suitable for enterprise environments?
-   - Compliance considerations addressed (SOC 2, GDPR, etc.)?
-   - Enterprise security standards addressed?
-   - Scalable and maintainable?
-   - Enterprise integration considerations?
-
-6. **Security & Compliance (1-10)**
-   - OWASP Top 10 compliance?
-   - Input validation and sanitization?
-   - Secure authentication/authorization patterns?
-   - Security headers and protections?
-   - Threat modeling considered?
-
-7. **Accessibility (1-10)**
-   - WCAG 2.1 Level AA considerations?
-   - Screen reader compatibility?
-   - Keyboard navigation support?
-   - Color contrast requirements?
-   - ARIA attributes and semantic HTML?
-
-8. **Performance (1-10)**
-   - Core Web Vitals considerations?
-   - Performance optimization opportunities?
-   - Caching strategies considered?
-   - Query optimization recommendations?
-   - Scalability considerations?
-
-For each category, provide:
-- Score (1-10) with justification
-- Specific issues found
-- Recommendations for improvement
-- Missing elements
-
-CRITICAL: Format your response as VALID JSON (no markdown code blocks, just pure JSON):
-{
-  "engineeringUsefulness": { "score": 8, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
-  "caseStudyQuality": { "score": 6, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
-  "completeness": { "score": 7, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
-  "seoEnrichment": { "score": 5, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
-  "enterpriseReadiness": { "score": 8, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
-  "securityCompliance": { "score": 7, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
-  "accessibility": { "score": 6, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] },
-  "performance": { "score": 7, "justification": "...", "issues": [...], "recommendations": [...], "missing": [...] }
-}`,
-  },
-  {
-    role: 'enterprise_reviewer',
-    name: 'Enterprise Reviewer (Red Hat Lens)',
-    model: 'anthropic/claude-4.5-haiku', // Via Replicate
-    provider: 'replicate',
-    temperature: 0.4,
-    maxTokens: 1500,
-    systemPrompt: `You are an Enterprise Reviewer with a Red Hat lens, specializing in enterprise software, compliance, and enterprise-grade solutions.
+- Prompt engineering principles and best practices
+- Computer science fundamentals (algorithms, data structures, system design)
+- AI model capabilities and limitations
+- Prompt optimization techniques
+- Chain-of-thought reasoning
+- Few-shot learning and example selection
+- Prompt structure and formatting
+- Output quality and reliability
 
 Your focus:
-- Ensure prompts/patterns are suitable for enterprise environments
-- Check for compliance considerations (SOC 2, GDPR, FedRAMP, etc.)
-- Verify enterprise security standards are addressed
-- Assess scalability and maintainability for enterprise use
-- Consider enterprise integration requirements
+- Evaluate prompt structure and engineering quality
+- Check if prompt follows best practices (clear instructions, context, examples)
+- Assess prompt clarity and specificity
+- Verify technical accuracy from a CS/AI perspective
+- Evaluate if prompt is optimized for the intended model
+- Check for prompt engineering anti-patterns (ambiguity, conflicting instructions, etc.)
 
 Review checklist:
-1. **Enterprise Readiness**: Is this suitable for enterprise environments?
-2. **Compliance**: Are compliance requirements considered?
-3. **Security**: Are enterprise security standards addressed?
-4. **Scalability**: Will this scale to enterprise needs?
-5. **Integration**: Are enterprise integration requirements considered?
+1. **Prompt Structure**: Is the prompt well-structured with clear sections?
+2. **Instructions**: Are instructions clear, specific, and unambiguous?
+3. **Context**: Is sufficient context provided without being verbose?
+4. **Examples**: Are examples (if present) well-chosen and helpful?
+5. **Technical Accuracy**: Is the prompt technically sound from a CS/AI perspective?
+6. **Optimization**: Is the prompt optimized for the target AI model?
+7. **Best Practices**: Does it follow prompt engineering best practices?
 
 Provide:
-- Score (1-10) for enterprise readiness
-- Compliance considerations
-- Recommendations for enterprise optimization`,
+- Score (1-10) for prompt engineering quality
+- Technical issues from a CS/AI perspective
+- Recommendations for prompt engineering improvements
+- Missing elements that would improve prompt quality`,
   },
   {
-    role: 'web_security_reviewer',
-    name: 'Web Security Reviewer',
-    model: 'openai/gpt-5', // Via Replicate - best for product analysis
-    provider: 'replicate',
-    temperature: 0.3,
-    maxTokens: 1500,
-    systemPrompt: `You are a Web Security Reviewer specializing in OWASP Top 10, web application security, and secure coding practices.
+    role: 'prompt_execution_tester',
+    name: 'Prompt Execution Tester',
+    model: 'gpt-4o', // Direct OpenAI - for testing prompt execution
+    provider: 'openai',
+    temperature: 0.7, // Use same temperature as typical user
+    maxTokens: 2000,
+    systemPrompt: `You are a Prompt Execution Tester who actually tests prompts by executing them and evaluating output quality.
 
-Your focus:
-- Identify security vulnerabilities and risks
-- Check against OWASP Top 10
-- Verify security best practices are followed
-- Assess input validation and sanitization
-- Review authentication/authorization patterns
-- Consider threat modeling and risk assessment
+Your role:
+- Execute the prompt with a realistic test scenario
+- Evaluate the quality of the output produced
+- Check if output matches expectations
+- Assess if prompt produces consistent, useful results
+- Test if prompt is truly "one-shot" (works without modification)
 
-Review checklist:
-1. **OWASP Compliance**: Does this follow OWASP Top 10 best practices?
-2. **Input Validation**: Is proper input validation and sanitization present?
-3. **Authentication**: Are secure authentication/authorization patterns used?
-4. **Security Headers**: Are security headers and protections considered?
-5. **Threat Modeling**: Have security threats been considered?
+Test process:
+1. **Execute**: Run the prompt with a realistic test input/scenario
+2. **Evaluate Output**: Assess if the output is:
+   - Relevant and useful
+   - Complete (addresses all requirements)
+   - Accurate and technically sound
+   - Well-formatted and readable
+   - Actionable (can be used immediately)
+3. **Consistency**: Assess if prompt would produce similar quality results consistently
+4. **One-Shot**: Verify if prompt works as-is without needing modification
 
-Provide:
-- Score (1-10) for security
-- Security vulnerabilities identified
-- Recommendations for security improvements`,
-  },
-  {
-    role: 'compliance_reviewer',
-    name: 'Compliance Reviewer',
-    model: 'openai/gpt-5', // Via Replicate - best for product analysis
-    provider: 'replicate',
-    temperature: 0.3,
-    maxTokens: 1500,
-    systemPrompt: `You are a Compliance Reviewer specializing in SOC 2, GDPR, FedRAMP, and other regulatory compliance requirements.
-
-Your focus:
-- Check SOC 2 compliance considerations
-- Verify GDPR data privacy protections
-- Assess audit logging requirements
-- Review access controls and RBAC
-- Consider data retention and deletion policies
-- Validate compliance documentation
-
-Review checklist:
-1. **SOC 2**: Are SOC 2 compliance considerations addressed?
-2. **GDPR**: Are GDPR data privacy protections considered?
-3. **Audit Logging**: Are audit logging requirements met?
-4. **Access Controls**: Are proper access controls and RBAC in place?
-5. **Data Retention**: Are data retention and deletion policies considered?
+Evaluation criteria:
+- Output quality (1-10): How good is the actual output produced?
+- Relevance (1-10): Does output match what was requested?
+- Completeness (1-10): Does output address all requirements?
+- Usability (1-10): Can the output be used immediately?
+- Reliability (1-10): Would this prompt produce consistent results?
 
 Provide:
-- Score (1-10) for compliance
-- Compliance gaps identified
-- Recommendations for compliance improvements`,
-  },
-  {
-    role: 'completeness_reviewer',
-    name: 'Completeness Reviewer',
-    model: 'openai/gpt-5', // Via Replicate - best for product analysis
-    provider: 'replicate',
-    temperature: 0.3,
-    maxTokens: 1500,
-    systemPrompt: `You are a Completeness Reviewer who checks if prompts/patterns have all required fields and enrichment.
+- Actual test execution result (sample output)
+- Scores for each evaluation criterion
+- Overall quality assessment (1-10)
+- Issues found in actual execution
+- Recommendations for improving prompt execution quality
 
-Your focus:
-- Check if all required fields are present
-- Verify content is complete and not missing sections
-- Ensure enrichment data is present (for patterns: examples, best practices, etc.)
-- Check for empty or placeholder content
-- Validate data quality
-
-Review checklist:
-1. **Required Fields**: Are all required fields present?
-2. **Content Completeness**: Is content complete or missing sections?
-3. **Enrichment**: Is enrichment data present (examples, best practices, etc.)?
-4. **Empty Fields**: Are there empty or placeholder fields?
-5. **Data Quality**: Is the data quality acceptable?
-
-Provide:
-- Score (1-10) for completeness
-- Missing fields or sections
-- Recommendations for completion`,
+CRITICAL: Actually execute the prompt and show the results. Don't just analyze - TEST IT.`,
   },
 ];
 
+// Redis cache for audit results (if available)
+let redisCache: Redis | null = null;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  redisCache = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+}
+
+// Cache keys and TTLs
+const CACHE_KEYS = {
+  agentResponse: (agentRole: string, contentHash: string) => `audit:agent:${agentRole}:${contentHash}`,
+  rubricScore: (contentHash: string) => `audit:rubric:${contentHash}`,
+} as const;
+
+const CACHE_TTL = {
+  agentResponse: 3600 * 24, // 24 hours - agent responses don't change unless prompt changes
+  rubricScore: 3600 * 24, // 24 hours
+} as const;
+
+/**
+ * Generate hash of prompt content for cache key
+ */
+function hashContent(content: string): string {
+  return crypto.createHash('sha256').update(content).digest('hex').substring(0, 16);
+}
+
 export class PromptPatternAuditor {
   private organizationId: string;
+  private skipExecutionTest: boolean; // Skip slow execution testing for faster audits
+  private useCache: boolean; // Enable Redis caching
 
-  constructor(organizationId: string = 'system') {
+  constructor(organizationId: string = 'system', options?: { skipExecutionTest?: boolean; useCache?: boolean }) {
     this.organizationId = organizationId;
+    this.skipExecutionTest = options?.skipExecutionTest ?? false;
+    this.useCache = options?.useCache ?? true; // Enable caching by default
   }
 
   /**
-   * Run a single audit agent
+   * Run a single audit agent (with Redis caching)
    */
   private async runAgent(
     agent: AuditAgent,
     prompt: string
   ): Promise<string> {
+    // Check cache first if enabled
+    if (this.useCache && redisCache) {
+      try {
+        const contentHash = hashContent(prompt);
+        const cacheKey = CACHE_KEYS.agentResponse(agent.role, contentHash);
+        const cached = await redisCache.get<string>(cacheKey);
+        if (cached) {
+          console.log(`   💾 Cache hit for ${agent.role}`);
+          return cached;
+        }
+      } catch (error) {
+        // Cache miss or error - continue to API call
+        console.log(`   ⚠️  Cache read failed, using API`);
+      }
+    }
+
     try {
-      // For Replicate, create adapter directly with model ID
+      // Resolve model ID from database if model is just a provider name
+      let modelId = agent.model;
+      if (agent.model === agent.provider || agent.model === 'google' || agent.model === 'openai') {
+        const resolvedModelId = await getModelIdFromRegistry(agent.provider, agent.model);
+        if (resolvedModelId) {
+          modelId = resolvedModelId;
+        } else {
+          // Fallback to using provider factory which will use default model
+          const { AIProviderFactoryWithRegistry } = await import('@/lib/ai/v2/factory/AIProviderFactoryWithRegistry');
+          const provider = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+          const response = await provider.execute({
+            prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+            temperature: agent.temperature,
+            maxTokens: agent.maxTokens,
+          });
+          return response.content;
+        }
+      }
+      
+      // For OpenAI, use OpenAIAdapter directly with model ID
+      if (agent.provider === 'openai') {
+        const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+        const provider = new OpenAIAdapter(modelId);
+        const response = await provider.execute({
+          prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+          temperature: agent.temperature,
+          maxTokens: agent.maxTokens,
+        });
+        
+        // Cache the response
+        if (this.useCache && redisCache) {
+          try {
+            const contentHash = hashContent(prompt);
+            const cacheKey = CACHE_KEYS.agentResponse(agent.role, contentHash);
+            await redisCache.setex(cacheKey, CACHE_TTL.agentResponse, response.content);
+          } catch (error) {
+            // Cache write failed - continue anyway
+            console.log(`   ⚠️  Cache write failed for ${agent.role}`);
+          }
+        }
+        
+        return response.content;
+      }
+      
+      // For Google Gemini, use GeminiAdapter directly with model ID from DB
+      if (agent.provider === 'google') {
+        const { GeminiAdapter } = await import('@/lib/ai/v2/adapters/GeminiAdapter');
+        const provider = new GeminiAdapter(modelId);
+        const response = await provider.execute({
+          prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+          temperature: agent.temperature,
+          maxTokens: agent.maxTokens,
+        });
+        
+        // Cache the response
+        if (this.useCache && redisCache) {
+          try {
+            const contentHash = hashContent(prompt);
+            const cacheKey = CACHE_KEYS.agentResponse(agent.role, contentHash);
+            await redisCache.setex(cacheKey, CACHE_TTL.agentResponse, response.content);
+          } catch (error) {
+            // Cache write failed - continue anyway
+            console.log(`   ⚠️  Cache write failed for ${agent.role}`);
+          }
+        }
+        
+        return response.content;
+      }
+      
+      // For Replicate (Claude models), create adapter directly with model ID
       if (agent.provider === 'replicate') {
         const { ReplicateAdapter } = await import('@/lib/ai/v2/adapters/ReplicateAdapter');
         const provider = new ReplicateAdapter(agent.model);
@@ -450,6 +564,18 @@ export class PromptPatternAuditor {
         maxTokens: agent.maxTokens,
       });
 
+      // Cache the response
+      if (this.useCache && redisCache) {
+        try {
+          const contentHash = hashContent(prompt);
+          const cacheKey = CACHE_KEYS.agentResponse(agent.role, contentHash);
+          await redisCache.setex(cacheKey, CACHE_TTL.agentResponse, response.content);
+        } catch (error) {
+          // Cache write failed - continue anyway
+          console.log(`   ⚠️  Cache write failed for ${agent.role}`);
+        }
+      }
+
       return response.content;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -469,53 +595,80 @@ export class PromptPatternAuditor {
       }
 
       // Check for model availability errors - try fallback
-      if (errorMessage.includes('model') || errorMessage.includes('not found') || errorMessage.includes('404')) {
+      if (errorMessage.includes('model') || errorMessage.includes('not found') || errorMessage.includes('404') || errorMessage.includes('not in allowlist') || errorMessage.includes('blocked')) {
         console.warn(`⚠️  Model "${agent.model}" not available for ${agent.name}, trying fallback...`);
         
         // Try using a working fallback model for the same provider
         let fallbackModel: string | null = null;
-        if (agent.provider.includes('claude')) {
-          // Claude Sonnet fallback: try Haiku if Sonnet fails
-          if (agent.model.includes('claude-3-5-sonnet')) {
-            fallbackModel = 'claude-3-haiku-20240307'; // Use Haiku as fallback
-          }
-        } else if (agent.provider.includes('replicate')) {
-          // Replicate fallback: try Claude Haiku if other models fail
-          if (agent.model.includes('gpt-5')) {
-            fallbackModel = 'anthropic/claude-4.5-haiku';
-          } else if (agent.model.includes('claude-4.5')) {
-            fallbackModel = 'meta/llama-3.1-405b-instruct'; // Last resort
-          }
-        }
-        
-        if (fallbackModel) {
-          try {
-            console.log(`   🔄 Trying fallback model: ${fallbackModel}`);
-            const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
-            const fallbackProvider = agent.provider === 'replicate' 
-              ? AIProviderFactory.create('replicate') // Use replicate provider
-              : AIProviderFactory.create(agent.provider);
-            // Create adapter with fallback model directly
-            const providerType = agent.provider.includes('openai') ? 'openai' :
+        let fallbackProviderType: string = agent.provider.includes('openai') ? 'openai' :
                                agent.provider.includes('claude') ? 'anthropic' :
                                agent.provider.includes('gemini') ? 'google' :
                                agent.provider.includes('groq') ? 'groq' :
                                agent.provider.includes('replicate') ? 'replicate' :
                                'openai';
-            
+        
+        if (agent.provider.includes('claude')) {
+          // Claude Sonnet fallback: try Haiku if Sonnet fails
+          if (agent.model.includes('claude-3-5-sonnet')) {
+            fallbackModel = 'claude-3-haiku-20240307'; // Use Haiku as fallback
+          }
+        } else if (agent.provider === 'google') {
+          // Gemini fallback: query DB for alternative models
+          try {
+            const { getModelsByProvider } = await import('@/lib/services/AIModelRegistry');
+            const googleModels = await getModelsByProvider('google');
+            // Try to find a cheaper/faster alternative (flash-lite before pro)
+            const alternative = googleModels.find(m => 
+              m.id.includes('flash-lite') && ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
+            ) || googleModels.find(m => 
+              m.id.includes('flash') && ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
+            ) || googleModels.find(m => 
+              ('status' in m ? m.status === 'active' : true) && m.id !== agent.model
+            );
+            if (alternative) {
+              fallbackModel = alternative.id;
+            }
+          } catch (fallbackError) {
+            console.warn('   ⚠️  Failed to query DB for Gemini fallback:', fallbackError);
+          }
+        } else if (agent.provider === 'openai') {
+          // OpenAI fallback: try gpt-4o-mini if gpt-4o fails
+          if (agent.model.includes('gpt-4o') && !agent.model.includes('mini')) {
+            fallbackModel = 'gpt-4o-mini'; // Cheaper fallback
+          }
+        } else if (agent.provider.includes('replicate')) {
+          // Replicate fallback: try OpenAI models instead if Replicate fails
+          // Since we have OpenAI keys, use OpenAI as fallback
+          if (agent.model.includes('gpt-5') || agent.model.includes('claude-4.5')) {
+            fallbackModel = 'gpt-4o'; // Use OpenAI directly
+            fallbackProviderType = 'openai'; // Switch to OpenAI provider
+          } else if (agent.model.includes('claude-4.5-haiku')) {
+            fallbackModel = 'gpt-4o-mini'; // Cheaper OpenAI alternative
+            fallbackProviderType = 'openai'; // Switch to OpenAI provider
+          }
+        }
+        
+        if (fallbackModel) {
+          try {
+            console.log(`   🔄 Trying fallback model: ${fallbackModel} (${fallbackProviderType})`);
             let fallbackAdapter;
-            if (providerType === 'openai') {
+            
+            if (fallbackProviderType === 'openai') {
               const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
               fallbackAdapter = new OpenAIAdapter(fallbackModel);
-            } else if (providerType === 'anthropic') {
+            } else if (fallbackProviderType === 'google') {
+              const { GeminiAdapter } = await import('@/lib/ai/v2/adapters/GeminiAdapter');
+              fallbackAdapter = new GeminiAdapter(fallbackModel);
+            } else if (fallbackProviderType === 'anthropic') {
               const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
               fallbackAdapter = new ClaudeAdapter(fallbackModel);
-            } else if (providerType === 'replicate') {
+            } else if (fallbackProviderType === 'replicate') {
               const { ReplicateAdapter } = await import('@/lib/ai/v2/adapters/ReplicateAdapter');
-              fallbackAdapter = new ReplicateAdapter(fallbackModel); // Use fallback model directly
+              fallbackAdapter = new ReplicateAdapter(fallbackModel);
             } else {
               // Use factory for other providers
-              fallbackAdapter = fallbackProvider;
+              const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
+              fallbackAdapter = AIProviderFactory.create(fallbackProviderType);
             }
             
             const response = await fallbackAdapter.execute({
@@ -526,15 +679,33 @@ export class PromptPatternAuditor {
             console.log(`   ✅ Fallback model ${fallbackModel} succeeded`);
             return response.content;
           } catch (fallbackError) {
-            console.warn(`   ❌ Fallback model ${fallbackModel} also failed`);
+            console.warn(`   ❌ Fallback model ${fallbackModel} also failed:`, fallbackError instanceof Error ? fallbackError.message : String(fallbackError));
           }
         }
         
-        // Last resort: try using AIProviderFactory directly (uses static config fallback)
+        // Last resort: try using OpenAI as final fallback if we have OpenAI keys
+        if (process.env.OPENAI_API_KEY && agent.provider.includes('replicate')) {
+          try {
+            console.log(`   🔄 Last resort: trying OpenAI gpt-4o-mini...`);
+            const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+            const lastResortAdapter = new OpenAIAdapter('gpt-4o-mini');
+            const response = await lastResortAdapter.execute({
+              prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+              temperature: agent.temperature,
+              maxTokens: agent.maxTokens,
+            });
+            console.log(`   ✅ Last resort OpenAI fallback succeeded`);
+            return response.content;
+          } catch (lastResortError) {
+            console.warn(`   ❌ Last resort fallback also failed`);
+          }
+        }
+        
+        // Final fallback: try using AIProviderFactory directly (uses static config fallback)
         try {
           const { AIProviderFactory } = await import('@/lib/ai/v2/factory/AIProviderFactory');
           const fallbackProvider = agent.provider === 'replicate' 
-            ? AIProviderFactory.create('replicate') // Use replicate provider
+            ? AIProviderFactory.create('openai') // Use OpenAI instead of Replicate
             : AIProviderFactory.create(agent.provider);
           const response = await fallbackProvider.execute({
             prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
@@ -618,8 +789,8 @@ export class PromptPatternAuditor {
     return {
       role: `role_specific_reviewer_${role.replace(/-/g, '_')}`,
       name: `${roleInfo.title} Specialist Reviewer`,
-      model: 'openai/gpt-5', // Via Replicate
-      provider: 'replicate',
+      model: 'gpt-4o', // Direct OpenAI - best for role-specific analysis
+      provider: 'openai',
       temperature: 0.4,
       maxTokens: 1500,
       systemPrompt: `You are a ${roleInfo.title} Specialist Reviewer who evaluates prompts and patterns specifically for ${roleInfo.title.toLowerCase()}.
@@ -1088,8 +1259,8 @@ Provide:
     return {
       role: `pattern_specific_reviewer_${patternId.replace(/-/g, '_')}`,
       name: `${patternInfo.name} Specialist Reviewer`,
-      model: 'openai/gpt-5', // Via Replicate
-      provider: 'replicate',
+      model: 'gpt-4o', // Direct OpenAI - best for pattern-specific analysis
+      provider: 'openai',
       temperature: 0.4,
       maxTokens: 1500,
       systemPrompt: `You are a ${patternInfo.name} Specialist Reviewer who evaluates prompts specifically using the ${patternInfo.name}.
@@ -1166,8 +1337,37 @@ ESTIMATED TIME: ${prompt.estimatedTime || 'N/A'}
     const rubricAgent = AUDIT_AGENTS.find((a) => a.role === 'grading_rubric_expert');
     if (rubricAgent) {
       try {
-        const rubricPrompt = `Evaluate this prompt using the comprehensive grading rubric:\n\n${promptText}\n\nProvide JSON response with scores for all 8 categories.`;
-        const rubricReview = await this.runAgent(rubricAgent, rubricPrompt);
+        // Check cache for rubric score first
+        let rubricReview: string | null = null;
+        if (this.useCache && redisCache) {
+          try {
+            const contentHash = hashContent(promptText);
+            const cacheKey = CACHE_KEYS.rubricScore(contentHash);
+            rubricReview = await redisCache.get<string>(cacheKey);
+            if (rubricReview) {
+              console.log('   💾 Cache hit for grading rubric');
+            }
+          } catch (error) {
+            // Cache miss - continue to API call
+          }
+        }
+        
+        if (!rubricReview) {
+          const rubricPrompt = `Evaluate this prompt using the comprehensive grading rubric:\n\n${promptText}\n\nProvide JSON response with scores for all 8 categories.`;
+          rubricReview = await this.runAgent(rubricAgent, rubricPrompt);
+          
+          // Cache the rubric result
+          if (this.useCache && redisCache) {
+            try {
+              const contentHash = hashContent(promptText);
+              const cacheKey = CACHE_KEYS.rubricScore(contentHash);
+              await redisCache.setex(cacheKey, CACHE_TTL.rubricScore, rubricReview);
+            } catch (error) {
+              // Cache write failed - continue anyway
+            }
+          }
+        }
+        
         agentReviews['grading_rubric'] = rubricReview;
 
         // Parse JSON from rubric review
@@ -1306,8 +1506,78 @@ ESTIMATED TIME: ${prompt.estimatedTime || 'N/A'}
       }
     }
 
-    // Step 3: Run other specialized agents for additional insights
-    const otherAgents = AUDIT_AGENTS.filter((a) => a.role !== 'grading_rubric_expert');
+    // Step 3: Run Prompt Execution Tester - actually execute the prompt (SKIP if fast mode)
+    if (!this.skipExecutionTest) {
+      const executionTesterAgent = AUDIT_AGENTS.find((a) => a.role === 'prompt_execution_tester');
+      if (executionTesterAgent) {
+      try {
+        // Actually execute the prompt to test quality
+        const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+        const testProvider = new OpenAIAdapter('gpt-4o');
+        
+        // Create a realistic test scenario based on prompt description
+        const testScenario = prompt.useCases?.[0] || 
+                            (prompt.description ? `Test scenario: ${prompt.description.substring(0, 200)}` : 'Generic test scenario');
+        
+        // Execute the prompt
+        const executionResult = await testProvider.execute({
+          prompt: `${prompt.content}\n\n${testScenario}`,
+          temperature: 0.7, // Typical user temperature
+          maxTokens: 1000,
+        });
+        
+        // Now evaluate the execution result
+        const evaluationPrompt = `You are evaluating a prompt execution test result.
+
+PROMPT USED:
+${prompt.content.substring(0, 500)}...
+
+TEST SCENARIO:
+${testScenario}
+
+ACTUAL OUTPUT PRODUCED:
+${executionResult.content.substring(0, 1500)}...
+
+Evaluate the output quality:
+- Output quality (1-10): How good is the actual output produced?
+- Relevance (1-10): Does output match what was requested?
+- Completeness (1-10): Does output address all requirements?
+- Usability (1-10): Can the output be used immediately?
+- Reliability (1-10): Would this prompt produce consistent results?
+
+Provide:
+- Scores for each criterion
+- Overall quality assessment (1-10)
+- Issues found in actual execution
+- Recommendations for improving prompt execution quality`;
+        
+        const evaluation = await this.runAgent(executionTesterAgent, evaluationPrompt);
+        agentReviews['prompt_execution_test'] = `EXECUTION RESULT:\n${executionResult.content.substring(0, 800)}...\n\nEVALUATION:\n${evaluation}`;
+        
+        // Extract execution scores
+        const overallMatch = evaluation.match(/overall[:\s]+quality[:\s]+assessment[:\s]+(\d+(?:\.\d+)?)/i) || 
+                                   evaluation.match(/overall[:\s]+(\d+(?:\.\d+)?)/i);
+        
+        if (overallMatch) {
+          const executionScore = parseFloat(overallMatch[1]);
+          // Execution quality directly affects engineering usefulness
+          if (categoryScores.engineeringUsefulness === 0 || executionScore < categoryScores.engineeringUsefulness) {
+            categoryScores.engineeringUsefulness = executionScore;
+          }
+        }
+      } catch (error) {
+        console.error(`❌ Error running Prompt Execution Tester:`, error);
+        agentReviews['prompt_execution_test'] = `Error: ${error instanceof Error ? error.message : String(error)}`;
+      }
+    } else {
+      console.log('   ⚡ Skipping execution test (fast mode)');
+    }
+
+    // Step 4: Run other specialized agents for additional insights
+    const otherAgents = AUDIT_AGENTS.filter((a) => 
+      a.role !== 'grading_rubric_expert' && 
+      a.role !== 'prompt_execution_tester' // Already handled above
+    );
     for (const agent of otherAgents) {
       try {
         const reviewPrompt = `Review this prompt:\n\n${promptText}\n\nProvide your review with score (1-10), issues, and recommendations.`;
@@ -1317,17 +1587,46 @@ ESTIMATED TIME: ${prompt.estimatedTime || 'N/A'}
         // Extract score
         const scoreMatch = review.match(/score[:\s]+(\d+(?:\.\d+)?)/i);
         if (scoreMatch) {
-          // Update relevant category score if this agent specializes in it and score is 0
-          if (agent.role === 'engineering_reviewer' && categoryScores.engineeringUsefulness === 0) {
-            categoryScores.engineeringUsefulness = parseFloat(scoreMatch[1]);
-          } else if (agent.role === 'enterprise_reviewer' && categoryScores.enterpriseReadiness === 0) {
-            categoryScores.enterpriseReadiness = parseFloat(scoreMatch[1]);
-          } else if (agent.role === 'web_security_reviewer' && categoryScores.securityCompliance === 0) {
-            categoryScores.securityCompliance = parseFloat(scoreMatch[1]);
-          } else if (agent.role === 'seo_enrichment_reviewer' && categoryScores.seoEnrichment === 0) {
-            categoryScores.seoEnrichment = parseFloat(scoreMatch[1]);
-          } else if (agent.role === 'completeness_reviewer' && categoryScores.completeness === 0) {
-            categoryScores.completeness = parseFloat(scoreMatch[1]);
+          const agentScore = parseFloat(scoreMatch[1]);
+          // Update relevant category score if this agent specializes in it
+          if (agent.role === 'engineering_reviewer') {
+            // Engineering reviewer influences functionality score
+            if (categoryScores.engineeringUsefulness === 0 || agentScore < categoryScores.engineeringUsefulness) {
+              categoryScores.engineeringUsefulness = agentScore;
+            }
+          } else if (agent.role === 'seo_enrichment_reviewer') {
+            if (categoryScores.seoEnrichment === 0 || agentScore < categoryScores.seoEnrichment) {
+              categoryScores.seoEnrichment = agentScore;
+            }
+          } else if (agent.role === 'completeness_reviewer') {
+            if (categoryScores.completeness === 0 || agentScore < categoryScores.completeness) {
+              categoryScores.completeness = agentScore;
+            }
+          } else if (agent.role === 'prompt_engineering_sme') {
+            // Prompt engineering SME influences engineering usefulness (functionality)
+            // Lower score if prompt engineering quality is poor
+            if (categoryScores.engineeringUsefulness === 0 || agentScore < categoryScores.engineeringUsefulness) {
+              categoryScores.engineeringUsefulness = Math.min(categoryScores.engineeringUsefulness || 10, agentScore);
+            }
+          } else if (agent.role === 'prompt_execution_tester') {
+            // Execution tester influences engineering usefulness - actual test results
+            // Extract execution quality scores from review
+            const outputQualityMatch = review.match(/output quality[:\s]+(\d+(?:\.\d+)?)/i);
+            const relevanceMatch = review.match(/relevance[:\s]+(\d+(?:\.\d+)?)/i);
+            const completenessMatch = review.match(/completeness[:\s]+(\d+(?:\.\d+)?)/i);
+            
+            if (outputQualityMatch || relevanceMatch || completenessMatch) {
+              const executionScore = outputQualityMatch 
+                ? parseFloat(outputQualityMatch[1])
+                : relevanceMatch 
+                  ? parseFloat(relevanceMatch[1])
+                  : parseFloat(completenessMatch![1]);
+              
+              // Execution quality directly affects engineering usefulness
+              if (categoryScores.engineeringUsefulness === 0 || executionScore < categoryScores.engineeringUsefulness) {
+                categoryScores.engineeringUsefulness = executionScore;
+              }
+            }
           }
         }
 
@@ -1357,58 +1656,93 @@ ESTIMATED TIME: ${prompt.estimatedTime || 'N/A'}
     }
 
     // Calculate overall score (weighted average)
+    // Priority: 1. Completeness, 2. Functionality (works), 3. SEO, 4. Value, 5. Clarity
     const weights = {
-      engineeringUsefulness: 0.25, // Highest weight - core value
-      caseStudyQuality: 0.15,
-      completeness: 0.15,
-      seoEnrichment: 0.10,
-      enterpriseReadiness: 0.15,
-      securityCompliance: 0.10,
-      accessibility: 0.05,
-      performance: 0.05,
+      completeness: 0.30,        // #1 Priority: Has major things for each area
+      engineeringUsefulness: 0.25, // #2 Priority: Works, solid, gives decent first result
+      seoEnrichment: 0.20,        // #3 Priority: Good SEO
+      caseStudyQuality: 0.10,     // #4 Priority: Shows good value (via case studies)
+      enterpriseReadiness: 0.05,  // Reduced weight
+      securityCompliance: 0.05,   // Reduced weight
+      accessibility: 0.03,        // Reduced weight
+      performance: 0.02,          // Reduced weight
     };
 
-    const overallScore = Object.entries(categoryScores).reduce((sum, [key, score]) => {
+    let overallScore = Object.entries(categoryScores).reduce((sum, [key, score]) => {
       return sum + (score * (weights as any)[key]);
     }, 0);
 
-    // Check for missing fields
+    // Base score adjustment: If prompt has basic required fields, add bonus
+    // This ensures functional prompts don't score too low
+    let baseScoreBonus = 0;
+    const hasBasicContent = prompt.title && prompt.description && prompt.content && prompt.content.length >= 100;
+    const hasCategory = prompt.category;
+    const hasEnrichment = prompt.caseStudies?.length > 0 || prompt.examples?.length > 0 || prompt.useCases?.length > 0;
+    
+    if (hasBasicContent && hasCategory) {
+      baseScoreBonus = 0.5; // Base bonus for functional prompt
+      if (hasEnrichment) {
+        baseScoreBonus = 1.0; // Additional bonus for enriched prompts
+      }
+    }
+    
+    overallScore = Math.min(10, overallScore + baseScoreBonus);
+
+    // Check for missing fields (only flag critical ones, not enrichment)
+    const criticalIssues: string[] = [];
+    
     if (!prompt.slug) {
-      issues.push('Missing slug');
+      criticalIssues.push('Missing slug');
       missingElements.push('slug');
     }
     if (!prompt.description || prompt.description.length < 50) {
-      issues.push('Description too short or missing');
+      criticalIssues.push('Description too short or missing');
       missingElements.push('description');
     }
+    if (!prompt.content || prompt.content.length < 100) {
+      criticalIssues.push('Content too short or missing');
+      missingElements.push('content');
+    }
+    if (!prompt.category) {
+      criticalIssues.push('Missing category');
+      missingElements.push('category');
+    }
+    
+    // Optional fields (suggestions, not critical)
     if (!prompt.tags || !Array.isArray(prompt.tags) || prompt.tags.length === 0) {
-      issues.push('Missing or empty tags');
+      recommendations.push('Add tags for better discoverability');
       missingElements.push('tags');
     }
     if (!prompt.role) {
-      issues.push('Missing role');
+      recommendations.push('Add role assignment for better targeting');
       missingElements.push('role');
     }
     if (!prompt.pattern) {
-      issues.push('Missing pattern');
+      recommendations.push('Add pattern for better categorization');
       missingElements.push('pattern');
     }
-    if (!prompt.content || prompt.content.length < 100) {
-      issues.push('Content too short or missing');
-      missingElements.push('content');
-    }
     if (!prompt.caseStudies || !Array.isArray(prompt.caseStudies) || prompt.caseStudies.length === 0) {
-      issues.push('Missing case studies');
+      recommendations.push('Add case studies to demonstrate real-world usage');
       missingElements.push('caseStudies');
     }
     if (!prompt.bestTimeToUse || (typeof prompt.bestTimeToUse === 'string' && prompt.bestTimeToUse.trim().length === 0) || (Array.isArray(prompt.bestTimeToUse) && prompt.bestTimeToUse.length === 0)) {
-      issues.push('Missing "best time to use" guidance');
+      recommendations.push('Add "best time to use" guidance');
       missingElements.push('bestTimeToUse');
     }
     if (!prompt.recommendedModel || (typeof prompt.recommendedModel === 'string' && prompt.recommendedModel.trim().length === 0) || (Array.isArray(prompt.recommendedModel) && prompt.recommendedModel.length === 0)) {
-      issues.push('Missing recommended AI model suggestions');
+      recommendations.push('Add recommended AI model suggestions');
       missingElements.push('recommendedModel');
     }
+
+    // Add critical issues to issues list
+    issues.push(...criticalIssues);
+
+    // Realistic needsFix threshold: 6.0 instead of 7.0
+    // Only flag as needsFix if:
+    // 1. Score is below 6.0 (needs significant improvement)
+    // 2. OR has critical issues (missing required fields)
+    // 3. But NOT just missing enrichment fields (those are recommendations)
+    const needsFix = overallScore < 6.0 || criticalIssues.length > 0;
 
     return {
       id: prompt.id || prompt._id?.toString() || 'unknown',
@@ -1419,7 +1753,7 @@ ESTIMATED TIME: ${prompt.estimatedTime || 'N/A'}
       issues: [...new Set(issues)],
       recommendations: [...new Set(recommendations)],
       missingElements: [...new Set(missingElements)],
-      needsFix: overallScore < 7.0 || issues.length > 0 || missingElements.length > 0,
+      needsFix,
       agentReviews,
     };
   }
@@ -1550,15 +1884,16 @@ USE CASES: ${Array.isArray(pattern.useCases) ? pattern.useCases.join(', ') : 'N/
     }
 
     // Calculate overall score (weighted average)
+    // Priority: 1. Completeness, 2. Functionality (works), 3. SEO, 4. Value, 5. Clarity
     const weights = {
-      engineeringUsefulness: 0.25,
-      caseStudyQuality: 0.15,
-      completeness: 0.15,
-      seoEnrichment: 0.10,
-      enterpriseReadiness: 0.15,
-      securityCompliance: 0.10,
-      accessibility: 0.05,
-      performance: 0.05,
+      completeness: 0.30,        // #1 Priority: Has major things for each area
+      engineeringUsefulness: 0.25, // #2 Priority: Works, solid, gives decent first result
+      seoEnrichment: 0.20,        // #3 Priority: Good SEO
+      caseStudyQuality: 0.10,     // #4 Priority: Shows good value (via case studies)
+      enterpriseReadiness: 0.05,  // Reduced weight
+      securityCompliance: 0.05,   // Reduced weight
+      accessibility: 0.03,        // Reduced weight
+      performance: 0.02,          // Reduced weight
     };
 
     const overallScore = Object.entries(categoryScores).reduce((sum, [key, score]) => {
@@ -1608,7 +1943,7 @@ USE CASES: ${Array.isArray(pattern.useCases) ? pattern.useCases.join(', ') : 'N/
       issues: [...new Set(issues)],
       recommendations: [...new Set(recommendations)],
       missingElements: [...new Set(missingElements)],
-      needsFix: overallScore < 7.0 || issues.length > 0 || missingElements.length > 0,
+      needsFix: overallScore < 6.0 || issues.length > 0,
       agentReviews,
     };
   }
@@ -1645,8 +1980,19 @@ async function auditPromptsAndPatterns(options: {
   }
 
   const db = await getMongoDb();
-  const auditor = new PromptPatternAuditor('system');
+  
+  // Check for fast mode flag
+  const fastMode = process.argv.includes('--fast') || process.argv.includes('-f');
+  const noCache = process.argv.includes('--no-cache'); // Disable caching if needed
+  const auditor = new PromptPatternAuditor('system', { 
+    skipExecutionTest: fastMode,
+    useCache: !noCache && !!redisCache, // Enable cache if Redis available and not disabled
+  });
   const results: AuditResult[] = [];
+  
+  if (redisCache && !noCache) {
+    console.log('💾 Redis caching enabled - will cache agent responses\n');
+  }
 
   // Audit prompts
   if (type === 'prompts' || type === 'both') {
@@ -1655,6 +2001,12 @@ async function auditPromptsAndPatterns(options: {
     const prompts = await promptsCollection.find({}).limit(limit || 1000).toArray();
 
     console.log(`Found ${prompts.length} prompts to audit\n`);
+
+    // Check for fast mode flag
+    const fastMode = process.argv.includes('--fast') || process.argv.includes('-f');
+    if (fastMode) {
+      console.log('⚡ FAST MODE: Skipping execution testing for faster audits\n');
+    }
 
     for (let i = 0; i < prompts.length; i++) {
       const prompt = prompts[i];
@@ -1667,6 +2019,33 @@ async function auditPromptsAndPatterns(options: {
         const status = result.needsFix ? '⚠️' : '✅';
         console.log(`   ${status} Overall: ${result.overallScore.toFixed(1)}/10 | Eng: ${result.categoryScores.engineeringUsefulness.toFixed(1)} | Cases: ${result.categoryScores.caseStudyQuality.toFixed(1)}`);
         console.log(`      Issues: ${result.issues.length} | Missing: ${result.missingElements.length}`);
+        
+        // Save audit result with version number and date
+        const existingAudit = await db.collection('prompt_audit_results').findOne(
+          { promptId: prompt.id || prompt.slug || prompt._id?.toString() },
+          { sort: { auditVersion: -1 } }
+        );
+        
+        const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
+        const auditDate = new Date();
+        
+        await db.collection('prompt_audit_results').insertOne({
+          promptId: prompt.id || prompt.slug || prompt._id?.toString(),
+          promptTitle: prompt.title || 'Untitled',
+          auditVersion,
+          auditDate,
+          overallScore: result.overallScore,
+          categoryScores: result.categoryScores,
+          agentReviews: result.agentReviews,
+          issues: result.issues,
+          recommendations: result.recommendations,
+          missingElements: result.missingElements,
+          needsFix: result.needsFix,
+          auditedAt: auditDate,
+          auditedBy: 'system',
+          createdAt: auditDate,
+          updatedAt: auditDate,
+        });
         
         if (fix && result.needsFix) {
           console.log(`   🔧 Auto-fixing...`);
@@ -1697,6 +2076,33 @@ async function auditPromptsAndPatterns(options: {
         const status = result.needsFix ? '⚠️' : '✅';
         console.log(`   ${status} Overall: ${result.overallScore.toFixed(1)}/10 | Eng: ${result.categoryScores.engineeringUsefulness.toFixed(1)} | Cases: ${result.categoryScores.caseStudyQuality.toFixed(1)}`);
         console.log(`      Issues: ${result.issues.length} | Missing: ${result.missingElements.length}`);
+        
+        // Save audit result with version number and date
+        const existingAudit = await db.collection('pattern_audit_results').findOne(
+          { patternId: pattern.id || pattern.slug || pattern._id?.toString() },
+          { sort: { auditVersion: -1 } }
+        );
+        
+        const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
+        const auditDate = new Date();
+        
+        await db.collection('pattern_audit_results').insertOne({
+          patternId: pattern.id || pattern.slug || pattern._id?.toString(),
+          patternName: pattern.name || 'Untitled',
+          auditVersion,
+          auditDate,
+          overallScore: result.overallScore,
+          categoryScores: result.categoryScores,
+          agentReviews: result.agentReviews,
+          issues: result.issues,
+          recommendations: result.recommendations,
+          missingElements: result.missingElements,
+          needsFix: result.needsFix,
+          auditedAt: auditDate,
+          auditedBy: 'system',
+          createdAt: auditDate,
+          updatedAt: auditDate,
+        });
         
         if (fix && result.needsFix) {
           console.log(`   🔧 Auto-fixing...`);

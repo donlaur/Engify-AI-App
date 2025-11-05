@@ -99,11 +99,16 @@ export class PromptRepository
   /**
    * Get prompt by ID or slug
    * For public pages, shows prompts that are not explicitly private
+   * All prompts are public by default (unless explicitly marked private)
    */
   async getById(idOrSlug: string): Promise<Prompt | null> {
     const document = await this.findOne({
       $or: [{ id: idOrSlug }, { slug: idOrSlug }, { _id: idOrSlug }],
-      isPublic: { $ne: false }, // Show if isPublic is true or undefined/null
+      // Show if isPublic is not explicitly false (public by default)
+      // This includes: true, undefined, null
+      isPublic: { $ne: false },
+      // Show if active is not explicitly false (active by default)
+      // This includes: true, undefined, null
       active: { $ne: false },
     });
     return document ? this.processor.process(document) : null;

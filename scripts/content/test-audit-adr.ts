@@ -7,13 +7,13 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { getMongoDb } from '@/lib/db/mongodb';
-import { PromptPatternAuditor } from '@/scripts/content/audit-prompts-patterns';
+import { PromptPatternAuditor } from './audit-prompts-patterns';
 
 async function testAudit() {
   console.log('🎯 Testing Audit for Architecture Decision Record (ADR)\n');
   
   const db = await getMongoDb();
-  const auditor = new PromptPatternAuditor('system');
+  const auditor = new PromptPatternAuditor('system', { skipExecutionTest: true, useCache: true });
   
   // Find the prompt
   const prompt = await db.collection('prompts').findOne({
@@ -53,29 +53,38 @@ async function testAudit() {
       console.log(`   ${label}: ${score.toFixed(1)}/10`);
     });
     
-    // Save to database
-    await db.collection('prompt_audit_results').updateOne(
+    // Get existing audit to determine version number
+    const existingAudit = await db.collection('prompt_audit_results').findOne(
       { promptId: prompt.id },
-      {
-        $set: {
-          promptId: prompt.id,
-          promptTitle: prompt.title,
-          overallScore: auditResult.overallScore,
-          categoryScores: auditResult.categoryScores,
-          agentReviews: auditResult.agentReviews,
-          issues: auditResult.issues,
-          recommendations: auditResult.recommendations,
-          missingElements: auditResult.missingElements,
-          needsFix: auditResult.needsFix,
-          auditedAt: new Date(),
-          auditedBy: 'system',
-          updatedAt: new Date(),
-        },
-      },
-      { upsert: true }
+      { sort: { auditVersion: -1 } }
     );
+
+    // Calculate next version number
+    const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
+    const auditDate = new Date();
+
+    // Save to database
+    await db.collection('prompt_audit_results').insertOne({
+      promptId: prompt.id,
+      promptTitle: prompt.title,
+      auditVersion,
+      auditDate,
+      overallScore: auditResult.overallScore,
+      categoryScores: auditResult.categoryScores,
+      agentReviews: auditResult.agentReviews,
+      issues: auditResult.issues,
+      recommendations: auditResult.recommendations,
+      missingElements: auditResult.missingElements,
+      needsFix: auditResult.needsFix,
+      auditedAt: auditDate,
+      auditedBy: 'system',
+      createdAt: auditDate,
+      updatedAt: auditDate,
+    });
     
     console.log('\n✅ Audit saved to database');
+    console.log(`   Version: ${auditVersion}`);
+    console.log(`   Date: ${auditDate.toISOString()}`);
     console.log(`\n📝 Issues: ${auditResult.issues.length}`);
     console.log(`💡 Recommendations: ${auditResult.recommendations.length}`);
     console.log(`❌ Missing Elements: ${auditResult.missingElements.length}\n`);

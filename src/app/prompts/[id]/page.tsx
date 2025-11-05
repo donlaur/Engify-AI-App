@@ -38,8 +38,8 @@ import { PromptEnrichment } from '@/components/features/PromptEnrichment';
 import { PromptAuditScores } from '@/components/features/PromptAuditScores';
 import { PromptRevisions } from '@/components/features/PromptRevisions';
 import { PremiumPromptLock } from '@/components/features/PremiumPromptLock';
-import { auth } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { PromptTrust, PromptSEOFeatures, PromptPremiumCTA } from '@/components/features/PromptTrust';
+import { PromptPageClient } from '@/components/features/PromptPageClient';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -144,19 +144,10 @@ export default async function PromptPage({
       notFound();
     }
 
-    // Check if prompt requires authentication or is premium
-    const session = await auth();
-    const isAuthenticated = !!session?.user;
-
-    // If prompt requires auth and user is not authenticated, redirect to login
-    if (prompt.requiresAuth && !isAuthenticated) {
-      redirect(`/login?redirect=/prompts/${params.id}`);
-    }
-
-    // If prompt is premium and user is not authenticated, show upgrade message
-    // (For now, we'll allow viewing but mark it as premium for future implementation)
+    // All prompts are free and public - no authentication required
+    // (Previously had auth checks, but removed for public access)
     const isPremium = prompt.isPremium === true;
-    const canViewPremium = isAuthenticated; // Future: Check subscription status
+    const canViewPremium = true; // All prompts are free now - allow viewing
 
     // Note: RelatedPrompts now fetches related prompts via API (client-side)
     // This eliminates the need to fetch all prompts during build, dramatically improving performance
@@ -337,6 +328,15 @@ export default async function PromptPage({
               </pre>
             </div>
 
+            {/* Trust & Social Proof */}
+            <PromptTrust
+              views={prompt.views}
+              rating={prompt.rating}
+              verified={prompt.verified}
+              premium={prompt.isPremium}
+              updatedAt={prompt.updatedAt}
+            />
+
             {/* Navigation & Actions */}
             <div className="mt-8 flex flex-wrap gap-4">
               <Button asChild>
@@ -353,6 +353,13 @@ export default async function PromptPage({
               />
             </div>
 
+            {/* SEO-Focused Features */}
+            <PromptSEOFeatures
+              useCases={prompt.useCases}
+              bestPractices={prompt.bestPractices}
+              examples={prompt.examples}
+            />
+
             {/* Enrichment Details - Case Studies, Best Time to Use, Recommended Models, etc. */}
             <PromptEnrichment
               caseStudies={prompt.caseStudies}
@@ -364,6 +371,12 @@ export default async function PromptPage({
               whenNotToUse={prompt.whenNotToUse}
               difficulty={prompt.difficulty}
               estimatedTime={prompt.estimatedTime}
+            />
+
+            {/* Premium CTA */}
+            <PromptPremiumCTA
+              isPremium={prompt.isPremium}
+              promptTitle={prompt.title}
             />
 
             {/* Audit Scores - Fetch client-side */}

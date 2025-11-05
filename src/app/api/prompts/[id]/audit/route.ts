@@ -47,8 +47,9 @@ export async function GET(
     // Check for audit results in a dedicated collection
     const auditResult = await db.collection('prompt_audit_results').findOne({
       promptId: prompt.id || prompt.slug || prompt._id.toString(),
-    })
-    .sort({ auditedAt: -1 });
+    }, {
+      sort: { auditVersion: -1 } // Get latest version
+    });
 
     if (!auditResult) {
       return NextResponse.json({
@@ -61,6 +62,8 @@ export async function GET(
       hasAudit: true,
       promptId: prompt.id || prompt.slug,
       auditResult: {
+        auditVersion: auditResult.auditVersion,
+        auditDate: auditResult.auditDate,
         overallScore: auditResult.overallScore,
         categoryScores: auditResult.categoryScores,
         agentReviews: auditResult.agentReviews,
@@ -109,31 +112,40 @@ export async function POST(
     const auditor = new AuditorClass('system');
     const auditResult = await auditor.auditPrompt(prompt);
 
-    // Save audit result to database
-    await db.collection('prompt_audit_results').updateOne(
+    // Get existing audit to determine version number
+    const existingAudit = await db.collection('prompt_audit_results').findOne(
       { promptId: prompt.id || prompt.slug || prompt._id.toString() },
-      {
-        $set: {
-          promptId: prompt.id || prompt.slug || prompt._id.toString(),
-          promptTitle: prompt.title,
-          overallScore: auditResult.overallScore,
-          categoryScores: auditResult.categoryScores,
-          agentReviews: auditResult.agentReviews,
-          issues: auditResult.issues,
-          recommendations: auditResult.recommendations,
-          missingElements: auditResult.missingElements,
-          needsFix: auditResult.needsFix,
-          auditedAt: new Date(),
-          auditedBy: session?.user?.id || 'system',
-          updatedAt: new Date(),
-        },
-      },
-      { upsert: true }
+      { sort: { auditVersion: -1 } }
     );
+
+    // Calculate next version number
+    const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
+    const auditDate = new Date();
+
+    // Save audit result to database
+    await db.collection('prompt_audit_results').insertOne({
+      promptId: prompt.id || prompt.slug || prompt._id.toString(),
+      promptTitle: prompt.title,
+      auditVersion,
+      auditDate,
+      overallScore: auditResult.overallScore,
+      categoryScores: auditResult.categoryScores,
+      agentReviews: auditResult.agentReviews,
+      issues: auditResult.issues,
+      recommendations: auditResult.recommendations,
+      missingElements: auditResult.missingElements,
+      needsFix: auditResult.needsFix,
+      auditedAt: auditDate,
+      auditedBy: session?.user?.id || 'system',
+      createdAt: auditDate,
+      updatedAt: auditDate,
+    });
 
     return NextResponse.json({
       success: true,
       auditResult: {
+        auditVersion,
+        auditDate,
         overallScore: auditResult.overallScore,
         categoryScores: auditResult.categoryScores,
         issues: auditResult.issues,

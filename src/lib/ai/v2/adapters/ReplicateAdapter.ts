@@ -12,6 +12,7 @@ const DEFAULT_ALLOWED_MODELS = [
   'meta/llama-3.1-405b-instruct',
   'openai/gpt-5',
   'anthropic/claude-4.5-haiku',
+  'anthropic/claude-4.5-sonnet', // Added for product/engineering reviews
 ];
 
 const MAX_RETRIES = Number(process.env.REPLICATE_MAX_RETRIES ?? '2');
@@ -27,6 +28,7 @@ const MODEL_COSTS_USD_PER_1M_TOKENS: Record<
   'meta/llama-3.1-405b-instruct': { input: 0.59, output: 0.79 },
   'openai/gpt-5': { input: 0.0025, output: 0.01 }, // Estimated based on GPT-4o pricing
   'anthropic/claude-4.5-haiku': { input: 0.00025, output: 0.00125 },
+  'anthropic/claude-4.5-sonnet': { input: 0.003, output: 0.015 }, // Estimated - more capable than Haiku
 };
 
 function parseAllowedModels(): Set<string> | null {

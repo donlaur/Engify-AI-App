@@ -18,3 +18,6 @@ export function PromptPageClient({ promptId }: PromptPageClientProps) {
 
   return null; // This component only handles side effects
 }
+
+// Also export as default for compatibility
+export default PromptPageClient;

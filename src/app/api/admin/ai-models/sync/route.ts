@@ -99,7 +99,7 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
   const models = await openai.models.list();
 
   const aiModels: AIModel[] = models.data
-    .filter((m) => m.id.includes('gpt') || m.id.includes('o1'))
+    .filter((m) => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3'))
     .map((m) => {
       return {
         id: m.id, // Use model ID as-is (matches config)
@@ -108,21 +108,24 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
         displayName: m.id
           .replace(/^gpt-/, 'GPT-')
           .replace(/^o1-/, 'O1-')
+          .replace(/^o3-/, 'O3-')
+          .replace(/^o4-/, 'O4-')
           .replace(/-preview$/i, ' Preview')
-          .replace(/-turbo$/i, ' Turbo'),
+          .replace(/-turbo$/i, ' Turbo')
+          .replace(/-2024\d+$/, ''),
         status: 'active' as const,
-        capabilities: ['text', ...(m.id.includes('vision') || m.id.includes('o1') ? ['vision'] : [])],
+        capabilities: ['text', ...(m.id.includes('vision') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4') ? ['vision'] : [])],
         contextWindow: getOpenAIContextWindow(m.id),
-        maxOutputTokens: m.id.includes('gpt-4o') ? 16384 : 4096,
+        maxOutputTokens: m.id.includes('gpt-4o') ? 16384 : m.id.includes('gpt-4') ? 8192 : 4096,
         costPer1kInputTokens: getOpenAICost(m.id, 'input'),
         costPer1kOutputTokens: getOpenAICost(m.id, 'output'),
         inputCostPer1M: getOpenAICost(m.id, 'input') * 1000,
         outputCostPer1M: getOpenAICost(m.id, 'output') * 1000,
         supportsStreaming: true,
         supportsJSON: m.id.includes('o') || m.id.includes('gpt-4'),
-        supportsVision: m.id.includes('vision') || m.id.includes('o1'),
-        recommended: m.id.includes('gpt-4o'),
-        tier: m.id.includes('gpt-4o-mini') ? 'affordable' as const : 'premium' as const,
+        supportsVision: m.id.includes('vision') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4'),
+        recommended: m.id.includes('gpt-4o') && !m.id.includes('mini'),
+        tier: m.id.includes('gpt-4o-mini') || m.id.includes('gpt-3.5') ? 'affordable' as const : 'premium' as const,
         isAllowed: true,
         tags: getOpenAITags(m.id),
         lastVerified: new Date(),
@@ -139,10 +142,14 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
  */
 async function syncAnthropicModels(): Promise<{ created: number; updated: number }> {
   // Anthropic doesn't have a public models list API
-  // Use known models as of Nov 2025
+  // Updated with latest models as of Nov 2024
   const knownModels: Array<{ name: string; displayName: string; contextWindow: number }> = [
+    // Claude 3.5 Series (latest)
     { name: 'claude-3-5-sonnet-20241022', displayName: 'Claude 3.5 Sonnet', contextWindow: 200000 },
+    { name: 'claude-3-5-haiku-20241022', displayName: 'Claude 3.5 Haiku', contextWindow: 200000 },
+    // Claude 3 Series
     { name: 'claude-3-opus-20240229', displayName: 'Claude 3 Opus', contextWindow: 200000 },
+    { name: 'claude-3-sonnet-20240229', displayName: 'Claude 3 Sonnet', contextWindow: 200000 },
     { name: 'claude-3-haiku-20240307', displayName: 'Claude 3 Haiku', contextWindow: 200000 },
   ];
 
@@ -154,7 +161,7 @@ async function syncAnthropicModels(): Promise<{ created: number; updated: number
     status: 'active' as const,
     capabilities: ['text', 'vision'],
     contextWindow: m.contextWindow,
-    maxOutputTokens: m.name.includes('sonnet') || m.name.includes('opus') ? 8192 : 4096,
+    maxOutputTokens: m.name.includes('3-5-sonnet') || m.name.includes('opus') ? 8192 : m.name.includes('sonnet') || m.name.includes('opus') ? 8192 : 4096,
     costPer1kInputTokens: getAnthropicCost(m.name, 'input'),
     costPer1kOutputTokens: getAnthropicCost(m.name, 'output'),
     inputCostPer1M: getAnthropicCost(m.name, 'input') * 1000,
@@ -162,7 +169,7 @@ async function syncAnthropicModels(): Promise<{ created: number; updated: number
     supportsStreaming: true,
     supportsJSON: false,
     supportsVision: true,
-    recommended: m.name.includes('sonnet'),
+    recommended: m.name.includes('3-5-sonnet') || m.name.includes('3-5-haiku'),
     tier: m.name.includes('haiku') ? 'affordable' as const : 'premium' as const,
     isAllowed: true,
     tags: getAnthropicTags(m.name),
@@ -178,11 +185,17 @@ async function syncAnthropicModels(): Promise<{ created: number; updated: number
  * Sync Google models
  */
 async function syncGoogleModels(): Promise<{ created: number; updated: number }> {
-  // Google Gemini models (as of Nov 2025)
+  // Google Gemini models (updated as of Nov 2024)
   const knownModels: Array<{ name: string; displayName: string }> = [
+    // Gemini 2.0 Series (latest experimental)
     { name: 'gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash Experimental' },
-    { name: 'gemini-1.5-pro', displayName: 'Gemini 1.5 Pro' }, // If still available
-    { name: 'gemini-1.5-flash', displayName: 'Gemini 1.5 Flash' }, // If still available
+    // Gemini 1.5 Series (stable)
+    { name: 'gemini-1.5-pro', displayName: 'Gemini 1.5 Pro' },
+    { name: 'gemini-1.5-flash', displayName: 'Gemini 1.5 Flash' },
+    { name: 'gemini-1.5-flash-8b', displayName: 'Gemini 1.5 Flash 8B' },
+    // Gemini 1.0 Series (legacy)
+    { name: 'gemini-pro', displayName: 'Gemini Pro' },
+    { name: 'gemini-pro-vision', displayName: 'Gemini Pro Vision' },
   ];
 
   const aiModels: AIModel[] = knownModels.map((m) => ({
@@ -215,24 +228,41 @@ async function syncGoogleModels(): Promise<{ created: number; updated: number }>
 
 // Helper functions for pricing (as of Nov 2025)
 function getOpenAIContextWindow(modelId: string): number {
+  // O-series models (reasoning)
+  if (modelId.includes('o1') || modelId.includes('o3') || modelId.includes('o4')) return 200000;
+  // GPT-4o series
   if (modelId.includes('gpt-4o')) return 128000;
+  // GPT-4 Turbo series
   if (modelId.includes('gpt-4-turbo')) return 128000;
+  // GPT-4 base
   if (modelId.includes('gpt-4')) return 8192;
+  // GPT-3.5 series
   if (modelId.includes('gpt-3.5')) return 16385;
   return 128000; // Default
 }
 
 function getOpenAICost(modelId: string, type: 'input' | 'output'): number {
-  // Prices per 1M tokens as of Nov 2025
+  // Prices per 1K tokens as of Nov 2024 (updated with latest pricing)
+  // O-series models (reasoning - premium pricing)
+  if (modelId.includes('o1') || modelId.includes('o3') || modelId.includes('o4')) {
+    return type === 'input' ? 15.00 / 1000 : 60.00 / 1000; // Higher for reasoning models
+  }
+  // GPT-4o series (latest, best price/performance)
+  if (modelId.includes('gpt-4o-mini')) {
+    return type === 'input' ? 0.15 / 1000 : 0.60 / 1000; // $0.15/$0.60 per 1M
+  }
   if (modelId.includes('gpt-4o')) {
     return type === 'input' ? 2.50 / 1000 : 10.00 / 1000; // $2.50/$10 per 1M
   }
+  // GPT-4 Turbo series
   if (modelId.includes('gpt-4-turbo')) {
     return type === 'input' ? 10.00 / 1000 : 30.00 / 1000;
   }
+  // GPT-4 base
   if (modelId.includes('gpt-4')) {
     return type === 'input' ? 30.00 / 1000 : 60.00 / 1000;
   }
+  // GPT-3.5 series (affordable)
   if (modelId.includes('gpt-3.5')) {
     return type === 'input' ? 0.50 / 1000 : 1.50 / 1000;
   }
@@ -241,21 +271,34 @@ function getOpenAICost(modelId: string, type: 'input' | 'output'): number {
 
 function getOpenAITags(modelId: string): string[] {
   const tags: string[] = [];
-  if (modelId.includes('gpt-4o')) tags.push('smart', 'fast', 'latest');
+  if (modelId.includes('gpt-4o')) tags.push('smart', 'fast', 'latest', 'recommended');
+  if (modelId.includes('gpt-4o-mini')) tags.push('smart', 'fast', 'affordable', 'latest');
   if (modelId.includes('gpt-4')) tags.push('smart', 'expensive');
   if (modelId.includes('vision')) tags.push('multimodal');
-  if (modelId.includes('o1')) tags.push('reasoning');
+  if (modelId.includes('o1') || modelId.includes('o3') || modelId.includes('o4')) {
+    tags.push('reasoning', 'advanced');
+  }
   return tags;
 }
 
 function getAnthropicCost(modelName: string, type: 'input' | 'output'): number {
-  // Prices per 1M tokens as of Nov 2025
-  if (modelName.includes('opus')) {
-    return type === 'input' ? 15.00 / 1000 : 75.00 / 1000;
+  // Prices per 1K tokens as of Nov 2024 (updated with latest pricing)
+  // Claude 3.5 series (latest)
+  if (modelName.includes('3-5-sonnet')) {
+    return type === 'input' ? 3.00 / 1000 : 15.00 / 1000; // $3/$15 per 1M
   }
+  if (modelName.includes('3-5-haiku')) {
+    return type === 'input' ? 0.25 / 1000 : 1.25 / 1000; // $0.25/$1.25 per 1M
+  }
+  // Claude 3 Opus (most capable)
+  if (modelName.includes('opus')) {
+    return type === 'input' ? 15.00 / 1000 : 75.00 / 1000; // $15/$75 per 1M
+  }
+  // Claude 3 Sonnet
   if (modelName.includes('sonnet')) {
     return type === 'input' ? 3.00 / 1000 : 15.00 / 1000;
   }
+  // Claude 3 Haiku (fastest, cheapest)
   if (modelName.includes('haiku')) {
     return type === 'input' ? 0.25 / 1000 : 1.25 / 1000;
   }
@@ -264,8 +307,9 @@ function getAnthropicCost(modelName: string, type: 'input' | 'output'): number {
 
 function getAnthropicTags(modelName: string): string[] {
   const tags: string[] = ['smart'];
-  if (modelName.includes('sonnet')) tags.push('balanced');
-  if (modelName.includes('haiku')) tags.push('fast', 'cheap');
+  if (modelName.includes('3-5')) tags.push('latest');
+  if (modelName.includes('sonnet')) tags.push('balanced', 'recommended');
+  if (modelName.includes('haiku')) tags.push('fast', 'affordable');
   if (modelName.includes('opus')) tags.push('expensive', 'highest-quality');
   return tags;
 }

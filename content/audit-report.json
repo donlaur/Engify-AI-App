@@ -1,0 +1,230 @@
+{
+  "timestamp": "2025-11-05T03:06:51.345Z",
+  "summary": {
+    "total": 5,
+    "needsFix": 5,
+    "avgScore": 0,
+    "categoryAverages": {
+      "engineeringUsefulness": 0,
+      "caseStudyQuality": 0,
+      "completeness": 0,
+      "seoEnrichment": 0,
+      "enterpriseReadiness": 0,
+      "securityCompliance": 0,
+      "accessibility": 0,
+      "performance": 0
+    }
+  },
+  "results": [
+    {
+      "id": "cg-001",
+      "type": "prompt",
+      "title": "Code Review Assistant",
+      "overallScore": 0,
+      "categoryScores": {
+        "engineeringUsefulness": 0,
+        "caseStudyQuality": 0,
+        "completeness": 0,
+        "seoEnrichment": 0,
+        "enterpriseReadiness": 0,
+        "securityCompliance": 0,
+        "accessibility": 0,
+        "performance": 0
+      },
+      "issues": [
+        "Missing case studies",
+        "Missing \"best time to use\" guidance",
+        "Missing recommended AI model suggestions"
+      ],
+      "recommendations": [],
+      "missingElements": [
+        "caseStudies",
+        "bestTimeToUse",
+        "recommendedModel"
+      ],
+      "needsFix": true,
+      "agentReviews": {
+        "grading_rubric": "Error: ❌ Model error for Grading Rubric Expert (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "role_specific_reviewer_engineer": "Error: ❌ Model error for Engineers Specialist Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"openai/gpt-5\" is available in the database registry or static config.",
+        "pattern_specific_reviewer_persona": "Error: ❌ Model error for Persona Pattern Specialist Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"openai/gpt-5\" is available in the database registry or static config.",
+        "engineering_reviewer": "Error: ❌ Model error for Engineering Team Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "product_reviewer": "Error: ❌ Model error for Product Team Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "roles_use_cases_reviewer": "Error: ❌ Model error for Roles & Use Cases Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "seo_enrichment_reviewer": "Error: ❌ Model error for SEO Enrichment Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "enterprise_saas_expert": "Error: ❌ Model error for Enterprise SaaS Expert (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "enterprise_reviewer": "Error: ❌ Model error for Enterprise Reviewer (Red Hat Lens) (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "web_security_reviewer": "Error: ❌ Model error for Web Security Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "compliance_reviewer": "Error: ❌ Model error for Compliance Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "completeness_reviewer": "Error: ❌ Model error for Completeness Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config."
+      }
+    },
+    {
+      "id": "cg-002",
+      "type": "prompt",
+      "title": "API Endpoint Generator",
+      "overallScore": 0,
+      "categoryScores": {
+        "engineeringUsefulness": 0,
+        "caseStudyQuality": 0,
+        "completeness": 0,
+        "seoEnrichment": 0,
+        "enterpriseReadiness": 0,
+        "securityCompliance": 0,
+        "accessibility": 0,
+        "performance": 0
+      },
+      "issues": [
+        "Missing case studies",
+        "Missing \"best time to use\" guidance",
+        "Missing recommended AI model suggestions"
+      ],
+      "recommendations": [],
+      "missingElements": [
+        "caseStudies",
+        "bestTimeToUse",
+        "recommendedModel"
+      ],
+      "needsFix": true,
+      "agentReviews": {
+        "grading_rubric": "Error: ❌ Model error for Grading Rubric Expert (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "role_specific_reviewer_engineer": "Error: ❌ Model error for Engineers Specialist Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"openai/gpt-5\" is available in the database registry or static config.",
+        "pattern_specific_reviewer_template": "Error: ❌ Model error for Template Pattern Specialist Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"openai/gpt-5\" is available in the database registry or static config.",
+        "engineering_reviewer": "Error: ❌ Model error for Engineering Team Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "product_reviewer": "Error: ❌ Model error for Product Team Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "roles_use_cases_reviewer": "Error: ❌ Model error for Roles & Use Cases Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "seo_enrichment_reviewer": "Error: ❌ Model error for SEO Enrichment Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "enterprise_saas_expert": "Error: ❌ Model error for Enterprise SaaS Expert (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "enterprise_reviewer": "Error: ❌ Model error for Enterprise Reviewer (Red Hat Lens) (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "web_security_reviewer": "Error: ❌ Model error for Web Security Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "compliance_reviewer": "Error: ❌ Model error for Compliance Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "completeness_reviewer": "Error: ❌ Model error for Completeness Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config."
+      }
+    },
+    {
+      "id": "cg-003",
+      "type": "prompt",
+      "title": "React Component Builder",
+      "overallScore": 0,
+      "categoryScores": {
+        "engineeringUsefulness": 0,
+        "caseStudyQuality": 0,
+        "completeness": 0,
+        "seoEnrichment": 0,
+        "enterpriseReadiness": 0,
+        "securityCompliance": 0,
+        "accessibility": 0,
+        "performance": 0
+      },
+      "issues": [
+        "Missing case studies",
+        "Missing \"best time to use\" guidance",
+        "Missing recommended AI model suggestions"
+      ],
+      "recommendations": [],
+      "missingElements": [
+        "caseStudies",
+        "bestTimeToUse",
+        "recommendedModel"
+      ],
+      "needsFix": true,
+      "agentReviews": {
+        "grading_rubric": "Error: ❌ Model error for Grading Rubric Expert (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "role_specific_reviewer_engineer": "Error: ❌ Model error for Engineers Specialist Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"openai/gpt-5\" is available in the database registry or static config.",
+        "pattern_specific_reviewer_template": "Error: ❌ Model error for Template Pattern Specialist Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"openai/gpt-5\" is available in the database registry or static config.",
+        "engineering_reviewer": "Error: ❌ Model error for Engineering Team Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "product_reviewer": "Error: ❌ Model error for Product Team Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "roles_use_cases_reviewer": "Error: ❌ Model error for Roles & Use Cases Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "seo_enrichment_reviewer": "Error: ❌ Model error for SEO Enrichment Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "enterprise_saas_expert": "Error: ❌ Model error for Enterprise SaaS Expert (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "enterprise_reviewer": "Error: ❌ Model error for Enterprise Reviewer (Red Hat Lens) (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "web_security_reviewer": "Error: ❌ Model error for Web Security Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "compliance_reviewer": "Error: ❌ Model error for Compliance Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "completeness_reviewer": "Error: ❌ Model error for Completeness Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config."
+      }
+    },
+    {
+      "id": "db-001",
+      "type": "prompt",
+      "title": "Bug Investigation Helper",
+      "overallScore": 0,
+      "categoryScores": {
+        "engineeringUsefulness": 0,
+        "caseStudyQuality": 0,
+        "completeness": 0,
+        "seoEnrichment": 0,
+        "enterpriseReadiness": 0,
+        "securityCompliance": 0,
+        "accessibility": 0,
+        "performance": 0
+      },
+      "issues": [
+        "Missing case studies",
+        "Missing \"best time to use\" guidance",
+        "Missing recommended AI model suggestions"
+      ],
+      "recommendations": [],
+      "missingElements": [
+        "caseStudies",
+        "bestTimeToUse",
+        "recommendedModel"
+      ],
+      "needsFix": true,
+      "agentReviews": {
+        "grading_rubric": "Error: ❌ Model error for Grading Rubric Expert (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "role_specific_reviewer_engineer": "Error: ❌ Model error for Engineers Specialist Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"openai/gpt-5\" is available in the database registry or static config.",
+        "pattern_specific_reviewer_chain_of_thought": "Error: ❌ Model error for Chain-of-Thought Pattern Specialist Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"openai/gpt-5\" is available in the database registry or static config.",
+        "engineering_reviewer": "Error: ❌ Model error for Engineering Team Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "product_reviewer": "Error: ❌ Model error for Product Team Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "roles_use_cases_reviewer": "Error: ❌ Model error for Roles & Use Cases Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "seo_enrichment_reviewer": "Error: ❌ Model error for SEO Enrichment Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "enterprise_saas_expert": "Error: ❌ Model error for Enterprise SaaS Expert (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "enterprise_reviewer": "Error: ❌ Model error for Enterprise Reviewer (Red Hat Lens) (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "web_security_reviewer": "Error: ❌ Model error for Web Security Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "compliance_reviewer": "Error: ❌ Model error for Compliance Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "completeness_reviewer": "Error: ❌ Model error for Completeness Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config."
+      }
+    },
+    {
+      "id": "db-002",
+      "type": "prompt",
+      "title": "Performance Bottleneck Analyzer",
+      "overallScore": 0,
+      "categoryScores": {
+        "engineeringUsefulness": 0,
+        "caseStudyQuality": 0,
+        "completeness": 0,
+        "seoEnrichment": 0,
+        "enterpriseReadiness": 0,
+        "securityCompliance": 0,
+        "accessibility": 0,
+        "performance": 0
+      },
+      "issues": [
+        "Missing case studies",
+        "Missing \"best time to use\" guidance",
+        "Missing recommended AI model suggestions"
+      ],
+      "recommendations": [],
+      "missingElements": [
+        "caseStudies",
+        "bestTimeToUse",
+        "recommendedModel"
+      ],
+      "needsFix": true,
+      "agentReviews": {
+        "grading_rubric": "Error: ❌ Model error for Grading Rubric Expert (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "role_specific_reviewer_engineer": "Error: ❌ Model error for Engineers Specialist Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"openai/gpt-5\" is available in the database registry or static config.",
+        "pattern_specific_reviewer_chain_of_thought": "Error: ❌ Model error for Chain-of-Thought Pattern Specialist Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"openai/gpt-5\" is available in the database registry or static config.",
+        "engineering_reviewer": "Error: ❌ Model error for Engineering Team Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "product_reviewer": "Error: ❌ Model error for Product Team Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "roles_use_cases_reviewer": "Error: ❌ Model error for Roles & Use Cases Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "seo_enrichment_reviewer": "Error: ❌ Model error for SEO Enrichment Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "enterprise_saas_expert": "Error: ❌ Model error for Enterprise SaaS Expert (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "enterprise_reviewer": "Error: ❌ Model error for Enterprise Reviewer (Red Hat Lens) (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-haiku\" is available in the database registry or static config.",
+        "web_security_reviewer": "Error: ❌ Model error for Web Security Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "compliance_reviewer": "Error: ❌ Model error for Compliance Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config.",
+        "completeness_reviewer": "Error: ❌ Model error for Completeness Reviewer (replicate): Replicate model \"google/gemini-2.5-flash\" is not in allowlist. Add REPLICATE_ALLOW_ALL=true to .env.local to allow all models, or add it to REPLICATE_ALLOWED_MODELS\nFallback also failed. Please check if the model \"anthropic/claude-4.5-sonnet\" is available in the database registry or static config."
+      }
+    }
+  ]
+}
