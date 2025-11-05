@@ -2166,7 +2166,23 @@ async function auditPromptsAndPatterns(options: {
 
     for (let i = 0; i < prompts.length; i++) {
       const prompt = prompts[i];
+      
+      // Check if prompt already has an audit (and what version)
+      const existingAudit = await db.collection('prompt_audit_results').findOne(
+        { promptId: prompt.id || prompt.slug || prompt._id?.toString() },
+        { sort: { auditVersion: -1 } }
+      );
+      
+      // Skip prompts that already have version > 1 (already improved)
+      if (existingAudit && existingAudit.auditVersion > 1) {
+        console.log(`[${i + 1}/${prompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Version ${existingAudit.auditVersion} - already improved)`);
+        continue;
+      }
+      
       console.log(`[${i + 1}/${prompts.length}] Auditing: ${prompt.title || prompt.id || 'Untitled'}`);
+      if (existingAudit) {
+        console.log(`   (Re-auditing version ${existingAudit.auditVersion})`);
+      }
       
       try {
         const result = await auditor.auditPrompt(prompt);
@@ -2176,12 +2192,7 @@ async function auditPromptsAndPatterns(options: {
         console.log(`   ${status} Overall: ${result.overallScore.toFixed(1)}/10 | Eng: ${result.categoryScores.engineeringUsefulness.toFixed(1)} | Cases: ${result.categoryScores.caseStudyQuality.toFixed(1)}`);
         console.log(`      Issues: ${result.issues.length} | Missing: ${result.missingElements.length}`);
         
-        // Save audit result with version number and date
-        const existingAudit = await db.collection('prompt_audit_results').findOne(
-          { promptId: prompt.id || prompt.slug || prompt._id?.toString() },
-          { sort: { auditVersion: -1 } }
-        );
-        
+        // Calculate next version number
         const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
         const auditDate = new Date();
         
