@@ -16,6 +16,44 @@ config({ path: '.env.local' });
 import { getMongoDb } from '@/lib/db/mongodb';
 import { OpenAIAdapter } from '@/lib/ai/v2/adapters/OpenAIAdapter';
 import { GeminiAdapter } from '@/lib/ai/v2/adapters/GeminiAdapter';
+import { Redis } from '@upstash/redis';
+import path from 'path';
+
+// Reload env vars to ensure we have the latest keys
+// This is important if keys were updated while script is running
+const envPath = path.resolve(process.cwd(), '.env.local');
+console.log(`📁 Loading environment from: ${envPath}`);
+
+const googleKey = process.env.GOOGLE_API_KEY || process.env.GOOGLE_AI_API_KEY;
+if (googleKey) {
+  const maskedKey = googleKey.length > 12 
+    ? `${googleKey.substring(0, 8)}...${googleKey.substring(googleKey.length - 4)}`
+    : '***masked***';
+  console.log(`✅ Gemini API key found: ${maskedKey} (from ${process.env.GOOGLE_API_KEY ? 'GOOGLE_API_KEY' : 'GOOGLE_AI_API_KEY'})`);
+  console.log(`   💡 If you're hitting quota limits, the script will auto-fallback to OpenAI\n`);
+} else {
+  console.warn(`⚠️  No Gemini API key found in GOOGLE_API_KEY or GOOGLE_AI_API_KEY`);
+  console.warn(`   Make sure your key is in: ${envPath}`);
+  console.warn(`   Script will use OpenAI fallback for all requests\n`);
+}
+
+// Redis for distributed locking (prevent concurrent modifications)
+let redisCache: Redis | null = null;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  redisCache = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+}
+
+// Lock keys and TTLs
+const LOCK_KEYS = {
+  improveLock: (promptId: string) => `improve:lock:${promptId}`, // Lock for prompt modifications
+};
+
+const LOCK_TTL = {
+  improveLock: 60 * 30, // 30 minutes - improvements take longer than audits
+};
 
 interface AuditPattern {
   issue: string;
@@ -31,6 +69,59 @@ interface ImprovementStats {
   keywordsAdded: number;
   metaDescriptionsFixed: number;
   slugsOptimized: number;
+}
+
+/**
+ * Execute AI request with automatic fallback on quota/rate limit errors
+ * Falls back to paid providers (OpenAI, Claude) if free tier (Gemini) hits quota
+ */
+async function executeWithFallback(
+  provider: any,
+  request: { prompt: string; temperature?: number; maxTokens?: number },
+  taskName: string
+): Promise<{ content: string }> {
+  try {
+    return await provider.execute(request);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    
+    // Check for quota/rate limit errors (429) - switch to PAID providers immediately
+    if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('rate limit') || errorMessage.includes('Too Many Requests')) {
+      console.warn(`   ⚠️  Quota/rate limit exceeded for ${taskName}, switching to paid provider...`);
+      
+      // Priority: GPT-4o-mini (cheap) → Claude Haiku (fast) → GPT-4o (reliable)
+      const fallbackModels = [
+        { provider: 'openai', model: 'gpt-4o-mini', name: 'GPT-4o-mini (cheap)' },
+        { provider: 'openai', model: 'gpt-4o', name: 'GPT-4o (reliable)' },
+      ];
+      
+      for (const fallback of fallbackModels) {
+        try {
+          console.log(`   🔄 Trying ${fallback.name} (paid provider)...`);
+          
+          let fallbackAdapter;
+          if (fallback.provider === 'openai') {
+            fallbackAdapter = new OpenAIAdapter(fallback.model);
+          } else {
+            continue; // Skip unknown providers
+          }
+          
+          const response = await fallbackAdapter.execute(request);
+          console.log(`   ✅ Switched to ${fallback.name} successfully`);
+          return response;
+        } catch (fallbackError) {
+          // Try next fallback
+          continue;
+        }
+      }
+      
+      // All fallbacks failed
+      throw new Error(`All providers exhausted for ${taskName}: ${errorMessage}`);
+    }
+    
+    // Re-throw non-quota errors
+    throw error;
+  }
 }
 
 async function analyzeAuditPatterns(db: any): Promise<{
@@ -202,10 +293,11 @@ async function applyImprovements(
   };
 
   // Use different models for different improvement tasks (optimized for cost/quality)
-  // SEO improvements → Gemini Flash (fast, cheap, good for structured data)
+  // SEO improvements → Gemini Flash (fast, cheap, good for structured data) with auto-fallback to GPT-4o-mini
   // Case studies → GPT-4o (creative, detailed content)
   // Completeness → GPT-4o (balanced quality)
-  const seoProvider = new GeminiAdapter('gemini-2.0-flash-exp'); // Fast & cheap for SEO
+  // Note: If Gemini hits quota limits, will automatically switch to OpenAI (paid providers)
+  const seoProvider = new GeminiAdapter('gemini-2.0-flash-exp'); // Fast & cheap for SEO (will fallback if quota exceeded)
   const contentProvider = new OpenAIAdapter('gpt-4o'); // Best quality for creative content
   const completenessProvider = new OpenAIAdapter('gpt-4o'); // Balanced for examples/use cases
 
@@ -327,6 +419,7 @@ async function applyImprovements(
   for (let i = 0; i < promptsWithAudits.length; i++) {
     const prompt = promptsWithAudits[i];
     const audit = promptAudits.get(prompt.id);
+    const promptId = prompt.id || prompt.slug || prompt._id?.toString();
 
     // Skip prompts that have already been improved (revision > 1)
     // Focus on baseline prompts (revision 1) to upgrade them to version 2
@@ -336,23 +429,50 @@ async function applyImprovements(
       continue;
     }
 
+    // Try to acquire lock for this prompt (prevent concurrent modifications)
+    let lockAcquired = false;
+    if (redisCache) {
+      try {
+        // Try to set lock with NX (only if not exists) and EX (expiration)
+        // Returns "OK" if lock acquired, null if already locked
+        const lockResult = await redisCache.set(
+          LOCK_KEYS.improveLock(promptId),
+          `improving-${Date.now()}`,
+          { ex: LOCK_TTL.improveLock, nx: true }
+        );
+        lockAcquired = lockResult === 'OK';
+        
+        if (!lockAcquired) {
+          console.log(`\n[${i + 1}/${promptsWithAudits.length}] 🔒 Skipping: ${prompt.title || prompt.id} (currently being improved by another process)`);
+          continue;
+        }
+      } catch (lockError) {
+        // If Redis fails, continue without lock (graceful degradation)
+        console.log(`   ⚠️  Lock check failed, continuing without lock: ${lockError instanceof Error ? lockError.message : String(lockError)}`);
+      }
+    }
+
     console.log(`\n[${i + 1}/${promptsWithAudits.length}] 📝 ${prompt.title || prompt.id}`);
+    if (lockAcquired) {
+      console.log(`   🔒 Lock acquired (prevents concurrent modifications)`);
+    }
     console.log(`   Current Score: ${audit.overallScore}/10`);
     console.log(`   Revision: ${promptRevision} → Will upgrade to ${promptRevision + 1}`);
     
-    // Determine which model to use based on what needs improvement (from audit recommendations)
-    // Check audit recommendations for model suggestions
-    const needsSEO = audit.categoryScores?.seoEnrichment < 7;
-    const needsCaseStudies = audit.categoryScores?.caseStudyQuality < 7;
-    const needsCompleteness = audit.categoryScores?.completeness < 7;
-    
-    // Log which models will be used for which improvements
-    if (needsSEO) console.log(`   🔍 SEO improvements → Using: Gemini Flash (fast & cheap)`);
-    if (needsCaseStudies) console.log(`   📚 Case studies → Using: GPT-4o (creative quality)`);
-    if (needsCompleteness) console.log(`   ✅ Completeness → Using: GPT-4o (balanced quality)`);
+    try {
+      // Determine which model to use based on what needs improvement (from audit recommendations)
+      // Check audit recommendations for model suggestions
+      const needsSEO = audit.categoryScores?.seoEnrichment < 7;
+      const needsCaseStudies = audit.categoryScores?.caseStudyQuality < 7;
+      const needsCompleteness = audit.categoryScores?.completeness < 7;
+      
+      // Log which models will be used for which improvements
+      if (needsSEO) console.log(`   🔍 SEO improvements → Using: Gemini Flash (auto-fallback to GPT-4o-mini if quota exceeded)`);
+      if (needsCaseStudies) console.log(`   📚 Case studies → Using: GPT-4o (creative quality)`);
+      if (needsCompleteness) console.log(`   ✅ Completeness → Using: GPT-4o (balanced quality)`);
 
-    const improvements: string[] = [];
-    const updates: any = {};
+      const improvements: string[] = [];
+      const updates: any = {};
 
     // 1. Fix SEO issues
     if (audit.categoryScores?.seoEnrichment < 7) {
@@ -402,11 +522,15 @@ Format as JSON:
   "keywords": ["keyword1", "keyword2", ...]
 }`;
 
-            const response = await seoProvider.execute({
-              prompt: seoPrompt,
-              temperature: 0.3,
-              maxTokens: 500,
-            });
+            const response = await executeWithFallback(
+              seoProvider,
+              {
+                prompt: seoPrompt,
+                temperature: 0.3,
+                maxTokens: 500,
+              },
+              'SEO'
+            );
 
             // Try to extract JSON from response (handle markdown code blocks and trailing commas)
             let jsonText = response.content;
@@ -498,11 +622,15 @@ Format as JSON array:
   ...
 ]`;
 
-            const response = await contentProvider.execute({
-              prompt: caseStudyPrompt,
-              temperature: 0.7,
-              maxTokens: 1500,
-            });
+            const response = await executeWithFallback(
+              contentProvider,
+              {
+                prompt: caseStudyPrompt,
+                temperature: 0.7,
+                maxTokens: 1500,
+              },
+              'Case Studies'
+            );
 
             // Try to extract JSON from response (handle markdown code blocks and trailing commas)
             let jsonText = response.content;
@@ -565,43 +693,79 @@ Format as JSON array:
 TITLE: ${prompt.title}
 DESCRIPTION: ${prompt.description?.substring(0, 300) || 'N/A'}
 
-Generate:
-${missingExamples ? '- 3-5 practical examples\n' : ''}
-${missingUseCases ? '- 5-8 use cases\n' : ''}
-${missingBestPractices ? '- 5-7 best practices\n' : ''}
+IMPORTANT: Keep each item concise (1-2 sentences max). This ensures complete JSON output.
 
-Format as JSON:
+Generate:
+${missingExamples ? '- 3-5 practical examples (each 1-2 sentences)\n' : ''}
+${missingUseCases ? '- 5-8 use cases (each 1-2 sentences)\n' : ''}
+${missingBestPractices ? '- 5-7 best practices (each 1-2 sentences)\n' : ''}
+
+Format as JSON (keep strings short to avoid truncation):
 {
-  ${missingExamples ? '"examples": ["example1", ...],' : ''}
-  ${missingUseCases ? '"useCases": ["use case 1", ...],' : ''}
-  ${missingBestPractices ? '"bestPractices": ["practice 1", ...]' : ''}
+  ${missingExamples ? '"examples": ["example1", "example2", ...],' : ''}
+  ${missingUseCases ? '"useCases": ["use case 1", "use case 2", ...],' : ''}
+  ${missingBestPractices ? '"bestPractices": ["practice 1", "practice 2", ...]' : ''}
 }`;
 
-              const response = await completenessProvider.execute({
-                prompt: completenessPrompt,
-                temperature: 0.7,
-                maxTokens: 1500,
-              });
+              const response = await executeWithFallback(
+                completenessProvider,
+                {
+                  prompt: completenessPrompt,
+                  temperature: 0.7,
+                  maxTokens: 2000, // Increased from 1500 to handle longer responses
+                },
+                'Completeness'
+              );
 
               // Try to extract JSON from response (handle markdown code blocks)
               let jsonText = response.content;
               
-              // Try to extract from markdown code blocks first
-              const codeBlockMatch = response.content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+              // Try to extract from markdown code blocks first (use greedy matching to get full block)
+              const codeBlockMatch = response.content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
               if (codeBlockMatch) {
                 jsonText = codeBlockMatch[1];
               } else {
-                // Try to extract JSON object directly
+                // Try to extract JSON object directly (use greedy to get full object)
                 const jsonMatch = response.content.match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
                   jsonText = jsonMatch[0];
                 }
               }
               
-              // Try to fix common JSON issues (trailing commas, unclosed strings)
-              jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
-              jsonText = jsonText.replace(/,(\s*$)/gm, ''); // Remove trailing commas at end of lines
+              // Repair common JSON issues
+              // 1. Remove trailing commas before closing brackets/braces
+              jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
+              jsonText = jsonText.replace(/,(\s*$)/gm, '');
               
+              // 2. Fix incomplete string literals in arrays (common issue with truncated responses)
+              // If we have an incomplete string like "text...", try to close it
+              jsonText = jsonText.replace(/"([^"]*?)\.\.\.[^"]*$/gm, '"$1"'); // Remove trailing "..."
+              // Close unclosed strings at end of line (lines ending with quote but no closing quote)
+              jsonText = jsonText.replace(/"([^"]+)(?:\n|$)/gm, (match, content) => {
+                // If this looks like an incomplete string (ends with line break or end of text), close it
+                if (!match.endsWith('"')) {
+                  return `"${content}"`;
+                }
+                return match;
+              });
+              
+              // 3. Try to close incomplete arrays/objects
+              // Count open vs closed brackets
+              const openBraces = (jsonText.match(/\{/g) || []).length;
+              const closeBraces = (jsonText.match(/\}/g) || []).length;
+              const openBrackets = (jsonText.match(/\[/g) || []).length;
+              const closeBrackets = (jsonText.match(/\]/g) || []).length;
+              
+              // Close incomplete structures
+              if (openBrackets > closeBrackets) {
+                jsonText += ']'.repeat(openBrackets - closeBrackets);
+              }
+              if (openBraces > closeBraces) {
+                jsonText += '}'.repeat(openBraces - closeBraces);
+              }
+              
+              // 4. Remove incomplete last array element if JSON is still invalid
+              // This handles cases where response was cut off mid-string
               try {
                 const completenessData = JSON.parse(jsonText);
                 
@@ -624,9 +788,95 @@ Format as JSON:
                   stats.completenessImproved++;
                 }
               } catch (parseError) {
-                console.error(`   ❌ Error parsing JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
-                console.error(`   Raw response preview: ${response.content.substring(0, 300)}...`);
-                // Continue without updating completeness data
+                // If still failing, try to extract partial data by parsing each array separately
+                console.warn(`   ⚠️  JSON parsing failed, attempting partial extraction...`);
+                
+                try {
+                  // Try to extract individual arrays from the response
+                  // Use greedy matching first, then fallback to non-greedy
+                  // This handles both complete and incomplete arrays
+                  let examplesMatch = response.content.match(/"examples"\s*:\s*\[([\s\S]*)\]/);
+                  if (!examplesMatch) {
+                    // Try to find incomplete array (no closing bracket)
+                    const incompleteMatch = response.content.match(/"examples"\s*:\s*\[([\s\S]*?)(?:\n|$)/);
+                    if (incompleteMatch) examplesMatch = incompleteMatch;
+                  }
+                  
+                  let useCasesMatch = response.content.match(/"useCases"\s*:\s*\[([\s\S]*)\]/);
+                  if (!useCasesMatch) {
+                    const incompleteMatch = response.content.match(/"useCases"\s*:\s*\[([\s\S]*?)(?:\n|$)/);
+                    if (incompleteMatch) useCasesMatch = incompleteMatch;
+                  }
+                  
+                  let bestPracticesMatch = response.content.match(/"bestPractices"\s*:\s*\[([\s\S]*)\]/);
+                  if (!bestPracticesMatch) {
+                    const incompleteMatch = response.content.match(/"bestPractices"\s*:\s*\[([\s\S]*?)(?:\n|$)/);
+                    if (incompleteMatch) bestPracticesMatch = incompleteMatch;
+                  }
+                  
+                  // Helper to extract array items from text (handles incomplete strings)
+                  const extractArrayItems = (text: string): string[] => {
+                    if (!text) return [];
+                    // First, try to find complete quoted strings
+                    const completeStrings: string[] = [];
+                    const completeMatches = text.match(/"([^"]+)"/g);
+                    if (completeMatches) {
+                      completeStrings.push(...completeMatches.map(m => m.replace(/^"|"$/g, '')));
+                    }
+                    
+                    // Then, try to find incomplete strings (lines that start with quote but don't end with quote)
+                    // This handles truncated responses
+                    const lines = text.split('\n');
+                    for (const line of lines) {
+                      const trimmed = line.trim();
+                      // If line starts with quote but doesn't end with quote, it's likely incomplete
+                      if (trimmed.startsWith('"') && !trimmed.endsWith('"')) {
+                        const content = trimmed.replace(/^"|,$/g, '').trim();
+                        if (content.length > 0 && !completeStrings.includes(content)) {
+                          completeStrings.push(content);
+                        }
+                      }
+                    }
+                    
+                    return completeStrings.filter(s => s.length > 0);
+                  };
+                  
+                  if (missingExamples && examplesMatch) {
+                    const examples = extractArrayItems(examplesMatch[1]);
+                    if (examples.length > 0) {
+                      updates.examples = examples;
+                      improvements.push(`Added ${examples.length} examples (partial)`);
+                    }
+                  }
+                  
+                  if (missingUseCases && useCasesMatch) {
+                    const useCases = extractArrayItems(useCasesMatch[1]);
+                    if (useCases.length > 0) {
+                      updates.useCases = useCases;
+                      improvements.push(`Added ${useCases.length} use cases (partial)`);
+                    }
+                  }
+                  
+                  if (missingBestPractices && bestPracticesMatch) {
+                    const bestPractices = extractArrayItems(bestPracticesMatch[1]);
+                    if (bestPractices.length > 0) {
+                      updates.bestPractices = bestPractices;
+                      improvements.push(`Added ${bestPractices.length} best practices (partial)`);
+                    }
+                  }
+                  
+                  if (Object.keys(updates).length > 0) {
+                    stats.completenessImproved++;
+                    console.log(`   ✅ Extracted partial data from incomplete JSON`);
+                  } else {
+                    console.error(`   ❌ Error parsing JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+                    console.error(`   Raw response preview: ${response.content.substring(0, 500)}...`);
+                  }
+                } catch (fallbackError) {
+                  console.error(`   ❌ Error parsing JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+                  console.error(`   Fallback extraction also failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`);
+                  console.error(`   Raw response preview: ${response.content.substring(0, 500)}...`);
+                }
               }
             } catch (error) {
               console.error(`   ❌ Error improving completeness: ${error}`);
@@ -656,9 +906,26 @@ Format as JSON:
         console.log(`   ✅ Applied: ${improvements.join(', ')}`);
         console.log(`   📌 Revision updated: ${promptRevision} → ${promptRevision + 1}`);
         stats.seoFixed += updates.slug || updates.metaDescription || updates.seoKeywords ? 1 : 0;
+        stats.caseStudiesAdded += updates.caseStudies ? 1 : 0;
+        stats.completenessImproved += updates.examples || updates.useCases || updates.bestPractices ? 1 : 0;
+        stats.keywordsAdded += updates.seoKeywords ? 1 : 0;
+        stats.metaDescriptionsFixed += updates.metaDescription ? 1 : 0;
+        stats.slugsOptimized += updates.slug ? 1 : 0;
       }
     } else {
       console.log(`   ✅ No improvements needed`);
+    }
+    } catch (error) {
+      console.error(`   ❌ Error during improvements: ${error}`);
+    } finally {
+      // Always release lock after improvements complete (success or error)
+      if (lockAcquired && redisCache) {
+        try {
+          await redisCache.del(LOCK_KEYS.improveLock(promptId));
+        } catch (e) {
+          // Ignore lock release errors
+        }
+      }
     }
   }
 

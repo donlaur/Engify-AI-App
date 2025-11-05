@@ -742,11 +742,13 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 const CACHE_KEYS = {
   agentResponse: (agentRole: string, contentHash: string) => `audit:agent:${agentRole}:${contentHash}`,
   rubricScore: (contentHash: string) => `audit:rubric:${contentHash}`,
+  auditLock: (promptId: string) => `audit:lock:${promptId}`, // Lock key for preventing concurrent audits
 } as const;
 
 const CACHE_TTL = {
   agentResponse: 3600 * 24, // 24 hours - agent responses don't change unless prompt changes
   rubricScore: 3600 * 24, // 24 hours
+  auditLock: 60 * 20, // 20 minutes - audit should complete within this time
 } as const;
 
 /**
@@ -755,6 +757,9 @@ const CACHE_TTL = {
 function hashContent(content: string): string {
   return crypto.createHash('sha256').update(content).digest('hex').substring(0, 16);
 }
+
+// Audit tool version - increment when audit logic changes significantly
+const AUDIT_TOOL_VERSION = '1.1';
 
 export class PromptPatternAuditor {
   private organizationId: string;
@@ -1869,7 +1874,36 @@ Provide:
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async auditPrompt(prompt: any): Promise<AuditResult> {
-    const promptText = `
+    const promptId = prompt.id || prompt.slug || prompt._id?.toString();
+    
+    // Try to acquire lock for this prompt (prevent concurrent audits across scripts)
+    let lockAcquired = false;
+    if (redisCache) {
+      try {
+        // Try to set lock with NX (only if not exists) and EX (expiration)
+        // Returns "OK" if lock acquired, null if already locked
+        const lockResult = await redisCache.set(
+          CACHE_KEYS.auditLock(promptId),
+          `auditing-${Date.now()}`,
+          { ex: CACHE_TTL.auditLock, nx: true }
+        );
+        lockAcquired = lockResult === 'OK';
+        
+        if (!lockAcquired) {
+          throw new Error(`Prompt "${prompt.title || promptId}" is currently being audited by another process`);
+        }
+      } catch (lockError) {
+        // If lock already exists, throw error
+        if (lockError instanceof Error && lockError.message.includes('currently being audited')) {
+          throw lockError;
+        }
+        // If Redis fails, continue without lock (graceful degradation)
+        console.log(`   ⚠️  Lock check failed, continuing without lock: ${lockError instanceof Error ? lockError.message : String(lockError)}`);
+      }
+    }
+    
+    try {
+      const promptText = `
 TITLE: ${prompt.title || 'N/A'}
 DESCRIPTION: ${prompt.description || 'N/A'}
 CATEGORY: ${prompt.category || 'N/A'}
@@ -2326,9 +2360,9 @@ Provide:
     // 3. But NOT just missing enrichment fields (those are recommendations)
     const needsFix = overallScore < 5.0 || criticalIssues.length > 0;
 
-    return {
+    const result: AuditResult = {
       id: prompt.id || prompt._id?.toString() || 'unknown',
-      type: 'prompt',
+      type: 'prompt' as const,
       title: prompt.title || 'Untitled',
       overallScore: Math.round(overallScore * 10) / 10,
       categoryScores,
@@ -2338,6 +2372,18 @@ Provide:
       needsFix,
       agentReviews,
     };
+    
+    return result;
+    } finally {
+      // Always release lock after audit completes (success or error)
+      if (lockAcquired && redisCache) {
+        try {
+          await redisCache.del(CACHE_KEYS.auditLock(promptId));
+        } catch (e) {
+          // Ignore lock release errors
+        }
+      }
+    }
   }
 
   /**
@@ -2620,37 +2666,109 @@ async function auditPromptsAndPatterns(options: {
       console.log('⚡⚡ QUICK MODE: Running only 2 core agents (Grading Rubric, Completeness) - FASTEST\n');
     }
 
-    let skippedCount = 0;
-    for (let i = 0; i < prompts.length; i++) {
-      const prompt = prompts[i];
-      
+    // Filter prompts that need auditing first, then randomize
+    // This ensures we only randomize among prompts that actually need audits
+    const promptsNeedingAudit: any[] = [];
+    
+    for (const prompt of prompts) {
       // Check if prompt already has an audit (and what version)
       const existingAudit = await db.collection('prompt_audit_results').findOne(
         { promptId: prompt.id || prompt.slug || prompt._id?.toString() },
         { sort: { auditVersion: -1 } }
       );
       
-      // Skip prompts that have more than 1 audit (we only want to audit prompts with <= 1 audit)
-      // This allows us to generate fresh audits for prompts that haven't been audited much
+      // Skip prompts that have more than 1 audit
       const currentAuditVersion = existingAudit?.auditVersion || 0;
       if (currentAuditVersion > 1) {
-        console.log(`[${i + 1}/${prompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Audit Version ${currentAuditVersion} - already audited multiple times)`);
-        skippedCount++;
         continue;
       }
       
       // Skip prompts that have been improved (currentRevision > 1)
-      // We only audit prompts at revision 1 (not yet improved)
-      // Audit version tracks audit count (can be multiple audits per revision)
-      // Prompt revision tracks actual content changes (only increments when content updated)
       const promptRevision = prompt.currentRevision || 1;
       if (promptRevision > 1) {
-        console.log(`[${i + 1}/${prompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Revision ${promptRevision} - already improved)`);
+        continue;
+      }
+      
+      // This prompt needs auditing - add it to the list
+      promptsNeedingAudit.push(prompt);
+    }
+    
+    // Randomize the filtered list of prompts that need auditing
+    const shuffledPrompts = promptsNeedingAudit.sort(() => Math.random() - 0.5);
+    
+    console.log(`📊 ${prompts.length} total prompts found`);
+    console.log(`✅ ${shuffledPrompts.length} prompts need auditing (randomized)`);
+    console.log(`⏭️  ${prompts.length - shuffledPrompts.length} prompts skipped (already audited or improved)\n`);
+
+    let skippedCount = 0;
+    for (let i = 0; i < shuffledPrompts.length; i++) {
+      const prompt = shuffledPrompts[i];
+      const promptId = prompt.id || prompt.slug || prompt._id?.toString();
+      
+      // Try to acquire lock for this prompt (prevent concurrent audits across scripts)
+      let lockAcquired = false;
+      if (redisCache) {
+        try {
+          // Try to set lock with NX (only if not exists) and EX (expiration)
+          // Returns "OK" if lock acquired, null if already locked
+          const lockResult = await redisCache.set(
+            CACHE_KEYS.auditLock(promptId),
+            `auditing-${Date.now()}`,
+            { ex: CACHE_TTL.auditLock, nx: true }
+          );
+          lockAcquired = lockResult === 'OK';
+          
+          if (!lockAcquired) {
+            console.log(`[${i + 1}/${shuffledPrompts.length}] 🔒 Skipping: ${prompt.title || prompt.id || 'Untitled'} (currently being audited by another process)`);
+            skippedCount++;
+            continue;
+          }
+        } catch (lockError) {
+          // If Redis fails, continue without lock (graceful degradation)
+          console.log(`   ⚠️  Lock check failed, continuing without lock: ${lockError instanceof Error ? lockError.message : String(lockError)}`);
+        }
+      }
+      
+      // Double-check (shouldn't be needed, but safety check)
+      const existingAudit = await db.collection('prompt_audit_results').findOne(
+        { promptId },
+        { sort: { auditVersion: -1 } }
+      );
+      
+      const currentAuditVersion = existingAudit?.auditVersion || 0;
+      if (currentAuditVersion > 1) {
+        // Release lock if we acquired it
+        if (lockAcquired && redisCache) {
+          try {
+            await redisCache.del(CACHE_KEYS.auditLock(promptId));
+          } catch (e) {
+            // Ignore lock release errors
+          }
+        }
+        console.log(`[${i + 1}/${shuffledPrompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Audit Version ${currentAuditVersion} - already audited multiple times)`);
         skippedCount++;
         continue;
       }
       
-      console.log(`[${i + 1}/${prompts.length}] Auditing: ${prompt.title || prompt.id || 'Untitled'}`);
+      const promptRevision = prompt.currentRevision || 1;
+      if (promptRevision > 1) {
+        // Release lock if we acquired it
+        if (lockAcquired && redisCache) {
+          try {
+            await redisCache.del(CACHE_KEYS.auditLock(promptId));
+          } catch (e) {
+            // Ignore lock release errors
+          }
+        }
+        console.log(`[${i + 1}/${shuffledPrompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Revision ${promptRevision} - already improved)`);
+        skippedCount++;
+        continue;
+      }
+      
+      console.log(`[${i + 1}/${shuffledPrompts.length}] 🔒 Auditing: ${prompt.title || prompt.id || 'Untitled'}`);
+      if (lockAcquired) {
+        console.log(`   🔒 Lock acquired (prevents concurrent audits)`);
+      }
       const auditCount = currentAuditVersion + 1;
       if (existingAudit) {
         console.log(`   (Audit #${auditCount} for Revision ${promptRevision})`);
@@ -2671,6 +2789,10 @@ async function auditPromptsAndPatterns(options: {
         const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
         const auditDate = new Date();
         
+        // Determine audit type based on mode (access quickMode from auditor instance)
+        // Note: quickMode is a private property, but we can infer it from the options passed
+        const auditType = quickMode ? 'quick' : 'full';
+        
         // Save immediately after audit completes (don't wait for batch)
         // Note: This is just an audit record, NOT a prompt content update
         await db.collection('prompt_audit_results').insertOne({
@@ -2679,6 +2801,8 @@ async function auditPromptsAndPatterns(options: {
           promptRevision: promptRevision, // Track which prompt revision this audit is for
           auditVersion, // Audit count (how many times we've audited)
           auditDate,
+          auditToolVersion: AUDIT_TOOL_VERSION, // Version of audit tool used (e.g., "1.1")
+          auditType, // 'quick' or 'full' - indicates which audit mode was used
           overallScore: result.overallScore,
           categoryScores: result.categoryScores,
           agentReviews: result.agentReviews,
@@ -2692,13 +2816,31 @@ async function auditPromptsAndPatterns(options: {
           updatedAt: auditDate,
         });
         
-        console.log(`   💾 Saved audit #${auditVersion} (Prompt Revision: ${promptRevision})`);
+        console.log(`   💾 Saved audit #${auditVersion} (Prompt Revision: ${promptRevision}) [Tool: ${AUDIT_TOOL_VERSION}, Type: ${auditType}]`);
+        
+        // Release lock after successful audit
+        if (lockAcquired && redisCache) {
+          try {
+            await redisCache.del(CACHE_KEYS.auditLock(promptId));
+          } catch (e) {
+            // Ignore lock release errors
+          }
+        }
         
         if (fix && result.needsFix) {
           console.log(`   🔧 Auto-fixing...`);
           // TODO: Implement auto-fix logic
         }
       } catch (error) {
+        // Release lock on error too
+        if (lockAcquired && redisCache) {
+          try {
+            await redisCache.del(CACHE_KEYS.auditLock(promptId));
+          } catch (e) {
+            // Ignore lock release errors
+          }
+        }
+        
         console.error(`   ❌ Error auditing prompt:`, error);
         // Continue to next prompt even if this one fails
       }
@@ -2739,11 +2881,16 @@ async function auditPromptsAndPatterns(options: {
         const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
         const auditDate = new Date();
         
+        // Determine audit type based on mode (use quickMode from function scope)
+        const auditType = quickMode ? 'quick' : 'full';
+        
         await db.collection('pattern_audit_results').insertOne({
           patternId: pattern.id || pattern.slug || pattern._id?.toString(),
           patternName: pattern.name || 'Untitled',
           auditVersion,
           auditDate,
+          auditToolVersion: AUDIT_TOOL_VERSION, // Version of audit tool used (e.g., "1.1")
+          auditType, // 'quick' or 'full' - indicates which audit mode was used
           overallScore: result.overallScore,
           categoryScores: result.categoryScores,
           agentReviews: result.agentReviews,

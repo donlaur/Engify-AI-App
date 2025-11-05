@@ -1,0 +1,673 @@
+/**
+ * Comprehensive Role Content Data
+ * Based on the Executive Summary Report
+ * 
+ * This file contains detailed information about each role including:
+ * - Core role analysis
+ * - Daily tasks
+ * - Common problems
+ * - AI-powered solutions
+ * - Use cases
+ * - Real-life examples
+ */
+
+export interface RoleProblem {
+  title: string;
+  description: string;
+  aiSolution: string;
+  solutionSteps?: string[];
+  example?: string;
+}
+
+export interface RoleContent {
+  coreRole: {
+    title: string;
+    description: string;
+    keyResponsibilities: string[];
+  };
+  howAIHelps: {
+    headline: string;
+    explanation: string;
+    keyBenefits: string[];
+    example: string;
+  };
+  dailyTasks: string[];
+  commonProblems: RoleProblem[];
+  useCases: string[];
+  realLifeExamples: string[];
+  aiPromptPatterns: string[];
+}
+
+export const ROLE_CONTENT: Record<string, RoleContent> = {
+  'engineering-manager': {
+    coreRole: {
+      title: 'Engineering Manager',
+      description: 'Engineering Managers are force multipliers who orchestrate teams by improving processes, handling technical planning, and facilitating inter-team collaboration. Their days are dominated by communication, constant context switching, and a high volume of meetings, making efficiency and structured communication at scale their most critical needs.',
+      keyResponsibilities: [
+        'People management and career growth coaching',
+        'Improving team processes and workflows',
+        'Technical planning and strategy',
+        'Facilitating inter-team collaboration',
+        'Managing stakeholder communications',
+        'Recruiting and onboarding new engineers',
+      ],
+    },
+    howAIHelps: {
+      headline: 'How AI Transforms Engineering Management',
+      explanation: 'When you say "Act as an Engineering Manager" to AI, you\'re not just asking for generic advice. You\'re creating a specialized workflow assistant that understands the unique challenges of balancing technical oversight with people management. AI becomes your force multiplier for communication, documentation, and strategic thinking.',
+      keyBenefits: [
+        'Automates time-consuming documentation (performance reviews, PIPs, delegation tasks)',
+        'Synthesizes complex technical context into actionable summaries',
+        'Identifies workflow bottlenecks through data analysis',
+        'Generates personalized onboarding plans and interview kits',
+        'Creates structured conversation guides for difficult discussions',
+      ],
+      example: 'Instead of spending 4 hours writing a performance review, an EM can use AI to synthesize a year\'s worth of project data, peer feedback, and 1:1 notes into a comprehensive review draft in minutes, then refine it to match their voice and company culture.',
+    },
+    dailyTasks: [
+      'Conducting 1:1s with team members',
+      'Writing performance reviews and feedback',
+      'Managing difficult performance conversations',
+      'Balancing technical contribution with managerial duties',
+      'Identifying and resolving workflow bottlenecks',
+      'Recruiting and interviewing candidates',
+      'Onboarding new team members',
+      'Facilitating inter-team collaboration',
+      'Context switching between technical and strategic discussions',
+      'Reviewing code and technical designs at a high level',
+    ],
+    commonProblems: [
+      {
+        title: 'Writing High-Quality Performance Reviews',
+        description: 'This task is intensely time-consuming, and managers struggle to be specific with concrete, behavioral examples. They often fail to recall a full year\'s worth of data and default to recent events, leading to reviews that feel unfair or incomplete.',
+        aiSolution: 'The "Review Synthesizer" Workflow: A multi-step process that separates data ingestion from drafting. The AI first analyzes all inputs (self-review, projects, peer feedback) to identify themes, then generates specific sections based on competency models.',
+        solutionSteps: [
+          'Step 1: Data Ingestion - AI analyzes self-review, completed projects, and peer feedback to identify 5 key themes, 3 strengths, and 3 areas for development',
+          'Step 2: Targeted Drafting - AI generates specific sections based on company competency models using behavioral examples',
+          'Step 3: Refinement - AI helps refine tone and co-create SMART goals for future development',
+        ],
+        example: 'AI can transform 50 pages of raw feedback into a structured, fair, and comprehensive performance review in minutes, ensuring no important themes are missed.',
+      },
+      {
+        title: 'Managing Difficult Performance Conversations & PIPs',
+        description: 'This is the task most managers dread. They need to be clear and direct about performance gaps while also being empathetic and avoiding legal or HR pitfalls.',
+        aiSolution: 'The "Empathetic Scriptwriter": Generates conversation guides and structured PIPs that are clear, objective, and legally sound. AI helps create a 3-part conversation guide and formal PIP documents with measurable improvement goals.',
+        example: 'AI generates a complete conversation guide for a difficult discussion, including opening statements, observed performance gaps with objective examples, and a structured PIP with 30-day timelines and support resources.',
+      },
+      {
+        title: 'Balancing Technical Contribution with Managerial Duties',
+        description: 'New EMs often fall into the trap of doing all the project management or writing code themselves, which makes them a bottleneck and hinders their team\'s growth.',
+        aiSolution: 'The "Delegation & Context Engine": Compresses technical context for the EM and expands the EM\'s intent for the team. AI summarizes technical documents into actionable bullet points and generates clear delegation messages.',
+      },
+      {
+        title: 'Identifying Invisible Workflow Bottlenecks',
+        description: 'EMs often feel their team is "slow" but have limited visibility into the why. Bottlenecks can be external dependencies, slow approval cycles, or resource mismatches.',
+        aiSolution: 'The "SDLC Analyst": Analyzes workflow data (Jira exports) to calculate cycle times, identify bottleneck stages, and suggest process improvements based on best practices.',
+      },
+      {
+        title: 'Recruiting and Onboarding New Engineers',
+        description: 'Hiring is a core EM duty but is a major time-sink. Poor onboarding leads to slow ramp-up time and frustrates senior engineers answering repetitive setup questions.',
+        aiSolution: 'The "Talent Operations Assistant": Generates role-specific interview kits with behavioral questions, technical questions, systems design problems, and scoring rubrics. Creates personalized 30/60/90-day onboarding plans.',
+      },
+    ],
+    useCases: [
+      'Synthesizing a year\'s worth of performance data into comprehensive reviews',
+      'Creating structured conversation guides for difficult discussions',
+      'Summarizing technical design documents for high-level oversight',
+      'Generating delegation messages that include context, definition of done, and next steps',
+      'Analyzing Jira workflow data to identify bottlenecks',
+      'Creating interview kits tailored to specific roles and technical requirements',
+      'Building personalized onboarding plans with week-by-week milestones',
+    ],
+    realLifeExamples: [
+      'An EM reduced performance review writing time from 4 hours to 30 minutes using AI to synthesize project data, peer feedback, and 1:1 notes',
+      'A manager used AI to create a structured PIP that was clear, objective, and legally sound, reducing HR review time by 50%',
+      'An EM identified that code review wait time was the primary bottleneck by having AI analyze 60 days of Jira workflow data',
+      'A new EM used AI to generate interview kits for 3 different roles, saving 8 hours of preparation time',
+      'An EM created personalized onboarding plans for 5 new hires simultaneously, ensuring consistent and comprehensive ramp-up',
+    ],
+    aiPromptPatterns: [
+      'Review Synthesizer Pattern',
+      'Empathetic Scriptwriter Pattern',
+      'Delegation & Context Engine Pattern',
+      'SDLC Analyst Pattern',
+      'Talent Operations Assistant Pattern',
+    ],
+  },
+  'product-manager': {
+    coreRole: {
+      title: 'Product Manager',
+      description: 'Product Managers are the "quarterback" of the product, sitting at the intersection of Business, Technology, and User Experience. Their core responsibilities are strategic: defining the product vision, deeply understanding customer needs, creating and maintaining the product roadmap, and managing a complex web of stakeholders.',
+      keyResponsibilities: [
+        'Defining product vision and strategy',
+        'Understanding customer needs through research',
+        'Creating and maintaining product roadmaps',
+        'Managing stakeholder priorities and alignment',
+        'Synthesizing customer feedback into actionable insights',
+        'Conducting competitor analysis',
+        'Internal launch communications',
+      ],
+    },
+    howAIHelps: {
+      headline: 'How AI Transforms Product Management',
+      explanation: 'When you say "Act as a Product Manager" to AI, you\'re creating a strategic partner that can synthesize complex stakeholder input, analyze customer feedback at scale, and generate data-driven roadmaps. AI becomes your neutral mediator for stakeholder conflicts and your research analyst for customer insights.',
+      keyBenefits: [
+        'Synthesizes competing stakeholder priorities into objective frameworks',
+        'Performs thematic analysis on large volumes of customer feedback',
+        'Generates structured roadmaps from strategic goals',
+        'Conducts comprehensive competitor analysis',
+        'Creates tailored communications for different internal audiences',
+      ],
+      example: 'A PM can upload 50 customer interview transcripts and have AI identify the top 5 pain points, cluster them into themes, and suggest feature ideas—work that would normally take days.',
+    },
+    dailyTasks: [
+      'Managing competing stakeholder priorities',
+      'Synthesizing customer feedback from multiple sources',
+      'Creating and maintaining product roadmaps',
+      'Conducting competitor analysis',
+      'Writing internal launch communications',
+      'Prioritizing features using frameworks (RICE, MoSCoW)',
+      'Facilitating stakeholder alignment meetings',
+      'Translating business goals into product requirements',
+      'Analyzing product metrics and user behavior',
+      'Coordinating with engineering and design teams',
+    ],
+    commonProblems: [
+      {
+        title: 'Managing Competing Stakeholder Priorities',
+        description: 'PMs must align diverse viewpoints from multiple "bosses" who all have different, conflicting priorities. They must achieve this alignment without direct authority, relying on empathy, transparency, and persuasion.',
+        aiSolution: 'The "Stakeholder Alignment Bot": Synthesizes competing requests, identifies conflicts, and drafts neutral, data-driven compromise proposals using frameworks like RICE.',
+        solutionSteps: [
+          'Step 1: Synthesize conflicts - AI creates a table mapping stakeholder requests to business goals and identifies direct conflicts',
+          'Step 2: Propose neutral framework - AI drafts an email proposing objective prioritization frameworks (RICE)',
+          'Step 3: Draft empathetic "no" - AI helps craft rejections that acknowledge needs while explaining prioritization decisions',
+        ],
+      },
+      {
+        title: 'Translating Vague Customer Feedback into Actionable Insights',
+        description: 'PMs are flooded with raw data—survey results, interview notes, support tickets—but lack the time to manually synthesize it all into actionable themes.',
+        aiSolution: 'The "User Research Analyst": Performs thematic analysis on raw qualitative data (interviews, surveys) to extract key pain points and feature ideas.',
+      },
+      {
+        title: 'Creating and Maintaining a Clear, Defensible Product Roadmap',
+        description: 'It\'s a constant challenge to create a roadmap that aligns with business objectives and doesn\'t get derailed by new requests or shifting timelines.',
+        aiSolution: 'The "Roadmap Generation" Workflow: Translates strategic goals and prioritized features into a structured, timeline-based roadmap document.',
+      },
+      {
+        title: 'Conducting Effective Competitor Analysis',
+        description: 'A core PM responsibility that is often done manually, is time-consuming, and quickly becomes outdated.',
+        aiSolution: 'The "AI Market Researcher": Benchmarks competitors\' features, pricing, and value propositions to identify market gaps.',
+      },
+      {
+        title: 'Drafting Clear Internal Launch Communications',
+        description: 'The PM must communicate the "why" and "what" of new features to various internal teams, all of whom have different needs and levels of technical understanding.',
+        aiSolution: 'The "Comms & PR Assistant": Drafts tailored launch announcements for different internal audiences (Sales, Execs, Engineering) from a single feature doc.',
+      },
+    ],
+    useCases: [
+      'Synthesizing 3 competing stakeholder requests into an objective prioritization framework',
+      'Analyzing 50 customer interview transcripts to identify top 5 pain points',
+      'Generating a 12-month product roadmap from strategic goals and feature list',
+      'Creating competitor comparison tables identifying market gaps',
+      'Drafting 3 different internal announcements (Sales, Execs, Support) from one feature description',
+      'Using RICE framework to score and prioritize 20 potential features',
+      'Translating business goals into quarterly product milestones',
+    ],
+    realLifeExamples: [
+      'A PM reduced stakeholder alignment time from 2 weeks to 2 days by using AI to synthesize competing priorities into objective frameworks',
+      'A PM analyzed 100 customer support tickets in minutes, identifying a critical UX issue that was causing 30% of churn',
+      'A PM created a comprehensive competitor analysis that identified 3 market gaps, leading to a new product initiative',
+      'A PM generated tailored launch communications for 5 different internal teams in one session, ensuring consistent messaging',
+    ],
+    aiPromptPatterns: [
+      'Stakeholder Alignment Bot Pattern',
+      'User Research Analyst Pattern',
+      'Roadmap Generation Pattern',
+      'AI Market Researcher Pattern',
+      'Comms & PR Assistant Pattern',
+    ],
+  },
+  'product-owner': {
+    coreRole: {
+      title: 'Product Owner',
+      description: 'Product Owners are tactical execution specialists who own the product backlog and work directly with the development team on a daily basis. They translate the PM\'s high-level vision into detailed, buildable user stories and acceptance criteria.',
+      keyResponsibilities: [
+        'Writing clear user stories',
+        'Defining comprehensive acceptance criteria',
+        'Managing and prioritizing the product backlog',
+        'Preparing for sprint planning',
+        'Protecting team focus from stakeholder requests',
+        'Translating PM vision into buildable requirements',
+      ],
+    },
+    howAIHelps: {
+      headline: 'How AI Transforms Product Ownership',
+      explanation: 'When you say "Act as a Product Owner" to AI, you\'re creating a requirements specialist that can convert high-level features into detailed user stories, uncover edge cases through probing questions, and maintain backlog integrity. AI becomes your requirements analyst and backlog grooming assistant.',
+      keyBenefits: [
+        'Generates comprehensive user stories from high-level features',
+        'Uncovers edge cases through structured questioning',
+        'Helps prioritize and cluster backlog items',
+        'Creates clear acceptance criteria for all scenarios',
+        'Generates sprint planning materials',
+      ],
+      example: 'A PO can convert a single feature idea into 5 detailed user stories with comprehensive acceptance criteria in minutes, ensuring nothing is missed.',
+    },
+    dailyTasks: [
+      'Writing user stories in the "As a... I want... So that..." format',
+      'Defining acceptance criteria for user stories',
+      'Managing and prioritizing the product backlog',
+      'Grooming backlog items into epics',
+      'Preparing for sprint planning meetings',
+      'Saying "no" to stakeholders tactfully',
+      'Translating PM vision into buildable requirements',
+      'Identifying dependencies between stories',
+      'Ensuring stories are "ready" for development',
+      'Reviewing completed work in sprint reviews',
+    ],
+    commonProblems: [
+      {
+        title: 'Writing Clear, Comprehensive User Stories',
+        description: 'A vaguely written user story is a primary source of development waste, leading to rework and features that miss the mark.',
+        aiSolution: 'The "Story Generation" Tool: Uses Role-Task-Format pattern to convert high-level features into granular stories following the "As a... I want... So that..." format.',
+      },
+      {
+        title: 'Defining Thorough Acceptance Criteria',
+        description: 'POs often just write "happy path" ACs, but developers must build for all edge cases, error states, and non-functional requirements.',
+        aiSolution: 'The "AC Interviewer": Uses the Flipped Interaction Pattern to ask the PO "what if" questions to uncover all edge cases and error states.',
+      },
+      {
+        title: 'Managing and Prioritizing a Large, Complex Product Backlog',
+        description: 'Backlog management involves managing epics, features, and user stories and handling constantly changing priorities from multiple stakeholders.',
+        aiSolution: 'The "Backlog Grooming" Assistant: Helps cluster stories into epics, identify dependencies, and flag stories that are "not ready".',
+      },
+      {
+        title: 'Effectively Saying "No" to Stakeholders',
+        description: 'A critical skill for a PO is the ability to say "no" to stakeholders who try to bypass the PM\'s strategy and inject work directly into a sprint.',
+        aiSolution: 'The "Tactical \'No\'" Script Generator: Provides empathetic rejections based on established sprint priorities and team capacity.',
+      },
+      {
+        title: 'Preparing for and Running Sprint Planning Meetings',
+        description: 'The PO is responsible for preparing the backlog for the meeting and demonstrating the completed work at the end in the Sprint Review.',
+        aiSolution: 'The "Sprint Prep" Tool: Summarizes top-priority stories, drafts a potential sprint goal, and outlines the sprint backlog based on velocity.',
+      },
+    ],
+    useCases: [
+      'Converting a feature idea into 5 detailed user stories with context and risks',
+      'Uncovering all edge cases for a user story through AI\'s probing questions',
+      'Clustering 20 user stories into 3-5 epics',
+      'Prioritizing stories using MoSCoW method based on RICE scores',
+      'Drafting a professional "no" email to a stakeholder requesting sprint changes',
+      'Generating sprint goal and suggested sprint backlog based on team velocity',
+      'Identifying dependencies between stories before sprint planning',
+    ],
+    realLifeExamples: [
+      'A PO reduced user story creation time by 70% using AI to convert feature ideas into detailed stories',
+      'A PO discovered 15 edge cases for a story through AI\'s structured questioning that would have caused production bugs',
+      'A PO clustered 50 backlog items into 5 epics in minutes, making backlog management much more manageable',
+      'A PO generated a sprint planning document that reduced planning meeting time from 4 hours to 2 hours',
+    ],
+    aiPromptPatterns: [
+      'Story Generation Pattern',
+      'AC Interviewer Pattern (Flipped Interaction)',
+      'Backlog Grooming Pattern',
+      'Tactical "No" Script Generator Pattern',
+      'Sprint Prep Pattern',
+    ],
+  },
+  'engineer': {
+    coreRole: {
+      title: 'Senior Software Engineer',
+      description: 'Senior Software Engineers transcend simple coding. They are responsible for high-level software design and architecture, leading technical discussions, and driving initiatives. They act as mentors for junior engineers and are expected to enforce code quality standards.',
+      keyResponsibilities: [
+        'Designing software architecture',
+        'Leading technical discussions',
+        'Debugging complex distributed systems',
+        'Understanding and refactoring legacy code',
+        'Writing comprehensive unit tests',
+        'Creating technical documentation',
+        'Performing thorough code reviews',
+        'Mentoring junior engineers',
+      ],
+    },
+    howAIHelps: {
+      headline: 'How AI Transforms Software Engineering',
+      explanation: 'When you say "Act as a Senior Software Engineer" to AI, you\'re creating a technical partner that can synthesize fragmented debugging context, document legacy code, generate comprehensive tests, and perform first-pass code reviews. AI becomes your debugging partner, code archaeologist, and documentation generator.',
+      keyBenefits: [
+        'Synthesizes fragmented debugging context across multiple services',
+        'Documents legacy code automatically',
+        'Generates comprehensive test suites before implementation',
+        'Creates technical documentation from code',
+        'Performs first-pass code reviews checking for bugs, security, and style',
+      ],
+      example: 'An engineer debugging a distributed system can paste logs from 5 different services, and AI synthesizes them to identify the root cause—work that would take hours of manual trace analysis.',
+    },
+    dailyTasks: [
+      'Debugging complex distributed system bugs',
+      'Understanding and refactoring legacy code',
+      'Writing comprehensive unit tests',
+      'Creating technical documentation',
+      'Performing code reviews',
+      'Designing software architecture',
+      'Leading technical discussions',
+      'Mentoring junior engineers',
+      'Reviewing code for quality and security',
+      'Writing clean, maintainable code',
+    ],
+    commonProblems: [
+      {
+        title: 'Debugging Complex, Intermittent, or Distributed System Bugs',
+        description: 'In modern microservice architectures, a bug is rarely in one place. It involves tracing requests across multiple services, databases, and message queues, which is "hard-to-trace" and described as "the worst part of debugging".',
+        aiSolution: 'The "AI Debugging Partner": Performs Root Cause Analysis (RCA) by synthesizing stack traces, logs, and code snippets to suggest hypotheses and fixes.',
+        solutionSteps: [
+          'Step 1: Provide all context - AI receives logs from multiple services, stack traces, and code snippets',
+          'Step 2: Root Cause Analysis - AI applies "5 Whys" technique and identifies recurring patterns',
+          'Step 3: Suggest fix - AI proposes code fixes for the most likely root cause',
+        ],
+      },
+      {
+        title: 'Understanding and Refactoring Legacy Code',
+        description: 'SSEs are often tasked with modernizing or fixing "spaghetti code" that has no documentation, high technical debt, and is understood only through "tribal knowledge".',
+        aiSolution: 'The "Code Archaeologist" Workflow: Ingests legacy code to generate documentation, identify code smells, and propose specific, safe refactoring patterns.',
+      },
+      {
+        title: 'Writing Comprehensive and Meaningful Unit Tests',
+        description: 'Writing tests is often seen as "time-consuming and annoying" but is critical for maintaining long-term quality.',
+        aiSolution: 'The "Test-Driven Development (TDD) Bot": Generates the complete test scaffolding for a function that does not exist yet, including happy path, edge cases, error states, and mocks.',
+      },
+      {
+        title: 'Writing Clear and Maintainable Technical Documentation',
+        description: 'Documentation is often cited as a top task for AI because developers dislike writing it and it quickly becomes outdated.',
+        aiSolution: 'The "Doc-From-Code" Generator: Analyzes code (e.g., a REST API) and generates READMEs, API documentation, and code comments.',
+      },
+      {
+        title: 'Performing Thorough and Constructive Code Reviews',
+        description: 'SSEs perform many code reviews. This is a key part of mentoring but is a slow, interrupt-driven task. Furthermore, "office politics" and interpersonal dynamics can make giving direct feedback challenging.',
+        aiSolution: 'The "AI Review Buddy": Performs a "first pass" review of a merge request, checking for bugs, security issues, and style, and drafting constructive comments.',
+      },
+    ],
+    useCases: [
+      'Synthesizing logs from 5 microservices to identify a distributed system bug',
+      'Documenting a 1000-line legacy file with function comments and a README',
+      'Generating comprehensive unit tests before writing implementation code',
+      'Creating API documentation from code with request/response examples',
+      'Performing first-pass code review checking for bugs, security, and style',
+      'Identifying code smells and suggesting refactoring patterns',
+      'Applying "5 Whys" technique to debug intermittent production issues',
+    ],
+    realLifeExamples: [
+      'An engineer reduced debugging time from 4 hours to 30 minutes by having AI synthesize logs from 5 services to identify a race condition',
+      'An engineer documented 10 legacy files in one session using AI, saving 20 hours of manual documentation work',
+      'An engineer used AI to generate tests first, then wrote code to pass those tests—resulting in 95% test coverage',
+      'An engineer reduced code review time by 60% by having AI perform first-pass reviews, catching obvious issues before human review',
+    ],
+    aiPromptPatterns: [
+      'AI Debugging Partner Pattern',
+      'Code Archaeologist Pattern',
+      'TDD Bot Pattern',
+      'Doc-From-Code Pattern',
+      'AI Review Buddy Pattern',
+    ],
+  },
+  'devops-sre': {
+    coreRole: {
+      title: 'DevOps & SRE Engineer',
+      description: 'DevOps and Site Reliability Engineering (SRE) are "bridge" roles that connect development with operations. Their primary concerns are automation, system reliability, infrastructure provisioning and management, building and maintaining CI/CD pipelines, and incident response. Their main enemy is "toil"—manual, repetitive, and non-scalable administrative tasks.',
+      keyResponsibilities: [
+        'Writing and debugging Infrastructure as Code (IaC)',
+        'Responding to and resolving site incidents',
+        'Fixing CI/CD pipeline bottlenecks',
+        'Creating monitoring dashboards and alerts',
+        'Automating repetitive administrative tasks',
+        'Ensuring system reliability and uptime',
+      ],
+    },
+    howAIHelps: {
+      headline: 'How AI Transforms DevOps & SRE',
+      explanation: 'When you say "Act as a DevOps Engineer" to AI, you\'re creating an infrastructure specialist that can generate and debug IaC, analyze incident timelines, optimize CI/CD pipelines, and write complex monitoring queries. AI becomes your infrastructure generator, incident co-pilot, and automation assistant.',
+      keyBenefits: [
+        'Generates and debugs Terraform, CloudFormation, and Ansible configurations',
+        'Analyzes incidents and drafts postmortem reports',
+        'Identifies CI/CD bottlenecks and suggests optimizations',
+        'Writes complex PromQL queries from simple descriptions',
+        'Generates scripts for automating "toil"',
+      ],
+      example: 'An SRE can describe infrastructure requirements in plain English, and AI generates complete Terraform code—work that would take hours of manual configuration.',
+    },
+    dailyTasks: [
+      'Writing and debugging Infrastructure as Code (IaC)',
+      'Responding to P0 incidents',
+      'Writing incident postmortems',
+      'Fixing CI/CD pipeline failures',
+      'Creating monitoring dashboards',
+      'Writing PromQL queries',
+      'Automating repetitive tasks with scripts',
+      'Managing cloud infrastructure',
+      'Optimizing deployment pipelines',
+      'Ensuring system reliability and uptime',
+    ],
+    commonProblems: [
+      {
+        title: 'Writing and Debugging Infrastructure as Code (IaC)',
+        description: 'IaC (e.g., Terraform, Ansible) is the industry standard for managing cloud infrastructure. However, the domain-specific languages are complex, and debugging configuration errors or failed plans is notoriously difficult.',
+        aiSolution: 'The "IaC Generator": Creates and debugs complex Terraform, CloudFormation, or Ansible configurations from natural language requirements.',
+      },
+      {
+        title: 'Diagnosing and Resolving Live Site Incidents',
+        description: 'When a system fails, SREs are on the hook. They face high "operational load" and cognitive "overload" from the high-stress, complex debugging required to restore service.',
+        aiSolution: 'The "Incident Co-Pilot": Analyzes alerts, suggests troubleshooting steps (RCA), and drafts postmortem reports from an incident timeline.',
+      },
+      {
+        title: 'Fixing CI/CD Bottlenecks',
+        description: 'A slow or flaky CI/CD pipeline is a bottleneck for the entire engineering organization. Common problems include slow build times, serialized deployments that create queues, and a lack of visibility into failure points.',
+        aiSolution: 'The "CI/CD Pipeline Analyzer": Ingests pipeline logs to identify slow, flaky, or failing stages and suggests optimization strategies.',
+      },
+      {
+        title: 'Creating Monitoring Dashboards and Alerts',
+        description: 'SREs live by monitoring and instrumentation. However, writing queries for modern observability tools like Prometheus (using PromQL) is a specialized, complex skill.',
+        aiSolution: 'The "Monitoring Query Generator": Writes complex queries for tools like Prometheus (PromQL) from simple English descriptions.',
+      },
+      {
+        title: 'Automating "Toil" (Repetitive Administrative Tasks)',
+        description: '"Toil" is the set of manual, repetitive, non-strategic tasks that SREs are forced to do. The SRE mandate is to automate this toil away.',
+        aiSolution: 'The "Scripting Assistant": Generates Bash, Python, or PowerShell scripts for repetitive administrative tasks (e.g., backups, log rotation).',
+      },
+    ],
+    useCases: [
+      'Generating Terraform code to provision AWS infrastructure from natural language',
+      'Debugging Terraform plan errors and suggesting fixes',
+      'Analyzing incident timeline to draft blameless postmortem',
+      'Identifying slow stages in CI/CD pipeline from logs',
+      'Writing PromQL queries for 95th percentile latency monitoring',
+      'Generating Bash scripts for log rotation and archiving',
+      'Optimizing Terraform configurations for cost savings',
+    ],
+    realLifeExamples: [
+      'An SRE generated complete Terraform infrastructure in 10 minutes that would have taken 2 hours to write manually',
+      'An SRE reduced incident resolution time by 40% by having AI suggest troubleshooting steps based on alerts',
+      'An SRE identified that the test stage was taking 80% of CI/CD time by having AI analyze pipeline logs',
+      'An SRE wrote a complex PromQL query in minutes that would have taken an hour to research and write manually',
+    ],
+    aiPromptPatterns: [
+      'IaC Generator Pattern',
+      'Incident Co-Pilot Pattern',
+      'CI/CD Pipeline Analyzer Pattern',
+      'Monitoring Query Generator Pattern',
+      'Scripting Assistant Pattern',
+    ],
+  },
+  'qa': {
+    coreRole: {
+      title: 'Quality Assurance Engineer',
+      description: 'The modern QA Engineer is not a "gatekeeper" at the end of the development process. In an Agile and DevOps culture, the QA role is a collaborative partner who "builds quality in from the start". Their focus is on "shift-left" testing—getting involved early in the requirements phase, driving test automation, and enabling defect prevention.',
+      keyResponsibilities: [
+        'Generating comprehensive test cases',
+        'Writing effective bug reports',
+        'Identifying and fixing "flaky" tests',
+        'Creating realistic test data',
+        'Writing test automation scripts',
+        'Ensuring quality throughout the development lifecycle',
+      ],
+    },
+    howAIHelps: {
+      headline: 'How AI Transforms Quality Assurance',
+      explanation: 'When you say "Act as a QA Engineer" to AI, you\'re creating a test specialist that can generate comprehensive test plans, write perfect bug reports, analyze flaky tests, and generate automation scripts. AI becomes your test case generator, bug report formatter, and automation scripter.',
+      keyBenefits: [
+        'Generates comprehensive test cases covering happy path, negative, and edge cases',
+        'Formats raw bug notes into professional, developer-ready reports',
+        'Identifies root causes of flaky tests',
+        'Creates realistic, privacy-safe test data',
+        'Generates boilerplate automation scripts',
+      ],
+      example: 'A QA can paste a user story and acceptance criteria, and AI generates a complete test plan with 20 test cases covering all scenarios—work that would take hours.',
+    },
+    dailyTasks: [
+      'Generating test cases from user stories',
+      'Writing bug reports',
+      'Identifying and fixing flaky tests',
+      'Creating test data',
+      'Writing test automation scripts',
+      'Reviewing requirements for testability',
+      'Executing manual tests',
+      'Analyzing test results',
+      'Maintaining test suites',
+      'Collaborating with developers on quality',
+    ],
+    commonProblems: [
+      {
+        title: 'Generating Comprehensive Test Cases from User Stories',
+        description: 'Given a user story, the QA must envision all the ways it could break or be misused. This requires a systematic approach to cover positive ("happy path"), negative, and boundary/edge cases.',
+        aiSolution: 'The "Test Case Generator": Uses the RTF (Role, Task, Format) pattern to create comprehensive test plans from user stories and ACs.',
+      },
+      {
+        title: 'Writing Effective Bug Reports That Developers Can\'t "Re-close"',
+        description: 'A major source of friction in the development lifecycle is "communication gaps" between QA and developers. A bug report that lacks clear steps to reproduce, logs, or expected results will be rejected by a developer.',
+        aiSolution: 'The "Bug Report Formatter": Takes a QA\'s raw notes and structures them into a perfect, developer-ready bug report.',
+      },
+      {
+        title: 'Identifying and Fixing "Flaky" Tests',
+        description: 'Flaky tests are a nightmare for automation. They pass sometimes and fail other times for no apparent reason, which "erodes developer trust" in the entire CI pipeline.',
+        aiSolution: 'The "Flaky Test Analyzer": Ingests test failure logs to identify non-deterministic bugs (e.g., timing, data) and suggests fixes.',
+      },
+      {
+        title: 'Creating Realistic Test Data',
+        description: 'Good testing requires good data, but this is a significant operational challenge. Key problems include ensuring data privacy (masking sensitive production data), maintaining referential integrity, and acquiring "invalid data" to test negative scenarios.',
+        aiSolution: 'The "Synthetic Data Generator": Creates large, realistic, and privacy-safe datasets (e.g., JSON, CSV) based on a schema.',
+      },
+      {
+        title: 'Writing Test Automation Scripts',
+        description: 'Many QAs are "hybrid" (doing both manual and automation) and need to write automation scripts quickly to keep up with the development pace.',
+        aiSolution: 'The "Automation Scripter": Generates boilerplate code for test frameworks (Selenium, Playwright) from natural language steps.',
+      },
+    ],
+    useCases: [
+      'Generating 20 comprehensive test cases from a user story and acceptance criteria',
+      'Converting raw bug notes into a professional bug report with all required fields',
+      'Analyzing flaky test logs to identify root cause (race condition, timing issue)',
+      'Generating 1000 realistic test user records with valid and invalid data',
+      'Creating Playwright automation scripts from natural language test steps',
+      'Identifying edge cases and boundary conditions for test coverage',
+      'Formatting bug reports with clear steps to reproduce and expected results',
+    ],
+    realLifeExamples: [
+      'A QA generated 30 test cases in 10 minutes that would have taken 2 hours to write manually',
+      'A QA reduced bug report rejection rate by 80% by using AI to format reports with all required information',
+      'A QA identified a race condition causing flaky tests by having AI analyze failure logs',
+      'A QA generated 5000 test users with realistic data in minutes, eliminating privacy concerns',
+    ],
+    aiPromptPatterns: [
+      'Test Case Generator Pattern',
+      'Bug Report Formatter Pattern',
+      'Flaky Test Analyzer Pattern',
+      'Synthetic Data Generator Pattern',
+      'Automation Scripter Pattern',
+    ],
+  },
+  'designer': {
+    coreRole: {
+      title: 'Product Designer (UX/UI)',
+      description: 'The Product Designer\'s role is to be the "advocate for the people", focusing on making products usable, enjoyable, and accessible. In an enterprise context, designers deal with significant data complexity, navigate legacy systems, and understand highly specialized, niche workflows.',
+      keyResponsibilities: [
+        'Synthesizing user research',
+        'Creating user personas',
+        'Writing UX microcopy',
+        'Designer-developer handoff',
+        'Designing for enterprise complexity',
+        'Conducting user interviews',
+      ],
+    },
+    howAIHelps: {
+      headline: 'How AI Transforms UX/UI Design',
+      explanation: 'When you say "Act as a UX Designer" to AI, you\'re creating a research partner that can synthesize qualitative data, build personas, write microcopy, and bridge the designer-developer handoff gap. AI becomes your research analyst, persona generator, and handoff specialist.',
+      keyBenefits: [
+        'Performs thematic analysis on user interview transcripts',
+        'Creates detailed personas focused on goals and pain points',
+        'Generates clear, concise UX microcopy',
+        'Translates designs into developer-ready user stories and ACs',
+        'Brainstorms layouts and data visualizations for complex dashboards',
+      ],
+      example: 'A designer can paste 10 user interview transcripts, and AI identifies the top 3 usability pain points with supporting quotes—work that would take hours of manual analysis.',
+    },
+    dailyTasks: [
+      'Synthesizing qualitative user research',
+      'Creating user personas',
+      'Writing UX microcopy',
+      'Preparing designer-developer handoffs',
+      'Designing for enterprise complexity',
+      'Conducting user interviews',
+      'Creating wireframes and prototypes',
+      'Designing data visualizations',
+      'Writing interaction notes',
+      'Ensuring accessibility compliance',
+    ],
+    commonProblems: [
+      {
+        title: 'Synthesizing Qualitative User Research into Actionable Insights',
+        description: 'The designer conducts user interviews but is then left with hours of transcripts or raw notes. The challenge is finding the patterns and "key themes" in this unstructured, qualitative data.',
+        aiSolution: 'The "Qualitative Data Analyst": Ingests raw interview transcripts to perform thematic analysis and extract key user pain points.',
+      },
+      {
+        title: 'Creating Detailed and Representative User Personas',
+        description: 'Personas are a core UX tool, but they are often created poorly, focusing on irrelevant demographic data. A valuable persona focuses on goals, motivations, behaviors, and pain points.',
+        aiSolution: 'The "Persona Generator": Builds personas from research themes, focusing on goals, motivations, and pain points, not just demographics.',
+      },
+      {
+        title: 'Writing Clear and Effective Microcopy (UX Writing)',
+        description: 'Designers often use "Lorem Ipsum" as placeholder text, but the copy is a critical part of the design. "UX Writing" is a specialized skill, especially for complex enterprise apps.',
+        aiSolution: 'The "UX Writing Assistant": Generates clear, concise, and on-brand copy for UI states (e.g., error, success, empty) from a simple description.',
+      },
+      {
+        title: 'The Designer-Developer Handoff',
+        description: 'This is a massive cross-functional bottleneck. Designers and developers "speak different languages". Developers frequently receive designs that are "missing screens or logic" and lack context for interaction, errors, or edge cases.',
+        aiSolution: 'The "AI Handoff Specialist": Translates a design mockup (or description) into the full set of developer-ready assets: user stories, ACs, and interaction notes.',
+      },
+      {
+        title: 'Designing for Complex, Data-Heavy Enterprise Applications',
+        description: 'Enterprise UX is not consumer UX. It is defined by high data complexity, the need for efficiency for expert users, and user "journeys that could wrap a building".',
+        aiSolution: 'The "Information Architect" Brainstorming Partner: Suggests layouts, data visualizations, and component ideas for complex, data-heavy dashboards.',
+      },
+    ],
+    useCases: [
+      'Analyzing 10 user interview transcripts to identify top 3 pain points',
+      'Creating a persona from research themes focusing on goals and motivations',
+      'Generating UX microcopy for error, success, and empty states',
+      'Translating design mockup into complete user story and acceptance criteria',
+      'Brainstorming 3 different dashboard layouts for enterprise data',
+      'Extracting key themes from qualitative research with supporting quotes',
+      'Identifying missing states and edge cases in design handoffs',
+    ],
+    realLifeExamples: [
+      'A designer reduced research synthesis time from 8 hours to 1 hour by using AI to analyze interview transcripts',
+      'A designer created 5 personas in one session using AI, ensuring consistency across the design team',
+      'A designer generated all microcopy for a feature in 15 minutes, ensuring consistent tone and clarity',
+      'A designer improved handoff quality by 90% by having AI generate complete user stories and ACs from designs',
+    ],
+    aiPromptPatterns: [
+      'Qualitative Data Analyst Pattern',
+      'Persona Generator Pattern',
+      'UX Writing Assistant Pattern',
+      'AI Handoff Specialist Pattern',
+      'Information Architect Pattern',
+    ],
+  },
+};
+

@@ -8,6 +8,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { auth } from '@/lib/auth';
 
+// Audit tool version - must match the version in audit-prompts-patterns.ts
+const AUDIT_TOOL_VERSION = '1.1';
+
 // Dynamic import using webpack alias configured in next.config.js
 async function getAuditor() {
   try {
@@ -64,6 +67,8 @@ export async function GET(
       auditResult: {
         auditVersion: auditResult.auditVersion,
         auditDate: auditResult.auditDate,
+        auditToolVersion: auditResult.auditToolVersion,
+        auditType: auditResult.auditType,
         overallScore: auditResult.overallScore,
         categoryScores: auditResult.categoryScores,
         agentReviews: auditResult.agentReviews,
@@ -109,7 +114,9 @@ export async function POST(
 
     // Run audit
     const AuditorClass = await getAuditor();
-    const auditor = new AuditorClass('system');
+    // API route defaults to full audit (can be extended to accept quick mode via query param)
+    const quickMode = new URL(request.url).searchParams.get('quick') === 'true';
+    const auditor = new AuditorClass('system', { quickMode });
     const auditResult = await auditor.auditPrompt(prompt);
 
     // Get existing audit to determine audit count (not prompt revision)
@@ -123,6 +130,9 @@ export async function POST(
     const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
     const auditDate = new Date();
     const promptRevision = prompt.currentRevision || 1;
+    
+    // Determine audit type based on mode
+    const auditType = quickMode ? 'quick' : 'full';
 
     // Save audit result to database
     // Note: This is just an audit record, NOT a prompt content update
@@ -132,6 +142,8 @@ export async function POST(
       promptRevision: promptRevision, // Track which prompt revision this audit is for
       auditVersion, // Audit count (how many times we've audited)
       auditDate,
+      auditToolVersion: AUDIT_TOOL_VERSION, // Version of audit tool used (e.g., "1.1")
+      auditType, // 'quick' or 'full' - indicates which audit mode was used
       overallScore: auditResult.overallScore,
       categoryScores: auditResult.categoryScores,
       agentReviews: auditResult.agentReviews,

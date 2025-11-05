@@ -10,6 +10,105 @@ config({ path: '.env.local' });
 import { getMongoDb } from '@/lib/db/mongodb';
 import { OpenAIAdapter } from '@/lib/ai/v2/adapters/OpenAIAdapter';
 
+/**
+ * Robust JSON parsing with repair and fallback extraction
+ * Handles truncated responses, incomplete strings, and malformed JSON
+ */
+function parseJSONWithFallback(responseContent: string, arrayMode: boolean = false): any {
+  let jsonText = responseContent;
+  
+  // Try to extract from markdown code blocks first (use greedy matching to get full block)
+  const codeBlockMatch = responseContent.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+  if (codeBlockMatch) {
+    jsonText = codeBlockMatch[1];
+  } else if (arrayMode) {
+    // For arrays, try to extract array from code blocks
+    const arrayBlockMatch = responseContent.match(/```(?:json)?\s*(\[[\s\S]*\])\s*```/);
+    if (arrayBlockMatch) {
+      jsonText = arrayBlockMatch[1];
+    } else {
+      // Try to extract JSON object/array directly (use greedy to get full object)
+      const jsonMatch = responseContent.match(arrayMode ? /\[[\s\S]*\]/ : /\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[0];
+      }
+    }
+  } else {
+    // Try to extract JSON object directly (use greedy to get full object)
+    const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+  }
+  
+  // Repair common JSON issues
+  // 1. Remove trailing commas before closing brackets/braces
+  jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
+  jsonText = jsonText.replace(/,(\s*$)/gm, '');
+  
+  // 2. Fix incomplete string literals in arrays (common issue with truncated responses)
+  jsonText = jsonText.replace(/"([^"]*?)\.\.\.[^"]*$/gm, '"$1"'); // Remove trailing "..."
+  // Close unclosed strings at end of line
+  jsonText = jsonText.replace(/"([^"]+)(?:\n|$)/gm, (match, content) => {
+    if (!match.endsWith('"')) {
+      return `"${content}"`;
+    }
+    return match;
+  });
+  
+  // 3. Try to close incomplete arrays/objects
+  const openBraces = (jsonText.match(/\{/g) || []).length;
+  const closeBraces = (jsonText.match(/\}/g) || []).length;
+  const openBrackets = (jsonText.match(/\[/g) || []).length;
+  const closeBrackets = (jsonText.match(/\]/g) || []).length;
+  
+  // Close incomplete structures
+  if (openBrackets > closeBrackets) {
+    jsonText += ']'.repeat(openBrackets - closeBrackets);
+  }
+  if (openBraces > closeBraces) {
+    jsonText += '}'.repeat(openBraces - closeBraces);
+  }
+  
+  try {
+    return JSON.parse(jsonText);
+  } catch (parseError) {
+    // Fallback: extract partial data from incomplete JSON
+    if (arrayMode) {
+      return extractArrayItems(responseContent);
+    }
+    return null;
+  }
+}
+
+/**
+ * Extract array items from text (handles incomplete strings)
+ */
+function extractArrayItems(text: string): any[] {
+  if (!text) return [];
+  
+  // First, try to find complete quoted strings
+  const completeStrings: string[] = [];
+  const completeMatches = text.match(/"([^"]+)"/g);
+  if (completeMatches) {
+    completeStrings.push(...completeMatches.map(m => m.replace(/^"|"$/g, '')));
+  }
+  
+  // Then, try to find incomplete strings (lines that start with quote but don't end with quote)
+  const lines = text.split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('"') && !trimmed.endsWith('"')) {
+      const content = trimmed.replace(/^"|,$/g, '').trim();
+      if (content.length > 0 && !completeStrings.includes(content)) {
+        completeStrings.push(content);
+      }
+    }
+  }
+  
+  return completeStrings.filter(s => s.length > 0);
+}
+
 async function enrichPromptWithAI(promptId: string) {
   console.log('╔════════════════════════════════════════════════════════════╗');
   console.log('║  AI-Powered Prompt Enrichment Based on Audit Feedback ║');
@@ -88,11 +187,23 @@ Format as JSON array:
         maxTokens: 2000,
       });
       
-      // Extract JSON from response
+      // Extract JSON from response (with robust parsing)
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        caseStudies = JSON.parse(jsonMatch[0]);
-        console.log(`   ✅ Generated ${caseStudies.length} case studies`);
+        try {
+          caseStudies = parseJSONWithFallback(response.content, true);
+          if (caseStudies && Array.isArray(caseStudies) && caseStudies.length > 0) {
+            console.log(`   ✅ Generated ${caseStudies.length} case studies`);
+          } else {
+            // Try fallback extraction
+            caseStudies = extractArrayItems(response.content);
+            if (caseStudies.length > 0) {
+              console.log(`   ✅ Extracted ${caseStudies.length} case studies (partial)`);
+            }
+          }
+        } catch (error) {
+          console.warn('   ⚠️  Failed to parse case studies:', error);
+        }
       }
     } catch (error) {
       console.warn('   ⚠️  Failed to generate case studies:', error);
@@ -132,8 +243,19 @@ Format as JSON array:
       
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        examples = JSON.parse(jsonMatch[0]);
-        console.log(`   ✅ Generated ${examples.length} examples`);
+        try {
+          examples = parseJSONWithFallback(response.content, true);
+          if (examples && Array.isArray(examples) && examples.length > 0) {
+            console.log(`   ✅ Generated ${examples.length} examples`);
+          } else {
+            examples = extractArrayItems(response.content);
+            if (examples.length > 0) {
+              console.log(`   ✅ Extracted ${examples.length} examples (partial)`);
+            }
+          }
+        } catch (error) {
+          console.warn('   ⚠️  Failed to parse examples:', error);
+        }
       }
     } catch (error) {
       console.warn('   ⚠️  Failed to generate examples:', error);
@@ -167,8 +289,19 @@ Format as JSON array:
       
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        bestPractices = JSON.parse(jsonMatch[0]);
-        console.log(`   ✅ Generated ${bestPractices.length} best practices`);
+        try {
+          bestPractices = parseJSONWithFallback(response.content, true);
+          if (bestPractices && Array.isArray(bestPractices) && bestPractices.length > 0) {
+            console.log(`   ✅ Generated ${bestPractices.length} best practices`);
+          } else {
+            bestPractices = extractArrayItems(response.content);
+            if (bestPractices.length > 0) {
+              console.log(`   ✅ Extracted ${bestPractices.length} best practices (partial)`);
+            }
+          }
+        } catch (error) {
+          console.warn('   ⚠️  Failed to parse best practices:', error);
+        }
       }
     } catch (error) {
       console.warn('   ⚠️  Failed to generate best practices:', error);
@@ -201,8 +334,19 @@ Format as JSON array:
       
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        useCases = JSON.parse(jsonMatch[0]);
-        console.log(`   ✅ Generated ${useCases.length} use cases`);
+        try {
+          useCases = parseJSONWithFallback(response.content, true);
+          if (useCases && Array.isArray(useCases) && useCases.length > 0) {
+            console.log(`   ✅ Generated ${useCases.length} use cases`);
+          } else {
+            useCases = extractArrayItems(response.content);
+            if (useCases.length > 0) {
+              console.log(`   ✅ Extracted ${useCases.length} use cases (partial)`);
+            }
+          }
+        } catch (error) {
+          console.warn('   ⚠️  Failed to parse use cases:', error);
+        }
       }
     } catch (error) {
       console.warn('   ⚠️  Failed to generate use cases:', error);
@@ -234,8 +378,19 @@ Format as JSON array:
       
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        bestTimeToUse = JSON.parse(jsonMatch[0]);
-        console.log(`   ✅ Generated ${bestTimeToUse.length} "best time to use" scenarios`);
+        try {
+          bestTimeToUse = parseJSONWithFallback(response.content, true);
+          if (bestTimeToUse && Array.isArray(bestTimeToUse) && bestTimeToUse.length > 0) {
+            console.log(`   ✅ Generated ${bestTimeToUse.length} "best time to use" scenarios`);
+          } else {
+            bestTimeToUse = extractArrayItems(response.content);
+            if (bestTimeToUse.length > 0) {
+              console.log(`   ✅ Extracted ${bestTimeToUse.length} scenarios (partial)`);
+            }
+          }
+        } catch (error) {
+          console.warn('   ⚠️  Failed to parse best time to use:', error);
+        }
       }
     } catch (error) {
       console.warn('   ⚠️  Failed to generate best time to use:', error);
@@ -286,17 +441,23 @@ Format as JSON:
         maxTokens: 1500,
       });
       
-      // Extract JSON from response
+      // Extract JSON from response (with robust parsing)
       const jsonMatch = response.content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const explanationData = JSON.parse(jsonMatch[0]);
-        if (explanationData.whatIs) {
-          whatIs = explanationData.whatIs;
+        try {
+          const explanationData = parseJSONWithFallback(response.content, false);
+          if (explanationData) {
+            if (explanationData.whatIs) {
+              whatIs = explanationData.whatIs;
+            }
+            if (explanationData.whyUse && Array.isArray(explanationData.whyUse)) {
+              whyUse = explanationData.whyUse;
+            }
+            console.log(`   ✅ Generated "What is" and ${whyUse.length} "Why Use" reasons`);
+          }
+        } catch (error) {
+          console.warn('   ⚠️  Failed to parse explanations:', error);
         }
-        if (explanationData.whyUse && Array.isArray(explanationData.whyUse)) {
-          whyUse = explanationData.whyUse;
-        }
-        console.log(`   ✅ Generated "What is" and ${whyUse.length} "Why Use" reasons`);
       }
     } catch (error) {
       console.warn('   ⚠️  Failed to generate explanations:', error);
@@ -337,8 +498,16 @@ Format as JSON array:
       
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        recommendedModel = JSON.parse(jsonMatch[0]);
-        console.log(`   ✅ Generated ${recommendedModel.length} recommended models`);
+        try {
+          recommendedModel = parseJSONWithFallback(response.content, true);
+          if (recommendedModel && Array.isArray(recommendedModel) && recommendedModel.length > 0) {
+            console.log(`   ✅ Generated ${recommendedModel.length} recommended models`);
+          } else {
+            recommendedModel = [];
+          }
+        } catch (error) {
+          console.warn('   ⚠️  Failed to parse recommended models:', error);
+        }
       }
     } catch (error) {
       console.warn('   ⚠️  Failed to generate recommended models:', error);
@@ -401,12 +570,16 @@ Focus on:
       
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        parameters = JSON.parse(jsonMatch[0]);
-        console.log(`   ✅ Generated ${parameters.length} parameters`);
-        
-        // Update prompt content to include placeholders for parameters
-        // This allows the PromptParameters component to replace {{id}} with actual values
-        // Note: This is optional - prompts can work without placeholders
+        try {
+          parameters = parseJSONWithFallback(response.content, true);
+          if (parameters && Array.isArray(parameters) && parameters.length > 0) {
+            console.log(`   ✅ Generated ${parameters.length} parameters`);
+          } else {
+            parameters = [];
+          }
+        } catch (error) {
+          console.warn('   ⚠️  Failed to parse parameters:', error);
+        }
       }
     } catch (error) {
       console.warn('   ⚠️  Failed to generate parameters:', error);

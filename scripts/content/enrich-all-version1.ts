@@ -11,6 +11,105 @@ config({ path: '.env.local' });
 
 import { getMongoDb } from '@/lib/db/mongodb';
 
+/**
+ * Robust JSON parsing with repair and fallback extraction
+ * Handles truncated responses, incomplete strings, and malformed JSON
+ */
+function parseJSONWithFallback(responseContent: string, arrayMode: boolean = false): any {
+  let jsonText = responseContent;
+  
+  // Try to extract from markdown code blocks first (use greedy matching to get full block)
+  const codeBlockMatch = responseContent.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+  if (codeBlockMatch) {
+    jsonText = codeBlockMatch[1];
+  } else if (arrayMode) {
+    // For arrays, try to extract array from code blocks
+    const arrayBlockMatch = responseContent.match(/```(?:json)?\s*(\[[\s\S]*\])\s*```/);
+    if (arrayBlockMatch) {
+      jsonText = arrayBlockMatch[1];
+    } else {
+      // Try to extract JSON object/array directly (use greedy to get full object)
+      const jsonMatch = responseContent.match(arrayMode ? /\[[\s\S]*\]/ : /\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[0];
+      }
+    }
+  } else {
+    // Try to extract JSON object directly (use greedy to get full object)
+    const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+  }
+  
+  // Repair common JSON issues
+  // 1. Remove trailing commas before closing brackets/braces
+  jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
+  jsonText = jsonText.replace(/,(\s*$)/gm, '');
+  
+  // 2. Fix incomplete string literals in arrays (common issue with truncated responses)
+  jsonText = jsonText.replace(/"([^"]*?)\.\.\.[^"]*$/gm, '"$1"'); // Remove trailing "..."
+  // Close unclosed strings at end of line
+  jsonText = jsonText.replace(/"([^"]+)(?:\n|$)/gm, (match, content) => {
+    if (!match.endsWith('"')) {
+      return `"${content}"`;
+    }
+    return match;
+  });
+  
+  // 3. Try to close incomplete arrays/objects
+  const openBraces = (jsonText.match(/\{/g) || []).length;
+  const closeBraces = (jsonText.match(/\}/g) || []).length;
+  const openBrackets = (jsonText.match(/\[/g) || []).length;
+  const closeBrackets = (jsonText.match(/\]/g) || []).length;
+  
+  // Close incomplete structures
+  if (openBrackets > closeBrackets) {
+    jsonText += ']'.repeat(openBrackets - closeBrackets);
+  }
+  if (openBraces > closeBraces) {
+    jsonText += '}'.repeat(openBraces - closeBraces);
+  }
+  
+  try {
+    return JSON.parse(jsonText);
+  } catch (parseError) {
+    // Fallback: extract partial data from incomplete JSON
+    if (arrayMode) {
+      return extractArrayItems(responseContent);
+    }
+    return null;
+  }
+}
+
+/**
+ * Extract array items from text (handles incomplete strings)
+ */
+function extractArrayItems(text: string): any[] {
+  if (!text) return [];
+  
+  // First, try to find complete quoted strings
+  const completeStrings: string[] = [];
+  const completeMatches = text.match(/"([^"]+)"/g);
+  if (completeMatches) {
+    completeStrings.push(...completeMatches.map(m => m.replace(/^"|"$/g, '')));
+  }
+  
+  // Then, try to find incomplete strings (lines that start with quote but don't end with quote)
+  const lines = text.split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('"') && !trimmed.endsWith('"')) {
+      const content = trimmed.replace(/^"|,$/g, '').trim();
+      if (content.length > 0 && !completeStrings.includes(content)) {
+        completeStrings.push(content);
+      }
+    }
+  }
+  
+  return completeStrings.filter(s => s.length > 0);
+}
+
 // Import the enrichment logic directly (not the script)
 async function enrichPromptWithAI(promptId: string) {
   const db = await getMongoDb();
@@ -62,7 +161,14 @@ Format as JSON array with: title, scenario, challenge, process, outcome, keyLear
       const response = await provider.execute({ prompt: caseStudyPrompt, temperature: 0.7, maxTokens: 2000 });
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        caseStudies = JSON.parse(jsonMatch[0]);
+        try {
+          caseStudies = parseJSONWithFallback(response.content, true);
+          if (!caseStudies || !Array.isArray(caseStudies) || caseStudies.length === 0) {
+            caseStudies = extractArrayItems(response.content);
+          }
+        } catch (error) {
+          console.warn(`   ⚠️  Failed to parse case studies: ${error}`);
+        }
       }
     } catch (error) {
       console.warn(`   ⚠️  Failed to generate case studies: ${error}`);
@@ -79,7 +185,14 @@ Format as JSON array with: title, input, expectedOutput`;
       const response = await provider.execute({ prompt: examplePrompt, temperature: 0.7, maxTokens: 1500 });
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        examples = JSON.parse(jsonMatch[0]);
+        try {
+          examples = parseJSONWithFallback(response.content, true);
+          if (!examples || !Array.isArray(examples) || examples.length === 0) {
+            examples = extractArrayItems(response.content);
+          }
+        } catch (error) {
+          console.warn(`   ⚠️  Failed to parse examples: ${error}`);
+        }
       }
     } catch (error) {
       console.warn(`   ⚠️  Failed to generate examples: ${error}`);
@@ -96,7 +209,14 @@ Format as JSON array of strings`;
       const response = await provider.execute({ prompt: bestPracticesPrompt, temperature: 0.7, maxTokens: 1000 });
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        bestPractices = JSON.parse(jsonMatch[0]);
+        try {
+          bestPractices = parseJSONWithFallback(response.content, true);
+          if (!bestPractices || !Array.isArray(bestPractices) || bestPractices.length === 0) {
+            bestPractices = extractArrayItems(response.content);
+          }
+        } catch (error) {
+          console.warn(`   ⚠️  Failed to parse best practices: ${error}`);
+        }
       }
     } catch (error) {
       console.warn(`   ⚠️  Failed to generate best practices: ${error}`);
@@ -113,7 +233,14 @@ Format as JSON array of strings`;
       const response = await provider.execute({ prompt: useCasesPrompt, temperature: 0.7, maxTokens: 800 });
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        useCases = JSON.parse(jsonMatch[0]);
+        try {
+          useCases = parseJSONWithFallback(response.content, true);
+          if (!useCases || !Array.isArray(useCases) || useCases.length === 0) {
+            useCases = extractArrayItems(response.content);
+          }
+        } catch (error) {
+          console.warn(`   ⚠️  Failed to parse use cases: ${error}`);
+        }
       }
     } catch (error) {
       console.warn(`   ⚠️  Failed to generate use cases: ${error}`);
@@ -130,7 +257,14 @@ Format as JSON array of strings`;
       const response = await provider.execute({ prompt: bestTimePrompt, temperature: 0.7, maxTokens: 800 });
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        bestTimeToUse = JSON.parse(jsonMatch[0]);
+        try {
+          bestTimeToUse = parseJSONWithFallback(response.content, true);
+          if (!bestTimeToUse || !Array.isArray(bestTimeToUse) || bestTimeToUse.length === 0) {
+            bestTimeToUse = extractArrayItems(response.content);
+          }
+        } catch (error) {
+          console.warn(`   ⚠️  Failed to parse best time to use: ${error}`);
+        }
       }
     } catch (error) {
       console.warn(`   ⚠️  Failed to generate best time to use: ${error}`);
@@ -161,14 +295,21 @@ Format as JSON: { "whatIs": "Full explanation (3-5 sentences, not just the title
       const response = await provider.execute({ prompt: explanationPrompt, temperature: 0.7, maxTokens: 1500 });
       const jsonMatch = response.content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const explanationData = JSON.parse(jsonMatch[0]);
-        if (explanationData.whatIs) whatIs = explanationData.whatIs;
-        if (explanationData.whyUse && Array.isArray(explanationData.whyUse)) {
-          whyUse = explanationData.whyUse;
+        try {
+          const explanationData = parseJSONWithFallback(response.content, false);
+          if (explanationData) {
+            if (explanationData.whatIs) whatIs = explanationData.whatIs;
+            if (explanationData.whyUse && Array.isArray(explanationData.whyUse)) {
+              whyUse = explanationData.whyUse;
+            }
+          }
+        } catch (error) {
+          console.warn(`   ⚠️  Failed to parse explanations: ${error}`);
         }
       }
     } catch (error) {
       console.warn(`   ⚠️  Failed to generate explanations: ${error}`);
+    }
     }
   }
 
@@ -182,10 +323,74 @@ Format as JSON array with: model, provider, reason, useCase`;
       const response = await provider.execute({ prompt: modelsPrompt, temperature: 0.5, maxTokens: 1000 });
       const jsonMatch = response.content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        recommendedModel = JSON.parse(jsonMatch[0]);
+        try {
+          recommendedModel = parseJSONWithFallback(response.content, true);
+          if (!recommendedModel || !Array.isArray(recommendedModel) || recommendedModel.length === 0) {
+            recommendedModel = [];
+          }
+        } catch (error) {
+          console.warn(`   ⚠️  Failed to parse recommended models: ${error}`);
+        }
       }
     } catch (error) {
       console.warn(`   ⚠️  Failed to generate recommended models: ${error}`);
+    }
+  }
+
+  // Generate interactive parameters/leading questions if missing
+  let parameters = prompt.parameters || [];
+  if (!parameters || parameters.length === 0) {
+    try {
+      const parametersPrompt = `Generate interactive parameters/leading questions for this prompt:
+
+TITLE: ${prompt.title}
+DESCRIPTION: ${prompt.description}
+CATEGORY: ${prompt.category}
+CONTENT: ${prompt.content.substring(0, 500)}...
+
+Requirements:
+- Identify what inputs/users need to provide before using this prompt
+- For code review prompts: programming language, security focus, bug reduction focus
+- For other prompts: identify key variables that need customization
+- Create clear, helpful questions that guide users
+- Use appropriate input types (text, select, textarea, multiselect)
+- Include examples to guide users
+
+Format as JSON array:
+[
+  {
+    "id": "programming_language",
+    "label": "Programming Language",
+    "type": "select",
+    "required": true,
+    "options": ["JavaScript", "TypeScript", "Python", "Java", "Go", "Rust", "C++", "Other"],
+    "description": "Select the programming language for the code review",
+    "example": "JavaScript"
+  }
+]
+
+Focus on:
+- What information is needed to make this prompt accurate?
+- What customization options would help users?
+- What parameters would make this prompt more useful?
+- Be specific and actionable`;
+
+      const response = await provider.execute({ prompt: parametersPrompt, temperature: 0.7, maxTokens: 2000 });
+      const jsonMatch = response.content.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        try {
+          parameters = parseJSONWithFallback(response.content, true);
+          if (parameters && Array.isArray(parameters) && parameters.length > 0) {
+            console.log(`   ✅ Generated ${parameters.length} parameters`);
+          } else {
+            parameters = [];
+          }
+        } catch (error) {
+          console.warn(`   ⚠️  Failed to parse parameters: ${error}`);
+        }
+      }
+    } catch (error) {
+      console.warn(`   ⚠️  Failed to generate parameters: ${error}`);
     }
   }
 
@@ -200,6 +405,7 @@ Format as JSON array with: model, provider, reason, useCase`;
     recommendedModel: recommendedModel.length > 0 ? recommendedModel : prompt.recommendedModel,
     whatIs: whatIs || prompt.whatIs,
     whyUse: whyUse.length > 0 ? whyUse : prompt.whyUse,
+    parameters: parameters.length > 0 ? parameters : prompt.parameters,
     updatedAt: new Date(),
   };
 
