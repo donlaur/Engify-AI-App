@@ -2164,6 +2164,7 @@ async function auditPromptsAndPatterns(options: {
       console.log('⚡⚡ QUICK MODE: Running only 2 core agents (Grading Rubric, Completeness) - FASTEST\n');
     }
 
+    let skippedCount = 0;
     for (let i = 0; i < prompts.length; i++) {
       const prompt = prompts[i];
       
@@ -2176,6 +2177,7 @@ async function auditPromptsAndPatterns(options: {
       // Skip prompts that already have version > 1 (already improved)
       if (existingAudit && existingAudit.auditVersion > 1) {
         console.log(`[${i + 1}/${prompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Version ${existingAudit.auditVersion} - already improved)`);
+        skippedCount++;
         continue;
       }
       
@@ -2225,6 +2227,11 @@ async function auditPromptsAndPatterns(options: {
         console.error(`   ❌ Error auditing prompt:`, error);
         // Continue to next prompt even if this one fails
       }
+    }
+    
+    console.log(`\n✅ Completed auditing ${results.length} prompts`);
+    if (skippedCount > 0) {
+      console.log(`⏭️  Skipped ${skippedCount} prompts (already at version > 1)`);
     }
   }
 
