@@ -186,12 +186,7 @@ async function main() {
 
   // Get all active models from database (exclude deprecated/sunset)
   const query: any = { 
-    status: { $in: ['active'] }, // Only active models
-    // Explicitly exclude deprecated/sunset
-    $nor: [
-      { status: 'deprecated' },
-      { status: 'sunset' }
-    ]
+    status: 'active' // Only active models
   };
   if (providerFilter) {
     query.provider = providerFilter;
