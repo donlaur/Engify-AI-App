@@ -17,10 +17,11 @@ import { getDb } from '@/lib/mongodb';
  * - Priority 0.6: About, blog
  * - Priority 0.5: Contact, terms, privacy
  *
- * ISR: Regenerates every hour to pick up new content and slug changes
+ * ISR: Regenerates every 12 hours when accessed (faster for frequent crawls)
+ * Cron: Also revalidates daily at midnight via Vercel Cron (ensures freshness)
  */
 
-export const revalidate = 3600; // Revalidate every hour (ISR)
+export const revalidate = 43200; // Revalidate every 12 hours (ISR when accessed)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_URL;

@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { APP_URL } from '@/lib/constants';
 import TagPageClient from './tag-page-client';
 import { getMongoDb } from '@/lib/db/mongodb';
@@ -46,18 +47,27 @@ async function getPromptsByTag(tag: string) {
 }
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
-  const tag = decodeURIComponent(params.tag);
-  const displayTag = tag
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  try {
+    const tag = decodeURIComponent(params.tag);
+    
+    // Normalize tag for display
+    const normalizedTag = tag.replace(/\//g, '-');
+    const displayTag = normalizedTag
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
 
-  // Get prompts with this tag
-  const taggedPrompts = await getPromptsByTag(tag);
+    // Get prompts with this tag (try both original and normalized)
+    const taggedPrompts = await getPromptsByTag(tag);
+    const normalizedPrompts = tag !== normalizedTag ? await getPromptsByTag(normalizedTag) : [];
+    const allPrompts = [...taggedPrompts, ...normalizedPrompts];
+    const uniquePrompts = Array.from(
+      new Map(allPrompts.map(p => [p.id, p])).values()
+    );
 
-  const title = `${displayTag} - Prompt Engineering Prompts | Engify.ai`;
-  const description = `Explore ${taggedPrompts.length} prompt${taggedPrompts.length !== 1 ? 's' : ''} tagged with "${displayTag}". Find prompts for ${displayTag.toLowerCase()} and improve your prompt engineering skills.`;
-  const url = `${APP_URL}/tags/${encodeURIComponent(tag)}`;
+    const title = `${displayTag} - Prompt Engineering Prompts | Engify.ai`;
+    const description = `Explore ${uniquePrompts.length} prompt${uniquePrompts.length !== 1 ? 's' : ''} tagged with "${displayTag}". Find prompts for ${displayTag.toLowerCase()} and improve your prompt engineering skills.`;
+    const url = `${APP_URL}/tags/${encodeURIComponent(tag)}`;
 
   return {
     title,
@@ -86,29 +96,50 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
       'prompt templates',
     ],
   };
+  } catch (error) {
+    // Return fallback metadata on error
+    return {
+      title: 'Tag Not Found | Engify.ai',
+      description: 'The requested tag could not be found.',
+    };
+  }
 }
 
 export default async function TagPage({ params }: { params: { tag: string } }) {
-  const tag = decodeURIComponent(params.tag);
-  const displayTag = tag
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  try {
+    const tag = decodeURIComponent(params.tag);
+    
+    // Normalize tag: replace slashes with hyphens for URL compatibility
+    // Tags like "CI/CD integration" become "CI-CD integration"
+    const normalizedTag = tag.replace(/\//g, '-');
+    
+    const displayTag = normalizedTag
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
 
-  // Get prompts with this tag from MongoDB
-  const taggedPrompts = await getPromptsByTag(tag);
+    // Get prompts with this tag from MongoDB
+    // Try both the original tag and normalized version
+    const taggedPrompts = await getPromptsByTag(tag);
+    const normalizedPrompts = tag !== normalizedTag ? await getPromptsByTag(normalizedTag) : [];
+    const allPrompts = [...taggedPrompts, ...normalizedPrompts];
+    
+    // Remove duplicates based on prompt ID
+    const uniquePrompts = Array.from(
+      new Map(allPrompts.map(p => [p.id, p])).values()
+    );
 
-  // Generate JSON-LD structured data
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: `${displayTag} Prompts`,
-    description: `A collection of ${taggedPrompts.length} prompt engineering prompts tagged with "${displayTag}"`,
-    url: `${APP_URL}/tags/${encodeURIComponent(tag)}`,
-    mainEntity: {
-      '@type': 'ItemList',
-      numberOfItems: taggedPrompts.length,
-      itemListElement: taggedPrompts.slice(0, 10).map((prompt, index) => ({
+    // Generate JSON-LD structured data
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: `${displayTag} Prompts`,
+      description: `A collection of ${uniquePrompts.length} prompt engineering prompts tagged with "${displayTag}"`,
+      url: `${APP_URL}/tags/${encodeURIComponent(tag)}`,
+      mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: uniquePrompts.length,
+        itemListElement: uniquePrompts.slice(0, 10).map((prompt, index) => ({
         '@type': 'ListItem',
         position: index + 1,
         item: {
@@ -131,7 +162,12 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <TagPageClient tag={tag} displayTag={displayTag} taggedPrompts={taggedPrompts} />
+      <TagPageClient tag={tag} displayTag={displayTag} taggedPrompts={uniquePrompts} />
     </>
   );
+  } catch (error) {
+    console.error('Error loading tag page:', params.tag, error);
+    // Return 404 for invalid tags
+    notFound();
+  }
 }

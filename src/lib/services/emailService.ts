@@ -187,7 +187,7 @@ export async function sendContactEmail(
   message: string
 ): Promise<EmailResponse> {
   return sendEmail({
-    to: 'contact@engify.ai',
+    to: 'donlaur@engify.ai',
     subject: `Contact Form: ${subject}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

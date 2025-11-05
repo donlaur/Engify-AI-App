@@ -143,6 +143,13 @@ export default async function PromptPage({
   params: { id: string };
 }) {
   try {
+    // Early detection: Generated prompts are temporary and may not exist
+    // Return 404 gracefully to prevent 5xx errors
+    if (params.id.startsWith('generated-')) {
+      logger.warn('Generated prompt ID not found (temporary prompt)', { id: params.id });
+      notFound();
+    }
+
     // Try JSON first (fast), then MongoDB fallback (reliable)
     // MongoDB is primary source for detail pages - more reliable in production
     const prompt = await getPromptById(params.id);
@@ -162,6 +169,17 @@ export default async function PromptPage({
     // Pass empty array - RelatedPrompts will fetch via API client-side
 
     const slug = getPromptSlug(prompt);
+
+    // Redirect to canonical slug if URL doesn't match (SEO best practice)
+    // This handles slug changes gracefully: old slugs → new slugs, IDs → slugs
+    // Only redirect if we're not already on the canonical slug
+    if (params.id !== slug) {
+      // Always redirect to canonical slug for SEO consistency
+      // This ensures old slugs and IDs redirect to the proper slug URL
+      // Note: redirect() uses temporary redirect by default, but the redirect preserves SEO value
+      const { redirect } = await import('next/navigation');
+      redirect(`/prompts/${slug}`);
+    }
 
     // Enhanced JSON-LD structured data with category, role, and pattern
     const categoryLabel = categoryLabels[prompt.category] || prompt.category;

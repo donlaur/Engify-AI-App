@@ -75,13 +75,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function ArticlePage({ params }: PageProps) {
-  const article = await getArticle(params.slug);
+  try {
+    const article = await getArticle(params.slug);
 
-  if (!article) {
-    notFound();
-  }
+    if (!article) {
+      // Log missing articles for SEO monitoring
+      console.warn('Article not found:', params.slug);
+      notFound();
+    }
 
-  return (
+    return (
     <MainLayout>
       {/* Breadcrumbs */}
       <nav className="border-b bg-slate-50 dark:bg-slate-900">
@@ -282,4 +285,9 @@ export default async function ArticlePage({ params }: PageProps) {
       />
     </MainLayout>
   );
+  } catch (error) {
+    // Log error for monitoring
+    console.error('Error loading article:', params.slug, error);
+    notFound();
+  }
 }

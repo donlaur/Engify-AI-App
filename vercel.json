@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/revalidate-sitemap",
-      "schedule": "0 */12 * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }

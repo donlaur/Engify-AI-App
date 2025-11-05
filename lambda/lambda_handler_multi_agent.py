@@ -66,7 +66,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
     if not search_query:
         return ""
     
-    # Search prompts collection using text index
+    # Search prompts collection using text index (includes enriched fields)
     try:
         prompts = list(db['prompts'].find(
             {
@@ -80,7 +80,15 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                 'description': 1,
                 'pattern': 1,
                 'category': 1,
-                'tags': 1
+                'tags': 1,
+                # Enriched fields for better context
+                'whatIs': 1,
+                'whyUse': 1,
+                'caseStudies': 1,
+                'examples': 1,
+                'useCases': 1,
+                'bestPractices': 1,
+                'seoKeywords': 1,
             }
         ).sort([('score', {'$meta': 'textScore'})]).limit(5))
         
@@ -91,30 +99,80 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                 category = p.get('category', '')
                 desc = p.get('description', '')[:200]
                 title = p.get('title', 'Untitled')
-                context_parts.append(
-                    f"- **{title}** ({pattern} pattern, {category} category): {desc}"
-                )
+                
+                # Build enriched context
+                enriched_context = []
+                
+                # Add whatIs if available
+                what_is = p.get('whatIs', '')
+                if what_is:
+                    enriched_context.append(f"What it is: {what_is[:150]}")
+                
+                # Add whyUse if available (array of strings)
+                why_use = p.get('whyUse', [])
+                if why_use and isinstance(why_use, list):
+                    why_use_text = '; '.join(why_use[:3])  # First 3 reasons
+                    if why_use_text:
+                        enriched_context.append(f"Why use: {why_use_text[:150]}")
+                
+                # Add useCases if available
+                use_cases = p.get('useCases', [])
+                if use_cases and isinstance(use_cases, list):
+                    use_cases_text = '; '.join(use_cases[:2])  # First 2 use cases
+                    if use_cases_text:
+                        enriched_context.append(f"Use cases: {use_cases_text[:150]}")
+                
+                # Add case study summary if available
+                case_studies = p.get('caseStudies', [])
+                if case_studies and isinstance(case_studies, list) and len(case_studies) > 0:
+                    first_case = case_studies[0]
+                    if isinstance(first_case, dict):
+                        case_title = first_case.get('title', '')
+                        case_context = first_case.get('context', '') or first_case.get('scenario', '')
+                        if case_title or case_context:
+                            enriched_context.append(f"Example: {case_title} - {case_context[:100]}")
+                
+                # Build full context string
+                base_context = f"- **{title}** ({pattern} pattern, {category} category): {desc}"
+                if enriched_context:
+                    base_context += f"\n  - {' | '.join(enriched_context)}"
+                
+                context_parts.append(base_context)
     except Exception as e:
         print(f"Prompt search error: {e}")
-        # Fallback: Try regex search if text index fails
+        # Fallback: Try regex search if text index fails (includes enriched fields)
         try:
             query_words = search_query.lower().split()[:3]  # First 3 words
             if query_words:
+                regex_pattern = '|'.join(query_words)
                 prompts = list(db['prompts'].find({
                     'isPublic': True,
                     'active': {'$ne': False},
                     '$or': [
-                        {'title': {'$regex': '|'.join(query_words), '$options': 'i'}},
-                        {'description': {'$regex': '|'.join(query_words), '$options': 'i'}},
-                        {'tags': {'$in': query_words}}
+                        {'title': {'$regex': regex_pattern, '$options': 'i'}},
+                        {'description': {'$regex': regex_pattern, '$options': 'i'}},
+                        {'whatIs': {'$regex': regex_pattern, '$options': 'i'}},
+                        {'useCases': {'$regex': regex_pattern, '$options': 'i'}},
+                        {'tags': {'$in': query_words}},
+                        {'seoKeywords': {'$in': query_words}}
                     ]
+                }, {
+                    'title': 1,
+                    'description': 1,
+                    'whatIs': 1,
+                    'whyUse': 1,
+                    'useCases': 1,
                 }).limit(3))
                 
                 if prompts:
                     context_parts.append("## Relevant Prompts:")
                     for p in prompts:
+                        title = p.get('title', 'Untitled')
+                        desc = p.get('description', '')[:150]
+                        what_is = p.get('whatIs', '')
+                        enriched_info = f" ({what_is[:100]})" if what_is else ""
                         context_parts.append(
-                            f"- **{p.get('title', 'Untitled')}**: {p.get('description', '')[:150]}"
+                            f"- **{title}**: {desc}{enriched_info}"
                         )
         except Exception as e2:
             print(f"Fallback prompt search error: {e2}")

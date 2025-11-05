@@ -33,6 +33,7 @@ async function ensureTextIndexes() {
     console.log(`📦 Database: ${dbName}\n`);
 
     // 1. Prompts collection - for RAG chat search
+    // Includes enriched fields: caseStudies, whatIs, whyUse, examples, useCases, bestPractices, seoKeywords
     console.log('Creating text index on prompts collection...');
     try {
       await db.collection('prompts').createIndex(
@@ -41,13 +42,32 @@ async function ensureTextIndexes() {
           description: 'text',
           content: 'text',
           tags: 'text',
+          // Enriched fields for better RAG search
+          whatIs: 'text',
+          whyUse: 'text',
+          metaDescription: 'text',
+          seoKeywords: 'text',
+          caseStudies: 'text',
+          examples: 'text',
+          useCases: 'text',
+          bestPractices: 'text',
+          whenNotToUse: 'text',
         },
         {
           name: 'prompts_text_search',
           weights: {
             title: 10,
-            description: 5,
-            content: 3,
+            description: 8,
+            content: 5,
+            whatIs: 6,
+            whyUse: 5,
+            metaDescription: 4,
+            seoKeywords: 3,
+            caseStudies: 4,
+            examples: 4,
+            useCases: 5,
+            bestPractices: 4,
+            whenNotToUse: 3,
             tags: 2,
           },
           default_language: 'english',
