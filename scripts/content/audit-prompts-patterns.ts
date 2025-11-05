@@ -16,9 +16,15 @@
  * Usage:
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --fast  # Skip execution testing (faster)
- *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --quick # Quick mode: only 3 core agents (fastest)
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --quick # Quick mode: only 2 core agents (fastest)
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --category=code-generation  # Filter by category
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --category=documentation --role=engineer  # Filter by category and role
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --role=product-manager  # Filter by role (PM prompts)
  *   tsx scripts/content/audit-prompts-patterns.ts --type=patterns
  *   tsx scripts/content/audit-prompts-patterns.ts --type=both --limit=10
+ * 
+ * Categories: code-generation, debugging, documentation, testing, refactoring, architecture, learning, general
+ * Roles: engineer, product-manager, engineering-manager, architect, designer, qa, devops-sre, scrum-master, product-owner, c-level
  * 
  * NOTE: This script ONLY does SCORING. It saves audit results to prompt_audit_results collection.
  * To apply improvements, use: pnpm tsx scripts/content/enrich-prompt.ts --id=<prompt-id>
@@ -2081,8 +2087,10 @@ async function auditPromptsAndPatterns(options: {
   type: 'prompts' | 'patterns' | 'both';
   fix?: boolean;
   limit?: number;
+  category?: string;
+  role?: string;
 }) {
-  const { type, fix = false, limit } = options;
+  const { type, fix = false, limit, category, role } = options;
 
   console.log('╔════════════════════════════════════════════════════════════╗');
   console.log('║  Prompt & Pattern Audit System with Grading Rubric      ║');
@@ -2090,6 +2098,8 @@ async function auditPromptsAndPatterns(options: {
   console.log('');
   console.log(`📊 Type: ${type}`);
   console.log(`🔧 Auto-fix: ${fix ? 'Yes' : 'No'}`);
+  if (category) console.log(`📁 Category: ${category}`);
+  if (role) console.log(`👤 Role: ${role}`);
   if (limit) console.log(`🔢 Limit: ${limit}`);
   console.log('');
   console.log('⏳ This will take several minutes...');
@@ -2125,9 +2135,25 @@ async function auditPromptsAndPatterns(options: {
   if (type === 'prompts' || type === 'both') {
     console.log('📝 Auditing prompts...\n');
     const promptsCollection = db.collection('prompts');
-    const prompts = await promptsCollection.find({}).limit(limit || 1000).toArray();
+    
+    // Build query filter
+    const queryFilter: any = {};
+    if (category) {
+      queryFilter.category = category;
+      console.log(`🔍 Filtering by category: ${category}\n`);
+    }
+    if (role) {
+      queryFilter.role = role;
+      console.log(`🔍 Filtering by role: ${role}\n`);
+    }
+    
+    const prompts = await promptsCollection.find(queryFilter).limit(limit || 1000).toArray();
 
-    console.log(`Found ${prompts.length} prompts to audit\n`);
+    console.log(`Found ${prompts.length} prompts to audit`);
+    if (category || role) {
+      console.log(`   (Filtered by: ${[category, role].filter(Boolean).join(', ')})`);
+    }
+    console.log('');
 
     // Check for fast mode flag
     const fastMode = process.argv.includes('--fast') || process.argv.includes('-f');
@@ -2341,12 +2367,14 @@ async function auditPromptsAndPatterns(options: {
 }
 
 // Parse CLI arguments
-function parseArgs(): { type: 'prompts' | 'patterns' | 'both'; fix?: boolean; limit?: number } {
+function parseArgs(): { type: 'prompts' | 'patterns' | 'both'; fix?: boolean; limit?: number; category?: string; role?: string } {
   const args = process.argv.slice(2);
 
   let type: 'prompts' | 'patterns' | 'both' = 'both';
   let fix = false;
   let limit: number | undefined;
+  let category: string | undefined;
+  let role: string | undefined;
 
   for (const arg of args) {
     if (arg.startsWith('--type=')) {
@@ -2358,10 +2386,14 @@ function parseArgs(): { type: 'prompts' | 'patterns' | 'both'; fix?: boolean; li
       fix = true;
     } else if (arg.startsWith('--limit=')) {
       limit = parseInt(arg.split('=')[1]) || undefined;
+    } else if (arg.startsWith('--category=')) {
+      category = arg.split('=')[1];
+    } else if (arg.startsWith('--role=')) {
+      role = arg.split('=')[1];
     }
   }
 
-  return { type, fix, limit };
+  return { type, fix, limit, category, role };
 }
 
 // Main execution
