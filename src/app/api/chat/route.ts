@@ -44,6 +44,12 @@ export async function POST(request: NextRequest) {
     }
 
     body = await request.json();
+    if (!body) {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      );
+    }
     const { messages, useRAG = true } = body;
 
     // Sanitize user input
@@ -68,28 +74,20 @@ export async function POST(request: NextRequest) {
         try {
           const { getDb } = await import('@/lib/mongodb');
           const db = await getDb();
-          // Use aggregation pipeline for text search with score
+          // Use find with text search (requires text index)
           const prompts = await db
             .collection('prompts')
-            .aggregate([
+            .find(
               {
-                $match: {
-                  $text: { $search: sanitizedLastMessage },
-                  active: { $ne: false },
-                },
+                $text: { $search: sanitizedLastMessage },
+                active: { $ne: false },
               },
               {
-                $addFields: {
-                  score: { $meta: 'textScore' },
-                },
-              },
-              {
-                $sort: { score: -1 },
-              },
-              {
-                $limit: 3,
-              },
-            ])
+                projection: { score: { $meta: 'textScore' } },
+              }
+            )
+            .sort({ score: { $meta: 'textScore' } })
+            .limit(3)
             .toArray();
 
           if (prompts.length > 0) {
