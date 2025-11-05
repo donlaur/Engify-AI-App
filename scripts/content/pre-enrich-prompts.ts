@@ -230,9 +230,33 @@ Return ONLY the slug (no quotes, no JSON, just: slug-text-here):`;
             .replace(/^-|-$/g, '');
 
           if (slug && slug.length > 5 && slug.length < 60) {
-            updates.slug = slug;
-            improvements.push('Optimized slug');
-            stats.slugsOptimized++;
+            // Validate slug uniqueness before saving
+            const existingPrompt = await db.collection('prompts').findOne({
+              slug: slug,
+              id: { $ne: prompt.id }
+            });
+            
+            if (existingPrompt) {
+              // Generate unique slug with numeric suffix
+              const { generateUniqueSlug } = await import('@/lib/utils/slug');
+              const allSlugs = new Set<string>();
+              const allPrompts = await db.collection('prompts').find({}).toArray();
+              allPrompts.forEach((p: any) => {
+                if (p.slug && p.id !== prompt.id) {
+                  allSlugs.add(p.slug);
+                }
+              });
+              
+              const uniqueSlug = generateUniqueSlug(prompt.title || slug, allSlugs);
+              updates.slug = uniqueSlug;
+              improvements.push('Optimized slug (unique)');
+              stats.slugsOptimized++;
+              console.log(`   ✅ Generated unique slug: ${uniqueSlug}`);
+            } else {
+              updates.slug = slug;
+              improvements.push('Optimized slug');
+              stats.slugsOptimized++;
+            }
           }
         } catch (error) {
           console.error(`   ❌ Error generating slug: ${error}`);

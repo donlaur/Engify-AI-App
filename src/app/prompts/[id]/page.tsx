@@ -117,6 +117,9 @@ export async function generateMetadata({
         metaDescription: prompt.metaDescription || null,
         seoKeywords: prompt.seoKeywords || null,
         slug: prompt.slug || null,
+        updatedAt: prompt.updatedAt,
+        lastRevisedAt: prompt.lastRevisedAt,
+        createdAt: prompt.createdAt,
       },
       categoryLabel,
       roleLabel,
@@ -164,9 +167,9 @@ export default async function PromptPage({
     const isPremium = prompt.isPremium === true;
     const canViewPremium = true; // All prompts are free now - allow viewing
 
-    // Note: Redirect logic moved to middleware for better performance (301 redirects)
-    // Middleware handles redirects before page render, reducing server load
-    // The redirect logic here is kept as a fallback but should rarely execute
+    // Redirect logic: Handle slug redirects in page component
+    // (Moved from middleware because Edge runtime doesn't support MongoDB/crypto)
+    // The redirect() function will use appropriate status code for SEO
 
     const slug = getPromptSlug(prompt);
 
@@ -188,10 +191,10 @@ export default async function PromptPage({
         const testUrl = new URL(`/prompts/${slug}`, APP_URL);
         // Verify the path component matches our slug (no encoding issues)
         if (testUrl.pathname === `/prompts/${slug}`) {
-          // Slug is valid - redirect to canonical slug (301 permanent redirect)
-          // Note: This should rarely execute as middleware handles redirects
-          const { redirect } = await import('next/navigation');
-          redirect(`/prompts/${encodeURIComponent(slug)}`);
+          // Slug is valid - redirect to canonical slug (permanent redirect for SEO)
+          // Next.js 15 supports permanentRedirect for 301 redirects
+          const { permanentRedirect } = await import('next/navigation');
+          permanentRedirect(`/prompts/${encodeURIComponent(slug)}`);
         } else {
           // URL encoding changed the slug - log warning and skip redirect
           logger.warn('Slug encoding mismatch, skipping redirect', { 
@@ -292,7 +295,7 @@ export default async function PromptPage({
         },
       },
       datePublished: prompt.createdAt?.toISOString(),
-      dateModified: prompt.updatedAt?.toISOString(),
+      dateModified: prompt.lastRevisedAt?.toISOString() || prompt.updatedAt?.toISOString(),
       mainEntityOfPage: {
         '@type': 'WebPage',
         '@id': `${APP_URL}/prompts/${slug}`,
@@ -363,6 +366,19 @@ export default async function PromptPage({
               <p className="mb-6 text-xl text-muted-foreground">
                 {prompt.description}
               </p>
+
+              {/* Last Modified Date - SEO & User Value */}
+              {(prompt.lastRevisedAt || prompt.updatedAt) && (
+                <div className="mb-4 text-sm text-muted-foreground">
+                  <Icons.clock className="mr-1 inline h-4 w-4" />
+                  Last updated:{' '}
+                  {new Date(prompt.lastRevisedAt || prompt.updatedAt || '').toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </div>
+              )}
 
               {/* Metadata Badges */}
               <div className="flex flex-wrap gap-2">

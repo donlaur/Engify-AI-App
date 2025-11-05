@@ -555,9 +555,42 @@ Format as JSON:
               const seoData = JSON.parse(jsonText);
               
               if (seoData.slug && needsSlug) {
-                updates.slug = seoData.slug;
-                improvements.push('Optimized slug');
-                stats.slugsOptimized++;
+                // Validate slug uniqueness before saving
+                const generatedSlug = seoData.slug
+                  .toLowerCase()
+                  .trim()
+                  .replace(/^["']|["']$/g, '')
+                  .replace(/[^a-z0-9-]/g, '-')
+                  .replace(/-+/g, '-')
+                  .replace(/^-|-$/g, '');
+                
+                // Check if slug already exists (excluding current prompt)
+                const existingPrompt = await db.collection('prompts').findOne({
+                  slug: generatedSlug,
+                  id: { $ne: prompt.id }
+                });
+                
+                if (existingPrompt) {
+                  // Generate unique slug with numeric suffix
+                  const { generateUniqueSlug } = await import('@/lib/utils/slug');
+                  const allSlugs = new Set<string>();
+                  const allPrompts = await db.collection('prompts').find({}).toArray();
+                  allPrompts.forEach((p: any) => {
+                    if (p.slug && p.id !== prompt.id) {
+                      allSlugs.add(p.slug);
+                    }
+                  });
+                  
+                  const uniqueSlug = generateUniqueSlug(prompt.title || generatedSlug, allSlugs);
+                  updates.slug = uniqueSlug;
+                  improvements.push('Optimized slug (unique)');
+                  stats.slugsOptimized++;
+                  console.log(`   ✅ Generated unique slug: ${uniqueSlug}`);
+                } else {
+                  updates.slug = generatedSlug;
+                  improvements.push('Optimized slug');
+                  stats.slugsOptimized++;
+                }
               }
               
               if (seoData.metaDescription && needsMeta) {

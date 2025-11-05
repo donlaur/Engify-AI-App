@@ -217,6 +217,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     pattern?: string;
     tags?: string[];
     updatedAt?: Date;
+    lastRevisedAt?: Date;
     createdAt?: Date;
   }> = [];
 
@@ -232,6 +233,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       pattern: p.pattern,
       tags: p.tags,
       updatedAt: p.updatedAt ? new Date(p.updatedAt) : undefined,
+      lastRevisedAt: p.lastRevisedAt ? new Date(p.lastRevisedAt) : undefined,
       createdAt: p.createdAt ? new Date(p.createdAt) : undefined,
     }));
   } catch (error) {
@@ -274,7 +276,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       return {
         url: `${baseUrl}/prompts/${encodeURIComponent(slug)}`,
-        lastModified: prompt.updatedAt || prompt.createdAt || now,
+        lastModified: prompt.lastRevisedAt || prompt.updatedAt || prompt.createdAt || now,
         changeFrequency: 'monthly' as const,
         priority: 0.7,
       };

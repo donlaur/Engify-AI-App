@@ -40,6 +40,9 @@ export function generatePromptMetadata(
     metaDescription?: string | null; // Use prompt's meta description if available
     seoKeywords?: string[] | null; // Use prompt's SEO keywords if available
     slug?: string | null; // Use prompt's slug if available
+    updatedAt?: Date; // Last updated date for SEO
+    lastRevisedAt?: Date; // Last revised date (preferred for SEO)
+    createdAt?: Date; // Created date for SEO
   },
   categoryLabel: string,
   roleLabel: string | null,

@@ -304,15 +304,34 @@ const promptPages: MetadataRoute.Sitemap = prompts
 
 ---
 
-### 9. **Slug Generation - No Validation**
+### 9. **Slug Generation - No Validation** ✅ FIXED
 
 **Issue:** AI-generated slugs in enrichment scripts don't validate against existing slugs.
 
-**Location:** `scripts/content/pre-enrich-prompts.ts:232`
+**Location:** `scripts/content/pre-enrich-prompts.ts:232` → **Fixed in** `scripts/content/pre-enrich-prompts.ts` and `scripts/content/batch-improve-from-audits.ts`
 
-**Risk:** Could create duplicate slugs if multiple prompts processed simultaneously.
+**Risk:**
+- ~~Could create duplicate slugs if multiple prompts processed simultaneously.~~
 
-**Recommendation:** Add uniqueness check before saving slug.
+**Fix Applied:**
+- ✅ **Added uniqueness validation** before saving slugs in `pre-enrich-prompts.ts`
+- ✅ **Added uniqueness validation** before saving slugs in `batch-improve-from-audits.ts`
+- ✅ **Uses `generateUniqueSlug()` utility** to append numeric suffix if duplicate found
+- ✅ **Checks database** for existing slugs before saving
+- ✅ **Prevents duplicate slugs** across concurrent script executions
+
+**Implementation:**
+- Before saving a generated slug, scripts now query MongoDB for existing slugs
+- If a duplicate is found, `generateUniqueSlug()` is called to generate a unique variant (e.g., `slug-2`)
+- Both enrichment scripts (`pre-enrich-prompts.ts` and `batch-improve-from-audits.ts`) now include this validation
+
+**Benefits:**
+- Prevents duplicate slugs in database
+- Ensures unique URLs for SEO
+- Handles concurrent script executions safely
+- Maintains data integrity
+
+**Date Fixed:** 2025-11-05
 
 ---
 

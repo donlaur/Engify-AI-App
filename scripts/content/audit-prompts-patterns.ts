@@ -2690,11 +2690,8 @@ async function auditPromptsAndPatterns(options: {
         continue;
       }
       
-      // Skip prompts that have been improved (currentRevision > 1)
-      const promptRevision = prompt.currentRevision || 1;
-      if (promptRevision > 1) {
-        continue;
-      }
+      // Don't skip based on currentRevision - we want to audit prompts at revision 2
+      // to upgrade them to version 3. The auditVersion check above is sufficient.
       
       // This prompt needs auditing - add it to the list
       promptsNeedingAudit.push(prompt);
@@ -2752,25 +2749,15 @@ async function auditPromptsAndPatterns(options: {
             // Ignore lock release errors
           }
         }
-        console.log(`[${i + 1}/${shuffledPrompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Audit Version ${currentAuditVersion} - already at target version ${targetVersion}+)`);
+        console.log(`[${i + 1}/${shuffledPrompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Audit Version ${currentAuditVersion} >= ${targetVersion})`);
         skippedCount++;
         continue;
       }
       
+      // Don't skip based on currentRevision - we want to audit prompts at revision 2
+      // to upgrade them to audit version 3. The auditVersion check above is sufficient.
+      
       const promptRevision = prompt.currentRevision || 1;
-      if (promptRevision > 1) {
-        // Release lock if we acquired it
-        if (lockAcquired && redisCache) {
-          try {
-            await redisCache.del(CACHE_KEYS.auditLock(promptId));
-          } catch (e) {
-            // Ignore lock release errors
-          }
-        }
-        console.log(`[${i + 1}/${shuffledPrompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Revision ${promptRevision} - already improved)`);
-        skippedCount++;
-        continue;
-      }
       
       console.log(`[${i + 1}/${shuffledPrompts.length}] 🔒 Auditing: ${prompt.title || prompt.id || 'Untitled'}`);
       if (lockAcquired) {
