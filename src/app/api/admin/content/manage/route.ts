@@ -129,7 +129,8 @@ export async function POST(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session?.user?.email || 'unknown',
-      action: 'content_created',
+      action: 'admin_action',
+      resource: 'learning_content',
       details: {
         contentId: result.insertedId.toString(),
         type,
@@ -226,7 +227,8 @@ export async function PUT(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session?.user?.email || 'unknown',
-      action: 'content_updated',
+      action: 'admin_action',
+      resource: 'learning_content',
       details: {
         contentId: _id,
         title,
@@ -302,7 +304,8 @@ export async function DELETE(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session?.user?.email || 'unknown',
-      action: 'content_deleted',
+      action: 'admin_action',
+      resource: 'learning_content',
       details: {
         contentId: id,
         title: contentItem?.title || 'Unknown',
