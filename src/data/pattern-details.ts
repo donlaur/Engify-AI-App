@@ -431,6 +431,193 @@ Start by asking me for the output of 'kubectl describe pod <pod_name>'.`,
     ],
     relatedPatterns: ['persona', 'question-refinement', 'chain-of-thought'],
   },
+  {
+    id: 'cognitive-verifier',
+    name: 'Cognitive Verifier',
+    category: 'Reasoning',
+    level: 'intermediate',
+    shortDescription:
+      'Instructs the AI to verify its own reasoning and check for errors before presenting conclusions',
+    fullDescription:
+      'The Cognitive Verifier pattern asks the AI to critically examine its own reasoning process, identify potential errors or assumptions, and verify the correctness of its conclusions before presenting them. This pattern improves accuracy by making the AI double-check its work, similar to how a human would review their solution before submitting it. It\'s especially powerful when combined with Chain-of-Thought, as the AI can verify each step of its reasoning.',
+    howItWorks:
+      'You instruct the AI to: (1) Provide its initial answer or reasoning, (2) Review its own work critically, checking for logical errors, incorrect assumptions, or missing considerations, (3) Verify the correctness of each step or conclusion, and (4) Present the verified answer with confidence. The AI acts as its own quality control mechanism.',
+    whenToUse: [
+      'Mathematical problems or calculations where accuracy is critical',
+      'Logical reasoning tasks where errors could cascade',
+      'Code review or debugging where correctness matters',
+      'Analysis tasks where assumptions need verification',
+      'Any complex problem where self-checking improves quality',
+      'Situations where you want to catch errors before they propagate',
+    ],
+    example: {
+      before:
+        'Solve this equation: 2x + 5 = 15. What is the value of x?',
+      after: `Solve this equation: 2x + 5 = 15. What is the value of x?
+
+**Step 1: Solve the equation**
+2x + 5 = 15
+2x = 15 - 5
+2x = 10
+x = 10 / 2
+x = 5
+
+**Step 2: Verify your answer**
+Let me check if x = 5 is correct by substituting back into the original equation:
+2(5) + 5 = 10 + 5 = 15 ✓
+
+The equation holds true, so x = 5 is correct.`,
+      explanation:
+        'The Cognitive Verifier pattern forces the AI to verify its answer by substituting the result back into the original equation, catching any arithmetic errors before presenting the final answer.',
+    },
+    bestPractices: [
+      'Explicitly ask the AI to verify its reasoning',
+      'Specify what aspects to check (logic, math, assumptions, completeness)',
+      'Combine with Chain-of-Thought for step-by-step verification',
+      'Use for critical tasks where errors are costly',
+      'Instruct the AI to show its verification process',
+      'Ask for confidence level after verification',
+    ],
+    commonMistakes: [
+      'Not specifying what to verify (too vague)',
+      'Using for simple tasks where verification adds no value',
+      'Expecting perfect verification (AI can still make errors)',
+      'Not combining with other patterns (works best with Chain-of-Thought)',
+      'Asking for verification but not using the results',
+    ],
+    relatedPatterns: ['chain-of-thought', 'self-reflection', 'critique-improve'],
+  },
+  {
+    id: 'hypothesis-testing',
+    name: 'Hypothesis Testing',
+    category: 'Reasoning',
+    level: 'advanced',
+    shortDescription:
+      'Generates multiple plausible explanations or hypotheses and evaluates them systematically',
+    fullDescription:
+      'The Hypothesis Testing pattern instructs the AI to generate multiple plausible explanations or hypotheses for a problem, then systematically evaluate each one against the available evidence. This is similar to scientific method: propose multiple theories, test them, and determine which best fits the data. This pattern is powerful for complex problems where multiple explanations are possible and you need to find the most likely one.',
+    howItWorks:
+      'You instruct the AI to: (1) Generate 3-5 plausible hypotheses or explanations, (2) For each hypothesis, identify what evidence would support or refute it, (3) Evaluate each hypothesis against the available evidence, (4) Rank hypotheses by likelihood or strength of evidence, and (5) Present the most likely explanation with reasoning.',
+    whenToUse: [
+      'Debugging complex systems where multiple root causes are possible',
+      'Diagnostic scenarios (medical, technical, business)',
+      'Analyzing ambiguous data or situations',
+      'Investigating incidents or anomalies',
+      'Research problems where multiple theories exist',
+      'Decision-making with uncertainty',
+      'Root cause analysis',
+    ],
+    example: {
+      before:
+        'My application is slow. What could be causing this?',
+      after: `My application is slow. Use hypothesis testing to identify the root cause.
+
+**Step 1: Generate Hypotheses**
+Generate 3-5 plausible explanations for why the application might be slow:
+1. Database query performance issues
+2. Network latency or bandwidth constraints
+3. Insufficient server resources (CPU, memory)
+4. Inefficient code or algorithms
+5. External API dependencies causing delays
+
+**Step 2: Evaluate Each Hypothesis**
+For each hypothesis, identify:
+- What evidence would support it?
+- What evidence would refute it?
+- What diagnostic steps would confirm it?
+
+**Step 3: Rank Hypotheses**
+Rank the hypotheses by likelihood based on available evidence and present the most likely cause with your reasoning.`,
+      explanation:
+        'Instead of jumping to a single conclusion, the AI systematically considers multiple possibilities and evaluates them, leading to more accurate diagnoses.',
+    },
+    bestPractices: [
+      'Specify the number of hypotheses to generate (3-5 is optimal)',
+      'Instruct the AI to evaluate evidence systematically',
+      'Ask for ranking based on likelihood or evidence strength',
+      'Use for complex problems with multiple possible causes',
+      'Combine with diagnostic data or evidence when available',
+      'Instruct the AI to explain why each hypothesis is plausible',
+    ],
+    commonMistakes: [
+      'Generating too many hypotheses (overwhelming)',
+      'Not providing enough context or evidence for evaluation',
+      'Not ranking hypotheses (all seem equally likely)',
+      'Using for simple problems with obvious causes',
+      'Not following up with diagnostic steps',
+    ],
+    relatedPatterns: ['chain-of-thought', 'cognitive-verifier', 'flipped-interaction'],
+  },
+  {
+    id: 'rag',
+    name: 'RAG (Retrieval Augmented Generation)',
+    category: 'Context Management',
+    level: 'advanced',
+    shortDescription:
+      'Retrieves relevant information from external knowledge base before generating response',
+    fullDescription:
+      'RAG (Retrieval Augmented Generation) is a pattern that combines information retrieval with text generation. Instead of relying solely on the AI\'s training data, RAG first retrieves relevant documents or information from a knowledge base (database, vector store, documentation), then uses that retrieved context to generate accurate, up-to-date responses. This pattern is essential for applications that need to reference specific documents, codebases, or knowledge bases that change frequently or contain domain-specific information not in the AI\'s training data.',
+    howItWorks:
+      'The RAG process involves: (1) **Query**: User asks a question, (2) **Retrieval**: System searches knowledge base (often using semantic search/embeddings) to find relevant documents, (3) **Augmentation**: Retrieved documents are added to the prompt as context, (4) **Generation**: AI generates response using both its training knowledge and the retrieved context. This ensures answers are grounded in your specific data.',
+    whenToUse: [
+      'You have a large knowledge base or documentation that changes frequently',
+      'You need to answer questions about specific codebases or projects',
+      'The AI needs access to information not in its training data',
+      'You want to cite sources or provide references',
+      'Building chatbots that answer questions about your product/service',
+      'Creating AI assistants that reference internal documentation',
+      'You need to combine multiple sources of information',
+    ],
+    example: {
+      before:
+        'What are the key features of our product?',
+      after: `Answer this question using our product documentation.
+
+**Question:** What are the key features of our product?
+
+**Step 1: Retrieve Relevant Information**
+Search our product documentation for:
+- Feature descriptions
+- Product specifications
+- Release notes
+- User guides
+
+**Step 2: Extract Key Information**
+From the retrieved documents, identify:
+- Core features
+- Feature descriptions
+- Use cases
+- Technical specifications
+
+**Step 3: Generate Response**
+Using the retrieved information, provide a comprehensive answer about our product features. Cite specific documents or sections where information came from.
+
+**Available Documentation:**
+[Your knowledge base or documentation source]
+
+Generate the answer based on the retrieved context.`,
+      explanation:
+        'RAG ensures the AI uses your actual product documentation rather than generic knowledge, resulting in accurate, up-to-date answers that reflect your specific product.',
+    },
+    bestPractices: [
+      'Use semantic search or embeddings for better retrieval',
+      'Retrieve top 3-5 most relevant documents',
+      'Include source citations in the response',
+      'Instruct the AI to use only information from retrieved context',
+      'Handle cases where no relevant information is found',
+      'Combine retrieved information with AI\'s general knowledge appropriately',
+      'Use chunking strategies for large documents',
+    ],
+    commonMistakes: [
+      'Retrieving too many documents (overwhelming context)',
+      'Not instructing the AI to prioritize retrieved information',
+      'Using simple keyword search instead of semantic search',
+      'Not handling cases where retrieval finds nothing',
+      'Not citing sources (hard to verify accuracy)',
+      'Mixing retrieved context with hallucinated information',
+    ],
+    relatedPatterns: ['context', 'few-shot', 'template'],
+  },
 ];
 
 export function getPatternById(id: string): PatternDetail | undefined {

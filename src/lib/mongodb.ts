@@ -16,6 +16,62 @@
  */
 
 import { MongoClient, Db } from 'mongodb';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load environment variables (for scripts and serverless environments)
+// Check multiple locations: current dir, parent dir (for worktrees), common git worktree locations
+if (typeof process !== 'undefined') {
+  const currentDir = process.cwd();
+  const parentDir = resolve(currentDir, '..');
+  const fs = require('fs');
+  
+  // Try current directory first
+  config({ path: resolve(currentDir, '.env.local') });
+  config({ path: resolve(currentDir, '.env') });
+  
+  // If not found, try parent directory (for git worktrees)
+  if (!process.env.MONGODB_URI) {
+    config({ path: resolve(parentDir, '.env.local') });
+    config({ path: resolve(parentDir, '.env') });
+  }
+  
+  // If still not found and we're in a worktree, try common worktree patterns
+  if (!process.env.MONGODB_URI && currentDir.includes('worktrees')) {
+    // Try going up to find git common dir or main repo
+    const worktreeRoot = currentDir.split('/worktrees/')[0];
+    if (worktreeRoot) {
+      // Try worktree root's parent (common git worktree location)
+      const possibleMainRepo = resolve(worktreeRoot, '..');
+      const envPaths = [
+        resolve(possibleMainRepo, '.env.local'),
+        resolve(worktreeRoot, '.env.local'),
+        // Also try absolute path to main repo (common worktree scenario)
+        resolve('/Users/donlaur/dev/Engify-AI-App', '.env.local'),
+      ];
+      
+      for (const envPath of envPaths) {
+        if (fs.existsSync(envPath)) {
+          config({ path: envPath });
+          if (process.env.MONGODB_URI) break;
+        }
+      }
+    } else {
+      // Fallback: try common absolute paths
+      const commonPaths = [
+        resolve('/Users/donlaur/dev/Engify-AI-App', '.env.local'),
+        resolve('/Users/donlaur/dev/Engify-AI-App', '.env'),
+      ];
+      
+      for (const envPath of commonPaths) {
+        if (fs.existsSync(envPath)) {
+          config({ path: envPath });
+          if (process.env.MONGODB_URI) break;
+        }
+      }
+    }
+  }
+}
 
 /**
  * Get MongoDB URI (lazy check - only when needed)

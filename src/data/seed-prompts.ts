@@ -752,10 +752,619 @@ Provide a prioritized action plan with business justification for each item.`,
   },
 ];
 
-// Combine curated prompts with playbook prompts
+// Combine curated prompts with playbook prompts AND new pattern prompts
 export const seedPrompts: Omit<Prompt, 'createdAt' | 'updatedAt'>[] = [
   ...curatedPrompts,
   ...convertPlaybooksToPrompts(),
+  // Cognitive Verifier Pattern Prompts
+  {
+    id: 'cv-001',
+    title: 'Code Review with Self-Verification',
+    description:
+      'Get code reviews that verify their own analysis for logical errors and completeness',
+    content: `You are an expert code reviewer. Review this code and provide detailed feedback. After providing your review, verify your analysis:
+
+**Code to Review:**
+\`\`\`{language}
+{code}
+\`\`\`
+
+**Review Process:**
+1. **Initial Analysis**: Review for security, performance, best practices, and maintainability
+2. **Provide Feedback**: Give specific, actionable recommendations
+3. **Verify Your Review**: After providing feedback, verify:
+   - Are all security issues identified?
+   - Did I check for common vulnerabilities (SQL injection, XSS, etc.)?
+   - Are performance concerns accurate?
+   - Did I miss any edge cases?
+   - Are my recommendations actually feasible?
+4. **Final Review**: Present your verified review with confidence level
+
+**Verification Checklist:**
+- [ ] Checked for security vulnerabilities
+- [ ] Reviewed performance implications
+- [ ] Validated best practice recommendations
+- [ ] Confirmed edge cases are covered
+- [ ] Verified recommendations are implementable
+
+Provide your verified review and indicate your confidence level (High/Medium/Low) for each recommendation.`,
+    category: 'code-review',
+    role: 'engineer',
+    pattern: 'cognitive-verifier',
+    tags: ['code-review', 'verification', 'quality-assurance'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'cv-002',
+    title: 'Mathematical Problem Solving with Verification',
+    description:
+      'Solve mathematical problems step-by-step and verify answers are correct',
+    content: `Solve this mathematical problem step-by-step, then verify your answer:
+
+**Problem:**
+{problem}
+
+**Solution Process:**
+1. **Solve**: Show your step-by-step solution
+2. **Verify**: Check your answer by:
+   - Substituting your answer back into the original problem
+   - Checking if your steps follow mathematical rules
+   - Verifying calculations are correct
+   - Checking if answer makes logical sense
+3. **Present**: Provide your verified answer with confidence
+
+**Verification Steps:**
+- Substitute answer back into original equation/problem
+- Check each calculation step
+- Verify units are correct (if applicable)
+- Confirm answer is reasonable given context
+
+After verification, present your final answer and indicate if you found any errors during verification.`,
+    category: 'general',
+    role: null,
+    pattern: 'cognitive-verifier',
+    tags: ['mathematics', 'problem-solving', 'verification'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
+  },
+  {
+    id: 'cv-003',
+    title: 'Logical Reasoning with Self-Check',
+    description:
+      'Perform logical analysis and verify your reasoning for errors or assumptions',
+    content: `Analyze this logical problem and verify your reasoning:
+
+**Problem:**
+{problem}
+
+**Analysis Process:**
+1. **Initial Reasoning**: Provide your logical analysis
+2. **Identify Assumptions**: List all assumptions you made
+3. **Verify Logic**: Check your reasoning for:
+   - Logical fallacies
+   - Incorrect assumptions
+   - Missing premises
+   - Flawed deductions
+4. **Validate Conclusion**: Verify if your conclusion logically follows from your premises
+5. **Present Verified Answer**: Share your verified analysis
+
+**Verification Questions:**
+- Are my premises true?
+- Does my conclusion logically follow from my premises?
+- Did I make any logical leaps?
+- Are there alternative conclusions I should consider?
+- Did I account for all relevant factors?
+
+Provide your verified logical analysis with confidence level.`,
+    category: 'general',
+    role: null,
+    pattern: 'cognitive-verifier',
+    tags: ['logic', 'reasoning', 'critical-thinking'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
+  },
+  {
+    id: 'cv-004',
+    title: 'Architecture Decision Verification',
+    description:
+      'Evaluate architecture decisions and verify your analysis for completeness',
+    content: `You are a senior software architect. Evaluate this architecture decision and verify your analysis:
+
+**Decision Context:**
+{decision_context}
+
+**Evaluation:**
+1. **Initial Assessment**: Analyze the decision for:
+   - Technical feasibility
+   - Scalability implications
+   - Cost considerations
+   - Risk factors
+   - Alternative options
+2. **Provide Recommendation**: Give your assessment
+3. **Verify Your Analysis**: After your assessment, verify:
+   - Did I consider all stakeholders?
+   - Are there risks I missed?
+   - Did I evaluate all alternatives?
+   - Are my assumptions valid?
+   - Is my recommendation complete?
+4. **Final Assessment**: Present your verified evaluation
+
+**Verification Checklist:**
+- [ ] Considered all technical constraints
+- [ ] Evaluated scalability implications
+- [ ] Assessed all risks
+- [ ] Reviewed alternative approaches
+- [ ] Validated assumptions
+
+Provide your verified architecture assessment.`,
+    category: 'architecture',
+    role: 'architect',
+    pattern: 'cognitive-verifier',
+    tags: ['architecture', 'decision-making', 'verification'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'cv-005',
+    title: 'Security Analysis with Self-Verification',
+    description:
+      'Analyze security vulnerabilities and verify your findings are accurate',
+    content: `You are a security expert. Analyze this system for security vulnerabilities and verify your findings:
+
+**System to Analyze:**
+{system_description}
+
+**Analysis Process:**
+1. **Initial Security Review**: Identify potential vulnerabilities:
+   - Authentication/authorization issues
+   - Input validation problems
+   - Data exposure risks
+   - Common vulnerabilities (OWASP Top 10)
+2. **Provide Findings**: Document identified issues
+3. **Verify Your Analysis**: After providing findings, verify:
+   - Are these actual vulnerabilities or false positives?
+   - Did I miss any critical security issues?
+   - Are my severity assessments accurate?
+   - Are my remediation suggestions correct?
+   - Did I consider the attack surface comprehensively?
+4. **Final Report**: Present your verified security analysis
+
+**Verification Questions:**
+- Can I confirm each vulnerability is real?
+- Are severity ratings appropriate?
+- Did I check for all common vulnerability types?
+- Are remediation steps accurate?
+- Is my analysis complete?
+
+Provide your verified security analysis with confidence levels for each finding.`,
+    category: 'security',
+    role: 'engineer',
+    pattern: 'cognitive-verifier',
+    tags: ['security', 'vulnerability-assessment', 'verification'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  // Hypothesis Testing Pattern Prompts
+  {
+    id: 'ht-001',
+    title: 'Root Cause Analysis with Hypothesis Testing',
+    description:
+      'Systematically generate and test multiple hypotheses to find root causes',
+    content: `You are a troubleshooting expert. Use hypothesis testing to identify the root cause of this issue:
+
+**Issue:**
+{issue_description}
+
+**Available Information:**
+{available_data}
+
+**Hypothesis Testing Process:**
+1. **Generate Hypotheses**: Propose 3-5 plausible explanations for this issue
+2. **For Each Hypothesis, Identify:**
+   - What evidence would support it?
+   - What evidence would refute it?
+   - What diagnostic steps would confirm it?
+   - What is the likelihood based on available evidence?
+3. **Evaluate Evidence**: Compare each hypothesis against available information
+4. **Rank Hypotheses**: Order hypotheses by likelihood and evidence strength
+5. **Recommend**: Present the most likely root cause with your reasoning
+
+**Hypothesis Format:**
+For each hypothesis, provide:
+- Hypothesis: [explanation]
+- Supporting Evidence: [what fits]
+- Refuting Evidence: [what doesn't fit]
+- Diagnostic Steps: [how to confirm]
+- Likelihood: High/Medium/Low
+
+Provide your analysis with the most likely root cause ranked first.`,
+    category: 'debugging',
+    role: 'engineer',
+    pattern: 'hypothesis-testing',
+    tags: ['debugging', 'root-cause-analysis', 'troubleshooting'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'ht-002',
+    title: 'Performance Issue Diagnosis',
+    description:
+      'Generate and test multiple hypotheses to diagnose performance problems',
+    content: `You are a performance optimization expert. Diagnose this performance issue using hypothesis testing:
+
+**Performance Problem:**
+- Issue: {performance_issue}
+- Symptoms: {symptoms}
+- Current Metrics: {metrics}
+- Environment: {environment}
+
+**Hypothesis Testing:**
+1. **Generate 5 Hypotheses** for why performance is degraded:
+   - Database query performance
+   - Network latency
+   - Resource constraints (CPU/Memory)
+   - Code inefficiencies
+   - External dependencies
+
+2. **For Each Hypothesis:**
+   - What evidence supports it?
+   - What evidence refutes it?
+   - What metrics would confirm it?
+   - Likelihood: High/Medium/Low
+
+3. **Rank Hypotheses** by likelihood based on available evidence
+
+4. **Recommend Diagnostic Steps** to confirm the most likely cause
+
+5. **Propose Solution** for the highest-ranked hypothesis
+
+Present your analysis with hypotheses ranked by likelihood.`,
+    category: 'performance',
+    role: 'engineer',
+    pattern: 'hypothesis-testing',
+    tags: ['performance', 'diagnostics', 'optimization'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'ht-003',
+    title: 'System Failure Investigation',
+    description:
+      'Investigate system failures by testing multiple hypotheses systematically',
+    content: `You are a Site Reliability Engineer. Investigate this system failure using hypothesis testing:
+
+**Failure Details:**
+- When: {timestamp}
+- What: {failure_description}
+- Impact: {impact}
+- Error Messages: {error_messages}
+- Recent Changes: {recent_changes}
+
+**Hypothesis Testing Process:**
+Generate 3-5 hypotheses for the root cause:
+
+1. **Hypothesis 1**: [Possible cause]
+   - Supporting Evidence: [evidence that fits]
+   - Refuting Evidence: [evidence that doesn't fit]
+   - Diagnostic Steps: [how to verify]
+   - Likelihood: [High/Medium/Low]
+
+2. **Hypothesis 2**: [Another possible cause]
+   - [Same structure]
+
+3. **Continue for all hypotheses...**
+
+**Rank Hypotheses** by likelihood and evidence strength.
+
+**Recommend Investigation Priority** starting with highest-likelihood hypothesis.
+
+**Provide Action Plan** for confirming and resolving the most likely cause.
+
+Present your analysis with hypotheses ranked from most to least likely.`,
+    category: 'debugging',
+    role: 'engineer',
+    pattern: 'hypothesis-testing',
+    tags: ['incident-response', 'sre', 'troubleshooting'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'ht-004',
+    title: 'Data Anomaly Investigation',
+    description:
+      'Investigate data anomalies by generating and testing multiple hypotheses',
+    content: `You are a data analyst. Investigate this data anomaly using hypothesis testing:
+
+**Anomaly:**
+{anomaly_description}
+
+**Data Context:**
+{data_context}
+
+**Hypothesis Testing:**
+1. **Generate Hypotheses**: Propose 3-5 explanations for this anomaly:
+   - Data quality issues
+   - Process changes
+   - External factors
+   - Calculation errors
+   - System bugs
+
+2. **For Each Hypothesis:**
+   - What data patterns would support it?
+   - What data patterns would refute it?
+   - What analysis would confirm it?
+   - Likelihood: High/Medium/Low
+
+3. **Evaluate Against Data**: Compare each hypothesis with actual data patterns
+
+4. **Rank Hypotheses**: Order by likelihood based on evidence
+
+5. **Recommend**: Present most likely explanation with data supporting it
+
+**Provide:**
+- Ranked hypotheses with likelihood scores
+- Supporting/refuting evidence for each
+- Next steps to confirm most likely cause
+- Recommended actions based on top hypothesis
+
+Present your analysis with the most likely explanation ranked first.`,
+    category: 'general',
+    role: null,
+    pattern: 'hypothesis-testing',
+    tags: ['data-analysis', 'investigation', 'analytics'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
+  },
+  {
+    id: 'ht-005',
+    title: 'User Behavior Analysis',
+    description:
+      'Analyze user behavior patterns by testing multiple hypotheses',
+    content: `You are a product analyst. Analyze this user behavior pattern using hypothesis testing:
+
+**Behavior Pattern:**
+{behavior_description}
+
+**Available Data:**
+{user_data}
+
+**Hypothesis Testing:**
+1. **Generate 3-5 Hypotheses** for why users are behaving this way:
+   - UX/UI issues
+   - Feature discovery problems
+   - Performance barriers
+   - Value proposition unclear
+   - External factors
+
+2. **For Each Hypothesis:**
+   - What user data supports it?
+   - What user data refutes it?
+   - What research would confirm it?
+   - Likelihood: High/Medium/Low
+
+3. **Evaluate Against User Data**: Compare hypotheses with actual user behavior
+
+4. **Rank Hypotheses**: Order by likelihood
+
+5. **Recommend Actions**: Propose solutions for most likely cause
+
+Present your analysis with hypotheses ranked by likelihood and recommended actions.`,
+    category: 'analytics',
+    role: 'product-manager',
+    pattern: 'hypothesis-testing',
+    tags: ['user-behavior', 'analytics', 'product-analysis'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
+  },
+  // RAG Pattern Prompts
+  {
+    id: 'rag-001',
+    title: 'Codebase Documentation Q&A',
+    description:
+      'Answer questions about codebase using retrieved documentation and code context',
+    content: `Answer this question about our codebase using the retrieved documentation:
+
+**Question:** {question}
+
+**Retrieved Context:**
+The following documentation and code snippets have been retrieved from our knowledge base:
+{retrieved_context}
+
+**Instructions:**
+1. **Use Only Retrieved Context**: Base your answer primarily on the retrieved documentation
+2. **Cite Sources**: Reference specific files, functions, or documentation sections
+3. **If Information Missing**: If the retrieved context doesn't fully answer the question, state what's missing
+4. **Provide Accurate Answer**: Use the retrieved context to provide a precise answer
+
+**Answer Format:**
+- **Answer**: [Your answer based on retrieved context]
+- **Sources**: [List specific files/documentation referenced]
+- **Confidence**: High/Medium/Low (based on how well retrieved context answers the question)
+
+**Important**: Only use information from the retrieved context. Do not rely solely on general knowledge if it conflicts with the retrieved documentation.`,
+    category: 'documentation',
+    role: 'engineer',
+    pattern: 'rag',
+    tags: ['documentation', 'codebase', 'qa'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'rag-002',
+    title: 'API Documentation Search',
+    description:
+      'Answer API questions using retrieved API documentation',
+    content: `Answer this API question using our API documentation:
+
+**Question:** {api_question}
+
+**Retrieved API Documentation:**
+{api_docs}
+
+**Instructions:**
+1. Search the retrieved documentation for relevant endpoints, parameters, and examples
+2. Provide specific answers with endpoint names, parameter details, and examples
+3. Cite which documentation sections you used
+4. If the question can't be answered from retrieved docs, state what's missing
+
+**Answer Format:**
+- **Endpoint**: [specific endpoint if applicable]
+- **Answer**: [detailed answer from documentation]
+- **Example**: [code example from documentation]
+- **Documentation Source**: [specific doc section/page]
+
+Base your answer entirely on the retrieved API documentation.`,
+    category: 'documentation',
+    role: 'engineer',
+    pattern: 'rag',
+    tags: ['api', 'documentation', 'reference'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'rag-003',
+    title: 'Product Knowledge Base Assistant',
+    description:
+      'Answer product questions using retrieved product documentation',
+    content: `Answer this product question using our product documentation:
+
+**Question:** {product_question}
+
+**Retrieved Product Documentation:**
+{product_docs}
+
+**Instructions:**
+1. Use information from the retrieved product documentation
+2. Provide accurate, up-to-date answers based on the docs
+3. Cite specific documentation sections
+4. If information is missing, indicate what documentation needs to be added
+
+**Answer Format:**
+- **Answer**: [answer from product documentation]
+- **Features**: [relevant features mentioned]
+- **Details**: [specific details from docs]
+- **Sources**: [documentation sections referenced]
+
+Ensure your answer reflects the current state of the product as described in the retrieved documentation.`,
+    category: 'general',
+    role: null,
+    pattern: 'rag',
+    tags: ['product', 'documentation', 'knowledge-base'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
+  {
+    id: 'rag-004',
+    title: 'Internal Process Documentation Query',
+    description:
+      'Answer questions about internal processes using retrieved process documentation',
+    content: `Answer this question about our internal processes using the retrieved process documentation:
+
+**Question:** {process_question}
+
+**Retrieved Process Documentation:**
+{process_docs}
+
+**Instructions:**
+1. Find relevant process information in the retrieved documentation
+2. Provide step-by-step answers based on documented processes
+3. Reference specific process documents or sections
+4. Include any relevant forms, checklists, or templates mentioned
+
+**Answer Format:**
+- **Process**: [process name]
+- **Steps**: [steps from documentation]
+- **Requirements**: [requirements from docs]
+- **Resources**: [referenced resources]
+- **Source**: [documentation source]
+
+Use only information from the retrieved process documentation.`,
+    category: 'general',
+    role: null,
+    pattern: 'rag',
+    tags: ['processes', 'documentation', 'internal'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: false,
+  },
+  {
+    id: 'rag-005',
+    title: 'Technical Architecture Reference',
+    description:
+      'Answer architecture questions using retrieved technical documentation',
+    content: `Answer this architecture question using our technical documentation:
+
+**Question:** {architecture_question}
+
+**Retrieved Architecture Documentation:**
+{architecture_docs}
+
+**Instructions:**
+1. Search the retrieved documentation for relevant architecture information
+2. Provide detailed answers with diagrams, components, and relationships mentioned in docs
+3. Cite specific documentation sections
+4. Include any relevant design decisions or trade-offs documented
+
+**Answer Format:**
+- **Overview**: [architecture overview from docs]
+- **Components**: [components described in docs]
+- **Relationships**: [how components relate]
+- **Design Decisions**: [decisions documented]
+- **Sources**: [documentation sections]
+
+Base your answer on the retrieved architecture documentation.`,
+    category: 'architecture',
+    role: 'architect',
+    pattern: 'rag',
+    tags: ['architecture', 'documentation', 'technical'],
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    isPublic: true,
+    isFeatured: true,
+  },
 ];
 
 // Helper to add timestamps

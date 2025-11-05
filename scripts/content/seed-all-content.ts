@@ -10,18 +10,8 @@
  *   pnpm tsx scripts/content/seed-all-content.ts --only=patterns,ai-adoption
  */
 
-import { config } from 'dotenv';
-import { MongoClient, Db } from 'mongodb';
-
-// Load environment variables
-config({ path: '.env.local' });
-
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  console.error('❌ MONGODB_URI not found in environment variables');
-  process.exit(1);
-}
+import { Db } from 'mongodb';
+import { getMongoDb } from '@/lib/db/mongodb';
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -234,13 +224,11 @@ const seeders: Seeder[] = [
  * Main Seeding Function
  */
 async function seedAllContent() {
-  const client = new MongoClient(MONGODB_URI);
-
   try {
-    await client.connect();
+    console.log('🌱 Starting content seeding...\n');
+    
+    const db = await getMongoDb();
     console.log('✅ Connected to MongoDB\n');
-
-    const db = client.db();
 
     // Filter seeders if --only flag is provided
     const activeSeeders = onlyTypes
@@ -294,8 +282,6 @@ async function seedAllContent() {
   } catch (error) {
     console.error('❌ Error seeding content:', error);
     process.exit(1);
-  } finally {
-    await client.close();
   }
 }
 

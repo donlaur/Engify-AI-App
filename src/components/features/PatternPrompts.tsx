@@ -97,11 +97,13 @@ export function PatternPrompts({ patternId }: PatternPromptsProps) {
         <h2 className="text-2xl font-bold">
           {prompts.length} Example {prompts.length === 1 ? 'Prompt' : 'Prompts'} Using This Pattern
         </h2>
-        <Link href={`/prompts?pattern=${encodeURIComponent(patternId)}`}>
-          <Badge variant="outline" className="cursor-pointer hover:bg-primary/10">
-            View All →
-          </Badge>
-        </Link>
+        {prompts.length > 0 && (
+          <Link href={`/prompts?pattern=${encodeURIComponent(patternId)}`}>
+            <Badge variant="outline" className="cursor-pointer hover:bg-primary/10">
+              View All →
+            </Badge>
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

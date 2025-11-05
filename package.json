@@ -46,6 +46,7 @@
     "audit:icons": "tsx scripts/audit-icons.ts",
     "seed": "tsx src/lib/db/seed.ts",
     "seed:prompts": "tsx scripts/seed-prompts-to-db.ts",
+    "backup:db": "tsx scripts/db/backup-mongodb.ts",
     "test:prompts": "tsx scripts/test-prompts-batch.ts",
     "analyze:tests": "tsx scripts/analyze-test-results.ts",
     "db:seed": "npm run seed",

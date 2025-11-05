@@ -84,6 +84,12 @@ next-env.d.ts
 # Never commit password reset scripts
 **/reset-password*
 
+# Database backups (gitignored - contains sensitive data)
+backups/
+db-backups/
+*.backup.json
+backup-report_*.json
+
 # Private scripts (migration, content management)
 scripts/private/
 

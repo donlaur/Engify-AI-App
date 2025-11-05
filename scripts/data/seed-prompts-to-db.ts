@@ -3,8 +3,8 @@
  * Run with: npx tsx scripts/seed-prompts-to-db.ts
  */
 
-import { MongoClient } from 'mongodb';
-import { getSeedPromptsWithTimestamps } from '../src/data/seed-prompts';
+import { getMongoDb } from '@/lib/db/mongodb';
+import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 
 // Generate SEO-friendly slug from title (CLEAN - no IDs)
 function generateSlug(title: string): string {
@@ -13,44 +13,10 @@ function generateSlug(title: string): string {
 }
 
 async function seedDatabase() {
-  // Try to load from .env.local
-  const fs = require('fs');
-  const path = require('path');
-
   try {
-    const envPath = path.join(process.cwd(), '.env.local');
-    if (fs.existsSync(envPath)) {
-      const envContent = fs.readFileSync(envPath, 'utf-8');
-      const mongoMatch = envContent.match(/MONGODB_URI=(.+)/);
-      if (mongoMatch) {
-        // Remove quotes if present
-        process.env.MONGODB_URI = mongoMatch[1]
-          .trim()
-          .replace(/^["']|["']$/g, '');
-      }
-    }
-  } catch (e) {
-    // Ignore
-  }
-
-  const uri = process.env.MONGODB_URI;
-
-  if (!uri) {
-    console.error('❌ MONGODB_URI not found in environment variables');
-    console.log('💡 Add MONGODB_URI to your .env.local file');
-    console.log(
-      '   Example: MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/engify'
-    );
-    process.exit(1);
-  }
-
-  const client = new MongoClient(uri);
-
-  try {
-    await client.connect();
+    console.log('Connecting to MongoDB...');
+    const db = await getMongoDb();
     console.log('✅ Connected to MongoDB');
-
-    const db = client.db('engify');
     const promptsCollection = db.collection('prompts');
 
     // Get all prompts with timestamps
@@ -66,13 +32,33 @@ async function seedDatabase() {
       updatedAt: new Date(),
     }));
 
-    // Clear existing prompts (optional - comment out to keep existing)
-    await promptsCollection.deleteMany({});
-    console.log('🗑️  Cleared existing prompts');
+    // Check existing prompts count
+    const existingCount = await promptsCollection.countDocuments({});
+    console.log(`📊 Found ${existingCount} existing prompts in database`);
 
-    // Insert all prompts
-    const result = await promptsCollection.insertMany(promptsWithSlugs);
-    console.log(`✅ Inserted ${result.insertedCount} prompts`);
+    // Upsert prompts (update if exists by id, insert if new)
+    // This preserves existing prompts and only adds/updates the ones from seed file
+    let inserted = 0;
+    let updated = 0;
+    
+    for (const prompt of promptsWithSlugs) {
+      const result = await promptsCollection.updateOne(
+        { id: prompt.id },
+        { $set: prompt },
+        { upsert: true }
+      );
+      
+      if (result.upsertedCount > 0) {
+        inserted++;
+      } else if (result.modifiedCount > 0) {
+        updated++;
+      }
+    }
+    
+    console.log(`✅ Upserted ${promptsWithSlugs.length} prompts:`);
+    console.log(`   - Inserted: ${inserted} new prompts`);
+    console.log(`   - Updated: ${updated} existing prompts`);
+    console.log(`   - Unchanged: ${promptsWithSlugs.length - inserted - updated} prompts`);
 
     // Create indexes for better performance
     await promptsCollection.createIndex({ slug: 1 }, { unique: true });
@@ -117,12 +103,11 @@ async function seedDatabase() {
     samplePrompts.forEach((p) => {
       console.log(`   /library/${p.slug}`);
     });
+    console.log('\n');
+    process.exit(0);
   } catch (error) {
     console.error('❌ Error seeding database:', error);
     process.exit(1);
-  } finally {
-    await client.close();
-    console.log('\n👋 Disconnected from MongoDB');
   }
 }
 
