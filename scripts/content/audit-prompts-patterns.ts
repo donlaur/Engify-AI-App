@@ -73,16 +73,47 @@ interface AuditAgent {
 }
 
 /**
- * Get a valid model ID from database registry for a provider
+ * Get a valid text-to-text model ID from database registry for a provider
+ * Filters out image/video/audio models to avoid wasting tokens
  * Falls back to provider name if DB unavailable (will use factory default)
  */
 async function getModelIdFromRegistry(provider: string, preferredModel?: string): Promise<string | null> {
   try {
     const { getModelsByProvider } = await import('@/lib/services/AIModelRegistry');
-    const models = await getModelsByProvider(provider);
+    const allModels = await getModelsByProvider(provider);
+    
+    // Filter to only text-to-text models (skip image/video/audio)
+    const models = allModels.filter((m: any) => {
+      const capabilities = m.capabilities || [];
+      const tags = m.tags || [];
+      const modelId = (m.id || '').toLowerCase();
+      
+      // Must have 'text' capability
+      if (!capabilities.includes('text')) {
+        return false;
+      }
+      
+      // Skip image/video/audio generation models
+      if (capabilities.includes('image-generation') || 
+          capabilities.includes('video-generation') ||
+          capabilities.includes('audio-generation') ||
+          tags.includes('image-generation') ||
+          tags.includes('video-generation') ||
+          tags.includes('audio-generation') ||
+          modelId.includes('image') ||
+          modelId.includes('flux') ||
+          modelId.includes('sora') ||
+          modelId.includes('video') ||
+          modelId.includes('dalle') ||
+          modelId.includes('midjourney')) {
+        return false;
+      }
+      
+      return true;
+    });
     
     if (models.length === 0) {
-      return null; // No models found, will use factory default
+      return null; // No text-to-text models found, will use factory default
     }
     
     // If preferred model specified and exists, use it
@@ -592,10 +623,11 @@ export class PromptPatternAuditor {
 
     try {
       // ALWAYS resolve model ID from database registry (not hardcoded)
-      // This ensures we use the latest models from the database
+      // This ensures we use the latest text-to-text models from the database
+      // Non-text models (image/video) are automatically filtered out
       let modelId = agent.model;
       
-      // Try to resolve from database first
+      // Try to resolve from database first (getModelIdFromRegistry filters out non-text models)
       const resolvedModelId = await getModelIdFromRegistry(agent.provider, agent.model);
       if (resolvedModelId) {
         modelId = resolvedModelId;

@@ -191,19 +191,77 @@ async function main() {
     console.log(`🔍 Filtering by provider: ${providerFilter}\n`);
   }
 
-  const models = await db.collection('ai_models')
+  const allModels = await db.collection('ai_models')
     .find(query)
     .sort({ provider: 1, recommended: -1, tier: 1 })
     .toArray();
 
+  // Filter to only text-to-text models (skip image/video models)
+  const models = allModels.filter((model: any) => {
+    // Must have 'text' capability
+    const capabilities = model.capabilities || [];
+    if (!capabilities.includes('text')) {
+      return false;
+    }
+
+    // Skip if it's primarily an image/video generation model
+    const tags = model.tags || [];
+    const modelId = (model.id || '').toLowerCase();
+    const modelName = (model.displayName || model.name || '').toLowerCase();
+
+    // Skip image generation models
+    if (capabilities.includes('image-generation') || 
+        tags.includes('image-generation') ||
+        tags.includes('image') ||
+        modelId.includes('image') ||
+        modelId.includes('flux') ||
+        modelId.includes('dalle') ||
+        modelId.includes('midjourney') ||
+        modelName.includes('image') ||
+        modelName.includes('flux')) {
+      return false;
+    }
+
+    // Skip video generation models
+    if (capabilities.includes('video-generation') ||
+        tags.includes('video-generation') ||
+        tags.includes('video') ||
+        modelId.includes('video') ||
+        modelId.includes('sora') ||
+        modelId.includes('veo') ||
+        modelName.includes('video') ||
+        modelName.includes('sora')) {
+      return false;
+    }
+
+    // Skip audio generation models
+    if (capabilities.includes('audio-generation') ||
+        tags.includes('audio-generation') ||
+        tags.includes('audio')) {
+      return false;
+    }
+
+    return true;
+  });
+
+  const skippedCount = allModels.length - models.length;
+
   if (models.length === 0) {
-    console.log('❌ No active models found in database');
+    console.log('❌ No text-to-text models found in database');
+    if (skippedCount > 0) {
+      console.log(`   Skipped ${skippedCount} image/video/audio models`);
+    }
     console.log('   Run: pnpm tsx scripts/db/sync-ai-models-latest.ts');
     await db.client.close();
     process.exit(1);
   }
 
-  console.log(`📊 Testing ${models.length} models with real prompt audit\n`);
+  if (skippedCount > 0) {
+    console.log(`ℹ️  Skipped ${skippedCount} non-text models (image/video/audio)`);
+    console.log(`   Only testing ${models.length} text-to-text models\n`);
+  }
+
+  console.log(`📊 Testing ${models.length} text-to-text models with real prompt audit\n`);
   console.log('🚀 Starting tests...\n');
 
   const results: TestResult[] = [];
