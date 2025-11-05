@@ -188,16 +188,17 @@ async function syncAnthropicModels(): Promise<{ created: number; updated: number
  */
 async function syncGoogleModels(): Promise<{ created: number; updated: number }> {
   // Google Gemini models (updated as of Nov 2024)
-  const knownModels: Array<{ name: string; displayName: string }> = [
+  // Many Gemini 1.0 and 1.5 models are deprecated/removed as of 2025
+  const knownModels: Array<{ name: string; displayName: string; deprecated?: boolean }> = [
     // Gemini 2.0 Series (latest experimental)
     { name: 'gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash Experimental' },
-    // Gemini 1.5 Series (stable)
-    { name: 'gemini-1.5-pro', displayName: 'Gemini 1.5 Pro' },
-    { name: 'gemini-1.5-flash', displayName: 'Gemini 1.5 Flash' },
-    { name: 'gemini-1.5-flash-8b', displayName: 'Gemini 1.5 Flash 8B' },
-    // Gemini 1.0 Series (legacy)
-    { name: 'gemini-pro', displayName: 'Gemini Pro' },
-    { name: 'gemini-pro-vision', displayName: 'Gemini Pro Vision' },
+    // Gemini 1.5 Series - many deprecated
+    { name: 'gemini-1.5-pro', displayName: 'Gemini 1.5 Pro', deprecated: true }, // Deprecated/removed
+    { name: 'gemini-1.5-flash', displayName: 'Gemini 1.5 Flash', deprecated: true }, // Deprecated/removed
+    { name: 'gemini-1.5-flash-8b', displayName: 'Gemini 1.5 Flash 8B', deprecated: true }, // Deprecated/removed
+    // Gemini 1.0 Series (legacy - all deprecated)
+    { name: 'gemini-pro', displayName: 'Gemini Pro', deprecated: true },
+    { name: 'gemini-pro-vision', displayName: 'Gemini Pro Vision', deprecated: true },
   ];
 
   const aiModels: AIModel[] = knownModels.map((m) => ({
@@ -205,7 +206,8 @@ async function syncGoogleModels(): Promise<{ created: number; updated: number }>
     provider: 'google' as const,
     name: m.name,
     displayName: m.displayName,
-    status: 'active' as const,
+    status: m.deprecated ? ('deprecated' as const) : ('active' as const),
+    deprecationDate: m.deprecated ? new Date() : undefined,
     capabilities: ['text', 'vision'],
     contextWindow: 1000000, // Gemini has large context
     maxOutputTokens: 8192,
@@ -216,11 +218,12 @@ async function syncGoogleModels(): Promise<{ created: number; updated: number }>
     supportsStreaming: true,
     supportsJSON: true,
     supportsVision: true,
-    recommended: m.name.includes('2.0'),
+    recommended: m.name.includes('2.0') && !m.deprecated,
     tier: getGoogleCost(m.name, 'input') === 0 ? 'free' as const : 'affordable' as const,
-    isAllowed: true,
+    isAllowed: !m.deprecated, // Deprecated models not allowed
     tags: ['fast', 'multimodal'],
-    lastVerified: new Date(),
+    replacementModel: m.deprecated ? 'gemini-2.0-flash-exp' : undefined, // Suggest 2.0 Flash as replacement
+    lastVerified: m.deprecated ? undefined : new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
   } satisfies AIModel));

@@ -184,8 +184,15 @@ async function main() {
     console.log(`   Use --prompt-id=<id> to test with a specific prompt\n`);
   }
 
-  // Get all active models from database
-  const query: any = { status: 'active' };
+  // Get all active models from database (exclude deprecated/sunset)
+  const query: any = { 
+    status: { $in: ['active'] }, // Only active models
+    // Explicitly exclude deprecated/sunset
+    $nor: [
+      { status: 'deprecated' },
+      { status: 'sunset' }
+    ]
+  };
   if (providerFilter) {
     query.provider = providerFilter;
     console.log(`🔍 Filtering by provider: ${providerFilter}\n`);
@@ -196,8 +203,14 @@ async function main() {
     .sort({ provider: 1, recommended: -1, tier: 1 })
     .toArray();
 
+  // Double-check: filter out any deprecated/sunset models that might have slipped through
+  const activeModels = allModels.filter((model: any) => {
+    const status = model.status || 'active';
+    return status === 'active' && status !== 'deprecated' && status !== 'sunset';
+  });
+
   // Filter to only text-to-text models (skip image/video models)
-  const models = allModels.filter((model: any) => {
+  const models = activeModels.filter((model: any) => {
     // Must have 'text' capability
     const capabilities = model.capabilities || [];
     if (!capabilities.includes('text')) {
@@ -253,11 +266,12 @@ async function main() {
   });
 
   const skippedCount = allModels.length - models.length;
+  const deprecatedCount = allModels.length - activeModels.length;
 
   if (models.length === 0) {
     console.log('❌ No text-to-text models found in database');
     if (skippedCount > 0) {
-      console.log(`   Skipped ${skippedCount} image/video/audio models`);
+      console.log(`   Skipped ${skippedCount} models (${deprecatedCount} deprecated + ${skippedCount - deprecatedCount} non-text)`);
     }
     console.log('   Run: pnpm tsx scripts/db/sync-ai-models-latest.ts');
     await db.client.close();
@@ -265,8 +279,14 @@ async function main() {
   }
 
   if (skippedCount > 0) {
-    console.log(`ℹ️  Skipped ${skippedCount} non-text models (image/video/audio)`);
-    console.log(`   Only testing ${models.length} text-to-text models\n`);
+    console.log(`ℹ️  Skipped ${skippedCount} models:`);
+    if (deprecatedCount > 0) {
+      console.log(`   - ${deprecatedCount} deprecated/sunset models`);
+    }
+    if (skippedCount - deprecatedCount > 0) {
+      console.log(`   - ${skippedCount - deprecatedCount} non-text models (image/video/audio)`);
+    }
+    console.log(`   Only testing ${models.length} active text-to-text models\n`);
   }
 
   console.log(`📊 Testing ${models.length} text-to-text models with real prompt audit\n`);
