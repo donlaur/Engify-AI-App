@@ -109,8 +109,14 @@ export async function generateMetadata({
       : null;
 
     // Use new programmatic metadata utility
+    // Pass metaDescription and seoKeywords if available for SEO optimization
     return generatePromptMetadata(
-      prompt,
+      {
+        ...prompt,
+        metaDescription: prompt.metaDescription || null,
+        seoKeywords: prompt.seoKeywords || null,
+        slug: prompt.slug || null,
+      },
       categoryLabel,
       roleLabel,
       patternLabel

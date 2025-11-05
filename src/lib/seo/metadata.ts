@@ -37,6 +37,9 @@ export function generatePromptMetadata(
     tags?: string[];
     views?: number;
     rating?: number;
+    metaDescription?: string | null; // Use prompt's meta description if available
+    seoKeywords?: string[] | null; // Use prompt's SEO keywords if available
+    slug?: string | null; // Use prompt's slug if available
   },
   categoryLabel: string,
   roleLabel: string | null,
@@ -49,62 +52,76 @@ export function generatePromptMetadata(
 
   const title = `${prompt.title} | A Proven AI Prompt for ${useCase} | Engify.ai`;
 
-  // Build unique description (150-160 chars)
-  // Template: Learn to use the [Prompt Name] prompt to solve [Problem]. Get examples and best practices from Engify.ai, the AI training platform for engineering teams.
-  const descriptionParts: string[] = [];
-
-  // Start with learning angle
-  descriptionParts.push(`Learn to use the "${prompt.title}" prompt`);
-
-  // Add specific use case
-  if (roleLabel) {
-    descriptionParts.push(
-      `to solve ${categoryLabel.toLowerCase()} challenges for ${roleLabel.toLowerCase()}s`
-    );
+  // Use metaDescription from prompt if available and valid, otherwise generate
+  let description: string;
+  if (prompt.metaDescription && prompt.metaDescription.length >= 100 && prompt.metaDescription.length <= 165) {
+    // Use provided meta description (already optimized)
+    description = prompt.metaDescription;
   } else {
-    descriptionParts.push(`for ${categoryLabel.toLowerCase()}`);
-  }
+    // Build unique description (150-160 chars)
+    // Template: Learn to use the [Prompt Name] prompt to solve [Problem]. Get examples and best practices from Engify.ai, the AI training platform for engineering teams.
+    const descriptionParts: string[] = [];
 
-  // Add pattern context if available
-  if (patternLabel) {
-    descriptionParts.push(`using the ${patternLabel} pattern`);
-  }
+    // Start with learning angle
+    descriptionParts.push(`Learn to use the "${prompt.title}" prompt`);
 
-  // Add training platform CTA
-  descriptionParts.push(
-    'Get examples and best practices from Engify.ai, the AI training platform for engineering teams.'
-  );
+    // Add specific use case
+    if (roleLabel) {
+      descriptionParts.push(
+        `to solve ${categoryLabel.toLowerCase()} challenges for ${roleLabel.toLowerCase()}s`
+      );
+    } else {
+      descriptionParts.push(`for ${categoryLabel.toLowerCase()}`);
+    }
 
-  let description = descriptionParts.join('. ');
+    // Add pattern context if available
+    if (patternLabel) {
+      descriptionParts.push(`using the ${patternLabel} pattern`);
+    }
 
-  // Ensure length is optimal (150-160 chars)
-  if (description.length > 160) {
-    // Trim intelligently
-    description = description.substring(0, 157) + '...';
-  } else if (description.length < 120) {
-    // Add more context if too short
-    description +=
-      ' Master prompt engineering with structured learning paths and proven patterns.';
+    // Add training platform CTA
+    descriptionParts.push(
+      'Get examples and best practices from Engify.ai, the AI training platform for engineering teams.'
+    );
+
+    description = descriptionParts.join('. ');
+
+    // Ensure length is optimal (150-160 chars)
     if (description.length > 160) {
+      // Trim intelligently
       description = description.substring(0, 157) + '...';
+    } else if (description.length < 120) {
+      // Add more context if too short
+      description +=
+        ' Master prompt engineering with structured learning paths and proven patterns.';
+      if (description.length > 160) {
+        description = description.substring(0, 157) + '...';
+      }
     }
   }
 
-  const slug = prompt.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  // Use slug from prompt if available, otherwise generate
+  const slug = prompt.slug || prompt.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   const url = `${APP_URL}/prompts/${slug}`;
 
-  // Build keywords array
+  // Build keywords array - prioritize prompt's seoKeywords if available
+  const baseKeywords = prompt.seoKeywords && prompt.seoKeywords.length > 0
+    ? prompt.seoKeywords // Use provided SEO keywords
+    : [
+        prompt.title,
+        `${prompt.title} prompt`,
+        categoryLabel,
+        `${categoryLabel} prompt`,
+        ...(roleLabel
+          ? [`${roleLabel} prompts`, `prompts for ${roleLabel.toLowerCase()}s`]
+          : []),
+        ...(patternLabel
+          ? [patternLabel, `${patternLabel.toLowerCase()} pattern`]
+          : []),
+      ];
+
   const keywords = [
-    prompt.title,
-    `${prompt.title} prompt`,
-    categoryLabel,
-    `${categoryLabel} prompt`,
-    ...(roleLabel
-      ? [`${roleLabel} prompts`, `prompts for ${roleLabel.toLowerCase()}s`]
-      : []),
-    ...(patternLabel
-      ? [patternLabel, `${patternLabel.toLowerCase()} pattern`]
-      : []),
+    ...baseKeywords,
     ...TRAINING_KEYWORDS,
     'prompt engineering training',
     'AI prompt template',

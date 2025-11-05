@@ -166,14 +166,33 @@ export function PromptContextExplanation({
         </h2>
         <Card>
           <CardContent className="pt-6">
-            <ul className="space-y-3">
-              {context.whyUse.map((reason, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <Icons.check className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
-                  <span className="text-base leading-relaxed">{reason}</span>
-                </li>
-              ))}
-            </ul>
+            {/* Summary paragraph for SEO and context - dynamically generated from content */}
+            {context.whyUse.length > 0 && (
+              <p className="mb-6 text-base leading-relaxed text-muted-foreground">
+                {title} provides practical benefits for engineering teams, including improved efficiency, 
+                better code quality, and streamlined workflows. The key advantages include:
+              </p>
+            )}
+            
+            {/* Responsive grid: 2 columns on md+, 1 column on mobile */}
+            {/* Show top 4-5 most important reasons for better UX */}
+            {context.whyUse.length > 0 && (
+              <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {context.whyUse.slice(0, 5).map((reason, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <Icons.check className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+                    <span className="text-base leading-relaxed">{reason}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            
+            {/* Show count if there are more reasons */}
+            {context.whyUse.length > 5 && (
+              <p className="mt-4 text-sm text-muted-foreground">
+                And {context.whyUse.length - 5} more benefit{context.whyUse.length - 5 > 1 ? 's' : ''}...
+              </p>
+            )}
           </CardContent>
         </Card>
       </section>

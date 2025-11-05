@@ -125,6 +125,59 @@ export const PromptSchema = z.object({
   // SEO & Educational Content
   whatIs: z.string().optional(), // Explanation of what the concept is
   whyUse: z.array(z.string()).optional(), // Array of reasons why someone would use this
+  metaDescription: z.string().max(165).optional(), // SEO meta description (150-160 chars optimal)
+  seoKeywords: z.array(z.string()).optional(), // SEO keywords array
+  
+  // Enrichment Fields - Content for user education and SEO
+  caseStudies: z.array(z.object({
+    title: z.string(),
+    scenario: z.string().optional(),
+    context: z.string().optional(),
+    challenge: z.string().optional(),
+    solution: z.string().optional(),
+    process: z.string().optional(),
+    outcome: z.string().optional(),
+    keyLearning: z.string().optional(),
+    metrics: z.string().optional(),
+  })).optional(), // Real-world examples showing how prompts are used
+  
+  examples: z.array(z.object({
+    title: z.string().optional(),
+    input: z.string().optional(),
+    output: z.string().optional(),
+    expectedOutput: z.string().optional(),
+    description: z.string().optional(),
+  })).optional(), // Input/output examples
+  
+  useCases: z.array(z.string()).optional(), // Specific scenarios where prompts excel
+  
+  bestPractices: z.array(z.string()).optional(), // Tips for getting the best results
+  
+  bestTimeToUse: z.union([
+    z.array(z.string()),
+    z.string()
+  ]).optional(), // Guidance on when to use each prompt
+  
+  recommendedModel: z.array(z.object({
+    model: z.string(), // e.g., "gpt-4o", "claude-3-5-sonnet-20241022"
+    provider: z.enum(['openai', 'anthropic', 'google', 'groq', 'replicate']).optional(),
+    reason: z.string().optional(), // Why this model is recommended
+    useCase: z.string().optional(), // Specific use case for this model
+  })).optional(), // AI model suggestions with reasoning
+  
+  whenNotToUse: z.array(z.string()).optional(), // Guidance on when to avoid using a prompt
+  
+  difficulty: z.union([
+    z.enum(['beginner', 'intermediate', 'advanced']),
+    z.number().min(1).max(5), // 1-5 scale
+  ]).optional(), // Difficulty level
+  
+  estimatedTime: z.union([
+    z.string(), // e.g., "15-30 minutes"
+    z.number(), // minutes
+  ]).optional(), // Estimated time to complete
+  
+  verified: z.boolean().default(false).optional(), // Verified by admin/team
 });
 
 export const CreatePromptSchema = PromptSchema.omit({
