@@ -28,7 +28,32 @@ pnpm tsx scripts/content/track-progress.ts
 
 ---
 
-## 🔍 Audit Scripts
+## ⚠️ Important Clarification: Audit vs Improvement
+
+### What Audit Scripts Do (SCORING ONLY)
+
+**All audit scripts (including quick mode) ONLY SCORE prompts - they do NOT modify the prompt itself.**
+
+**What gets saved:**
+- ✅ Audit results saved to `prompt_audit_results` collection
+- ✅ Scores, issues, recommendations, missing elements
+- ✅ New audit version number
+- ❌ **Prompt itself is NOT modified**
+
+**To actually improve prompts after auditing, you need to run enrichment scripts separately.**
+
+### What Improvement Scripts Do (MODIFY PROMPTS)
+
+**Enrichment scripts actually modify the prompt in the `prompts` collection.**
+
+**What gets saved:**
+- ✅ Prompt fields updated: `caseStudies`, `examples`, `whatIs`, `whyUse`, etc.
+- ✅ Prompt record in `prompts` collection is modified
+- ✅ `updatedAt` timestamp updated
+
+---
+
+## 🔍 Audit Scripts (SCORING ONLY)
 
 ### Main Audit Script
 
@@ -83,6 +108,8 @@ pnpm tsx scripts/content/audit-prompts-patterns.ts --type=both
 - ✅ Saves audit results incrementally (no data loss on crash)
 - ✅ Shows skip count summary at end
 - ✅ Uses Redis caching for faster subsequent audits
+- ⚠️ **ONLY SCORES - does NOT modify prompts**
+- ⚠️ **To apply improvements, run enrichment scripts separately**
 
 **Categories:**
 - `code-generation`
@@ -161,7 +188,9 @@ pnpm tsx scripts/content/review-audit-scores.ts --type=enrichments
 
 ---
 
-## ✨ Enrichment Scripts
+## ✨ Enrichment Scripts (MODIFY PROMPTS)
+
+**These scripts actually modify the prompt records in the database.**
 
 ### Enrich Single Prompt
 
@@ -179,6 +208,8 @@ pnpm tsx scripts/content/enrich-prompt.ts --id=<prompt-id>
 - ✅ Only enriches prompts at audit version 1
 - ✅ Skips if already enriched (version > 1)
 - ✅ Generates: case studies, examples, use cases, best practices, whatIs, whyUse, etc.
+- ✅ **MODIFIES the prompt record in `prompts` collection**
+- ✅ Updates `updatedAt` timestamp
 
 ---
 
@@ -401,16 +432,16 @@ curl -X POST https://engify.ai/api/admin/ai-models/sync
 ### Workflow 1: Initial Audit of New Prompts
 
 ```bash
-# Step 1: Pre-enrich with basic fields
+# Step 1: Pre-enrich with basic fields (OPTIONAL - improves scores)
 pnpm tsx scripts/content/pre-enrich-prompts.ts
 
-# Step 2: Quick audit (fastest)
+# Step 2: Quick audit (SCORING ONLY - saves to prompt_audit_results)
 pnpm tsx scripts/content/audit-prompts-patterns.ts --type=prompts --quick
 
 # Step 3: Review scores
 pnpm tsx scripts/content/review-audit-scores.ts
 
-# Step 4: Enrich version 1 prompts
+# Step 4: Enrich version 1 prompts (ACTUALLY MODIFIES PROMPTS)
 pnpm tsx scripts/content/enrich-all-version1.ts
 ```
 
