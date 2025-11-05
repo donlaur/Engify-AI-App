@@ -675,12 +675,13 @@ export class PromptPatternAuditor {
       }
     }
 
+    let resolvedModelId: string | null = null; // Track resolved ID for error handling (declared outside try)
+    
     try {
       // ALWAYS resolve model ID from database registry (not hardcoded)
       // This ensures we use the latest text-to-text models from the database
       // Non-text models (image/video) are automatically filtered out
       let modelId = agent.model;
-      let resolvedModelId: string | null = null; // Track resolved ID for error handling
       
       // Try to resolve from database first (getModelIdFromRegistry filters out non-text models)
       // It also prefers verified/working models (recent lastVerified date)
