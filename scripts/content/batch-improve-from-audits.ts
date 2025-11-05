@@ -249,6 +249,7 @@ async function applyImprovements(
         const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
         const auditDate = new Date();
 
+        // Save immediately after audit completes (don't wait for batch)
         await db.collection('prompt_audit_results').insertOne({
           promptId: prompt.id,
           promptTitle: prompt.title,
@@ -275,9 +276,10 @@ async function applyImprovements(
           missingElements: auditResult.missingElements,
         });
         
-        console.log(`   ✅ Audited (Score: ${auditResult.overallScore}/10)`);
+        console.log(`   ✅ Audited and saved (Score: ${auditResult.overallScore}/10, Version ${auditVersion})`);
       } catch (error) {
         console.error(`   ❌ Audit failed: ${error}`);
+        // Continue to next prompt even if this one fails
       }
     }
     

@@ -2145,6 +2145,7 @@ async function auditPromptsAndPatterns(options: {
         const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
         const auditDate = new Date();
         
+        // Save immediately after audit completes (don't wait for batch)
         await db.collection('prompt_audit_results').insertOne({
           promptId: prompt.id || prompt.slug || prompt._id?.toString(),
           promptTitle: prompt.title || 'Untitled',
@@ -2163,12 +2164,15 @@ async function auditPromptsAndPatterns(options: {
           updatedAt: auditDate,
         });
         
+        console.log(`   💾 Saved to database (Version ${auditVersion})`);
+        
         if (fix && result.needsFix) {
           console.log(`   🔧 Auto-fixing...`);
           // TODO: Implement auto-fix logic
         }
       } catch (error) {
         console.error(`   ❌ Error auditing prompt:`, error);
+        // Continue to next prompt even if this one fails
       }
     }
   }
