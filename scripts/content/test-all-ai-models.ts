@@ -209,6 +209,21 @@ async function main() {
     const modelId = (model.id || '').toLowerCase();
     const modelName = (model.displayName || model.name || '').toLowerCase();
 
+    // Skip audio models (they require audio input/output)
+    if (capabilities.includes('audio-generation') ||
+        capabilities.includes('audio') ||
+        tags.includes('audio') ||
+        modelId.includes('audio') ||
+        modelName.includes('audio')) {
+      return false;
+    }
+
+    // Skip realtime models (they use different API endpoints)
+    if (modelId.includes('realtime') ||
+        modelName.includes('realtime')) {
+      return false;
+    }
+
     // Skip image generation models
     if (capabilities.includes('image-generation') || 
         tags.includes('image-generation') ||
@@ -231,13 +246,6 @@ async function main() {
         modelId.includes('veo') ||
         modelName.includes('video') ||
         modelName.includes('sora')) {
-      return false;
-    }
-
-    // Skip audio generation models
-    if (capabilities.includes('audio-generation') ||
-        tags.includes('audio-generation') ||
-        tags.includes('audio')) {
       return false;
     }
 
@@ -305,13 +313,23 @@ async function main() {
     } else {
       console.log(`   ❌ Error: ${result.error}`);
       
-      // If error is 404 (model not found) or deprecated, mark as deprecated in DB
+      // Check if error is due to wrong model type (not deprecated, just wrong API/input type)
       const errorMsg = result.error?.toLowerCase() || '';
-      if (errorMsg.includes('404') || 
-          errorMsg.includes('not found') || 
-          errorMsg.includes('not_found_error') ||
-          errorMsg.includes('deprecated') ||
-          errorMsg.includes('sunset')) {
+      const isWrongModelType = errorMsg.includes('requires') && 
+                              (errorMsg.includes('audio') || errorMsg.includes('video') || errorMsg.includes('image')) ||
+                              errorMsg.includes('not a chat model') ||
+                              errorMsg.includes('not supported in') ||
+                              errorMsg.includes('different endpoint');
+      
+      // If error is 404 (model not found) or explicitly deprecated, mark as deprecated
+      const isDeprecated = errorMsg.includes('404') || 
+                           errorMsg.includes('not found') || 
+                           errorMsg.includes('not_found_error') ||
+                           errorMsg.includes('deprecated') ||
+                           errorMsg.includes('sunset');
+      
+      if (isDeprecated) {
+        // Model is actually deprecated/removed
         try {
           await db.collection('ai_models').updateOne(
             { id: model.id },
@@ -326,6 +344,27 @@ async function main() {
           console.log(`   🏷️  Marked as deprecated in database (model not found/removed)`);
         } catch (error) {
           console.log(`   ⚠️  Failed to mark as deprecated: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      } else if (isWrongModelType) {
+        // Model works but is wrong type for text-to-text - update capabilities/tags instead
+        try {
+          await db.collection('ai_models').updateOne(
+            { id: model.id },
+            { 
+              $set: { 
+                isAllowed: false, // Don't allow for text-to-text tasks
+                updatedAt: new Date(),
+              },
+              $addToSet: {
+                tags: errorMsg.includes('audio') ? 'audio-only' : 
+                      errorMsg.includes('realtime') ? 'realtime-only' : 
+                      'unsuitable-for-text'
+              }
+            }
+          );
+          console.log(`   🏷️  Marked as unsuitable for text-to-text tasks (wrong model type)`);
+        } catch (error) {
+          console.log(`   ⚠️  Failed to update model status: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
     }

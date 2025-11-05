@@ -92,6 +92,14 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
         return false;
       }
       
+      // Skip models not allowed for text-to-text (wrong type)
+      if ('isAllowed' in m && m.isAllowed === false) {
+        const tags = m.tags || [];
+        if (tags.includes('audio-only') || tags.includes('realtime-only') || tags.includes('unsuitable-for-text')) {
+          return false;
+        }
+      }
+      
       const capabilities = m.capabilities || [];
       const tags = m.tags || [];
       const modelId = (m.id || '').toLowerCase();
@@ -101,13 +109,26 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
         return false;
       }
       
+      // Skip audio models (they require audio input/output)
+      if (capabilities.includes('audio-generation') ||
+          capabilities.includes('audio') ||
+          tags.includes('audio') ||
+          tags.includes('audio-only') ||
+          modelId.includes('audio')) {
+        return false;
+      }
+      
+      // Skip realtime models (they use different API endpoints)
+      if (tags.includes('realtime-only') ||
+          modelId.includes('realtime')) {
+        return false;
+      }
+      
       // Skip image/video/audio generation models
       if (capabilities.includes('image-generation') || 
           capabilities.includes('video-generation') ||
-          capabilities.includes('audio-generation') ||
           tags.includes('image-generation') ||
           tags.includes('video-generation') ||
-          tags.includes('audio-generation') ||
           modelId.includes('image') ||
           modelId.includes('flux') ||
           modelId.includes('sora') ||
