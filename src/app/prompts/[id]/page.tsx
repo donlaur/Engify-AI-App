@@ -172,13 +172,61 @@ export default async function PromptPage({
 
     // Redirect to canonical slug if URL doesn't match (SEO best practice)
     // This handles slug changes gracefully: old slugs → new slugs, IDs → slugs
-    // Only redirect if we're not already on the canonical slug
-    if (params.id !== slug) {
-      // Always redirect to canonical slug for SEO consistency
-      // This ensures old slugs and IDs redirect to the proper slug URL
-      // Note: redirect() uses temporary redirect by default, but the redirect preserves SEO value
-      const { redirect } = await import('next/navigation');
-      redirect(`/prompts/${slug}`);
+    // Only redirect if we're not already on the canonical slug AND slug is valid
+    
+    // Validate slug before redirecting to prevent redirect loops and invalid URLs
+    const isValidSlug = slug && 
+                        slug !== 'untitled' && 
+                        slug !== prompt.id &&
+                        slug.length > 0 &&
+                        slug.length <= 100 && // Reasonable URL length limit
+                        /^[a-z0-9-]+$/.test(slug) && // Only lowercase letters, numbers, hyphens
+                        !slug.startsWith('-') && // No leading hyphen
+                        !slug.endsWith('-') && // No trailing hyphen
+                        !slug.includes('--'); // No consecutive hyphens
+
+    if (params.id !== slug && isValidSlug) {
+      // Additional validation: ensure slug forms a valid URL path
+      try {
+        const testUrl = new URL(`/prompts/${slug}`, APP_URL);
+        // Verify the path component matches our slug (no encoding issues)
+        if (testUrl.pathname === `/prompts/${slug}`) {
+          // Slug is valid - redirect to canonical slug
+          const { redirect } = await import('next/navigation');
+          redirect(`/prompts/${encodeURIComponent(slug)}`);
+        } else {
+          // URL encoding changed the slug - log warning and skip redirect
+          logger.warn('Slug encoding mismatch, skipping redirect', { 
+            promptId: prompt.id, 
+            slug,
+            encodedPath: testUrl.pathname,
+            paramsId: params.id 
+          });
+        }
+      } catch (error) {
+        // Invalid slug - don't redirect, fallback to ID-based URL
+        logger.warn('Invalid slug detected, skipping redirect', { 
+          promptId: prompt.id, 
+          slug,
+          paramsId: params.id,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    } else if (!isValidSlug && params.id !== slug) {
+      // Slug is invalid but URL doesn't match - log for debugging
+      logger.debug('Skipping redirect due to invalid slug', {
+        promptId: prompt.id,
+        slug,
+        paramsId: params.id,
+        reason: !slug ? 'empty' : 
+                slug === 'untitled' ? 'fallback-untitled' :
+                slug === prompt.id ? 'same-as-id' :
+                slug.length === 0 ? 'zero-length' :
+                slug.length > 100 ? 'too-long' :
+                !/^[a-z0-9-]+$/.test(slug) ? 'invalid-characters' :
+                slug.startsWith('-') || slug.endsWith('-') ? 'leading-trailing-hyphen' :
+                slug.includes('--') ? 'consecutive-hyphens' : 'unknown'
+      });
     }
 
     // Enhanced JSON-LD structured data with category, role, and pattern

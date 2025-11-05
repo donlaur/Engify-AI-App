@@ -52,6 +52,9 @@ async function ensureTextIndexes() {
           useCases: 'text',
           bestPractices: 'text',
           whenNotToUse: 'text',
+          // Flattened text fields for better searchability
+          caseStudiesText: 'text',
+          examplesText: 'text',
         },
         {
           name: 'prompts_text_search',
@@ -68,6 +71,9 @@ async function ensureTextIndexes() {
             useCases: 5,
             bestPractices: 4,
             whenNotToUse: 3,
+            // Flattened text fields (higher weight since they're pre-processed)
+            caseStudiesText: 5,
+            examplesText: 5,
             tags: 2,
           },
           default_language: 'english',

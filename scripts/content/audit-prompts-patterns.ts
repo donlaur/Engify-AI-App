@@ -17,6 +17,8 @@
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --fast  # Skip execution testing (faster)
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --quick # Quick mode: only 2 core agents (fastest)
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --target-version=2  # Audit prompts to version 2 (default)
+ *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --target-version=3  # Audit prompts to version 3
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --category=code-generation  # Filter by category
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --category=documentation --role=engineer  # Filter by category and role
  *   tsx scripts/content/audit-prompts-patterns.ts --type=prompts --role=product-manager  # Filter by role (PM prompts)
@@ -25,6 +27,9 @@
  * 
  * Categories: code-generation, debugging, documentation, testing, refactoring, architecture, learning, general
  * Roles: engineer, product-manager, engineering-manager, architect, designer, qa, devops-sre, scrum-master, product-owner, c-level
+ * 
+ * Target Version: Defaults to 2. Only audits prompts with auditVersion < targetVersion.
+ *   Example: --target-version=2 will audit prompts at version 1 or below (bringing them to version 2)
  * 
  * NOTE: This script ONLY does SCORING. It saves audit results to prompt_audit_results collection.
  * To apply improvements, use: pnpm tsx scripts/content/enrich-prompt.ts --id=<prompt-id>
@@ -2590,8 +2595,9 @@ async function auditPromptsAndPatterns(options: {
   limit?: number;
   category?: string;
   role?: string;
+  targetVersion?: number;
 }) {
-  const { type, fix = false, limit, category, role } = options;
+  const { type, fix = false, limit, category, role, targetVersion = 2 } = options;
 
   console.log('╔════════════════════════════════════════════════════════════╗');
   console.log('║  Prompt & Pattern Audit System with Grading Rubric      ║');
@@ -2599,6 +2605,7 @@ async function auditPromptsAndPatterns(options: {
   console.log('');
   console.log(`📊 Type: ${type}`);
   console.log(`🔧 Auto-fix: ${fix ? 'Yes' : 'No'}`);
+  console.log(`📋 Target Audit Version: ${targetVersion} (will audit prompts with version < ${targetVersion})`);
   if (category) console.log(`📁 Category: ${category}`);
   if (role) console.log(`👤 Role: ${role}`);
   if (limit) console.log(`🔢 Limit: ${limit}`);
@@ -2654,7 +2661,7 @@ async function auditPromptsAndPatterns(options: {
     if (category || role) {
       console.log(`   (Filtered by: ${[category, role].filter(Boolean).join(', ')})`);
     }
-    console.log('   📋 Will only audit prompts with <= 1 audit (skip prompts with 2+ audits)');
+    console.log(`   📋 Will only audit prompts with auditVersion < ${targetVersion} (skip prompts already at version ${targetVersion}+)`);
     console.log('');
 
     // Check for fast mode flag
@@ -2677,9 +2684,9 @@ async function auditPromptsAndPatterns(options: {
         { sort: { auditVersion: -1 } }
       );
       
-      // Skip prompts that have more than 1 audit
+      // Skip prompts that already have target version or higher
       const currentAuditVersion = existingAudit?.auditVersion || 0;
-      if (currentAuditVersion > 1) {
+      if (currentAuditVersion >= targetVersion) {
         continue;
       }
       
@@ -2736,7 +2743,7 @@ async function auditPromptsAndPatterns(options: {
       );
       
       const currentAuditVersion = existingAudit?.auditVersion || 0;
-      if (currentAuditVersion > 1) {
+      if (currentAuditVersion >= targetVersion) {
         // Release lock if we acquired it
         if (lockAcquired && redisCache) {
           try {
@@ -2745,7 +2752,7 @@ async function auditPromptsAndPatterns(options: {
             // Ignore lock release errors
           }
         }
-        console.log(`[${i + 1}/${shuffledPrompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Audit Version ${currentAuditVersion} - already audited multiple times)`);
+        console.log(`[${i + 1}/${shuffledPrompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Audit Version ${currentAuditVersion} - already at target version ${targetVersion}+)`);
         skippedCount++;
         continue;
       }
@@ -2858,10 +2865,26 @@ async function auditPromptsAndPatterns(options: {
     const patternsCollection = db.collection('patterns');
     const patterns = await patternsCollection.find({}).limit(limit || 1000).toArray();
 
-    console.log(`Found ${patterns.length} patterns to audit\n`);
+    console.log(`Found ${patterns.length} patterns to audit`);
+    console.log(`   📋 Will only audit patterns with auditVersion < ${targetVersion} (skip patterns already at version ${targetVersion}+)\n`);
 
+    let patternsSkipped = 0;
     for (let i = 0; i < patterns.length; i++) {
       const pattern = patterns[i];
+      
+      // Check if pattern already has target version or higher
+      const existingAudit = await db.collection('pattern_audit_results').findOne(
+        { patternId: pattern.id || pattern.slug || pattern._id?.toString() },
+        { sort: { auditVersion: -1 } }
+      );
+      
+      const currentAuditVersion = existingAudit?.auditVersion || 0;
+      if (currentAuditVersion >= targetVersion) {
+        console.log(`[${i + 1}/${patterns.length}] ⏭️  Skipping: ${pattern.name || pattern.id || 'Untitled'} (Audit Version ${currentAuditVersion} - already at target version ${targetVersion}+)`);
+        patternsSkipped++;
+        continue;
+      }
+      
       console.log(`[${i + 1}/${patterns.length}] Auditing: ${pattern.name || pattern.id || 'Untitled'}`);
       
       try {
@@ -2911,6 +2934,11 @@ async function auditPromptsAndPatterns(options: {
       } catch (error) {
         console.error(`   ❌ Error auditing pattern:`, error);
       }
+    }
+    
+    console.log(`\n✅ Completed auditing ${patterns.length - patternsSkipped} patterns`);
+    if (patternsSkipped > 0) {
+      console.log(`⏭️  Skipped ${patternsSkipped} patterns (already at target version ${targetVersion}+)`);
     }
   }
 
@@ -3007,7 +3035,7 @@ async function auditPromptsAndPatterns(options: {
 }
 
 // Parse CLI arguments
-function parseArgs(): { type: 'prompts' | 'patterns' | 'both'; fix?: boolean; limit?: number; category?: string; role?: string } {
+function parseArgs(): { type: 'prompts' | 'patterns' | 'both'; fix?: boolean; limit?: number; category?: string; role?: string; targetVersion?: number } {
   const args = process.argv.slice(2);
 
   let type: 'prompts' | 'patterns' | 'both' = 'both';
@@ -3015,6 +3043,7 @@ function parseArgs(): { type: 'prompts' | 'patterns' | 'both'; fix?: boolean; li
   let limit: number | undefined;
   let category: string | undefined;
   let role: string | undefined;
+  let targetVersion: number = 2; // Default to version 2
 
   for (const arg of args) {
     if (arg.startsWith('--type=')) {
@@ -3030,10 +3059,15 @@ function parseArgs(): { type: 'prompts' | 'patterns' | 'both'; fix?: boolean; li
       category = arg.split('=')[1];
     } else if (arg.startsWith('--role=')) {
       role = arg.split('=')[1];
+    } else if (arg.startsWith('--target-version=') || arg.startsWith('--version=')) {
+      const versionValue = parseInt(arg.split('=')[1]);
+      if (!isNaN(versionValue) && versionValue > 0) {
+        targetVersion = versionValue;
+      }
     }
   }
 
-  return { type, fix, limit, category, role };
+  return { type, fix, limit, category, role, targetVersion };
 }
 
 // Main execution

@@ -240,13 +240,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // Individual prompt pages: /prompts/[slug] - use slug for better SEO
+  // Filter out prompts with invalid slugs (empty, 'untitled', or missing)
   const { getPromptSlug } = await import('@/lib/utils/slug');
-  const promptPages: MetadataRoute.Sitemap = prompts.map((prompt) => ({
-    url: `${baseUrl}/prompts/${getPromptSlug(prompt)}`,
-    lastModified: new Date(prompt.updatedAt || prompt.createdAt),
-    changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  }));
+  const promptPages: MetadataRoute.Sitemap = prompts
+    .map((prompt) => {
+      const slug = getPromptSlug(prompt);
+      // Skip prompts with invalid slugs - use ID as fallback or skip
+      if (!slug || slug === 'untitled' || slug === prompt.id) {
+        // Use ID as fallback for prompts without proper slugs
+        return {
+          url: `${baseUrl}/prompts/${prompt.id}`,
+          lastModified: new Date(prompt.updatedAt || prompt.createdAt),
+          changeFrequency: 'monthly' as const,
+          priority: 0.7,
+        };
+      }
+      return {
+        url: `${baseUrl}/prompts/${encodeURIComponent(slug)}`,
+        lastModified: new Date(prompt.updatedAt || prompt.createdAt),
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+      };
+    })
+    .filter((page) => page.url && !page.url.includes('/untitled')); // Remove any untitled URLs
 
   // Extract unique categories, roles, and tags from prompts
   const categories = Array.from(
