@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
       });
     } catch (emailError) {
       // Log email error but don't reveal to user
-      logger.error('Failed to send password reset email', emailError, {
+      logger.apiError('/api/auth/forgot-password', emailError, {
         userId: user._id.toString(),
         email: user.email,
       });

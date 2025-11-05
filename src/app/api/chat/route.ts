@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   let body: {
     messages?: Array<{ role: string; content: string }>;
     useRAG?: boolean;
-  };
+  } | null = null;
 
   try {
     // Rate limiting
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     // Sanitize user input
     const sanitizedMessages = Array.isArray(messages)
       ? messages.map((msg: { role: string; content: string }) => ({
-          role: msg.role,
+          role: msg.role as 'user' | 'assistant' | 'system',
           content: sanitizeText(msg.content || ''),
         }))
       : [];
@@ -68,19 +68,28 @@ export async function POST(request: NextRequest) {
         try {
           const { getDb } = await import('@/lib/mongodb');
           const db = await getDb();
+          // Use aggregation pipeline for text search with score
           const prompts = await db
             .collection('prompts')
-            .find(
+            .aggregate([
               {
-                $text: { $search: sanitizedLastMessage },
-                active: { $ne: false },
+                $match: {
+                  $text: { $search: sanitizedLastMessage },
+                  active: { $ne: false },
+                },
               },
               {
-                score: { $meta: 'textScore' },
-              }
-            )
-            .sort({ score: { $meta: 'textScore' } })
-            .limit(3)
+                $addFields: {
+                  score: { $meta: 'textScore' },
+                },
+              },
+              {
+                $sort: { score: -1 },
+              },
+              {
+                $limit: 3,
+              },
+            ])
             .toArray();
 
           if (prompts.length > 0) {
@@ -166,10 +175,13 @@ Suggest specific pages: /prompts, /patterns, /learn, /workbench`;
       model: modelId,
       messages: [
         {
-          role: 'system',
+          role: 'system' as const,
           content: systemPrompt,
         },
-        ...sanitizedMessages,
+        ...sanitizedMessages.map((msg) => ({
+          role: msg.role as 'user' | 'assistant' | 'system',
+          content: msg.content,
+        })),
       ],
       temperature: 0.7,
       max_tokens: 400,
