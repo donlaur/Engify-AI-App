@@ -106,7 +106,8 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
 
 // Audit Agents - Reduced to 5 essential agents aligned with priorities
 // Priority: 1. Completeness, 2. Functionality, 3. SEO, 4. Value, 5. Clarity
-// All agents use OpenAI to avoid quota issues
+// Engineering-focused agents use Claude (better for coding/engineering tasks)
+// Other agents use OpenAI (broad capabilities)
 const AUDIT_AGENTS: AuditAgent[] = [
   {
     role: 'grading_rubric_expert',
@@ -273,8 +274,8 @@ Provide:
   {
     role: 'engineering_reviewer',
     name: 'Engineering Functionality Reviewer',
-    model: 'gpt-4o', // Direct OpenAI - Priority #2
-    provider: 'openai',
+    model: 'claude-3-5-sonnet-20241022', // Claude - excellent for engineering/coding tasks
+    provider: 'anthropic',
     temperature: 0.4,
     maxTokens: 1500,
     systemPrompt: `You are an Engineering Functionality Reviewer specializing in evaluating if prompts work as one-shot prompts.
@@ -401,8 +402,8 @@ Provide:
   {
     role: 'prompt_engineering_sme',
     name: 'Prompt Engineering SME',
-    model: 'gpt-4o', // Direct OpenAI - best for prompt engineering expertise
-    provider: 'openai',
+    model: 'claude-3-5-sonnet-20241022', // Claude - best for prompt engineering and CS expertise
+    provider: 'anthropic',
     temperature: 0.3,
     maxTokens: 2000,
     systemPrompt: `You are a Prompt Engineering Subject Matter Expert with deep expertise in computer science, AI, and prompt engineering best practices.
@@ -458,8 +459,8 @@ Provide:
   {
     role: 'prompt_execution_tester',
     name: 'Prompt Execution Tester',
-    model: 'gpt-4o', // Direct OpenAI - for testing prompt execution
-    provider: 'openai',
+    model: 'claude-3-5-sonnet-20241022', // Claude - excellent for code execution and testing
+    provider: 'anthropic',
     temperature: 0.7, // Use same temperature as typical user
     maxTokens: 2000,
     systemPrompt: `You are a Prompt Execution Tester who actually tests prompts by executing them and evaluating output quality.
@@ -609,6 +610,31 @@ export class PromptPatternAuditor {
       if (agent.provider === 'openai') {
         const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
         const provider = new OpenAIAdapter(modelId);
+        const response = await provider.execute({
+          prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
+          temperature: agent.temperature,
+          maxTokens: agent.maxTokens,
+        });
+        
+        // Cache the response
+        if (this.useCache && redisCache) {
+          try {
+            const contentHash = hashContent(prompt);
+            const cacheKey = CACHE_KEYS.agentResponse(agent.role, contentHash);
+            await redisCache.setex(cacheKey, CACHE_TTL.agentResponse, response.content);
+          } catch (error) {
+            // Cache write failed - continue anyway
+            console.log(`   ⚠️  Cache write failed for ${agent.role}`);
+          }
+        }
+        
+        return response.content;
+      }
+      
+      // For Anthropic Claude, use ClaudeAdapter directly
+      if (agent.provider === 'anthropic') {
+        const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
+        const provider = new ClaudeAdapter(agent.model);
         const response = await provider.execute({
           prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
           temperature: agent.temperature,
