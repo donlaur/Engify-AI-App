@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import { auth } from '@/lib/auth';
 import { getDb } from '@/lib/mongodb';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
+import { auditLog } from '@/lib/logging/audit';
+import { sanitizeText } from '@/lib/security/sanitize';
 
 /**
  * Content Management API
@@ -74,9 +77,8 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting
     const rateLimitResult = await checkRateLimit(
-      `content-create-${session?.user?.email}`,
-      5,
-      60
+      `content-create-${session?.user?.email || 'unknown'}`,
+      'authenticated'
     );
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
@@ -163,9 +165,8 @@ export async function PUT(request: NextRequest) {
 
     // Rate limiting
     const rateLimitResult = await checkRateLimit(
-      `content-update-${session?.user?.email}`,
-      10,
-      60
+      `content-update-${session?.user?.email || 'unknown'}`,
+      'authenticated'
     );
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
@@ -263,9 +264,8 @@ export async function DELETE(request: NextRequest) {
 
     // Rate limiting
     const rateLimitResult = await checkRateLimit(
-      `content-delete-${session?.user?.email}`,
-      5,
-      60
+      `content-delete-${session?.user?.email || 'unknown'}`,
+      'authenticated'
     );
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
