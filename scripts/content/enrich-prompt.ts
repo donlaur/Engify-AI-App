@@ -36,6 +36,13 @@ async function enrichPromptWithAI(promptId: string) {
     process.exit(1);
   }
 
+  // Only enrich prompts at audit version 1 (first audit)
+  if (auditResult.auditVersion !== 1) {
+    console.log(`ℹ️  Skipping enrichment: Prompt already enriched (audit version ${auditResult.auditVersion})`);
+    console.log(`   Only enriching prompts at audit version 1`);
+    process.exit(0);
+  }
+
   console.log(`📝 Enriching: "${prompt.title}"`);
   console.log(`   Current Score: ${auditResult.overallScore}/10`);
   console.log(`   Missing Elements: ${auditResult.missingElements?.length || 0}`);
@@ -359,24 +366,30 @@ Format as JSON array:
   if (whyUse.length > 0) console.log(`   ❓ ${whyUse.length} "Why Use" reasons`);
   console.log(`\n📄 Updated prompt saved to database!\n`);
 
+  await db.client.close();
   return enrichedPrompt;
 }
 
-// Get prompt ID from command line
-const promptId = process.argv.find(arg => arg.startsWith('--id='))?.split('=')[1] || 
-                 process.argv[2];
+// Export for use in batch scripts
+export { enrichPromptWithAI };
 
-if (!promptId) {
-  console.error('Usage: tsx enrich-prompt.ts --id=<prompt-id>');
-  process.exit(1);
-}
+// Get prompt ID from command line (only if run directly)
+if (require.main === module) {
+  const promptId = process.argv.find(arg => arg.startsWith('--id='))?.split('=')[1] || 
+                   process.argv[2];
 
-enrichPromptWithAI(promptId)
-  .then(() => {
-    console.log('✨ Enrichment complete! Run audit again to see score improvement.');
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error('❌ Error:', error);
+  if (!promptId) {
+    console.error('Usage: tsx enrich-prompt.ts --id=<prompt-id>');
     process.exit(1);
-  });
+  }
+
+  enrichPromptWithAI(promptId)
+    .then(() => {
+      console.log('✨ Enrichment complete! Run audit again to see score improvement.');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('❌ Error:', error);
+      process.exit(1);
+    });
+}
