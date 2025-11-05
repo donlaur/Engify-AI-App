@@ -104,10 +104,14 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
   }
 }
 
-// Audit Agents - Reduced to 5 essential agents aligned with priorities
+// Audit Agents - Optimized for cost and quality
 // Priority: 1. Completeness, 2. Functionality, 3. SEO, 4. Value, 5. Clarity
-// Engineering-focused agents use Claude (better for coding/engineering tasks)
-// Other agents use OpenAI (broad capabilities)
+// 
+// Model Strategy:
+// - Engineering-focused agents → Claude 3.5 Sonnet (best for coding/engineering)
+// - Fast/cheap tasks → Gemini Flash (completeness, SEO)
+// - Comprehensive scoring → GPT-4o (broad capabilities)
+// All models resolved from database registry (not hardcoded)
 const AUDIT_AGENTS: AuditAgent[] = [
   {
     role: 'grading_rubric_expert',
@@ -317,8 +321,8 @@ Provide:
   {
     role: 'seo_enrichment_reviewer',
     name: 'SEO Enrichment Reviewer',
-    model: 'gpt-4o', // Direct OpenAI - Priority #3
-    provider: 'openai',
+    model: 'google', // Will resolve to recommended Gemini model from DB (fast & cheap for SEO)
+    provider: 'google',
     temperature: 0.3,
     maxTokens: 1500,
     systemPrompt: `You are an SEO Enrichment Reviewer who checks if prompts/patterns are properly optimized for SEO.
@@ -587,23 +591,19 @@ export class PromptPatternAuditor {
     }
 
     try {
-      // Resolve model ID from database if model is just a provider name
+      // ALWAYS resolve model ID from database registry (not hardcoded)
+      // This ensures we use the latest models from the database
       let modelId = agent.model;
-      if (agent.model === agent.provider || agent.model === 'google' || agent.model === 'openai') {
-        const resolvedModelId = await getModelIdFromRegistry(agent.provider, agent.model);
-        if (resolvedModelId) {
-          modelId = resolvedModelId;
-        } else {
-          // Fallback to using provider factory which will use default model
-          const { AIProviderFactoryWithRegistry } = await import('@/lib/ai/v2/factory/AIProviderFactoryWithRegistry');
-          const provider = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
-          const response = await provider.execute({
-            prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
-            temperature: agent.temperature,
-            maxTokens: agent.maxTokens,
-          });
-          return response.content;
-        }
+      
+      // Try to resolve from database first
+      const resolvedModelId = await getModelIdFromRegistry(agent.provider, agent.model);
+      if (resolvedModelId) {
+        modelId = resolvedModelId;
+        console.log(`   📋 Using model from DB: ${modelId} (${agent.provider})`);
+      } else {
+        // Fallback to hardcoded model ID if DB lookup fails
+        console.log(`   ⚠️  DB lookup failed, using hardcoded: ${agent.model}`);
+        modelId = agent.model;
       }
       
       // For OpenAI, use OpenAIAdapter directly with model ID
