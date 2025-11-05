@@ -899,7 +899,7 @@ export class PromptPatternAuditor {
 
       // Check for model availability errors - try fallback
       if (errorMessage.includes('model') || errorMessage.includes('not found') || errorMessage.includes('404') || errorMessage.includes('not in allowlist') || errorMessage.includes('blocked') || errorMessage.includes('not_found_error')) {
-        console.warn(`⚠️  Model "${modelId}" not available for ${agent.name}, trying fallback...`);
+        console.warn(`⚠️  Model "${agent.model}" not available for ${agent.name}, trying fallback...`);
         
         // Mark model as deprecated in DB if it's a 404/not found error
         if ((errorMessage.includes('404') || errorMessage.includes('not found') || errorMessage.includes('not_found_error')) && resolvedModelId) {
