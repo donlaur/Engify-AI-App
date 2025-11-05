@@ -304,6 +304,30 @@ async function main() {
       }
     } else {
       console.log(`   ❌ Error: ${result.error}`);
+      
+      // If error is 404 (model not found) or deprecated, mark as deprecated in DB
+      const errorMsg = result.error?.toLowerCase() || '';
+      if (errorMsg.includes('404') || 
+          errorMsg.includes('not found') || 
+          errorMsg.includes('not_found_error') ||
+          errorMsg.includes('deprecated') ||
+          errorMsg.includes('sunset')) {
+        try {
+          await db.collection('ai_models').updateOne(
+            { id: model.id },
+            { 
+              $set: { 
+                status: 'deprecated',
+                deprecationDate: new Date(),
+                updatedAt: new Date(),
+              }
+            }
+          );
+          console.log(`   🏷️  Marked as deprecated in database (model not found/removed)`);
+        } catch (error) {
+          console.log(`   ⚠️  Failed to mark as deprecated: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
     }
     console.log('');
   }

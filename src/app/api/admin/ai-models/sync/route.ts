@@ -143,14 +143,14 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
 async function syncAnthropicModels(): Promise<{ created: number; updated: number }> {
   // Anthropic doesn't have a public models list API
   // Updated with latest models as of Nov 2024
-  const knownModels: Array<{ name: string; displayName: string; contextWindow: number }> = [
+  const knownModels: Array<{ name: string; displayName: string; contextWindow: number; deprecated?: boolean }> = [
     // Claude 3.5 Series (latest)
     { name: 'claude-3-5-sonnet-20241022', displayName: 'Claude 3.5 Sonnet', contextWindow: 200000 },
     { name: 'claude-3-5-haiku-20241022', displayName: 'Claude 3.5 Haiku', contextWindow: 200000 },
-    // Claude 3 Series
-    { name: 'claude-3-opus-20240229', displayName: 'Claude 3 Opus', contextWindow: 200000 },
-    { name: 'claude-3-sonnet-20240229', displayName: 'Claude 3 Sonnet', contextWindow: 200000 },
-    { name: 'claude-3-haiku-20240307', displayName: 'Claude 3 Haiku', contextWindow: 200000 },
+    // Claude 3 Series (deprecated - replaced by 3.5)
+    { name: 'claude-3-opus-20240229', displayName: 'Claude 3 Opus', contextWindow: 200000, deprecated: true },
+    { name: 'claude-3-sonnet-20240229', displayName: 'Claude 3 Sonnet', contextWindow: 200000, deprecated: true },
+    { name: 'claude-3-haiku-20240307', displayName: 'Claude 3 Haiku', contextWindow: 200000, deprecated: true },
   ];
 
   const aiModels: AIModel[] = knownModels.map((m) => ({
@@ -158,7 +158,8 @@ async function syncAnthropicModels(): Promise<{ created: number; updated: number
     provider: 'anthropic' as const,
     name: m.name,
     displayName: m.displayName,
-    status: 'active' as const,
+    status: m.deprecated ? ('deprecated' as const) : ('active' as const),
+    deprecationDate: m.deprecated ? new Date() : undefined,
     capabilities: ['text', 'vision'],
     contextWindow: m.contextWindow,
     maxOutputTokens: m.name.includes('3-5-sonnet') || m.name.includes('opus') ? 8192 : m.name.includes('sonnet') || m.name.includes('opus') ? 8192 : 4096,
@@ -171,9 +172,10 @@ async function syncAnthropicModels(): Promise<{ created: number; updated: number
     supportsVision: true,
     recommended: m.name.includes('3-5-sonnet') || m.name.includes('3-5-haiku'),
     tier: m.name.includes('haiku') ? 'affordable' as const : 'premium' as const,
-    isAllowed: true,
+    isAllowed: !m.deprecated, // Deprecated models not allowed by default
     tags: getAnthropicTags(m.name),
-    lastVerified: new Date(),
+    replacementModel: m.deprecated ? 'claude-3-5-sonnet-20241022' : undefined, // Suggest 3.5 Sonnet as replacement
+    lastVerified: m.deprecated ? undefined : new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
   } satisfies AIModel));

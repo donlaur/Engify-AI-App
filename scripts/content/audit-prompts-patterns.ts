@@ -84,7 +84,14 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
     const allModels = await getModelsByProvider(provider);
     
     // Filter to only text-to-text models (skip image/video/audio)
+    // AND exclude deprecated/sunset models
     const models = allModels.filter((m: any) => {
+      // Skip deprecated or sunset models
+      const status = ('status' in m ? m.status : 'active');
+      if (status === 'deprecated' || status === 'sunset') {
+        return false;
+      }
+      
       const capabilities = m.capabilities || [];
       const tags = m.tags || [];
       const modelId = (m.id || '').toLowerCase();
@@ -117,20 +124,29 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
       return null; // No text-to-text models found, will use factory default
     }
     
-    // If preferred model specified and exists, use it
+    // If preferred model specified and exists, use it (must be active)
     if (preferredModel) {
-      const preferred = models.find(m => m.id === preferredModel && ('status' in m ? m.status === 'active' : true));
+      const preferred = models.find(m => {
+        const status = ('status' in m ? m.status : 'active');
+        return m.id === preferredModel && status === 'active';
+      });
       if (preferred) return preferred.id;
     }
     
     // Sort by: verified status (recent lastVerified) > recommended > active status
     const sortedModels = models.sort((a: any, b: any) => {
+      const aStatus = ('status' in a ? a.status : 'active');
+      const bStatus = ('status' in b ? b.status : 'active');
+      
+      // Only consider active models
+      if (aStatus !== 'active' || bStatus !== 'active') {
+        return aStatus === 'active' ? -1 : 1;
+      }
+      
       const aVerified = a.lastVerified ? new Date(a.lastVerified).getTime() : 0;
       const bVerified = b.lastVerified ? new Date(b.lastVerified).getTime() : 0;
       const aRecommended = ('recommended' in a ? (a as any).recommended : false) ? 1 : 0;
       const bRecommended = ('recommended' in b ? (b as any).recommended : false) ? 1 : 0;
-      const aActive = ('status' in a ? a.status === 'active' : true) ? 1 : 0;
-      const bActive = ('status' in b ? b.status === 'active' : true) ? 1 : 0;
       
       // Prefer verified models (most recent first)
       if (aVerified !== bVerified) {
@@ -140,12 +156,11 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
       if (aRecommended !== bRecommended) {
         return bRecommended - aRecommended;
       }
-      // Then prefer active
-      return bActive - aActive;
+      return 0;
     });
     
-    // Use first sorted model (most verified/recommended/active)
-    const bestModel = sortedModels.find(m => ('status' in m ? m.status === 'active' : true));
+    // Use first sorted model (must be active)
+    const bestModel = sortedModels.find(m => ('status' in m ? m.status : 'active') === 'active');
     return bestModel ? bestModel.id : null;
   } catch (error) {
     console.warn(`[Audit] Failed to query DB for ${provider} models:`, error);
@@ -862,8 +877,29 @@ export class PromptPatternAuditor {
       }
 
       // Check for model availability errors - try fallback
-      if (errorMessage.includes('model') || errorMessage.includes('not found') || errorMessage.includes('404') || errorMessage.includes('not in allowlist') || errorMessage.includes('blocked')) {
-        console.warn(`⚠️  Model "${agent.model}" not available for ${agent.name}, trying fallback...`);
+      if (errorMessage.includes('model') || errorMessage.includes('not found') || errorMessage.includes('404') || errorMessage.includes('not in allowlist') || errorMessage.includes('blocked') || errorMessage.includes('not_found_error')) {
+        console.warn(`⚠️  Model "${modelId}" not available for ${agent.name}, trying fallback...`);
+        
+        // Mark model as deprecated in DB if it's a 404/not found error
+        if ((errorMessage.includes('404') || errorMessage.includes('not found') || errorMessage.includes('not_found_error')) && resolvedModelId) {
+          try {
+            const db = await getMongoDb();
+            await db.collection('ai_models').updateOne(
+              { id: resolvedModelId },
+              { 
+                $set: { 
+                  status: 'deprecated',
+                  deprecationDate: new Date(),
+                  updatedAt: new Date(),
+                }
+              }
+            );
+            console.log(`   🏷️  Marked "${resolvedModelId}" as deprecated in database (404/not found)`);
+          } catch (dbError) {
+            // DB update failed - continue with fallback
+            console.log(`   ⚠️  Failed to mark model as deprecated`);
+          }
+        }
         
         // Try using a working fallback model for the same provider
         let fallbackModel: string | null = null;
