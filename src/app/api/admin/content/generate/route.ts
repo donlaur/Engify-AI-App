@@ -34,13 +34,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limiting
-    const rateLimitResult = await checkRateLimit({
-      identifier: session.user.id,
-      action: 'content_generate',
-      limit: 10, // 10 generations per minute
-    });
+    const rateLimitResult = await checkRateLimit(
+      `content-generate-${session.user.id}`,
+      'authenticated'
+    );
 
-    if (!rateLimitResult.success) {
+    if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded' },
         { status: 429 }

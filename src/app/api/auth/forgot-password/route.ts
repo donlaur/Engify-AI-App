@@ -28,7 +28,6 @@ function getClientIP(request: NextRequest): string {
   return (
     request.headers.get('x-forwarded-for')?.split(',')[0] ||
     request.headers.get('x-real-ip') ||
-    request.ip ||
     'unknown'
   );
 }
@@ -158,7 +157,7 @@ export async function POST(request: NextRequest) {
       });
     } catch (emailError) {
       // Log email error but don't reveal to user
-      logger.error('Failed to send password reset email', emailError, {
+      logger.apiError('/api/auth/forgot-password', emailError, {
         userId: user._id.toString(),
         email: user.email,
       });

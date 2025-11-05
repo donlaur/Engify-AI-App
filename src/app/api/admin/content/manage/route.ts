@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import { auth } from '@/lib/auth';
 import { getDb } from '@/lib/mongodb';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
+import { auditLog } from '@/lib/logging/audit';
+import { sanitizeText } from '@/lib/security/sanitize';
 
 /**
  * Content Management API
@@ -74,9 +77,8 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting
     const rateLimitResult = await checkRateLimit(
-      `content-create-${session?.user?.email}`,
-      5,
-      60
+      `content-create-${session?.user?.email || 'unknown'}`,
+      'authenticated'
     );
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
@@ -127,7 +129,8 @@ export async function POST(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session?.user?.email || 'unknown',
-      action: 'content_created',
+      action: 'admin_action',
+      resource: 'learning_content',
       details: {
         contentId: result.insertedId.toString(),
         type,
@@ -163,9 +166,8 @@ export async function PUT(request: NextRequest) {
 
     // Rate limiting
     const rateLimitResult = await checkRateLimit(
-      `content-update-${session?.user?.email}`,
-      10,
-      60
+      `content-update-${session?.user?.email || 'unknown'}`,
+      'authenticated'
     );
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
@@ -225,7 +227,8 @@ export async function PUT(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session?.user?.email || 'unknown',
-      action: 'content_updated',
+      action: 'admin_action',
+      resource: 'learning_content',
       details: {
         contentId: _id,
         title,
@@ -263,9 +266,8 @@ export async function DELETE(request: NextRequest) {
 
     // Rate limiting
     const rateLimitResult = await checkRateLimit(
-      `content-delete-${session?.user?.email}`,
-      5,
-      60
+      `content-delete-${session?.user?.email || 'unknown'}`,
+      'authenticated'
     );
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
@@ -302,7 +304,8 @@ export async function DELETE(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session?.user?.email || 'unknown',
-      action: 'content_deleted',
+      action: 'admin_action',
+      resource: 'learning_content',
       details: {
         contentId: id,
         title: contentItem?.title || 'Unknown',

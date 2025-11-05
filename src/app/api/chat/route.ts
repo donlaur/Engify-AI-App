@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   let body: {
     messages?: Array<{ role: string; content: string }>;
     useRAG?: boolean;
-  };
+  } | null = null;
 
   try {
     // Rate limiting
@@ -22,7 +22,6 @@ export async function POST(request: NextRequest) {
     const identifier =
       session?.user?.id ||
       request.headers.get('x-forwarded-for')?.split(',')[0] ||
-      request.ip ||
       'unknown';
 
     const rateLimitResult = await checkRateLimit(identifier, tier);
@@ -45,12 +44,18 @@ export async function POST(request: NextRequest) {
     }
 
     body = await request.json();
+    if (!body) {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      );
+    }
     const { messages, useRAG = true } = body;
 
     // Sanitize user input
     const sanitizedMessages = Array.isArray(messages)
       ? messages.map((msg: { role: string; content: string }) => ({
-          role: msg.role,
+          role: msg.role as 'user' | 'assistant' | 'system',
           content: sanitizeText(msg.content || ''),
         }))
       : [];
@@ -69,6 +74,7 @@ export async function POST(request: NextRequest) {
         try {
           const { getDb } = await import('@/lib/mongodb');
           const db = await getDb();
+          // Use find with text search (requires text index)
           const prompts = await db
             .collection('prompts')
             .find(
@@ -77,7 +83,7 @@ export async function POST(request: NextRequest) {
                 active: { $ne: false },
               },
               {
-                score: { $meta: 'textScore' },
+                projection: { score: { $meta: 'textScore' } },
               }
             )
             .sort({ score: { $meta: 'textScore' } })
@@ -167,10 +173,13 @@ Suggest specific pages: /prompts, /patterns, /learn, /workbench`;
       model: modelId,
       messages: [
         {
-          role: 'system',
+          role: 'system' as const,
           content: systemPrompt,
         },
-        ...sanitizedMessages,
+        ...sanitizedMessages.map((msg) => ({
+          role: msg.role as 'user' | 'assistant' | 'system',
+          content: msg.content,
+        })),
       ],
       temperature: 0.7,
       max_tokens: 400,

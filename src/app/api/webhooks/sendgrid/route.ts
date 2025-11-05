@@ -83,28 +83,23 @@ async function processEmailEvent(event: SendGridEvent) {
     case 'bounce':
     case 'dropped':
       // Handle failed emails - maybe notify user
-      logger.warn('Email failed', {
-        email: event.email,
-        reason: event.reason,
-        messageId: event.sg_message_id,
+      logger.warn('Email failed', { 
+        email: event.email, 
+        reason: event.reason 
       });
       break;
 
     case 'click':
       // Track link clicks for analytics
-      logger.info('Email link clicked', {
-        email: event.email,
-        url: event.url,
-        messageId: event.sg_message_id,
+      logger.debug('Email link clicked', { 
+        email: event.email, 
+        url: event.url 
       });
       break;
 
     case 'open':
       // Track email opens
-      logger.info('Email opened', {
-        email: event.email,
-        messageId: event.sg_message_id,
-      });
+      logger.debug('Email opened', { email: event.email });
       break;
   }
 }
@@ -189,11 +184,9 @@ async function processInboundEmail(email: SendGridInboundEmail) {
     },
   });
 
-  // Log queued email
-  logger.info('Inbound email queued for processing', {
+  // Log queued email (using audit log in production)
+  logger.debug('Queued inbound email', {
     from: email.from,
-    to: email.to,
-    subject: email.subject,
     contentType: processingJob.contentType,
     priority: processingJob.priority,
   });
@@ -278,9 +271,6 @@ export async function POST(request: NextRequest) {
     logger.apiError('/api/webhooks/sendgrid', error, {
       method: 'POST',
     });
-
-    // Still return 200 to prevent SendGrid from retrying
-    // Log error for investigation
     await auditLog({
       userId: 'system',
       action: 'WEBHOOK_ERROR',

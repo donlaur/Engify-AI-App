@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import { auth } from '@/lib/auth';
 import { getDb } from '@/lib/mongodb';
 import {
@@ -24,10 +25,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Rate limiting
-    const rateLimitResult = await checkRateLimit(request, {
-      maxRequests: 30,
-      windowMs: 60000, // 1 minute
-    });
+    const identifier = session.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const rateLimitResult = await checkRateLimit(identifier, 'authenticated');
 
     if (!rateLimitResult.allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -102,10 +101,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limiting
-    const rateLimitResult = await checkRateLimit(request, {
-      maxRequests: 10,
-      windowMs: 60000, // 1 minute
-    });
+    const identifier = session.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const rateLimitResult = await checkRateLimit(identifier, 'authenticated');
 
     if (!rateLimitResult.allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -216,10 +213,9 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const rateLimitResult = await checkRateLimit(request, {
-      maxRequests: 10,
-      windowMs: 60000,
-    });
+    // Rate limiting
+    const identifier = session.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const rateLimitResult = await checkRateLimit(identifier, 'authenticated');
 
     if (!rateLimitResult.allowed) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -241,7 +237,7 @@ export async function DELETE(request: NextRequest) {
       type === 'link' ? 'affiliate_config' : 'partnership_outreach';
 
     // SECURITY: This query is intentionally system-wide - admin data only
-    const result = await db.collection(collectionName).deleteOne({ _id: id });
+    const result = await db.collection(collectionName).deleteOne({ _id: new ObjectId(id) });
 
     // Audit logging
     await auditLog({

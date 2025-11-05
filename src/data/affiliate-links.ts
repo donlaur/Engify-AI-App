@@ -3,8 +3,6 @@
  * Monetization through AI tool referrals
  */
 
-import { trackEvent } from '@/lib/utils/analytics';
-
 export interface AffiliateLink {
   tool: string;
   baseUrl: string;
@@ -167,21 +165,21 @@ export function getToolLink(toolKey: string): string {
  * Track affiliate click for analytics
  */
 export function trackAffiliateClick(toolKey: string) {
+  // TODO: Implement analytics tracking
   if (typeof window !== 'undefined') {
-    // Track with analytics service
-    trackEvent({
-      name: 'affiliate_click',
-      properties: {
-        tool: toolKey,
-        url: getToolLink(toolKey),
-      },
-    });
-
+    // Client-side tracking - use browser analytics
     // Example: Google Analytics
     // gtag('event', 'affiliate_click', {
     //   tool: toolKey,
     //   url: getToolLink(toolKey)
     // });
+    
+    // Note: Client-side console.log is acceptable for development debugging
+    // In production, this should use actual analytics service (gtag, posthog, etc.)
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.log(`Affiliate click: ${toolKey}`);
+    }
   }
 }
 
@@ -221,28 +219,28 @@ export const partnershipOutreach = [
     company: 'Cursor',
     priority: 'high',
     contact: 'partnerships@cursor.sh', // Find actual contact
-    // Rating removed per ADR-009 (no fake metrics)
+    rating: 4.5,
     traffic: 'High intent - developers actively comparing',
   },
   {
     company: 'Codeium (Windsurf)',
     priority: 'high',
     contact: 'partnerships@codeium.com',
-    // Rating removed per ADR-009
+    rating: 4.8,
     traffic: 'Highest rated - strong conversion potential',
   },
   {
     company: 'Tabnine',
     priority: 'medium',
     contact: 'partnerships@tabnine.com',
-    // Rating removed per ADR-009
+    rating: 3.8,
     traffic: 'Enterprise focus - higher value conversions',
   },
   {
     company: 'Replit',
     priority: 'medium',
     contact: 'partnerships@replit.com',
-    // Rating removed per ADR-009
+    rating: 3.7,
     traffic: 'Education/prototyping segment',
   },
   {

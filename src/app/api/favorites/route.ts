@@ -137,14 +137,16 @@ export async function POST(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session.user.id,
-      action: 'user.favorite.added',
+      action: 'admin_action',
+      resource: 'favorites',
       details: {
         promptId,
         promptTitle: prompt.title,
+        operation: 'added',
       },
       ipAddress:
         request.headers.get('x-forwarded-for')?.split(',')[0] ||
-        request.ip ||
+        request.headers.get('x-real-ip') ||
         'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown',
     });
@@ -208,7 +210,7 @@ export async function DELETE(request: NextRequest) {
     const result = await db.collection('users').updateOne(
       { _id: new ObjectId(session.user.id) },
       {
-        $pull: { favoritePrompts: promptId },
+        $pull: { favoritePrompts: promptId } as Record<string, unknown>,
         $set: { updatedAt: new Date() },
       }
     );
@@ -236,13 +238,15 @@ export async function DELETE(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session.user.id,
-      action: 'user.favorite.removed',
+      action: 'admin_action',
+      resource: 'favorites',
       details: {
         promptId,
+        operation: 'removed',
       },
       ipAddress:
         request.headers.get('x-forwarded-for')?.split(',')[0] ||
-        request.ip ||
+        request.headers.get('x-real-ip') ||
         'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown',
     });
