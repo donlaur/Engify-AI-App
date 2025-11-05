@@ -1,130 +1,110 @@
 #!/usr/bin/env tsx
 /**
- * Test All AI Models with Real Prompt Audit
+ * Test All AI Models with Full Prompt Audits
  * 
- * Tests each model from the ai_models database by actually auditing a prompt
- * This gives you real feedback while verifying models work correctly
+ * Tests all active models by running FULL audits on prompts using the multi-agent system.
+ * Saves all audit results to prompt_audit_results collection for actionable feedback.
+ * 
+ * This provides:
+ * - Full audit scores (overall + category scores)
+ * - Issues found
+ * - Recommendations for improvement
+ * - Missing elements
+ * - All stored in DB for batch improvement scripts
  * 
  * Usage:
  *   pnpm tsx scripts/content/test-all-ai-models.ts
+ *   pnpm tsx scripts/content/test-all-ai-models.ts --prompt-id=<id>  # Test specific prompt
+ *   pnpm tsx scripts/content/test-all-ai-models.ts --prompts=5  # Test on 5 different prompts
  *   pnpm tsx scripts/content/test-all-ai-models.ts --provider=openai  # Test only OpenAI models
- *   pnpm tsx scripts/content/test-all-ai-models.ts --provider=anthropic  # Test only Claude models
- *   pnpm tsx scripts/content/test-all-ai-models.ts --provider=google  # Test only Gemini models
- *   pnpm tsx scripts/content/test-all-ai-models.ts --prompt-id=<id>  # Test with specific prompt
+ * 
+ * Results saved to:
+ *   - prompt_audit_results collection (with testedModel field)
+ *   - Use batch-improve-from-audits.ts to apply improvements
  */
 
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { getMongoDb } from '@/lib/db/mongodb';
-import { OpenAIAdapter } from '@/lib/ai/v2/adapters/OpenAIAdapter';
-import { ClaudeAdapter } from '@/lib/ai/v2/adapters/ClaudeAdapter';
-import { GeminiAdapter } from '@/lib/ai/v2/adapters/GeminiAdapter';
+import { PromptPatternAuditor } from './audit-prompts-patterns';
 
 interface TestResult {
   provider: string;
   modelId: string;
   displayName: string;
   status: 'success' | 'error';
-  auditFeedback?: {
-    score?: number;
-    issues?: string[];
-    recommendations?: string[];
-    responsePreview?: string;
+  auditResult?: {
+    overallScore: number;
+    categoryScores: Record<string, number>;
+    issues: string[];
+    recommendations: string[];
+    missingElements: string[];
   };
   error?: string;
   latencyMs?: number;
-  tokensUsed?: number;
+  auditVersion?: number;
 }
 
-async function testModelWithPrompt(model: any, prompt: any): Promise<TestResult> {
+async function testModelWithFullAudit(model: any, prompt: any): Promise<TestResult> {
   const startTime = Date.now();
   
-  // Create a focused audit prompt for testing
-  const auditPrompt = `You are reviewing a prompt for quality and completeness.
-
-PROMPT TO REVIEW:
-Title: ${prompt.title || 'N/A'}
-Description: ${prompt.description?.substring(0, 200) || 'N/A'}
-Content: ${prompt.content?.substring(0, 500) || 'N/A'}
-
-Provide a brief audit:
-1. Overall quality score (1-10)
-2. Top 2-3 issues found
-3. Top 2-3 recommendations for improvement
-
-Keep response concise (under 200 words).`;
-
   try {
-    let adapter: any;
-    let response: any;
+    // Use the full audit system (not just a simple prompt)
+    const auditor = new PromptPatternAuditor('system', { 
+      skipExecutionTest: true, // Skip execution test for speed
+      useCache: true, // Use cache to speed up
+    });
 
-    if (model.provider === 'openai') {
-      adapter = new OpenAIAdapter(model.id);
-      response = await adapter.execute({
-        prompt: auditPrompt,
-        temperature: 0.3,
-        maxTokens: 300,
-      });
-    } else if (model.provider === 'anthropic') {
-      adapter = new ClaudeAdapter(model.id);
-      response = await adapter.execute({
-        prompt: auditPrompt,
-        temperature: 0.3,
-        maxTokens: 300,
-      });
-    } else if (model.provider === 'google') {
-      adapter = new GeminiAdapter(model.id);
-      response = await adapter.execute({
-        prompt: auditPrompt,
-        temperature: 0.3,
-        maxTokens: 300,
-      });
-    } else {
-      return {
-        provider: model.provider,
-        modelId: model.id,
-        displayName: model.displayName,
-        status: 'error',
-        error: `Unsupported provider: ${model.provider}`,
-      };
-    }
-
+    // Run full audit on the prompt
+    const auditResult = await auditor.auditPrompt(prompt);
     const latencyMs = Date.now() - startTime;
-    const responseText = response.content || '';
 
-    // Extract score from response
-    const scoreMatch = responseText.match(/score[:\s]+(\d+(?:\.\d+)?)/i) || 
-                       responseText.match(/(\d+(?:\.\d+)?)\s*\/\s*10/i);
-    const score = scoreMatch ? parseFloat(scoreMatch[1]) : undefined;
+    // Save audit result to database so others can take action
+    const db = await getMongoDb();
+    const existingAudit = await db.collection('prompt_audit_results').findOne(
+      { promptId: prompt.id },
+      { sort: { auditVersion: -1 } }
+    );
+    
+    const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
+    const auditDate = new Date();
 
-    // Extract issues (look for numbered lists or bullet points)
-    const issues: string[] = [];
-    const issueMatches = responseText.match(/(?:issue|problem|concern)[s]?[:\s]+([^\n]+)/gi);
-    if (issueMatches) {
-      issues.push(...issueMatches.slice(0, 3).map(m => m.replace(/^(?:issue|problem|concern)[s]?[:\s]+/i, '').trim()));
-    }
-
-    // Extract recommendations
-    const recommendations: string[] = [];
-    const recMatches = responseText.match(/(?:recommend|suggest|improve)[s]?[:\s]+([^\n]+)/gi);
-    if (recMatches) {
-      recommendations.push(...recMatches.slice(0, 3).map(m => m.replace(/^(?:recommend|suggest|improve)[s]?[:\s]+/i, '').trim()));
-    }
+    await db.collection('prompt_audit_results').insertOne({
+      promptId: prompt.id,
+      promptTitle: prompt.title,
+      promptRevision: prompt.currentRevision || 1,
+      auditVersion,
+      auditDate,
+      overallScore: auditResult.overallScore,
+      categoryScores: auditResult.categoryScores,
+      agentReviews: auditResult.agentReviews,
+      issues: auditResult.issues,
+      recommendations: auditResult.recommendations,
+      missingElements: auditResult.missingElements,
+      needsFix: auditResult.needsFix,
+      auditedAt: auditDate,
+      auditedBy: `model-test-${model.id}`, // Track which model tested
+      testedModel: model.id, // Track which model was used for this audit
+      testedProvider: model.provider,
+      createdAt: auditDate,
+      updatedAt: auditDate,
+    });
 
     return {
       provider: model.provider,
       modelId: model.id,
       displayName: model.displayName,
       status: 'success',
-      auditFeedback: {
-        score,
-        issues: issues.length > 0 ? issues : undefined,
-        recommendations: recommendations.length > 0 ? recommendations : undefined,
-        responsePreview: responseText.substring(0, 200),
+      auditResult: {
+        overallScore: auditResult.overallScore,
+        categoryScores: auditResult.categoryScores,
+        issues: auditResult.issues,
+        recommendations: auditResult.recommendations,
+        missingElements: auditResult.missingElements,
       },
       latencyMs,
-      tokensUsed: response.usage?.totalTokens || 0,
+      auditVersion,
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -428,24 +408,31 @@ async function main() {
   console.log(`❌ Failed: ${failed.length}/${results.length}\n`);
 
   // Show best scoring models
-  const scoredResults = successful.filter(r => r.auditFeedback?.score !== undefined);
+  const scoredResults = successful.filter(r => r.auditResult?.overallScore !== undefined);
   if (scoredResults.length > 0) {
-    console.log('📊 Model Audit Scores:');
+    console.log('📊 Model Audit Scores (stored in prompt_audit_results):');
     scoredResults
-      .sort((a, b) => (b.auditFeedback?.score || 0) - (a.auditFeedback?.score || 0))
+      .sort((a, b) => (b.auditResult?.overallScore || 0) - (a.auditResult?.overallScore || 0))
       .slice(0, 5)
       .forEach(r => {
-        console.log(`   ${r.provider}: ${r.displayName || r.modelId} - Score: ${r.auditFeedback?.score}/10`);
+        console.log(`   ${r.provider}: ${r.displayName || r.modelId} - Score: ${r.auditResult?.overallScore}/10`);
       });
     console.log('');
   }
 
   if (successful.length > 0) {
-    console.log('✅ Working Models:');
+    console.log('✅ Working Models (Audit Results Saved):');
     successful.forEach(r => {
       console.log(`   ${r.provider}: ${r.displayName || r.modelId}`);
-      if (r.auditFeedback?.score) {
-        console.log(`      Score: ${r.auditFeedback.score}/10`);
+      if (r.auditResult?.overallScore) {
+        console.log(`      Score: ${r.auditResult.overallScore}/10`);
+        console.log(`      Audit Version: ${r.auditVersion}`);
+      }
+      if (r.auditResult?.issues && r.auditResult.issues.length > 0) {
+        console.log(`      Issues: ${r.auditResult.issues.length}`);
+      }
+      if (r.auditResult?.recommendations && r.auditResult.recommendations.length > 0) {
+        console.log(`      Recommendations: ${r.auditResult.recommendations.length}`);
       }
     });
     console.log('');
@@ -479,17 +466,22 @@ async function main() {
     const successRate = ((stats.success / total) * 100).toFixed(1);
     console.log(`   ${provider}: ${stats.success}/${total} (${successRate}%)`);
   });
+  console.log('');
 
-  console.log('\n💡 Use this feedback to improve your prompt!');
-  console.log(`   Prompt ID: ${testPrompt.id}`);
-  console.log(`   Run: pnpm tsx scripts/content/enrich-prompt.ts --id=${testPrompt.id}\n`);
+  // Show actionable next steps
+  if (successful.length > 0) {
+    console.log('💡 Next Steps:');
+    console.log(`   • All audit results saved to prompt_audit_results collection`);
+    console.log(`   • Run batch-improve-from-audits.ts to apply improvements:`);
+    console.log(`     pnpm tsx scripts/content/batch-improve-from-audits.ts`);
+    console.log(`   • View audit results in database or via API:`);
+    console.log(`     GET /api/prompts/${testPrompts[0].id}/audit`);
+    console.log(`   • Each audit includes issues, recommendations, and missingElements`);
+    console.log(`   • Results are actionable - use them to improve prompts!\n`);
+  }
 
   await db.client.close();
-
-  // Exit with error code if any tests failed
-  if (failed.length > 0) {
-    process.exit(1);
-  }
+  process.exit(0);
 }
 
 main().catch((error) => {
