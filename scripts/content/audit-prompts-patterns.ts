@@ -160,7 +160,7 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
       
       // Google/Gemini keywords: find latest recommended Gemini Flash
       if (normalizedPreferred === 'google' || 
-          normalizedPreferred.includes('gemini') && normalizedPreferred.includes('flash')) {
+          (normalizedPreferred.includes('gemini') && normalizedPreferred.includes('flash'))) {
         // Find latest recommended Gemini Flash model
         const geminiFlash = models.find(m => {
           const status = ('status' in m ? m.status : 'active');
@@ -188,6 +188,7 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
           console.log(`   ✅ Using preferred model: ${geminiFlash.id} (${provider} - resolved from "${preferredModel}")`);
           return geminiFlash.id;
         }
+        // If keyword match fails, fall through to best available (don't show warning)
       }
       
       // Claude keywords: find latest recommended Claude model
@@ -243,7 +244,7 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
         }
       }
       
-      // Try exact match first (for specific model IDs)
+      // Try exact match (for specific model IDs)
       const preferred = models.find(m => {
         const status = ('status' in m ? m.status : 'active');
         const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
@@ -254,20 +255,28 @@ async function getModelIdFromRegistry(provider: string, preferredModel?: string)
         console.log(`   ✅ Using preferred model: ${preferred.id} (${provider})`);
         return preferred.id;
       } else {
-        // If preferred model not found or deprecated, try to find alternative from same family
-        if (preferredModel.includes('claude-3-5-sonnet')) {
-          // Try Haiku instead if Sonnet not available
-          const haikuAlternative = models.find(m => 
-            m.id.includes('claude-3-5-haiku') && 
-            ('status' in m ? m.status === 'active' : true) &&
-            ('isAllowed' in m ? m.isAllowed !== false : true)
-          );
-          if (haikuAlternative) {
-            console.log(`   ⚠️  Preferred model "${preferredModel}" not available, using alternative: ${haikuAlternative.id}`);
-            return haikuAlternative.id;
+        // Only show warning if it's not a keyword (keywords already tried above)
+        const isKeyword = normalizedPreferred === 'google' || 
+                          (normalizedPreferred.includes('gemini') && normalizedPreferred.includes('flash')) ||
+                          normalizedPreferred.includes('claude');
+        
+        if (!isKeyword) {
+          // If preferred model not found or deprecated, try to find alternative from same family
+          if (preferredModel.includes('claude-3-5-sonnet')) {
+            // Try Haiku instead if Sonnet not available
+            const haikuAlternative = models.find(m => 
+              m.id.includes('claude-3-5-haiku') && 
+              ('status' in m ? m.status === 'active' : true) &&
+              ('isAllowed' in m ? m.isAllowed !== false : true)
+            );
+            if (haikuAlternative) {
+              console.log(`   ⚠️  Preferred model "${preferredModel}" not available, using alternative: ${haikuAlternative.id}`);
+              return haikuAlternative.id;
+            }
           }
+          console.log(`   ⚠️  Preferred model "${preferredModel}" not found or not active/allowed, using best available`);
         }
-        console.log(`   ⚠️  Preferred model "${preferredModel}" not found or not active/allowed, using best available`);
+        // For keywords, silently fall through to best available model
       }
     }
     
