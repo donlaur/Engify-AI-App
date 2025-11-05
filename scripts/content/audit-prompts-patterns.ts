@@ -1570,6 +1570,7 @@ Provide:
         console.error(`❌ Error running Prompt Execution Tester:`, error);
         agentReviews['prompt_execution_test'] = `Error: ${error instanceof Error ? error.message : String(error)}`;
       }
+      }
     } else {
       console.log('   ⚡ Skipping execution test (fast mode)');
     }
