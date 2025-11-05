@@ -653,7 +653,7 @@ export class PromptPatternAuditor {
   }
 
   /**
-   * Run a single audit agent (with Redis caching)
+   * Run a single audit agent (with Redis caching and parameter support tracking)
    */
   private async runAgent(
     agent: AuditAgent,
@@ -690,13 +690,53 @@ export class PromptPatternAuditor {
         modelId = resolvedId;
         resolvedModelId = resolvedId; // Store for error handling
         console.log(`   📋 Using model from DB: ${modelId} (${agent.provider})`);
-        
-        // Mark model as verified after successful use (if it worked)
-        // We'll update this after the API call succeeds
       } else {
         // Fallback to hardcoded model ID if DB lookup fails
         console.log(`   ⚠️  DB lookup failed, using hardcoded: ${agent.model}`);
         modelId = agent.model;
+      }
+      
+      // Get model's supported parameters from DB (or use defaults)
+      const db = await getMongoDb();
+      const modelRecord = await db.collection('ai_models').findOne({ id: modelId });
+      const supportedParams = modelRecord?.supportedParameters || {};
+      
+      // Determine safe parameters to use based on model's known limitations
+      let temperature = agent.temperature;
+      let maxTokens = agent.maxTokens;
+      
+      // Check if model has temperature restrictions
+      if (supportedParams.temperature) {
+        if (supportedParams.temperature.supported === false) {
+          temperature = undefined; // Don't send if not supported
+        } else {
+          // Use model's default or respect min/max
+          if (supportedParams.temperature.default !== undefined) {
+            temperature = supportedParams.temperature.default;
+          } else if (supportedParams.temperature.max !== undefined) {
+            temperature = Math.min(agent.temperature, supportedParams.temperature.max);
+          }
+          if (supportedParams.temperature.min !== undefined) {
+            temperature = Math.max(temperature || 0, supportedParams.temperature.min);
+          }
+        }
+      }
+      
+      // Check if model has maxTokens restrictions
+      if (supportedParams.maxTokens) {
+        if (supportedParams.maxTokens.supported === false) {
+          maxTokens = undefined; // Don't send if not supported
+        } else {
+          // Use model's default or respect min/max
+          if (supportedParams.maxTokens.default !== undefined) {
+            maxTokens = supportedParams.maxTokens.default;
+          } else if (supportedParams.maxTokens.max !== undefined) {
+            maxTokens = Math.min(agent.maxTokens, supportedParams.maxTokens.max);
+          }
+          if (supportedParams.maxTokens.min !== undefined) {
+            maxTokens = Math.max(maxTokens || 0, supportedParams.maxTokens.min);
+          }
+        }
       }
       
       // For OpenAI, use OpenAIAdapter directly with model ID
@@ -705,8 +745,8 @@ export class PromptPatternAuditor {
         const provider = new OpenAIAdapter(modelId);
         const response = await provider.execute({
           prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
-          temperature: agent.temperature,
-          maxTokens: agent.maxTokens,
+          temperature,
+          maxTokens,
         });
         
         // Cache the response
@@ -748,8 +788,8 @@ export class PromptPatternAuditor {
         const provider = new ClaudeAdapter(modelId);
         const response = await provider.execute({
           prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
-          temperature: agent.temperature,
-          maxTokens: agent.maxTokens,
+          temperature,
+          maxTokens,
         });
         
         // Cache the response
@@ -791,8 +831,8 @@ export class PromptPatternAuditor {
         const provider = new GeminiAdapter(modelId);
         const response = await provider.execute({
           prompt: `${agent.systemPrompt}\n\n---\n\n${prompt}`,
-          temperature: agent.temperature,
-          maxTokens: agent.maxTokens,
+          temperature,
+          maxTokens,
         });
         
         // Cache the response

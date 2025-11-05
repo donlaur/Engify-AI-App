@@ -50,6 +50,43 @@ async function testModelWithFullAudit(model: any, prompt: any): Promise<TestResu
   const startTime = Date.now();
   
   try {
+    // Get model's supported parameters from DB (or use defaults)
+    const db = await getMongoDb();
+    const modelRecord = await db.collection('ai_models').findOne({ id: model.id });
+    const supportedParams = modelRecord?.supportedParameters || {};
+    
+    // Determine safe parameters to use based on model's known limitations
+    let temperature = 0.7; // Default
+    let maxTokens = 2000; // Default
+    
+    // Check if model has temperature restrictions
+    if (supportedParams.temperature) {
+      if (supportedParams.temperature.supported === false) {
+        temperature = undefined; // Don't send if not supported
+      } else {
+        // Use model's default or respect min/max
+        if (supportedParams.temperature.default !== undefined) {
+          temperature = supportedParams.temperature.default;
+        } else if (supportedParams.temperature.max !== undefined) {
+          temperature = Math.min(0.7, supportedParams.temperature.max);
+        }
+      }
+    }
+    
+    // Check if model has maxTokens restrictions
+    if (supportedParams.maxTokens) {
+      if (supportedParams.maxTokens.supported === false) {
+        maxTokens = undefined; // Don't send if not supported
+      } else {
+        // Use model's default or respect min/max
+        if (supportedParams.maxTokens.default !== undefined) {
+          maxTokens = supportedParams.maxTokens.default;
+        } else if (supportedParams.maxTokens.max !== undefined) {
+          maxTokens = Math.min(2000, supportedParams.maxTokens.max);
+        }
+      }
+    }
+    
     // Use the full audit system (not just a simple prompt)
     const auditor = new PromptPatternAuditor('system', { 
       skipExecutionTest: true, // Skip execution test for speed
@@ -61,7 +98,6 @@ async function testModelWithFullAudit(model: any, prompt: any): Promise<TestResu
     const latencyMs = Date.now() - startTime;
 
     // Save audit result to database so others can take action
-    const db = await getMongoDb();
     const existingAudit = await db.collection('prompt_audit_results').findOne(
       { promptId: prompt.id },
       { sort: { auditVersion: -1 } }
@@ -108,13 +144,64 @@ async function testModelWithFullAudit(model: any, prompt: any): Promise<TestResu
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const latencyMs = Date.now() - startTime;
+    
+    // Parse error to detect parameter failures
+    const errorLower = errorMessage.toLowerCase();
+    let parameterFailure: { parameter: string; error: string; attemptedValue?: any } | null = null;
+    
+    if (errorLower.includes('temperature') || errorLower.includes('temp')) {
+      parameterFailure = {
+        parameter: 'temperature',
+        error: errorMessage,
+        attemptedValue: undefined, // We don't know what was attempted in audit script
+      };
+    } else if (errorLower.includes('max_tokens') || errorLower.includes('maxtokens') || errorLower.includes('max tokens')) {
+      parameterFailure = {
+        parameter: 'maxTokens',
+        error: errorMessage,
+        attemptedValue: undefined,
+      };
+    } else if (errorLower.includes('max_output_tokens') || errorLower.includes('maxoutputtokens')) {
+      parameterFailure = {
+        parameter: 'maxTokens',
+        error: errorMessage,
+        attemptedValue: undefined,
+      };
+    }
+    
+    // If we detected a parameter failure, record it in the database
+    if (parameterFailure) {
+      try {
+        const db = await getMongoDb();
+        await db.collection('ai_models').updateOne(
+          { id: model.id },
+          {
+            $push: {
+              parameterFailures: {
+                ...parameterFailure,
+                timestamp: new Date(),
+                source: 'test-all-ai-models',
+              },
+            },
+            $set: {
+              updatedAt: new Date(),
+            },
+          }
+        );
+        console.log(`   📝 Recorded parameter failure: ${parameterFailure.parameter}`);
+      } catch (dbError) {
+        console.log(`   ⚠️  Failed to record parameter failure: ${dbError instanceof Error ? dbError.message : String(dbError)}`);
+      }
+    }
+    
     return {
       provider: model.provider,
       modelId: model.id,
       displayName: model.displayName,
       status: 'error',
       error: errorMessage,
-      latencyMs: Date.now() - startTime,
+      latencyMs,
     };
   }
 }

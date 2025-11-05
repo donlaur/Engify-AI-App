@@ -45,6 +45,38 @@ export const AIModelSchema = z.object({
   replacementModel: z.string().optional(), // ID of model to use instead if deprecated (matches config field name)
   notes: z.string().optional(),
   organizationId: z.string().optional(), // Multi-tenant support (null = system-wide)
+  // Parameter support tracking
+  supportedParameters: z.object({
+    temperature: z.object({
+      supported: z.boolean().default(true),
+      min: z.number().optional(),
+      max: z.number().optional(),
+      default: z.number().optional(),
+      notes: z.string().optional(), // e.g., "Gemini uses 0-1 range"
+    }).optional(),
+    maxTokens: z.object({
+      supported: z.boolean().default(true),
+      min: z.number().optional(),
+      max: z.number().optional(),
+      default: z.number().optional(),
+      notes: z.string().optional(), // e.g., "Use maxOutputTokens instead"
+    }).optional(),
+    stream: z.object({
+      supported: z.boolean().default(true),
+      notes: z.string().optional(),
+    }).optional(),
+    systemPrompt: z.object({
+      supported: z.boolean().default(true),
+      notes: z.string().optional(), // e.g., "Must be prepended to user message"
+    }).optional(),
+  }).optional(),
+  parameterFailures: z.array(z.object({
+    parameter: z.string(), // 'temperature', 'maxTokens', etc.
+    error: z.string(), // Error message received
+    attemptedValue: z.any().optional(), // What value was tried
+    timestamp: z.date(),
+    source: z.string().optional(), // Where it failed (e.g., 'test-all-ai-models', 'audit-prompts')
+  })).default([]),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
