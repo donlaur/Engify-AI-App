@@ -112,21 +112,25 @@ export async function POST(
     const auditor = new AuditorClass('system');
     const auditResult = await auditor.auditPrompt(prompt);
 
-    // Get existing audit to determine version number
+    // Get existing audit to determine audit count (not prompt revision)
     const existingAudit = await db.collection('prompt_audit_results').findOne(
       { promptId: prompt.id || prompt.slug || prompt._id.toString() },
       { sort: { auditVersion: -1 } }
     );
 
-    // Calculate next version number
+    // Calculate audit version (audit count - can be multiple audits per prompt revision)
+    // This tracks how many times we've audited this prompt (not prompt content changes)
     const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
     const auditDate = new Date();
+    const promptRevision = prompt.currentRevision || 1;
 
     // Save audit result to database
+    // Note: This is just an audit record, NOT a prompt content update
     await db.collection('prompt_audit_results').insertOne({
       promptId: prompt.id || prompt.slug || prompt._id.toString(),
       promptTitle: prompt.title,
-      auditVersion,
+      promptRevision: promptRevision, // Track which prompt revision this audit is for
+      auditVersion, // Audit count (how many times we've audited)
       auditDate,
       overallScore: auditResult.overallScore,
       categoryScores: auditResult.categoryScores,

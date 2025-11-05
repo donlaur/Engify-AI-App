@@ -36,15 +36,18 @@ async function enrichPromptWithAI(promptId: string) {
     process.exit(1);
   }
 
-  // Only enrich prompts at audit version 1 (first audit)
-  if (auditResult.auditVersion !== 1) {
-    console.log(`ℹ️  Skipping enrichment: Prompt already enriched (audit version ${auditResult.auditVersion})`);
-    console.log(`   Only enriching prompts at audit version 1`);
+  // Only enrich prompts at revision 1 (not yet improved)
+  // Check prompt revision, not audit version
+  const promptRevision = prompt.currentRevision || 1;
+  if (promptRevision > 1) {
+    console.log(`ℹ️  Skipping enrichment: Prompt already enriched (revision ${promptRevision})`);
+    console.log(`   Only enriching prompts at revision 1`);
     process.exit(0);
   }
 
   console.log(`📝 Enriching: "${prompt.title}"`);
-  console.log(`   Current Score: ${auditResult.overallScore}/10`);
+  console.log(`   Current Revision: ${promptRevision}`);
+  console.log(`   Latest Audit Score: ${auditResult.overallScore}/10`);
   console.log(`   Missing Elements: ${auditResult.missingElements?.length || 0}`);
   console.log(`   Recommendations: ${auditResult.recommendations?.length || 0}\n`);
 
@@ -358,10 +361,39 @@ Format as JSON array:
     metaDescription: prompt.metaDescription || prompt.description.substring(0, 160),
   };
 
-  // Update in database
+  // Update in database with revision tracking
+  // Increment revision number since we're modifying content
+  const newRevision = promptRevision + 1;
+  
+  // Create revision record before updating (for history tracking)
+  const { createRevision } = await import('@/lib/db/schemas/prompt-revision');
+  const revision = createRevision(
+    prompt.id || prompt._id?.toString(),
+    prompt,
+    { ...prompt, ...enrichedPrompt },
+    'system',
+    'AI enrichment based on audit feedback'
+  );
+
+  // Save revision to history
+  await db.collection('prompt_revisions').insertOne({
+    ...revision,
+    revisionNumber: newRevision,
+    createdAt: new Date(),
+  });
+
+  // Update prompt with enriched content AND increment revision
   await db.collection('prompts').updateOne(
     { id: promptId },
-    { $set: enrichedPrompt }
+    { 
+      $set: {
+        ...enrichedPrompt,
+        currentRevision: newRevision,
+        lastRevisedBy: 'system',
+        lastRevisedAt: new Date(),
+        updatedAt: new Date(),
+      }
+    }
   );
 
   console.log('\n✅ Prompt enriched with:');
@@ -373,7 +405,8 @@ Format as JSON array:
   if (recommendedModel.length > 0) console.log(`   🤖 ${recommendedModel.length} recommended models`);
   if (whatIs) console.log(`   📖 "What is" explanation`);
   if (whyUse.length > 0) console.log(`   ❓ ${whyUse.length} "Why Use" reasons`);
-  console.log(`\n📄 Updated prompt saved to database!\n`);
+  console.log(`\n📄 Updated prompt saved to database!`);
+  console.log(`   📌 Revision: ${promptRevision} → ${newRevision} (content updated)`);
 
   await db.client.close();
   return enrichedPrompt;

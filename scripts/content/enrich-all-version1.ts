@@ -31,9 +31,11 @@ async function enrichPromptWithAI(promptId: string) {
     throw new Error(`No audit results found for prompt: ${promptId}`);
   }
 
-  // Only enrich prompts at audit version 1 (first audit)
-  if (auditResult.auditVersion !== 1) {
-    return { skipped: true, reason: `Audit version ${auditResult.auditVersion}, not version 1` };
+  // Only enrich prompts at revision 1 (not yet improved)
+  // Check prompt revision, not audit version
+  const promptRevision = prompt.currentRevision || 1;
+  if (promptRevision > 1) {
+    return { skipped: true, reason: `Prompt revision ${promptRevision}, not revision 1` };
   }
 
   const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
@@ -216,61 +218,38 @@ async function enrichAllVersion1Prompts() {
 
   const db = await getMongoDb();
 
-  // Find all prompts that have audit version 1
-  // We need to find prompts where the latest audit is version 1
-  const allAudits = await db.collection('prompt_audit_results')
-    .find({})
-    .sort({ promptId: 1, auditVersion: -1 })
-    .toArray();
-
-  // Group by promptId and get only those with version 1 as latest
-  const version1PromptIds = new Set<string>();
-  const latestAuditsByPrompt = new Map<string, any>();
-
-  for (const audit of allAudits) {
-    if (!latestAuditsByPrompt.has(audit.promptId)) {
-      latestAuditsByPrompt.set(audit.promptId, audit);
-      if (audit.auditVersion === 1) {
-        version1PromptIds.add(audit.promptId);
-      }
-    }
-  }
-
-  const promptIds = Array.from(version1PromptIds);
+  // Find prompts with revision 1 (not yet improved)
+  // We want to enrich prompts that haven't been improved yet
+  const prompts = await db.collection('prompts').find({
+    currentRevision: { $lte: 1 } // Only revision 1 or less
+  }).toArray();
   
-  if (promptIds.length === 0) {
-    console.log('✅ No prompts found with audit version 1');
-    console.log('   All prompts have been enriched or have multiple audit versions\n');
+  if (prompts.length === 0) {
+    console.log('✅ No prompts found at revision 1');
+    console.log('   All prompts have been enriched\n');
     await db.client.close();
     process.exit(0);
   }
 
-  console.log(`📋 Found ${promptIds.length} prompts with audit version 1\n`);
+  console.log(`📋 Found ${prompts.length} prompts at revision 1\n`);
   console.log('🚀 Starting batch enrichment...\n');
 
   const results = {
     success: 0,
     skipped: 0,
     failed: 0,
-    total: promptIds.length,
+    total: prompts.length,
   };
 
   // Process each prompt
-  for (let i = 0; i < promptIds.length; i++) {
-    const promptId = promptIds[i];
-    const prompt = await db.collection('prompts').findOne({ id: promptId });
-
-    if (!prompt) {
-      console.log(`[${i + 1}/${promptIds.length}] ⚠️  Prompt not found: ${promptId}`);
-      results.failed++;
-      continue;
-    }
+  for (let i = 0; i < prompts.length; i++) {
+    const prompt = prompts[i];
 
     try {
-      console.log(`[${i + 1}/${promptIds.length}] 📝 Enriching: "${prompt.title}"`);
-      console.log(`   ID: ${promptId}\n`);
+      console.log(`[${i + 1}/${prompts.length}] 📝 Enriching: "${prompt.title}"`);
+      console.log(`   ID: ${prompt.id}\n`);
 
-      const result = await enrichPromptWithAI(promptId);
+      const result = await enrichPromptWithAI(prompt.id);
       
       if (result.skipped) {
         results.skipped++;

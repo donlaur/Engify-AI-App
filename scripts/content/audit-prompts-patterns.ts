@@ -2174,16 +2174,21 @@ async function auditPromptsAndPatterns(options: {
         { sort: { auditVersion: -1 } }
       );
       
-      // Skip prompts that already have version > 1 (already improved)
-      if (existingAudit && existingAudit.auditVersion > 1) {
-        console.log(`[${i + 1}/${prompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Version ${existingAudit.auditVersion} - already improved)`);
+      // Skip prompts that have been improved (currentRevision > 1)
+      // We only audit prompts at revision 1 (not yet improved)
+      // Audit version tracks audit count (can be multiple audits per revision)
+      // Prompt revision tracks actual content changes (only increments when content updated)
+      const promptRevision = prompt.currentRevision || 1;
+      if (promptRevision > 1) {
+        console.log(`[${i + 1}/${prompts.length}] ⏭️  Skipping: ${prompt.title || prompt.id || 'Untitled'} (Revision ${promptRevision} - already improved)`);
         skippedCount++;
         continue;
       }
       
       console.log(`[${i + 1}/${prompts.length}] Auditing: ${prompt.title || prompt.id || 'Untitled'}`);
+      const auditCount = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
       if (existingAudit) {
-        console.log(`   (Re-auditing version ${existingAudit.auditVersion})`);
+        console.log(`   (Audit #${auditCount} for Revision ${promptRevision})`);
       }
       
       try {
@@ -2194,15 +2199,18 @@ async function auditPromptsAndPatterns(options: {
         console.log(`   ${status} Overall: ${result.overallScore.toFixed(1)}/10 | Eng: ${result.categoryScores.engineeringUsefulness.toFixed(1)} | Cases: ${result.categoryScores.caseStudyQuality.toFixed(1)}`);
         console.log(`      Issues: ${result.issues.length} | Missing: ${result.missingElements.length}`);
         
-        // Calculate next version number
+        // Calculate audit version (audit count - can be multiple audits per prompt revision)
+        // This tracks how many times we've audited this prompt (not prompt content changes)
         const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
         const auditDate = new Date();
         
         // Save immediately after audit completes (don't wait for batch)
+        // Note: This is just an audit record, NOT a prompt content update
         await db.collection('prompt_audit_results').insertOne({
           promptId: prompt.id || prompt.slug || prompt._id?.toString(),
           promptTitle: prompt.title || 'Untitled',
-          auditVersion,
+          promptRevision: promptRevision, // Track which prompt revision this audit is for
+          auditVersion, // Audit count (how many times we've audited)
           auditDate,
           overallScore: result.overallScore,
           categoryScores: result.categoryScores,
@@ -2217,7 +2225,7 @@ async function auditPromptsAndPatterns(options: {
           updatedAt: auditDate,
         });
         
-        console.log(`   💾 Saved to database (Version ${auditVersion})`);
+        console.log(`   💾 Saved audit #${auditVersion} (Prompt Revision: ${promptRevision})`);
         
         if (fix && result.needsFix) {
           console.log(`   🔧 Auto-fixing...`);
@@ -2231,7 +2239,7 @@ async function auditPromptsAndPatterns(options: {
     
     console.log(`\n✅ Completed auditing ${results.length} prompts`);
     if (skippedCount > 0) {
-      console.log(`⏭️  Skipped ${skippedCount} prompts (already at version > 1)`);
+      console.log(`⏭️  Skipped ${skippedCount} prompts (already at revision > 1)`);
     }
   }
 

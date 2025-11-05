@@ -37,8 +37,10 @@ pnpm tsx scripts/content/track-progress.ts
 **What gets saved:**
 - ✅ Audit results saved to `prompt_audit_results` collection
 - ✅ Scores, issues, recommendations, missing elements
-- ✅ New audit version number
+- ✅ **Audit version** (audit count - how many times we've audited)
+- ✅ **Prompt revision** (which prompt revision this audit is for)
 - ❌ **Prompt itself is NOT modified**
+- ❌ **Prompt revision number is NOT incremented**
 
 **To actually improve prompts after auditing, you need to run enrichment scripts separately.**
 
@@ -49,7 +51,20 @@ pnpm tsx scripts/content/track-progress.ts
 **What gets saved:**
 - ✅ Prompt fields updated: `caseStudies`, `examples`, `whatIs`, `whyUse`, etc.
 - ✅ Prompt record in `prompts` collection is modified
+- ✅ **Prompt revision incremented** (e.g., 1 → 2)
+- ✅ Revision history created in `prompt_revisions` collection
 - ✅ `updatedAt` timestamp updated
+
+### Version vs Revision
+
+- **Audit Version**: Tracks how many times we've audited a prompt (can be multiple audits per revision)
+  - Example: Prompt Revision 1 can have Audit Versions 1, 2, 3, etc.
+  - Increments every time we run an audit (even if no changes made)
+
+- **Prompt Revision**: Tracks actual content changes to the prompt
+  - Example: Prompt starts at Revision 1, becomes Revision 2 after enrichment
+  - Only increments when prompt content is actually modified
+  - Used to skip prompts that have already been improved
 
 ---
 
@@ -104,11 +119,14 @@ pnpm tsx scripts/content/audit-prompts-patterns.ts --type=both
 - `--no-cache` - Disable Redis caching
 
 **Behavior:**
-- ✅ Automatically skips prompts with version > 1 (already improved)
+- ✅ Automatically skips prompts with revision > 1 (already improved)
 - ✅ Saves audit results incrementally (no data loss on crash)
 - ✅ Shows skip count summary at end
 - ✅ Uses Redis caching for faster subsequent audits
+- ✅ Tracks `promptRevision` field in audit results (which revision was audited)
+- ✅ Increments `auditVersion` (audit count, not prompt revision)
 - ⚠️ **ONLY SCORES - does NOT modify prompts**
+- ⚠️ **Prompt revision number stays the same**
 - ⚠️ **To apply improvements, run enrichment scripts separately**
 
 **Categories:**
@@ -205,10 +223,12 @@ pnpm tsx scripts/content/enrich-prompt.ts --id=<prompt-id>
 ```
 
 **Behavior:**
-- ✅ Only enriches prompts at audit version 1
-- ✅ Skips if already enriched (version > 1)
+- ✅ Only enriches prompts at revision 1
+- ✅ Skips if already enriched (revision > 1)
 - ✅ Generates: case studies, examples, use cases, best practices, whatIs, whyUse, etc.
 - ✅ **MODIFIES the prompt record in `prompts` collection**
+- ✅ **Increments prompt revision** (e.g., 1 → 2)
+- ✅ **Creates revision history** in `prompt_revisions` collection
 - ✅ Updates `updatedAt` timestamp
 
 ---
