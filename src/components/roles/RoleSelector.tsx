@@ -11,12 +11,13 @@ import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import { cn } from '@/lib/utils';
 
+// Ordered by content volume: Engineers (most) → Managers → Directors → others → Designers (0 prompts)
 const roles = [
   {
-    id: 'directors',
-    label: 'Directors',
-    icon: Icons.briefcase,
-    href: '/for-directors',
+    id: 'engineers',
+    label: 'Engineers',
+    icon: Icons.code,
+    href: '/for-engineers',
   },
   {
     id: 'managers',
@@ -25,10 +26,10 @@ const roles = [
     href: '/for-managers',
   },
   {
-    id: 'engineers',
-    label: 'Engineers',
-    icon: Icons.code,
-    href: '/for-engineers',
+    id: 'directors',
+    label: 'Directors',
+    icon: Icons.briefcase,
+    href: '/for-directors',
   },
   {
     id: 'architects',
@@ -41,12 +42,6 @@ const roles = [
     label: 'DevOps/SRE',
     icon: Icons.server,
     href: '/for-devops-sre',
-  },
-  {
-    id: 'designers',
-    label: 'Designers',
-    icon: Icons.palette,
-    href: '/for-designers',
   },
   {
     id: 'pms',
@@ -66,6 +61,12 @@ const roles = [
     label: 'Scrum Masters',
     icon: Icons.calendar,
     href: '/for-scrum-masters',
+  },
+  {
+    id: 'designers',
+    label: 'Designers',
+    icon: Icons.palette,
+    href: '/for-designers',
   },
 ];
 
@@ -90,9 +91,9 @@ export function RoleSelector() {
                     variant={isActive ? 'default' : 'outline'}
                     className={cn(
                       'cursor-pointer whitespace-nowrap transition-all hover:scale-105',
-                      isActive 
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-purple-600 shadow-sm' 
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700'
+                      isActive
+                        ? 'border-purple-600 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
+                        : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                     )}
                   >
                     <Icon className="mr-1 h-3 w-3" />

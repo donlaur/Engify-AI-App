@@ -67,16 +67,35 @@ describe('Visual Regression Tests', () => {
   async function captureAndCompare(
     name: string,
     viewport: { width: number; height: number },
-    url: string = BASE_URL
+    url: string = BASE_URL,
+    darkMode: boolean = false
   ) {
     if (!page) throw new Error('Page not initialized');
     await page.setViewport(viewport);
+
+    // Set dark mode preference
+    await page.emulateMediaFeatures([
+      { name: 'prefers-color-scheme', value: darkMode ? 'dark' : 'light' },
+    ]);
+
     await page.goto(url, { waitUntil: 'networkidle2', timeout: TIMEOUT });
+
+    // Apply or remove dark class (next-themes uses class-based dark mode)
+    await page.evaluate((isDark) => {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }, darkMode);
+
+    // Wait for theme to apply
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Wait for any animations to complete
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const screenshotName = `${name}-${viewport.width}x${viewport.height}.png`;
+    const screenshotName = `${name}${darkMode ? '-dark' : ''}-${viewport.width}x${viewport.height}.png`;
     const baselinePath = path.join(BASELINE_DIR, screenshotName);
     const currentPath = path.join(CURRENT_DIR, screenshotName);
     const diffPath = path.join(DIFF_DIR, screenshotName);
@@ -200,5 +219,150 @@ describe('Visual Regression Tests', () => {
       },
       TIMEOUT
     );
+  });
+
+  // Role Landing Pages
+  const rolePages = [
+    { slug: 'directors', name: 'Directors' },
+    { slug: 'managers', name: 'Managers' },
+    { slug: 'engineers', name: 'Engineers' },
+    { slug: 'architects', name: 'Architects' },
+    { slug: 'devops-sre', name: 'DevOps/SRE' },
+    { slug: 'designers', name: 'Designers' },
+    { slug: 'pms', name: 'Product Managers' },
+    { slug: 'product-owners', name: 'Product Owners' },
+    { slug: 'qa', name: 'QA Engineers' },
+    { slug: 'scrum-masters', name: 'Scrum Masters' },
+  ];
+
+  rolePages.forEach((role) => {
+    describe(`Role Landing Page: ${role.name}`, () => {
+      const pageUrl = `${BASE_URL}/for-${role.slug}`;
+      const screenshotName = `role-${role.slug}`;
+
+      it.skipIf(!serverAvailable)(
+        `should match baseline on desktop - ${role.name}`,
+        async () => {
+          if (!page) throw new Error('Page not initialized');
+          const result = await captureAndCompare(
+            screenshotName,
+            {
+              width: 1920,
+              height: 1080,
+            },
+            pageUrl
+          );
+
+          if (!result.isBaseline) {
+            expect(result.diff).toBeLessThan(2); // Allow 2% difference for dynamic content
+          }
+        },
+        TIMEOUT
+      );
+
+      it.skipIf(!serverAvailable)(
+        `should match baseline on tablet - ${role.name}`,
+        async () => {
+          if (!page) throw new Error('Page not initialized');
+          const result = await captureAndCompare(
+            screenshotName,
+            {
+              width: 768,
+              height: 1024,
+            },
+            pageUrl
+          );
+
+          if (!result.isBaseline) {
+            expect(result.diff).toBeLessThan(2);
+          }
+        },
+        TIMEOUT
+      );
+
+      it.skipIf(!serverAvailable)(
+        `should match baseline on mobile - ${role.name}`,
+        async () => {
+          if (!page) throw new Error('Page not initialized');
+          const result = await captureAndCompare(
+            screenshotName,
+            {
+              width: 375,
+              height: 667,
+            },
+            pageUrl
+          );
+
+          if (!result.isBaseline) {
+            expect(result.diff).toBeLessThan(2);
+          }
+        },
+        TIMEOUT
+      );
+
+      // Dark mode tests
+      it.skipIf(!serverAvailable)(
+        `should match baseline in dark mode on desktop - ${role.name}`,
+        async () => {
+          if (!page) throw new Error('Page not initialized');
+          const result = await captureAndCompare(
+            screenshotName,
+            {
+              width: 1920,
+              height: 1080,
+            },
+            pageUrl,
+            true // darkMode = true
+          );
+
+          if (!result.isBaseline) {
+            expect(result.diff).toBeLessThan(2);
+          }
+        },
+        TIMEOUT
+      );
+
+      it.skipIf(!serverAvailable)(
+        `should match baseline in dark mode on tablet - ${role.name}`,
+        async () => {
+          if (!page) throw new Error('Page not initialized');
+          const result = await captureAndCompare(
+            screenshotName,
+            {
+              width: 768,
+              height: 1024,
+            },
+            pageUrl,
+            true // darkMode = true
+          );
+
+          if (!result.isBaseline) {
+            expect(result.diff).toBeLessThan(2);
+          }
+        },
+        TIMEOUT
+      );
+
+      it.skipIf(!serverAvailable)(
+        `should match baseline in dark mode on mobile - ${role.name}`,
+        async () => {
+          if (!page) throw new Error('Page not initialized');
+          const result = await captureAndCompare(
+            screenshotName,
+            {
+              width: 375,
+              height: 667,
+            },
+            pageUrl,
+            true // darkMode = true
+          );
+
+          if (!result.isBaseline) {
+            expect(result.diff).toBeLessThan(2);
+          }
+        },
+        TIMEOUT
+      );
+    });
   });
 });
