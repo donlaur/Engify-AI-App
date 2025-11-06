@@ -40,8 +40,8 @@ function getCacheKey(question: string): string {
 export async function getCachedRAGResponse(
   question: string
 ): Promise<CachedRAGResponse | null> {
+  // Gracefully skip if Redis not configured
   if (!redis) {
-    console.warn('Redis not configured, skipping cache check');
     return null;
   }
 
@@ -50,14 +50,14 @@ export async function getCachedRAGResponse(
     const cached = await redis.get<CachedRAGResponse>(cacheKey);
     
     if (cached) {
-      console.log(`Cache HIT for question: ${question.substring(0, 50)}...`);
+      console.log(`✓ Cache HIT: ${question.substring(0, 50)}...`);
       return cached;
     }
     
-    console.log(`Cache MISS for question: ${question.substring(0, 50)}...`);
     return null;
   } catch (error) {
-    console.error('Error getting cached RAG response:', error);
+    // Silently fail and continue without cache
+    console.error('Cache read error (continuing without cache):', error);
     return null;
   }
 }
@@ -69,8 +69,8 @@ export async function cacheRAGResponse(
   question: string,
   response: Omit<CachedRAGResponse, 'cachedAt'>
 ): Promise<void> {
+  // Gracefully skip if Redis not configured
   if (!redis) {
-    console.warn('Redis not configured, skipping cache set');
     return;
   }
 
@@ -83,9 +83,10 @@ export async function cacheRAGResponse(
     
     // Cache for 24 hours (86400 seconds)
     await redis.set(cacheKey, cachedResponse, { ex: 86400 });
-    console.log(`Cached response for question: ${question.substring(0, 50)}...`);
+    console.log(`✓ Cached: ${question.substring(0, 50)}...`);
   } catch (error) {
-    console.error('Error caching RAG response:', error);
+    // Silently fail - caching is optional
+    console.error('Cache write error (non-critical):', error);
   }
 }
 
