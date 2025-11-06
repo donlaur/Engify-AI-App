@@ -252,6 +252,122 @@ export default async function AIToolsHubPage() {
           </Card>
         </div>
 
+        {/* Cursor vs Windsurf Comparison */}
+        <div className="mb-12">
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 dark:border-purple-800 dark:from-purple-900/20 dark:to-blue-900/20">
+            <CardHeader>
+              <CardTitle className="text-2xl">
+                🥊 Cursor vs Windsurf: AI IDE Showdown (2025)
+              </CardTitle>
+              <CardDescription>
+                The two leading AI-native IDEs compared side-by-side
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="p-3 text-left font-semibold">Feature</th>
+                      <th className="p-3 text-left font-semibold text-purple-900 dark:text-purple-100">
+                        Cursor
+                      </th>
+                      <th className="p-3 text-left font-semibold text-blue-900 dark:text-blue-100">
+                        Windsurf
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm">
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Core Philosophy</td>
+                      <td className="p-3">&quot;Power Tool&quot; - Precise control</td>
+                      <td className="p-3">&quot;Automated AI Flow&quot; - Guided work</td>
+                    </tr>
+                    <tr className="border-b bg-muted/30">
+                      <td className="p-3 font-medium">Context Management</td>
+                      <td className="p-3">Manual & Precise (@Codebase, @web)</td>
+                      <td className="p-3">Automatic Indexing (&quot;Cascade&quot;)</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Ease of Use</td>
+                      <td className="p-3">Steeper learning curve, for power users</td>
+                      <td className="p-3">Beginner-friendly, intuitive UI</td>
+                    </tr>
+                    <tr className="border-b bg-muted/30">
+                      <td className="p-3 font-medium">Key Differentiator</td>
+                      <td className="p-3">Granular control over AI edits</td>
+                      <td className="p-3">Built-in deploy/preview features</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Corporate Backing</td>
+                      <td className="p-3">Anysphere ($9.9B valuation, $500M+ ARR)</td>
+                      <td className="p-3">Cognition (Acquired, part of Devin)</td>
+                    </tr>
+                    <tr className="border-b bg-muted/30">
+                      <td className="p-3 font-medium">Base Price</td>
+                      <td className="p-3 font-semibold">$20/month</td>
+                      <td className="p-3 font-semibold">$15/month</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Best For</td>
+                      <td className="p-3">Experienced devs wanting full control</td>
+                      <td className="p-3">Beginners, rapid prototyping</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-medium">User Sentiment</td>
+                      <td className="p-3">
+                        <div className="space-y-1">
+                          <div className="text-green-700 dark:text-green-400">
+                            ✓ 4x faster projects
+                          </div>
+                          <div className="text-red-700 dark:text-red-400">
+                            ✗ Can be time sink
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="space-y-1">
+                          <div className="text-green-700 dark:text-green-400">
+                            ✓ Easier than Cursor
+                          </div>
+                          <div className="text-red-700 dark:text-red-400">
+                            ✗ Loses context
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <div className="rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-800 dark:bg-purple-900/20">
+                  <h4 className="mb-2 font-semibold text-purple-900 dark:text-purple-100">
+                    Choose Cursor if:
+                  </h4>
+                  <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                    <li>• You want maximum control over AI actions</li>
+                    <li>• You&apos;re comfortable with manual context management</li>
+                    <li>• You need Fortune 500-grade enterprise features</li>
+                    <li>• Budget allows for $20-$200/mo</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+                  <h4 className="mb-2 font-semibold text-blue-900 dark:text-blue-100">
+                    Choose Windsurf if:
+                  </h4>
+                  <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                    <li>• You want AI to handle context automatically</li>
+                    <li>• You prefer a gentler learning curve</li>
+                    <li>• You want better value ($15 vs $20/mo)</li>
+                    <li>• You&apos;re interested in Devin integration</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Tools by Category */}
         <div className="space-y-12">
           {Object.entries(byCategory).map(([category, categoryTools]) => (
