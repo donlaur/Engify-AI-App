@@ -26,16 +26,24 @@ export async function POST(request: NextRequest) {
 
     const rateLimitResult = await checkRateLimit(identifier, tier);
     if (!rateLimitResult.allowed) {
+      const resetTime = new Date(rateLimitResult.resetAt).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+      });
+      
       return NextResponse.json(
         {
-          error: rateLimitResult.reason || 'Rate limit exceeded',
-          message: 'Sorry, too many requests. Please try again later.',
+          error: 'free_trial_limit_reached',
+          message: tier === 'anonymous' 
+            ? `You've reached the limit of your free trial. Sign in to continue or try again after ${resetTime}.`
+            : `Rate limit reached. Please try again after ${resetTime}.`,
+          resetAt: rateLimitResult.resetAt.toISOString(),
         },
         {
           status: 429,
           headers: {
             'Retry-After': '60',
-            'X-RateLimit-Limit': '100',
+            'X-RateLimit-Limit': tier === 'anonymous' ? '20' : '100',
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
           },

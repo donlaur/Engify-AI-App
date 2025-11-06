@@ -16,12 +16,12 @@
  */
 export const AI_RATE_LIMITS = {
   anonymous: {
-    perMinute: 3,
-    perHour: 3,
-    perDay: 10,
-    perMonth: 100,
+    perMinute: 10,
+    perHour: 20,
+    perDay: 50,
+    perMonth: 200,
     maxTokensPerRequest: 1000,
-    maxTokensPerDay: 10000,
+    maxTokensPerDay: 20000,
   },
   authenticated: {
     perMinute: 20,
