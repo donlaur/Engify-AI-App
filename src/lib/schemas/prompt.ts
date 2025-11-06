@@ -29,6 +29,11 @@ export const userRoles = [
   'devops-sre',
   'scrum-master',
   'product-owner',
+  'engineering-director',
+  'product-director',
+  'vp-engineering',
+  'vp-product',
+  'cto',
 ] as const;
 
 export type UserRole = (typeof userRoles)[number];
@@ -236,6 +241,11 @@ export const roleLabels: Record<UserRole, string> = {
   'devops-sre': 'DevOps/SRE',
   'scrum-master': 'Scrum Master',
   'product-owner': 'Product Owner',
+  'engineering-director': 'Engineering Director',
+  'product-director': 'Product Director',
+  'vp-engineering': 'VP of Engineering',
+  'vp-product': 'VP of Product',
+  cto: 'CTO',
 };
 
 export const patternLabels: Record<PromptPattern, string> = {
