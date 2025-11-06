@@ -124,8 +124,8 @@ export async function POST(req: NextRequest) {
         `,
       });
     } catch (emailError) {
-      // Log but don't fail the request
-      logger.error('Failed to send confirmation email', {
+      // Log but don't fail the request - email is optional
+      logger.warn('Confirmation email not sent (SendGrid not configured)', {
         email: data.email,
         error:
           emailError instanceof Error ? emailError.message : String(emailError),
@@ -137,16 +137,28 @@ export async function POST(req: NextRequest) {
       process.env.ADMIN_EMAIL ||
       process.env.NEXT_PUBLIC_CONTACT_EMAIL ||
       'donlaur@engify.ai';
-    try {
-      const trackingInfo = [
-        data.ref && `Company/Ref: ${data.ref}`,
-        data.version && `Resume Version: ${data.version}`,
-        data.source && `Source: ${data.source}`,
-        data.utm_campaign && `Campaign: ${data.utm_campaign}`,
-      ]
-        .filter(Boolean)
-        .join('\n');
+    
+    const trackingInfo = [
+      data.ref && `Company/Ref: ${data.ref}`,
+      data.version && `Resume Version: ${data.version}`,
+      data.source && `Source: ${data.source}`,
+      data.utm_campaign && `Campaign: ${data.utm_campaign}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
 
+    // Log to console as fallback (visible in Vercel logs)
+    console.log('🎯 NEW BETA ACCESS REQUEST:', {
+      name: data.name,
+      email: data.email,
+      company: data.company,
+      role: data.role,
+      useCase: data.useCase,
+      tracking: trackingInfo || 'None',
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
       await sendEmail({
         to: adminEmail,
         subject: `New Beta Access Request - ${data.name}${data.company ? ` from ${data.company}` : ''}`,
@@ -168,13 +180,16 @@ export async function POST(req: NextRequest) {
           </div>
         `,
       });
+      console.log('✅ Admin notification email sent to:', adminEmail);
     } catch (emailError) {
-      // Log but don't fail
-      logger.error('Failed to send admin notification', {
+      // Log but don't fail - request is still saved in DB
+      logger.warn('Admin notification email not sent (SendGrid not configured)', {
         adminEmail,
         error:
           emailError instanceof Error ? emailError.message : String(emailError),
+        note: 'Request saved in MongoDB - check /opshub/access-requests or Vercel logs',
       });
+      console.log('⚠️ Email not sent (SendGrid not configured). Check MongoDB or /opshub/access-requests');
     }
 
     // Audit log
