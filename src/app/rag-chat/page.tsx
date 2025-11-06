@@ -125,7 +125,7 @@ export default function RAGChatPage() {
               key={index}
               variant="outline"
               size="sm"
-              className="h-auto w-full justify-start border-purple-200 bg-white p-3 text-left text-sm hover:border-purple-300 hover:bg-purple-100 dark:border-purple-700 dark:bg-purple-950 dark:hover:bg-purple-900"
+              className="h-auto min-h-[44px] w-full justify-start whitespace-normal border-purple-200 bg-white p-3 text-left text-sm hover:border-purple-300 hover:bg-purple-100 dark:border-purple-700 dark:bg-purple-950 dark:hover:bg-purple-900"
               onClick={() => {
                 setInput(question);
                 setTimeout(() => {
@@ -134,7 +134,7 @@ export default function RAGChatPage() {
                 setSidebarOpen(false);
               }}
             >
-              <Icons.messageSquare className="mr-2 h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" />
+              <Icons.messageSquare className="mr-2 h-4 w-4 shrink-0 self-start text-purple-600 dark:text-purple-400" />
               <span className="break-words text-gray-900 dark:text-gray-100">{question}</span>
             </Button>
           ))}
