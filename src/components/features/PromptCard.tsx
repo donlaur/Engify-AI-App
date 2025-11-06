@@ -49,15 +49,26 @@ export function PromptCard(props: PromptCardProps) {
   const { toast } = useToast();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const { id, title, description, content, category, role, slug, onView, updatedAt, lastRevisedAt, currentRevision } =
-    props;
+  const {
+    id,
+    title,
+    description,
+    content,
+    category,
+    role,
+    slug,
+    onView,
+    updatedAt,
+    lastRevisedAt,
+    currentRevision,
+  } = props;
   const promptSlug = getPromptSlug({ title, slug });
 
   // Determine if prompt was recently updated (within last 30 days)
   // Only show badge if there's an actual update date and it's recent
   const lastUpdateDate = updatedAt || lastRevisedAt;
-  const isRecentlyUpdated = lastUpdateDate 
-    ? (Date.now() - new Date(lastUpdateDate).getTime()) < 30 * 24 * 60 * 60 * 1000
+  const isRecentlyUpdated = lastUpdateDate
+    ? Date.now() - new Date(lastUpdateDate).getTime() < 30 * 24 * 60 * 60 * 1000
     : false;
 
   const handleCopy = async () => {
@@ -128,11 +139,11 @@ export function PromptCard(props: PromptCardProps) {
   return (
     <>
       <Card className="group relative flex h-full flex-col rounded-xl transition-all duration-200 hover:border-primary hover:shadow-xl hover:shadow-primary/10">
-        <CardHeader className="flex-1">
+        <CardHeader className="flex-1 pb-4">
           <div className="flex items-start justify-between">
             <Link
               href={`/prompts/${promptSlug}`}
-              className="flex-1 space-y-1 transition-colors hover:text-primary pr-2"
+              className="flex-1 space-y-1 pr-2 transition-colors hover:text-primary"
               onClick={(e) => {
                 // Allow modal to open on middle-click or ctrl-click, but default to page navigation
                 if (e.metaKey || e.ctrlKey) return;
@@ -145,7 +156,9 @@ export function PromptCard(props: PromptCardProps) {
               <CardTitle className="text-lg transition-colors group-hover:text-white dark:group-hover:text-white">
                 {title.replace(/\.md$/i, '')}
               </CardTitle>
-              <CardDescription className="leading-relaxed">{description}</CardDescription>
+              <CardDescription className="line-clamp-3 min-h-[3.5rem] leading-relaxed">
+                {description || 'No description available.'}
+              </CardDescription>
             </Link>
             <div className="flex shrink-0 gap-1">
               <Button
@@ -223,7 +236,7 @@ export function PromptCard(props: PromptCardProps) {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-shrink-0 space-y-3">
+        <CardContent className="flex flex-1 flex-col justify-end space-y-3 pt-0">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">
               {categoryLabels[category] || category}
@@ -234,8 +247,8 @@ export function PromptCard(props: PromptCardProps) {
               </Badge>
             )}
             {isRecentlyUpdated && (
-              <Badge 
-                variant="outline" 
+              <Badge
+                variant="outline"
                 className="border-green-500/30 bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400"
                 title="Recently updated"
               >

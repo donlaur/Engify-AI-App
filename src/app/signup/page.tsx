@@ -113,16 +113,20 @@ function SignupContent() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mb-4 flex items-center justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                <Icons.check className="h-6 w-6 text-green-600" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                <Icons.check className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <CardTitle>Account created!</CardTitle>
-            <CardDescription>Redirecting you to login...</CardDescription>
+            <CardTitle className="text-gray-900 dark:text-white">
+              Account created!
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-300">
+              Redirecting you to login...
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -132,31 +136,37 @@ function SignupContent() {
   // Show Request Access form if signup is disabled
   if (!ALLOW_PUBLIC_SIGNUP) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <div className="mb-4 flex items-center justify-center">
-              <Icons.sparkles className="h-8 w-8 text-blue-600" />
+              <Icons.sparkles className="h-8 w-8 text-blue-600 dark:text-blue-400" />
             </div>
-            <CardTitle className="text-center text-2xl">
+            <CardTitle className="text-center text-2xl text-gray-900 dark:text-white">
               Request Early Access
             </CardTitle>
-            <CardDescription className="text-center">
-              Engify.ai is in early access. Request an invitation to get
-              started with exclusive features.
+            <CardDescription className="text-center text-gray-600 dark:text-gray-300">
+              Engify.ai is in early access. Request an invitation to get started
+              with exclusive features.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense
+              fallback={
+                <div className="text-gray-600 dark:text-gray-300">
+                  Loading...
+                </div>
+              }
+            >
               <RequestAccessForm />
             </Suspense>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <div className="text-center text-sm text-gray-600">
+            <div className="text-center text-sm text-gray-600 dark:text-gray-400">
               Already have an account?{' '}
               <Link
                 href="/login"
-                className="font-medium text-blue-600 hover:underline"
+                className="font-medium text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Sign in
               </Link>
@@ -168,23 +178,28 @@ function SignupContent() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="mb-4 flex items-center justify-center">
-            <Icons.sparkles className="h-8 w-8 text-blue-600" />
+            <Icons.sparkles className="h-8 w-8 text-blue-600 dark:text-blue-400" />
           </div>
-          <CardTitle className="text-center text-2xl">
+          <CardTitle className="text-center text-2xl text-gray-900 dark:text-white">
             Create an account
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-gray-600 dark:text-gray-300">
             Start your AI learning journey with Engify.ai
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label
+                htmlFor="name"
+                className="text-gray-700 dark:text-gray-200"
+              >
+                Full Name
+              </Label>
               <Input
                 id="name"
                 name="name"
@@ -194,11 +209,17 @@ function SignupContent() {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                className="bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label
+                htmlFor="email"
+                className="text-gray-700 dark:text-gray-200"
+              >
+                Email
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -208,11 +229,17 @@ function SignupContent() {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                className="bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label
+                htmlFor="password"
+                className="text-gray-700 dark:text-gray-200"
+              >
+                Password
+              </Label>
               <Input
                 id="password"
                 name="password"
@@ -222,14 +249,20 @@ function SignupContent() {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                className="bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Must be at least 8 characters
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label
+                htmlFor="confirmPassword"
+                className="text-gray-700 dark:text-gray-200"
+              >
+                Confirm Password
+              </Label>
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -239,6 +272,7 @@ function SignupContent() {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                className="bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400"
               />
             </div>
 
@@ -253,21 +287,27 @@ function SignupContent() {
               />
               <label
                 htmlFor="terms"
-                className="text-sm leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm leading-none text-gray-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-gray-300"
               >
                 I agree to the{' '}
-                <Link href="/terms" className="text-blue-600 hover:underline">
+                <Link
+                  href="/terms"
+                  className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
+                >
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="text-blue-600 hover:underline">
+                <Link
+                  href="/privacy"
+                  className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
+                >
                   Privacy Policy
                 </Link>
               </label>
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-600">
+              <div className="flex items-center gap-2 rounded-md bg-red-50 p-3 text-sm text-red-600 dark:border dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
                 <Icons.alertTriangle className="h-4 w-4" />
                 {error}
               </div>
@@ -286,11 +326,11 @@ function SignupContent() {
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{' '}
             <Link
               href="/login"
-              className="font-medium text-blue-600 hover:underline"
+              className="font-medium text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
             >
               Sign in
             </Link>

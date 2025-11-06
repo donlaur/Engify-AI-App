@@ -58,7 +58,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="mb-4 flex items-center justify-center">
@@ -74,7 +74,10 @@ export default function LoginPage() {
         <CardContent className="space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-700 dark:text-gray-200">
+              <Label
+                htmlFor="email"
+                className="text-gray-700 dark:text-gray-200"
+              >
                 Email
               </Label>
               <Input
@@ -89,12 +92,15 @@ export default function LoginPage() {
                 disabled={isLoading}
                 aria-invalid={error ? 'true' : 'false'}
                 aria-describedby={error ? 'email-error' : undefined}
-                className="bg-white dark:bg-gray-800"
+                className="bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400"
               />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-gray-700 dark:text-gray-200">
+                <Label
+                  htmlFor="password"
+                  className="text-gray-700 dark:text-gray-200"
+                >
                   Password
                 </Label>
                 <Link
@@ -116,7 +122,7 @@ export default function LoginPage() {
                 disabled={isLoading}
                 aria-invalid={error ? 'true' : 'false'}
                 aria-describedby={error ? 'password-error' : undefined}
-                className="bg-white dark:bg-gray-800"
+                className="bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400"
               />
             </div>
 
@@ -127,7 +133,10 @@ export default function LoginPage() {
                 aria-live="polite"
                 className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
               >
-                <Icons.alertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <Icons.alertTriangle
+                  className="h-4 w-4 shrink-0"
+                  aria-hidden="true"
+                />
                 <span>{error}</span>
               </div>
             )}
@@ -140,7 +149,10 @@ export default function LoginPage() {
             >
               {isLoading ? (
                 <>
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                  <Icons.spinner
+                    className="mr-2 h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
                   Signing in...
                 </>
               ) : (
