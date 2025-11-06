@@ -2683,8 +2683,9 @@ async function auditPromptsAndPatterns(options: {
       console.log('⚡⚡ QUICK MODE: Running only 2 core agents (Grading Rubric, Completeness) - FASTEST\n');
     }
 
-    // Filter prompts that need auditing first, then randomize
-    // This ensures we only randomize among prompts that actually need audits
+    // Filter prompts that need auditing first, then sort by auditVersion (lowest first)
+    // This ensures new prompts (version 0) get audited before version 1, version 1 before version 2, etc.
+    // This way newly added prompts get handled first
     const promptsNeedingAudit: any[] = [];
     
     for (const prompt of prompts) {
@@ -2703,20 +2704,42 @@ async function auditPromptsAndPatterns(options: {
       // Don't skip based on currentRevision - we want to audit prompts at revision 2
       // to upgrade them to version 3. The auditVersion check above is sufficient.
       
-      // This prompt needs auditing - add it to the list
-      promptsNeedingAudit.push(prompt);
+      // This prompt needs auditing - add it to the list with auditVersion stored for sorting
+      promptsNeedingAudit.push({
+        ...prompt,
+        _currentAuditVersion: currentAuditVersion, // Store for sorting
+      });
     }
     
-    // Randomize the filtered list of prompts that need auditing
-    const shuffledPrompts = promptsNeedingAudit.sort(() => Math.random() - 0.5);
+    // Sort by auditVersion ascending (lowest first) - prioritize new prompts
+    // This ensures version 0 prompts get audited first, then version 1, then version 2, etc.
+    const shuffledPrompts = promptsNeedingAudit.sort((a, b) => {
+      const versionA = a._currentAuditVersion || 0;
+      const versionB = b._currentAuditVersion || 0;
+      return versionA - versionB; // Ascending order (lowest first)
+    });
     
     console.log(`📊 ${prompts.length} total prompts found`);
-    console.log(`✅ ${shuffledPrompts.length} prompts need auditing (randomized)`);
+    console.log(`✅ ${shuffledPrompts.length} prompts need auditing (sorted by auditVersion: lowest first)`);
+    console.log(`   📊 Priority order: Version 0 → Version 1 → Version 2 → ...`);
+    if (shuffledPrompts.length > 0) {
+      const versionCounts = shuffledPrompts.reduce((acc: Record<number, number>, p: any) => {
+        const v = p._currentAuditVersion || 0;
+        acc[v] = (acc[v] || 0) + 1;
+        return acc;
+      }, {});
+      const versionBreakdown = Object.entries(versionCounts)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([v, count]) => `v${v}: ${count}`)
+        .join(', ');
+      console.log(`   📈 Breakdown: ${versionBreakdown}`);
+    }
     console.log(`⏭️  ${prompts.length - shuffledPrompts.length} prompts skipped (already audited or improved)\n`);
 
     let skippedCount = 0;
     for (let i = 0; i < shuffledPrompts.length; i++) {
-      const prompt = shuffledPrompts[i];
+      // Remove the temporary _currentAuditVersion field before using prompt
+      const { _currentAuditVersion, ...prompt } = shuffledPrompts[i];
       const promptId = prompt.id || prompt.slug || prompt._id?.toString();
       
       // Try to acquire lock for this prompt (prevent concurrent audits across scripts)
