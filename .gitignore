@@ -124,3 +124,38 @@ docs/private/
 BizIntel/
 **/BizIntel/
 .env.vercel
+
+# Competitive Advantage - Content generation blueprints and audit workflows
+# These are our secret sauce for content quality and automation
+docs/operations/CLEANUP_AUDIT.md
+docs/operations/CURRENT_STATUS.md
+docs/operations/CURRENT_TASK_PROMPT_AUDIT_WORKFLOW.md
+docs/operations/ENTERPRISE_STANDARDS_AUDIT_2025.md
+docs/operations/ENTERPRISE_STANDARDS_DRY_CONSTANTS_AUDIT.md
+docs/operations/QUICK_START_AUDIT.md
+docs/operations/READY_TO_PUSH.md
+docs/content/GENERATE_ARTICLE_INSTRUCTIONS.md
+docs/pillar-pages/CONTENT_GENERATION_BRIEFS.md
+docs/pillar-pages/GEMINI_RESEARCH_ACTION_PLAN.md
+docs/pillar-pages/GENERATION_GUIDE.md
+docs/pillar-pages/PUBLISHING_WORKFLOW.md
+docs/development/PILLAR_PAGES_GENERATION_AUDIT.md
+docs/development/PATTERN_AUDIT_IMPROVEMENT_WORKFLOW.md
+docs/development/SCRIPTS_THAT_ANALYZE_PROMPTS.md
+scripts/content/generate-*.ts
+scripts/analysis/generate-*.ts
+
+# Keep one multi-agent example for showcase (exclude from above patterns)
+!scripts/content/review-multi-agent-doc.ts
+
+# Security audit reports (internal only - shows our security practices)
+SECURITY_AUDIT_REPORT.md
+docs/security/SECURITY_POLICY.md
+
+# One-time status docs and internal summaries (not needed for public repo)
+docs/rag/VECTOR_SEARCH_STATUS.md
+docs/security/GIT_SECRETS_AND_AWS_STATUS.md
+docs/testing/MULTI_AGENT_AWS_STATUS.md
+docs/content/MANAGEMENT_TEMPLATES.md
+docs/development/AI_WORKBENCH_RAG_INTEGRATION_SUMMARY.md
+docs/professional/AI_WORKFLOW_PAGE_SUMMARY.md

@@ -139,18 +139,21 @@ git push origin feature/your-feature-name
 ### 2. Code Quality Standards
 
 **TypeScript**
+
 - Strict mode enabled
 - No `any` types allowed
 - Comprehensive type definitions
 - JSDoc for public APIs
 
 **Testing**
+
 - Unit tests for utilities
 - Integration tests for API routes
 - E2E tests for user flows
 - Visual regression tests
 
 **Code Style**
+
 - ESLint with TypeScript rules
 - Prettier for formatting
 - Pre-commit hooks enabled
@@ -195,6 +198,7 @@ git push origin feature/your-feature-name
 ### Common Issues
 
 **Build Failures**
+
 ```bash
 # Clear caches
 rm -rf .next node_modules/.cache
@@ -203,6 +207,7 @@ pnpm build
 ```
 
 **TypeScript Errors**
+
 ```bash
 # Check types
 pnpm type-check
@@ -210,6 +215,7 @@ pnpm type-check
 ```
 
 **Database Connection**
+
 ```bash
 # Verify MongoDB URI
 echo $MONGODB_URI
@@ -218,6 +224,7 @@ pnpm db:test
 ```
 
 **AI Provider Issues**
+
 ```bash
 # Test API keys
 pnpm test:ai-keys
@@ -227,11 +234,13 @@ pnpm test:ai-keys
 ### Performance Issues
 
 **Slow Builds**
+
 - Check for circular dependencies
 - Optimize imports
 - Use dynamic imports for heavy components
 
 **Runtime Performance**
+
 - Use React DevTools Profiler
 - Check for unnecessary re-renders
 - Optimize database queries
