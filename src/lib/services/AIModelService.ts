@@ -101,6 +101,19 @@ export class AIModelService extends BaseService<AIModel> {
   }
 
   /**
+   * Update model fields
+   */
+  async update(id: string, updates: Partial<AIModel>): Promise<AIModel | null> {
+    const collection = await this.getCollection();
+    const result = await collection.findOneAndUpdate(
+      { id },
+      { $set: { ...updates, updatedAt: new Date() } },
+      { returnDocument: 'after' }
+    );
+    return result as AIModel | null;
+  }
+
+  /**
    * Update last verified date
    */
   async updateLastVerified(id: string): Promise<void> {

@@ -16,6 +16,15 @@ import { Icons } from '@/lib/icons';
 import { aiModelService } from '@/lib/services/AIModelService';
 import { generateSlug } from '@/lib/utils/slug';
 import { logger } from '@/lib/logging/logger';
+import {
+  PerformanceMetrics,
+  ModalitiesSection,
+  FeaturesSection,
+  ToolsSection,
+  EndpointsSection,
+  SnapshotsSection,
+  RateLimitsSection,
+} from '@/components/features/AIModelDetailSections';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate hourly
@@ -38,7 +47,12 @@ interface PageProps {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const model = await aiModelService.findBySlug(params.slug);
+  // Try slug first, then fallback to ID lookup (for backwards compatibility)
+  let model = await aiModelService.findBySlug(params.slug);
+  if (!model) {
+    // Fallback: try finding by ID in case slug doesn't exist
+    model = await aiModelService.findById(params.slug);
+  }
 
   if (!model) {
     return {
@@ -71,11 +85,31 @@ export async function generateMetadata({
 }
 
 export default async function AIModelDetailPage({ params }: PageProps) {
-  const model = await aiModelService.findBySlug(params.slug);
+  // Try slug first, then fallback to ID lookup (for backwards compatibility)
+  let model = await aiModelService.findBySlug(params.slug);
+  if (!model) {
+    // Fallback: try finding by ID in case slug doesn't exist
+    model = await aiModelService.findById(params.slug);
+  }
 
   if (!model) {
     logger.warn('AI model not found', { slug: params.slug });
     notFound();
+  }
+  
+  // If model found by ID but doesn't have slug, generate and save slug, then redirect
+  if (model && !model.slug) {
+    const slug = generateSlug(model.name || model.displayName || model.id);
+    if (slug && slug !== 'untitled') {
+      // Update the model with slug for future requests
+      await aiModelService.update(model.id, { slug });
+      
+      // Redirect to slug URL (if current URL doesn't match slug)
+      if (params.slug !== slug) {
+        const { redirect } = await import('next/navigation');
+        redirect(`/learn/ai-models/${slug}`);
+      }
+    }
   }
 
   const providerLabel = PROVIDER_LABELS[model.provider] || model.provider;
@@ -139,23 +173,37 @@ export default async function AIModelDetailPage({ params }: PageProps) {
           <div className="mb-8">
             <div className="mb-4 flex items-center gap-3">
               <h1 className="text-4xl font-bold">{model.displayName}</h1>
+              {model.isDefault && (
+                <Badge variant="secondary">Default</Badge>
+              )}
               {model.status === 'deprecated' && (
                 <Badge variant="destructive">Deprecated</Badge>
               )}
               {model.status === 'sunset' && (
                 <Badge variant="destructive">Sunset</Badge>
               )}
-              {model.recommended && (
+              {model.recommended && model.status === 'active' && (
                 <Badge variant="default">Recommended</Badge>
               )}
             </div>
-            <p className="text-xl text-muted-foreground">
+            {model.tagline && (
+              <p className="text-xl font-medium text-foreground">
+                {model.tagline}
+              </p>
+            )}
+            <p className="mt-2 text-lg text-muted-foreground">
               {providerLabel} • {model.capabilities.join(' • ')}
             </p>
-            {model.notes && (
-              <p className="mt-2 text-muted-foreground">{model.notes}</p>
+            {model.description && (
+              <p className="mt-3 text-muted-foreground">{model.description}</p>
+            )}
+            {model.notes && !model.description && (
+              <p className="mt-3 text-muted-foreground">{model.notes}</p>
             )}
           </div>
+
+          {/* Performance Metrics */}
+          <PerformanceMetrics model={model} />
 
           {/* EOL Warning */}
           {model.status === 'deprecated' && (
@@ -222,11 +270,29 @@ export default async function AIModelDetailPage({ params }: PageProps) {
                     {model.maxOutputTokens && (
                       <div>
                         <div className="text-sm font-medium text-muted-foreground">
-                          Max Output
+                          Max Output Tokens
                         </div>
                         <div className="text-lg font-semibold">
                           {model.maxOutputTokens.toLocaleString()} tokens
                         </div>
+                      </div>
+                    )}
+                    {model.knowledgeCutoff && (
+                      <div>
+                        <div className="text-sm font-medium text-muted-foreground">
+                          Knowledge Cutoff
+                        </div>
+                        <div className="text-lg font-semibold">
+                          {model.knowledgeCutoff}
+                        </div>
+                      </div>
+                    )}
+                    {model.capabilities.includes('reasoning') && (
+                      <div>
+                        <div className="text-sm font-medium text-muted-foreground">
+                          Reasoning Tokens
+                        </div>
+                        <div className="text-lg font-semibold">Supported</div>
                       </div>
                     )}
                     <div>
@@ -303,6 +369,24 @@ export default async function AIModelDetailPage({ params }: PageProps) {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Modalities */}
+              <ModalitiesSection model={model} />
+
+              {/* Features */}
+              <FeaturesSection model={model} />
+
+              {/* Tools */}
+              <ToolsSection model={model} />
+
+              {/* Endpoints */}
+              <EndpointsSection model={model} />
+
+              {/* Snapshots */}
+              <SnapshotsSection model={model} />
+
+              {/* Rate Limits */}
+              <RateLimitsSection model={model} />
             </div>
 
             {/* Sidebar */}
@@ -311,11 +395,16 @@ export default async function AIModelDetailPage({ params }: PageProps) {
               <Card>
                 <CardHeader>
                   <CardTitle>Pricing</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Pricing is based on the number of tokens used, or other
+                    metrics based on the model type. For tool-specific models,
+                    like search and computer use, there's a fee per tool call.
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">
-                      Input (per 1M tokens)
+                    <div className="mb-1 text-sm font-medium text-muted-foreground">
+                      Input
                     </div>
                     <div className="text-2xl font-bold">
                       ${costPer1MInput.toFixed(2)}
@@ -324,9 +413,28 @@ export default async function AIModelDetailPage({ params }: PageProps) {
                       ${model.costPer1kInputTokens.toFixed(4)} per 1K tokens
                     </div>
                   </div>
+                  {model.costPer1kCachedInputTokens && (
+                    <div>
+                      <div className="mb-1 text-sm font-medium text-muted-foreground">
+                        Cached Input
+                      </div>
+                      <div className="text-2xl font-bold">
+                        $
+                        {(
+                          (model.costPer1kCachedInputTokens || 0) * 1000
+                        ).toFixed(2)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        ${(model.costPer1kCachedInputTokens || 0).toFixed(
+                          4,
+                        )}{' '}
+                        per 1K tokens
+                      </div>
+                    </div>
+                  )}
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">
-                      Output (per 1M tokens)
+                    <div className="mb-1 text-sm font-medium text-muted-foreground">
+                      Output
                     </div>
                     <div className="text-2xl font-bold">
                       ${costPer1MOutput.toFixed(2)}

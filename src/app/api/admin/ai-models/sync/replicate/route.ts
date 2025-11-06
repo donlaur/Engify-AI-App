@@ -11,6 +11,7 @@ import { auth } from '@/lib/auth';
 import { auditLog } from '@/lib/logging/audit';
 import { aiModelService } from '@/lib/services/AIModelService';
 import { AIModel } from '@/lib/db/schemas/ai-model';
+import { generateSlug } from '@/lib/utils/slug';
 
 // Popular Replicate models (as of Nov 2025)
 // Source: https://replicate.com/explore
@@ -172,6 +173,7 @@ export async function POST(request: NextRequest) {
   try {
     const aiModels: AIModel[] = POPULAR_REPLICATE_MODELS.map((m) => ({
       id: m.id, // Use owner/model as ID
+      slug: generateSlug(m.displayName || m.id), // Generate slug for SEO URLs
       provider: 'replicate' as const,
       name: m.id, // Actual model name for API (owner/model format)
       displayName: m.displayName,

@@ -11,7 +11,9 @@ import { auth } from '@/lib/auth';
 import { auditLog } from '@/lib/logging/audit';
 import { aiModelService } from '@/lib/services/AIModelService';
 import { AIModel } from '@/lib/db/schemas/ai-model';
+import { generateSlug } from '@/lib/utils/slug';
 import OpenAI from 'openai';
+import { OPENAI_MODEL_DATA, convertOpenAIDataToModel } from '@/lib/data/openai-model-data';
 
 // POST: Sync models from providers
 export async function POST(request: NextRequest) {
@@ -98,21 +100,51 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const models = await openai.models.list();
 
-  const aiModels: AIModel[] = models.data
-    .filter((m) => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3'))
+  // Start with models from OpenAI API
+  const apiModels: AIModel[] = models.data
+    .filter((m) => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4'))
     .map((m) => {
+      const displayName = m.id
+        .replace(/^gpt-/, 'GPT-')
+        .replace(/^o1-/, 'O1-')
+        .replace(/^o3-/, 'O3-')
+        .replace(/^o4-/, 'O4-')
+        .replace(/-preview$/i, ' Preview')
+        .replace(/-turbo$/i, ' Turbo')
+        .replace(/-2024\d+$/, '');
+      
+      // Check if we have structured data for this model
+      const structuredData = OPENAI_MODEL_DATA[m.id];
+      
+      if (structuredData) {
+        // Use structured data with conversion helper
+        const baseModel = convertOpenAIDataToModel(
+          structuredData,
+          getOpenAIContextWindow(m.id),
+          m.id.includes('gpt-4o') ? 16384 : m.id.includes('gpt-4') ? 8192 : 4096
+        );
+        
+        return {
+          ...baseModel,
+          id: m.id,
+          slug: generateSlug(m.id),
+          provider: 'openai' as const,
+          name: m.id,
+          displayName: structuredData.displayName,
+          status: 'active' as const,
+          lastVerified: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } satisfies AIModel;
+      }
+      
+      // Fallback to existing logic for models not in structured data
       return {
-        id: m.id, // Use model ID as-is (matches config)
+        id: m.id,
+        slug: generateSlug(m.id),
         provider: 'openai' as const,
         name: m.id,
-        displayName: m.id
-          .replace(/^gpt-/, 'GPT-')
-          .replace(/^o1-/, 'O1-')
-          .replace(/^o3-/, 'O3-')
-          .replace(/^o4-/, 'O4-')
-          .replace(/-preview$/i, ' Preview')
-          .replace(/-turbo$/i, ' Turbo')
-          .replace(/-2024\d+$/, ''),
+        displayName,
         status: 'active' as const,
         capabilities: ['text', ...(m.id.includes('vision') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4') ? ['vision'] : [])],
         contextWindow: getOpenAIContextWindow(m.id),
@@ -134,7 +166,36 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
       } satisfies AIModel;
     });
 
-  return await aiModelService.bulkUpsert(aiModels);
+  // Add structured models that might not be in the API list (e.g., GPT-5 series, Sora 2)
+  // These are hypothetical/future models that we want to track
+  const structuredModels: AIModel[] = Object.values(OPENAI_MODEL_DATA)
+    .filter((data) => {
+      // Only add if not already in API models
+      return !apiModels.some((m) => m.id === data.id);
+    })
+    .map((data) => {
+      const baseModel = convertOpenAIDataToModel(
+        data,
+        data.id.includes('gpt-5') ? 400000 : 128000,
+        data.id.includes('gpt-5') ? 128000 : 8192
+      );
+      
+      return {
+        ...baseModel,
+        slug: generateSlug(data.id),
+        provider: 'openai' as const,
+        status: 'active' as const,
+        isAllowed: true,
+        tags: getOpenAITags(data.id),
+        lastVerified: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } satisfies AIModel;
+    });
+
+  const allModels = [...apiModels, ...structuredModels];
+
+  return await aiModelService.bulkUpsert(allModels);
 }
 
 /**
@@ -155,6 +216,7 @@ async function syncAnthropicModels(): Promise<{ created: number; updated: number
 
   const aiModels: AIModel[] = knownModels.map((m) => ({
     id: m.name, // Use model name as ID (matches config)
+    slug: generateSlug(m.name), // Generate slug for SEO URLs
     provider: 'anthropic' as const,
     name: m.name,
     displayName: m.displayName,
@@ -189,23 +251,25 @@ async function syncAnthropicModels(): Promise<{ created: number; updated: number
 async function syncGoogleModels(): Promise<{ created: number; updated: number }> {
   // Google Gemini models (updated as of Nov 2024)
   // Many Gemini 1.0 and 1.5 models are deprecated/removed as of 2025
-  const knownModels: Array<{ name: string; displayName: string; deprecated?: boolean }> = [
+  const knownModels: Array<{ name: string; displayName: string; codename?: string; deprecated?: boolean }> = [
     // Gemini 2.0 Series (latest experimental)
-    { name: 'gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash Experimental' },
+    { name: 'gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash Experimental', codename: 'flash' },
     // Gemini 1.5 Series - many deprecated
-    { name: 'gemini-1.5-pro', displayName: 'Gemini 1.5 Pro', deprecated: true }, // Deprecated/removed
-    { name: 'gemini-1.5-flash', displayName: 'Gemini 1.5 Flash', deprecated: true }, // Deprecated/removed
-    { name: 'gemini-1.5-flash-8b', displayName: 'Gemini 1.5 Flash 8B', deprecated: true }, // Deprecated/removed
+    { name: 'gemini-1.5-pro', displayName: 'Gemini 1.5 Pro', codename: 'pro', deprecated: true }, // Deprecated/removed
+    { name: 'gemini-1.5-flash', displayName: 'Gemini 1.5 Flash', codename: 'flash', deprecated: true }, // Deprecated/removed
+    { name: 'gemini-1.5-flash-8b', displayName: 'Gemini 1.5 Flash 8B', codename: 'flash-8b', deprecated: true }, // Deprecated/removed
     // Gemini 1.0 Series (legacy - all deprecated)
-    { name: 'gemini-pro', displayName: 'Gemini Pro', deprecated: true },
-    { name: 'gemini-pro-vision', displayName: 'Gemini Pro Vision', deprecated: true },
+    { name: 'gemini-pro', displayName: 'Gemini Pro', codename: 'pro', deprecated: true },
+    { name: 'gemini-pro-vision', displayName: 'Gemini Pro Vision', codename: 'pro-vision', deprecated: true },
   ];
 
   const aiModels: AIModel[] = knownModels.map((m) => ({
     id: m.name, // Use model name as ID (matches config)
+    slug: generateSlug(m.name), // Generate slug for SEO URLs
     provider: 'google' as const,
     name: m.name,
     displayName: m.displayName,
+    codename: m.codename, // Internal codename (nano, banana, flash, etc.)
     status: m.deprecated ? ('deprecated' as const) : ('active' as const),
     deprecationDate: m.deprecated ? new Date() : undefined,
     capabilities: ['text', 'vision'],

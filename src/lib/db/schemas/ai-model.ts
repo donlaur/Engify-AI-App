@@ -21,6 +21,7 @@ export const AIModelSchema = z.object({
   ]),
   name: z.string(), // Actual model name used in API: 'gpt-4o'
   displayName: z.string(), // Human-readable: 'GPT-4o'
+  codename: z.string().optional(), // Internal codename (e.g., 'nano', 'banana', 'flash' for Gemini)
   status: z.enum(['active', 'deprecated', 'sunset']).default('active'),
   deprecationDate: z.date().optional(),
   sunsetDate: z.date().optional(),
@@ -29,13 +30,16 @@ export const AIModelSchema = z.object({
   maxOutputTokens: z.number().optional(), // 16384
   costPer1kInputTokens: z.number(), // 0.0025 (in dollars per 1k tokens)
   costPer1kOutputTokens: z.number(), // 0.01
+  costPer1kCachedInputTokens: z.number().optional(), // Cached input pricing (e.g., OpenAI)
   // Compatibility with providers.ts interface
   inputCostPer1M: z.number().optional(), // Auto-calculated from costPer1kInputTokens * 1000
   outputCostPer1M: z.number().optional(), // Auto-calculated from costPer1kOutputTokens * 1000
+  cachedInputCostPer1M: z.number().optional(), // Auto-calculated from costPer1kCachedInputTokens * 1000
   supportsStreaming: z.boolean().default(true),
   supportsJSON: z.boolean().default(false),
   supportsVision: z.boolean().default(false),
   recommended: z.boolean().default(false),
+  isDefault: z.boolean().default(false), // Default model for provider
   tier: z.enum(['free', 'affordable', 'premium']).optional(),
   averageLatency: z.number().optional(), // milliseconds
   qualityScore: z.number().min(0).max(10).optional(),
@@ -45,6 +49,70 @@ export const AIModelSchema = z.object({
   replacementModel: z.string().optional(), // ID of model to use instead if deprecated (matches config field name)
   notes: z.string().optional(),
   organizationId: z.string().optional(), // Multi-tenant support (null = system-wide)
+  
+  // OpenAI-style metadata
+  knowledgeCutoff: z.string().optional(), // e.g., "Sep 30, 2024"
+  tagline: z.string().optional(), // e.g., "The best model for coding and agentic tasks"
+  description: z.string().optional(), // Detailed model description
+  
+  // Performance indicators (OpenAI-style)
+  performanceMetrics: z.object({
+    reasoning: z.enum(['lower', 'low', 'medium', 'high', 'higher']).optional(),
+    speed: z.enum(['slower', 'slow', 'medium', 'fast', 'faster']).optional(),
+    priceRange: z.string().optional(), // e.g., "$1.25 - $10"
+  }).optional(),
+  
+  // Modalities (Input/Output support)
+  modalities: z.object({
+    text: z.enum(['input-output', 'input-only', 'output-only', 'not-supported']).optional(),
+    image: z.enum(['input-output', 'input-only', 'output-only', 'not-supported']).optional(),
+    audio: z.enum(['input-output', 'input-only', 'output-only', 'not-supported']).optional(),
+    video: z.enum(['input-output', 'input-only', 'output-only', 'not-supported']).optional(),
+  }).optional(),
+  
+  // Features (boolean flags)
+  features: z.object({
+    streaming: z.boolean().default(true),
+    structuredOutputs: z.boolean().default(false),
+    distillation: z.boolean().default(false),
+    functionCalling: z.boolean().default(false),
+    fineTuning: z.boolean().default(false),
+  }).optional(),
+  
+  // Tools supported (when using Responses API or similar)
+  tools: z.object({
+    webSearch: z.boolean().default(false),
+    imageGeneration: z.boolean().default(false),
+    computerUse: z.boolean().default(false),
+    fileSearch: z.boolean().default(false),
+    codeInterpreter: z.boolean().default(false),
+    mcp: z.boolean().default(false), // Model Context Protocol
+  }).optional(),
+  
+  // API Endpoints supported
+  endpoints: z.array(z.object({
+    name: z.string(), // e.g., "Chat Completions"
+    path: z.string(), // e.g., "v1/chat/completions"
+    supported: z.boolean().default(true),
+    icon: z.string().optional(), // Icon identifier
+  })).optional(),
+  
+  // Model snapshots/versions (aliases)
+  snapshots: z.array(z.object({
+    id: z.string(), // e.g., "gpt-5"
+    pointsTo: z.string(), // e.g., "gpt-5-2025-08-07"
+    isAlias: z.boolean().default(false),
+    isSnapshot: z.boolean().default(false),
+  })).optional(),
+  
+  // Rate limits by tier
+  rateLimits: z.array(z.object({
+    tier: z.string(), // e.g., "Free", "Tier 1", "Tier 2"
+    rpm: z.number().optional(), // Requests per minute
+    tpm: z.number().optional(), // Tokens per minute
+    batchQueueLimit: z.number().optional(), // Batch queue limit
+  })).optional(),
+  
   // Parameter support tracking
   supportedParameters: z.object({
     temperature: z.object({

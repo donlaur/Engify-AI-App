@@ -127,9 +127,9 @@ export default async function LibraryPage() {
         <div className="container py-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="mb-2 text-4xl font-bold">Prompt Library</h1>
+            <h1 className="mb-2 text-4xl font-bold">Prompt Playbooks</h1>
             <p className="text-lg text-muted-foreground">
-              Browse and discover {totalPrompts} proven prompts for your
+              Browse and discover {totalPrompts} proven prompt playbooks for your
               workflow
             </p>
           </div>

@@ -143,6 +143,9 @@ import {
   Play,
   Wifi,
   Globe,
+  Music,
+  Video,
+  Type,
 } from 'lucide-react';
 
 // Export all icons with descriptive names
@@ -286,6 +289,9 @@ export const Icons = {
   play: Play,
   wifi: Wifi,
   globe: Globe,
+  music: Music,
+  video: Video,
+  type: Type,
 
   // Social
   twitter: Twitter,

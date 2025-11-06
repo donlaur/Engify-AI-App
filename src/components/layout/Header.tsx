@@ -38,6 +38,7 @@ interface HeaderProps {
 const navigationLinks = [
   { href: '/prompts', label: 'Prompts' },
   { href: '/patterns', label: 'Patterns' },
+  { href: '/learn/ai-tools', label: 'Tools' },
   { href: '/learn', label: 'Learn' },
   { href: '/workbench', label: 'Workbench' },
 ];
@@ -67,13 +68,19 @@ export function Header({ user }: HeaderProps) {
             href="/prompts"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
-            Prompt Playbooks
+            Prompts
           </Link>
           <Link
             href="/patterns"
             className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
           >
             Patterns
+          </Link>
+          <Link
+            href="/learn/ai-tools"
+            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+          >
+            Tools
           </Link>
           <Link
             href="/learn"
@@ -186,6 +193,17 @@ export function Header({ user }: HeaderProps) {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <nav className="mt-8 flex flex-col space-y-4">
+                {/* Home Link */}
+                <Link
+                  href="/"
+                  className="text-lg font-medium transition-colors hover:text-primary flex items-center gap-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Icons.home className="h-5 w-5" />
+                  Home
+                </Link>
+                
+                {/* Main Navigation Links */}
                 {navigationLinks.map((link) => (
                   <Link
                     key={link.href}
@@ -196,15 +214,51 @@ export function Header({ user }: HeaderProps) {
                     {link.label}
                   </Link>
                 ))}
+                
+                {/* Conditional Playground Link */}
+                {process.env.NEXT_PUBLIC_SHOW_PLAYGROUND === 'true' && (
+                  <Link
+                    href="/pattern-playground"
+                    className="text-lg font-medium transition-colors hover:text-primary"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Playground
+                  </Link>
+                )}
+                
+                {/* Built in Public Link */}
+                <Link
+                  href="/built-in-public"
+                  className="inline-flex items-center gap-2 rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-200 w-fit"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Icons.github className="h-4 w-4" />
+                  Built in Public
+                </Link>
+                
+                {/* Admin Link (if enabled) */}
+                {process.env.NEXT_PUBLIC_SHOW_ADMIN_LINK === 'true' && (
+                  <Link
+                    href="/opshub"
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 w-fit"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Admin
+                  </Link>
+                )}
+                
+                {/* User Actions */}
                 {!user && (
                   <>
-                    <div className="mt-4 border-t pt-4">
-                      <Button variant="outline" className="mb-2 w-full" asChild>
-                        <Link href="/api/auth/signin">Sign in</Link>
+                    <div className="mt-4 border-t pt-4 space-y-2">
+                      <Button variant="outline" className="w-full" asChild>
+                        <Link href="/api/auth/signin" onClick={() => setMobileMenuOpen(false)}>
+                          Sign in
+                        </Link>
                       </Button>
-                      <Button className="w-full" asChild>
-                        <Link href="/pattern-playground">
-                          Pattern Playground
+                      <Button className="w-full bg-purple-600 text-white hover:bg-purple-700" asChild>
+                        <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
+                          Get Started
                         </Link>
                       </Button>
                     </div>

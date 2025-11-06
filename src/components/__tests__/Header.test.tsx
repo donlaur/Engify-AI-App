@@ -14,7 +14,7 @@ describe('Header', () => {
 
     expect(screen.getByText('Workbench')).toBeInTheDocument();
     expect(screen.getByText('Patterns')).toBeInTheDocument();
-    expect(screen.getByText('Prompt Playbooks')).toBeInTheDocument();
+    expect(screen.getByText('Prompts')).toBeInTheDocument();
     expect(screen.getByText('Learn')).toBeInTheDocument();
   });
 
