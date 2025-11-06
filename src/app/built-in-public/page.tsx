@@ -420,24 +420,24 @@ export default function BuiltInPublicPage() {
           </Card>
 
           {/* The REAL Philosophy */}
-          <Card className="border-2 border-red-200 bg-gradient-to-br from-red-50 to-orange-50">
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Icons.zap className="h-6 w-6 text-red-600" />
+                <Icons.zap className="h-6 w-6 text-purple-600" />
                 The Evolution: Rapid → Refined → Production
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-lg font-semibold text-red-900">
+              <p className="text-lg font-semibold text-purple-900">
                 1,357 total commits. Not sloppy - strategic. Small, atomic,
                 revertable. Each commit ships working code.
               </p>
               <div className="space-y-3">
-                <div className="rounded-lg border-l-4 border-red-500 bg-white p-4">
-                  <p className="mb-2 font-semibold text-red-900">
+                <div className="rounded-lg border-l-4 border-purple-500 bg-white p-4">
+                  <p className="mb-2 font-semibold text-purple-900">
                     🔥 This is NOT &quot;vibe coding&quot;
                   </p>
-                  <p className="text-sm text-red-800">
+                  <p className="text-sm text-purple-800">
                     This is: Try → Ship → Learn → Iterate. If something
                     doesn&apos;t work? Delete it and rebuild. Modern development
                     is about velocity AND quality, not one or the other.
@@ -929,12 +929,12 @@ export default function BuiltInPublicPage() {
                   </ul>
                 </div>
 
-                <div className="rounded-lg border-2 border-red-200 bg-red-50 p-4">
+                <div className="rounded-lg border-2 border-purple-200 bg-purple-50 p-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <h4 className="font-bold text-red-900">Day 7 (Nov 5)</h4>
+                    <h4 className="font-bold text-purple-900">Day 7 (Nov 5)</h4>
                     <Badge variant="secondary">80 commits</Badge>
                   </div>
-                  <ul className="space-y-2 text-sm text-red-900">
+                  <ul className="space-y-2 text-sm text-purple-900">
                     <li className="flex items-start gap-2">
                       <Icons.check className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
                       <span><strong>Security Audit:</strong> Comprehensive security scan (10/10 score) - all secrets externalized</span>

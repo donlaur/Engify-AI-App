@@ -56,15 +56,15 @@ export function Footer() {
 
   return (
     <footer className="border-t bg-background">
-      <div className="container px-4 py-12 md:py-16">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+      <div className="container px-4 py-8 md:py-12">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-6">
           {/* Brand */}
-          <div className="col-span-1 sm:col-span-2 md:col-span-4 lg:col-span-2">
+          <div className="col-span-1 sm:col-span-2 lg:col-span-2">
             <Link href="/" className="mb-4 flex items-center space-x-2">
               <Icons.sparkles className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold">Engify.ai</span>
             </Link>
-            <p className="max-w-xs text-sm text-muted-foreground">
+            <p className="mb-4 max-w-xs text-sm text-muted-foreground sm:mb-0">
               Master prompt engineering with AI-powered learning and
               gamification.
             </p>
@@ -72,7 +72,7 @@ export function Footer() {
 
           {/* Product Links */}
           <div>
-            <h3 className="mb-4 font-semibold">Product</h3>
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground">Product</h3>
             <ul className="space-y-3">
               {footerLinks.product.map((link) => (
                 <li key={link.href}>
@@ -89,7 +89,7 @@ export function Footer() {
 
           {/* Company Links */}
           <div>
-            <h3 className="mb-4 font-semibold">Company</h3>
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground">Company</h3>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
@@ -106,7 +106,7 @@ export function Footer() {
 
           {/* Resources Links */}
           <div>
-            <h3 className="mb-4 font-semibold">Resources</h3>
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground">Resources</h3>
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.href}>
