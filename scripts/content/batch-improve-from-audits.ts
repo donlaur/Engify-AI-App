@@ -191,6 +191,127 @@ function extractJSONFromResponse(content: string, arrayMode: boolean = false): s
 }
 
 /**
+ * Extract partial data from corrupted/truncated JSON (fallback when parseJSONSafely fails)
+ * This extracts complete fields even if the JSON is incomplete
+ */
+function extractPartialJSON(jsonText: string): any {
+  if (!jsonText || jsonText.trim().length === 0) {
+    return null;
+  }
+  
+  const partial: any = {};
+  
+  // Extract slug
+  const slugMatch = jsonText.match(/"slug"\s*:\s*"([^"]+)"/);
+  if (slugMatch && slugMatch[1]) {
+    partial.slug = slugMatch[1].trim();
+  }
+  
+  // Extract metaDescription (can be multi-line, handle truncation)
+  // Look for metaDescription: "text..." where text might be truncated
+  const metaMatch = jsonText.match(/"metaDescription"\s*:\s*"([^"]*(?:"|$))/);
+  if (metaMatch && metaMatch[1]) {
+    let metaDesc = metaMatch[1];
+    // If it doesn't end with quote, it's truncated - clean it up
+    if (!metaMatch[0].endsWith('"')) {
+      // Remove trailing ellipsis or partial words
+      metaDesc = metaDesc.replace(/\.\.\.?$/, '').trim();
+      // Try to find a complete sentence ending
+      const lastSentence = metaDesc.match(/^(.+?[.!?])/);
+      if (lastSentence) {
+        metaDesc = lastSentence[1];
+      }
+    }
+    if (metaDesc.length > 20) { // Only use if reasonably complete
+      partial.metaDescription = metaDesc;
+    }
+  }
+  
+  // Extract keywords array (handle truncated arrays)
+  // Look for "keywords": ["keyword1", "keyword2", ... possibly truncated
+  const keywordsMatch = jsonText.match(/"keywords"\s*:\s*\[([^\]]*)/);
+  if (keywordsMatch && keywordsMatch[1]) {
+    const keywordsContent = keywordsMatch[1];
+    // Extract all complete quoted strings
+    const keywordMatches = keywordsContent.matchAll(/"([^"]+)"/g);
+    const keywords: string[] = [];
+    for (const match of keywordMatches) {
+      if (match[1] && match[1].trim().length > 0) {
+        keywords.push(match[1].trim());
+      }
+    }
+    if (keywords.length > 0) {
+      partial.keywords = keywords;
+    }
+  }
+  
+  // Return partial object only if we extracted at least one field
+  return Object.keys(partial).length > 0 ? partial : null;
+}
+
+/**
+ * Extract partial completeness data from corrupted/truncated JSON
+ */
+function extractPartialCompletenessJSON(jsonText: string): any {
+  if (!jsonText || jsonText.trim().length === 0) {
+    return null;
+  }
+  
+  const partial: any = {};
+  
+  // Extract examples array (handle truncated arrays)
+  const examplesMatch = jsonText.match(/"examples"\s*:\s*\[([^\]]*)/);
+  if (examplesMatch && examplesMatch[1]) {
+    const examplesContent = examplesMatch[1];
+    const exampleMatches = examplesContent.matchAll(/"([^"]+)"/g);
+    const examples: string[] = [];
+    for (const match of exampleMatches) {
+      if (match[1] && match[1].trim().length > 0) {
+        examples.push(match[1].trim());
+      }
+    }
+    if (examples.length > 0) {
+      partial.examples = examples;
+    }
+  }
+  
+  // Extract useCases array (handle truncated arrays)
+  const useCasesMatch = jsonText.match(/"useCases"\s*:\s*\[([^\]]*)/);
+  if (useCasesMatch && useCasesMatch[1]) {
+    const useCasesContent = useCasesMatch[1];
+    const useCaseMatches = useCasesContent.matchAll(/"([^"]+)"/g);
+    const useCases: string[] = [];
+    for (const match of useCaseMatches) {
+      if (match[1] && match[1].trim().length > 0) {
+        useCases.push(match[1].trim());
+      }
+    }
+    if (useCases.length > 0) {
+      partial.useCases = useCases;
+    }
+  }
+  
+  // Extract bestPractices array (handle truncated arrays)
+  const bestPracticesMatch = jsonText.match(/"bestPractices"\s*:\s*\[([^\]]*)/);
+  if (bestPracticesMatch && bestPracticesMatch[1]) {
+    const bestPracticesContent = bestPracticesMatch[1];
+    const practiceMatches = bestPracticesContent.matchAll(/"([^"]+)"/g);
+    const bestPractices: string[] = [];
+    for (const match of practiceMatches) {
+      if (match[1] && match[1].trim().length > 0) {
+        bestPractices.push(match[1].trim());
+      }
+    }
+    if (bestPractices.length > 0) {
+      partial.bestPractices = bestPractices;
+    }
+  }
+  
+  // Return partial object only if we extracted at least one field
+  return Object.keys(partial).length > 0 ? partial : null;
+}
+
+/**
  * Parse JSON safely with repair and fallback extraction
  */
 function parseJSONSafely(jsonText: string): any {
@@ -927,7 +1048,16 @@ Format as JSON (keep strings short to avoid truncation):
 
             // Extract and parse JSON from response (handles markdown code blocks)
             const jsonText = extractJSONFromResponse(response.content, false);
-            const seoData = parseJSONSafely(jsonText);
+            let seoData = parseJSONSafely(jsonText);
+            
+            // If parsing failed, try to extract partial data from corrupted JSON
+            if (!seoData) {
+              console.warn(`   ⚠️  JSON parsing failed, attempting partial extraction...`);
+              seoData = extractPartialJSON(jsonText);
+              if (seoData) {
+                console.log(`   ✅ Extracted partial data: ${Object.keys(seoData).join(', ')}`);
+              }
+            }
             
             if (seoData) {
               
@@ -1052,7 +1182,31 @@ Format as JSON array:
 
             // Extract and parse JSON from response (handles markdown code blocks)
             const jsonText = extractJSONFromResponse(response.content, true); // Array mode
-            const caseStudies = parseJSONSafely(jsonText);
+            let caseStudies = parseJSONSafely(jsonText);
+            
+            // If parsing failed, try to extract partial data from corrupted JSON
+            if (!caseStudies || !Array.isArray(caseStudies)) {
+              console.warn(`   ⚠️  JSON parsing failed, attempting partial extraction...`);
+              // Try to extract individual case study objects
+              const partialCaseStudies: any[] = [];
+              // Look for individual case study objects in the JSON
+              const caseStudyMatches = jsonText.matchAll(/\{\s*"title"\s*:\s*"([^"]+)",\s*"context"\s*:\s*"([^"]*(?:"|$))/g);
+              for (const match of caseStudyMatches) {
+                const title = match[1];
+                let context = match[2];
+                // Clean up truncated context
+                if (!context.endsWith('"')) {
+                  context = context.replace(/\.\.\.?$/, '').trim();
+                }
+                if (title && context && context.length > 20) {
+                  partialCaseStudies.push({ title, context });
+                }
+              }
+              if (partialCaseStudies.length > 0) {
+                caseStudies = partialCaseStudies;
+                console.log(`   ✅ Extracted ${partialCaseStudies.length} partial case studies`);
+              }
+            }
             
             if (caseStudies && Array.isArray(caseStudies) && caseStudies.length > 0) {
               updates.caseStudies = caseStudies;
@@ -1125,11 +1279,26 @@ Format as JSON (keep strings short to avoid truncation):
                 db
               );
 
-              // Extract and parse JSON from response (handles markdown code blocks)
-              const jsonText = extractJSONFromResponse(response.content, false);
-              const completenessData = parseJSONSafely(jsonText);
-              
+            // Extract and parse JSON from response (handles markdown code blocks)
+            const jsonText = extractJSONFromResponse(response.content, false);
+            let completenessData = parseJSONSafely(jsonText);
+            
+            // If parsing failed, try to extract partial data from corrupted JSON
+            if (!completenessData) {
+              console.warn(`   ⚠️  JSON parsing failed, attempting partial extraction...`);
+              completenessData = extractPartialCompletenessJSON(jsonText);
               if (completenessData) {
+                const extractedFields = Object.keys(completenessData).filter(k => {
+                  const arr = completenessData[k];
+                  return Array.isArray(arr) && arr.length > 0;
+                });
+                if (extractedFields.length > 0) {
+                  console.log(`   ✅ Extracted partial data: ${extractedFields.join(', ')}`);
+                }
+              }
+            }
+            
+            if (completenessData) {
                 if (completenessData.examples && missingExamples) {
                   updates.examples = completenessData.examples;
                   improvements.push(`Added ${completenessData.examples.length} examples`);
