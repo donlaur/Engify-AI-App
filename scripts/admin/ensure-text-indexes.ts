@@ -42,6 +42,8 @@ async function ensureTextIndexes() {
           description: 'text',
           content: 'text',
           tags: 'text',
+          role: 'text',  // Include role for leadership role searches (engineering-director, vp-engineering, etc.)
+          category: 'text',  // Include category for better filtering
           // Enriched fields for better RAG search
           whatIs: 'text',
           whyUse: 'text',
@@ -62,6 +64,8 @@ async function ensureTextIndexes() {
             title: 10,
             description: 8,
             content: 5,
+            role: 4,  // Role matches for leadership prompts (engineering-director, vp-engineering, etc.)
+            category: 3,  // Category for filtering
             whatIs: 6,
             whyUse: 5,
             metaDescription: 4,

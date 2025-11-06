@@ -3,9 +3,12 @@ Lambda Handler for Engineering Leadership Discussion Prep Tool
 Multi-Perspective Analysis for Engineering Problems
 
 Use Case: Engineering leaders input a problem/situation, get comprehensive 
-analysis from 4 roles (Director, Manager, Tech Lead, Architect) before meetings 
-or ARB reviews. Perfect for preparing for engineering+product leadership 
+analysis from multiple perspectives (Director, Manager, Tech Lead, Architect, VP, CTO) 
+before meetings or ARB reviews. Perfect for preparing for engineering+product leadership 
 discussions.
+
+Supports all leadership roles: Engineering Directors, Product Directors, VP Engineering, 
+VP Product, CTOs, and more. Includes eNPS, career ladders, OKRs, and leadership prompts.
 
 Beta-optimized: 5-minute timeout, single invocation, no chunking, RAG-enhanced
 """
@@ -80,6 +83,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                 'description': 1,
                 'pattern': 1,
                 'category': 1,
+                'role': 1,  # Include role for better context matching
                 'tags': 1,
                 # Enriched fields for better context
                 'whatIs': 1,
@@ -99,6 +103,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
             for p in prompts:
                 pattern = p.get('pattern', 'unknown')
                 category = p.get('category', '')
+                role = p.get('role', '')  # Get role for context
                 desc = p.get('description', '')[:200]
                 title = p.get('title', 'Untitled')
                 
@@ -134,8 +139,9 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                         if case_title or case_context:
                             enriched_context.append(f"Example: {case_title} - {case_context[:100]}")
                 
-                # Build full context string
-                base_context = f"- **{title}** ({pattern} pattern, {category} category): {desc}"
+                # Build full context string with role if available
+                role_info = f", {role} role" if role else ""
+                base_context = f"- **{title}** ({pattern} pattern, {category} category{role_info}): {desc}"
                 if enriched_context:
                     base_context += f"\n  - {' | '.join(enriched_context)}"
                 
@@ -173,12 +179,14 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                         {'useCases': {'$regex': regex_pattern, '$options': 'i'}},
                         {'caseStudiesText': {'$regex': regex_pattern, '$options': 'i'}},  # Flattened case studies
                         {'examplesText': {'$regex': regex_pattern, '$options': 'i'}},  # Flattened examples
+                        {'role': {'$regex': regex_pattern, '$options': 'i'}},  # Search by role (engineering-director, vp-engineering, etc.)
                         {'tags': {'$in': query_words}},
                         {'seoKeywords': {'$in': query_words}}
                     ]
                 }, {
                     'title': 1,
                     'description': 1,
+                    'role': 1,  # Include role for better context
                     'whatIs': 1,
                     'whyUse': 1,
                     'useCases': 1,
@@ -189,10 +197,12 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                     for p in prompts:
                         title = p.get('title', 'Untitled')
                         desc = p.get('description', '')[:150]
+                        role = p.get('role', '')
                         what_is = p.get('whatIs', '')
                         enriched_info = f" ({what_is[:100]})" if what_is else ""
+                        role_info = f" [{role}]" if role else ""
                         context_parts.append(
-                            f"- **{title}**: {desc}{enriched_info}"
+                            f"- **{title}**{role_info}: {desc}{enriched_info}"
                         )
         except Exception as e2:
             print(f"Fallback prompt search error: {e2}")
@@ -252,11 +262,13 @@ def handler(event, context):
 async def async_handler(event, context):
     """
     Lambda handler for engineering leadership discussion prep tool.
-    Provides multi-perspective analysis on engineering problems from 4 roles.
+    Provides multi-perspective analysis on engineering problems from multiple roles.
+    Supports all leadership roles: Engineering Directors, Product Directors, VPs, CTOs.
+    Includes eNPS prompts, career ladders, OKRs, skip-level 1:1s, and more.
     Beta: 5-minute timeout, single invocation, no chunking.
     
     Use Case: Leaders input a problem, get comprehensive perspectives before 
-    meetings or ARB reviews.
+    meetings or ARB reviews. RAG-enhanced with latest prompts from Engify.ai library.
     
     Note: When invoked directly via Lambda SDK (not API Gateway),
     the payload is passed directly as the event object.
