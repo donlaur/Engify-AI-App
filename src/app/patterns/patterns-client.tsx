@@ -122,9 +122,12 @@ export function PatternsClient({
     return categoryMatch && levelMatch;
   });
 
-  const getLevelColor = (level: string) => {
-    const levelObj = levels.find((l) => l.value === level);
-    return levelObj?.color || 'bg-gray-100 text-gray-800';
+  const getLevelBadgeVariant = (level: string): 'default' | 'secondary' | 'outline' => {
+    // Use consistent badge variants with good contrast (same as prompt cards)
+    if (level === 'beginner') return 'secondary';
+    if (level === 'intermediate') return 'secondary';
+    if (level === 'advanced') return 'default';
+    return 'outline';
   };
 
   return (
@@ -245,7 +248,10 @@ export function PatternsClient({
                       {pattern.description}
                     </CardDescription>
                   </div>
-                  <Badge className={getLevelColor(pattern.level)}>
+                  <Badge 
+                    variant={getLevelBadgeVariant(pattern.level)}
+                    className="text-xs capitalize"
+                  >
                     {pattern.level}
                   </Badge>
                 </div>

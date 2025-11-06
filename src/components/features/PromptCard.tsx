@@ -53,10 +53,11 @@ export function PromptCard(props: PromptCardProps) {
     props;
   const promptSlug = getPromptSlug({ title, slug });
 
-  // Determine if prompt was recently updated (within last 7 days)
+  // Determine if prompt was recently updated (within last 30 days)
+  // Only show badge if there's an actual update date and it's recent
   const lastUpdateDate = updatedAt || lastRevisedAt;
   const isRecentlyUpdated = lastUpdateDate 
-    ? (Date.now() - new Date(lastUpdateDate).getTime()) < 7 * 24 * 60 * 60 * 1000
+    ? (Date.now() - new Date(lastUpdateDate).getTime()) < 30 * 24 * 60 * 60 * 1000
     : false;
 
   const handleCopy = async () => {
@@ -131,7 +132,7 @@ export function PromptCard(props: PromptCardProps) {
           <div className="flex items-start justify-between">
             <Link
               href={`/prompts/${promptSlug}`}
-              className="flex-1 space-y-1 transition-colors hover:text-primary"
+              className="flex-1 space-y-1 transition-colors hover:text-primary pr-2"
               onClick={(e) => {
                 // Allow modal to open on middle-click or ctrl-click, but default to page navigation
                 if (e.metaKey || e.ctrlKey) return;
@@ -142,9 +143,9 @@ export function PromptCard(props: PromptCardProps) {
               }}
             >
               <CardTitle className="text-lg transition-colors group-hover:text-white dark:group-hover:text-white">
-                {title}
+                {title.replace(/\.md$/i, '')}
               </CardTitle>
-              <CardDescription>{description}</CardDescription>
+              <CardDescription className="leading-relaxed">{description}</CardDescription>
             </Link>
             <div className="flex shrink-0 gap-1">
               <Button
@@ -233,9 +234,12 @@ export function PromptCard(props: PromptCardProps) {
               </Badge>
             )}
             {isRecentlyUpdated && (
-              <Badge variant="default" className="bg-green-600 hover:bg-green-700">
-                <Icons.clock className="mr-1 h-3 w-3" />
-                Recently Updated
+              <Badge 
+                variant="outline" 
+                className="border-green-500/30 bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:text-green-400"
+                title="Recently updated"
+              >
+                <Icons.sparkles className="h-3 w-3" />
               </Badge>
             )}
             {currentRevision && currentRevision > 1 && (
