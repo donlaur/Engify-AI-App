@@ -5,6 +5,7 @@ import PatternDetailClient from './pattern-detail-client';
 import {
   generatePatternMetadata,
   generateCourseSchema,
+  generateBreadcrumbSchema,
 } from '@/lib/seo/metadata';
 import { patternRepository } from '@/lib/db/repositories/ContentService';
 import { logger } from '@/lib/logging/logger';
@@ -75,6 +76,13 @@ export default async function PatternDetailPage({
       `${APP_URL}/patterns/${encodeURIComponent(pattern.id)}`
     );
 
+    // Generate BreadcrumbList schema for navigation SEO
+    const breadcrumbSchema = generateBreadcrumbSchema([
+      { name: 'Home', url: APP_URL },
+      { name: 'Patterns', url: `${APP_URL}/patterns` },
+      { name: pattern.name, url: `${APP_URL}/patterns/${encodeURIComponent(pattern.id)}` },
+    ]);
+
     // Also include Article schema for additional SEO
     const articleSchema = {
       '@context': 'https://schema.org',
@@ -114,6 +122,11 @@ export default async function PatternDetailPage({
 
     return (
       <>
+        {/* BreadcrumbList Schema for navigation SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
         {/* Course Schema for rich results */}
         <script
           type="application/ld+json"

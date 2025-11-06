@@ -33,6 +33,7 @@ import Link from 'next/link';
 import {
   generatePromptMetadata,
   generateHowToSchema,
+  generateBreadcrumbSchema,
 } from '@/lib/seo/metadata';
 import { PromptEnrichment } from '@/components/features/PromptEnrichment';
 import { PromptAuditScores } from '@/components/features/PromptAuditScores';
@@ -270,6 +271,13 @@ export default async function PromptPage({
     ].filter(Boolean);
 
     // Generate HowTo schema for rich results
+    const breadcrumbSchema = generateBreadcrumbSchema([
+      { name: 'Home', url: APP_URL },
+      { name: 'Prompts', url: `${APP_URL}/prompts` },
+      ...(categoryLabel ? [{ name: categoryLabel, url: `${APP_URL}/prompts/category/${prompt.category}` }] : []),
+      { name: prompt.title, url: `${APP_URL}/prompts/${slug}` },
+    ]);
+
     const howToSchema = generateHowToSchema(
       prompt,
       categoryLabel,
@@ -326,6 +334,11 @@ export default async function PromptPage({
         {/* Client component for view tracking */}
         <PromptPageClient promptId={prompt.id} />
 
+        {/* BreadcrumbList Schema for navigation SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
         {/* HowTo Schema for rich results */}
         <script
           type="application/ld+json"

@@ -5,9 +5,13 @@
  * career ladders, OKRs/SMART goals, professional development plans
  */
 
-import { MongoClient } from 'mongodb';
-import { generateId } from '@/lib/utils/id';
+import { ObjectId } from 'mongodb';
 import { generateUniqueSlug } from '@/lib/utils/slug';
+
+// Simple ID generator
+function generateId(prefix: string): string {
+  return `${prefix}-${new ObjectId().toString()}`;
+}
 
 interface PromptToCreate {
   title: string;
@@ -1825,76 +1829,63 @@ You are an Engineering Director or VP analyzing eNPS results for your department
 ];
 
 async function main() {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    console.error('❌ MONGODB_URI not found');
-    process.exit(1);
-  }
+  const { getMongoDb } = await import('@/lib/db/mongodb');
+  const db = await getMongoDb();
+  
+  console.log('✅ Connected to MongoDB');
 
-  const client = new MongoClient(uri);
-  try {
-    await client.connect();
-    console.log('✅ Connected to MongoDB');
+  const promptsCollection = db.collection('prompts');
 
-    const db = client.db('engify');
-    const promptsCollection = db.collection('prompts');
+  let created = 0;
+  let skipped = 0;
 
-    let created = 0;
-    let skipped = 0;
+  for (const promptData of LEADERSHIP_PROMPTS) {
+    // Check if prompt already exists
+    const existing = await promptsCollection.findOne({
+      title: promptData.title,
+    });
 
-    for (const promptData of LEADERSHIP_PROMPTS) {
-      // Check if prompt already exists
-      const existing = await promptsCollection.findOne({
-        title: promptData.title,
-      });
-
-      if (existing) {
-        console.log(`⏭️  Skipping: ${promptData.title} (already exists)`);
-        skipped++;
-        continue;
-      }
-
-      // Generate slug
-      const allPrompts = await promptsCollection.find({}).toArray();
-      const allSlugs = new Set(allPrompts.map((p: any) => p.slug).filter(Boolean));
-      const slug = generateUniqueSlug(promptData.title, allSlugs);
-
-      const prompt = {
-        id: generateId('leadership'),
-        slug,
-        title: promptData.title,
-        description: promptData.description,
-        content: promptData.content,
-        category: promptData.category,
-        role: promptData.role,
-        tags: promptData.tags,
-        views: 0,
-        rating: 0,
-        ratingCount: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isPublic: true,
-        isFeatured: false,
-        currentRevision: 1,
-        source: 'seed',
-        active: true,
-      };
-
-      await promptsCollection.insertOne(prompt);
-      console.log(`✅ Created: ${promptData.title}`);
-      created++;
+    if (existing) {
+      console.log(`⏭️  Skipping: ${promptData.title} (already exists)`);
+      skipped++;
+      continue;
     }
 
-    console.log(`\n📊 Summary:`);
-    console.log(`   Created: ${created}`);
-    console.log(`   Skipped: ${skipped}`);
-    console.log(`   Total: ${LEADERSHIP_PROMPTS.length}`);
-  } catch (error) {
-    console.error('❌ Error:', error);
-    process.exit(1);
-  } finally {
-    await client.close();
+    // Generate slug
+    const allPrompts = await promptsCollection.find({}).toArray();
+    const allSlugs = new Set(allPrompts.map((p: any) => p.slug).filter(Boolean));
+    const slug = generateUniqueSlug(promptData.title, allSlugs);
+
+    const prompt = {
+      id: generateId('leadership'),
+      slug,
+      title: promptData.title,
+      description: promptData.description,
+      content: promptData.content,
+      category: promptData.category,
+      role: promptData.role,
+      tags: promptData.tags,
+      views: 0,
+      rating: 0,
+      ratingCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isPublic: true,
+      isFeatured: false,
+      currentRevision: 1,
+      source: 'seed',
+      active: true,
+    };
+
+    await promptsCollection.insertOne(prompt);
+    console.log(`✅ Created: ${promptData.title}`);
+    created++;
   }
+
+  console.log(`\n📊 Summary:`);
+  console.log(`   Created: ${created}`);
+  console.log(`   Skipped: ${skipped}`);
+  console.log(`   Total: ${LEADERSHIP_PROMPTS.length}`);
 }
 
 main();
