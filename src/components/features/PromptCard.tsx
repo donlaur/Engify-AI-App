@@ -153,7 +153,7 @@ export function PromptCard(props: PromptCardProps) {
                 }
               }}
             >
-              <CardTitle className="text-lg transition-colors group-hover:text-white dark:group-hover:text-white">
+              <CardTitle className="break-words text-base leading-tight transition-colors group-hover:text-white dark:group-hover:text-white sm:text-lg">
                 {title.replace(/\.md$/i, '')}
               </CardTitle>
               <CardDescription className="line-clamp-3 min-h-[3.5rem] leading-relaxed">

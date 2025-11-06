@@ -371,12 +371,12 @@ export default async function Home() {
                   </div>
                 </div>
               </div>
-              <div className="space-y-6 p-12">
+              <div className="space-y-6 p-6 sm:p-8 md:p-12">
                 <Badge className="border-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
                   <Icons.github className="mr-2 h-3 w-3" />
                   Built in Public
                 </Badge>
-                <h2 className="text-3xl font-bold">Watch This Being Built</h2>
+                <h2 className="text-2xl font-bold sm:text-3xl">Watch This Being Built</h2>
                 <p className="text-lg text-gray-700 dark:text-gray-300">
                   Built using AI-augmented development. See the code, follow the
                   commits, learn how modern teams ship fast.
@@ -422,10 +422,10 @@ export default async function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col gap-3 pt-4 sm:flex-row">
                   <Button
                     size="lg"
-                    className="bg-gradient-to-r from-purple-600 to-pink-600"
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 sm:w-auto"
                     asChild
                   >
                     <Link href="/built-in-public">
@@ -433,7 +433,7 @@ export default async function Home() {
                       See How It&apos;s Built
                     </Link>
                   </Button>
-                  <Button size="lg" variant="outline" asChild>
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto" asChild>
                     <Link href="/signup">
                       {allowSignup ? 'Try Free' : 'Request Access'}
                     </Link>
@@ -461,10 +461,10 @@ export default async function Home() {
           <Card className="mx-auto max-w-3xl border-white/20 bg-white/10 backdrop-blur-sm">
             <CardContent className="space-y-6 py-12 text-center">
               <Icons.trophy className="mx-auto h-16 w-16 text-white" />
-              <h2 className="text-4xl font-bold text-white">
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">
                 Ready to Transform Your Team?
               </h2>
-              <p className="mx-auto max-w-2xl text-xl text-gray-200">
+              <p className="mx-auto max-w-2xl text-lg text-gray-200 sm:text-xl">
                 Master AI with {siteStats.totalPrompts} expert prompts. Start
                 free today—no credit card required.
               </p>
