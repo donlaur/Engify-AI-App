@@ -4,6 +4,10 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { auth } from '@/lib/auth';
 import { sanitizeText } from '@/lib/security/sanitize';
 import { getModelById } from '@/lib/config/ai-models';
+import {
+  getCachedRAGResponse,
+  cacheRAGResponse,
+} from '@/lib/cache/rag-cache';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -63,6 +67,20 @@ export async function POST(request: NextRequest) {
     const lastMessage =
       sanitizedMessages[sanitizedMessages.length - 1]?.content || '';
     const sanitizedLastMessage = sanitizeText(lastMessage);
+
+    // Check cache first for RAG queries
+    if (useRAG && sanitizedLastMessage) {
+      const cachedResponse = await getCachedRAGResponse(sanitizedLastMessage);
+      if (cachedResponse) {
+        return NextResponse.json({
+          message: cachedResponse.message,
+          sources: cachedResponse.sources,
+          usedRAG: cachedResponse.usedRAG,
+          cached: true,
+          cachedAt: cachedResponse.cachedAt,
+        });
+      }
+    }
 
     let context = '';
     let sources: Array<{ title: string; content: string; score: number }> = [];
@@ -191,14 +209,23 @@ Suggest specific pages: /prompts, /patterns, /learn, /workbench`;
 
     const sanitizedResponse = sanitizeText(response);
 
-    return NextResponse.json({
+    const responseData = {
       message: sanitizedResponse,
       sources:
         sources.length > 0
           ? sources.map((s) => ({ title: s.title, score: s.score }))
           : [],
       usedRAG: sources.length > 0,
-    });
+    };
+
+    // Cache the response for future requests (fire and forget)
+    if (useRAG && sanitizedLastMessage) {
+      cacheRAGResponse(sanitizedLastMessage, responseData).catch((err) =>
+        console.error('Failed to cache response:', err)
+      );
+    }
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Chat API error:', error);
 
