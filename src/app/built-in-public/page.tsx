@@ -79,8 +79,8 @@ export default function BuiltInPublicPage() {
       <section className="container py-20">
         <div className="mx-auto max-w-4xl space-y-12">
           <div className="text-center">
-            <h2 className="mb-4 text-4xl font-bold">The Development Journey</h2>
-            <p className="text-xl text-gray-600">
+            <h2 className="mb-4 text-3xl font-bold sm:text-4xl">The Development Journey</h2>
+            <p className="text-lg text-gray-600 sm:text-xl">
               From prototype to production-ready SaaS
             </p>
             <div className="mt-6 rounded-lg border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50 p-6">
@@ -609,10 +609,10 @@ export default function BuiltInPublicPage() {
           </Card>
 
           {/* Production Stats */}
-          <div className="grid gap-6 md:grid-cols-4">
+          <div className="grid gap-6 grid-cols-2 sm:grid-cols-4">
             <Card>
               <CardContent className="pt-6 text-center">
-                <div className="text-5xl font-bold text-purple-600">1,357</div>
+                <div className="text-4xl font-bold text-purple-600 sm:text-5xl">1,357</div>
                 <div className="text-sm text-gray-600">Total Commits</div>
                 <div className="mt-1 text-xs text-gray-500">
                   Atomic, tested, documented
@@ -628,7 +628,7 @@ export default function BuiltInPublicPage() {
             </Card>
             <Card>
               <CardContent className="pt-6 text-center">
-                <div className="text-4xl font-bold text-blue-600">85K+</div>
+                <div className="text-3xl font-bold text-blue-600 sm:text-4xl">85K+</div>
                 <div className="text-sm text-gray-600">Lines of Code</div>
                 <div className="mt-1 text-xs text-gray-500">
                   TypeScript strict mode
@@ -649,7 +649,7 @@ export default function BuiltInPublicPage() {
           {/* Business Evolution: Days 1-5 */}
           <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
+              <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
                 <Icons.trendingUp className="h-6 w-6 text-blue-600" />
                 From Prototype to Production SaaS (Days 1-5)
               </CardTitle>
@@ -733,7 +733,7 @@ export default function BuiltInPublicPage() {
           {/* Days 6-7: Quality & Polish */}
           <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
+              <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
                 <Icons.target className="h-6 w-6 text-purple-600" />
                 Days 6-7: Content Quality & Trust Signals
               </CardTitle>
@@ -1042,7 +1042,7 @@ export default function BuiltInPublicPage() {
           {/* CTA */}
           <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
             <CardContent className="space-y-6 py-12 text-center">
-              <h3 className="text-3xl font-bold">
+              <h3 className="text-2xl font-bold sm:text-3xl">
                 Interested in This Approach?
               </h3>
               <p className="mx-auto max-w-2xl text-lg text-gray-700">

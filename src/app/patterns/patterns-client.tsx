@@ -134,10 +134,10 @@ export function PatternsClient({
     <div className="container py-8">
       {/* Hero Header */}
       <div className="mb-8 text-center">
-        <h1 className="mb-4 text-4xl font-bold">
+        <h1 className="mb-4 text-3xl font-bold sm:text-4xl">
           {patterns.length} Proven Patterns
         </h1>
-        <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
+        <p className="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl">
           Master prompt engineering with battle-tested patterns from industry leaders.
           Learn proven techniques to get better results from AI.
         </p>
@@ -145,7 +145,7 @@ export function PatternsClient({
 
       {/* Why Use Patterns Section */}
       <div className="mb-8 rounded-lg border bg-card p-6 md:p-8">
-        <h2 className="mb-4 text-2xl font-bold">Why Follow Proven Patterns?</h2>
+        <h2 className="mb-4 text-xl font-bold sm:text-2xl">Why Follow Proven Patterns?</h2>
         <div className="grid gap-6 md:grid-cols-2">
           <div>
             <h3 className="mb-2 text-lg font-semibold">🧠 Systematic Problem-Solving</h3>
@@ -180,7 +180,7 @@ export function PatternsClient({
 
       {/* Pattern Categories Section */}
       <div className="mb-8 rounded-lg border bg-card p-6 md:p-8">
-        <h2 className="mb-4 text-2xl font-bold">Pattern Categories</h2>
+        <h2 className="mb-4 text-xl font-bold sm:text-2xl">Pattern Categories</h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h3 className="mb-2 text-lg font-semibold">🔨 Foundational</h3>
@@ -214,21 +214,21 @@ export function PatternsClient({
       </div>
 
       {/* Compact Stats */}
-      <div className="mb-8 grid grid-cols-4 gap-4">
+      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-lg border bg-card p-4 text-center">
-          <div className="text-2xl font-bold">{patterns.length}</div>
+          <div className="text-xl font-bold sm:text-2xl">{patterns.length}</div>
           <div className="text-xs text-muted-foreground">Total Patterns</div>
         </div>
         <div className="rounded-lg border bg-card p-4 text-center">
-          <div className="text-2xl font-bold">{new Set(patterns.map((p) => p.category)).size}</div>
+          <div className="text-xl font-bold sm:text-2xl">{new Set(patterns.map((p) => p.category)).size}</div>
           <div className="text-xs text-muted-foreground">Categories</div>
         </div>
         <div className="rounded-lg border bg-card p-4 text-center">
-          <div className="text-2xl font-bold">{new Set(patterns.map((p) => p.level)).size}</div>
+          <div className="text-xl font-bold sm:text-2xl">{new Set(patterns.map((p) => p.level)).size}</div>
           <div className="text-xs text-muted-foreground">Skill Levels</div>
         </div>
         <div className="rounded-lg border bg-card p-4 text-center">
-          <div className="text-2xl font-bold">{totalPromptsUsingPatterns}</div>
+          <div className="text-xl font-bold sm:text-2xl">{totalPromptsUsingPatterns}</div>
           <div className="text-xs text-muted-foreground">Prompts Using Patterns</div>
         </div>
       </div>
@@ -360,7 +360,7 @@ export function PatternsClient({
       <Card className="dark:surface-frosted mt-12 border-primary/20 bg-primary/5">
         <CardContent className="py-8 text-center">
           <Icons.book className="mx-auto mb-4 h-12 w-12 text-primary" />
-          <h3 className="text-primary-light dark:text-primary-light mb-2 text-2xl font-bold">
+          <h3 className="text-primary-light dark:text-primary-light mb-2 text-xl font-bold sm:text-2xl">
             Ready to use these patterns?
           </h3>
           <p className="text-secondary-light dark:text-secondary-light mb-6">
