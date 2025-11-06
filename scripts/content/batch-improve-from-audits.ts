@@ -103,69 +103,184 @@ async function markGeminiLockedOut(): Promise<void> {
 let geminiQuotaExhausted = false;
 
 /**
- * Extract JSON from response content (handles markdown code blocks)
+ * Extract JSON from response content (handles markdown code blocks and incomplete JSON)
  */
 function extractJSONFromResponse(content: string, arrayMode: boolean = false): string {
-  let jsonText = content;
+  let jsonText = content.trim();
   
-  // Try to extract from markdown code blocks first (use greedy matching to get full block)
-  const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
-  if (codeBlockMatch) {
-    jsonText = codeBlockMatch[1];
-  } else if (arrayMode) {
-    // For arrays, try to extract array from code blocks
-    const arrayBlockMatch = content.match(/```(?:json)?\s*(\[[\s\S]*\])\s*```/);
-    if (arrayBlockMatch) {
-      jsonText = arrayBlockMatch[1];
-    } else {
-      // Try to extract JSON array directly
-      const jsonMatch = content.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        jsonText = jsonMatch[0];
-      }
-    }
-  } else {
-    // Try to extract JSON object directly
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      jsonText = jsonMatch[0];
+  // First, try to extract from markdown code blocks (handles multi-line)
+  // Match: ```json ... ``` or ``` ... ```
+  // Use NON-GREEDY first to get everything between first ``` and last ```
+  const codeBlockMatches = content.matchAll(/```(?:json)?\s*([\s\S]*?)```/g);
+  const allMatches = Array.from(codeBlockMatches);
+  
+  if (allMatches.length > 0) {
+    // Take the last match (most likely to be complete) or the longest
+    const bestMatch = allMatches.reduce((longest, match) => 
+      match[1] && match[1].length > (longest[1]?.length || 0) ? match : longest
+    );
+    if (bestMatch && bestMatch[1]) {
+      jsonText = bestMatch[1].trim();
     }
   }
   
-  return jsonText;
+  // If array mode, try to find JSON array
+  if (arrayMode) {
+    // Try to extract array from the extracted text
+    const arrayMatch = jsonText.match(/\[[\s\S]*\]/);
+    if (arrayMatch) {
+      jsonText = arrayMatch[0];
+    } else if (allMatches.length === 0) {
+      // If no code block found, try to find array in original content
+      const directArrayMatch = content.match(/\[[\s\S]*\]/);
+      if (directArrayMatch) {
+        jsonText = directArrayMatch[0];
+      }
+    }
+  } else {
+    // Object mode - try to find JSON object
+    const objectMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (objectMatch) {
+      jsonText = objectMatch[0];
+    } else if (allMatches.length === 0) {
+      // If no code block found, try to find object in original content
+      const directObjectMatch = content.match(/\{[\s\S]*\}/);
+      if (directObjectMatch) {
+        jsonText = directObjectMatch[0];
+      }
+    }
+  }
+  
+  // Remove any trailing text after the JSON (common with incomplete responses)
+  // Find the last complete JSON structure
+  if (arrayMode) {
+    // For arrays, find balanced brackets
+    let bracketCount = 0;
+    let lastValidIndex = -1;
+    for (let i = 0; i < jsonText.length; i++) {
+      if (jsonText[i] === '[') bracketCount++;
+      if (jsonText[i] === ']') {
+        bracketCount--;
+        if (bracketCount === 0) {
+          lastValidIndex = i;
+        }
+      }
+    }
+    if (lastValidIndex > 0) {
+      jsonText = jsonText.substring(0, lastValidIndex + 1);
+    }
+  } else {
+    // For objects, find balanced braces
+    let braceCount = 0;
+    let lastValidIndex = -1;
+    for (let i = 0; i < jsonText.length; i++) {
+      if (jsonText[i] === '{') braceCount++;
+      if (jsonText[i] === '}') {
+        braceCount--;
+        if (braceCount === 0) {
+          lastValidIndex = i;
+        }
+      }
+    }
+    if (lastValidIndex > 0) {
+      jsonText = jsonText.substring(0, lastValidIndex + 1);
+    }
+  }
+  
+  return jsonText.trim();
 }
 
 /**
  * Parse JSON safely with repair and fallback extraction
  */
 function parseJSONSafely(jsonText: string): any {
+  if (!jsonText || jsonText.trim().length === 0) {
+    return null;
+  }
+  
   // Repair common JSON issues
   // 1. Remove trailing commas before closing brackets/braces
   jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
   jsonText = jsonText.replace(/,(\s*$)/gm, '');
   
   // 2. Fix incomplete string literals (common issue with truncated responses)
-  jsonText = jsonText.replace(/"([^"]*?)\.\.\.[^"]*$/gm, '"$1"'); // Remove trailing "..."
+  // Remove trailing "..." or incomplete strings
+  jsonText = jsonText.replace(/"([^"]*?)\.\.\.[^"]*$/gm, '"$1"');
   
-  // 3. Try to close incomplete arrays/objects
+  // Fix truncated strings (remove trailing incomplete text after last quote)
+  // Find strings that end abruptly without closing quote
+  jsonText = jsonText.replace(/"([^"]+)([^",}\]]*?)([,\]}])/g, (match, p1, p2, p3) => {
+    // If there's trailing text after the string content but before comma/brace, clean it up
+    const cleanValue = p1.trim();
+    if (cleanValue.length > 0) {
+      return `"${cleanValue}"${p3}`;
+    }
+    return match;
+  });
+  
+  // Fix strings that are cut off mid-word (common with maxTokens limit)
+  // Look for unclosed strings at the end
+  const lines = jsonText.split('\n');
+  const fixedLines: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    // If line has an opening quote but no closing quote (and not the last line)
+    const openQuotes = (line.match(/"/g) || []).length;
+    if (openQuotes % 2 === 1 && i < lines.length - 1) {
+      // Try to close the string
+      const lastQuoteIndex = line.lastIndexOf('"');
+      if (lastQuoteIndex >= 0) {
+        const beforeQuote = line.substring(0, lastQuoteIndex + 1);
+        const afterQuote = line.substring(lastQuoteIndex + 1);
+        // If there's content after the quote, it might be incomplete
+        if (afterQuote.trim().length > 0 && !afterQuote.trim().match(/^[,:}\]\]]/)) {
+          line = beforeQuote + '"';
+        }
+      }
+    }
+    fixedLines.push(line);
+  }
+  jsonText = fixedLines.join('\n');
+  
+  // 4. Try to close incomplete arrays/objects
   const openBraces = (jsonText.match(/\{/g) || []).length;
   const closeBraces = (jsonText.match(/\}/g) || []).length;
   const openBrackets = (jsonText.match(/\[/g) || []).length;
   const closeBrackets = (jsonText.match(/\]/g) || []).length;
   
-  // Close incomplete structures
-  if (openBrackets > closeBrackets) {
+  // Close incomplete structures (but be careful - don't close if we're in the middle)
+  // Only close if we're near the end of the string
+  const lastChar = jsonText.trim().slice(-1);
+  if (openBrackets > closeBrackets && (lastChar === ',' || lastChar === '[' || lastChar === '{')) {
     jsonText += ']'.repeat(openBrackets - closeBrackets);
   }
-  if (openBraces > closeBraces) {
+  if (openBraces > closeBraces && (lastChar === ',' || lastChar === '{')) {
     jsonText += '}'.repeat(openBraces - closeBraces);
   }
   
   try {
     return JSON.parse(jsonText);
   } catch (error) {
-    // If still failing, return null (caller can handle fallback)
-    return null;
+    // Try repairing with regex-based fixes
+    try {
+      // Fix common issues: unclosed strings, missing quotes
+      let repaired = jsonText;
+      
+      // Fix unclosed strings (look for key: value without quote)
+      repaired = repaired.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([^",}\]]+?)([,\]}])/g, (match, p1, key, value, end) => {
+        const trimmedValue = value.trim();
+        // If value doesn't start with quote and isn't a number/boolean/null, quote it
+        if (!trimmedValue.match(/^["\[\{]|^(true|false|null|\d+)$/)) {
+          return `${p1}"${key}": "${trimmedValue}"${end}`;
+        }
+        return match;
+      });
+      
+      return JSON.parse(repaired);
+    } catch (repairError) {
+      // If still failing, return null (caller can handle fallback)
+      return null;
+    }
   }
 }
 
@@ -835,7 +950,12 @@ Format as JSON:
               }
             } else {
               console.error(`   ❌ Error generating SEO: Could not extract valid JSON from response`);
-              console.error(`   Response preview: ${response.content.substring(0, 200)}...`);
+              console.error(`   Response preview: ${response.content.substring(0, 300)}...`);
+              // Log extracted JSON for debugging
+              const extracted = extractJSONFromResponse(response.content, false);
+              if (extracted && extracted.length > 0) {
+                console.error(`   Extracted JSON text (${extracted.length} chars): ${extracted.substring(0, 200)}...`);
+              }
             }
           } catch (error) {
             console.error(`   ❌ Error in SEO generation: ${error}`);
@@ -907,7 +1027,12 @@ Format as JSON array:
               stats.caseStudiesAdded++;
             } else {
               console.error(`   ❌ Error generating case studies: Could not extract valid JSON array from response`);
-              console.error(`   Response preview: ${response.content.substring(0, 200)}...`);
+              console.error(`   Response preview: ${response.content.substring(0, 300)}...`);
+              // Log extracted JSON for debugging
+              const extracted = extractJSONFromResponse(response.content, true);
+              if (extracted && extracted.length > 0) {
+                console.error(`   Extracted JSON text (${extracted.length} chars): ${extracted.substring(0, 200)}...`);
+              }
             }
           } catch (error) {
             console.error(`   ❌ Error in case study generation: ${error}`);
