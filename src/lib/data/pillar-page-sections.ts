@@ -389,18 +389,197 @@ export function getAIFirstOrganizationSections(config: PillarPageConfig): Resear
 }
 
 /**
- * Get research-based sections for a pillar page
+ * Get research-based sections for Ultimate Guide to AI-Assisted Software Development pillar page
  */
-export function getResearchBasedSections(config: PillarPageConfig): ResearchBasedSection[] {
-  if (config.id === 'ai-upskilling-program') {
-    return getAIUpskillingSections(config);
-  }
+export function getAIAssistedDevelopmentSections(config: PillarPageConfig): ResearchBasedSection[] {
+  const wordsPerSection = Math.ceil(config.targetWordCount / 7); // 7 major sections + intro/conclusion
   
-  if (config.id === 'ai-first-engineering-organization') {
-    return getAIFirstOrganizationSections(config);
-  }
-  
-  // For other pages, return empty array to use AI generation
-  return [];
+  return [
+    {
+      id: 'introduction',
+      title: 'Introduction: The New Paradigm of AI-Assisted Development',
+      order: 1,
+      targetWordCount: 500,
+      keywords: ['AI-assisted software development', 'AI in software development', 'generative AI for developers'],
+      relatedRoles: ['engineer', 'senior-engineer', 'tech-lead'],
+      keyConcepts: [
+        'AI as collaborator vs tool',
+        'SDLC transformation',
+        'Hybrid audience (engineers to directors)',
+      ],
+    },
+    {
+      id: 'sdlc-framework',
+      title: 'The Big Picture: AI\'s Role in the Modern SDLC',
+      order: 2,
+      targetWordCount: 2500,
+      keywords: [
+        'AI in SDLC',
+        'AI-driven development lifecycle',
+        'AI-DLC',
+        'AI across software development lifecycle',
+        'generative AI in SDLC',
+      ],
+      relatedRoles: ['engineer', 'senior-engineer', 'tech-lead', 'engineering-director'],
+      keyConcepts: [
+        'Requirements & Planning',
+        'Design & Architecture',
+        'Development (coding)',
+        'Testing & QA',
+        'Deployment & DevOps',
+        'Maintenance & Documentation',
+      ],
+      frameworks: ['SDLC framework', 'AI-DLC model'],
+      visualRequirements: ['AI in SDLC stage-by-stage diagram', 'SDLC table with AI tasks'],
+    },
+    {
+      id: 'reality-check-iceberg',
+      title: 'The Reality Check: The "Tip of the Iceberg"',
+      order: 3,
+      targetWordCount: 1000,
+      keywords: [
+        'AI-assisted coding limitations',
+        'AI code quality concerns',
+        'AI vs human software development',
+      ],
+      relatedRoles: ['senior-engineer', 'tech-lead', 'engineering-director'],
+      keyConcepts: [
+        'The "Easy 30%" AI handles well',
+        'The "Hidden 70%" that remains',
+        'Architecture & Technical Debt',
+        'Scalability & Performance',
+        'Security & Compliance',
+        'Complex Debugging & Integration',
+      ],
+      frameworks: ['Iceberg analogy'],
+      visualRequirements: ['AI-Assisted Iceberg diagram'],
+    },
+    {
+      id: 'toolkit-deep-dive',
+      title: 'The Toolkit: A Deep Dive into AI Development Tools',
+      order: 4,
+      targetWordCount: 3000,
+      keywords: [
+        'best AI coding assistants',
+        'GitHub Copilot vs Amazon Q Developer',
+        'Cursor vs Copilot',
+        'best open source AI coding assistant',
+        'AI coding assistant context vs IQ',
+        'AI-powered code review tools',
+      ],
+      relatedRoles: ['engineer', 'senior-engineer', 'tech-lead'],
+      keyConcepts: [
+        'Prompt Engineering for Developers',
+        'Context vs. IQ Framework',
+        'Closed-Source vs. Open-Source',
+        'Repository-wide indexing',
+        'RAG (Retrieval-Augmented Generation)',
+        'Abstract Syntax Trees (AST)',
+      ],
+      frameworks: ['Context vs. IQ', 'Closed vs. Open decision framework'],
+      visualRequirements: ['AI Tool Feature & Pricing Matrix', 'Context vs. IQ comparison'],
+    },
+    {
+      id: 'enterprise-frameworks',
+      title: 'The Enterprise Frameworks: Strategy, Security & ROI',
+      order: 5,
+      targetWordCount: 3500,
+      keywords: [
+        'AI development tool ROI',
+        'measuring AI developer productivity',
+        'on-premise vs cloud AI coding tools',
+        'AI-generated code security',
+        'securing AI coding assistants',
+        'Shadow AI',
+        'AI code vulnerabilities',
+      ],
+      relatedRoles: ['engineering-director', 'vp-engineering', 'cto', 'tech-lead'],
+      keyConcepts: [
+        'Security & Governance Imperative',
+        'Untrusted by Default',
+        'Vulnerable Code Generation',
+        'Data/IP Leakage',
+        'Malicious Suggestions',
+        'On-Premise vs. Cloud Deployment',
+        '3-Tier ROI Framework',
+        'Measurable ROI',
+        'Strategic ROI',
+        'Capability ROI',
+      ],
+      frameworks: [
+        'Security framework',
+        'On-Premise vs. Cloud decision framework',
+        '3-Tier ROI Framework',
+      ],
+      visualRequirements: [
+        'On-Premise vs. Cloud decision matrix',
+        'ROI measurement framework',
+        'Security risks diagram',
+      ],
+    },
+    {
+      id: 'future-collaborator',
+      title: 'The Future: From "Assistant" to "Collaborator"',
+      order: 6,
+      targetWordCount: 1500,
+      keywords: [
+        'AI agentic coding framework',
+        'AI-driven development lifecycle',
+        'AI-autonomous development',
+        'AI agents for coding',
+      ],
+      relatedRoles: ['engineer', 'senior-engineer', 'tech-lead', 'engineering-director'],
+      keyConcepts: [
+        'AI-Driven Development Lifecycle (AI-DLC)',
+        'AI-Assisted vs. AI-Driven vs. AI-Autonomous',
+        'AI Agents',
+        'Agentic Workflows',
+        'Plan, Reflect, Use Tools, Collaborate',
+      ],
+      frameworks: ['AI-DLC model', 'Agentic AI framework'],
+      visualRequirements: ['AI-Assisted vs. AI-Driven vs. AI-Autonomous diagram'],
+    },
+    {
+      id: 'practical-guides',
+      title: 'Practical Guides & Tutorials',
+      order: 7,
+      targetWordCount: 2000,
+      keywords: [
+        'how to use GitHub Copilot',
+        'Amazon Q Developer tutorial',
+        'Aider tutorial',
+        'AI agent commands',
+        'AI for legacy code refactoring',
+      ],
+      relatedRoles: ['engineer', 'senior-engineer'],
+      keyConcepts: [
+        'Agentic Commands (/test, /doc, /review)',
+        'GitHub Copilot CLI',
+        'Amazon Q Developer agents',
+        'Aider open-source agent',
+        'Legacy code refactoring case study',
+      ],
+      frameworks: ['Practical tutorials', 'Step-by-step guides'],
+    },
+    {
+      id: 'faq',
+      title: 'Frequently Asked Questions',
+      order: 8,
+      targetWordCount: 1000,
+      keywords: [
+        'will AI replace software engineers',
+        'is AI-generated code secure',
+        'AI coding copyright risks',
+        'best free AI coding assistant',
+      ],
+      relatedRoles: ['engineer', 'senior-engineer', 'tech-lead', 'engineering-director'],
+      keyConcepts: [
+        'Job displacement concerns',
+        'Code security',
+        'Copyright and IP risks',
+        'Free vs. paid tools',
+      ],
+    },
+  ];
 }
 
