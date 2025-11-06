@@ -298,6 +298,44 @@ async function fetchOpenRouterModels(): Promise<OpenRouterModel[]> {
 }
 
 /**
+ * Find existing model by matching name/provider (not just ID)
+ * This helps detect duplicates when IDs differ (e.g., "gpt-4" vs "openai/gpt-4")
+ */
+async function findExistingModel(
+  provider: AIModel['provider'],
+  modelName: string,
+  openRouterId: string
+): Promise<AIModel | null> {
+  const db = await getMongoDb();
+  const collection = db.collection<AIModel>('ai_models');
+
+  // Try multiple matching strategies:
+  // 1. Exact ID match
+  const byId = await collection.findOne({ id: openRouterId });
+  if (byId) return byId;
+
+  // 2. Match by provider + name (case-insensitive)
+  const byProviderName = await collection.findOne({
+    provider,
+    $or: [
+      { name: { $regex: new RegExp(`^${modelName}$`, 'i') } },
+      { displayName: { $regex: new RegExp(`^${modelName}$`, 'i') } },
+      // Also check if our name is contained in OpenRouter's name or vice versa
+      { name: { $regex: new RegExp(modelName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } },
+      { displayName: { $regex: new RegExp(modelName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } },
+    ],
+  });
+  if (byProviderName) return byProviderName;
+
+  // 3. Match by slug (if slug matches model name)
+  const slug = generateSlug(openRouterId);
+  const bySlug = await collection.findOne({ slug });
+  if (bySlug) return bySlug;
+
+  return null;
+}
+
+/**
  * Main sync function
  */
 async function syncFromOpenRouter() {
@@ -308,24 +346,67 @@ async function syncFromOpenRouter() {
     await getMongoDb();
     console.log('✅ Database connected\n');
 
+    // Fetch existing models for duplicate detection
+    console.log('🔍 Loading existing models for duplicate detection...');
+    const existingModels = await aiModelService.find({});
+    console.log(`   Found ${existingModels.length} existing models\n`);
+
     // Fetch models from OpenRouter
     const openRouterModels = await fetchOpenRouterModels();
 
-    // Map to our schema
-    console.log('🔄 Mapping models to our schema...');
+    // Map to our schema and detect duplicates
+    console.log('🔄 Mapping models to our schema and detecting duplicates...');
     const modelsToSync: Partial<AIModel>[] = [];
+    let duplicatesFound = 0;
+    let matchedByExactId = 0;
+    let matchedByProviderName = 0;
+    let matchedBySlug = 0;
 
     for (const openRouterModel of openRouterModels) {
       try {
-        const mappedModel = mapOpenRouterToModel(openRouterModel);
-        modelsToSync.push(mappedModel);
+        const provider = extractProvider(openRouterModel.id);
+        const modelName = extractModelName(openRouterModel.id);
+        
+        // Check if model already exists
+        const existing = await findExistingModel(provider, modelName, openRouterModel.id);
+        
+        if (existing) {
+          duplicatesFound++;
+          // If existing model has different ID format, update it to use OpenRouter ID
+          // This ensures we can match it in the future
+          if (existing.id !== openRouterModel.id) {
+            console.log(`   🔗 Found duplicate: ${existing.id} → ${openRouterModel.id} (${modelName})`);
+            // Update existing model with OpenRouter data
+            const mappedModel = mapOpenRouterToModel(openRouterModel);
+            // Preserve existing ID but update with OpenRouter data
+            mappedModel.id = existing.id; // Keep original ID to avoid breaking references
+            modelsToSync.push({
+              ...mappedModel,
+              id: existing.id, // Use existing ID
+            });
+          } else {
+            matchedByExactId++;
+            // Update existing model
+            const mappedModel = mapOpenRouterToModel(openRouterModel);
+            modelsToSync.push(mappedModel);
+          }
+        } else {
+          // New model
+          const mappedModel = mapOpenRouterToModel(openRouterModel);
+          modelsToSync.push(mappedModel);
+        }
       } catch (error) {
         console.warn(`⚠️  Failed to map model ${openRouterModel.id}:`, error);
         continue;
       }
     }
 
-    console.log(`✅ Mapped ${modelsToSync.length} models\n`);
+    console.log(`✅ Mapped ${modelsToSync.length} models`);
+    console.log(`   📊 Duplicate detection:`);
+    console.log(`      - Exact ID matches: ${matchedByExactId}`);
+    console.log(`      - Provider+Name matches: ${matchedByProviderName}`);
+    console.log(`      - Slug matches: ${matchedBySlug}`);
+    console.log(`      - Total duplicates found: ${duplicatesFound}\n`);
 
     // Sync to database
     console.log('💾 Syncing to database...');
@@ -334,8 +415,8 @@ async function syncFromOpenRouter() {
     console.log('\n📊 Sync Summary:');
     console.log(`   ✅ Created: ${result.created} models`);
     console.log(`   ✅ Updated: ${result.updated} models`);
-    console.log(`   ⏭️  Skipped: ${openRouterModels.length - result.created - result.updated} models`);
-    console.log(`   📈 Total synced: ${result.created + result.updated} models\n`);
+    console.log(`   📈 Total synced: ${result.created + result.updated} models`);
+    console.log(`   🔗 Duplicates detected: ${duplicatesFound} models\n`);
 
     console.log('✨ Sync completed successfully!');
 
