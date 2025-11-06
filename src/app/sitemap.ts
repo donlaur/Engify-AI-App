@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { APP_URL } from '@/lib/constants';
 import { getDb } from '@/lib/mongodb';
+import { getCompletePillarPages } from '@/lib/data/pillar-pages';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
@@ -53,12 +54,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
-    {
-      url: `${baseUrl}/learn/prompt-engineering-masterclass`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
+    // Pillar pages - explicitly include all complete pillar pages
+    ...getCompletePillarPages().map((pillar) => ({
+      url: `${baseUrl}/learn/${pillar.slug}`,
+      lastModified: pillar.updatedAt || pillar.createdAt || now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9, // High priority for pillar pages
+    })),
     {
       url: `${baseUrl}/learn/chain-of-thought-guide`,
       lastModified: now,

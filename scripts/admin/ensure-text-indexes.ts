@@ -152,9 +152,49 @@ async function ensureTextIndexes() {
       }
     }
 
+    // 4. Learning resources collection - for RAG search (includes pillar pages)
+    console.log('Creating text index on learning_resources collection...');
+    try {
+      await db.collection('learning_resources').createIndex(
+        {
+          title: 'text',
+          description: 'text',
+          content: 'text',
+          contentHtml: 'text',
+          tags: 'text',
+          category: 'text',
+          type: 'text',
+          'seo.metaDescription': 'text',
+          'seo.keywords': 'text',
+        },
+        {
+          name: 'learning_resources_text_search',
+          weights: {
+            title: 10,
+            description: 8,
+            content: 5,
+            contentHtml: 5,
+            'seo.metaDescription': 4,
+            category: 3,
+            'seo.keywords': 3,
+            type: 2,
+            tags: 2,
+          },
+          default_language: 'english',
+        }
+      );
+      console.log('✅ Learning resources text index created\n');
+    } catch (error: any) {
+      if (error.code === 85 || error.codeName === 'IndexOptionsConflict') {
+        console.log('ℹ️  Learning resources text index already exists (skipping)\n');
+      } else {
+        throw error;
+      }
+    }
+
     // List all indexes
     console.log('📋 Current indexes:');
-    const collections = ['prompts', 'patterns', 'web_content'];
+    const collections = ['prompts', 'patterns', 'web_content', 'learning_resources'];
     for (const collName of collections) {
       const indexes = await db.collection(collName).indexes();
       console.log(`\n${collName}:`);

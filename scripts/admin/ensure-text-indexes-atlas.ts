@@ -166,9 +166,41 @@ async function ensureTextIndexes(mongoUri: string) {
       }
     );
 
+    // 4. Learning resources collection - for RAG search (includes pillar pages)
+    console.log('Ensuring text index on learning_resources collection...');
+    await ensureTextIndex(
+      'learning_resources',
+      'learning_resources_text_search',
+      {
+        title: 'text',
+        description: 'text',
+        content: 'text',
+        contentHtml: 'text',
+        tags: 'text',
+        category: 'text',
+        type: 'text',
+        'seo.metaDescription': 'text',
+        'seo.keywords': 'text',
+      },
+      {
+        weights: {
+          title: 10,
+          description: 8,
+          content: 5,
+          contentHtml: 5,
+          'seo.metaDescription': 4,
+          category: 3,
+          'seo.keywords': 3,
+          type: 2,
+          tags: 2,
+        },
+        default_language: 'english',
+      }
+    );
+
     // List all indexes
     console.log('📋 Current indexes:');
-    const collections = ['prompts', 'patterns', 'web_content'];
+    const collections = ['prompts', 'patterns', 'web_content', 'learning_resources'];
     for (const collName of collections) {
       const indexes = await db.collection(collName).indexes();
       console.log(`\n${collName}:`);

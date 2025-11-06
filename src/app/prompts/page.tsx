@@ -125,13 +125,113 @@ export default async function LibraryPage() {
       />
       <MainLayout>
         <div className="container py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="mb-2 text-4xl font-bold">Prompt Playbooks</h1>
-            <p className="text-lg text-muted-foreground">
-              Browse and discover {totalPrompts} proven prompt playbooks for your
-              workflow
+          {/* Hero Header */}
+          <div className="mb-8 text-center">
+            <h1 className="mb-4 text-4xl font-bold">Prompt Playbooks</h1>
+            <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
+              Browse and discover {totalPrompts} proven prompt playbooks for your workflow.
+              Expert-crafted prompts for engineers, managers, directors, and product teams.
             </p>
+          </div>
+
+          {/* Why Use Prompts Section */}
+          <div className="mb-8 rounded-lg border bg-card p-6 md:p-8">
+            <h2 className="mb-4 text-2xl font-bold">Why Use Proven Prompts?</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">⚡ Save Time & Increase Quality</h3>
+                <p className="text-sm text-muted-foreground">
+                  Well-crafted prompts produce better results faster. Our prompts are battle-tested 
+                  and optimized for clarity, specificity, and actionable outputs.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">🎯 Role-Specific Solutions</h3>
+                <p className="text-sm text-muted-foreground">
+                  Find prompts tailored to your role—from individual contributors to engineering directors. 
+                  Each prompt addresses real-world challenges specific to your responsibilities.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">📚 Learn Best Practices</h3>
+                <p className="text-sm text-muted-foreground">
+                  Every prompt follows proven patterns like Chain-of-Thought, KERNEL Framework, 
+                  and structured reasoning. Learn by example and improve your prompt engineering skills.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">🔄 Consistent Results</h3>
+                <p className="text-sm text-muted-foreground">
+                  Proven prompts deliver reliable, high-quality outputs. No more trial and error— 
+                  use prompts that have been refined through real-world application.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Types of Prompts Section */}
+          <div className="mb-8 rounded-lg border bg-card p-6 md:p-8">
+            <h2 className="mb-4 text-2xl font-bold">Types of Prompts</h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">🔧 Code Generation</h3>
+                <p className="text-sm text-muted-foreground">
+                  Generate code, refactor legacy systems, write tests, and create documentation. 
+                  Perfect for accelerating development workflows.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">📊 Architecture & Design</h3>
+                <p className="text-sm text-muted-foreground">
+                  System design, technical decisions, scalability planning, and architecture reviews. 
+                  Essential for senior engineers and architects.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">👥 Leadership & Management</h3>
+                <p className="text-sm text-muted-foreground">
+                  1-on-1s, performance reviews, team building, and strategic planning. 
+                  Designed for managers, directors, and VPs.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">🐛 Debugging & Troubleshooting</h3>
+                <p className="text-sm text-muted-foreground">
+                  Root cause analysis, error diagnosis, performance optimization, and incident response. 
+                  Critical for on-call engineers and SREs.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">📈 Product & Strategy</h3>
+                <p className="text-sm text-muted-foreground">
+                  PRDs, roadmaps, user research, A/B testing, and product strategy. 
+                  Tailored for product managers and product directors.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-2 text-lg font-semibold">🔍 Code Review & Quality</h3>
+                <p className="text-sm text-muted-foreground">
+                  Automated code reviews, security audits, best practices, and quality gates. 
+                  Improve code quality and catch issues early.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Compact Stats */}
+          <div className="mb-8 grid grid-cols-3 gap-4">
+            <div className="rounded-lg border bg-card p-4 text-center">
+              <div className="text-2xl font-bold">{totalPrompts}</div>
+              <div className="text-xs text-muted-foreground">Total Prompts</div>
+            </div>
+            <div className="rounded-lg border bg-card p-4 text-center">
+              <div className="text-2xl font-bold">{uniqueCategories.length}</div>
+              <div className="text-xs text-muted-foreground">Categories</div>
+            </div>
+            <div className="rounded-lg border bg-card p-4 text-center">
+              <div className="text-2xl font-bold">{uniqueRoles.length}</div>
+              <div className="text-xs text-muted-foreground">Roles</div>
+            </div>
           </div>
 
           {/* Client-side filtering component */}

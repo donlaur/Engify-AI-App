@@ -132,59 +132,105 @@ export function PatternsClient({
 
   return (
     <div className="container py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-primary-light dark:text-primary-light mb-2 text-4xl font-bold">
+      {/* Hero Header */}
+      <div className="mb-8 text-center">
+        <h1 className="mb-4 text-4xl font-bold">
           {patterns.length} Proven Patterns
         </h1>
-        <p className="text-secondary-light dark:text-secondary-light text-xl">
-          Master prompt engineering with battle-tested patterns from industry
-          leaders
+        <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
+          Master prompt engineering with battle-tested patterns from industry leaders.
+          Learn proven techniques to get better results from AI.
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="mb-8 grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
-              {patterns.length}
-            </div>
-            <p className="text-tertiary dark:text-tertiary text-xs">
-              Total Patterns
+      {/* Why Use Patterns Section */}
+      <div className="mb-8 rounded-lg border bg-card p-6 md:p-8">
+        <h2 className="mb-4 text-2xl font-bold">Why Follow Proven Patterns?</h2>
+        <div className="grid gap-6 md:grid-cols-2">
+          <div>
+            <h3 className="mb-2 text-lg font-semibold">🧠 Systematic Problem-Solving</h3>
+            <p className="text-sm text-muted-foreground">
+              Patterns provide structured approaches to complex problems. Instead of guessing, 
+              use proven frameworks like Chain-of-Thought or Cognitive Verifier to guide AI reasoning.
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
-              {new Set(patterns.map((p) => p.category)).size}
-            </div>
-            <p className="text-tertiary dark:text-tertiary text-xs">
-              Categories
+          </div>
+          <div>
+            <h3 className="mb-2 text-lg font-semibold">📈 Better Results, Consistently</h3>
+            <p className="text-sm text-muted-foreground">
+              Patterns are battle-tested techniques that produce higher-quality outputs. 
+              They help you avoid common pitfalls and achieve more reliable results.
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
-              {new Set(patterns.map((p) => p.level)).size}
-            </div>
-            <p className="text-tertiary dark:text-tertiary text-xs">
-              Skill Levels
+          </div>
+          <div>
+            <h3 className="mb-2 text-lg font-semibold">🎓 Learn from Experts</h3>
+            <p className="text-sm text-muted-foreground">
+              These patterns come from industry leaders, research papers, and real-world applications. 
+              Learn the techniques used by top AI practitioners and teams.
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
-              {totalPromptsUsingPatterns}
-            </div>
-            <p className="text-tertiary dark:text-tertiary text-xs">
-              Example Prompts
+          </div>
+          <div>
+            <h3 className="mb-2 text-lg font-semibold">🔄 Reusable & Scalable</h3>
+            <p className="text-sm text-muted-foreground">
+              Once you master a pattern, you can apply it across different contexts and use cases. 
+              Build a toolkit of patterns that work for your specific needs.
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Pattern Categories Section */}
+      <div className="mb-8 rounded-lg border bg-card p-6 md:p-8">
+        <h2 className="mb-4 text-2xl font-bold">Pattern Categories</h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <h3 className="mb-2 text-lg font-semibold">🔨 Foundational</h3>
+            <p className="text-sm text-muted-foreground">
+              Core patterns every prompt engineer should know. Basic techniques for structuring 
+              prompts and controlling output format.
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-2 text-lg font-semibold">🏗️ Structural</h3>
+            <p className="text-sm text-muted-foreground">
+              Patterns for organizing complex prompts. Templates, few-shot examples, and 
+              structured output formatting.
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-2 text-lg font-semibold">🧩 Cognitive</h3>
+            <p className="text-sm text-muted-foreground">
+              Advanced reasoning patterns. Chain-of-Thought, Cognitive Verifier, and techniques 
+              that improve AI's problem-solving capabilities.
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-2 text-lg font-semibold">🔄 Iterative</h3>
+            <p className="text-sm text-muted-foreground">
+              Patterns for refinement and improvement. Self-consistency, meta-prompting, and 
+              techniques that iterate toward better solutions.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Compact Stats */}
+      <div className="mb-8 grid grid-cols-4 gap-4">
+        <div className="rounded-lg border bg-card p-4 text-center">
+          <div className="text-2xl font-bold">{patterns.length}</div>
+          <div className="text-xs text-muted-foreground">Total Patterns</div>
+        </div>
+        <div className="rounded-lg border bg-card p-4 text-center">
+          <div className="text-2xl font-bold">{new Set(patterns.map((p) => p.category)).size}</div>
+          <div className="text-xs text-muted-foreground">Categories</div>
+        </div>
+        <div className="rounded-lg border bg-card p-4 text-center">
+          <div className="text-2xl font-bold">{new Set(patterns.map((p) => p.level)).size}</div>
+          <div className="text-xs text-muted-foreground">Skill Levels</div>
+        </div>
+        <div className="rounded-lg border bg-card p-4 text-center">
+          <div className="text-2xl font-bold">{totalPromptsUsingPatterns}</div>
+          <div className="text-xs text-muted-foreground">Prompts Using Patterns</div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -322,7 +368,7 @@ export function PatternsClient({
             {totalPromptsUsingPatterns > 0
               ? `${totalPromptsUsingPatterns}+ `
               : ''}
-            expert prompts that use these patterns
+            expert prompts that implement these patterns
           </p>
           <Button
             size="lg"

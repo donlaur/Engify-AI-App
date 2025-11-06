@@ -9,6 +9,7 @@ import { ArticleRenderer } from '@/components/article/ArticleRenderer';
 import { RelatedArticles } from '@/components/features/RelatedArticles';
 import { HubSpokeLinks } from '@/components/features/HubSpokeLinks';
 import { CrossContentLinks } from '@/components/features/CrossContentLinks';
+import { ArticleFeedback } from '@/components/article/ArticleFeedback';
 import { getClient } from '@/lib/mongodb';
 
 interface PageProps {
@@ -165,9 +166,17 @@ export default async function ArticlePage({ params }: PageProps) {
               </Button>
             </div>
           </div>
+        </header>
 
+        {/* Content - Rendered Markdown with syntax highlighting, copy buttons, proper formatting */}
+        <ArticleRenderer content={article.content || article.contentHtml || ''} />
+
+        {/* Footer - Engagement and metadata */}
+        <footer className="mt-16 space-y-8 border-t pt-8">
+          {/* Tags - Moved from header to footer */}
           {article.tags && Array.isArray(article.tags) && article.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-4">
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Tags:</span>
               {article.tags.map((tag: string) => (
                 <Link
                   key={tag}
@@ -179,28 +188,12 @@ export default async function ArticlePage({ params }: PageProps) {
               ))}
             </div>
           )}
-        </header>
 
-        {/* Content - Rendered Markdown with syntax highlighting, copy buttons, proper formatting */}
-        <ArticleRenderer content={article.content || article.contentHtml || ''} />
-
-        {/* Footer - Engagement and metadata */}
-        <footer className="mt-16 space-y-8 border-t pt-8">
-          {/* Share buttons */}
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Was this article helpful?
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Icons.like className="mr-2 h-4 w-4" />
-                Helpful
-              </Button>
-              <Button variant="outline" size="sm">
-                Share
-              </Button>
-            </div>
-          </div>
+          {/* Feedback buttons */}
+          <ArticleFeedback
+            articleId={article._id?.toString() || article.id || ''}
+            articleSlug={article.seo?.slug || article.slug || params.slug}
+          />
 
           {/* Author info */}
           <div className="rounded-lg border bg-slate-50 p-6 dark:bg-slate-900">
