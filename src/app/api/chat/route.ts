@@ -219,10 +219,13 @@ Suggest specific pages: /prompts, /patterns, /learn, /workbench`;
     };
 
     // Cache the response for future requests (fire and forget)
+    // Cache with full source data for proper typing
     if (useRAG && sanitizedLastMessage) {
-      cacheRAGResponse(sanitizedLastMessage, responseData).catch((err) =>
-        console.error('Failed to cache response:', err)
-      );
+      cacheRAGResponse(sanitizedLastMessage, {
+        message: sanitizedResponse,
+        sources, // Full sources with content
+        usedRAG: sources.length > 0,
+      }).catch((err) => console.error('Failed to cache response:', err));
     }
 
     return NextResponse.json(responseData);
