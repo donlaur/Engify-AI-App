@@ -58,7 +58,7 @@ const levels = [
     name: 'Intermediate',
     value: 'intermediate',
     color:
-      'bg-brand-blue/20 text-brand-blue border-brand-blue/30 dark:bg-brand-blue/20 dark:text-brand-blue dark:border-brand-blue/30',
+      'bg-blue-50 text-blue-900 border-blue-300 dark:bg-blue-900/30 dark:text-blue-100 dark:border-blue-700',
   },
   {
     name: 'Advanced',
@@ -259,7 +259,7 @@ export function PatternsClient({
               <CardContent className="flex-shrink-0 space-y-3">
                 <Badge
                   variant="outline"
-                  className="border-brand-blue/30 bg-brand-blue/20 text-xs text-brand-blue dark:border-brand-blue/30 dark:bg-brand-blue/20 dark:text-brand-blue"
+                  className="border-blue-300 bg-blue-50 text-xs font-medium text-blue-900 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-100"
                 >
                   {pattern.category}
                 </Badge>
@@ -272,7 +272,7 @@ export function PatternsClient({
                         <Badge
                           key={idx}
                           variant="secondary"
-                          className="border-brand-blue/30 bg-brand-blue/20 text-xs text-brand-blue dark:border-brand-blue/30 dark:bg-brand-blue/20 dark:text-brand-blue"
+                          className="border-blue-300 bg-blue-50 text-xs font-medium text-blue-900 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-100"
                         >
                           {useCase}
                         </Badge>
