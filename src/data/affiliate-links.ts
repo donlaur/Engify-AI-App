@@ -124,6 +124,15 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
     notes: 'Google Gemini AI Studio with Simple Vibe Coder - check for partnership opportunities',
   },
 
+  perplexity: {
+    tool: 'Perplexity AI',
+    baseUrl: 'https://www.perplexity.ai',
+    referralUrl: undefined, // TODO: Check for Perplexity affiliate program
+    status: 'requested',
+    commission: 'TBD',
+    notes: 'AI search engine with browser - check for affiliate program',
+  },
+
   // AI Providers
   openai: {
     tool: 'OpenAI',
