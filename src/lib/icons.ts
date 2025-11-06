@@ -30,6 +30,7 @@ import {
   Minus,
   Edit,
   Trash2,
+  Save,
   Download,
   Upload,
   Share2,
@@ -166,6 +167,8 @@ export const Icons = {
   remove: Minus,
   edit: Edit,
   delete: Trash2,
+  trash: Trash2, // Alias for delete
+  save: Save,
   download: Download,
   upload: Upload,
   share: Share2,
@@ -249,6 +252,7 @@ export const Icons = {
   brain: Brain,
   link: Link,
   help: HelpCircle,
+  helpCircle: HelpCircle, // Alias for help
   focus: Focus,
   shield: Shield,
   tree: TreePine,
