@@ -23,9 +23,9 @@ import type { Metadata } from 'next';
 import { PreloadContentJson } from '@/components/features/PreloadContentJson';
 
 export const metadata: Metadata = {
-  title: 'Engify.ai - AI Training Platform for Engineering Teams',
+  title: 'Engify.ai - AI-Powered Processes for Engineering Teams',
   description:
-    'AI training platform for engineering teams. Train developers, engineers, and product managers to use AI effectively with structured learning paths, interactive workbenches, and proven prompt patterns.',
+    'Stop reinventing workflows. Start amplifying them. 300+ battle-tested prompts, 19 role-specific playbooks, automated guardrails. Built with engineering discipline.',
   keywords: [
     'AI training platform',
     'engineering teams',
@@ -37,17 +37,17 @@ export const metadata: Metadata = {
     'AI training for engineers',
   ],
   openGraph: {
-    title: 'Engify.ai - AI Training Platform for Engineering Teams',
+    title: 'Engify.ai - AI-Powered Processes for Engineering Teams',
     description:
-      'Train developers, engineers, and product managers to use AI effectively. Structured learning paths, interactive workbenches, and proven prompt patterns.',
+      'Stop reinventing workflows. Start amplifying them. 300+ battle-tested prompts, 19 role-specific playbooks, automated guardrails.',
     type: 'website',
     siteName: 'Engify.ai',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Engify.ai - AI Training Platform for Engineering Teams',
+    title: 'Engify.ai - AI-Powered Processes for Engineering Teams',
     description:
-      'Train developers, engineers, and product managers to use AI effectively.',
+      'Stop reinventing workflows. Start amplifying them. 300+ battle-tested prompts, 19 role-specific playbooks.',
     creator: '@engifyai',
   },
 };
@@ -86,18 +86,21 @@ export default async function Home() {
   const data = await getServerStats();
   const allowSignup = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
 
-  // Build stats for display
+  // Build stats for display - matching new hero messaging
   const stats = [
     {
-      label: 'Expert Prompts',
-      value: `${data.prompts?.total || data.stats?.prompts || 0}+`,
+      label: 'Prompts',
+      value: `${data.prompts?.total || data.stats?.prompts || 300}+`,
     },
     {
-      label: 'Proven Patterns',
-      value: `${data.patterns?.total || data.stats?.patterns || 0}`,
+      label: 'Roles',
+      value: '19',
     },
-    { label: 'AI Providers', value: '4' },
-    { label: 'Beta Access', value: 'Free' },
+    {
+      label: 'Patterns',
+      value: `${data.patterns?.total || data.stats?.patterns || 23}`,
+    },
+    { label: 'Production-Ready', value: '✓' },
   ];
 
   // Build role stats from data
@@ -151,11 +154,15 @@ export default async function Home() {
             </Badge>
 
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
-              Engify.ai
+              AI-Powered Processes for Engineering Teams
             </h1>
 
-            <p className="mx-auto max-w-3xl text-2xl font-semibold leading-relaxed text-white sm:text-3xl">
-              AI training platform for engineering teams. Train developers, engineers, and product managers to use AI effectively.
+            <p className="mx-auto max-w-3xl text-xl font-semibold leading-relaxed text-white sm:text-2xl">
+              Stop reinventing workflows. Start amplifying them.
+            </p>
+
+            <p className="mx-auto max-w-3xl text-lg leading-relaxed text-white/90">
+              300+ battle-tested prompts • 19 role-specific playbooks • Automated guardrails • Built with engineering discipline.
             </p>
 
             <div className="flex justify-center pt-8">
@@ -166,7 +173,7 @@ export default async function Home() {
                   asChild
                 >
                   <Link href="/prompts">
-                    Browse Prompt Playbook
+                    Explore Platform
                     <Icons.arrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -176,8 +183,8 @@ export default async function Home() {
                   className="w-full border-white/30 text-white hover:bg-white/10 sm:w-auto"
                   asChild
                 >
-                  <Link href="/signup">
-                    {allowSignup ? 'Start Free' : 'Request Beta Access'}
+                  <Link href="/built-in-public">
+                    Built in Public →
                   </Link>
                 </Button>
               </div>
