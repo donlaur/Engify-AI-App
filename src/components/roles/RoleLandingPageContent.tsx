@@ -13,7 +13,7 @@ import { Icons } from '@/lib/icons';
 import { RoleSelector } from '@/components/roles/RoleSelector';
 import { ScrollButton } from '@/components/roles/ScrollButton';
 import Link from 'next/link';
-import { getMongoDb } from '@/lib/db/mongodb';
+import { promptRepository, patternRepository } from '@/lib/db/repositories/ContentService';
 import { getDbRoleFromSlug, getRoleInfo } from '@/lib/utils/role-mapping';
 import { APP_URL } from '@/lib/constants';
 import { ROLE_CONTENT } from '@/lib/data/role-content';
@@ -26,22 +26,25 @@ interface RoleLandingPageProps {
 
 async function getPromptsByRole(role: string) {
   try {
-    const db = await getMongoDb();
-    const collection = db.collection('prompts');
-
-    // Public query - organizationId not required for public content
-    // This is intentional: public prompts are accessible to all users
-    const prompts = await collection
-      .find({
-        role: role.toLowerCase(),
-        isPublic: true,
+    // Use repository for public prompts by role
+    const prompts = await promptRepository.getByRole(role.toLowerCase());
+    
+    // Sort and limit in TypeScript (repository returns all matching prompts)
+    const sortedPrompts = prompts
+      .sort((a, b) => {
+        // Sort by featured first, then views, then quality score
+        if (a.isFeatured !== b.isFeatured) {
+          return a.isFeatured ? -1 : 1;
+        }
+        if ((b.views || 0) !== (a.views || 0)) {
+          return (b.views || 0) - (a.views || 0);
+        }
+        return (b.qualityScore || 0) - (a.qualityScore || 0);
       })
-      .sort({ isFeatured: -1, views: -1, qualityScore: -1 })
-      .limit(100)
-      .toArray();
+      .slice(0, 100);
 
-    return prompts.map((p) => ({
-      id: p.id || p._id?.toString() || '',
+    return sortedPrompts.map((p) => ({
+      id: p.id || '',
       slug: p.slug,
       title: p.title,
       description: p.description,
@@ -51,8 +54,8 @@ async function getPromptsByRole(role: string) {
       tags: p.tags || [],
       isFeatured: p.isFeatured || false,
       views: p.views || 0,
-      rating: p.rating || p.stats?.averageRating || 0,
-      ratingCount: p.ratingCount || p.stats?.totalRatings || 0,
+      rating: p.rating || 0,
+      ratingCount: p.ratingCount || 0,
       qualityScore: p.qualityScore || 0,
     }));
   } catch (error) {
@@ -63,16 +66,12 @@ async function getPromptsByRole(role: string) {
 
 async function getUseCasesFromPrompts(role: string): Promise<string[]> {
   try {
-    const db = await getMongoDb();
-    const prompts = await db.collection('prompts').find({
-      role: role.toLowerCase(),
-      isPublic: true,
-      useCases: { $exists: true, $ne: [] },
-    }).limit(20).toArray();
+    // Use repository and filter in TypeScript
+    const prompts = await promptRepository.getByRole(role.toLowerCase());
     
     const useCases = new Set<string>();
-    prompts.forEach((p: { useCases?: string[] }) => {
-      if (p.useCases && Array.isArray(p.useCases)) {
+    prompts.forEach((p) => {
+      if (p.useCases && Array.isArray(p.useCases) && p.useCases.length > 0) {
         p.useCases.forEach(uc => useCases.add(uc));
       }
     });
@@ -86,21 +85,19 @@ async function getUseCasesFromPrompts(role: string): Promise<string[]> {
 
 async function getRealLifeExamplesFromPrompts(role: string): Promise<string[]> {
   try {
-    const db = await getMongoDb();
-    const prompts = await db.collection('prompts').find({
-      role: role.toLowerCase(),
-      isPublic: true,
-      caseStudies: { $exists: true, $ne: [] },
-    }).limit(20).toArray();
+    // Use repository and filter in TypeScript
+    const prompts = await promptRepository.getByRole(role.toLowerCase());
     
     const examples: string[] = [];
-    prompts.forEach((p: { caseStudies?: Array<{ outcome?: string; metrics?: string; scenario?: string }>, title?: string }) => {
+    prompts.forEach((p) => {
       if (p.caseStudies && Array.isArray(p.caseStudies)) {
         p.caseStudies.forEach((cs) => {
-          if (cs.outcome && cs.metrics) {
-            examples.push(`${cs.outcome} ${cs.metrics}`);
-          } else if (cs.scenario && cs.outcome) {
-            examples.push(`${cs.scenario}: ${cs.outcome}`);
+          if (typeof cs === 'object' && cs !== null) {
+            if ('outcome' in cs && 'metrics' in cs && cs.outcome && cs.metrics) {
+              examples.push(`${cs.outcome} ${cs.metrics}`);
+            } else if ('scenario' in cs && 'outcome' in cs && cs.scenario && cs.outcome) {
+              examples.push(`${cs.scenario}: ${cs.outcome}`);
+            }
           }
         });
       }
@@ -115,18 +112,14 @@ async function getRealLifeExamplesFromPrompts(role: string): Promise<string[]> {
 
 async function getDailyTasksFromTags(role: string): Promise<string[]> {
   try {
-    const db = await getMongoDb();
-    const prompts = await db.collection('prompts').find({
-      role: role.toLowerCase(),
-      isPublic: true,
-      tags: { $exists: true, $ne: [] },
-    }).limit(50).toArray();
+    // Use repository and filter in TypeScript
+    const prompts = await promptRepository.getByRole(role.toLowerCase());
     
     // Extract task-related tags (common daily task keywords)
     const taskKeywords = new Set<string>();
     const taskPatterns = ['planning', 'review', 'meeting', 'documentation', 'analysis', 'communication', 'report', 'delegation', 'onboarding', 'interview'];
     
-    prompts.forEach((p: { tags?: string[], title?: string }) => {
+    prompts.forEach((p) => {
       if (p.tags && Array.isArray(p.tags)) {
         p.tags.forEach(tag => {
           const tagLower = tag.toLowerCase();
@@ -155,22 +148,20 @@ async function getDailyTasksFromTags(role: string): Promise<string[]> {
 
 async function getPatternsByRole(role: string) {
   try {
-    const db = await getMongoDb();
-    // Public query - organizationId not required for public content
-    // This is intentional: public prompts are accessible to all users
-    const prompts = await db.collection('prompts').find({ role, isPublic: true }).toArray();
+    // Use repository to get prompts by role
+    const prompts = await promptRepository.getByRole(role);
     const patternIds = [...new Set(prompts.map((p) => p.pattern).filter(Boolean))];
     
     if (patternIds.length === 0) return [];
     
-    const patterns = await db.collection('patterns')
-      .find({ id: { $in: patternIds } })
-      .toArray();
+    // Use pattern repository to get patterns by IDs
+    const allPatterns = await patternRepository.getAll();
+    const patterns = allPatterns.filter(p => patternIds.includes(p.id));
     
     return patterns.map((p) => ({
-      id: p.id || p._id?.toString() || '',
-      name: p.name || p.title,
-      description: p.description,
+      id: p.id || '',
+      name: p.name,
+      description: p.description || '',
       category: p.category,
     }));
   } catch (error) {
@@ -273,7 +264,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
   const realLifeExamples = dbRealLifeExamples.length > 0 ? dbRealLifeExamples : (roleContent?.realLifeExamples || []);
   const dailyTasks = dbDailyTasks.length > 0 ? dbDailyTasks : (roleContent?.dailyTasks || []);
   const aiPromptPatterns = patterns.length > 0 
-    ? patterns.map(p => p.name).filter(Boolean) 
+    ? patterns.map(p => p.name).filter((name): name is string => Boolean(name))
     : (roleContent?.aiPromptPatterns || []);
 
   // Get icon component - map icon names to Icons object keys
@@ -326,7 +317,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
               {roleInfo.title === 'VP of Engineering' && 'Scale Engineering at Scale.'}
               {roleInfo.title === 'VP of Product' && 'Scale Product Vision.'}
               {roleInfo.title === 'CTO' && 'Set Technical Strategy.'}
-              {!['Engineers', 'Engineering Managers', 'Product Managers', 'QA Engineers', 'Software Architects', 'DevOps & SRE', 'Scrum Masters', 'Product Owners', 'Directors & C-Level', 'Designers', 'Engineering Directors', 'Product Directors', 'VP of Engineering', 'VP of Product', 'CTO'].includes(roleInfo.title) && 'Level Up Your Skills.'}
+              {!['Engineers', 'Engineering Managers', 'Product Managers', 'QA Engineers', 'Software Architects', 'DevOps & SRE', 'Scrum Masters', 'Product Owners', 'Directors & C-Level', 'Designers', 'Engineering Directors', 'Product Directors', 'VP of Engineering', 'VP of Product', 'CTO'].includes(roleInfo.title ?? '') && 'Level Up Your Skills.'}
               <br />
               <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
                 {roleInfo.title === 'Engineers' && 'Ship Better.'}
@@ -339,12 +330,12 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
                 {roleInfo.title === 'Product Owners' && 'Ship Value.'}
                 {roleInfo.title === 'Directors & C-Level' && 'Ship Innovation.'}
                 {roleInfo.title === 'Designers' && 'Ship Delight.'}
-                {roleInfo.title === 'Engineering Directors' && 'Ship Excellence.'}
-                {roleInfo.title === 'Product Directors' && 'Ship Impact.'}
-                {roleInfo.title === 'VP of Engineering' && 'Ship Scale.'}
-                {roleInfo.title === 'VP of Product' && 'Ship Strategy.'}
-                {roleInfo.title === 'CTO' && 'Ship Vision.'}
-                {!['Engineers', 'Engineering Managers', 'Product Managers', 'QA Engineers', 'Software Architects', 'DevOps & SRE', 'Scrum Masters', 'Product Owners', 'Directors & C-Level', 'Designers', 'Engineering Directors', 'Product Directors', 'VP of Engineering', 'VP of Product', 'CTO'].includes(roleInfo.title) && 'Ship Success.'}
+              {roleInfo.title === 'Engineering Directors' && 'Ship Excellence.'}
+              {roleInfo.title === 'Product Directors' && 'Ship Impact.'}
+              {roleInfo.title === 'VP of Engineering' && 'Ship Scale.'}
+              {roleInfo.title === 'VP of Product' && 'Ship Strategy.'}
+              {roleInfo.title === 'CTO' && 'Ship Vision.'}
+              {!['Engineers', 'Engineering Managers', 'Product Managers', 'QA Engineers', 'Software Architects', 'DevOps & SRE', 'Scrum Masters', 'Product Owners', 'Directors & C-Level', 'Designers', 'Engineering Directors', 'Product Directors', 'VP of Engineering', 'VP of Product', 'CTO'].includes(roleInfo.title ?? '') && 'Ship Success.'}
               </span>
             </h1>
 
@@ -595,7 +586,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
                       )}
                     </div>
                     <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50" asChild>
-                      <Link href={`/prompts/${prompt.slug || prompt.id}`}>
+                      <Link href={`/prompts/${prompt.slug ?? prompt.id}`}>
                         View Prompt
                         <Icons.arrowRight className="ml-2 h-4 w-4" />
                       </Link>
