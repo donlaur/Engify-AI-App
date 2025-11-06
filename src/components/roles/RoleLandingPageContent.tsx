@@ -725,11 +725,11 @@ export async function RoleLandingPageContent({
                 {displayPrompts.map((prompt) => (
                   <Card
                     key={prompt.id}
-                    className="group border-2 border-gray-200 bg-white shadow-sm transition-all duration-300 hover:border-blue-300 hover:shadow-lg"
+                    className="group border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg"
                   >
                     <CardHeader>
                       <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="line-clamp-2 text-lg text-gray-900">
+                        <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
                           {prompt.title}
                         </CardTitle>
                         {prompt.isFeatured && (
@@ -825,14 +825,14 @@ export async function RoleLandingPageContent({
                 {patterns.map((pattern) => (
                   <Card
                     key={pattern.id}
-                    className="group border-2 border-gray-200 bg-white shadow-sm transition-all duration-300 hover:border-blue-300 hover:shadow-lg"
+                    className="group border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg"
                   >
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-gray-900">
-                        <Icons.zap className="h-5 w-5 text-blue-600" />
+                      <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                        <Icons.zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         {pattern.name}
                       </CardTitle>
-                      <CardDescription className="text-gray-600">
+                      <CardDescription className="text-gray-600 dark:text-gray-400">
                         {pattern.description}
                       </CardDescription>
                     </CardHeader>
@@ -878,7 +878,7 @@ export async function RoleLandingPageContent({
         )}
 
         {/* FAQ Section */}
-        <section className="container bg-white py-10">
+        <section className="container bg-white dark:bg-gray-900 py-10">
           <div className="mx-auto max-w-4xl">
             <FAQSection
               faqs={getRoleFAQs(dbRole)}
@@ -890,14 +890,14 @@ export async function RoleLandingPageContent({
         </section>
 
         {/* CTA */}
-        <section className="container bg-white py-10">
-          <Card className="mx-auto max-w-3xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 shadow-lg">
+        <section className="container bg-white dark:bg-gray-900 py-10">
+          <Card className="mx-auto max-w-3xl border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 shadow-lg">
             <CardContent className="space-y-4 py-8 text-center">
-              <IconComponent className="mx-auto h-12 w-12 text-blue-600" />
-              <h2 className="text-3xl font-bold text-gray-900">
+              <IconComponent className="mx-auto h-12 w-12 text-blue-600 dark:text-blue-400" />
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 Ready to Level Up?
               </h2>
-              <p className="mx-auto max-w-2xl text-base text-gray-700">
+              <p className="mx-auto max-w-2xl text-base text-gray-700 dark:text-gray-300">
                 Join {roleInfo.title.toLowerCase()} using AI to work smarter and
                 ship faster.
               </p>
