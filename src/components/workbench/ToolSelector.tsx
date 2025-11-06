@@ -64,13 +64,12 @@ export function ToolSelector({ selectedTool, onSelectTool }: ToolSelectorProps) 
                       <Badge variant="secondary" className={getCategoryColor(tool.category)}>
                         {tool.category}
                       </Badge>
-                      {tool.comingSoon && (
+                      {tool.comingSoon ? (
                         <Badge variant="outline" className="text-xs">
                           Coming Soon
                         </Badge>
-                      )}
-                      {!tool.requiresBackend && (
-                        <Badge variant="outline" className="text-xs">
+                      ) : (
+                        <Badge variant="outline" className="text-xs text-green-600 border-green-600">
                           ✓ Available
                         </Badge>
                       )}

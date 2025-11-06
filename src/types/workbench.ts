@@ -132,6 +132,7 @@ export const WORKBENCH_TOOLS: Record<WorkbenchToolId, WorkbenchTool> = {
     icon: 'target',
     category: 'strategy',
     requiresBackend: false,
+    comingSoon: true,
     features: [
       'OKR template generation',
       'Progress tracking forms',
@@ -147,6 +148,7 @@ export const WORKBENCH_TOOLS: Record<WorkbenchToolId, WorkbenchTool> = {
     icon: 'users',
     category: 'strategy',
     requiresBackend: false,
+    comingSoon: true,
     features: [
       'Team assessment tools',
       'Format recommendations',
@@ -162,6 +164,7 @@ export const WORKBENCH_TOOLS: Record<WorkbenchToolId, WorkbenchTool> = {
     icon: 'wrench',
     category: 'strategy',
     requiresBackend: false,
+    comingSoon: true,
     features: [
       'Business case generation',
       'ROI calculations',
