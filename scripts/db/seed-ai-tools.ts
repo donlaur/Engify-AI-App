@@ -55,8 +55,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       'Can be resource-intensive',
       'Occasional context window issues',
     ],
-    rating: 4.5,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['ide', 'vscode', 'claude', 'paid', 'popular'],
     icon: 'code',
   },
@@ -85,8 +85,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       'Smaller community',
       'Limited backend support',
     ],
-    rating: 4.0,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['ide', 'codeium', 'frontend', 'paid'],
     icon: 'zap',
   },
@@ -116,8 +116,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       'Less AI features than competitors',
       'GitHub integration required',
     ],
-    rating: 4.2,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['code-assistant', 'github', 'paid', 'enterprise'],
     icon: 'github',
   },
@@ -141,8 +141,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
     ],
     pros: ['Free option', 'Good performance', 'Multiple IDE support'],
     cons: ['Paid features limited', 'Smaller model options'],
-    rating: 4.0,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['code-assistant', 'free', 'ide-integration'],
     icon: 'sparkles',
   },
@@ -167,8 +167,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
     ],
     pros: ['Privacy options', 'Enterprise-ready', 'On-premise available'],
     cons: ['Less AI features', 'More expensive'],
-    rating: 3.8,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['code-assistant', 'privacy', 'enterprise', 'paid'],
     icon: 'shield',
   },
@@ -193,8 +193,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
     ],
     pros: ['No installation', 'Easy deployment', 'Good for education'],
     cons: ['Limited for production', 'Browser limitations'],
-    rating: 3.7,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['builder', 'browser', 'education', 'free-tier'],
     icon: 'globe',
   },
@@ -229,8 +229,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       'Terminal-focused (not full IDE)',
       'Some features require subscription',
     ],
-    rating: 4.0,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['terminal', 'ai-terminal', 'devops', 'macos'],
     icon: 'terminal',
   },
@@ -266,8 +266,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       'Limited customization',
       'Newer tool (less mature)',
     ],
-    rating: 4.0,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['builder', 'react', 'mvp', 'no-code'],
     icon: 'heart',
   },
@@ -303,8 +303,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       'Less control than coding',
       'Platform dependency',
     ],
-    rating: 3.8,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['builder', 'full-stack', 'free', 'prototyping'],
     icon: 'zap',
   },
@@ -340,8 +340,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       'Can be expensive for heavy use',
       'Limited to React/Next.js',
     ],
-    rating: 4.0,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['ui-generator', 'react', 'tailwind', 'vercel'],
     icon: 'sparkles',
   },
@@ -382,8 +382,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       'Requires Claude Pro subscription',
       'Less integrated than IDE tools',
     ],
-    rating: 4.5,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['code-assistant', 'anthropic', 'claude', 'paid', 'web-based'],
     icon: 'sparkles',
   },
@@ -425,8 +425,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       'Less control than traditional IDEs',
       'Gemini model limitations',
     ],
-    rating: 4.0,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['builder', 'google', 'gemini', 'free', 'vibe-coding', 'no-code'],
     icon: 'zap',
   },
@@ -462,8 +462,8 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       'Requires implementation',
       'Smaller ecosystem',
     ],
-    rating: 4.2,
-    reviewCount: 0,
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
     tags: ['protocol', 'framework', 'anthropic', 'integration'],
     icon: 'puzzle',
   },

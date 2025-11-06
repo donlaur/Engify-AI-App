@@ -399,7 +399,7 @@ const complianceRules = [
   
   {
     name: 'Mock engagement metrics (views/ratings) in production',
-    pattern: /(views|rating):\s*\d{3,}/g,
+    pattern: /(views|rating):\s*\d{1,}(\.\d+)?/g,
     check: (match, content, filePath) => {
       // Skip test files
       if (filePath.includes('.test.') || filePath.includes('.spec.') || filePath.includes('__tests__')) {
@@ -417,7 +417,7 @@ const complianceRules = [
       }
       
       // Check if it's starting at 0 (acceptable)
-      if (match.includes(': 0') || match.includes('= 0')) {
+      if (match.includes(': 0') || match.includes('= 0') || match.includes(': 0.0')) {
         return false;
       }
       

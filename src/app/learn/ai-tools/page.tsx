@@ -157,11 +157,12 @@ export default async function AIToolsHubPage() {
                               </CardDescription>
                             )}
                           </div>
-                          {tool.rating && (
+                          {/* Rating only shows when there are actual reviews */}
+                          {tool.rating && (tool.reviewCount ?? 0) > 0 && (
                             <div className="flex items-center gap-1">
-                              <Icons.star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              <Icons.heart className="h-4 w-4 fill-red-500 text-red-500" />
                               <span className="text-sm font-medium">
-                                {tool.rating}
+                                {tool.rating.toFixed(1)}
                               </span>
                             </div>
                           )}

@@ -120,11 +120,11 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                     billingDuration: 'P1M',
                   },
                 },
-            aggregateRating: tool.rating
+            aggregateRating: tool.rating && (tool.reviewCount ?? 0) > 0
               ? {
                   '@type': 'AggregateRating',
                   ratingValue: tool.rating,
-                  ratingCount: tool.reviewCount ?? 0,
+                  ratingCount: tool.reviewCount,
                 }
               : undefined,
           }),
@@ -154,16 +154,15 @@ export default async function AIToolDetailPage({ params }: PageProps) {
           <div className="mb-8">
             <div className="mb-4 flex items-center gap-3">
               <h1 className="text-4xl font-bold">{tool.name}</h1>
-              {tool.rating && (
+              {/* Rating only shows when there are actual reviews */}
+              {tool.rating && (tool.reviewCount ?? 0) > 0 && (
                 <div className="flex items-center gap-1">
-                  <Icons.star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="text-lg font-semibold">{tool.rating}</span>
-                  {(tool.reviewCount ?? 0) > 0 && (
-                    <span className="text-sm text-muted-foreground">
-                      ({tool.reviewCount}{' '}
-                      {tool.reviewCount === 1 ? 'review' : 'reviews'})
-                    </span>
-                  )}
+                  <Icons.heart className="h-5 w-5 fill-red-500 text-red-500" />
+                  <span className="text-lg font-semibold">{tool.rating.toFixed(1)}</span>
+                  <span className="text-sm text-muted-foreground">
+                    ({tool.reviewCount}{' '}
+                    {tool.reviewCount === 1 ? 'review' : 'reviews'})
+                  </span>
                 </div>
               )}
             </div>
