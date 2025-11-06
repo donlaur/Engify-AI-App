@@ -473,14 +473,6 @@ export default async function AIModelDetailPage({ params }: PageProps) {
                 </CardContent>
               </Card>
 
-              {/* CTA */}
-              <Button asChild className="w-full" size="lg">
-                <Link href="/demo">
-                  Try This Model
-                  <Icons.arrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-
               {/* Related Links */}
               <Card>
                 <CardHeader>
