@@ -109,7 +109,6 @@ export default function RAGChatPage() {
     'What workflows or guardrails should I have?',
     'What IDE or AI editor is best?',
     'How do AI coding assistants compare?',
-    'What is Chain of Thought prompting?',
   ];
 
   const SidebarContent = () => (
