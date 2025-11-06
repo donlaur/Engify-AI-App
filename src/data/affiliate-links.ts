@@ -17,10 +17,10 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
   cursor: {
     tool: 'Cursor',
     baseUrl: 'https://cursor.sh',
-    referralUrl: undefined, // TODO: Get Cursor referral link
-    status: 'requested',
-    commission: 'TBD',
-    notes: 'Reach out to Cursor team for partnership',
+    referralUrl: undefined, // Cursor confirmed no referral program
+    status: 'pending',
+    commission: 'N/A',
+    notes: 'Cursor confirmed - no referral/affiliate program available',
   },
 
   windsurf: {
