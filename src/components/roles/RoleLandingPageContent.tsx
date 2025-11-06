@@ -14,7 +14,7 @@ import { RoleSelector } from '@/components/roles/RoleSelector';
 import { ScrollButton } from '@/components/roles/ScrollButton';
 import Link from 'next/link';
 import { promptRepository, patternRepository } from '@/lib/db/repositories/ContentService';
-import { getDbRoleFromSlug, getRoleInfo } from '@/lib/utils/role-mapping';
+import { getRoleInfo } from '@/lib/utils/role-mapping';
 import { APP_URL } from '@/lib/constants';
 import { ROLE_CONTENT } from '@/lib/data/role-content';
 import { fetchPlatformStats } from '@/lib/stats/fetch-platform-stats';
@@ -226,7 +226,7 @@ export async function generateRoleMetadata({ slug, dbRole }: RoleLandingPageProp
   };
 }
 
-export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPageProps) {
+export async function RoleLandingPageContent({ slug: _slug, dbRole }: RoleLandingPageProps) {
   const roleInfo = getRoleInfo(dbRole);
   const prompts = await getPromptsByRole(dbRole);
   const patterns = await getPatternsByRole(dbRole);
@@ -663,7 +663,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
               <Icons.inbox className="mb-4 h-12 w-12 text-muted-foreground" />
               <h3 className="mb-2 text-2xl font-bold">No Prompts Yet</h3>
               <p className="mb-6 text-center text-muted-foreground">
-                We're working on creating prompts for {roleInfo.title.toLowerCase()}. Check back soon!
+                We&apos;re working on creating prompts for {roleInfo.title.toLowerCase()}. Check back soon!
               </p>
               <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium" asChild>
                 <Link href="/prompts">Browse All Prompts</Link>

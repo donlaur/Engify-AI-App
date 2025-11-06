@@ -443,7 +443,7 @@ export default async function AIToolsHubPage() {
             <div>
               <h3 className="mb-2 text-lg font-semibold">For Individual Developers</h3>
               <p className="mb-3 text-sm text-muted-foreground">
-                If you're a solo developer or freelancer, consider:
+                If you&apos;re a solo developer or freelancer, consider:
               </p>
               <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
                 <li>Free tier limits and pricing</li>
