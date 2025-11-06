@@ -127,17 +127,17 @@ export default async function LearnPage() {
         <div className="mb-12">
           <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-cyan-900/20">
             <CardContent className="p-8">
-              <div className="flex flex-col items-center gap-6 text-center lg:flex-row lg:text-left">
+              <div className="flex flex-col items-center gap-6 text-center md:flex-row md:text-left">
                 <div className="flex-shrink-0">
                   <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-blue-600">
                     <Icons.sparkles className="h-10 w-10 text-white" />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                     Ask Our AI Assistant
                   </h2>
-                  <p className="mb-4 text-lg text-gray-700 dark:text-gray-300">
+                  <p className="mb-4 text-base text-gray-700 dark:text-gray-300 sm:text-lg">
                     Get instant answers about prompt engineering, AI patterns, and best practices. Our RAG-powered chatbot searches through 300+ prompts and 23 patterns to give you accurate, sourced answers.
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -153,7 +153,7 @@ export default async function LearnPage() {
                   </div>
                 </div>
                 <div className="flex-shrink-0">
-                  <Button size="lg" asChild className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                  <Button size="lg" asChild className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 sm:w-auto">
                     <Link href="/rag-chat">
                       <Icons.sparkles className="mr-2 h-5 w-5" />
                       Try AI Assistant
