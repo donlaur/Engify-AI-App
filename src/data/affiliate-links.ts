@@ -26,10 +26,11 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
   windsurf: {
     tool: 'Windsurf (Codeium)',
     baseUrl: 'https://codeium.com/windsurf',
-    referralUrl: undefined, // TODO: Get Windsurf/Codeium referral link
-    status: 'requested',
-    commission: 'TBD',
-    notes: 'Contact Codeium for affiliate program',
+    referralUrl: 'https://windsurf.com/refer?referral_code=9e4uju62dcni2vev',
+    affiliateCode: '9e4uju62dcni2vev',
+    status: 'active',
+    commission: '250 bonus credits per referral',
+    notes: 'Windsurf referral program - 250 bonus credits when referred friends subscribe to Pro',
   },
 
   copilot: {
