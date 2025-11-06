@@ -144,7 +144,7 @@ export default function BuiltInPublicPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-600">
+              <p className="text-gray-200">
                 Started with Google&apos;s brand new AI Studio (vibe coder) to
                 validate the concept before writing any code.
               </p>
@@ -187,7 +187,7 @@ export default function BuiltInPublicPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-600">
+              <p className="text-gray-200">
                 Moved to Cursor + Claude. Focus: Ship in minutes, not hours.
               </p>
               <div className="space-y-2">
@@ -235,7 +235,7 @@ export default function BuiltInPublicPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-600">
+              <p className="text-gray-200">
                 Can&apos;t demo AI features without protecting API keys. This
                 had to be production-ready.
               </p>
@@ -288,7 +288,7 @@ export default function BuiltInPublicPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-600">
+              <p className="text-gray-200">
                 45 minutes for UI that looks like a funded startup.
               </p>
               <div className="space-y-2">
@@ -324,7 +324,7 @@ export default function BuiltInPublicPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-600">
+              <p className="text-gray-200">
                 OpenAI + Google AI integration with tracking and analytics.
               </p>
               <div className="overflow-x-auto rounded-lg bg-slate-900 p-4 font-mono text-sm text-white">
