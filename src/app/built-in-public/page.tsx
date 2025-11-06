@@ -469,47 +469,47 @@ export default function BuiltInPublicPage() {
           </Card>
 
           {/* Philosophy */}
-          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 dark:border-blue-800 dark:from-blue-900/30 dark:to-cyan-900/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Icons.lightbulb className="h-6 w-6 text-blue-600" />
+                <Icons.lightbulb className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 The Philosophy
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div>
-                  <p className="font-semibold text-blue-900">
+                  <p className="font-semibold text-blue-900 dark:text-blue-100">
                     1. AI-Augmented, Not AI-Generated
                   </p>
-                  <p className="text-sm text-blue-800">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
                     AI suggests, human decides. AI writes boilerplate, human
                     writes logic.
                   </p>
                 </div>
                 <div>
-                  <p className="font-semibold text-blue-900">
+                  <p className="font-semibold text-blue-900 dark:text-blue-100">
                     2. Ship Fast, Iterate Faster
                   </p>
-                  <p className="text-sm text-blue-800">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
                     TypeScript files → Database (when needed). Mock → Real APIs
                     (when validated).
                   </p>
                 </div>
                 <div>
-                  <p className="font-semibold text-blue-900">
+                  <p className="font-semibold text-blue-900 dark:text-blue-100">
                     3. Production Quality from Day One
                   </p>
-                  <p className="text-sm text-blue-800">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
                     Real auth, real APIs, real error handling. No shortcuts on
                     fundamentals.
                   </p>
                 </div>
                 <div>
-                  <p className="font-semibold text-blue-900">
+                  <p className="font-semibold text-blue-900 dark:text-blue-100">
                     4. Progressive Enhancement
                   </p>
-                  <p className="text-sm text-blue-800">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
                     Start simple, add complexity as needed. Pre-commit hooks
                     added when patterns emerged.
                   </p>
