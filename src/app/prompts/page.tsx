@@ -92,6 +92,17 @@ export default async function LibraryPage() {
 
   const totalPrompts = sortedPrompts.length;
 
+  // Calculate unique patterns and pattern stats
+  const uniquePatterns = [...new Set(sortedPrompts.map((p) => p.pattern).filter(Boolean))]
+    .sort((a, b) => (a || '').localeCompare(b || ''));
+  
+  const patternStats = sortedPrompts.reduce((acc, prompt) => {
+    if (prompt.pattern) {
+      acc[prompt.pattern] = (acc[prompt.pattern] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
+
   // Generate JSON-LD structured data for SEO - include ALL prompts
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -239,8 +250,10 @@ export default async function LibraryPage() {
             initialPrompts={sortedPrompts as never}
             categoryStats={categoryStats}
             roleStats={roleStats}
+            patternStats={patternStats}
             uniqueCategories={uniqueCategories}
             uniqueRoles={uniqueRoles}
+            uniquePatterns={uniquePatterns}
           />
         </div>
       </MainLayout>

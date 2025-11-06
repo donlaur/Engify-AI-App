@@ -33,14 +33,17 @@ interface LibraryClientProps {
   initialPrompts: Prompt[];
   categoryStats: Record<string, number>;
   roleStats: Record<string, number>;
+  patternStats: Record<string, number>;
   uniqueCategories: string[];
   uniqueRoles: string[];
+  uniquePatterns: string[];
 }
 
 type SortOption = 'alphabetical' | 'last-modified' | 'version' | 'category';
 
 const INITIAL_VISIBLE_CATEGORIES = 8;
 const INITIAL_VISIBLE_ROLES = 10;
+const INITIAL_VISIBLE_PATTERNS = 8;
 const INITIAL_VISIBLE_PROMPTS = 18; // Show 18 initially (6 rows x 3 columns) - but ALL are in HTML for SEO
 const LOAD_MORE_INCREMENT = 18; // Load 18 more at a time
 
@@ -48,8 +51,10 @@ export function LibraryClient({
   initialPrompts,
   categoryStats,
   roleStats,
+  patternStats,
   uniqueCategories,
   uniqueRoles,
+  uniquePatterns,
 }: LibraryClientProps) {
   const searchParams = useSearchParams();
   const filterParam = searchParams.get('filter');
@@ -60,8 +65,10 @@ export function LibraryClient({
     PromptCategory | 'all'
   >('all');
   const [selectedRole, setSelectedRole] = useState<UserRole | 'all'>('all');
+  const [selectedPattern, setSelectedPattern] = useState<string | 'all'>('all');
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllRoles, setShowAllRoles] = useState(false);
+  const [showAllPatterns, setShowAllPatterns] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('alphabetical');
   const [visiblePromptCount, setVisiblePromptCount] = useState(
     INITIAL_VISIBLE_PROMPTS
@@ -78,6 +85,7 @@ export function LibraryClient({
     searchQuery,
     selectedCategory,
     selectedRole,
+    selectedPattern,
     showFavoritesOnly,
     favorites,
     sortBy,
@@ -93,8 +101,10 @@ export function LibraryClient({
         selectedCategory === 'all' || prompt.category === selectedCategory;
       const matchesRole =
         selectedRole === 'all' || prompt.role === selectedRole;
+      const matchesPattern =
+        selectedPattern === 'all' || prompt.pattern === selectedPattern;
 
-      return matchesSearch && matchesCategory && matchesRole;
+      return matchesSearch && matchesCategory && matchesRole && matchesPattern;
     });
 
     // Apply favorites filter if active
@@ -135,6 +145,7 @@ export function LibraryClient({
     searchQuery,
     selectedCategory,
     selectedRole,
+    selectedPattern,
     showFavoritesOnly,
     favorites,
     sortBy,
@@ -212,6 +223,11 @@ export function LibraryClient({
     ...(uniqueRoles as UserRole[]),
   ];
 
+  const allPatterns: Array<string | 'all'> = [
+    'all',
+    ...uniquePatterns,
+  ];
+
   // Limit visible items with "Show More" functionality
   const visibleCategories = showAllCategories
     ? allCategories
@@ -220,6 +236,19 @@ export function LibraryClient({
   const visibleRoles = showAllRoles
     ? allRoles
     : allRoles.slice(0, INITIAL_VISIBLE_ROLES);
+
+  const visiblePatterns = showAllPatterns
+    ? allPatterns
+    : allPatterns.slice(0, INITIAL_VISIBLE_PATTERNS);
+
+  // Format pattern name from kebab-case to Title Case
+  const formatPatternName = (pattern: string): string => {
+    if (pattern === 'all') return 'All';
+    return pattern
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
 
   return (
     <>
@@ -246,40 +275,6 @@ export function LibraryClient({
           </div>
         </div>
       )}
-
-      {/* Stats Panel */}
-      <div className="mb-6 grid gap-4 md:grid-cols-3">
-        <Card className="surface-frosted">
-          <CardContent className="pt-6">
-            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
-              {showFavoritesOnly
-                ? filteredPrompts.length
-                : initialPrompts.length}
-            </div>
-            <p className="text-tertiary dark:text-tertiary text-xs">
-              {showFavoritesOnly ? 'Favorite Prompts' : 'Total Prompts'}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="surface-frosted">
-          <CardContent className="pt-6">
-            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
-              {uniqueCategories.length}
-            </div>
-            <p className="text-tertiary dark:text-tertiary text-xs">
-              Categories
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="surface-frosted">
-          <CardContent className="pt-6">
-            <div className="text-primary-light dark:text-primary-light text-2xl font-bold">
-              {uniqueRoles.length}
-            </div>
-            <p className="text-tertiary dark:text-tertiary text-xs">Roles</p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Search and Filters */}
       <div className="mb-8 space-y-4">
@@ -399,6 +394,58 @@ export function LibraryClient({
             )}
           </div>
         </div>
+
+        {/* Pattern Filter */}
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-medium">Pattern</p>
+            {selectedPattern !== 'all' && (
+              <span className="text-xs text-muted-foreground">
+                {patternStats[selectedPattern] || 0} prompts
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {visiblePatterns.map((pattern) => (
+              <Badge
+                key={pattern}
+                variant={selectedPattern === pattern ? 'default' : 'outline'}
+                className="cursor-pointer transition-colors hover:bg-primary/10"
+                onClick={() => {
+                  setSelectedPattern(pattern);
+                  if (pattern !== 'all') {
+                    trackFilterUsage('pattern', pattern, {
+                      result_count: filteredPrompts.length,
+                    });
+                  }
+                }}
+              >
+                {pattern === 'all'
+                  ? `All (${initialPrompts.length})`
+                  : `${formatPatternName(pattern)} (${patternStats[pattern] || 0})`}
+              </Badge>
+            ))}
+            {allPatterns.length > INITIAL_VISIBLE_PATTERNS && (
+              <Badge
+                variant="ghost"
+                className="cursor-pointer text-primary hover:bg-primary/10"
+                onClick={() => setShowAllPatterns(!showAllPatterns)}
+              >
+                {showAllPatterns ? (
+                  <>
+                    <Icons.chevronUp className="mr-1 h-3 w-3" />
+                    Show Less
+                  </>
+                ) : (
+                  <>
+                    <Icons.chevronDown className="mr-1 h-3 w-3" />
+                    Show {allPatterns.length - INITIAL_VISIBLE_PATTERNS} More
+                  </>
+                )}
+              </Badge>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Results Count */}
@@ -429,12 +476,14 @@ export function LibraryClient({
           
           {(searchQuery ||
             selectedCategory !== 'all' ||
-            selectedRole !== 'all') && (
+            selectedRole !== 'all' ||
+            selectedPattern !== 'all') && (
             <button
               onClick={() => {
                 setSearchQuery('');
                 setSelectedCategory('all');
                 setSelectedRole('all');
+                setSelectedPattern('all');
               }}
               className="text-sm text-primary hover:underline"
             >
