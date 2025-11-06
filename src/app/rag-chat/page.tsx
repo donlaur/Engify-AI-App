@@ -107,7 +107,6 @@ export default function RAGChatPage() {
     'How do I improve my prompting?',
     'How do I use AI in engineering workflows?',
     'What workflows or guardrails should I have?',
-    'What IDE or AI editor is best?',
     'How do AI coding assistants compare?',
   ];
 
@@ -115,10 +114,10 @@ export default function RAGChatPage() {
     <div className="space-y-4">
       {/* Quick Questions */}
       <Card className="border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-900/20">
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base text-purple-900 dark:text-purple-100">Quick Questions</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-2 px-4">
           {quickQuestions.map((question, index) => (
             <Button
               key={index}
