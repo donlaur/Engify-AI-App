@@ -155,7 +155,7 @@ export default async function LearnPage() {
                 <div className="flex-shrink-0">
                   <Button size="lg" asChild className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
                     <Link href="/rag-chat">
-                      <Icons.messageCircle className="mr-2 h-5 w-5" />
+                      <Icons.sparkles className="mr-2 h-5 w-5" />
                       Try AI Assistant
                     </Link>
                   </Button>
