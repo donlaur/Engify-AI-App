@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
@@ -25,6 +25,22 @@ export default function PatternPlaygroundPage() {
   const [userInput, setUserInput] = useState('');
   const [selectedPattern, setSelectedPattern] = useState('persona');
   const [transformedPrompt, setTransformedPrompt] = useState('');
+  const [promptCount, setPromptCount] = useState(300);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setPromptCount(data.prompts?.total || data.stats?.prompts || 300);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    }
+    fetchStats();
+  }, []);
 
   const transformPrompt = (input: string, pattern: string): string => {
     if (!input.trim()) return '';
@@ -270,7 +286,7 @@ export default function PatternPlaygroundPage() {
             Ready to Apply These Patterns?
           </h2>
           <p className="mb-6 text-gray-600">
-            Browse our library of 100+ prompts using these patterns
+            Browse our library of {promptCount}+ prompts using these patterns
           </p>
           <Button size="lg" asChild>
             <Link href="/prompts">

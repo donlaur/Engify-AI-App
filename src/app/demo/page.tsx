@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
@@ -62,6 +62,8 @@ export default function DemoPage() {
   const [prompt, setPrompt] = useState('');
   const [pattern, setPattern] = useState('persona');
   const [selectedDemo, setSelectedDemo] = useState<number | null>(null);
+  const [promptCount, setPromptCount] = useState(300);
+  const [patternCount, setPatternCount] = useState(15);
 
   // Check for pre-filled prompt from URL
   React.useEffect(() => {
@@ -70,6 +72,22 @@ export default function DemoPage() {
     if (urlPrompt) {
       setPrompt(decodeURIComponent(urlPrompt));
     }
+  }, []);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setPromptCount(data.prompts?.total || data.stats?.prompts || 300);
+          setPatternCount(data.patterns?.total || data.stats?.patterns || 15);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    }
+    fetchStats();
   }, []);
 
   const handleDemoSelect = (index: number) => {
@@ -235,7 +253,7 @@ export default function DemoPage() {
               Ready to Master Prompt Engineering?
             </h3>
             <p className="mb-6 text-muted-foreground">
-              Access 67+ expert prompts, 15 proven patterns, and interactive
+              Access {promptCount}+ expert prompts, {patternCount} proven patterns, and interactive
               learning
             </p>
             <div className="flex justify-center gap-4">

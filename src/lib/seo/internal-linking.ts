@@ -10,6 +10,7 @@ import {
   learningResourceRepository,
 } from '@/lib/db/repositories/ContentService';
 import { getPromptSlug } from '@/lib/utils/slug';
+import { getCompletePillarPages, type PillarPageConfig } from '@/lib/data/pillar-pages';
 
 export interface InternalLink {
   url: string;
@@ -21,16 +22,92 @@ export interface InternalLink {
 
 /**
  * Find links to pillar pages
- * Returns link to prompt engineering masterclass pillar page
+ * Returns all complete pillar pages that match the given tags/roles
+ * If no tags/roles provided, returns the primary pillar page (Prompt Engineering Masterclass)
  */
-export async function findPillarPageLink(): Promise<InternalLink | null> {
+export async function findPillarPageLink(
+  tags?: string[],
+  role?: string
+): Promise<InternalLink | null> {
+  const completePillars = getCompletePillarPages();
+  
+  // If no filters, return the primary pillar page
+  if (!tags && !role) {
+    const primaryPillar = completePillars.find(
+      (p) => p.id === 'prompt-engineering-masterclass'
+    );
+    if (primaryPillar) {
+      return pillarPageToInternalLink(primaryPillar);
+    }
+  }
+  
+  // Find matching pillar pages
+  let matchingPillars: PillarPageConfig[] = completePillars;
+  
+  if (tags && tags.length > 0) {
+    matchingPillars = matchingPillars.filter((pillar) =>
+      pillar.relatedTags?.some((tag) => tags.includes(tag))
+    );
+  }
+  
+  if (role) {
+    matchingPillars = matchingPillars.filter((pillar) =>
+      pillar.relatedRoles?.includes(role)
+    );
+  }
+  
+  // Return the first matching pillar, or primary if none match
+  const selectedPillar = matchingPillars[0] || completePillars[0];
+  return selectedPillar ? pillarPageToInternalLink(selectedPillar) : null;
+}
+
+/**
+ * Find all relevant pillar pages for given tags/roles
+ */
+export async function findPillarPageLinks(
+  tags?: string[],
+  role?: string,
+  limit = 3
+): Promise<InternalLink[]> {
+  const completePillars = getCompletePillarPages();
+  
+  let matchingPillars: PillarPageConfig[] = completePillars;
+  
+  if (tags && tags.length > 0) {
+    matchingPillars = matchingPillars.filter((pillar) =>
+      pillar.relatedTags?.some((tag) => tags.includes(tag))
+    );
+  }
+  
+  if (role) {
+    matchingPillars = matchingPillars.filter((pillar) =>
+      pillar.relatedRoles?.includes(role)
+    );
+  }
+  
+  // If no matches, return primary pillar
+  if (matchingPillars.length === 0) {
+    const primaryPillar = completePillars.find(
+      (p) => p.id === 'prompt-engineering-masterclass'
+    );
+    return primaryPillar ? [pillarPageToInternalLink(primaryPillar)] : [];
+  }
+  
+  return matchingPillars
+    .slice(0, limit)
+    .map((pillar) => pillarPageToInternalLink(pillar));
+}
+
+/**
+ * Convert PillarPageConfig to InternalLink
+ */
+function pillarPageToInternalLink(pillar: PillarPageConfig): InternalLink {
   return {
-    url: '/learn/prompt-engineering-masterclass',
-    anchorText: 'Prompt Engineering Masterclass',
+    url: `/learn/${pillar.slug}`,
+    anchorText: pillar.title,
     type: 'article',
-    title: 'Prompt Engineering Masterclass: Complete Guide for Developers',
-    description:
-      'Master prompt engineering with this comprehensive guide. Learn proven patterns, advanced techniques, and practical examples.',
+    title: pillar.title,
+    description: pillar.description,
   };
 }
 

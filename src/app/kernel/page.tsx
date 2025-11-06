@@ -2,6 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -16,6 +17,22 @@ import { Icons } from '@/lib/icons';
 import Link from 'next/link';
 
 export default function KERNELPage() {
+  const [promptCount, setPromptCount] = useState(300);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setPromptCount(data.prompts?.total || data.stats?.prompts || 300);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    }
+    fetchStats();
+  }, []);
   const principles = [
     {
       letter: 'K',
@@ -283,7 +300,7 @@ export default function KERNELPage() {
             <Icons.sparkles className="mx-auto h-16 w-16 text-primary" />
             <h2 className="text-4xl font-bold">Ready to Apply KERNEL?</h2>
             <p className="text-xl text-gray-600">
-              Browse our library of 100+ prompts built with the KERNEL framework
+              Browse our library of {promptCount}+ prompts built with the KERNEL framework
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button

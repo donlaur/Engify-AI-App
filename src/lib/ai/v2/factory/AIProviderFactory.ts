@@ -35,7 +35,7 @@ export class AIProviderFactory {
     // Claude models
     ['claude', () => new ClaudeAdapter('claude-3-haiku-20240307')],
     ['claude-haiku', () => new ClaudeAdapter('claude-3-haiku-20240307')],
-    ['claude-sonnet', () => new ClaudeAdapter('claude-3-5-sonnet-20241022')], // Use working version
+    ['claude-sonnet', () => new ClaudeAdapter('claude-3-5-sonnet-20250219')], // Latest non-deprecated version
     ['claude-opus', () => new ClaudeAdapter('claude-3-opus-20240229')],
 
     // Gemini models (VERIFIED Oct 31, 2025 - 1.5 models SUNSET!)

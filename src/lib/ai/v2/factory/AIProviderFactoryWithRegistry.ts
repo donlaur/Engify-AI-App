@@ -26,7 +26,7 @@ const PROVIDER_TO_MODEL_ID: Record<string, string> = {
   'openai-gpt4o': 'gpt-4o',
   'claude': 'claude-3-haiku-20240307',
   'claude-haiku': 'claude-3-haiku-20240307',
-  'claude-sonnet': 'claude-3-5-sonnet-20241022', // Use working version
+  'claude-sonnet': 'claude-3-5-sonnet-20250219', // Latest non-deprecated version
   'claude-opus': 'claude-3-opus-20240229',
   'gemini': 'gemini-2.0-flash-exp',
   'gemini-pro': 'gemini-2.0-flash-exp',

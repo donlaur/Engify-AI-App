@@ -34,7 +34,7 @@ export async function CrossContentLinks({
       findRelatedContent(contentType, excludeId || '', tags, category, 3),
       findRelatedContent(contentType, excludeId || '', tags, category, 3),
       findRelatedContent(contentType, excludeId || '', tags, category, 3),
-      findPillarPageLink(),
+      findPillarPageLink(tags), // Pass tags to find relevant pillar pages
     ]);
 
   const prompts = relatedPrompts.filter((link) => link.type === 'prompt');

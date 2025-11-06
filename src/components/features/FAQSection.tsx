@@ -64,12 +64,12 @@ export function FAQSection({
         {(title || description) && (
           <div className="mb-6">
             {title && (
-              <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h2 className="mb-2 text-3xl font-bold text-foreground">
                 {title}
               </h2>
             )}
             {description && (
-              <p className="text-base text-gray-600 dark:text-gray-400">
+              <p className="text-base text-foreground/80">
                 {description}
               </p>
             )}
@@ -82,7 +82,7 @@ export function FAQSection({
             return (
               <Card
                 key={index}
-                className="border border-gray-200 bg-white transition-all hover:border-blue-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-600"
+                className="border border-border bg-card transition-all hover:border-primary/50 dark:border-border dark:bg-card dark:hover:border-primary/50"
               >
                 <CardHeader
                   className="cursor-pointer pb-3"
@@ -98,22 +98,22 @@ export function FAQSection({
                   aria-expanded={isExpanded}
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <h3 className="flex-1 pr-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <h3 className="flex-1 pr-4 text-lg font-semibold text-foreground">
                       {faq.question}
                     </h3>
                     <div className="flex-shrink-0">
                       {isExpanded ? (
-                        <Icons.chevronUp className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                        <Icons.chevronUp className="h-5 w-5 text-muted-foreground" />
                       ) : (
-                        <Icons.chevronDown className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                        <Icons.chevronDown className="h-5 w-5 text-muted-foreground" />
                       )}
                     </div>
                   </div>
                 </CardHeader>
                 {isExpanded && (
                   <CardContent className="pb-4 pt-0">
-                    <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
-                      <p className="whitespace-pre-line">{faq.answer}</p>
+                    <div className="prose prose-sm max-w-none text-foreground/90 dark:text-foreground/90">
+                      <p className="whitespace-pre-line leading-relaxed">{faq.answer}</p>
                     </div>
                   </CardContent>
                 )}
