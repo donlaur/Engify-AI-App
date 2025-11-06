@@ -183,7 +183,7 @@ export default async function LearnPage() {
           {/* Pillar Articles */}
           <div>
             <h3 className="mb-4 text-2xl font-bold">Comprehensive Guides</h3>
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               <Card className="surface-frosted surface-frosted-hover transition-all duration-200 hover:border-primary hover:shadow-xl">
                 <CardHeader>
                   <Badge className="mb-2 w-fit bg-blue-100 text-blue-800">Pillar Article</Badge>
@@ -231,6 +231,24 @@ export default async function LearnPage() {
                 <CardContent>
                   <Button asChild variant="outline" className="w-full">
                     <Link href="/learn/ultimate-guide-to-ai-assisted-software-development">
+                      Read Guide
+                      <Icons.arrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="surface-frosted surface-frosted-hover transition-all duration-200 hover:border-primary hover:shadow-xl">
+                <CardHeader>
+                  <Badge className="mb-2 w-fit bg-orange-100 text-orange-800">Pillar Article</Badge>
+                  <CardTitle className="text-lg">Context Engineering vs Prompt Engineering</CardTitle>
+                  <CardDescription>
+                    Learn the key differences and when to use each approach for better AI results
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/learn/context-engineering-vs-prompt-engineering">
                       Read Guide
                       <Icons.arrowRight className="ml-2 h-4 w-4" />
                     </Link>
