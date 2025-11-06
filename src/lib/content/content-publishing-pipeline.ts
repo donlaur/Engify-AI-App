@@ -1153,11 +1153,48 @@ Provide your review in JSON format as specified in your system prompt.
         jsonContent = jsonContent.replace(/,(\s*$)/gm, ''); // Remove trailing commas at end of lines
         
         // Handle truncated strings - find incomplete string values and close them
+        // This handles strings that are cut off mid-value, especially in nested objects
         // Pattern: "key": "value that might be truncated...
-        jsonContent = jsonContent.replace(/"([^"]+)"\s*:\s*"([^"]*?)(?:"|$)/g, (match, key, value) => {
-          // If value doesn't end with quote and we're near end of content, close it
-          if (!match.endsWith('"') && jsonContent.indexOf(match) + match.length > jsonContent.length - 50) {
-            return `"${key}": "${value.replace(/"/g, '\\"')}"`;
+        const stringPattern = /"([^"]+)"\s*:\s*"([^"]*?)(?:"|$)/g;
+        let match;
+        const replacements: Array<{ start: number; end: number; replacement: string }> = [];
+        
+        while ((match = stringPattern.exec(jsonContent)) !== null) {
+          const fullMatch = match[0];
+          const key = match[1];
+          const value = match[2];
+          const matchStart = match.index;
+          const matchEnd = matchStart + fullMatch.length;
+          
+          // Check if this string value is incomplete (doesn't end with quote)
+          // and we're near the end of the content (likely truncated)
+          if (!fullMatch.endsWith('"')) {
+            const distanceFromEnd = jsonContent.length - matchEnd;
+            if (distanceFromEnd < 100) {
+              // This string is likely truncated - close it
+              const safeValue = value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+              replacements.push({
+                start: matchStart,
+                end: matchEnd,
+                replacement: `"${key}": "${safeValue}"`,
+              });
+            }
+          }
+        }
+        
+        // Apply replacements in reverse order to preserve indices
+        for (let i = replacements.length - 1; i >= 0; i--) {
+          const r = replacements[i];
+          jsonContent = jsonContent.substring(0, r.start) + r.replacement + jsonContent.substring(r.end);
+        }
+        
+        // Also handle cases where string is cut off mid-value (no quote at all)
+        // Pattern: "key": "value that ends abruptly
+        jsonContent = jsonContent.replace(/"([^"]+)"\s*:\s*"([^"]+)$/gm, (match, key, value) => {
+          // If we're at the end of content and string isn't closed, close it
+          if (jsonContent.indexOf(match) + match.length >= jsonContent.length - 10) {
+            const safeValue = value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+            return `"${key}": "${safeValue}"`;
           }
           return match;
         });
@@ -1193,12 +1230,45 @@ Provide your review in JSON format as specified in your system prompt.
         }
         
         // Close incomplete objects (if JSON is truncated)
+        // This handles nested objects like seoMetadata that might be incomplete
         const openBraces = (jsonContent.match(/\{/g) || []).length;
         const closeBraces = (jsonContent.match(/\}/g) || []).length;
         if (openBraces > closeBraces) {
-          // Only close if we're near the end (likely truncated)
-          const last100 = jsonContent.slice(-100);
-          if (last100.includes('"') && !last100.includes('}')) {
+          // Check if we're near the end (likely truncated)
+          const last200 = jsonContent.slice(-200);
+          // If we have incomplete strings or objects near the end, close them
+          if (last200.includes('"') || last200.includes('{')) {
+            // Close incomplete nested objects first
+            // Find the last incomplete object (one that doesn't have a closing brace)
+            let braceCount = 0;
+            let lastOpenBrace = -1;
+            for (let i = jsonContent.length - 1; i >= 0; i--) {
+              if (jsonContent[i] === '}') braceCount++;
+              if (jsonContent[i] === '{') {
+                braceCount--;
+                if (braceCount < 0) {
+                  lastOpenBrace = i;
+                  break;
+                }
+              }
+            }
+            
+            // If we found an incomplete object, close any incomplete strings first, then close the object
+            if (lastOpenBrace !== -1) {
+              const afterLastOpen = jsonContent.substring(lastOpenBrace);
+              // Check if there's an incomplete string before we close
+              const incompleteStringMatch = afterLastOpen.match(/"([^"]+)"\s*:\s*"([^"]*)$/);
+              if (incompleteStringMatch) {
+                // Close the incomplete string first
+                const key = incompleteStringMatch[1];
+                const value = incompleteStringMatch[2];
+                const safeValue = value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+                const beforeIncomplete = jsonContent.substring(0, lastOpenBrace + incompleteStringMatch.index);
+                jsonContent = beforeIncomplete + `"${key}": "${safeValue}"`;
+              }
+            }
+            
+            // Now close all incomplete braces
             jsonContent += '}'.repeat(openBraces - closeBraces);
           }
         }
@@ -1216,8 +1286,16 @@ Provide your review in JSON format as specified in your system prompt.
           timestamp: new Date(),
         };
       } catch (parseError: any) {
-        console.error(`   ⚠️  JSON parse error: ${parseError.message}`);
-        console.error(`   Raw response (first 500 chars): ${response.content.substring(0, 500)}`);
+        // Only log if we can't extract partial data (reduces noise)
+        const canExtractPartial = response.content.includes('"score"') || response.content.includes('"approved"');
+        
+        if (!canExtractPartial) {
+          console.error(`   ⚠️  JSON parse error: ${parseError.message}`);
+          console.error(`   Raw response (first 500 chars): ${response.content.substring(0, 500)}`);
+        } else {
+          // Silent recovery - we can extract partial data, so just log a brief note
+          console.log(`   ⚠️  JSON truncated but recoverable`);
+        }
         
         // Try to extract partial data from malformed JSON
         try {

@@ -603,7 +603,13 @@ Write comprehensive, authoritative content that:
 7. Addresses C-suite concerns (ROI, risk, strategy) for engineering leaders
 8. Provides specific metrics and measurement frameworks where relevant
 
-CRITICAL: This section must be at least ${section.targetWordCount} words. Write comprehensively and in detail.
+CRITICAL WORD COUNT REQUIREMENT: This section MUST be at least ${section.targetWordCount} words. 
+- Write in EXTREME detail with multiple subsections
+- Include extensive examples, case studies, frameworks, and actionable steps
+- Expand on every point with depth and nuance
+- Add subsections (###) to break down complex topics
+- Include specific metrics, numbers, and quantifiable examples
+- Write ${section.targetWordCount}+ words - this is NOT optional
 
 For engineering leaders audience, focus on:
 - Strategic frameworks and decision-making tools
@@ -621,7 +627,15 @@ Format with proper markdown headings (## for section title, ### for subsections)
       tone: config.level,
     });
 
-    return result.finalContent;
+    const generatedContent = result.finalContent;
+    const wordCount = generatedContent.split(/\s+/).length;
+    
+    // Validate word count - if too short, add a warning but continue
+    if (wordCount < section.targetWordCount * 0.7) {
+      console.warn(`   ⚠️  Section "${section.title}" is ${wordCount} words (target: ${section.targetWordCount}). Consider regenerating.`);
+    }
+    
+    return generatedContent;
   } catch (error) {
     console.error(`❌ Error generating section "${section.title}":`, error);
     return `## ${section.title}\n\n[Content generation failed. Please generate manually.]`;

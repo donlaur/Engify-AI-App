@@ -95,11 +95,12 @@ export const PILLAR_PAGES: PillarPageConfig[] = [
     category: 'strategy',
     level: 'intermediate',
     targetWordCount: 8000,
-    status: 'planned',
-    structure: 'mongodb', // Will be generated and stored in MongoDB
+    status: 'complete',
+    structure: 'mongodb',
     priority: 'high',
     relatedRoles: ['engineering-director', 'vp-engineering', 'cto', 'engineering-manager'],
     relatedTags: ['leadership', 'training', 'upskilling', 'roi', 'strategy'],
+    updatedAt: new Date('2025-11-06'),
   },
   {
     id: 'ultimate-guide-ai-assisted-development',
