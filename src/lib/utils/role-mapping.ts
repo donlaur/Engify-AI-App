@@ -15,6 +15,11 @@ export const DB_ROLE_TO_SLUG: Record<string, string> = {
   'director': 'directors',
   'designer': 'designers',
   'c-level': 'c-level',
+  'engineering-director': 'engineering-directors',
+  'product-director': 'product-directors',
+  'vp-engineering': 'vp-engineering',
+  'vp-product': 'vp-product',
+  'cto': 'ctos',
 };
 
 export const SLUG_TO_DB_ROLE: Record<string, string> = {
@@ -85,6 +90,31 @@ export const ROLE_INFO: Record<string, { title: string; description: string; ico
   'c-level': {
     title: 'C-Level Executives',
     description: 'Strategic prompts for CTOs, VPs, and executives making high-level technology and organizational decisions.',
+    icon: 'briefcase',
+  },
+  'engineering-director': {
+    title: 'Engineering Directors',
+    description: 'Leadership prompts for Engineering Directors focusing on team management, technical strategy, skip-level 1-on-1s, and eNPS improvement.',
+    icon: 'briefcase',
+  },
+  'product-director': {
+    title: 'Product Directors',
+    description: 'Leadership prompts for Product Directors focusing on product strategy, team management, customer impact, and product culture.',
+    icon: 'target',
+  },
+  'vp-engineering': {
+    title: 'VP of Engineering',
+    description: 'Strategic prompts for VPs of Engineering focusing on scaling organizations, executive communication, and aligning engineering with business goals.',
+    icon: 'briefcase',
+  },
+  'vp-product': {
+    title: 'VP of Product',
+    description: 'Strategic prompts for VPs of Product focusing on product vision, scaling product orgs, and aligning product strategy with business goals.',
+    icon: 'target',
+  },
+  'cto': {
+    title: 'CTO',
+    description: 'Strategic prompts for CTOs focusing on technical strategy, architecture decisions, risk management, and executive leadership.',
     icon: 'briefcase',
   },
 };

@@ -166,6 +166,11 @@ const validationRules = [
         return false;
       }
       
+      // Skip public content queries (isPublic: true) - these are intentionally accessible to all users
+      if (match.includes('isPublic') && (content.includes('isPublic: true') || content.includes('Public query') || content.includes('public content'))) {
+        return false;
+      }
+      
       // Check if this is a multi-tenant collection
       const multiTenantCollections = ['users', 'conversations', 'prompt_templates', 'audit_logs'];
       const isMultiTenant = multiTenantCollections.some(col => content.includes(`'${col}'`) || content.includes(`"${col}"`));

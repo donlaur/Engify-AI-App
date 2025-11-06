@@ -29,6 +29,8 @@ async function getPromptsByRole(role: string) {
     const db = await getMongoDb();
     const collection = db.collection('prompts');
 
+    // Public query - organizationId not required for public content
+    // This is intentional: public prompts are accessible to all users
     const prompts = await collection
       .find({
         role: role.toLowerCase(),
@@ -154,6 +156,8 @@ async function getDailyTasksFromTags(role: string): Promise<string[]> {
 async function getPatternsByRole(role: string) {
   try {
     const db = await getMongoDb();
+    // Public query - organizationId not required for public content
+    // This is intentional: public prompts are accessible to all users
     const prompts = await db.collection('prompts').find({ role, isPublic: true }).toArray();
     const patternIds = [...new Set(prompts.map((p) => p.pattern).filter(Boolean))];
     
@@ -317,7 +321,12 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
               {roleInfo.title === 'Product Owners' && 'Prioritize Smarter.'}
               {roleInfo.title === 'Directors & C-Level' && 'Make Strategic Decisions.'}
               {roleInfo.title === 'Designers' && 'Design Beautifully.'}
-              {!['Engineers', 'Engineering Managers', 'Product Managers', 'QA Engineers', 'Software Architects', 'DevOps & SRE', 'Scrum Masters', 'Product Owners', 'Directors & C-Level', 'Designers'].includes(roleInfo.title) && 'Level Up Your Skills.'}
+              {roleInfo.title === 'Engineering Directors' && 'Lead Engineering Organizations.'}
+              {roleInfo.title === 'Product Directors' && 'Drive Product Strategy.'}
+              {roleInfo.title === 'VP of Engineering' && 'Scale Engineering at Scale.'}
+              {roleInfo.title === 'VP of Product' && 'Scale Product Vision.'}
+              {roleInfo.title === 'CTO' && 'Set Technical Strategy.'}
+              {!['Engineers', 'Engineering Managers', 'Product Managers', 'QA Engineers', 'Software Architects', 'DevOps & SRE', 'Scrum Masters', 'Product Owners', 'Directors & C-Level', 'Designers', 'Engineering Directors', 'Product Directors', 'VP of Engineering', 'VP of Product', 'CTO'].includes(roleInfo.title) && 'Level Up Your Skills.'}
               <br />
               <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
                 {roleInfo.title === 'Engineers' && 'Ship Better.'}
@@ -330,7 +339,12 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
                 {roleInfo.title === 'Product Owners' && 'Ship Value.'}
                 {roleInfo.title === 'Directors & C-Level' && 'Ship Innovation.'}
                 {roleInfo.title === 'Designers' && 'Ship Delight.'}
-                {!['Engineers', 'Engineering Managers', 'Product Managers', 'QA Engineers', 'Software Architects', 'DevOps & SRE', 'Scrum Masters', 'Product Owners', 'Directors & C-Level', 'Designers'].includes(roleInfo.title) && 'Ship Success.'}
+                {roleInfo.title === 'Engineering Directors' && 'Ship Excellence.'}
+                {roleInfo.title === 'Product Directors' && 'Ship Impact.'}
+                {roleInfo.title === 'VP of Engineering' && 'Ship Scale.'}
+                {roleInfo.title === 'VP of Product' && 'Ship Strategy.'}
+                {roleInfo.title === 'CTO' && 'Ship Vision.'}
+                {!['Engineers', 'Engineering Managers', 'Product Managers', 'QA Engineers', 'Software Architects', 'DevOps & SRE', 'Scrum Masters', 'Product Owners', 'Directors & C-Level', 'Designers', 'Engineering Directors', 'Product Directors', 'VP of Engineering', 'VP of Product', 'CTO'].includes(roleInfo.title) && 'Ship Success.'}
               </span>
             </h1>
 

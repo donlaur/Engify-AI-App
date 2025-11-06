@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import { cn } from '@/lib/utils';
 
-// Ordered by content volume: Engineers (most) → Managers → Directors → others → Designers (0 prompts)
+// Ordered by content volume: Engineers (most) → Managers → Directors → VPs → CTO → others → Designers (0 prompts)
 const roles = [
   {
     id: 'engineers',
@@ -26,10 +26,40 @@ const roles = [
     href: '/for-managers',
   },
   {
+    id: 'engineering-directors',
+    label: 'Eng Directors',
+    icon: Icons.briefcase,
+    href: '/for-engineering-directors',
+  },
+  {
+    id: 'product-directors',
+    label: 'Product Directors',
+    icon: Icons.target,
+    href: '/for-product-directors',
+  },
+  {
     id: 'directors',
     label: 'Directors',
     icon: Icons.briefcase,
     href: '/for-directors',
+  },
+  {
+    id: 'vp-engineering',
+    label: 'VP Engineering',
+    icon: Icons.briefcase,
+    href: '/for-vp-engineering',
+  },
+  {
+    id: 'vp-product',
+    label: 'VP Product',
+    icon: Icons.target,
+    href: '/for-vp-product',
+  },
+  {
+    id: 'ctos',
+    label: 'CTO',
+    icon: Icons.briefcase,
+    href: '/for-ctos',
   },
   {
     id: 'architects',
