@@ -101,7 +101,8 @@ export const PromptSchema = z.object({
   category: PromptCategorySchema,
   role: UserRoleSchema.optional(),
   experienceLevel: ExperienceLevelSchema.optional(),
-  pattern: PromptPatternSchema.optional(),
+  pattern: PromptPatternSchema.optional(), // AI prompt engineering pattern (e.g., 'chain-of-thought', 'few-shot')
+  designPattern: z.string().optional(), // Software engineering design pattern (e.g., 'singleton', 'factory-pattern')
   tags: z.array(z.string()).default([]),
   views: z.number().int().min(0).default(0),
   rating: z.number().min(0).max(5).optional(),

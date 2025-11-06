@@ -26,10 +26,12 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate hourly
 
 export const metadata: Metadata = {
-  title: 'AI Development Tools Comparison | Best AI IDEs & Code Assistants 2024',
+  title: 'Generative AI Tools Comparison | Best AI Development Tools & IDEs 2024',
   description:
-    'Compare 20+ AI-powered development tools: Cursor, Windsurf, GitHub Copilot, Codeium, and more. Find the best AI IDE, code assistant, and app builder for your workflow. Pricing, features, and reviews.',
+    'Compare 20+ Generative AI development tools: Cursor, Windsurf, GitHub Copilot, Codeium, and more. Find the best Generative AI IDE, code assistant, and app builder for your workflow. Pricing, features, and reviews.',
   keywords: [
+    'generative AI tools',
+    'generative AI development tools',
     'AI coding tools',
     'AI development tools',
     'AI IDE',
@@ -53,9 +55,9 @@ export const metadata: Metadata = {
     'programming tools',
   ],
   openGraph: {
-    title: 'AI Development Tools Comparison | Best AI IDEs & Code Assistants 2024',
+    title: 'Generative AI Tools Comparison | Best AI IDEs & Code Assistants 2024',
     description:
-      'Compare 20+ AI-powered development tools: Cursor, Windsurf, GitHub Copilot, Codeium, and more. Find the best AI IDE for your workflow.',
+      'Compare 20+ Generative AI-powered development tools: Cursor, Windsurf, GitHub Copilot, Codeium, and more. Find the best Generative AI IDE for your workflow.',
     type: 'website',
   },
   alternates: {
@@ -159,11 +161,11 @@ export default async function AIToolsHubPage() {
         {/* Hero */}
         <div className="mb-12 text-center">
           <h1 className="mb-4 text-4xl font-bold">
-            AI Development Tools Comparison
+            Generative AI Tools Comparison
           </h1>
           <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-            Compare AI-powered IDEs, code assistants, and development tools.
-            Find the best AI tool for your workflow.
+            Compare Generative AI-powered IDEs, code assistants, and development tools.
+            Find the best Generative AI tool for your workflow.
           </p>
           
           {/* Prominent AI Models CTA */}

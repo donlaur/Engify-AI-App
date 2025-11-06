@@ -103,15 +103,43 @@ const roles = [
 export function RoleSelector() {
   const pathname = usePathname();
 
+  // Split roles into two rows for better layout
+  const midpoint = Math.ceil(roles.length / 2);
+  const firstRow = roles.slice(0, midpoint);
+  const secondRow = roles.slice(midpoint);
+
   return (
     <div className="border-b border-gray-200 bg-white">
       <div className="container">
-        <div className="flex items-center gap-2 overflow-x-auto py-4">
-          <span className="whitespace-nowrap text-sm font-medium text-gray-700">
-            View for:
-          </span>
-          <div className="flex gap-2">
-            {roles.map((role) => {
+        <div className="flex flex-col gap-3 py-4">
+          <span className="text-sm font-medium text-gray-700">View for:</span>
+          {/* First row */}
+          <div className="flex flex-wrap gap-2">
+            {firstRow.map((role) => {
+              const Icon = role.icon;
+              const isActive = pathname === role.href;
+
+              return (
+                <Link key={role.id} href={role.href}>
+                  <Badge
+                    variant={isActive ? 'default' : 'outline'}
+                    className={cn(
+                      'cursor-pointer whitespace-nowrap transition-all hover:scale-105',
+                      isActive
+                        ? 'border-purple-600 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
+                        : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                    )}
+                  >
+                    <Icon className="mr-1 h-3 w-3" />
+                    {role.label}
+                  </Badge>
+                </Link>
+              );
+            })}
+          </div>
+          {/* Second row */}
+          <div className="flex flex-wrap gap-2">
+            {secondRow.map((role) => {
               const Icon = role.icon;
               const isActive = pathname === role.href;
 

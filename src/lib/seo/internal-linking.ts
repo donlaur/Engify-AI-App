@@ -26,24 +26,32 @@ export async function findRelatedContent(
   limit = 6
 ): Promise<InternalLink[]> {
   const links: InternalLink[] = [];
+  
+  // Normalize tags to ensure it's always an array
+  const normalizedTags = Array.isArray(tags) ? tags : (tags ? [tags] : []);
 
   // Find related articles
   if (type !== 'article') {
     const articles = await learningResourceRepository.getAll();
     const relatedArticles = articles
       .filter(
-        (article) =>
-          article.id !== currentId &&
-          (article.tags?.some((tag) => tags.includes(tag)) ||
-            article.category === category)
+        (article) => {
+          const articleTags = Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : []);
+          return article.id !== currentId &&
+            (articleTags.length > 0 && normalizedTags.length > 0 
+              ? articleTags.some((tag) => normalizedTags.includes(tag))
+              : false) ||
+            article.category === category;
+        }
       )
       .slice(0, limit);
     
     relatedArticles.forEach((article) => {
       const slug = article.seo?.slug || article.id;
+      const articleTags = Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : []);
       links.push({
         url: `/learn/${slug}`,
-        anchorText: generateAnchorText(article.title, article.tags, 'article'),
+        anchorText: generateAnchorText(article.title, articleTags, 'article'),
         type: 'article',
         title: article.title,
         description: article.description,
@@ -56,18 +64,23 @@ export async function findRelatedContent(
     const prompts = await promptRepository.getAll();
     const relatedPrompts = prompts
       .filter(
-        (prompt) =>
-          prompt.id !== currentId &&
-          (prompt.tags?.some((tag) => tags.includes(tag)) ||
-            prompt.category === category)
+        (prompt) => {
+          const promptTags = Array.isArray(prompt.tags) ? prompt.tags : (prompt.tags ? [prompt.tags] : []);
+          return prompt.id !== currentId &&
+            (promptTags.length > 0 && normalizedTags.length > 0
+              ? promptTags.some((tag) => normalizedTags.includes(tag))
+              : false) ||
+            prompt.category === category;
+        }
       )
       .slice(0, limit);
     
     relatedPrompts.forEach((prompt) => {
       const slug = getPromptSlug(prompt);
+      const promptTags = Array.isArray(prompt.tags) ? prompt.tags : (prompt.tags ? [prompt.tags] : []);
       links.push({
         url: `/prompts/${slug}`,
-        anchorText: generateAnchorText(prompt.title, prompt.tags, 'prompt'),
+        anchorText: generateAnchorText(prompt.title, promptTags, 'prompt'),
         type: 'prompt',
         title: prompt.title,
         description: prompt.description,
@@ -80,17 +93,22 @@ export async function findRelatedContent(
     const patterns = await patternRepository.getAll();
     const relatedPatterns = patterns
       .filter(
-        (pattern) =>
-          pattern.id !== currentId &&
-          (pattern.tags?.some((tag) => tags.includes(tag)) ||
-            pattern.category === category)
+        (pattern) => {
+          const patternTags = Array.isArray(pattern.tags) ? pattern.tags : (pattern.tags ? [pattern.tags] : []);
+          return pattern.id !== currentId &&
+            (patternTags.length > 0 && normalizedTags.length > 0
+              ? patternTags.some((tag) => normalizedTags.includes(tag))
+              : false) ||
+            pattern.category === category;
+        }
       )
       .slice(0, limit);
     
     relatedPatterns.forEach((pattern) => {
+      const patternTags = Array.isArray(pattern.tags) ? pattern.tags : (pattern.tags ? [pattern.tags] : []);
       links.push({
         url: `/patterns/${encodeURIComponent(pattern.id)}`,
-        anchorText: generateAnchorText(pattern.name, pattern.tags, 'pattern'),
+        anchorText: generateAnchorText(pattern.name, patternTags, 'pattern'),
         type: 'pattern',
         title: pattern.name,
         description: pattern.description,
@@ -151,21 +169,27 @@ export async function findPillarClusterLinks(
   }
 
   // Check if current article is a pillar (has "pillar" tag or is featured)
-  const isPillar = currentArticle.tags?.includes('pillar') || currentArticle.featured;
+  const articleTags = Array.isArray(currentArticle.tags) ? currentArticle.tags : (currentArticle.tags ? [currentArticle.tags] : []);
+  const isPillar = articleTags.includes('pillar') || currentArticle.featured;
 
   if (isPillar) {
     // Find cluster articles (related articles with same category/tags)
     const clusters = articles
       .filter(
-        (a) =>
-          a.id !== currentArticle.id &&
-          (a.tags?.some((tag) => currentArticle.tags?.includes(tag)) ||
-            a.category === currentArticle.category) &&
-          !a.tags?.includes('pillar')
+        (a) => {
+          const aTags = Array.isArray(a.tags) ? a.tags : (a.tags ? [a.tags] : []);
+          return a.id !== currentArticle.id &&
+            (aTags.length > 0 && articleTags.length > 0
+              ? aTags.some((tag) => articleTags.includes(tag))
+              : false) ||
+            a.category === currentArticle.category &&
+            !aTags.includes('pillar');
+        }
       )
       .slice(0, 6)
       .map((article) => {
         const slug = article.seo?.slug || article.id;
+        const aTags = Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : []);
         return {
           url: `/learn/${slug}`,
           anchorText: article.title,
@@ -179,11 +203,15 @@ export async function findPillarClusterLinks(
   } else {
     // Find pillar article (featured article with same category/tags)
     const pillar = articles.find(
-      (a) =>
-        a.id !== currentArticle.id &&
-        (a.featured || a.tags?.includes('pillar')) &&
-        (a.tags?.some((tag) => currentArticle.tags?.includes(tag)) ||
-          a.category === currentArticle.category)
+      (a) => {
+        const aTags = Array.isArray(a.tags) ? a.tags : (a.tags ? [a.tags] : []);
+        return a.id !== currentArticle.id &&
+          (a.featured || aTags.includes('pillar')) &&
+          (aTags.length > 0 && articleTags.length > 0
+            ? aTags.some((tag) => articleTags.includes(tag))
+            : false) ||
+          a.category === currentArticle.category;
+      }
     );
 
     if (pillar) {

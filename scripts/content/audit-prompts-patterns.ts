@@ -2403,6 +2403,7 @@ Provide:
 
   /**
    * Audit a single pattern
+   * Patterns are more academic/research-focused than prompts
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async auditPattern(pattern: any): Promise<AuditResult> {
@@ -2483,10 +2484,13 @@ USE CASES: ${Array.isArray(pattern.useCases) ? pattern.useCases.join(', ') : 'N/
     }
 
     // Step 2: Run other specialized agents
+    // For patterns, adjust prompts to be more academic/research-focused
     const otherAgents = AUDIT_AGENTS.filter((a) => a.role !== 'grading_rubric_expert');
     for (const agent of otherAgents) {
       try {
-        const reviewPrompt = `Review this pattern:\n\n${patternText}\n\nProvide your review with score (1-10), issues, and recommendations.`;
+        // Patterns are academic/research-focused - emphasize theoretical foundations, 
+        // academic rigor, and comprehensive explanations
+        const reviewPrompt = `Review this prompt engineering pattern from an academic and research perspective:\n\n${patternText}\n\nPatterns are more academic than prompts - they are frameworks, methodologies, and theoretical constructs. Focus on:\n- Theoretical foundations and academic rigor\n- Comprehensive explanations and research backing\n- Clear methodology and systematic approach\n- Educational value and learning outcomes\n- SEO optimization for academic/research searches\n\nProvide your review with score (1-10), issues, and recommendations.`;
         const review = await this.runAgent(agent, reviewPrompt);
         agentReviews[agent.role] = review;
 

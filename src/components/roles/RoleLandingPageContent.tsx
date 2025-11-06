@@ -259,6 +259,12 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
   // Get role content from comprehensive data (SEO fallback)
   const roleContent = ROLE_CONTENT[dbRole] || null;
   
+  // Debug: Log role content lookup
+  if (!roleContent && ['engineering-director', 'product-director', 'cto'].includes(dbRole)) {
+    console.warn(`[RoleLandingPage] Missing roleContent for dbRole: ${dbRole}`);
+    console.warn(`[RoleLandingPage] Available keys:`, Object.keys(ROLE_CONTENT));
+  }
+  
   // Hybrid approach: Use DB data when available, fallback to hardcoded for SEO
   const useCases = dbUseCases.length > 0 ? dbUseCases : (roleContent?.useCases || []);
   const realLifeExamples = dbRealLifeExamples.length > 0 ? dbRealLifeExamples : (roleContent?.realLifeExamples || []);
@@ -585,7 +591,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
                         </Badge>
                       )}
                     </div>
-                    <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50" asChild>
+                    <Button variant="outline" className="w-full border-gray-400 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-500 font-medium" asChild>
                       <Link href={`/prompts/${prompt.slug ?? prompt.id}`}>
                         View Prompt
                         <Icons.arrowRight className="ml-2 h-4 w-4" />
@@ -598,7 +604,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
             {prompts.length > 8 && (
               <div className="mt-8 text-center">
-                <Button size="lg" variant="outline" asChild>
+                <Button size="lg" variant="outline" className="border-gray-400 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-500 font-medium" asChild>
                   <Link href={`/prompts/role/${dbRole}`}>
                     View All {promptCount} Prompts
                     <Icons.arrowRight className="ml-2 h-4 w-4" />
@@ -635,7 +641,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
                     <CardDescription className="text-gray-600">{pattern.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50" asChild>
+                    <Button variant="outline" className="w-full border-gray-400 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-500 font-medium" asChild>
                       <Link href={`/patterns/${pattern.id}`}>
                         Learn More
                         <Icons.arrowRight className="ml-2 h-4 w-4" />
@@ -659,7 +665,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
               <p className="mb-6 text-center text-muted-foreground">
                 We're working on creating prompts for {roleInfo.title.toLowerCase()}. Check back soon!
               </p>
-              <Button asChild>
+              <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium" asChild>
                 <Link href="/prompts">Browse All Prompts</Link>
               </Button>
             </CardContent>
@@ -687,7 +693,7 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
                   <Icons.arrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" className="border-gray-400 bg-white text-gray-900 hover:bg-gray-100 hover:border-gray-500 font-medium" asChild>
                 <Link href={`/prompts/role/${dbRole}`}>Browse All Prompts</Link>
               </Button>
             </div>

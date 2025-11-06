@@ -166,7 +166,7 @@ export default async function ArticlePage({ params }: PageProps) {
             </div>
           </div>
 
-          {article.tags && article.tags.length > 0 && (
+          {article.tags && Array.isArray(article.tags) && article.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-4">
               {article.tags.map((tag: string) => (
                 <Link
@@ -238,7 +238,7 @@ export default async function ArticlePage({ params }: PageProps) {
         <RelatedArticles
           currentArticle={{
             slug: article.seo?.slug || article.slug || params.slug,
-            tags: article.tags,
+            tags: Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : []),
             category: article.category,
             title: article.title,
           }}
@@ -250,7 +250,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
         {/* Cross-Content Links (Prompts & Patterns) */}
         <CrossContentLinks
-          tags={article.tags || []}
+          tags={Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : [])}
           category={article.category}
           excludeId={article._id || article.id}
         />

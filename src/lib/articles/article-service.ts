@@ -172,12 +172,18 @@ export async function getRelatedArticles(
     const client = await getClient();
     const db = client.db('engify');
     const collection = db.collection('learning_resources');
+    
+    // Normalize tags to ensure it's always an array
+    const normalizedTags = Array.isArray(tags) ? tags : (tags ? [tags] : []);
 
     const articles = await collection
       .find({
         'seo.slug': { $ne: currentSlug },
         status: 'active',
-        $or: [{ tags: { $in: tags } }, { category }],
+        $or: [
+          ...(normalizedTags.length > 0 ? [{ tags: { $in: normalizedTags } }] : []),
+          ...(category ? [{ category }] : [])
+        ],
       })
       .sort({ views: -1 })
       .limit(limit)

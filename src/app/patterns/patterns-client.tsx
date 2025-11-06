@@ -109,7 +109,7 @@ export function PatternsClient({
 }: PatternsClientProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
-  const [_selectedPatternId, _setSelectedPatternId] = useState<string | null>(
+  const [selectedPatternId, setSelectedPatternId] = useState<string | null>(
     null
   );
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -284,13 +284,14 @@ export function PatternsClient({
                 <Button
                   variant="ghost"
                   size="sm"
-                  asChild
+                  onClick={() => {
+                    setSelectedPatternId(pattern.id);
+                    setIsDrawerOpen(true);
+                  }}
                   className="transition-colors hover:bg-primary hover:text-primary-foreground"
                 >
-                  <Link href={`/patterns/${encodeURIComponent(pattern.id)}`}>
-                    Learn More
-                    <Icons.arrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                  Quick View
+                  <Icons.arrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
@@ -298,8 +299,8 @@ export function PatternsClient({
                   asChild
                   className="transition-colors hover:bg-primary hover:text-primary-foreground"
                 >
-                  <Link href={`/prompts?pattern=${encodeURIComponent(pattern.id)}`}>
-                    View Prompts
+                  <Link href={`/patterns/${encodeURIComponent(pattern.id)}`}>
+                    View Page
                     <Icons.externalLink className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -337,13 +338,16 @@ export function PatternsClient({
       </Card>
 
       {/* Pattern Detail Drawer */}
-      {_selectedPatternId && (
+      {selectedPatternId && (
         <PatternDetailDrawer
           pattern={convertToPatternDetail(
-            patterns.find((p) => p.id === _selectedPatternId) || {}
+            patterns.find((p) => p.id === selectedPatternId) || {}
           )}
           isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
+          onClose={() => {
+            setIsDrawerOpen(false);
+            setSelectedPatternId(null);
+          }}
         />
       )}
     </div>
