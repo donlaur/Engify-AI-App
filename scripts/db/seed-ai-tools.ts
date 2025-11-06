@@ -396,6 +396,49 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
     tags: ['code-assistant', 'anthropic', 'claude', 'paid', 'web-based'],
     icon: 'sparkles',
   },
+  perplexity: {
+    name: 'Perplexity AI',
+    tagline: 'AI-powered search engine with browser',
+    description:
+      'Perplexity AI combines search engine capabilities with AI chat, providing citations and real-time web browsing. Features include Perplexity Browser for interactive web research and AI-powered question answering.',
+    category: 'other',
+    pricing: {
+      free: true,
+      paid: {
+        monthly: 20,
+        tier: 'Pro',
+        creditsPerMonth: 600, // Requests/month
+        creditsUnit: 'requests',
+        unlimited: false,
+      },
+    },
+    features: [
+      'AI-powered search with citations',
+      'Perplexity Browser for interactive research',
+      'Real-time web browsing',
+      'Source citations',
+      'Multi-modal support',
+      'Code generation',
+      'Research-focused answers',
+    ],
+    pros: [
+      'Excellent for research',
+      'Provides citations',
+      'Real-time web access',
+      'Browser feature for interactive research',
+      'Free tier available',
+    ],
+    cons: [
+      'Not primarily a coding tool',
+      'Limited IDE integration',
+      'More focused on research than coding',
+      'Browser feature requires Pro subscription',
+    ],
+    // rating: undefined, // Start at 0 - no reviews yet
+    // reviewCount: 0, // Default schema value
+    tags: ['search', 'research', 'ai-chat', 'browser', 'citations'],
+    icon: 'compass',
+  },
   geminiStudio: {
     name: 'Gemini AI Studio',
     tagline: 'Build apps from natural language',
