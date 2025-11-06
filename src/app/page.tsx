@@ -222,6 +222,57 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* RAG Chatbot CTA */}
+      <section className="container bg-gradient-to-b from-white to-gray-50 py-16 dark:from-gray-950 dark:to-gray-900">
+        <div className="mx-auto max-w-5xl">
+          <Card className="overflow-hidden border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 shadow-2xl dark:border-purple-800 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-cyan-900/30">
+            <CardContent className="p-8 md:p-12">
+              <div className="flex flex-col items-center gap-8 text-center lg:flex-row lg:text-left">
+                <div className="flex-shrink-0">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg">
+                    <Icons.sparkles className="h-12 w-12 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h2 className="mb-3 text-4xl font-bold text-gray-900 dark:text-white">
+                    Ask Our AI Assistant Anything
+                  </h2>
+                  <p className="mb-4 text-lg text-gray-700 dark:text-gray-300">
+                    Get instant, accurate answers powered by RAG (Retrieval-Augmented Generation). Our chatbot searches through 300+ expert prompts and 23 proven patterns to give you context-aware responses with source citations.
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-2 lg:justify-start">
+                    <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100">
+                      <Icons.database className="mr-1 h-3 w-3" />
+                      MongoDB Vector Search
+                    </Badge>
+                    <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
+                      <Icons.check className="mr-1 h-3 w-3" />
+                      Source Citations
+                    </Badge>
+                    <Badge className="bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100">
+                      <Icons.zap className="mr-1 h-3 w-3" />
+                      Real-Time Answers
+                    </Badge>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <Button
+                    size="lg"
+                    asChild
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-6 text-lg font-bold hover:from-purple-700 hover:to-blue-700"
+                  >
+                    <Link href="/rag-chat">
+                      <Icons.sparkles className="mr-2 h-5 w-5" />
+                      Try AI Assistant
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* Roles Section */}
       <section className="container bg-gradient-to-b from-white to-gray-50 py-12 dark:from-gray-950 dark:to-gray-900">
         <div className="mx-auto max-w-6xl">
