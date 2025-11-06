@@ -18,7 +18,7 @@ export function sanitizeErrorMessage(message: string): string {
   }
 
   // Remove MongoDB/database references
-  let sanitized = message
+  const sanitized = message
     .replace(/mongodb/gi, 'data store')
     .replace(/mongo/gi, 'database')
     .replace(/database connection failed/gi, 'connection failed')

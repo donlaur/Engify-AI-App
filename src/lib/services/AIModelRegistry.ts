@@ -5,7 +5,7 @@
  * Provides unified interface for accessing AI models
  */
 
-import { aiModelService, AIModelService } from './AIModelService';
+import { aiModelService } from './AIModelService';
 import { AIModel } from '@/lib/db/schemas/ai-model';
 import { AI_MODELS as STATIC_MODELS, AIModel as StaticAIModel } from '@/lib/config/ai-models';
 

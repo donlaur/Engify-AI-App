@@ -14,7 +14,7 @@ export type SubscriptionTier = 'free' | 'basic' | 'pro' | 'enterprise';
  */
 export function hasPromptCustomizationEntitlement(
   userRole?: UserRole | string | null,
-  subscriptionTier?: SubscriptionTier | string | null
+  _subscriptionTier?: SubscriptionTier | string | null
 ): boolean {
   // Beta mode: Available to all logged-in users
   // Future: Gate by subscription tier
@@ -23,7 +23,7 @@ export function hasPromptCustomizationEntitlement(
   
   // All authenticated users get access during beta
   // Future: Add subscription tier check
-  // return subscriptionTier === 'pro' || subscriptionTier === 'enterprise';
+  // return _subscriptionTier === 'pro' || _subscriptionTier === 'enterprise';
   return true;
 }
 
