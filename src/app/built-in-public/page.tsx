@@ -1007,30 +1007,30 @@ export default function BuiltInPublicPage() {
               </div>
 
               {/* Key Achievements */}
-              <div className="rounded-lg bg-gradient-to-r from-purple-100 to-pink-100 p-4">
-                <h4 className="mb-3 font-bold text-purple-900">🎯 Key Achievements</h4>
+              <div className="rounded-lg bg-gradient-to-r from-purple-100 to-pink-100 p-4 dark:from-purple-900/30 dark:to-pink-900/30">
+                <h4 className="mb-3 font-bold text-purple-900 dark:text-purple-100">🎯 Key Achievements</h4>
                 <div className="grid gap-2 md:grid-cols-2">
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
                     <Icons.check className="h-4 w-4 text-green-600" />
                     <span>14 ADRs documenting decisions</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
                     <Icons.check className="h-4 w-4 text-green-600" />
                     <span>261 documentation files</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
                     <Icons.check className="h-4 w-4 text-green-600" />
                     <span>620+ tests passing (100% rate)</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
                     <Icons.check className="h-4 w-4 text-green-600" />
                     <span>Zero production bugs</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
                     <Icons.check className="h-4 w-4 text-green-600" />
                     <span>10/10 security audit score</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
                     <Icons.check className="h-4 w-4 text-green-600" />
                     <span>Production-ready enterprise code</span>
                   </div>
@@ -1040,12 +1040,12 @@ export default function BuiltInPublicPage() {
           </Card>
 
           {/* CTA */}
-          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:border-purple-800 dark:from-purple-900/30 dark:to-pink-900/30">
             <CardContent className="space-y-6 py-12 text-center">
-              <h3 className="text-2xl font-bold sm:text-3xl">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                 Interested in This Approach?
               </h3>
-              <p className="mx-auto max-w-2xl text-lg text-gray-700">
+              <p className="mx-auto max-w-2xl text-lg text-gray-900 dark:text-gray-100">
                 <strong>Donnie Laur</strong> - Available for{' '}
                 <strong>Engineering Manager</strong>,
                 <strong> Director of Engineering</strong> roles, or consulting
