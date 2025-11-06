@@ -146,6 +146,7 @@ import {
   Music,
   Video,
   Type,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 // Export all icons with descriptive names
@@ -292,6 +293,8 @@ export const Icons = {
   music: Music,
   video: Video,
   type: Type,
+  image: ImageIcon,
+  Image: ImageIcon, // PascalCase alias
 
   // Social
   twitter: Twitter,
