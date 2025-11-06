@@ -869,7 +869,8 @@ async function findHubAndSpokeLinks(
  * Generate full pillar page
  */
 async function generatePillarPage(
-  config: PillarPageConfig
+  config: PillarPageConfig,
+  options: { skipImages?: boolean } = {}
 ): Promise<PillarPageGenerationResult> {
   console.log('╔════════════════════════════════════════════════════════════╗');
   console.log('║     Pillar Page Generator - Section-Based Processing      ║');
@@ -946,17 +947,25 @@ async function generatePillarPage(
   console.log(`   ✅ Found links to ${hubAndSpokeLinks.roles.length} roles`);
   console.log('');
 
-  // Step 7: Generate images
-  console.log('🎨 Step 7: Generating images...');
-  console.log(`   💰 Estimated cost: ~$${((1 + Math.min(3, generatedSections.length)) * 0.04).toFixed(2)} (DALL-E 3)`);
-  console.log('');
+  // Step 7: Generate images (optional)
+  let heroImage: PillarPageImage | null = null;
+  let sectionImages: PillarPageImage[] = [];
   
-  const heroImage = await generateHeroImage(config);
-  const sectionImages = await generateSectionImages(config, generatedSections);
-  const allImages = heroImage ? [heroImage, ...sectionImages] : sectionImages;
-  
-  console.log(`   ✅ Generated ${allImages.length} images`);
-  console.log('');
+  if (!options.skipImages) {
+    console.log('🎨 Step 7: Generating images...');
+    console.log(`   💰 Estimated cost: ~$${((1 + Math.min(3, generatedSections.length)) * 0.04).toFixed(2)} (DALL-E 3)`);
+    console.log('');
+    
+    heroImage = await generateHeroImage(config);
+    sectionImages = await generateSectionImages(config, generatedSections);
+    const allImages = heroImage ? [heroImage, ...sectionImages] : sectionImages;
+    
+    console.log(`   ✅ Generated ${allImages.length} images`);
+    console.log('');
+  } else {
+    console.log('⏭️  Step 7: Skipping image generation (--no-images flag set)');
+    console.log('');
+  }
 
   return {
     config,
@@ -965,7 +974,7 @@ async function generatePillarPage(
     seoMetadata: finalResult.seoMetadata,
     faq,
     hubAndSpokeLinks,
-    images: allImages,
+    images: heroImage ? [heroImage, ...sectionImages] : sectionImages,
     readabilityScore: finalResult.readabilityScore,
     publishReady: finalResult.publishReady,
   };
@@ -1082,6 +1091,7 @@ async function main() {
   // Parse arguments
   const idArg = args.find((arg) => arg.startsWith('--id='));
   const allPlannedArg = args.includes('--all-planned');
+  const skipImagesArg = args.includes('--no-images');
   const titleArg = args.find((arg) => !arg.startsWith('--'));
 
   let pillarPagesToGenerate: PillarPageConfig[] = [];
@@ -1113,6 +1123,9 @@ async function main() {
     console.log('\nUsage:');
     console.log('  tsx scripts/content/generate-pillar-page.ts --id=<pillar-id>');
     console.log('  tsx scripts/content/generate-pillar-page.ts --all-planned');
+    console.log('  tsx scripts/content/generate-pillar-page.ts --id=<pillar-id> --no-images');
+    console.log('\nFlags:');
+    console.log('  --no-images    Skip image generation (saves ~$0.16 per page)');
     console.log('\nAvailable pillar pages:');
     PILLAR_PAGES.forEach((p) => {
       console.log(`   - ${p.id} (${p.status}): ${p.title}`);
@@ -1128,7 +1141,7 @@ async function main() {
     }
 
     try {
-      const result = await generatePillarPage(config);
+      const result = await generatePillarPage(config, { skipImages: skipImagesArg });
 
       console.log('');
       console.log('═══════════════════════════════════════════════════════════');
@@ -1140,7 +1153,11 @@ async function main() {
       console.log(`📄 Word Count: ${result.fullContent.split(/\s+/).length} words`);
       console.log(`📋 Sections: ${result.sections.length}`);
       console.log(`❓ FAQ Items: ${result.faq.length}`);
-      console.log(`🖼️  Images: ${result.images.length} (${result.images.filter((i) => i.type === 'hero').length} hero, ${result.images.filter((i) => i.type === 'section').length} sections)`);
+      if (result.images.length > 0) {
+        console.log(`🖼️  Images: ${result.images.length} (${result.images.filter((i) => i.type === 'hero').length} hero, ${result.images.filter((i) => i.type === 'section').length} sections)`);
+      } else {
+        console.log(`⏭️  Images: Skipped (--no-images flag)`);
+      }
       console.log('');
 
       // Save to file for review

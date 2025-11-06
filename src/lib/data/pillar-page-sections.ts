@@ -583,3 +583,23 @@ export function getAIAssistedDevelopmentSections(config: PillarPageConfig): Rese
   ];
 }
 
+/**
+ * Get research-based sections for a pillar page
+ */
+export function getResearchBasedSections(config: PillarPageConfig): ResearchBasedSection[] {
+  if (config.id === 'ai-upskilling-program') {
+    return getAIUpskillingSections(config);
+  }
+  
+  if (config.id === 'ai-first-engineering-organization') {
+    return getAIFirstOrganizationSections(config);
+  }
+  
+  if (config.id === 'ultimate-guide-ai-assisted-development') {
+    return getAIAssistedDevelopmentSections(config);
+  }
+  
+  // For other pages, return empty array to use AI generation
+  return [];
+}
+
