@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { RoleSelector } from '@/components/roles/RoleSelector';
+import { ScrollButton } from '@/components/roles/ScrollButton';
 import Link from 'next/link';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { getDbRoleFromSlug, getRoleInfo } from '@/lib/utils/role-mapping';
@@ -54,6 +55,98 @@ async function getPromptsByRole(role: string) {
     }));
   } catch (error) {
     console.error('Error fetching prompts by role:', error);
+    return [];
+  }
+}
+
+async function getUseCasesFromPrompts(role: string): Promise<string[]> {
+  try {
+    const db = await getMongoDb();
+    const prompts = await db.collection('prompts').find({
+      role: role.toLowerCase(),
+      isPublic: true,
+      useCases: { $exists: true, $ne: [] },
+    }).limit(20).toArray();
+    
+    const useCases = new Set<string>();
+    prompts.forEach((p: { useCases?: string[] }) => {
+      if (p.useCases && Array.isArray(p.useCases)) {
+        p.useCases.forEach(uc => useCases.add(uc));
+      }
+    });
+    
+    return Array.from(useCases).slice(0, 10);
+  } catch (error) {
+    console.error('Error fetching use cases from prompts:', error);
+    return [];
+  }
+}
+
+async function getRealLifeExamplesFromPrompts(role: string): Promise<string[]> {
+  try {
+    const db = await getMongoDb();
+    const prompts = await db.collection('prompts').find({
+      role: role.toLowerCase(),
+      isPublic: true,
+      caseStudies: { $exists: true, $ne: [] },
+    }).limit(20).toArray();
+    
+    const examples: string[] = [];
+    prompts.forEach((p: { caseStudies?: Array<{ outcome?: string; metrics?: string; scenario?: string }>, title?: string }) => {
+      if (p.caseStudies && Array.isArray(p.caseStudies)) {
+        p.caseStudies.forEach((cs) => {
+          if (cs.outcome && cs.metrics) {
+            examples.push(`${cs.outcome} ${cs.metrics}`);
+          } else if (cs.scenario && cs.outcome) {
+            examples.push(`${cs.scenario}: ${cs.outcome}`);
+          }
+        });
+      }
+    });
+    
+    return examples.slice(0, 8);
+  } catch (error) {
+    console.error('Error fetching real-life examples from prompts:', error);
+    return [];
+  }
+}
+
+async function getDailyTasksFromTags(role: string): Promise<string[]> {
+  try {
+    const db = await getMongoDb();
+    const prompts = await db.collection('prompts').find({
+      role: role.toLowerCase(),
+      isPublic: true,
+      tags: { $exists: true, $ne: [] },
+    }).limit(50).toArray();
+    
+    // Extract task-related tags (common daily task keywords)
+    const taskKeywords = new Set<string>();
+    const taskPatterns = ['planning', 'review', 'meeting', 'documentation', 'analysis', 'communication', 'report', 'delegation', 'onboarding', 'interview'];
+    
+    prompts.forEach((p: { tags?: string[], title?: string }) => {
+      if (p.tags && Array.isArray(p.tags)) {
+        p.tags.forEach(tag => {
+          const tagLower = tag.toLowerCase();
+          if (taskPatterns.some(pattern => tagLower.includes(pattern))) {
+            taskKeywords.add(tag);
+          }
+        });
+      }
+      // Also extract from titles
+      if (p.title) {
+        const titleLower = p.title.toLowerCase();
+        taskPatterns.forEach(pattern => {
+          if (titleLower.includes(pattern)) {
+            taskKeywords.add(p.title.substring(0, 60)); // Use title as task hint
+          }
+        });
+      }
+    });
+    
+    return Array.from(taskKeywords).slice(0, 8);
+  } catch (error) {
+    console.error('Error fetching daily tasks from tags:', error);
     return [];
   }
 }
@@ -143,6 +236,13 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
   const prompts = await getPromptsByRole(dbRole);
   const patterns = await getPatternsByRole(dbRole);
   
+  // Get dynamic content from DB
+  const [dbUseCases, dbRealLifeExamples, dbDailyTasks] = await Promise.all([
+    getUseCasesFromPrompts(dbRole),
+    getRealLifeExamplesFromPrompts(dbRole),
+    getDailyTasksFromTags(dbRole),
+  ]);
+  
   // Get dynamic counts from stats API (not hardcoded)
   let promptCount = prompts.length;
   let patternCount = patterns.length;
@@ -161,8 +261,16 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
   const topPrompts = prompts.slice(0, 8);
   const displayPrompts = featuredPrompts.length > 0 ? featuredPrompts : topPrompts;
 
-  // Get role content from comprehensive data
+  // Get role content from comprehensive data (SEO fallback)
   const roleContent = ROLE_CONTENT[dbRole] || null;
+  
+  // Hybrid approach: Use DB data when available, fallback to hardcoded for SEO
+  const useCases = dbUseCases.length > 0 ? dbUseCases : (roleContent?.useCases || []);
+  const realLifeExamples = dbRealLifeExamples.length > 0 ? dbRealLifeExamples : (roleContent?.realLifeExamples || []);
+  const dailyTasks = dbDailyTasks.length > 0 ? dbDailyTasks : (roleContent?.dailyTasks || []);
+  const aiPromptPatterns = patterns.length > 0 
+    ? patterns.map(p => p.name).filter(Boolean) 
+    : (roleContent?.aiPromptPatterns || []);
 
   // Get icon component - map icon names to Icons object keys
   const iconMap: Record<string, keyof typeof Icons> = {
@@ -231,13 +339,17 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Badge variant="secondary" className="border-white/20 bg-white/10 text-white px-4 py-2">
-                {promptCount} Prompts
-              </Badge>
+              <ScrollButton
+                targetId="featured-prompts"
+                label={`${promptCount} Prompts`}
+                className="cursor-pointer rounded-md border border-white/20 bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20 hover:shadow-lg"
+              />
               {patternCount > 0 && (
-                <Badge variant="secondary" className="border-white/20 bg-white/10 text-white px-4 py-2">
-                  {patternCount} Patterns
-                </Badge>
+                <ScrollButton
+                  targetId="patterns-section"
+                  label={`${patternCount} Patterns`}
+                  className="cursor-pointer rounded-md border border-white/20 bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20 hover:shadow-lg"
+                />
               )}
             </div>
           </div>
@@ -250,33 +362,51 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
         </div>
       </section>
 
-      {/* What the Role Does */}
+      {/* Role Overview & AI Benefits - Combined Section */}
       {roleContent && (
-        <section className="container py-20 bg-white">
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-12 text-center">
-              <h2 className="mb-4 text-4xl font-bold text-gray-900">What Does a {roleContent.coreRole.title} Do?</h2>
-              <p className="text-xl text-gray-600">
-                Understanding the role and its impact
+        <section className="container py-10 bg-white">
+          <div className="mx-auto max-w-5xl">
+            {/* What the Role Does - Compact */}
+            <div className="mb-8">
+              <h2 className="mb-3 text-3xl font-bold text-gray-900">What Does a {roleContent.coreRole.title} Do?</h2>
+              <p className="text-base text-gray-700 mb-4">
+                {roleContent.coreRole.description}
               </p>
+              
+              <div className="grid gap-2 md:grid-cols-2">
+                {roleContent.coreRole.keyResponsibilities.map((resp, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <Icons.checkCircle className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+                    <span className="text-sm text-gray-800">{resp}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            
-            <Card className="mb-8 border-gray-200 bg-white shadow-sm">
-              <CardContent className="pt-6">
-                <p className="mb-6 text-lg leading-relaxed text-gray-800">
-                  {roleContent.coreRole.description}
+
+            {/* How AI Helps - Compact */}
+            <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 shadow-sm">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <Icons.zap className="h-6 w-6 text-blue-600" />
+                  <CardTitle className="text-xl text-gray-900">{roleContent.howAIHelps.headline}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-base leading-relaxed text-gray-800">
+                  {roleContent.howAIHelps.explanation}
                 </p>
-                
-                <div className="mt-6">
-                  <h3 className="mb-4 text-xl font-semibold text-gray-900">Key Responsibilities:</h3>
-                  <ul className="space-y-3">
-                    {roleContent.coreRole.keyResponsibilities.map((resp, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <Icons.checkCircle className="mt-1 h-5 w-5 shrink-0 text-blue-600" />
-                        <span className="text-gray-800">{resp}</span>
-                      </li>
-                    ))}
-                  </ul>
+
+                <div className="grid gap-2 md:grid-cols-2">
+                  {roleContent.howAIHelps.keyBenefits.map((benefit, idx) => (
+                    <div key={idx} className="flex items-start gap-2">
+                      <Icons.lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-yellow-500" />
+                      <span className="text-sm text-gray-800">{benefit}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-lg bg-blue-100 p-3 border border-blue-200">
+                  <p className="text-sm text-blue-900"><strong>Example:</strong> {roleContent.howAIHelps.example}</p>
                 </div>
               </CardContent>
             </Card>
@@ -284,167 +414,39 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
         </section>
       )}
 
-      {/* How AI Helps */}
-      {roleContent && (
-        <section className="bg-gradient-to-br from-blue-50 to-cyan-50 py-20">
-          <div className="container">
-            <div className="mx-auto max-w-4xl">
-              <div className="mb-12 text-center">
-                <Icons.zap className="mx-auto mb-4 h-12 w-12 text-blue-600" />
-                <h2 className="mb-4 text-4xl font-bold">{roleContent.howAIHelps.headline}</h2>
-                <p className="text-xl text-gray-600">
-                  How AI prompt engineering transforms this role
-                </p>
-              </div>
-
-              <Card className="mb-8 border-2 border-blue-200 bg-white shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-gray-900">When You Say "Act as a {roleContent.coreRole.title}"</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <p className="text-lg leading-relaxed text-gray-800">
-                    {roleContent.howAIHelps.explanation}
-                  </p>
-
-                  <div className="rounded-lg bg-gray-50 p-6 border border-gray-200">
-                    <h4 className="mb-3 font-semibold text-gray-900">Key Benefits:</h4>
-                    <ul className="space-y-2">
-                      {roleContent.howAIHelps.keyBenefits.map((benefit, idx) => (
-                        <li key={idx} className="flex items-start gap-3">
-                          <Icons.lightbulb className="mt-1 h-5 w-5 shrink-0 text-yellow-500" />
-                          <span className="text-gray-800">{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="rounded-lg bg-blue-50 p-6 border border-blue-200">
-                    <h4 className="mb-2 font-semibold text-blue-900">Real Example:</h4>
-                    <p className="text-blue-800 italic">{roleContent.howAIHelps.example}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Daily Tasks */}
-      {roleContent && roleContent.dailyTasks.length > 0 && (
-        <section className="container py-20 bg-white">
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-12 text-center">
-              <Icons.target className="mx-auto mb-4 h-12 w-12 text-blue-600" />
-              <h2 className="mb-4 text-4xl font-bold text-gray-900">Daily Tasks</h2>
-              <p className="text-xl text-gray-600">
-                What {roleContent.coreRole.title.toLowerCase()} do every day
-              </p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {roleContent.dailyTasks.map((task, idx) => (
-                <Card key={idx} className="border-l-4 border-l-blue-600 bg-white shadow-sm border-gray-200">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
-                        {idx + 1}
-                      </span>
-                      <p className="text-gray-800">{task}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Common Problems & Solutions */}
+      {/* Common Problems & Solutions - Compact */}
       {roleContent && roleContent.commonProblems.length > 0 && (
-        <section className="bg-gray-50 py-20">
-          <div className="container">
-            <div className="mx-auto max-w-5xl">
-              <div className="mb-12 text-center">
-                <Icons.users className="mx-auto mb-4 h-12 w-12 text-blue-600" />
-                <h2 className="mb-4 text-4xl font-bold text-gray-900">Common Problems & AI Solutions</h2>
-                <p className="text-xl text-gray-600">
-                  How AI prompt engineering solves real challenges
-                </p>
-              </div>
-
-              <div className="space-y-8">
-                {roleContent.commonProblems.map((problem, idx) => (
-                  <Card key={idx} className="border-2 border-gray-200 hover:border-blue-300 transition-colors bg-white shadow-sm">
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <CardTitle className="mb-2 text-xl text-gray-900">{problem.title}</CardTitle>
-                          <CardDescription className="text-base text-gray-700">
-                            {problem.description}
-                          </CardDescription>
-                        </div>
-                        <Badge variant="secondary" className="shrink-0 bg-gray-100 text-gray-700 border-gray-300">
-                          Problem #{idx + 1}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="rounded-lg bg-blue-50 p-4 border border-blue-200">
-                        <h4 className="mb-2 font-semibold text-blue-900">AI Solution:</h4>
-                        <p className="text-blue-800">{problem.aiSolution}</p>
-                      </div>
-
-                      {problem.solutionSteps && problem.solutionSteps.length > 0 && (
-                        <div>
-                          <h4 className="mb-3 font-semibold text-gray-900">Solution Steps:</h4>
-                          <ol className="space-y-2">
-                            {problem.solutionSteps.map((step, stepIdx) => (
-                              <li key={stepIdx} className="flex items-start gap-3">
-                                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
-                                  {stepIdx + 1}
-                                </span>
-                                <span className="text-gray-800">{step}</span>
-                              </li>
-                            ))}
-                          </ol>
-                        </div>
-                      )}
-
-                      {problem.example && (
-                        <div className="rounded-lg bg-green-50 p-4 border border-green-200">
-                          <h4 className="mb-2 font-semibold text-green-900">Example:</h4>
-                          <p className="text-green-800 italic">{problem.example}</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Use Cases */}
-      {roleContent && roleContent.useCases.length > 0 && (
-        <section className="container py-20 bg-white">
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-12 text-center">
-              <Icons.code className="mx-auto mb-4 h-12 w-12 text-blue-600" />
-              <h2 className="mb-4 text-4xl font-bold text-gray-900">Use Cases</h2>
-              <p className="text-xl text-gray-600">
-                Real-world applications of AI for {roleContent.coreRole.title.toLowerCase()}
+        <section className="container py-10 bg-white">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-6">
+              <h2 className="mb-2 text-3xl font-bold text-gray-900">Common Problems & AI Solutions</h2>
+              <p className="text-base text-gray-600">
+                How AI prompt engineering solves real challenges
               </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              {roleContent.useCases.map((useCase, idx) => (
-                <Card key={idx} className="group hover:shadow-lg transition-shadow bg-white border-gray-200 shadow-sm">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start gap-3">
-                      <Icons.checkCircle className="mt-1 h-5 w-5 shrink-0 text-green-600" />
-                      <p className="text-gray-800">{useCase}</p>
+            <div className="space-y-4">
+              {roleContent.commonProblems.map((problem, idx) => (
+                <Card key={idx} className="border border-gray-200 hover:border-blue-300 transition-colors bg-white shadow-sm">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <CardTitle className="mb-1 text-lg text-gray-900">{problem.title}</CardTitle>
+                        <CardDescription className="text-sm text-gray-700">
+                          {problem.description}
+                        </CardDescription>
+                      </div>
                     </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3 pt-0">
+                    <div className="rounded-lg bg-blue-50 p-3 border border-blue-200">
+                      <p className="text-sm text-blue-900"><strong>Solution:</strong> {problem.aiSolution}</p>
+                    </div>
+                    {problem.example && (
+                      <div className="rounded-lg bg-green-50 p-3 border border-green-200">
+                        <p className="text-sm text-green-800"><strong>Example:</strong> {problem.example}</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -453,70 +455,79 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
         </section>
       )}
 
-      {/* Real-Life Examples */}
-      {roleContent && roleContent.realLifeExamples.length > 0 && (
-        <section className="bg-gradient-to-br from-purple-50 to-pink-50 py-20">
-          <div className="container">
-            <div className="mx-auto max-w-4xl">
-              <div className="mb-12 text-center">
-                <Icons.lightbulb className="mx-auto mb-4 h-12 w-12 text-purple-600" />
-                <h2 className="mb-4 text-4xl font-bold text-gray-900">Real-Life Examples</h2>
-                <p className="text-xl text-gray-600">
-                  How professionals are using AI to improve their work
-                </p>
-              </div>
-
-              <div className="space-y-6">
-                {roleContent.realLifeExamples.map((example, idx) => (
-                  <Card key={idx} className="border-l-4 border-l-purple-600 bg-white shadow-sm border-gray-200">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100 text-lg font-bold text-purple-600">
-                          {idx + 1}
-                        </div>
-                        <p className="text-lg text-gray-800">{example}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* AI Prompt Patterns */}
-      {roleContent && roleContent.aiPromptPatterns.length > 0 && (
-        <section className="container py-20 bg-white">
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-12 text-center">
-              <Icons.zap className="mx-auto mb-4 h-12 w-12 text-yellow-500" />
-              <h2 className="mb-4 text-4xl font-bold text-gray-900">AI Prompt Patterns</h2>
-              <p className="text-xl text-gray-600">
-                Specialized prompt patterns for {roleContent.coreRole.title.toLowerCase()}
+      {/* Daily Tasks & Use Cases - Combined */}
+      {(dailyTasks.length > 0 || useCases.length > 0) && (
+        <section className="container py-10 bg-gray-50">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-6">
+              <h2 className="mb-2 text-3xl font-bold text-gray-900">Key Activities</h2>
+              <p className="text-base text-gray-600">
+                What {roleInfo.title.toLowerCase()} do and how AI helps
               </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {roleContent.aiPromptPatterns.map((pattern, idx) => (
-                <Card key={idx} className="border-2 border-yellow-200 hover:border-yellow-400 transition-colors bg-white shadow-sm">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <Icons.zap className="h-5 w-5 text-yellow-600" />
-                      <p className="font-semibold text-gray-900">{pattern}</p>
+              {dailyTasks.map((task, idx) => (
+                <Card key={`task-${idx}`} className="border-l-2 border-l-blue-600 bg-white shadow-sm border-gray-200">
+                  <CardContent className="pt-4 pb-4">
+                    <div className="flex items-start gap-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-600">
+                        {idx + 1}
+                      </span>
+                      <p className="text-sm text-gray-800">{task}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {useCases.map((useCase, idx) => (
+                <Card key={`usecase-${idx}`} className="border-l-2 border-l-green-600 bg-white shadow-sm border-gray-200">
+                  <CardContent className="pt-4 pb-4">
+                    <div className="flex items-start gap-2">
+                      <Icons.checkCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+                      <p className="text-sm text-gray-800">{useCase}</p>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
+          </div>
+        </section>
+      )}
 
-            <div className="mt-8 text-center">
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/patterns">
-                  Explore All Patterns
-                  <Icons.arrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+      {/* Real-Life Examples & Patterns - Combined */}
+      {(realLifeExamples.length > 0 || aiPromptPatterns.length > 0) && (
+        <section className="container py-10 bg-gray-50">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-6">
+              <h2 className="mb-2 text-3xl font-bold text-gray-900">Success Stories & Patterns</h2>
+              <p className="text-base text-gray-600">
+                How professionals use AI and patterns that work
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
+              {realLifeExamples.map((example, idx) => (
+                <Card key={`example-${idx}`} className="border-l-2 border-l-purple-600 bg-white shadow-sm border-gray-200">
+                  <CardContent className="pt-4 pb-4">
+                    <div className="flex items-start gap-2">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple-100 text-xs font-bold text-purple-600">
+                        {idx + 1}
+                      </span>
+                      <p className="text-sm text-gray-800 leading-relaxed">{example}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {aiPromptPatterns.map((pattern, idx) => (
+                <Card key={`pattern-${idx}`} className="border-l-2 border-l-yellow-500 bg-white shadow-sm border-gray-200">
+                  <CardContent className="pt-4 pb-4">
+                    <div className="flex items-center gap-2">
+                      <Icons.zap className="h-4 w-4 text-yellow-600" />
+                      <p className="text-sm font-semibold text-gray-900">{pattern}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
@@ -524,16 +535,16 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
       {/* Featured Prompts */}
       {displayPrompts.length > 0 && (
-        <section className="container py-20 bg-white">
+        <section id="featured-prompts" className="container py-10 bg-white scroll-mt-20">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-12 text-center">
-              <h2 className="mb-4 text-4xl font-bold text-gray-900">Featured Prompts</h2>
-              <p className="text-xl text-gray-600">
+            <div className="mb-6">
+              <h2 className="mb-2 text-3xl font-bold text-gray-900">Featured Prompts</h2>
+              <p className="text-base text-gray-600">
                 Top prompts for {roleInfo.title.toLowerCase()}
               </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {displayPrompts.map((prompt) => (
                 <Card
                   key={prompt.id}
@@ -596,16 +607,16 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
 
       {/* Patterns Section */}
       {patterns.length > 0 && (
-        <section className="container py-20 bg-gray-50">
+        <section id="patterns-section" className="container py-10 bg-gray-50 scroll-mt-20">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-12 text-center">
-              <h2 className="mb-4 text-4xl font-bold text-gray-900">Recommended Patterns</h2>
-              <p className="text-xl text-gray-600">
+            <div className="mb-6">
+              <h2 className="mb-2 text-3xl font-bold text-gray-900">Recommended Patterns</h2>
+              <p className="text-base text-gray-600">
                 Patterns most useful for {roleInfo.title.toLowerCase()}
               </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {patterns.map((pattern) => (
                 <Card
                   key={pattern.id}
@@ -652,12 +663,12 @@ export async function RoleLandingPageContent({ slug, dbRole }: RoleLandingPagePr
       )}
 
       {/* CTA */}
-      <section className="container py-20 bg-white">
+      <section className="container py-10 bg-white">
         <Card className="mx-auto max-w-3xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 shadow-lg">
-          <CardContent className="space-y-6 py-12 text-center">
-            <IconComponent className="mx-auto h-16 w-16 text-blue-600" />
-            <h2 className="text-4xl font-bold text-gray-900">Ready to Level Up?</h2>
-            <p className="mx-auto max-w-2xl text-xl text-gray-700">
+          <CardContent className="space-y-4 py-8 text-center">
+            <IconComponent className="mx-auto h-12 w-12 text-blue-600" />
+            <h2 className="text-3xl font-bold text-gray-900">Ready to Level Up?</h2>
+            <p className="mx-auto max-w-2xl text-base text-gray-700">
               Join {roleInfo.title.toLowerCase()} using AI to work smarter and ship faster.
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
