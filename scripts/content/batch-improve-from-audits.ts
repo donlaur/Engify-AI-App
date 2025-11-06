@@ -198,6 +198,18 @@ function parseJSONSafely(jsonText: string): any {
     return null;
   }
   
+  // First, repair incomplete strings that are cut off mid-word
+  // Look for strings that don't have a closing quote before the next structure
+  // Pattern: "text... followed by non-quote, non-comma, non-close brace
+  jsonText = jsonText.replace(/"([^"]+?)([^",}\]]*\s*)([,\]}])/g, (match, p1, p2, p3) => {
+    // If there's trailing text after a quote but before a comma/brace, it's likely incomplete
+    if (p2.trim().length > 0) {
+      // Take only the valid string part (p1), close it, then add the structure
+      return `"${p1}"${p3}`;
+    }
+    return match;
+  });
+  
   // Repair common JSON issues
   // 1. Remove trailing commas before closing brackets/braces
   jsonText = jsonText.replace(/,(\s*[}\]])/g, '$1');
@@ -207,34 +219,46 @@ function parseJSONSafely(jsonText: string): any {
   // Remove trailing "..." or incomplete strings
   jsonText = jsonText.replace(/"([^"]*?)\.\.\.[^"]*$/gm, '"$1"');
   
-  // Fix truncated strings (remove trailing incomplete text after last quote)
-  // Find strings that end abruptly without closing quote
-  jsonText = jsonText.replace(/"([^"]+)([^",}\]]*?)([,\]}])/g, (match, p1, p2, p3) => {
-    // If there's trailing text after the string content but before comma/brace, clean it up
-    const cleanValue = p1.trim();
-    if (cleanValue.length > 0) {
-      return `"${cleanValue}"${p3}`;
-    }
-    return match;
-  });
-  
-  // Fix strings that are cut off mid-word (common with maxTokens limit)
-  // Look for unclosed strings at the end
+  // 3. Fix strings cut off mid-word - find unclosed strings
+  // Look for quote followed by text that doesn't end with quote before comma/brace/end
   const lines = jsonText.split('\n');
   const fixedLines: string[] = [];
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i];
-    // If line has an opening quote but no closing quote (and not the last line)
+    
+    // Find incomplete strings on this line
+    // Pattern: "text that doesn't end with quote before comma/brace
+    line = line.replace(/"([^"]+?)([^",}\]]+?)([,\]}])/g, (match, p1, p2, p3) => {
+      // If p2 exists and has content, it's trailing garbage - remove it
+      if (p2 && p2.trim().length > 0) {
+        return `"${p1.trim()}"${p3}`;
+      }
+      return match;
+    });
+    
+    // Check if line has an opening quote but no closing quote (and not the last line)
     const openQuotes = (line.match(/"/g) || []).length;
     if (openQuotes % 2 === 1 && i < lines.length - 1) {
-      // Try to close the string
+      // Try to close the string intelligently
       const lastQuoteIndex = line.lastIndexOf('"');
       if (lastQuoteIndex >= 0) {
         const beforeQuote = line.substring(0, lastQuoteIndex + 1);
         const afterQuote = line.substring(lastQuoteIndex + 1);
-        // If there's content after the quote, it might be incomplete
+        // If there's content after the quote that isn't valid JSON structure, close the string
         if (afterQuote.trim().length > 0 && !afterQuote.trim().match(/^[,:}\]\]]/)) {
-          line = beforeQuote + '"';
+          // Find where the word likely ends (before trailing garbage)
+          const cleanAfter = afterQuote.trim().split(/[,\]}]/)[0]; // Take up to first structure char
+          if (cleanAfter && cleanAfter.length > 0) {
+            // Try to extract a valid word ending
+            const wordMatch = cleanAfter.match(/^(\w+)/);
+            if (wordMatch) {
+              line = beforeQuote + wordMatch[1] + '"';
+            } else {
+              line = beforeQuote + '"';
+            }
+          } else {
+            line = beforeQuote + '"';
+          }
         }
       }
     }
@@ -265,6 +289,13 @@ function parseJSONSafely(jsonText: string): any {
     try {
       // Fix common issues: unclosed strings, missing quotes
       let repaired = jsonText;
+      
+      // Fix incomplete strings - find strings that are cut off
+      // Look for: "text[garbage]structure where garbage shouldn't be there
+      repaired = repaired.replace(/"([^"]+?)([^":,\]}]+?)([,\]}])/g, (match, p1, p2, p3) => {
+        // p2 is garbage between string and structure - remove it
+        return `"${p1.trim()}"${p3}`;
+      });
       
       // Fix unclosed strings (look for key: value without quote)
       repaired = repaired.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([^",}\]]+?)([,\]}])/g, (match, p1, key, value, end) => {
@@ -869,16 +900,18 @@ DESCRIPTION: ${prompt.description?.substring(0, 200) || 'N/A'}
 CURRENT SLUG: ${prompt.slug || prompt.id}
 CURRENT META: ${prompt.metaDescription?.substring(0, 100) || 'Missing'}
 
-Requirements:
-1. Generate an SEO-friendly slug (short, descriptive, keyword-rich, lowercase, hyphens)
-2. Generate a meta description (150-160 chars, keyword-rich, compelling)
-3. Generate 5-8 relevant SEO keywords
+IMPORTANT: Return ONLY valid JSON. Keep strings concise (metaDescription max 160 chars).
 
-Format as JSON:
+Requirements:
+${needsSlug ? '1. Generate an SEO-friendly slug (short, descriptive, keyword-rich, lowercase, hyphens)\n' : ''}
+${needsMeta ? '2. Generate a meta description (150-160 chars, keyword-rich, compelling)\n' : ''}
+${needsKeywords ? '3. Generate 5-8 relevant SEO keywords\n' : ''}
+
+Format as JSON (keep strings short to avoid truncation):
 {
-  "slug": "seo-friendly-slug",
-  "metaDescription": "150-160 char description...",
-  "keywords": ["keyword1", "keyword2", ...]
+  ${needsSlug ? '"slug": "seo-friendly-slug",' : ''}
+  ${needsMeta ? '"metaDescription": "Under 160 chars compelling description",' : ''}
+  ${needsKeywords ? '"keywords": ["keyword1", "keyword2", "keyword3"]' : ''}
 }`;
 
             const response = await executeWithFallback(
@@ -886,7 +919,7 @@ Format as JSON:
               {
                 prompt: seoPrompt,
                 temperature: 0.3,
-                maxTokens: 500,
+                maxTokens: 800, // Increased from 500 to handle complete responses without truncation
               },
               'SEO',
               db
