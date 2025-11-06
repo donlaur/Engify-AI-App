@@ -29,6 +29,7 @@ import { generateCourseSchema } from '@/lib/seo/metadata';
 import { APP_URL } from '@/lib/constants';
 import { getServerStats } from '@/lib/server-stats';
 import { FAQSection } from '@/components/features/FAQSection';
+import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 import { PILLAR_FAQS } from '@/lib/data/pillar-faqs';
 import { patternRepository } from '@/lib/db/repositories/ContentService';
 

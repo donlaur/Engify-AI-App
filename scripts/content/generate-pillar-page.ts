@@ -25,6 +25,7 @@ import {
   getPlannedPillarPages,
   type PillarPageConfig,
 } from '@/lib/data/pillar-pages';
+import { getResearchBasedSections } from '@/lib/data/pillar-page-sections';
 import { ContentPublishingService } from '@/lib/content/content-publishing-pipeline';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFactoryWithRegistry';
@@ -333,11 +334,29 @@ interface PillarPageGenerationResult {
 
 /**
  * Generate section outline for a pillar page
+ * Uses research-based sections if available, otherwise generates via AI
  */
 async function generateSectionOutline(
   config: PillarPageConfig,
   service: ContentPublishingService
 ): Promise<Section[]> {
+  // First, check if we have research-based sections for this page
+  const researchSections = getResearchBasedSections(config);
+  
+  if (researchSections.length > 0) {
+    console.log(`   📋 Using research-based section structure (${researchSections.length} sections)`);
+    return researchSections.map(s => ({
+      id: s.id,
+      title: s.title,
+      order: s.order,
+      targetWordCount: s.targetWordCount,
+      content: '',
+      keywords: s.keywords,
+      relatedRoles: s.relatedRoles,
+    }));
+  }
+  
+  // Fallback to AI generation for pages without research-based structures
   const sections: Section[] = [];
   const wordsPerSection = Math.ceil(config.targetWordCount / 8); // ~8 sections for 8K words
 
@@ -578,11 +597,20 @@ Write comprehensive, authoritative content that:
 1. Covers the topic in depth (aim for ${section.targetWordCount}+ words)
 2. Includes practical examples and case studies
 3. Uses the target keywords naturally
-4. Provides actionable insights
+4. Provides actionable insights and frameworks
 5. Connects to related concepts
 6. Includes subsections (### headings) to break up content
+7. Addresses C-suite concerns (ROI, risk, strategy) for engineering leaders
+8. Provides specific metrics and measurement frameworks where relevant
 
 CRITICAL: This section must be at least ${section.targetWordCount} words. Write comprehensively and in detail.
+
+For engineering leaders audience, focus on:
+- Strategic frameworks and decision-making tools
+- ROI and measurement approaches
+- Organizational structure and team design
+- Risk management and governance
+- Real-world case studies with quantifiable results
 
 Format with proper markdown headings (## for section title, ### for subsections).`;
 
