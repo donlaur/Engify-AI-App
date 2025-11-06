@@ -115,9 +115,9 @@ export default function RAGChatPage() {
   const SidebarContent = () => (
     <div className="space-y-4">
       {/* Quick Questions */}
-      <Card>
+      <Card className="border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-900/20">
         <CardHeader>
-          <CardTitle className="text-base">Quick Questions</CardTitle>
+          <CardTitle className="text-base text-purple-900 dark:text-purple-100">Quick Questions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {quickQuestions.map((question, index) => (
@@ -125,7 +125,7 @@ export default function RAGChatPage() {
               key={index}
               variant="outline"
               size="sm"
-              className="h-auto w-full justify-start p-3 text-left text-sm hover:bg-muted"
+              className="h-auto w-full justify-start border-purple-200 bg-white p-3 text-left text-sm hover:border-purple-300 hover:bg-purple-100 dark:border-purple-700 dark:bg-purple-950 dark:hover:bg-purple-900"
               onClick={() => {
                 setInput(question);
                 setTimeout(() => {
@@ -134,8 +134,8 @@ export default function RAGChatPage() {
                 setSidebarOpen(false);
               }}
             >
-              <Icons.messageSquare className="mr-2 h-4 w-4 shrink-0" />
-              <span className="break-words">{question}</span>
+              <Icons.messageSquare className="mr-2 h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" />
+              <span className="break-words text-gray-900 dark:text-gray-100">{question}</span>
             </Button>
           ))}
         </CardContent>
