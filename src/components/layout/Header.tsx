@@ -12,8 +12,10 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Icons } from '@/lib/icons';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -45,6 +47,15 @@ const navigationLinks = [
 
 export function Header({ user }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Check if pathname matches or starts with the href
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -59,46 +70,81 @@ export function Header({ user }: HeaderProps) {
         <nav className="hidden md:flex md:items-center md:space-x-6">
           <Link
             href="/"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+            className={cn(
+              'text-sm font-medium transition-colors',
+              isActive('/')
+                ? 'text-primary'
+                : 'text-foreground/80 hover:text-primary dark:text-foreground/80'
+            )}
             title="Home"
           >
             <Icons.home className="h-4 w-4" />
           </Link>
           <Link
             href="/prompts"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+            className={cn(
+              'text-sm font-medium transition-colors',
+              isActive('/prompts')
+                ? 'text-primary'
+                : 'text-foreground/80 hover:text-primary dark:text-foreground/80'
+            )}
           >
             Prompts
           </Link>
           <Link
             href="/patterns"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+            className={cn(
+              'text-sm font-medium transition-colors',
+              isActive('/patterns')
+                ? 'text-primary'
+                : 'text-foreground/80 hover:text-primary dark:text-foreground/80'
+            )}
           >
             Patterns
           </Link>
           <Link
             href="/learn/ai-tools"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+            className={cn(
+              'text-sm font-medium transition-colors',
+              isActive('/learn/ai-tools')
+                ? 'text-primary'
+                : 'text-foreground/80 hover:text-primary dark:text-foreground/80'
+            )}
           >
             Tools
           </Link>
           <Link
             href="/learn"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+            className={cn(
+              'text-sm font-medium transition-colors',
+              isActive('/learn') && !isActive('/learn/ai-tools')
+                ? 'text-primary'
+                : 'text-foreground/80 hover:text-primary dark:text-foreground/80'
+            )}
           >
             Learn
           </Link>
           {process.env.NEXT_PUBLIC_SHOW_PLAYGROUND === 'true' && (
             <Link
               href="/pattern-playground"
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+              className={cn(
+                'text-sm font-medium transition-colors',
+                isActive('/pattern-playground')
+                  ? 'text-primary'
+                  : 'text-foreground/80 hover:text-primary dark:text-foreground/80'
+              )}
             >
               Playground
             </Link>
           )}
           <Link
             href="/workbench"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary dark:text-foreground/80"
+            className={cn(
+              'text-sm font-medium transition-colors',
+              isActive('/workbench')
+                ? 'text-primary'
+                : 'text-foreground/80 hover:text-primary dark:text-foreground/80'
+            )}
           >
             Workbench
           </Link>
@@ -196,7 +242,12 @@ export function Header({ user }: HeaderProps) {
                 {/* Home Link */}
                 <Link
                   href="/"
-                  className="text-lg font-medium transition-colors hover:text-primary flex items-center gap-2"
+                  className={cn(
+                    'text-lg font-medium transition-colors flex items-center gap-2',
+                    isActive('/')
+                      ? 'text-primary'
+                      : 'hover:text-primary'
+                  )}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Icons.home className="h-5 w-5" />
@@ -208,7 +259,12 @@ export function Header({ user }: HeaderProps) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-lg font-medium transition-colors hover:text-primary"
+                    className={cn(
+                      'text-lg font-medium transition-colors',
+                      isActive(link.href)
+                        ? 'text-primary'
+                        : 'hover:text-primary'
+                    )}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {link.label}
@@ -219,7 +275,12 @@ export function Header({ user }: HeaderProps) {
                 {process.env.NEXT_PUBLIC_SHOW_PLAYGROUND === 'true' && (
                   <Link
                     href="/pattern-playground"
-                    className="text-lg font-medium transition-colors hover:text-primary"
+                    className={cn(
+                      'text-lg font-medium transition-colors',
+                      isActive('/pattern-playground')
+                        ? 'text-primary'
+                        : 'hover:text-primary'
+                    )}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Playground

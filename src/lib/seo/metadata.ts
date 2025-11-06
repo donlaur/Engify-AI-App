@@ -57,7 +57,11 @@ export function generatePromptMetadata(
 
   // Use metaDescription from prompt if available and valid, otherwise generate
   let description: string;
-  if (prompt.metaDescription && prompt.metaDescription.length >= 100 && prompt.metaDescription.length <= 165) {
+  if (
+    prompt.metaDescription &&
+    prompt.metaDescription.length >= 100 &&
+    prompt.metaDescription.length <= 165
+  ) {
     // Use provided meta description (already optimized)
     description = prompt.metaDescription;
   } else {
@@ -65,24 +69,21 @@ export function generatePromptMetadata(
     // Template: Learn to use the [Prompt Name] prompt to solve [Problem]. Get examples and best practices from Engify.ai, the AI training platform for engineering teams.
     const descriptionParts: string[] = [];
 
-    // Start with learning angle
+    // Start with learning angle - exact template from SEO strategy
     descriptionParts.push(`Learn to use the "${prompt.title}" prompt`);
 
-    // Add specific use case
-    if (roleLabel) {
-      descriptionParts.push(
-        `to solve ${categoryLabel.toLowerCase()} challenges for ${roleLabel.toLowerCase()}s`
-      );
-    } else {
-      descriptionParts.push(`for ${categoryLabel.toLowerCase()}`);
-    }
+    // Add problem/use case - prioritize useCases field if available, otherwise use category + role
+    const problemText = roleLabel
+      ? `${categoryLabel.toLowerCase()} challenges for ${roleLabel.toLowerCase()}s`
+      : categoryLabel.toLowerCase();
+    descriptionParts.push(`to solve ${problemText}`);
 
-    // Add pattern context if available
+    // Add pattern context if available (but keep it concise)
     if (patternLabel) {
       descriptionParts.push(`using the ${patternLabel} pattern`);
     }
 
-    // Add training platform CTA
+    // Add training platform CTA - exact template from SEO strategy
     descriptionParts.push(
       'Get examples and best practices from Engify.ai, the AI training platform for engineering teams.'
     );
@@ -91,8 +92,15 @@ export function generatePromptMetadata(
 
     // Ensure length is optimal (150-160 chars)
     if (description.length > 160) {
-      // Trim intelligently
-      description = description.substring(0, 157) + '...';
+      // Trim intelligently - prioritize keeping the CTA
+      const cta =
+        'Get examples and best practices from Engify.ai, the AI training platform for engineering teams.';
+      const base = descriptionParts.slice(0, -1).join('. ');
+      if (base.length + cta.length + 3 <= 160) {
+        description = `${base}. ${cta}`;
+      } else {
+        description = description.substring(0, 157) + '...';
+      }
     } else if (description.length < 120) {
       // Add more context if too short
       description +=
@@ -104,24 +112,29 @@ export function generatePromptMetadata(
   }
 
   // Use slug from prompt if available, otherwise generate
-  const slug = prompt.slug || prompt.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const slug =
+    prompt.slug || prompt.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   const url = `${APP_URL}/prompts/${slug}`;
 
   // Build keywords array - prioritize prompt's seoKeywords if available
-  const baseKeywords = prompt.seoKeywords && prompt.seoKeywords.length > 0
-    ? prompt.seoKeywords // Use provided SEO keywords
-    : [
-        prompt.title,
-        `${prompt.title} prompt`,
-        categoryLabel,
-        `${categoryLabel} prompt`,
-        ...(roleLabel
-          ? [`${roleLabel} prompts`, `prompts for ${roleLabel.toLowerCase()}s`]
-          : []),
-        ...(patternLabel
-          ? [patternLabel, `${patternLabel.toLowerCase()} pattern`]
-          : []),
-      ];
+  const baseKeywords =
+    prompt.seoKeywords && prompt.seoKeywords.length > 0
+      ? prompt.seoKeywords // Use provided SEO keywords
+      : [
+          prompt.title,
+          `${prompt.title} prompt`,
+          categoryLabel,
+          `${categoryLabel} prompt`,
+          ...(roleLabel
+            ? [
+                `${roleLabel} prompts`,
+                `prompts for ${roleLabel.toLowerCase()}s`,
+              ]
+            : []),
+          ...(patternLabel
+            ? [patternLabel, `${patternLabel.toLowerCase()} pattern`]
+            : []),
+        ];
 
   const keywords = [
     ...baseKeywords,
@@ -170,19 +183,42 @@ export function generatePatternMetadata(pattern: {
   // Build unique description (150-160 chars)
   // Template: A complete guide to the [Pattern Name] prompt engineering pattern. Understand how it works, see examples, and learn how to apply it to your engineering workflow with Engify.ai.
   let description = `A complete guide to the ${pattern.title} prompt engineering pattern. `;
-  description += pattern.description;
 
-  // Add training angle
-  if (pattern.benefits && pattern.benefits.length > 0) {
-    description += ` Learn ${pattern.benefits.length} key benefits: ${pattern.benefits.slice(0, 2).join(', ')}.`;
+  // Add concise pattern description if space allows, then add template ending
+  const baseLength = description.length;
+  const ending =
+    'Understand how it works, see examples, and learn how to apply it to your engineering workflow with Engify.ai.';
+  const availableSpace = 160 - baseLength - ending.length - 2; // -2 for spacing
+
+  if (availableSpace > 20 && pattern.description) {
+    // Include a snippet of pattern description if there's space
+    const patternSnippet =
+      pattern.description.length > availableSpace
+        ? pattern.description.substring(0, availableSpace - 3) + '...'
+        : pattern.description;
+    description += `${patternSnippet} `;
   }
 
-  description +=
-    ' Master this technique with Engify.ai, the AI training platform for engineering teams.';
+  description += ending;
 
-  // Ensure optimal length
+  // Ensure optimal length (150-160 chars)
   if (description.length > 160) {
-    description = description.substring(0, 157) + '...';
+    // Trim intelligently - keep the ending
+    const base = `A complete guide to the ${pattern.title} prompt engineering pattern.`;
+    const trimmedEnding = ending.substring(0, 160 - base.length - 3);
+    description = `${base} ${trimmedEnding}...`;
+  } else if (description.length < 120) {
+    // Add pattern benefits if available and space allows
+    if (pattern.benefits && pattern.benefits.length > 0) {
+      const benefitsText = ` Learn key benefits: ${pattern.benefits.slice(0, 2).join(', ')}.`;
+      if (description.length + benefitsText.length <= 160) {
+        description = description.replace(ending, benefitsText + ' ' + ending);
+      }
+    }
+    // Final length check
+    if (description.length > 160) {
+      description = description.substring(0, 157) + '...';
+    }
   }
 
   const url = `${APP_URL}/patterns/${pattern.key}`;
@@ -403,7 +439,9 @@ export function generateCourseSchema(
  * Generate BreadcrumbList schema for SEO
  * Improves navigation understanding for search engines
  */
-export function generateBreadcrumbSchema(items: Array<{ name: string; url: string }>) {
+export function generateBreadcrumbSchema(
+  items: Array<{ name: string; url: string }>
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -434,5 +472,43 @@ export function generateFAQSchema(
         text: faq.answer,
       },
     })),
+  };
+}
+
+/**
+ * Generate CollectionPage schema for role landing pages
+ * Role landing pages function as collections of prompts and patterns
+ */
+export function generateCollectionPageSchema(
+  collectionName: string,
+  description: string,
+  itemCount: number,
+  items: Array<{ name: string; url: string; description?: string }>,
+  url: string
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: collectionName,
+    description,
+    url,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: itemCount,
+      itemListElement: items.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'CreativeWork',
+          name: item.name,
+          url: item.url,
+          ...(item.description && { description: item.description }),
+        },
+      })),
+    },
+    about: {
+      '@type': 'Thing',
+      name: 'AI Prompts and Patterns',
+    },
   };
 }

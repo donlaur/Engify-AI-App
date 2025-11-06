@@ -4,7 +4,11 @@
  * with SEO-optimized anchor text
  */
 
-import { patternRepository, promptRepository, learningResourceRepository } from '@/lib/db/repositories/ContentService';
+import {
+  patternRepository,
+  promptRepository,
+  learningResourceRepository,
+} from '@/lib/db/repositories/ContentService';
 import { getPromptSlug } from '@/lib/utils/slug';
 
 export interface InternalLink {
@@ -13,6 +17,21 @@ export interface InternalLink {
   type: 'article' | 'prompt' | 'pattern';
   title: string;
   description?: string;
+}
+
+/**
+ * Find links to pillar pages
+ * Returns link to prompt engineering masterclass pillar page
+ */
+export async function findPillarPageLink(): Promise<InternalLink | null> {
+  return {
+    url: '/learn/prompt-engineering-masterclass',
+    anchorText: 'Prompt Engineering Masterclass',
+    type: 'article',
+    title: 'Prompt Engineering Masterclass: Complete Guide for Developers',
+    description:
+      'Master prompt engineering with this comprehensive guide. Learn proven patterns, advanced techniques, and practical examples.',
+  };
 }
 
 /**
@@ -26,29 +45,37 @@ export async function findRelatedContent(
   limit = 6
 ): Promise<InternalLink[]> {
   const links: InternalLink[] = [];
-  
+
   // Normalize tags to ensure it's always an array
-  const normalizedTags = Array.isArray(tags) ? tags : (tags ? [tags] : []);
+  const normalizedTags = Array.isArray(tags) ? tags : tags ? [tags] : [];
 
   // Find related articles
   if (type !== 'article') {
     const articles = await learningResourceRepository.getAll();
     const relatedArticles = articles
-      .filter(
-        (article) => {
-          const articleTags = Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : []);
-          return article.id !== currentId &&
-            (articleTags.length > 0 && normalizedTags.length > 0 
+      .filter((article) => {
+        const articleTags = Array.isArray(article.tags)
+          ? article.tags
+          : article.tags
+            ? [article.tags]
+            : [];
+        return (
+          (article.id !== currentId &&
+            (articleTags.length > 0 && normalizedTags.length > 0
               ? articleTags.some((tag) => normalizedTags.includes(tag))
-              : false) ||
-            article.category === category;
-        }
-      )
+              : false)) ||
+          article.category === category
+        );
+      })
       .slice(0, limit);
-    
+
     relatedArticles.forEach((article) => {
       const slug = article.seo?.slug || article.id;
-      const articleTags = Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : []);
+      const articleTags = Array.isArray(article.tags)
+        ? article.tags
+        : article.tags
+          ? [article.tags]
+          : [];
       links.push({
         url: `/learn/${slug}`,
         anchorText: generateAnchorText(article.title, articleTags, 'article'),
@@ -63,21 +90,29 @@ export async function findRelatedContent(
   if (type !== 'prompt') {
     const prompts = await promptRepository.getAll();
     const relatedPrompts = prompts
-      .filter(
-        (prompt) => {
-          const promptTags = Array.isArray(prompt.tags) ? prompt.tags : (prompt.tags ? [prompt.tags] : []);
-          return prompt.id !== currentId &&
+      .filter((prompt) => {
+        const promptTags = Array.isArray(prompt.tags)
+          ? prompt.tags
+          : prompt.tags
+            ? [prompt.tags]
+            : [];
+        return (
+          (prompt.id !== currentId &&
             (promptTags.length > 0 && normalizedTags.length > 0
               ? promptTags.some((tag) => normalizedTags.includes(tag))
-              : false) ||
-            prompt.category === category;
-        }
-      )
+              : false)) ||
+          prompt.category === category
+        );
+      })
       .slice(0, limit);
-    
+
     relatedPrompts.forEach((prompt) => {
       const slug = getPromptSlug(prompt);
-      const promptTags = Array.isArray(prompt.tags) ? prompt.tags : (prompt.tags ? [prompt.tags] : []);
+      const promptTags = Array.isArray(prompt.tags)
+        ? prompt.tags
+        : prompt.tags
+          ? [prompt.tags]
+          : [];
       links.push({
         url: `/prompts/${slug}`,
         anchorText: generateAnchorText(prompt.title, promptTags, 'prompt'),
@@ -92,23 +127,23 @@ export async function findRelatedContent(
   if (type !== 'pattern') {
     const patterns = await patternRepository.getAll();
     const relatedPatterns = patterns
-      .filter(
-        (pattern) => {
-          const patternTags = Array.isArray(pattern.tags) ? pattern.tags : (pattern.tags ? [pattern.tags] : []);
-          return pattern.id !== currentId &&
-            (patternTags.length > 0 && normalizedTags.length > 0
-              ? patternTags.some((tag) => normalizedTags.includes(tag))
-              : false) ||
-            pattern.category === category;
-        }
-      )
+      .filter((pattern) => {
+        // Patterns don't have tags, so match by category or useCases if available
+        const matchesCategory = category && pattern.category.toLowerCase() === category.toLowerCase();
+        const matchesUseCases = pattern.useCases && normalizedTags.length > 0
+          ? pattern.useCases.some((useCase) => 
+              normalizedTags.some((tag) => useCase.toLowerCase().includes(tag.toLowerCase()))
+            )
+          : false;
+        
+        return pattern.id !== currentId && (matchesCategory || matchesUseCases);
+      })
       .slice(0, limit);
-    
+
     relatedPatterns.forEach((pattern) => {
-      const patternTags = Array.isArray(pattern.tags) ? pattern.tags : (pattern.tags ? [pattern.tags] : []);
       links.push({
         url: `/patterns/${encodeURIComponent(pattern.id)}`,
-        anchorText: generateAnchorText(pattern.name, patternTags, 'pattern'),
+        anchorText: generateAnchorText(pattern.name, [], 'pattern'),
         type: 'pattern',
         title: pattern.name,
         description: pattern.description,
@@ -169,27 +204,29 @@ export async function findPillarClusterLinks(
   }
 
   // Check if current article is a pillar (has "pillar" tag or is featured)
-  const articleTags = Array.isArray(currentArticle.tags) ? currentArticle.tags : (currentArticle.tags ? [currentArticle.tags] : []);
+  const articleTags = Array.isArray(currentArticle.tags)
+    ? currentArticle.tags
+    : currentArticle.tags
+      ? [currentArticle.tags]
+      : [];
   const isPillar = articleTags.includes('pillar') || currentArticle.featured;
 
   if (isPillar) {
     // Find cluster articles (related articles with same category/tags)
     const clusters = articles
-      .filter(
-        (a) => {
-          const aTags = Array.isArray(a.tags) ? a.tags : (a.tags ? [a.tags] : []);
-          return a.id !== currentArticle.id &&
+      .filter((a) => {
+        const aTags = Array.isArray(a.tags) ? a.tags : a.tags ? [a.tags] : [];
+        return (
+          (a.id !== currentArticle.id &&
             (aTags.length > 0 && articleTags.length > 0
               ? aTags.some((tag) => articleTags.includes(tag))
-              : false) ||
-            a.category === currentArticle.category &&
-            !aTags.includes('pillar');
-        }
-      )
+              : false)) ||
+          (a.category === currentArticle.category && !aTags.includes('pillar'))
+        );
+      })
       .slice(0, 6)
       .map((article) => {
         const slug = article.seo?.slug || article.id;
-        const aTags = Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : []);
         return {
           url: `/learn/${slug}`,
           anchorText: article.title,
@@ -202,17 +239,17 @@ export async function findPillarClusterLinks(
     return { clusters };
   } else {
     // Find pillar article (featured article with same category/tags)
-    const pillar = articles.find(
-      (a) => {
-        const aTags = Array.isArray(a.tags) ? a.tags : (a.tags ? [a.tags] : []);
-        return a.id !== currentArticle.id &&
+    const pillar = articles.find((a) => {
+      const aTags = Array.isArray(a.tags) ? a.tags : a.tags ? [a.tags] : [];
+      return (
+        (a.id !== currentArticle.id &&
           (a.featured || aTags.includes('pillar')) &&
           (aTags.length > 0 && articleTags.length > 0
             ? aTags.some((tag) => articleTags.includes(tag))
-            : false) ||
-          a.category === currentArticle.category;
-      }
-    );
+            : false)) ||
+        a.category === currentArticle.category
+      );
+    });
 
     if (pillar) {
       const slug = pillar.seo?.slug || pillar.id;
@@ -236,7 +273,9 @@ export async function findPillarClusterLinks(
  * Extract potential internal links from content
  * Finds mentions of patterns, prompts, or articles that we can link to
  */
-export async function extractContentLinks(content: string): Promise<InternalLink[]> {
+export async function extractContentLinks(
+  content: string
+): Promise<InternalLink[]> {
   const links: InternalLink[] = [];
 
   // Find pattern mentions
@@ -264,7 +303,7 @@ export async function extractContentLinks(content: string): Promise<InternalLink
       .split(/\s+/)
       .filter((word) => word.length > 4)
       .slice(0, 2);
-    
+
     if (keywords.length > 0) {
       const keywordRegex = new RegExp(`\\b${keywords.join('\\s+')}\\b`, 'i');
       if (keywordRegex.test(content)) {
@@ -282,4 +321,3 @@ export async function extractContentLinks(content: string): Promise<InternalLink
 
   return links;
 }
-

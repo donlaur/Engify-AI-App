@@ -25,9 +25,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
-import { generateCourseSchema, generateFAQSchema } from '@/lib/seo/metadata';
+import { generateCourseSchema } from '@/lib/seo/metadata';
 import { APP_URL } from '@/lib/constants';
 import { getServerStats } from '@/lib/server-stats';
+import { FAQSection } from '@/components/features/FAQSection';
+import { PILLAR_FAQS } from '@/lib/data/pillar-faqs';
+import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 
 // Generate metadata dynamically (must be exported, not in component)
 export async function generateMetadata(): Promise<Metadata> {
@@ -97,40 +100,7 @@ const PATTERN_LINKS = [
   { key: 'kernal', name: 'KERNEL Framework', category: 'Framework' },
 ];
 
-// FAQ data for FAQPage schema
-const FAQS = [
-  {
-    question: 'What is prompt engineering?',
-    answer:
-      'Prompt engineering is the practice of designing and optimizing text prompts to get better, more reliable results from AI models like ChatGPT, Claude, and Gemini. It involves understanding how AI models interpret instructions and crafting prompts that guide them to produce the desired output.',
-  },
-  {
-    question: 'Why is prompt engineering important for developers?',
-    answer:
-      "Prompt engineering is crucial for developers because it enables you to get consistent, high-quality results from AI tools. Well-engineered prompts can reduce debugging time, improve code quality, and unlock more advanced AI capabilities. It's the difference between getting generic responses and getting production-ready code.",
-  },
-  {
-    question: 'What are the most effective prompt engineering patterns?',
-    answer:
-      'The most effective patterns include Chain of Thought (for complex reasoning), Few-Shot Learning (for consistent formatting), Persona Pattern (for role-specific responses), and RAG (for accurate, up-to-date information). The best pattern depends on your specific use case.',
-  },
-  {
-    question: 'How do I improve my prompt engineering skills?',
-    answer:
-      'Improve your skills by practicing with real-world problems, studying proven patterns, analyzing successful prompts, and iterating based on results. Start with foundational patterns like Persona and Few-Shot, then progress to advanced techniques like Chain of Thought and RAG.',
-  },
-  {
-    question: 'Can prompt engineering work with any AI model?',
-    answer:
-      'Yes, prompt engineering principles work across all major AI models (OpenAI, Anthropic, Google, etc.), but each model has unique strengths. Some patterns work better with certain models - for example, Chain of Thought works exceptionally well with GPT-4, while Claude excels with constitutional AI patterns.',
-  },
-  {
-    question:
-      'What is the difference between prompt engineering and fine-tuning?',
-    answer:
-      'Prompt engineering involves crafting effective instructions without modifying the model, while fine-tuning involves training the model on custom data. Prompt engineering is faster, cheaper, and more accessible, while fine-tuning offers more control but requires significant resources.',
-  },
-];
+// FAQ data is now imported from pillar-faqs.ts
 
 export default async function PromptEngineeringMasterclassPage() {
   // Fetch dynamic stats
@@ -153,20 +123,12 @@ export default async function PromptEngineeringMasterclassPage() {
     `${APP_URL}/learn/prompt-engineering-masterclass`
   );
 
-  // Generate FAQ schema
-  const faqSchema = generateFAQSchema(FAQS);
-
   return (
     <>
       {/* Course Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }}
-      />
-      {/* FAQ Schema */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <MainLayout>
         {/* Breadcrumbs */}
@@ -772,21 +734,21 @@ Output: false`}</code>
 
           {/* FAQ */}
           <section id="faq" className="mb-16 scroll-mt-20">
-            <h2 className="mb-6 text-3xl font-bold">
-              8. Frequently Asked Questions
-            </h2>
-            <div className="space-y-6">
-              {FAQS.map((faq, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{faq.question}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{faq.answer}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <FAQSection
+              faqs={PILLAR_FAQS}
+              title="8. Frequently Asked Questions"
+              description="Common questions about prompt engineering, patterns, and best practices."
+              currentUrl={`${APP_URL}/learn/prompt-engineering-masterclass`}
+            />
+          </section>
+
+          {/* Related Content - Hub-and-Spoke Links */}
+          <section className="mb-16 scroll-mt-20">
+            <CrossContentLinks
+              tags={['prompt-engineering', 'ai-patterns', 'prompt-patterns']}
+              category="intermediate"
+              excludeId="prompt-engineering-masterclass"
+            />
           </section>
 
           {/* CTA Section */}

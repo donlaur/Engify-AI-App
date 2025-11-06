@@ -4,10 +4,11 @@
  */
 
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { findRelatedContent } from '@/lib/seo/internal-linking';
-import { getPromptSlug } from '@/lib/utils/slug';
+import {
+  findRelatedContent,
+  findPillarPageLink,
+} from '@/lib/seo/internal-linking';
 
 interface CrossContentLinksProps {
   tags: string[];
@@ -23,26 +24,36 @@ export async function CrossContentLinks({
   // Determine content type based on what we're excluding
   // If excludeId matches a pattern ID format, we're on a pattern page
   // Otherwise, assume article or prompt
-  const contentType = excludeId?.includes('pattern') || excludeId?.match(/^[a-z-]+$/) 
-    ? 'pattern' 
-    : 'article';
-  
-  const relatedPrompts = await findRelatedContent(contentType, excludeId || '', tags, category, 3);
-  const relatedPatterns = await findRelatedContent(contentType, excludeId || '', tags, category, 3);
-  const relatedArticles = await findRelatedContent(contentType, excludeId || '', tags, category, 3);
+  const contentType =
+    excludeId?.includes('pattern') || excludeId?.match(/^[a-z-]+$/)
+      ? 'pattern'
+      : 'article';
+
+  const [relatedPrompts, relatedPatterns, relatedArticles, pillarLink] =
+    await Promise.all([
+      findRelatedContent(contentType, excludeId || '', tags, category, 3),
+      findRelatedContent(contentType, excludeId || '', tags, category, 3),
+      findRelatedContent(contentType, excludeId || '', tags, category, 3),
+      findPillarPageLink(),
+    ]);
 
   const prompts = relatedPrompts.filter((link) => link.type === 'prompt');
   const patterns = relatedPatterns.filter((link) => link.type === 'pattern');
   const articles = relatedArticles.filter((link) => link.type === 'article');
 
-  if (prompts.length === 0 && patterns.length === 0 && articles.length === 0) {
+  if (
+    prompts.length === 0 &&
+    patterns.length === 0 &&
+    articles.length === 0 &&
+    !pillarLink
+  ) {
     return null;
   }
 
   return (
     <div className="mt-12 border-t pt-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">Try These Resources</h2>
+        <h2 className="mb-2 text-2xl font-bold">Try These Resources</h2>
         <p className="text-sm text-muted-foreground">
           Apply what you learned with these prompts and patterns
         </p>
@@ -62,7 +73,7 @@ export async function CrossContentLinks({
                   href={prompt.url}
                   className="group flex items-start gap-3 rounded-lg border bg-card p-4 transition-all hover:border-primary hover:bg-accent"
                 >
-                  <Icons.chevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary mt-1 flex-shrink-0" />
+                  <Icons.chevronRight className="mt-1 h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-primary" />
                   <div className="flex-1">
                     <h4 className="font-medium group-hover:text-primary">
                       {prompt.anchorText}
@@ -92,7 +103,7 @@ export async function CrossContentLinks({
                   href={pattern.url}
                   className="group flex items-start gap-3 rounded-lg border bg-card p-4 transition-all hover:border-primary hover:bg-accent"
                 >
-                  <Icons.chevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary mt-1 flex-shrink-0" />
+                  <Icons.chevronRight className="mt-1 h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-primary" />
                   <div className="flex-1">
                     <h4 className="font-medium group-hover:text-primary">
                       {pattern.anchorText}
@@ -122,7 +133,7 @@ export async function CrossContentLinks({
                   href={article.url}
                   className="group flex items-start gap-3 rounded-lg border bg-card p-4 transition-all hover:border-primary hover:bg-accent"
                 >
-                  <Icons.chevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary mt-1 flex-shrink-0" />
+                  <Icons.chevronRight className="mt-1 h-4 w-4 flex-shrink-0 text-muted-foreground group-hover:text-primary" />
                   <div className="flex-1">
                     <h4 className="font-medium group-hover:text-primary">
                       {article.anchorText}
@@ -138,8 +149,30 @@ export async function CrossContentLinks({
             </div>
           </div>
         )}
+
+        {/* Pillar Page Link - Hub-and-Spoke Model */}
+        {pillarLink && contentType !== 'article' && (
+          <div className="md:col-span-2 lg:col-span-3">
+            <div className="rounded-lg border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-purple-500/5 p-6">
+              <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold">
+                <Icons.star className="h-5 w-5 text-primary" />
+                Master Prompt Engineering
+              </h3>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Deep dive into prompt engineering with our comprehensive
+                masterclass covering all patterns and techniques.
+              </p>
+              <Link
+                href={pillarLink.url}
+                className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+              >
+                {pillarLink.anchorText}
+                <Icons.arrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-

@@ -3,6 +3,11 @@
  * Displays quality scores in a user-focused manner
  * Only shows metrics relevant to end users (hides admin/internal metrics)
  * Quality Breakdown is collapsible (hidden by default, especially when scores are low)
+ * 
+ * NOTE: Security scores are hidden from public view because:
+ * - Most prompts are NOT security-focused but aren't insecure
+ * - Default scores of 5-6 are normal but alarm enterprise clients
+ * - Security is still audited internally (kept in ADMIN_METRICS)
  */
 
 'use client';
@@ -52,14 +57,14 @@ const USER_FOCUSED_CATEGORIES: Record<string, { label: string; description: stri
     label: 'Enterprise Ready',
     description: 'Suitable for professional and team use'
   },
-  securityCompliance: {
-    label: 'Security & Privacy',
-    description: 'Follows security best practices'
-  },
+  // securityCompliance removed - scores are misleading for non-security prompts
+  // Most prompts are NOT security-focused but aren't insecure, leading to confusing low scores
+  // Kept in audits internally but hidden from public view
 };
 
 // Internal/admin metrics (hidden from public view)
-const ADMIN_METRICS = ['seoEnrichment', 'accessibility', 'performance'];
+// securityCompliance: Hidden because low scores (5-6) are normal for non-security prompts but alarm enterprise clients
+const ADMIN_METRICS = ['seoEnrichment', 'accessibility', 'performance', 'securityCompliance'];
 
 // Weights must match audit script calculation (scripts/content/audit-prompts-patterns.ts)
 // These are the actual weights used to calculate overallScore
