@@ -30,7 +30,7 @@ import { APP_URL } from '@/lib/constants';
 import { getServerStats } from '@/lib/server-stats';
 import { FAQSection } from '@/components/features/FAQSection';
 import { PILLAR_FAQS } from '@/lib/data/pillar-faqs';
-import { CrossContentLinks } from '@/components/features/CrossContentLinks';
+import { patternRepository } from '@/lib/db/repositories/ContentService';
 
 // Generate metadata dynamically (must be exported, not in component)
 export async function generateMetadata(): Promise<Metadata> {
@@ -69,35 +69,23 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
-// Pattern links for internal linking
-const PATTERN_LINKS = [
-  { key: 'chain-of-thought', name: 'Chain of Thought', category: 'Cognitive' },
-  { key: 'few-shot', name: 'Few-Shot Learning', category: 'Foundational' },
-  { key: 'zero-shot', name: 'Zero-Shot', category: 'Foundational' },
-  { key: 'persona', name: 'Persona Pattern', category: 'Foundational' },
-  { key: 'self-consistency', name: 'Self-Consistency', category: 'Iterative' },
-  { key: 'tree-of-thoughts', name: 'Tree of Thoughts', category: 'Cognitive' },
-  {
-    key: 'chain-of-verification',
-    name: 'Chain of Verification',
-    category: 'Cognitive',
-  },
-  { key: 're-act', name: 'ReAct (Reasoning + Acting)', category: 'Iterative' },
-  {
-    key: 'automatic-few-shot',
-    name: 'Automatic Few-Shot',
-    category: 'Structural',
-  },
-  { key: 'meta-prompting', name: 'Meta-Prompting', category: 'Advanced' },
-  { key: 'socratic-method', name: 'Socratic Method', category: 'Cognitive' },
-  { key: 'constitutional-ai', name: 'Constitutional AI', category: 'Advanced' },
-  {
-    key: 'retrieval-augmented',
-    name: 'Retrieval-Augmented Generation (RAG)',
-    category: 'Advanced',
-  },
-  { key: 'reflection', name: 'Reflection Pattern', category: 'Iterative' },
-  { key: 'kernal', name: 'KERNEL Framework', category: 'Framework' },
+// Pattern names to link to (will be matched to actual patterns from DB)
+const PATTERN_NAMES = [
+  'Chain of Thought',
+  'Few-Shot Learning',
+  'Zero-Shot',
+  'Persona Pattern',
+  'Self-Consistency',
+  'Tree of Thoughts',
+  'Chain of Verification',
+  'ReAct (Reasoning + Acting)',
+  'Automatic Few-Shot',
+  'Meta-Prompting',
+  'Socratic Method',
+  'Constitutional AI',
+  'Retrieval-Augmented Generation (RAG)',
+  'Reflection Pattern',
+  'KERNEL Framework',
 ];
 
 // FAQ data is now imported from pillar-faqs.ts
@@ -106,6 +94,23 @@ export default async function PromptEngineeringMasterclassPage() {
   // Fetch dynamic stats
   const stats = await getServerStats();
   const patternCount = stats.patterns?.total || stats.stats?.patterns || 18;
+  const promptCount = stats.prompts?.total || stats.stats?.prompts || 300;
+
+  // Fetch patterns from database and match by name
+  const allPatterns = await patternRepository.getAll();
+  const patternLinks = PATTERN_NAMES.map((name) => {
+    const pattern = allPatterns.find(
+      (p) => p.name.toLowerCase() === name.toLowerCase()
+    );
+    if (pattern) {
+      return {
+        id: pattern.id,
+        name: pattern.name,
+        category: pattern.category || 'Other',
+      };
+    }
+    return null;
+  }).filter((p): p is { id: string; name: string; category: string } => p !== null);
 
   // Generate Course schema
   const courseSchema = generateCourseSchema(
@@ -185,52 +190,52 @@ export default async function PromptEngineeringMasterclassPage() {
           </header>
 
           {/* Table of Contents */}
-          <nav className="mb-12 rounded-lg border bg-muted/50 p-6">
-            <h2 className="mb-4 font-semibold">Table of Contents</h2>
-            <ul className="space-y-2 text-sm">
+          <nav className="mb-12 rounded-lg border border-border bg-card p-6 shadow-sm">
+            <h2 className="mb-4 text-xl font-semibold text-foreground">Table of Contents</h2>
+            <ul className="space-y-2 text-base">
               <li>
                 <a
                   href="#introduction"
-                  className="text-primary hover:underline"
+                  className="font-medium text-foreground hover:text-primary hover:underline transition-colors"
                 >
                   1. Introduction: What is Prompt Engineering?
                 </a>
               </li>
               <li>
-                <a href="#foundations" className="text-primary hover:underline">
+                <a href="#foundations" className="font-medium text-foreground hover:text-primary hover:underline transition-colors">
                   2. Foundational Concepts
                 </a>
               </li>
               <li>
-                <a href="#patterns" className="text-primary hover:underline">
+                <a href="#patterns" className="font-medium text-foreground hover:text-primary hover:underline transition-colors">
                   3. Proven Patterns
                 </a>
               </li>
               <li>
-                <a href="#advanced" className="text-primary hover:underline">
+                <a href="#advanced" className="font-medium text-foreground hover:text-primary hover:underline transition-colors">
                   4. Advanced Techniques
                 </a>
               </li>
               <li>
-                <a href="#examples" className="text-primary hover:underline">
+                <a href="#examples" className="font-medium text-foreground hover:text-primary hover:underline transition-colors">
                   5. Practical Examples and Use Cases
                 </a>
               </li>
               <li>
-                <a href="#sdlc" className="text-primary hover:underline">
+                <a href="#sdlc" className="font-medium text-foreground hover:text-primary hover:underline transition-colors">
                   6. Integration with Software Development Lifecycle
                 </a>
               </li>
               <li>
                 <a
                   href="#best-practices"
-                  className="text-primary hover:underline"
+                  className="font-medium text-foreground hover:text-primary hover:underline transition-colors"
                 >
                   7. Best Practices and Common Mistakes
                 </a>
               </li>
               <li>
-                <a href="#faq" className="text-primary hover:underline">
+                <a href="#faq" className="font-medium text-foreground hover:text-primary hover:underline transition-colors">
                   8. Frequently Asked Questions
                 </a>
               </li>
@@ -386,16 +391,16 @@ export default async function PromptEngineeringMasterclassPage() {
             </p>
 
             <div className="mb-12 grid gap-6 md:grid-cols-2">
-              {PATTERN_LINKS.map((pattern) => (
+              {patternLinks.map((pattern) => (
                 <Card
-                  key={pattern.key}
+                  key={pattern.id}
                   className="transition-colors hover:border-primary"
                 >
                   <CardHeader>
                     <div className="mb-2 flex items-center justify-between">
                       <CardTitle className="text-lg">
                         <Link
-                          href={`/patterns/${pattern.key}`}
+                          href={`/patterns/${encodeURIComponent(pattern.id)}`}
                           className="hover:text-primary"
                         >
                           {pattern.name}
@@ -413,7 +418,7 @@ export default async function PromptEngineeringMasterclassPage() {
                   </CardHeader>
                   <CardContent>
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`/patterns/${pattern.key}`}>
+                      <Link href={`/patterns/${encodeURIComponent(pattern.id)}`}>
                         Learn More
                         <Icons.arrowRight className="ml-2 h-4 w-4" />
                       </Link>
@@ -552,23 +557,23 @@ export default async function PromptEngineeringMasterclassPage() {
               </h3>
               <p>Let&apos;s see how prompt engineering transforms results:</p>
 
-              <div className="my-6 rounded-lg border bg-muted/50 p-4">
+              <div className="my-6 rounded-lg border border-border bg-card p-4 shadow-sm">
                 <h4 className="mb-2 font-semibold text-red-600 dark:text-red-400">
                   ❌ Weak Prompt
                 </h4>
-                <pre className="text-sm">
+                <pre className="text-sm text-foreground">
                   <code>Write a function to validate emails</code>
                 </pre>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-foreground/80">
                   Result: Generic, unreliable code with no error handling
                 </p>
               </div>
 
-              <div className="my-6 rounded-lg border bg-muted/50 p-4">
+              <div className="my-6 rounded-lg border border-border bg-card p-4 shadow-sm">
                 <h4 className="mb-2 font-semibold text-green-600 dark:text-green-400">
                   ✅ Strong Prompt (Using Persona + Few-Shot + Template)
                 </h4>
-                <pre className="whitespace-pre-wrap text-sm">
+                <pre className="whitespace-pre-wrap text-sm text-foreground">
                   <code>{`You are a senior TypeScript engineer.
 
 Write a function that validates email addresses.
@@ -587,7 +592,7 @@ Output: true
 Input: "invalid-email"
 Output: false`}</code>
                 </pre>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-foreground/80">
                   Result: Production-ready code with proper error handling and
                   types
                 </p>
@@ -757,7 +762,7 @@ Output: false`}</code>
               Ready to Master Prompt Engineering?
             </h2>
             <p className="mb-6 text-lg text-muted-foreground">
-              Access our full library of 100+ expert prompts, interactive
+              Access our full library of {promptCount}+ expert prompts, interactive
               workbenches, and team training tools.
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
