@@ -49,9 +49,13 @@ export async function generateMetadata({
     ? 'Free'
     : `$${tool.pricing.paid?.monthly || 0}/month`;
 
+  const prosPreview = tool.pros && tool.pros.length > 0 
+    ? tool.pros.slice(0, 2).join('. ')
+    : '';
+
   return {
     title: `${tool.name} Review & Comparison - AI Development Tool | Engify.ai`,
-    description: `${tool.name}: ${tool.tagline || tool.description}. ${pricingText}. ${tool.pros.slice(0, 2).join('. ')}.`,
+    description: `${tool.name}: ${tool.tagline || tool.description}. ${pricingText}.${prosPreview ? ` ${prosPreview}.` : ''}`,
     keywords: [
       tool.name,
       `${tool.name} review`,
@@ -60,7 +64,7 @@ export async function generateMetadata({
       'AI development tool',
       'AI IDE',
       'code assistant',
-      ...tool.tags,
+      ...(tool.tags || []),
     ],
     openGraph: {
       title: `${tool.name} - AI Development Tool Review`,
@@ -120,7 +124,7 @@ export default async function AIToolDetailPage({ params }: PageProps) {
               ? {
                   '@type': 'AggregateRating',
                   ratingValue: tool.rating,
-                  ratingCount: tool.reviewCount || 0,
+                  ratingCount: tool.reviewCount ?? 0,
                 }
               : undefined,
           }),
@@ -154,7 +158,7 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                 <div className="flex items-center gap-1">
                   <Icons.star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="text-lg font-semibold">{tool.rating}</span>
-                  {tool.reviewCount > 0 && (
+                  {(tool.reviewCount ?? 0) > 0 && (
                     <span className="text-sm text-muted-foreground">
                       ({tool.reviewCount}{' '}
                       {tool.reviewCount === 1 ? 'review' : 'reviews'})
@@ -190,7 +194,7 @@ export default async function AIToolDetailPage({ params }: PageProps) {
               </Card>
 
               {/* Features */}
-              {tool.features.length > 0 && (
+              {tool.features && tool.features.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Features</CardTitle>
@@ -209,9 +213,9 @@ export default async function AIToolDetailPage({ params }: PageProps) {
               )}
 
               {/* Pros & Cons */}
-              {(tool.pros.length > 0 || tool.cons.length > 0) && (
+              {((tool.pros && tool.pros.length > 0) || (tool.cons && tool.cons.length > 0)) && (
                 <div className="grid gap-4 md:grid-cols-2">
-                  {tool.pros.length > 0 && (
+                  {tool.pros && tool.pros.length > 0 && (
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-green-600 dark:text-green-400">
@@ -231,7 +235,7 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                     </Card>
                   )}
 
-                  {tool.cons.length > 0 && (
+                  {tool.cons && tool.cons.length > 0 && (
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-red-600 dark:text-red-400">
@@ -254,7 +258,7 @@ export default async function AIToolDetailPage({ params }: PageProps) {
               )}
 
               {/* Tags */}
-              {tool.tags.length > 0 && (
+              {tool.tags && tool.tags.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Tags</CardTitle>
