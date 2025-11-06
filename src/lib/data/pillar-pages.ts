@@ -155,11 +155,12 @@ export const PILLAR_PAGES: PillarPageConfig[] = [
     category: 'guide',
     level: 'intermediate',
     targetWordCount: 15000, // Updated from 10k to 15k per research recommendation
-    status: 'planned',
+    status: 'complete',
     structure: 'mongodb',
     priority: 'high',
     relatedRoles: ['engineer', 'senior-engineer', 'tech-lead', 'architect', 'engineering-director'],
     relatedTags: ['ai-tools', 'code-generation', 'ai-development', 'sdlc', 'software-engineering', 'ai-security', 'roi', 'devops'],
+    updatedAt: new Date('2025-11-06'),
   },
   {
     id: 'ai-first-engineering-organization',
@@ -199,11 +200,12 @@ export const PILLAR_PAGES: PillarPageConfig[] = [
     category: 'strategy',
     level: 'advanced',
     targetWordCount: 8000,
-    status: 'planned',
+    status: 'complete',
     structure: 'mongodb',
     priority: 'high',
     relatedRoles: ['engineering-director', 'vp-engineering', 'cto', 'product-director', 'vp-product'],
     relatedTags: ['leadership', 'transformation', 'ai-strategy', 'organizational-change', 'culture'],
+    updatedAt: new Date('2025-11-06'),
   },
 ];
 

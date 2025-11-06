@@ -155,7 +155,7 @@ export default function KERNELPage() {
       <section className="container py-20">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-4xl font-bold">The Six Principles</h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-muted-foreground">
             Each letter represents a core principle for enterprise-grade prompts
           </p>
         </div>
@@ -188,32 +188,32 @@ export default function KERNELPage() {
               <CardContent className="space-y-6 p-6">
                 {/* Why It Matters */}
                 <div>
-                  <h4 className="mb-2 font-semibold text-gray-900">
+                  <h4 className="mb-2 font-semibold text-foreground">
                     Why It Matters
                   </h4>
-                  <p className="text-gray-600">{principle.why}</p>
+                  <p className="text-foreground/90">{principle.why}</p>
                 </div>
 
                 {/* Examples */}
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-lg border-2 border-red-200 bg-red-50 p-4">
+                  <div className="rounded-lg border-2 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/50 p-4">
                     <div className="mb-2 flex items-center gap-2">
-                      <Icons.x className="h-4 w-4 text-red-600" />
-                      <span className="font-semibold text-red-900">
+                      <Icons.x className="h-4 w-4 text-red-600 dark:text-red-400" />
+                      <span className="font-semibold text-red-900 dark:text-red-100">
                         Bad Example
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700">{principle.bad}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-200">{principle.bad}</p>
                   </div>
 
-                  <div className="rounded-lg border-2 border-green-200 bg-green-50 p-4">
+                  <div className="rounded-lg border-2 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/50 p-4">
                     <div className="mb-2 flex items-center gap-2">
-                      <Icons.check className="h-4 w-4 text-green-600" />
-                      <span className="font-semibold text-green-900">
+                      <Icons.check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <span className="font-semibold text-green-900 dark:text-green-100">
                         Good Example
                       </span>
                     </div>
-                    <p className="whitespace-pre-line text-sm text-gray-700">
+                    <p className="whitespace-pre-line text-sm text-gray-700 dark:text-gray-200">
                       {principle.good}
                     </p>
                   </div>
@@ -225,7 +225,7 @@ export default function KERNELPage() {
       </section>
 
       {/* Template */}
-      <section className="bg-gray-50 py-20">
+      <section className="bg-gray-50 dark:bg-gray-900 py-20">
         <div className="container">
           <div className="mx-auto max-w-3xl">
             <h2 className="mb-8 text-center text-4xl font-bold">
@@ -233,7 +233,7 @@ export default function KERNELPage() {
             </h2>
             <Card className="border-2">
               <CardContent className="space-y-4 p-8">
-                <pre className="overflow-x-auto rounded-lg bg-gray-900 p-6 text-sm text-gray-100">
+                <pre className="overflow-x-auto rounded-lg bg-gray-900 dark:bg-gray-950 p-6 text-sm text-gray-100 dark:text-gray-200">
                   {`### Context
 [Provide relevant background information]
 
@@ -266,7 +266,7 @@ export default function KERNELPage() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="mb-2 text-5xl font-bold text-primary">94%</div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   First-try success rate (vs 72% for ad-hoc prompts)
                 </p>
               </CardContent>
@@ -275,7 +275,7 @@ export default function KERNELPage() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="mb-2 text-5xl font-bold text-primary">58%</div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Reduction in token usage
                 </p>
               </CardContent>
@@ -284,7 +284,7 @@ export default function KERNELPage() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="mb-2 text-5xl font-bold text-primary">31%</div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Improvement in AI comprehension with logical structure
                 </p>
               </CardContent>
@@ -295,11 +295,11 @@ export default function KERNELPage() {
 
       {/* CTA */}
       <section className="container py-20">
-        <Card className="mx-auto max-w-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-purple-50">
+        <Card className="mx-auto max-w-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-purple-50 dark:from-primary/10 dark:to-purple-950/30">
           <CardContent className="space-y-6 py-12 text-center">
             <Icons.sparkles className="mx-auto h-16 w-16 text-primary" />
             <h2 className="text-4xl font-bold">Ready to Apply KERNEL?</h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-muted-foreground">
               Browse our library of {promptCount}+ prompts built with the KERNEL framework
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">

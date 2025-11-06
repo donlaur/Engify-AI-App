@@ -21,20 +21,26 @@ export async function CrossContentLinks({
   category,
   excludeId,
 }: CrossContentLinksProps) {
+  // Ensure tags is always an array
+  const normalizedTags = Array.isArray(tags) ? tags : tags ? [tags] : [];
+  
+  // Ensure excludeId is a string
+  const excludeIdStr = typeof excludeId === 'string' ? excludeId : String(excludeId || '');
+  
   // Determine content type based on what we're excluding
   // If excludeId matches a pattern ID format, we're on a pattern page
   // Otherwise, assume article or prompt
   const contentType =
-    excludeId?.includes('pattern') || excludeId?.match(/^[a-z-]+$/)
+    excludeIdStr.includes('pattern') || excludeIdStr.match(/^[a-z-]+$/)
       ? 'pattern'
       : 'article';
 
   const [relatedPrompts, relatedPatterns, relatedArticles, pillarLink] =
     await Promise.all([
-      findRelatedContent(contentType, excludeId || '', tags, category, 3),
-      findRelatedContent(contentType, excludeId || '', tags, category, 3),
-      findRelatedContent(contentType, excludeId || '', tags, category, 3),
-      findPillarPageLink(tags), // Pass tags to find relevant pillar pages
+      findRelatedContent(contentType, excludeIdStr, normalizedTags, category, 3),
+      findRelatedContent(contentType, excludeIdStr, normalizedTags, category, 3),
+      findRelatedContent(contentType, excludeIdStr, normalizedTags, category, 3),
+      findPillarPageLink(normalizedTags), // Pass normalized tags to find relevant pillar pages
     ]);
 
   const prompts = relatedPrompts.filter((link) => link.type === 'prompt');

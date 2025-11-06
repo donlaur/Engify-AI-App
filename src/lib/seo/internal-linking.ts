@@ -45,15 +45,17 @@ export async function findPillarPageLink(
   let matchingPillars: PillarPageConfig[] = completePillars;
   
   if (tags && tags.length > 0) {
-    matchingPillars = matchingPillars.filter((pillar) =>
-      pillar.relatedTags?.some((tag) => tags.includes(tag))
-    );
+    matchingPillars = matchingPillars.filter((pillar) => {
+      const pillarTags = Array.isArray(pillar.relatedTags) ? pillar.relatedTags : [];
+      return pillarTags.length > 0 && pillarTags.some((tag) => tags.includes(tag));
+    });
   }
   
   if (role) {
-    matchingPillars = matchingPillars.filter((pillar) =>
-      pillar.relatedRoles?.includes(role)
-    );
+    matchingPillars = matchingPillars.filter((pillar) => {
+      const pillarRoles = Array.isArray(pillar.relatedRoles) ? pillar.relatedRoles : [];
+      return pillarRoles.includes(role);
+    });
   }
   
   // Return the first matching pillar, or primary if none match
@@ -74,15 +76,17 @@ export async function findPillarPageLinks(
   let matchingPillars: PillarPageConfig[] = completePillars;
   
   if (tags && tags.length > 0) {
-    matchingPillars = matchingPillars.filter((pillar) =>
-      pillar.relatedTags?.some((tag) => tags.includes(tag))
-    );
+    matchingPillars = matchingPillars.filter((pillar) => {
+      const pillarTags = Array.isArray(pillar.relatedTags) ? pillar.relatedTags : [];
+      return pillarTags.length > 0 && pillarTags.some((tag) => tags.includes(tag));
+    });
   }
   
   if (role) {
-    matchingPillars = matchingPillars.filter((pillar) =>
-      pillar.relatedRoles?.includes(role)
-    );
+    matchingPillars = matchingPillars.filter((pillar) => {
+      const pillarRoles = Array.isArray(pillar.relatedRoles) ? pillar.relatedRoles : [];
+      return pillarRoles.includes(role);
+    });
   }
   
   // If no matches, return primary pillar
