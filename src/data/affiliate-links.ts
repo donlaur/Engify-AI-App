@@ -62,10 +62,11 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
   replit: {
     tool: 'Replit AI',
     baseUrl: 'https://replit.com',
-    referralUrl: undefined, // TODO: Get Replit referral link
-    status: 'requested',
+    referralUrl: 'https://replit.com/refer/donlaur',
+    affiliateCode: 'donlaur',
+    status: 'active',
     commission: 'TBD',
-    notes: 'Contact Replit for affiliate program',
+    notes: 'Active affiliate link via donlaur',
   },
 
   warp: {
