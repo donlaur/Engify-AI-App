@@ -123,6 +123,124 @@ export default async function LearnPage() {
           </Card>
         </div>
 
+        {/* Featured Resources */}
+        <div className="mb-12 space-y-6">
+          <h2 className="text-3xl font-bold">Featured Resources</h2>
+          
+          {/* AI Tools & Models */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card className="surface-frosted surface-frosted-hover transition-all duration-200 hover:border-primary hover:shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icons.code className="h-6 w-6 text-blue-600" />
+                  AI Development Tools
+                </CardTitle>
+                <CardDescription>
+                  Compare 253+ AI-powered IDEs, code assistants, and development tools
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Find the best AI tool for your workflow with detailed comparisons of Cursor, GitHub Copilot, Windsurf, and more.
+                  </p>
+                  <Button asChild className="w-full">
+                    <Link href="/learn/ai-tools">
+                      <Icons.arrowRight className="mr-2 h-4 w-4" />
+                      Explore AI Tools
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="surface-frosted surface-frosted-hover transition-all duration-200 hover:border-primary hover:shadow-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icons.sparkles className="h-6 w-6 text-purple-600" />
+                  AI Models Comparison
+                </CardTitle>
+                <CardDescription>
+                  Compare 253+ AI models from OpenAI, Anthropic, Google, and more
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Find the perfect AI model for your use case with pricing, capabilities, and EOL tracking.
+                  </p>
+                  <Button asChild className="w-full">
+                    <Link href="/learn/ai-models">
+                      <Icons.arrowRight className="mr-2 h-4 w-4" />
+                      Compare AI Models
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Pillar Articles */}
+          <div>
+            <h3 className="mb-4 text-2xl font-bold">Comprehensive Guides</h3>
+            <div className="grid gap-6 md:grid-cols-3">
+              <Card className="surface-frosted surface-frosted-hover transition-all duration-200 hover:border-primary hover:shadow-xl">
+                <CardHeader>
+                  <Badge className="mb-2 w-fit bg-blue-100 text-blue-800">Pillar Article</Badge>
+                  <CardTitle className="text-lg">AI Upskilling Program for Engineering Teams</CardTitle>
+                  <CardDescription>
+                    Build a high-ROI AI upskilling program that transforms your engineering team
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/learn/ai-upskilling-program-for-engineering-teams">
+                      Read Guide
+                      <Icons.arrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="surface-frosted surface-frosted-hover transition-all duration-200 hover:border-primary hover:shadow-xl">
+                <CardHeader>
+                  <Badge className="mb-2 w-fit bg-purple-100 text-purple-800">Pillar Article</Badge>
+                  <CardTitle className="text-lg">Building an AI-First Engineering Organization</CardTitle>
+                  <CardDescription>
+                    Transform your engineering culture to embrace AI-first development practices
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/learn/building-an-ai-first-engineering-organization">
+                      Read Guide
+                      <Icons.arrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="surface-frosted surface-frosted-hover transition-all duration-200 hover:border-primary hover:shadow-xl">
+                <CardHeader>
+                  <Badge className="mb-2 w-fit bg-green-100 text-green-800">Pillar Article</Badge>
+                  <CardTitle className="text-lg">Ultimate Guide to AI-Assisted Software Development</CardTitle>
+                  <CardDescription>
+                    Master AI-assisted development with tools, workflows, and best practices
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/learn/ultimate-guide-to-ai-assisted-software-development">
+                      Read Guide
+                      <Icons.arrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+
         {/* Pathways */}
         <div className="space-y-8">
           {verifiedPathways.map((pathway) => (
