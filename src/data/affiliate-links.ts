@@ -73,10 +73,11 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
   warp: {
     tool: 'Warp Terminal',
     baseUrl: 'https://www.warp.dev',
-    referralUrl: undefined, // TODO: Get Warp referral link
-    status: 'requested',
+    referralUrl: 'https://app.warp.dev/referral/QPG4E6',
+    affiliateCode: 'QPG4E6',
+    status: 'active',
     commission: 'TBD',
-    notes: 'Contact Warp for affiliate program',
+    notes: 'Active Warp referral link via QPG4E6',
   },
 
   lovable: {
