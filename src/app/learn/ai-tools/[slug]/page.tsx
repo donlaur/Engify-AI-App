@@ -290,6 +290,18 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                       <div className="text-sm text-muted-foreground">
                         Free tier available
                       </div>
+                      {/* Show credits for free tier if available */}
+                      {tool.pricing.paid?.creditsPerMonth && (
+                        <div className="mt-2 pt-2 border-t">
+                          <div className="text-sm font-medium">
+                            {tool.pricing.paid.creditsPerMonth.toLocaleString()}{' '}
+                            {tool.pricing.paid.creditsUnit || 'credits'}/month
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Included in free tier
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -315,6 +327,30 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                           </Badge>
                         </div>
                       )}
+                      {/* Credits/Tokens Information */}
+                      {tool.pricing.paid?.unlimited ? (
+                        <div className="pt-2 border-t">
+                          <div className="flex items-center gap-2">
+                            <Icons.infinity className="h-4 w-4 text-green-600" />
+                            <div className="text-sm font-medium">
+                              Unlimited usage
+                            </div>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Model selection affects cost
+                          </div>
+                        </div>
+                      ) : tool.pricing.paid?.creditsPerMonth ? (
+                        <div className="pt-2 border-t">
+                          <div className="text-sm font-medium">
+                            {tool.pricing.paid.creditsPerMonth.toLocaleString()}{' '}
+                            {tool.pricing.paid.creditsUnit || 'credits'}/month
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Included in monthly subscription
+                          </div>
+                        </div>
+                      ) : null}
                     </>
                   )}
                 </CardContent>

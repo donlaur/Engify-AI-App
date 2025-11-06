@@ -98,6 +98,7 @@ import {
   // Additional
   Calculator,
   Rocket,
+  Infinity,
 
   // Misc
   MoreVertical,
@@ -294,6 +295,7 @@ export const Icons = {
   // Additional
   calculator: Calculator,
   rocket: Rocket,
+  infinity: Infinity,
 } as const;
 
 // Export type for icon names

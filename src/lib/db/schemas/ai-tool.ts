@@ -32,6 +32,9 @@ export const AIToolSchema = z.object({
           monthly: z.number().optional(),
           annual: z.number().optional(),
           tier: z.string().optional(), // 'Pro', 'Enterprise', etc.
+          creditsPerMonth: z.number().optional(), // Monthly credits/tokens included
+          creditsUnit: z.string().optional(), // 'credits', 'tokens', 'requests', 'messages'
+          unlimited: z.boolean().default(false), // True if unlimited credits
         })
         .optional(),
     })

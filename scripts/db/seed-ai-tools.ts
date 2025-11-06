@@ -35,6 +35,9 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
         monthly: 20,
         annual: 200,
         tier: 'Pro',
+        creditsPerMonth: undefined, // Unlimited usage (model selection affects cost)
+        creditsUnit: 'unlimited',
+        unlimited: true,
       },
     },
     features: [
@@ -245,6 +248,9 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       paid: {
         monthly: 20,
         tier: 'Pro',
+        creditsPerMonth: 1500, // Credits/month
+        creditsUnit: 'credits',
+        unlimited: false,
       },
     },
     features: [
@@ -319,6 +325,9 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
       paid: {
         monthly: 0,
         tier: 'Credits',
+        creditsPerMonth: 500, // Free tier credits
+        creditsUnit: 'credits',
+        unlimited: false,
       },
     },
     features: [
