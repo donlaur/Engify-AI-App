@@ -39,7 +39,7 @@ import { PromptEnrichment } from '@/components/features/PromptEnrichment';
 import { PromptAuditScores } from '@/components/features/PromptAuditScores';
 import { PromptRevisions } from '@/components/features/PromptRevisions';
 import { PremiumPromptLock } from '@/components/features/PremiumPromptLock';
-import { PromptTrust, PromptSEOFeatures, PromptPremiumCTA } from '@/components/features/PromptTrust';
+import { PromptTrust, PromptPremiumCTA } from '@/components/features/PromptTrust';
 import { PromptPageClient } from '@/components/features/PromptPageClient';
 import { PromptContextExplanation } from '@/components/features/PromptContextExplanation';
 import { PromptCustomizer } from '@/components/features/PromptCustomizer';
@@ -479,14 +479,9 @@ export default async function PromptPage({
               />
             </div>
 
-            {/* SEO-Focused Features */}
-            <PromptSEOFeatures
-              useCases={prompt.useCases}
-              bestPractices={prompt.bestPractices}
-              examples={prompt.examples}
-            />
-
-            {/* Enrichment Details - Case Studies, Best Time to Use, Recommended Models, etc. */}
+            {/* Enrichment Details - Shows all enrichment fields if they exist in DB */}
+            {/* Includes: useCases, bestPractices, examples, caseStudies, bestTimeToUse, 
+                recommendedModel, whenNotToUse, difficulty, estimatedTime */}
             <PromptEnrichment
               caseStudies={prompt.caseStudies}
               bestTimeToUse={prompt.bestTimeToUse}
@@ -498,6 +493,15 @@ export default async function PromptPage({
               difficulty={prompt.difficulty}
               estimatedTime={prompt.estimatedTime}
             />
+
+            {/* Meta Description Summary - SEO-optimized description */}
+            {prompt.metaDescription && prompt.metaDescription.length >= 100 && (
+              <div className="mt-8 rounded-lg border border-border bg-muted/30 p-6">
+                <p className="text-base leading-relaxed text-foreground/90">
+                  {prompt.metaDescription}
+                </p>
+              </div>
+            )}
 
             {/* Premium CTA */}
             <PromptPremiumCTA

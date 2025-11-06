@@ -10,8 +10,10 @@
  *   tsx scripts/content/audit-pillar-pages.ts --id=ai-upskilling-program
  *   tsx scripts/content/audit-pillar-pages.ts --slug=ai-first-engineering-organization
  *   tsx scripts/content/audit-pillar-pages.ts --quick  # Quick mode: fewer agents
- *   tsx scripts/content/audit-pillar-pages.ts --include-planned  # Audit planned pages too
+ *   tsx scripts/content/audit-pillar-pages.ts --include-planned  # Audit planned pages (includes MongoDB drafts)
  *   tsx scripts/content/audit-pillar-pages.ts --target-version=1  # Audit to version 1
+ * 
+ * NOTE: Use --include-planned to audit pages that are in MongoDB but status='planned' in config
  * 
  * NOTE: This script ONLY does SCORING. It saves audit results to pillar_page_audit_results collection.
  * To apply improvements, use: tsx scripts/content/batch-improve-pillar-pages-from-audits.ts
@@ -396,12 +398,15 @@ async function auditPillarPage(
 ): Promise<PillarPageAuditResult> {
   const db = await getMongoDb();
   const pillarPage = await db.collection('learning_resources').findOne({
-    id: config.slug,
+    $or: [
+      { id: config.slug },
+      { 'seo.slug': config.slug },
+    ],
     type: 'pillar',
   });
 
   if (!pillarPage) {
-    throw new Error(`Pillar page not found: ${config.slug}`);
+    throw new Error(`Pillar page not found in MongoDB: ${config.slug}`);
   }
 
   console.log(`\n📄 Auditing: ${pillarPage.title}`);
@@ -505,18 +510,58 @@ async function main() {
     const id = idArg.split('=')[1];
     const page = getPillarPage(id);
     if (!page) {
-      console.error(`❌ Pillar page not found: ${id}`);
-      process.exit(1);
+      console.error(`❌ Pillar page not found in config: ${id}`);
+      // Try to find in MongoDB directly
+      const mongoPage = await db.collection('learning_resources').findOne({
+        type: 'pillar',
+        $or: [
+          { id: id },
+          { 'seo.slug': id },
+        ],
+      });
+      if (mongoPage) {
+        console.log(`   ✅ Found in MongoDB, using MongoDB document`);
+        pagesToAudit = [{
+          id: mongoPage.id || mongoPage.seo?.slug,
+          slug: mongoPage.seo?.slug || mongoPage.id,
+          title: mongoPage.title,
+          structure: 'mongodb',
+          status: mongoPage.status || 'draft',
+        }];
+      } else {
+        process.exit(1);
+      }
+    } else {
+      pagesToAudit = [page];
     }
-    pagesToAudit = [page];
   } else if (slugArg) {
     const slug = slugArg.split('=')[1];
     const page = PILLAR_PAGES.find(p => p.slug === slug);
     if (!page) {
-      console.error(`❌ Pillar page not found: ${slug}`);
-      process.exit(1);
+      console.error(`❌ Pillar page not found in config: ${slug}`);
+      // Try to find in MongoDB directly
+      const mongoPage = await db.collection('learning_resources').findOne({
+        type: 'pillar',
+        $or: [
+          { id: slug },
+          { 'seo.slug': slug },
+        ],
+      });
+      if (mongoPage) {
+        console.log(`   ✅ Found in MongoDB, using MongoDB document`);
+        pagesToAudit = [{
+          id: mongoPage.id || mongoPage.seo?.slug,
+          slug: mongoPage.seo?.slug || mongoPage.id,
+          title: mongoPage.title,
+          structure: 'mongodb',
+          status: mongoPage.status || 'draft',
+        }];
+      } else {
+        process.exit(1);
+      }
+    } else {
+      pagesToAudit = [page];
     }
-    pagesToAudit = [page];
   } else {
     // Audit all complete pages, optionally include planned
     pagesToAudit = PILLAR_PAGES.filter(p => {
@@ -524,6 +569,28 @@ async function main() {
       if (includePlanned && p.status === 'planned') return true;
       return false;
     });
+    
+    // Also check MongoDB for pages not in config but exist in DB
+    if (includePlanned) {
+      const mongoPages = await db.collection('learning_resources').find({
+        type: 'pillar',
+        status: { $in: ['draft', 'active'] },
+      }).toArray();
+      
+      for (const mongoPage of mongoPages) {
+        const slug = mongoPage.seo?.slug || mongoPage.id;
+        const existsInConfig = PILLAR_PAGES.some(p => p.slug === slug);
+        if (!existsInConfig) {
+          pagesToAudit.push({
+            id: mongoPage.id || slug,
+            slug: slug,
+            title: mongoPage.title,
+            structure: 'mongodb',
+            status: mongoPage.status || 'draft',
+          });
+        }
+      }
+    }
   }
 
   // Filter pages that need auditing
@@ -532,6 +599,20 @@ async function main() {
     // Only audit MongoDB-stored pages
     if (page.structure !== 'mongodb') {
       console.log(`⏭️  Skipping ${page.id} (static file, not MongoDB)`);
+      continue;
+    }
+
+    // Check if page exists in MongoDB
+    const mongoPage = await db.collection('learning_resources').findOne({
+      $or: [
+        { id: page.slug },
+        { 'seo.slug': page.slug },
+      ],
+      type: 'pillar',
+    });
+
+    if (!mongoPage) {
+      console.log(`⏭️  Skipping ${page.id} (not found in MongoDB - run generation first)`);
       continue;
     }
 

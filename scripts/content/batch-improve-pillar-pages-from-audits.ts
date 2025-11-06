@@ -217,8 +217,11 @@ async function applyImprovements(
   };
 
   // Get pillar page from MongoDB
-  const pillarPage = await db.collection('learning_resources').findOne({
-    id: config.slug,
+  let pillarPage = await db.collection('learning_resources').findOne({
+    $or: [
+      { id: config.slug },
+      { 'seo.slug': config.slug },
+    ],
     type: 'pillar',
   });
 
