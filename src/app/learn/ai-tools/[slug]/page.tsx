@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { aiToolService } from '@/lib/services/AIToolService';
 import { logger } from '@/lib/logging/logger';
+import { getToolLink } from '@/lib/utils/tool-links';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate hourly
@@ -319,28 +320,15 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                 </CardContent>
               </Card>
 
-              {/* CTA */}
-              {tool.affiliateLink && (
+              {/* CTA - Use affiliate link if available, otherwise website URL */}
+              {(tool.affiliateLink || tool.websiteUrl) && (
                 <Button asChild className="w-full" size="lg">
                   <a
-                    href={tool.affiliateLink}
+                    href={getToolLink(tool)}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Try {tool.name}
-                    <Icons.externalLink className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
-              )}
-
-              {tool.websiteUrl && !tool.affiliateLink && (
-                <Button asChild className="w-full" size="lg" variant="outline">
-                  <a
-                    href={tool.websiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Visit Website
+                    {tool.affiliateLink ? `Try ${tool.name}` : `Visit ${tool.name}`}
                     <Icons.externalLink className="ml-2 h-4 w-4" />
                   </a>
                 </Button>

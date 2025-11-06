@@ -80,10 +80,11 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
   lovable: {
     tool: 'Lovable (GPT Engineer)',
     baseUrl: 'https://lovable.dev',
-    referralUrl: undefined, // TODO: Get Lovable referral link
-    status: 'requested',
+    referralUrl: 'https://lovable.dev/?via=donnie',
+    affiliateCode: 'donnie',
+    status: 'active',
     commission: 'TBD',
-    notes: 'Contact Lovable for affiliate program',
+    notes: 'Active affiliate link via donnie',
   },
 
   bolt: {

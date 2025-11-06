@@ -502,7 +502,7 @@ async function seedAITools() {
         features: definition.features || [],
         pros: definition.pros || [],
         cons: definition.cons || [],
-        affiliateLink: affiliateLink.referralUrl || affiliateLink.baseUrl,
+        affiliateLink: affiliateLink.referralUrl, // Only set if referral URL exists
         websiteUrl: affiliateLink.baseUrl,
         rating: definition.rating,
         reviewCount: definition.reviewCount || 0,
