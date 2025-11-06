@@ -123,6 +123,48 @@ export default async function LearnPage() {
           </Card>
         </div>
 
+        {/* RAG Chatbot CTA */}
+        <div className="mb-12">
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-cyan-900/20">
+            <CardContent className="p-8">
+              <div className="flex flex-col items-center gap-6 text-center lg:flex-row lg:text-left">
+                <div className="flex-shrink-0">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-blue-600">
+                    <Icons.sparkles className="h-10 w-10 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+                    Ask Our AI Assistant
+                  </h2>
+                  <p className="mb-4 text-lg text-gray-700 dark:text-gray-300">
+                    Get instant answers about prompt engineering, AI patterns, and best practices. Our RAG-powered chatbot searches through 300+ prompts and 23 patterns to give you accurate, sourced answers.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                      Context-Aware
+                    </Badge>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                      Source Citations
+                    </Badge>
+                    <Badge variant="secondary" className="bg-cyan-100 text-cyan-800">
+                      Real-Time Answers
+                    </Badge>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <Button size="lg" asChild className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                    <Link href="/rag-chat">
+                      <Icons.messageCircle className="mr-2 h-5 w-5" />
+                      Try AI Assistant
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Featured Resources */}
         <div className="mb-12 space-y-6">
           <h2 className="text-3xl font-bold">Featured Resources</h2>
