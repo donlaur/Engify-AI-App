@@ -73,11 +73,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.sentry.io https://*.ingest.us.sentry.io https://www.googletagmanager.com https://www.google-analytics.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.sentry.io https://*.ingest.us.sentry.io https://www.googletagmanager.com https://www.google-analytics.com https://cdn.vercel-insights.com https://va.vercel-scripts.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.openai.com https://api.anthropic.com https://api.groq.com https://*.sentry.io https://*.ingest.us.sentry.io https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com",
+              "connect-src 'self' https://api.openai.com https://api.anthropic.com https://api.groq.com https://*.sentry.io https://*.ingest.us.sentry.io https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://vitals.vercel-insights.com",
               "frame-ancestors 'none'",
             ].join('; '),
           },
