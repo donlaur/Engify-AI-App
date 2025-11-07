@@ -13,10 +13,8 @@ import { Icons } from '@/lib/icons';
 import { RoleSelector } from '@/components/roles/RoleSelector';
 import { ScrollButton } from '@/components/roles/ScrollButton';
 import Link from 'next/link';
-import {
-  promptRepository,
-  patternRepository,
-} from '@/lib/db/repositories/ContentService';
+import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
+import { loadPatternsFromJson } from '@/lib/patterns/load-patterns-from-json';
 import { getRoleInfo } from '@/lib/utils/role-mapping';
 import { APP_URL } from '@/lib/constants';
 import { ROLE_CONTENT } from '@/lib/data/role-content';
@@ -32,8 +30,11 @@ interface RoleLandingPageProps {
 
 async function getPromptsByRole(role: string) {
   try {
-    // Use repository for public prompts by role
-    const prompts = await promptRepository.getByRole(role.toLowerCase());
+    // Load from static JSON (fast, no MongoDB at build time)
+    const allPrompts = await loadPromptsFromJson();
+    const prompts = allPrompts.filter(
+      (p) => p.role?.toLowerCase() === role.toLowerCase() && p.isPublic
+    );
 
     // Sort and limit in TypeScript (repository returns all matching prompts)
     const sortedPrompts = prompts
@@ -75,8 +76,11 @@ async function getPromptsByRole(role: string) {
 
 async function getUseCasesFromPrompts(role: string): Promise<string[]> {
   try {
-    // Use repository and filter in TypeScript
-    const prompts = await promptRepository.getByRole(role.toLowerCase());
+    // Load from static JSON
+    const allPrompts = await loadPromptsFromJson();
+    const prompts = allPrompts.filter(
+      (p) => p.role?.toLowerCase() === role.toLowerCase()
+    );
 
     const useCases = new Set<string>();
     prompts.forEach((p) => {
@@ -94,8 +98,11 @@ async function getUseCasesFromPrompts(role: string): Promise<string[]> {
 
 async function getRealLifeExamplesFromPrompts(role: string): Promise<string[]> {
   try {
-    // Use repository and filter in TypeScript
-    const prompts = await promptRepository.getByRole(role.toLowerCase());
+    // Load from static JSON
+    const allPrompts = await loadPromptsFromJson();
+    const prompts = allPrompts.filter(
+      (p) => p.role?.toLowerCase() === role.toLowerCase()
+    );
 
     const examples: string[] = [];
     prompts.forEach((p) => {
@@ -131,8 +138,11 @@ async function getRealLifeExamplesFromPrompts(role: string): Promise<string[]> {
 
 async function getDailyTasksFromTags(role: string): Promise<string[]> {
   try {
-    // Use repository and filter in TypeScript
-    const prompts = await promptRepository.getByRole(role.toLowerCase());
+    // Load from static JSON
+    const allPrompts = await loadPromptsFromJson();
+    const prompts = allPrompts.filter(
+      (p) => p.role?.toLowerCase() === role.toLowerCase()
+    );
 
     // Extract task-related tags (common daily task keywords)
     const taskKeywords = new Set<string>();
@@ -178,17 +188,20 @@ async function getDailyTasksFromTags(role: string): Promise<string[]> {
 
 async function getPatternsByRole(role: string) {
   try {
-    // Use repository to get prompts by role
-    const prompts = await promptRepository.getByRole(role);
+    // Load from static JSON
+    const allPrompts = await loadPromptsFromJson();
+    const prompts = allPrompts.filter(
+      (p) => p.role?.toLowerCase() === role.toLowerCase()
+    );
+    
     const patternNames = [
       ...new Set(prompts.map((p) => p.pattern).filter(Boolean)),
     ] as string[];
 
     if (patternNames.length === 0) return [];
 
-    // Use pattern repository to get patterns by name/id
-    // Pattern IDs match the prompt pattern enum values (e.g., 'chain-of-thought')
-    const allPatterns = await patternRepository.getAll();
+    // Load patterns from static JSON
+    const allPatterns = await loadPatternsFromJson();
     const patterns = allPatterns.filter((p) => 
       p.id && patternNames.includes(p.id)
     );
