@@ -96,8 +96,8 @@ const PATTERN_NAMES = [
 // FAQ data is now imported from pillar-faqs.ts
 
 export default async function PromptEngineeringMasterclassPage() {
-  // Fetch dynamic stats
-  const stats = await getServerStats();
+  // Fetch stats (skip MongoDB at build time to avoid timeouts)
+  const stats = await getServerStats(true); // skipMongoDB = true
   const patternCount = stats.patterns?.total || stats.stats?.patterns || 18;
   const promptCount = stats.prompts?.total || stats.stats?.prompts || 300;
 
