@@ -31,7 +31,7 @@ import { getServerStats } from '@/lib/server-stats';
 import { FAQSection } from '@/components/features/FAQSection';
 import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 import { PILLAR_FAQS } from '@/lib/data/pillar-faqs';
-import { patternRepository } from '@/lib/db/repositories/ContentService';
+import { loadPatternsFromJson } from '@/lib/patterns/load-patterns-from-json';
 
 // ISR: Regenerate every hour, don't generate at build time
 export const revalidate = 3600; // 1 hour
@@ -101,8 +101,8 @@ export default async function PromptEngineeringMasterclassPage() {
   const patternCount = stats.patterns?.total || stats.stats?.patterns || 18;
   const promptCount = stats.prompts?.total || stats.stats?.prompts || 300;
 
-  // Fetch patterns from database and match by name
-  const allPatterns = await patternRepository.getAll();
+  // Load patterns from static JSON (fast, no MongoDB at build time)
+  const allPatterns = await loadPatternsFromJson();
   const patternLinks = PATTERN_NAMES.map((name) => {
     const pattern = allPatterns.find(
       (p) => p.name.toLowerCase() === name.toLowerCase()
