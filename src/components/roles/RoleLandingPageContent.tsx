@@ -45,7 +45,10 @@ async function getPromptsByRole(role: string) {
         if ((b.views || 0) !== (a.views || 0)) {
           return (b.views || 0) - (a.views || 0);
         }
-        return (b.qualityScore || 0) - (a.qualityScore || 0);
+        // qualityScore is an object with 'overall' property
+        const aScore = typeof a.qualityScore === 'object' ? a.qualityScore?.overall || 0 : 0;
+        const bScore = typeof b.qualityScore === 'object' ? b.qualityScore?.overall || 0 : 0;
+        return bScore - aScore;
       })
       .slice(0, 100);
 
@@ -62,7 +65,7 @@ async function getPromptsByRole(role: string) {
       views: p.views || 0,
       rating: p.rating || 0,
       ratingCount: p.ratingCount || 0,
-      qualityScore: p.qualityScore || 0,
+      qualityScore: typeof p.qualityScore === 'object' ? p.qualityScore?.overall || 0 : 0,
     }));
   } catch (error) {
     console.error('Error fetching prompts by role:', error);
@@ -177,15 +180,18 @@ async function getPatternsByRole(role: string) {
   try {
     // Use repository to get prompts by role
     const prompts = await promptRepository.getByRole(role);
-    const patternIds = [
+    const patternNames = [
       ...new Set(prompts.map((p) => p.pattern).filter(Boolean)),
-    ];
+    ] as string[];
 
-    if (patternIds.length === 0) return [];
+    if (patternNames.length === 0) return [];
 
-    // Use pattern repository to get patterns by IDs
+    // Use pattern repository to get patterns by name/id
+    // Pattern IDs match the prompt pattern enum values (e.g., 'chain-of-thought')
     const allPatterns = await patternRepository.getAll();
-    const patterns = allPatterns.filter((p) => patternIds.includes(p.id));
+    const patterns = allPatterns.filter((p) => 
+      p.id && patternNames.includes(p.id)
+    );
 
     return patterns.map((p) => ({
       id: p.id || '',
@@ -292,7 +298,10 @@ export async function RoleLandingPageContent({
   }
 
   const featuredPrompts = prompts
-    .filter((p) => p.isFeatured || p.qualityScore >= 8.0)
+    .filter((p) => {
+      const score = typeof p.qualityScore === 'number' ? p.qualityScore : 0;
+      return p.isFeatured || score >= 8.0;
+    })
     .slice(0, 8);
   const topPrompts = prompts.slice(0, 8);
   const displayPrompts =
@@ -763,7 +772,7 @@ export async function RoleLandingPageContent({
                             {prompt.pattern}
                           </Badge>
                         )}
-                        {prompt.qualityScore >= 8.0 && (
+                        {typeof prompt.qualityScore === 'number' && prompt.qualityScore >= 8.0 && (
                           <Badge
                             variant="default"
                             className="bg-green-600 text-white"
