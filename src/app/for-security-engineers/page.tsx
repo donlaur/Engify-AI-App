@@ -13,9 +13,6 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import Link from 'next/link';
 
-// ISR: Regenerate every hour, don't generate at build time
-export const revalidate = 3600; // 1 hour
-export const dynamic = 'force-static';
 
 export default function ForSecurityEngineersPage() {
   return (
