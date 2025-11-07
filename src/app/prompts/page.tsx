@@ -9,7 +9,7 @@
 import type { Metadata } from 'next';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { LibraryClient } from '@/components/features/LibraryClient';
-import { promptRepository } from '@/lib/db/repositories/ContentService';
+import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
 import { getServerStats } from '@/lib/server-stats';
 import { getPromptSlug } from '@/lib/utils/slug';
 
@@ -59,8 +59,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Server Component
 export default async function LibraryPage() {
-  // Fetch prompts directly from MongoDB (reliable, no JSON loading issues)
-  const prompts = await promptRepository.getAll();
+  // Load from static JSON (fast, no MongoDB at build time)
+  const prompts = await loadPromptsFromJson();
 
   // Sort prompts alphabetically by default (server-side)
   const sortedPrompts = [...prompts].sort((a, b) => 
