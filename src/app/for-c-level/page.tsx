@@ -12,6 +12,10 @@ import { Icons } from '@/lib/icons';
 import { RoleSelector } from '@/components/roles/RoleSelector';
 import Link from 'next/link';
 
+// ISR: Regenerate every hour, don't generate at build time
+export const revalidate = 3600; // 1 hour
+export const dynamic = 'force-static';
+
 export default function ForCLevelPage() {
   const executiveChallenges = [
     {

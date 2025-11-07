@@ -5,6 +5,10 @@ import {
   generateRoleMetadata,
 } from '@/components/roles/RoleLandingPageContent';
 
+// ISR: Regenerate every hour, don't generate at build time
+export const revalidate = 3600; // 1 hour
+export const dynamic = 'force-static';
+
 export async function generateMetadata(): Promise<Metadata> {
   const slug = 'ctos';
   const dbRole = getDbRoleFromSlug(slug);
