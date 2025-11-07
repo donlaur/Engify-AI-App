@@ -44,16 +44,6 @@ Audits of prompts, patterns, articles, and learning resources.
 
 ---
 
-### `/scripts/` - Scripts & Code Audits
-Code quality audits, script cleanup, and technical debt tracking.
-
-**Files:**
-- `SCRIPTS_AUDIT.md` - Comprehensive scripts cleanup audit
-
-**Purpose:** Track code quality, identify one-off scripts, and manage technical debt.
-
----
-
 ## 🔄 Audit Workflow
 
 ### 1. Create New Audit
@@ -78,7 +68,6 @@ touch audits/[category]/[AUDIT_NAME]_$(date +%Y-%m-%d).md
 - **Security**: Monthly or after auth/API changes
 - **Performance**: Monthly or after major feature releases
 - **Content**: As needed for new content batches
-- **Scripts**: Quarterly or when scripts/ gets cluttered
 
 ---
 
