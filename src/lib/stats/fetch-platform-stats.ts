@@ -50,11 +50,58 @@ export interface StatsResponse {
 }
 
 /**
+ * Get static fallback stats (used when Redis and MongoDB are unavailable)
+ */
+async function getStaticFallbackStats(): Promise<StatsResponse> {
+  const { seedPrompts } = await import('@/data/seed-prompts');
+  const { promptPatterns } = await import('@/data/prompt-patterns');
+  const { learningPathways } = await import('@/data/learning-pathways');
+
+  // Count by category
+  const categoryCount: Record<string, number> = {};
+  seedPrompts.forEach((p) => {
+    categoryCount[p.category] = (categoryCount[p.category] || 0) + 1;
+  });
+
+  const categories = Object.entries(categoryCount)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  return {
+    stats: {
+      prompts: seedPrompts.length,
+      patterns: promptPatterns.length,
+      pathways: learningPathways.length,
+      learningResources: learningPathways.length,
+      users: 0,
+    },
+    prompts: {
+      total: seedPrompts.length,
+      byRole: {},
+      byCategory: categoryCount,
+      uniqueCategories: categories.map((c) => c.name),
+      uniqueRoles: [],
+    },
+    patterns: {
+      total: promptPatterns.length,
+    },
+    learningResources: {
+      total: learningPathways.length,
+    },
+    lastUpdated: new Date().toISOString(),
+    source: 'static',
+  };
+}
+
+/**
  * Get platform statistics
  * Uses Redis cache when available, falls back to MongoDB, then static fallback
  * This is the SINGLE SOURCE OF TRUTH for stats fetching
+ * 
+ * @param skipMongoDB - If true, skip MongoDB and use static fallback (for build-time)
  */
-export async function fetchPlatformStats(): Promise<StatsResponse> {
+export async function fetchPlatformStats(skipMongoDB = false): Promise<StatsResponse> {
   // Try Redis cache first (if available)
   if (redis) {
     try {
@@ -70,8 +117,14 @@ export async function fetchPlatformStats(): Promise<StatsResponse> {
       logger.warn('Redis cache read failed', {
         error: redisError instanceof Error ? redisError.message : String(redisError),
       });
-      // Continue to MongoDB if Redis fails
+      // Continue to next fallback
     }
+  }
+
+  // Skip MongoDB during build time or if explicitly requested
+  if (skipMongoDB) {
+    logger.info('Skipping MongoDB, using static fallback');
+    return await getStaticFallbackStats();
   }
 
   // Try MongoDB with timeout
@@ -181,46 +234,7 @@ export async function fetchPlatformStats(): Promise<StatsResponse> {
     logger.warn('MongoDB stats fetch failed, using static fallback', {
       error: dbError instanceof Error ? dbError.message : String(dbError),
     });
-
-    const { seedPrompts } = await import('@/data/seed-prompts');
-    const { promptPatterns } = await import('@/data/prompt-patterns');
-    const { learningPathways } = await import('@/data/learning-pathways');
-
-    // Count by category
-    const categoryCount: Record<string, number> = {};
-    seedPrompts.forEach((p) => {
-      categoryCount[p.category] = (categoryCount[p.category] || 0) + 1;
-    });
-
-    const categories = Object.entries(categoryCount)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-
-    return {
-      stats: {
-        prompts: seedPrompts.length,
-        patterns: promptPatterns.length,
-        pathways: learningPathways.length,
-        learningResources: learningPathways.length,
-        users: 0,
-      },
-      prompts: {
-        total: seedPrompts.length,
-        byRole: {},
-        byCategory: categoryCount,
-        uniqueCategories: categories.map((c) => c.name),
-        uniqueRoles: [],
-      },
-      patterns: {
-        total: promptPatterns.length,
-      },
-      learningResources: {
-        total: learningPathways.length,
-      },
-      lastUpdated: new Date().toISOString(),
-      source: 'static',
-    };
+    return await getStaticFallbackStats();
   }
 }
 

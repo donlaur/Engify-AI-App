@@ -277,10 +277,11 @@ export async function RoleLandingPageContent({
   ]);
 
   // Get dynamic counts from stats API (not hardcoded)
+  // Skip MongoDB during build time - use Redis cache or static fallback
   let promptCount = prompts.length;
   let patternCount = patterns.length;
   try {
-    const stats = await fetchPlatformStats();
+    const stats = await fetchPlatformStats(true); // skipMongoDB = true for builds
     // Use stats for more accurate counts (includes cache)
     promptCount = stats.prompts?.byRole?.[dbRole] || prompts.length;
     // Count unique patterns for this role
