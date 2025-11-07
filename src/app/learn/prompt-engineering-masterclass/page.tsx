@@ -33,10 +33,6 @@ import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 import { PILLAR_FAQS } from '@/lib/data/pillar-faqs';
 import { loadPatternsFromJson } from '@/lib/patterns/load-patterns-from-json';
 
-// ISR: Regenerate every hour, don't generate at build time
-export const revalidate = 3600; // 1 hour
-export const dynamic = 'force-static';
-
 // Generate metadata dynamically (must be exported, not in component)
 export async function generateMetadata(): Promise<Metadata> {
   // This can't be async in metadata export, so we'll use a default
