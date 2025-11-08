@@ -107,7 +107,7 @@ Power users report running out of tokens even on paid plans. Many spend $100-300
         context: "Choose Cursor if: enterprise, control, budget. Choose Windsurf if: individual, flow, affordable. Avoid both if: offline, sensitive code."
       }
     ],
-    additionalContext: "Last updated: November 2025. Tested: Cursor 0.42, Windsurf latest. MacOS, TypeScript/React.",
+    additionalContext: "Last updated: November 8, 2025. Tested: Cursor 2.0.69 (VSCode 1.99.3, Electron 37.7.0), Windsurf latest. MacOS arm64, TypeScript/React. Daily crashes requiring 2 reboots. Quality degrades from staff-level to junior-level within minutes of use.",
     createdBy: "gemini-research"
   },
 
@@ -127,13 +127,13 @@ Power users report running out of tokens even on paid plans. Many spend $100-300
         title: "Introduction: The Productivity Killer",
         purpose: "EXPERIENCE - Real user pain",
         targetWords: 250,
-        context: "'64GB RAM drained in an hour.' System freezes. Hard reboots. This is destroying productivity."
+        context: "REAL EXPERIENCE (Nov 8, 2025): Cursor 2.0.69 crashes DAILY requiring 2 reboots. Quality degrades from 'genius staff engineer' to 'high school student' within minutes. Frequent updates every few days. '64GB RAM drained in an hour.' System freezes. Hard reboots. This is destroying productivity."
       },
       {
-        title: "The Three Core Problems",
+        title: "The Four Core Problems",
         purpose: "EXPERTISE - Technical analysis",
-        targetWords: 800,
-        context: "1) System memory leaks (60GB+). 2) Agent context loops. 3) Destructive overwrites. Real quotes, technical details.",
+        targetWords: 900,
+        context: "1) System memory leaks (60GB+). 2) Agent context loops. 3) Destructive overwrites. 4) QUALITY DEGRADATION: AI goes from staff-level to junior-level within minutes (Nov 2025, v2.0.69). Daily crashes. Frequent forced updates. Real quotes, technical details, version-specific issues.",
         externalLinks: [
           { anchor: "GitHub Issue #1294", url: "https://github.com/getcursor/cursor/issues/1294", authority: "official" },
           { anchor: "Forum thread", url: "https://forum.cursor.com/t/17171", authority: "community" }
@@ -164,7 +164,7 @@ Power users report running out of tokens even on paid plans. Many spend $100-300
         context: "Trade-offs. Limitations. When to use Cursor vs alternatives. Defensive workflows."
       }
     ],
-    additionalContext: "Based on forum threads, GitHub issues, Reddit discussions. November 2025.",
+    additionalContext: "Based on forum threads, GitHub issues, Reddit discussions. Tested: Cursor 2.0.69 (Nov 8, 2025), VSCode 1.99.3, Electron 37.7.0, MacOS arm64. REAL EXPERIENCE: Daily crashes, 2 reboots required, quality degrades staff→junior level within minutes.",
     createdBy: "gemini-research"
   },
 
