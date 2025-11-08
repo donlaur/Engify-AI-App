@@ -1,3 +1,60 @@
+# Article Review: Cursor vs Windsurf: Speed vs Control (2025)
+
+**Total Words:** 2774
+**Average Slop Score:** 9.3/10
+**Sections:** 6
+
+## Section Breakdown
+
+
+### Section 1: Introduction: The 2025 AI IDE Battle
+- **Purpose:** EXPERIENCE - Hook with real developer pain points
+- **Words:** 253 (target: 250)
+- **Slop Score:** 10/10
+
+
+### Section 2: Core Philosophy: Control vs Speed
+- **Purpose:** EXPERTISE - Technical depth on how they work
+- **Words:** 633 (target: 600)
+- **Slop Score:** 9.5/10
+
+
+### Section 3: Pricing: Who Are They Targeting?
+- **Purpose:** TRUSTWORTHINESS - Transparent cost analysis
+- **Words:** 402 (target: 400)
+- **Slop Score:** 10/10
+
+
+### Section 4: Real User Experiences
+- **Purpose:** AUTHORITATIVENESS - Community consensus with citations
+- **Words:** 470 (target: 500)
+- **Slop Score:** 8/10
+
+
+### Section 5: My Testing Results
+- **Purpose:** EXPERIENCE - First-hand data with metrics
+- **Words:** 607 (target: 600)
+- **Slop Score:** 10/10
+
+
+### Section 6: Recommendations: Which Should You Choose?
+- **Purpose:** TRUSTWORTHINESS - Honest guidance with trade-offs
+- **Words:** 409 (target: 400)
+- **Slop Score:** 8/10
+
+
+## Final Review
+
+{
+  "approved": true,
+  "score": 9,
+  "feedback": "The article provides a comprehensive and well-structured comparison of the Cursor and Windsurf AI IDEs, covering their core philosophies, user experiences, and testing results. The flow and cohesion are excellent, with smooth transitions between sections and a clear narrative. The content is complete, addressing the key factors developers should consider when choosing between the two tools. The article also demonstrates the author's expertise and authority on the subject matter. Overall, this is a high-quality piece that will be valuable for developers in 2025.",
+  "improvements": [],
+  "decision": "APPROVE"
+}
+
+---
+
 # Cursor vs Windsurf: Speed vs Control (2025)
 
 ```markdown
