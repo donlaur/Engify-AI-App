@@ -17,6 +17,8 @@
 
 import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFactoryWithRegistry';
 import { getModelsByProvider, getModel } from '@/lib/services/AIModelRegistry';
+import { detectAISlop, printDetectionReport, type SlopDetectionResult } from './ai-slop-detector';
+import { getMongoDb } from '@/lib/db/mongodb';
 
 /**
  * BUSINESS CONTEXT for Content Generation
@@ -79,6 +81,7 @@ export interface ContentPublishingResult {
   readabilityScore: number;
   approved: boolean;
   publishReady: boolean;
+  slopDetection?: SlopDetectionResult;
 }
 
 // Content Publishing Agents - Focused on creating publishable articles
