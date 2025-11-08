@@ -39,6 +39,11 @@ document.getElementById('cancel-select').addEventListener('click', () => {
   selectedIntent = null;
 });
 
+// Screen 2: Close popup
+document.getElementById('close-popup').addEventListener('click', () => {
+  window.close();
+});
+
 // Listen for element selection from content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('Popup received message:', message);
@@ -47,12 +52,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     selectedElement = message.element;
     console.log('Element selected in popup:', selectedElement);
     
-    // Show form screen
-    showScreen('screen-form');
+    // Show success in selection screen first
+    const statusBox = document.querySelector('#screen-select .status-box');
+    statusBox.innerHTML = `
+      <div class="status-icon">✅</div>
+      <div class="status-text">Element selected!</div>
+      <div class="status-hint">Loading form...</div>
+    `;
+    statusBox.style.borderColor = '#28a745';
     
-    // Update element preview
-    const preview = document.getElementById('element-preview');
-    preview.textContent = `${selectedElement.tagName}${selectedElement.id ? '#' + selectedElement.id : ''}${selectedElement.className ? '.' + selectedElement.className.split(' ')[0] : ''}`;
+    // Wait a moment, then show form
+    setTimeout(() => {
+      showScreen('screen-form');
+      
+      // Update element preview
+      const preview = document.getElementById('element-preview');
+      preview.textContent = `${selectedElement.tagName}${selectedElement.id ? '#' + selectedElement.id : ''}${selectedElement.className ? '.' + selectedElement.className.split(' ')[0] : ''}`;
+    }, 500);
     
     sendResponse({ success: true });
   }
