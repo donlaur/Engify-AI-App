@@ -629,7 +629,7 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
       let dbModel = availableModels.find(m => {
         // Skip deprecated models
         const status = ('status' in m ? m.status : 'active');
-        if (status !== 'active' || m.deprecated) return false;
+        if (status !== 'active') return false;
         if ('isAllowed' in m && m.isAllowed === false) return false;
         
         return m.id === modelId || 
@@ -638,7 +638,7 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
       });
 
       // If exact match not found, try to find best available model for this provider
-      if (!dbModel || dbModel.deprecated) {
+      if (!dbModel || dbModel.status !== 'active') {
         // Find first available, ACTIVE, ALLOWED model for this provider
         // CRITICAL: Must explicitly check status === 'active' and isAllowed === true
         dbModel = availableModels.find(m => {
@@ -654,7 +654,7 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
           }
           
           // Skip deprecated or sunset models (safety check)
-          if (m.deprecated || status === 'deprecated' || status === 'sunset') {
+          if (status === 'deprecated' || status === 'sunset') {
             return false;
           }
           
@@ -798,7 +798,8 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
               const status = ('status' in m ? m.status : 'active');
               const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
               if (status !== 'active' || isAllowed === false) return false;
-              if (m.deprecated) return false;
+              const mStatus = ('status' in m ? m.status : 'active');
+              if (mStatus !== 'active') return false;
               
               const modelIdLower = (m.id || '').toLowerCase();
               const fallbackLower = fallbackModel.toLowerCase();
@@ -906,7 +907,7 @@ Provide your review in JSON format as specified in your system prompt.
         );
 
         // If exact match not found, try to find best available model for this provider
-        if (!dbModel || dbModel.deprecated) {
+        if (!dbModel || dbModel.status !== 'active') {
           // Find first available, ACTIVE, ALLOWED model for this provider
           // CRITICAL: Must explicitly check status === 'active' and isAllowed === true
           dbModel = availableModels.find(m => {
@@ -922,7 +923,7 @@ Provide your review in JSON format as specified in your system prompt.
             }
             
             // Skip deprecated or sunset models (safety check)
-            if (m.deprecated || status === 'deprecated' || status === 'sunset') {
+            if (status === 'deprecated' || status === 'sunset') {
               return false;
             }
             
@@ -1061,7 +1062,8 @@ Provide your review in JSON format as specified in your system prompt.
                 const status = ('status' in m ? m.status : 'active');
                 const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
                 if (status !== 'active' || isAllowed === false) return false;
-                if (m.deprecated) return false;
+                const mStatus = ('status' in m ? m.status : 'active');
+              if (mStatus !== 'active') return false;
                 
                 const modelIdLower = (m.id || '').toLowerCase();
                 const fallbackLower = fallbackModel.toLowerCase();
