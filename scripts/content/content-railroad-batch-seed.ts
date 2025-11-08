@@ -45,7 +45,10 @@ const ARTICLES: Omit<ArticleResearch, '_id' | 'createdAt' | 'updatedAt'>[] = [
 | **Ultra** | $200/mo (20x usage) | N/A |
 | **Teams** | $40/user/mo (SSO) | $30/user/mo (SSO) |
 
-**Key Insight:** Windsurf targets individual developers ($15). Cursor targets enterprise ($200 Ultra, SOC 2).
+**CRITICAL HIDDEN COST (Cursor):**
+Power users report running out of tokens even on paid plans. Many spend $100-300/month BEYOND the subscription due to token overages. The "$20/month" is misleading - actual cost for heavy users can be $200-500/month.
+
+**Key Insight:** Windsurf targets individual developers ($15 flat). Cursor targets enterprise ($200 Ultra, SOC 2) but has hidden overage costs.
 `,
     corePhilosophy: {
       cursor: "Control - Manual instructions, user control, VS Code fork",
@@ -76,7 +79,7 @@ const ARTICLES: Omit<ArticleResearch, '_id' | 'createdAt' | 'updatedAt'>[] = [
         title: "Pricing: Who Are They Targeting?",
         purpose: "TRUSTWORTHINESS - Transparent costs",
         targetWords: 400,
-        context: "Honest about $200 Cursor Ultra. Windsurf cheaper but credit limits. 'I tested free tiers...'"
+        context: "Honest about $200 Cursor Ultra. CRITICAL: Cursor has hidden token overage costs - power users spend $200-500/month beyond subscription. '$20/month' is misleading. Windsurf is flat $15/month. 'I tested free tiers and hit limits fast...'"
       },
       {
         title: "Real User Experiences",
