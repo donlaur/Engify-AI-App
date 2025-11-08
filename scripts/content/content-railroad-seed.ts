@@ -99,7 +99,32 @@ Include code examples showing:
 - Windsurf's Cascade auto-indexing
 
 Explain WHY each approach works, not just WHAT it does.
-`
+`,
+      externalLinks: [
+        {
+          anchor: "Cursor Directory",
+          url: "https://cursor.directory/",
+          authority: "cursor.directory - 62.5k+ community rules"
+        },
+        {
+          anchor: "Cursor documentation",
+          url: "https://docs.cursor.com/",
+          authority: "official docs"
+        }
+      ],
+      internalLinks: [
+        {
+          anchor: "best Cursor prompts",
+          url: "/prompts/cursor",
+          type: "prompt" as const
+        },
+        {
+          anchor: "AI IDE workflow patterns",
+          url: "/patterns/ai-ide-workflow",
+          type: "pattern" as const
+        }
+      ],
+      ragQuery: "cursor rules configuration best practices"
     },
     
     {
@@ -134,7 +159,26 @@ Include links to:
 - GitHub issues
 
 Be balanced - show both perspectives.
-`
+`,
+      externalLinks: [
+        {
+          anchor: "r/cursor community",
+          url: "https://reddit.com/r/cursor",
+          authority: "Reddit community"
+        },
+        {
+          anchor: "Cursor GitHub discussions",
+          url: "https://github.com/getcursor/cursor/discussions",
+          authority: "official GitHub"
+        }
+      ],
+      internalLinks: [
+        {
+          anchor: "Cursor tool page",
+          url: "/tools/cursor",
+          type: "tool" as const
+        }
+      ]
     },
     
     {

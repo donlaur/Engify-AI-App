@@ -10,6 +10,17 @@ export const ArticleSectionSchema = z.object({
   purpose: z.string(), // E-E-A-T focus
   targetWords: z.number(),
   context: z.string(), // Research data for this section
+  externalLinks: z.array(z.object({
+    anchor: z.string(),
+    url: z.string(),
+    authority: z.string(), // e.g., "cursor.directory", "official docs"
+  })).optional(),
+  internalLinks: z.array(z.object({
+    anchor: z.string(),
+    url: z.string(),
+    type: z.enum(['prompt', 'pattern', 'article', 'tool']),
+  })).optional(),
+  ragQuery: z.string().optional(), // Query our content for related resources
 });
 
 export const ArticleResearchSchema = z.object({

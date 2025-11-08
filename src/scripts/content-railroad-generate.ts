@@ -78,6 +78,17 @@ Windsurf: ${research.corePhilosophy.windsurf || 'N/A'}
 
 **Target Keywords:** ${research.keywords.slice(0, 3).join(', ')}
 
+${section.externalLinks && section.externalLinks.length > 0 ? `
+**EXTERNAL AUTHORITY LINKS (Include naturally):**
+${section.externalLinks.map(l => `- Link "${l.anchor}" to ${l.url} (${l.authority})`).join('\n')}
+` : ''}
+
+${section.internalLinks && section.internalLinks.length > 0 ? `
+**INTERNAL LINKS (Include naturally):**
+${section.internalLinks.map(l => `- Link "${l.anchor}" to ${l.url} (${l.type})`).join('\n')}
+Example: "For more details, check out our [${section.internalLinks[0].anchor}](${section.internalLinks[0].url})."
+` : ''}
+
 **CRITICAL REQUIREMENTS:**
 1. Write ONLY this section (don't write other sections)
 2. Use the research data provided
@@ -86,6 +97,8 @@ Windsurf: ${research.corePhilosophy.windsurf || 'N/A'}
 5. NO AI slop: delve, leverage, utilize, em dashes
 6. Vary sentence length
 7. Be honest about limitations
+8. Include ALL external and internal links naturally in the text
+9. Use markdown link format: [anchor text](url)
 
 Write the section now in markdown:
 `;
