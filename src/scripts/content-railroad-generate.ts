@@ -60,6 +60,11 @@ async function generateSection(
   section: ArticleSection, 
   research: ArticleResearch
 ): Promise<string> {
+  // Use Claude for EXPERTISE sections (better at technical depth)
+  // Use GPT-4o for EXPERIENCE/TRUSTWORTHINESS (better at conversational tone)
+  const isExpertise = section.purpose.includes('EXPERTISE');
+  const agent = isExpertise ? CONTENT_AGENTS[4] : CONTENT_AGENTS[0]; // Tech SME or Content Generator
+  
   const prompt = `
 Write the "${section.title}" section for the article: "${research.workingTitle}"
 
@@ -99,11 +104,12 @@ Example: "For more details, check out our [${section.internalLinks[0].anchor}]($
 7. Be honest about limitations
 8. Include ALL external and internal links naturally in the text
 9. Use markdown link format: [anchor text](url)
+${isExpertise ? '10. TECHNICAL DEPTH: Include code examples, architecture diagrams, specific version numbers, and deep technical analysis' : ''}
 
 Write the section now in markdown:
 `;
 
-  return service['runAgent'](CONTENT_AGENTS[0], prompt);
+  return service['runAgent'](agent, prompt);
 }
 
 async function generateArticle(articleId: string) {
