@@ -25,7 +25,8 @@ interface SectionResult {
   section: ArticleSection;
   content: string;
   wordCount: number;
-  slopScore: number;
+  qualityScore: number; // Simple 0-10 score
+  flags: string[]; // Quick quality flags
 }
 
 async function listArticles() {
@@ -129,17 +130,29 @@ async function generateArticle(articleId: string) {
 
     const content = await generateSection(service, section, research);
     const wordCount = content.split(/\s+/).length;
-    const slopDetection = detectAISlop(content);
     
-    console.log(`   ✅ Generated: ${wordCount} words`);
-    console.log(`   📊 Slop score: ${slopDetection.qualityScore}/10`);
-    console.log(`   🚩 Flags: ${slopDetection.flags.length}\n`);
+    // Quick section score (simple checks)
+    const flags: string[] = [];
+    if (wordCount < section.targetWords * 0.7) flags.push('too-short');
+    if (wordCount > section.targetWords * 1.5) flags.push('too-long');
+    if (!content.includes('```')) flags.push('no-code');
+    if (!/\d+/.test(content)) flags.push('no-numbers');
+    
+    const qualityScore = 10 - flags.length * 2; // Simple: 10 minus 2 per flag
+    
+    console.log(`   ✅ Generated: ${wordCount} words (target: ${section.targetWords})`);
+    console.log(`   📊 Quick score: ${qualityScore}/10`);
+    if (flags.length > 0) {
+      console.log(`   🚩 Flags: ${flags.join(', ')}`);
+    }
+    console.log('');
 
     sectionResults.push({
       section,
       content,
       wordCount,
-      slopScore: slopDetection.qualityScore
+      qualityScore,
+      flags
     });
 
     totalWords += wordCount;
@@ -147,6 +160,39 @@ async function generateArticle(articleId: string) {
 
   // Combine sections
   const fullArticle = `# ${research.workingTitle}\n\n${sectionResults.map(s => s.content).join('\n\n')}\n\n---\n**Last Updated:** November 2025\n**Keywords:** ${research.keywords.join(', ')}`;
+
+  // Cohesion check (high token budget to review full article)
+  console.log(`\n${'='.repeat(70)}`);
+  console.log(`🔗 COHESION CHECK - Reviewing Full Article Flow`);
+  console.log(`${'='.repeat(70)}\n`);
+  
+  const cohesionPrompt = `Review this complete article for flow and cohesion.
+
+**Article:**
+${fullArticle}
+
+**Check:**
+1. Do sections transition smoothly?
+2. Any repetition across sections?
+3. Does it feel unified or disjointed?
+4. Missing connections between ideas?
+
+Provide:
+- Cohesion score (1-10)
+- What works
+- What needs fixing
+- Specific transition improvements
+
+Be concise but specific.`;
+
+  const cohesionReview = await service['runAgent'](
+    CONTENT_AGENTS.find(a => a.role === 'final_publisher')!,
+    cohesionPrompt
+  );
+  
+  console.log('📝 Cohesion Review:');
+  console.log(cohesionReview);
+  console.log('');
 
   // Final quality score
   console.log(`${'='.repeat(70)}`);
@@ -181,7 +227,8 @@ async function generateArticle(articleId: string) {
   console.log(`✅ Updated in DB: ${articleId}`);
   console.log(`\n📊 Summary:`);
   console.log(`   Total Words: ${totalWords}`);
-  console.log(`   Avg Slop Score: ${(sectionResults.reduce((s, r) => s + r.slopScore, 0) / sectionResults.length).toFixed(1)}/10`);
+  console.log(`   Avg Section Score: ${(sectionResults.reduce((s, r) => s + r.qualityScore, 0) / sectionResults.length).toFixed(1)}/10`);
+  console.log(`   Overall Quality: ${qualityScore.overall.toFixed(1)}/10 (${qualityScore.verdict})`);
   console.log(`   Status: review\n`);
 }
 
