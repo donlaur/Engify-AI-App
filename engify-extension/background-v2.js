@@ -39,6 +39,14 @@ chrome.action.onClicked.addListener(async (tab) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('📨 Received message:', message);
   
+  // Auto-open popup when element is selected
+  if (message.type === 'element_selected' && message.openPopup) {
+    console.log('🎯 Element selected, opening popup...');
+    chrome.action.openPopup();
+    sendResponse({ success: true });
+    return true;
+  }
+  
   if (message.type === 'element_clicked') {
     console.log('🎯 Element was clicked:', message.element);
     

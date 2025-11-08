@@ -248,10 +248,11 @@ function handleSelectionClick(event) {
   };
   sessionStorage.setItem('engifySelectedElement', JSON.stringify(compactElementInfo));
   
-  // Send to popup (in case it's still open)
+  // Send to background to open popup automatically
   chrome.runtime.sendMessage({
     type: 'element_selected',
-    element: elementInfo
+    element: elementInfo,
+    openPopup: true  // Signal to open popup
   });
   
   // Turn off inspect mode
@@ -259,8 +260,8 @@ function handleSelectionClick(event) {
   document.body.style.cursor = 'default';
   removeHighlight();
   
-  // Show notification that element was selected
-  showNotification('✅ Element selected! Click Engify icon to continue.');
+  // Show notification that popup is opening
+  showNotification('✅ Element selected! Opening popup...');
 }
 
 // Handle mouse move for hover effect
