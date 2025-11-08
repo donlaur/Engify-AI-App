@@ -18,6 +18,7 @@ import path from 'path';
 import { ArticleResearchRepository } from '@/lib/db/repositories/article-research.repository';
 import { ContentPublishingService, CONTENT_AGENTS } from '@/lib/content/content-publishing-pipeline';
 import { detectAISlop, printDetectionReport } from '@/lib/content/ai-slop-detector';
+import { scoreContent, printQualityReport } from '@/lib/content/content-quality-scorer';
 import type { ArticleResearch, ArticleSection } from '@/lib/db/schemas/article-research.schema';
 
 interface SectionResult {
@@ -147,18 +148,18 @@ async function generateArticle(articleId: string) {
   // Combine sections
   const fullArticle = `# ${research.workingTitle}\n\n${sectionResults.map(s => s.content).join('\n\n')}\n\n---\n**Last Updated:** November 2025\n**Keywords:** ${research.keywords.join(', ')}`;
 
-  // Final slop detection
+  // Final quality score
   console.log(`${'='.repeat(70)}`);
-  console.log(`🔍 FINAL SLOP DETECTION`);
+  console.log(`🔍 FINAL QUALITY SCORE`);
   console.log(`${'='.repeat(70)}`);
-  const finalSlop = detectAISlop(fullArticle);
-  printDetectionReport(finalSlop);
+  const qualityScore = scoreContent(fullArticle, research.keywords);
+  printQualityReport(qualityScore);
 
   // Save to DB
   await ArticleResearchRepository.updateGenerated(articleId, {
     content: fullArticle,
     wordCount: totalWords,
-    slopScore: finalSlop.qualityScore,
+    slopScore: qualityScore.overall,
     generatedAt: new Date()
   });
 
