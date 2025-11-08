@@ -404,6 +404,162 @@ export default async function AIToolDetailPage({ params }: PageProps) {
               </Card>
             </div>
           </div>
+
+          {/* Hub Content Sections */}
+          {tool.hubContent && (
+            <div className="space-y-12">
+              {/* Section 7: Problems & Solutions */}
+              {tool.hubContent.problems && tool.hubContent.problems.length > 0 && (
+                <section>
+                  <h2 className="mb-6 text-2xl font-bold">
+                    {tool.hubContent.problemsHeading || `Common ${tool.name} Problems (And How Engify Helps)`}
+                  </h2>
+                  <div className="space-y-4">
+                    {tool.hubContent.problems.map((problem) => (
+                      <Card key={problem.id}>
+                        <CardHeader>
+                          <CardTitle>{problem.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            <p><strong>Issue:</strong> {problem.issue}</p>
+                            <p><strong>Impact:</strong> {problem.impact}</p>
+                            <p className="text-primary">
+                              <strong>Engify Solution:</strong> {problem.engifySolution}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Section 10: Community Resources */}
+              {((tool.hubContent.officialResources && tool.hubContent.officialResources.length > 0) ||
+                (tool.hubContent.communityResources && tool.hubContent.communityResources.length > 0)) && (
+                <section>
+                  <h2 className="mb-6 text-2xl font-bold">
+                    {tool.hubContent.communityHeading || 'Community Resources'}
+                  </h2>
+                  
+                  <div className="space-y-6">
+                    {tool.hubContent.officialResources && tool.hubContent.officialResources.length > 0 && (
+                      <div>
+                        <h3 className="mb-3 text-lg font-semibold">Official Resources</h3>
+                        <ul className="space-y-2">
+                          {tool.hubContent.officialResources.map((resource) => (
+                            <li key={resource.id}>
+                              <a href={resource.url} className="text-primary underline" target="_blank" rel="noopener noreferrer">
+                                {resource.title}
+                              </a>
+                              {resource.description && (
+                                <span className="text-muted-foreground"> - {resource.description}</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {tool.hubContent.communityResources && tool.hubContent.communityResources.length > 0 && (
+                      <div>
+                        <h3 className="mb-3 text-lg font-semibold">Community Resources</h3>
+                        <ul className="space-y-2">
+                          {tool.hubContent.communityResources.map((resource) => (
+                            <li key={resource.id}>
+                              <a href={resource.url} className="text-primary underline" target="_blank" rel="noopener noreferrer">
+                                {resource.title}
+                              </a>
+                              {resource.description && (
+                                <span className="text-muted-foreground"> - {resource.description}</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                    <p className="text-sm text-muted-foreground">
+                      {tool.hubContent.communityCallout || (
+                        <>
+                          <strong>Why we link to other sites:</strong> We believe the best resource for you might not 
+                          always be Engify. Our goal is to help you succeed with AI coding tools, 
+                          not to lock you into our platform.
+                        </>
+                      )}
+                    </p>
+                  </div>
+                </section>
+              )}
+
+              {/* Section 9: Getting Started */}
+              {tool.hubContent.gettingStarted && tool.hubContent.gettingStarted.length > 0 && (
+                <section>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        {tool.hubContent.gettingStartedHeading || `Getting Started with ${tool.name}`}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ol className="list-decimal space-y-3 pl-5">
+                        {tool.hubContent.gettingStarted.map((step) => (
+                          <li key={step.id}>
+                            <strong>{step.title}:</strong> {step.description}
+                          </li>
+                        ))}
+                      </ol>
+                      
+                      {tool.hubContent.gettingStartedProTip && (
+                        <div className="mt-6 rounded-lg bg-muted p-4">
+                          <p className="text-sm font-semibold">💡 Pro Tip:</p>
+                          <p className="text-sm text-muted-foreground">
+                            {tool.hubContent.gettingStartedProTip}
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </section>
+              )}
+
+              {/* Section 8: Articles */}
+              {tool.hubContent.articles && tool.hubContent.articles.length > 0 && (
+                <section>
+                  <h2 className="mb-6 text-2xl font-bold">
+                    {tool.hubContent.articlesHeading || `In-Depth ${tool.name} Guides`}
+                  </h2>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {tool.hubContent.articles.map((article) => (
+                      <Card key={article.id} className={article.status === 'coming_soon' ? 'border-dashed' : ''}>
+                        <CardHeader>
+                          <CardTitle>{article.title}</CardTitle>
+                          {article.status === 'coming_soon' && (
+                            <Badge variant="secondary">Coming Soon</Badge>
+                          )}
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground">
+                            {article.description}
+                          </p>
+                          {article.status === 'published' && article.slug && (
+                            <Button asChild className="mt-4" variant="outline">
+                              <Link href={`/learn/articles/${article.slug}`}>
+                                Read Article →
+                              </Link>
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
         </div>
       </MainLayout>
     </>
