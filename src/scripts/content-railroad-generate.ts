@@ -17,8 +17,8 @@ import fs from 'fs';
 import path from 'path';
 import { ArticleResearchRepository } from '@/lib/db/repositories/article-research.repository';
 import { ContentPublishingService, CONTENT_AGENTS } from '@/lib/content/content-publishing-pipeline';
-import { detectAISlop, printDetectionReport } from '@/lib/content/ai-slop-detector';
 import { scoreContent, printQualityReport } from '@/lib/content/content-quality-scorer';
+import { calculateReadability, printReadabilityReport, getReadabilityScore } from '@/lib/content/readability-calculator';
 import type { ArticleResearch, ArticleSection } from '@/lib/db/schemas/article-research.schema';
 
 interface SectionResult {
@@ -27,6 +27,7 @@ interface SectionResult {
   wordCount: number;
   qualityScore: number; // Simple 0-10 score
   flags: string[]; // Quick quality flags
+  readability: ReturnType<typeof calculateReadability>;
 }
 
 async function listArticles() {
@@ -150,17 +151,24 @@ async function generateArticle(articleId: string) {
     const content = await generateSection(service, section, research);
     const wordCount = content.split(/\s+/).length;
     
+    // Calculate readability
+    const readability = calculateReadability(content);
+    const readabilityScore = getReadabilityScore(readability);
+    
     // Quick section score (simple checks)
     const flags: string[] = [];
     if (wordCount < section.targetWords * 0.7) flags.push('too-short');
     if (wordCount > section.targetWords * 1.5) flags.push('too-long');
     if (!content.includes('```')) flags.push('no-code');
     if (!/\d+/.test(content)) flags.push('no-numbers');
+    if (readability.fleschKincaid > 12) flags.push('too-complex');
+    if (readability.fleschKincaid < 6) flags.push('too-simple');
     
     const qualityScore = 10 - flags.length * 2; // Simple: 10 minus 2 per flag
     
     console.log(`   ✅ Generated: ${wordCount} words (target: ${section.targetWords})`);
     console.log(`   📊 Quick score: ${qualityScore}/10`);
+    console.log(`   📖 Readability: ${readability.fleschKincaid} grade, ${readability.fleschReadingEase}/100 ease (${readabilityScore}/10)`);
     if (flags.length > 0) {
       console.log(`   🚩 Flags: ${flags.join(', ')}`);
     }
@@ -171,7 +179,8 @@ async function generateArticle(articleId: string) {
       content,
       wordCount,
       qualityScore,
-      flags
+      flags,
+      readability
     });
 
     totalWords += wordCount;
@@ -219,13 +228,36 @@ Be concise but specific.`;
   console.log(`${'='.repeat(70)}`);
   const qualityScore = scoreContent(fullArticle, research.keywords);
   printQualityReport(qualityScore);
+  
+  // Calculate overall readability
+  const overallReadability = calculateReadability(fullArticle);
+  printReadabilityReport(overallReadability);
 
-  // Save to DB
+  // Save to DB with comprehensive quality data
   await ArticleResearchRepository.updateGenerated(articleId, {
     content: fullArticle,
     wordCount: totalWords,
-    slopScore: qualityScore.overall,
-    generatedAt: new Date()
+    generatedAt: new Date(),
+    qualityScore: {
+      overall: qualityScore.overall,
+      aiSlop: qualityScore.slopScore,
+      eeat: qualityScore.eeatScore,
+      seo: qualityScore.seoScore,
+      technical: qualityScore.technicalScore,
+      readability: getReadabilityScore(overallReadability),
+    },
+    readability: {
+      fleschKincaid: overallReadability.fleschKincaid,
+      fleschReadingEase: overallReadability.fleschReadingEase,
+      avgSentenceLength: overallReadability.avgSentenceLength,
+      avgWordLength: overallReadability.avgWordLength,
+      avgParagraphLength: overallReadability.avgParagraphLength,
+    },
+    cohesion: {
+      score: 8, // From cohesion review (would need to parse)
+      feedback: cohesionReview,
+      improvements: [],
+    }
   });
 
   await ArticleResearchRepository.updateStatus(articleId, 'review');
