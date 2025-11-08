@@ -112,12 +112,20 @@ export function analyzeEEAT(content: string): EEATSignals {
   const timestamps = content.match(timestampPatterns) || [];
   const hasTimestamps = timestamps.length > 0;
   
-  const experienceScore = (
+  // PENALTY: Fake metrics detection
+  const fakeMetricMarkers = [
+    'approximately 30%', 'reduced by 25%', 'improved by 40%',
+    'decreased by 35%', 'increased by 50%' // Round numbers = suspicious
+  ];
+  const hasSuspiciousFakeMetrics = fakeMetricMarkers.some(m => lowerContent.includes(m));
+  
+  const experienceScore = Math.max(0, (
     (hasFirstHandTesting ? 3 : 0) +
     (hasSpecificMetrics ? 3 : 0) +
     (hasFailureMentions ? 2 : 0) +
-    (hasTimestamps ? 2 : 0)
-  );
+    (hasTimestamps ? 2 : 0) -
+    (hasSuspiciousFakeMetrics ? 5 : 0) // PENALTY for fake metrics
+  ));
   
   // EXPERTISE signals
   const versionPatterns = /v?\d+\.\d+(\.\d+)?|version \d+|cursor \d+\.\d+|gpt-4o/gi;
@@ -134,12 +142,20 @@ export function analyzeEEAT(content: string): EEATSignals {
   const docMarkers = ['official docs', 'documentation', 'github', 'readme'];
   const citesOfficialDocs = docMarkers.some(m => lowerContent.includes(m));
   
-  const expertiseScore = (
-    (hasSpecificVersions ? 3 : 0) +
-    (hasCodeExamples ? 3 : 0) +
-    (explainsWhy ? 2 : 0) +
-    (citesOfficialDocs ? 2 : 0)
+  // PENALTY: Fake code detection (Python code in Cursor/Electron article)
+  const hasPythonCode = codeBlocks.some(block => 
+    block.includes('```python') || block.includes('def ') || block.includes('import ')
   );
+  const isElectronArticle = lowerContent.includes('cursor') || lowerContent.includes('electron') || lowerContent.includes('vscode');
+  const hasFakeCode = hasPythonCode && isElectronArticle; // Python in Electron article = fake
+  
+  const expertiseScore = Math.max(0, (
+    (hasSpecificVersions ? 3 : 0) +
+    (hasCodeExamples && !hasFakeCode ? 3 : 0) + // No points for fake code
+    (explainsWhy ? 2 : 0) +
+    (citesOfficialDocs ? 2 : 0) -
+    (hasFakeCode ? 6 : 0) // MAJOR PENALTY for fake code
+  ));
   
   // AUTHORITATIVENESS signals
   const citationPatterns = /\[.*?\]\(.*?\)|\bhttps?:\/\/\S+|according to|source:|via/gi;
@@ -354,14 +370,18 @@ export function scoreContent(
     technicalScore * 0.15
   );
   
-  // Determine verdict
+  // Determine verdict (TOUGHER THRESHOLDS)
   let verdict: ContentQualityScore['verdict'];
-  if (overall >= 8.5) verdict = 'excellent';
-  else if (overall >= 7.0) verdict = 'good';
-  else if (overall >= 5.0) verdict = 'needs-improvement';
+  if (overall >= 9.0) verdict = 'excellent';  // Raised from 8.5
+  else if (overall >= 7.5) verdict = 'good';  // Raised from 7.0
+  else if (overall >= 6.0) verdict = 'needs-improvement';  // Raised from 5.0
   else verdict = 'poor';
   
-  const publishReady = overall >= 8.0 && slopScore >= 7.0 && eeatScore >= 7.0;
+  // MUCH TOUGHER publish requirements
+  const publishReady = overall >= 8.5 &&  // Raised from 8.0
+                       slopScore >= 8.0 &&  // Raised from 7.0
+                       eeatScore >= 8.0 &&  // Raised from 7.0
+                       !content.includes('```python');  // NO FAKE CODE
   
   // Generate recommendations
   const recommendations: string[] = [];
