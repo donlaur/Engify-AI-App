@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 350px;
+      min-height: 400px;
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ff6b6b;
+      margin-bottom: 8px;
+    }
+    
+    .screen {
+      display: none;
+    }
+    
+    .screen.active {
+      display: block;
+    }
+    
+    /* Screen 1: Intent Selection */
+    .intent-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .intent-card {
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .intent-card:hover {
+      border-color: #ff6b6b;
+      background: #fff5f5;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .intent-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .intent-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 4px;
+    }
+    
+    .intent-desc {
+      font-size: 11px;
+      color: #6c757d;
+      line-height: 1.3;
+    }
+    
+    /* Screen 2: Element Selection */
+    .status-box {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 2px solid #28a745;
+      text-align: center;
+    }
+    
+    .status-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+    
+    .status-text {
+      font-size: 14px;
+      color: #212529;
+      margin-bottom: 4px;
+    }
+    
+    .status-hint {
+      font-size: 12px;
+      color: #6c757d;
+    }
+    
+    .button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: #ff6b6b;
+      color: white;
+      margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+    
+    .button:hover {
+      background: #ff5252;
+    }
+    
+    .button.secondary {
+      background: #6c757d;
+    }
+    
+    .button.secondary:hover {
+      background: #5a6268;
+    }
+    
+    /* Screen 3: Form */
+    .form-section {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .form-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #ff6b6b;
+      box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+    }
+    
+    .mode-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .mode-option {
+      padding: 12px;
+      border: 2px solid #e9ecef;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      text-align: left;
+    }
+    
+    .mode-option:hover {
+      border-color: #ff6b6b;
+      background: #fff5f5;
+    }
+    
+    .mode-option.selected {
+      border-color: #ff6b6b;
+      background: #ff6b6b;
+      color: white;
+    }
+    
+    .element-preview {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 12px;
+      color: #495057;
+      margin-bottom: 12px;
+      font-family: 'Monaco', 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">Engify</div>
+    <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">Visual Bug Reporter</div>
+  </div>
+  
+  <!-- Screen 1: Choose Intent -->
+  <div class="screen active" id="screen-intent">
+    <h3 style="margin: 0 0 16px 0; font-size: 16px; text-align: center;">What do you want to do?</h3>
+    
+    <div class="intent-grid">
+      <div class="intent-card" data-intent="bug">
+        <div class="intent-icon">🐛</div>
+        <div class="intent-title">Report Bug</div>
+        <div class="intent-desc">Something's broken</div>
+      </div>
+      
+      <div class="intent-card" data-intent="learn">
+        <div class="intent-icon">💡</div>
+        <div class="intent-title">Learn Code</div>
+        <div class="intent-desc">How does this work?</div>
+      </div>
+      
+      <div class="intent-card" data-intent="debug">
+        <div class="intent-icon">📊</div>
+        <div class="intent-title">Debug Issue</div>
+        <div class="intent-desc">Console errors</div>
+      </div>
+      
+      <div class="intent-card" data-intent="design">
+        <div class="intent-icon">🎨</div>
+        <div class="intent-title">Design Feedback</div>
+        <div class="intent-desc">UI/UX improvements</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Screen 2: Select Element -->
+  <div class="screen" id="screen-select">
+    <div class="status-box">
+      <div class="status-icon">🎯</div>
+      <div class="status-text">Click any element on the page</div>
+      <div class="status-hint">The element will be highlighted as you hover</div>
+    </div>
+    
+    <button class="button secondary" id="cancel-select">Cancel</button>
+  </div>
+  
+  <!-- Screen 3: Form -->
+  <div class="screen" id="screen-form">
+    <div class="form-section">
+      <label class="form-label">Selected Element:</label>
+      <div class="element-preview" id="element-preview">
+        No element selected
+      </div>
+      
+      <label class="form-label">Description:</label>
+      <textarea id="description" placeholder="Describe what needs to be done..."></textarea>
+    </div>
+    
+    <div class="form-section">
+      <label class="form-label">Where to send?</label>
+      <div class="mode-options">
+        <div class="mode-option" data-mode="clipboard">
+          📋 Copy to Clipboard (Free)
+        </div>
+        <div class="mode-option" data-mode="dashboard">
+          🌐 Send to Dashboard
+        </div>
+        <div class="mode-option" data-mode="ide">
+          🚀 Send to IDE (Pro)
+        </div>
+      </div>
+    </div>
+    
+    <button class="button" id="submit-btn">Submit</button>
+    <button class="button secondary" id="back-btn">Back</button>
+  </div>
+  
+  <script src="popup-v3.js"></script>
+</body>
+</html>

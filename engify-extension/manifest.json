@@ -18,8 +18,8 @@
     }
   ],
   "action": {
-    "default_popup": "popup-enhanced.html",
-    "default_title": "Engify - Visual Debugger"
+    "default_popup": "popup-v3.html",
+    "default_title": "Engify - Visual Bug Reporter"
   },
   "icons": {
     "16": "icons/icon.svg",
