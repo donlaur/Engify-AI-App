@@ -16,6 +16,7 @@ import json
 import os
 from pathlib import Path
 from agents.article_generation import app, ArticleState
+from lib.ai_slop_detector import detect_ai_slop, print_detection_report
 
 # Sample research data for "Cursor vs Windsurf" article
 SAMPLE_RESEARCH = {
@@ -147,6 +148,11 @@ async def generate_article():
         print(f"💾 Saved to: {output_file}")
         print()
         
+        # Run AI slop detection
+        print("🔍 Running AI slop detection...")
+        detection = detect_ai_slop(result['final_article'])
+        print_detection_report(detection)
+        
         # Print preview
         print("📄 Article Preview:")
         print("=" * 60)
@@ -166,7 +172,13 @@ async def generate_article():
         print(f"   Lines: {len(lines):,}")
         print()
         
-        print("🎉 Success! Article ready for review.")
+        # Final verdict
+        if detection['quality_score'] >= 8:
+            print("🎉 Success! Article passed quality check and ready for review.")
+        elif detection['quality_score'] >= 6:
+            print("⚠️  Article generated but needs manual review/editing.")
+        else:
+            print("❌ Article quality too low. Consider regenerating with stricter prompts.")
         
     except Exception as e:
         print(f"❌ Error during generation: {e}")
