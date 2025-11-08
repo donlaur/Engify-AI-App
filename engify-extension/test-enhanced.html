@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Engify Enhanced Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      color: #333;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      color: #666;
+      font-size: 1.2em;
+    }
+    
+    .test-section {
+      margin: 20px 0;
+      padding: 20px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+    }
+    
+    .test-section h3 {
+      color: #495057;
+      margin-top: 0;
+    }
+    
+    .button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+    
+    .button:hover {
+      background: #0056b3;
+    }
+    
+    .button.small {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+    
+    .button.warning {
+      background: #ffc107;
+      color: #212529;
+    }
+    
+    .button.warning:hover {
+      background: #e0a800;
+    }
+    
+    .text-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    
+    .error-text {
+      color: #dc3545;
+      font-size: 14px;
+      background: #f8d7da;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 10px 0;
+      border-left: 4px solid #007bff;
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 500px;
+      width: 90%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Engify Enhanced Test Page</h1>
+      <p>Test the three-tier visual bug reporter</p>
+    </div>
+    
+    <div class="test-section">
+      <h3>🐛 Bug Testing</h3>
+      <p>Click this button to test bug reporting:</p>
+      <button class="button">Submit Button</button>
+      <button class="button small">Small Button</button>
+      <button class="button warning">Warning Button</button>
+    </div>
+    
+    <div class="test-section">
+      <h3>📝 Content Issues</h3>
+      <p>Test text content issues:</p>
+      <div class="error-text">
+        This text has poor contrast and might be hard to read
+      </div>
+      <div class="card">
+        This is a card component that might need repositioning
+      </div>
+      <input type="text" class="text-input" placeholder="Test form input">
+    </div>
+    
+    <div class="test-section">
+      <h3>🎨 Style & Layout</h3>
+      <p>Elements with potential style issues:</p>
+      <div style="background: #ffcccc; padding: 20px; margin: 10px 0; border-radius: 4px;">
+        This div has a harsh red background
+      </div>
+      <div style="font-size: 10px; color: #999;">
+        This text is too small and light
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h3>💡 Feature Requests</h3>
+      <p>Areas that might need new features:</p>
+      <ul>
+        <li>Missing search functionality</li>
+        <li>No dark mode option</li>
+        <li>Needs user profile section</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h3>Test Modal</h3>
+      <p>This is a modal that might need to be removed or improved.</p>
+      <button class="button" onclick="document.getElementById('overlay').style.display='none'">Close</button>
+    </div>
+  </div>
+  
+  <script>
+    // Add some interactive elements
+    document.querySelector('.button').addEventListener('click', () => {
+      alert('Button clicked - test interaction');
+    });
+    
+    document.querySelector('.text-input').addEventListener('input', (e) => {
+      console.log('Input value:', e.target.value);
+    });
+  </script>
+</body>
+</html>
