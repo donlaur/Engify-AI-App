@@ -123,6 +123,40 @@ Requirements:
 
 IMPORTANT: If the prompt specifies a target word count, you MUST write at least that many words. Expand with examples, case studies, and detailed explanations.
 
+**E-E-A-T REQUIREMENTS (Google Quality Signals):**
+
+EXPERIENCE (First-Hand Testing):
+- Include "I tested...", "We found...", "After trying..."
+- Share specific results: "reduced build time by 40%", "saved 2 hours/week"
+- Mention failures/challenges: "This didn't work when...", "Watch out for..."
+- Add timestamps: "As of November 2025...", "Updated for version 2.0"
+
+EXPERTISE (Technical Depth):
+- Use specific tool names and versions: "Cursor 0.42", "GPT-4o", not "AI tools"
+- Include code examples with real file paths and commands
+- Explain WHY, not just HOW: "This works because..."
+- Reference official docs with links
+
+AUTHORITATIVENESS (Credibility):
+- Cite authoritative sources: official docs, GitHub repos, Reddit discussions
+- Link to related articles on Engify.ai
+- Use data/metrics when available
+- Mention community consensus: "Most developers prefer..."
+
+TRUSTWORTHINESS (Transparency):
+- Be honest about limitations: "This approach has trade-offs..."
+- Include "Last updated" date
+- Admit when something is opinion vs fact
+- No exaggeration: avoid "revolutionary", "game-changing", "best ever"
+
+**AI SLOP DETECTION - FORBIDDEN:**
+- ❌ "delve", "leverage", "utilize", "robust", "seamless"
+- ❌ Em dashes (—) - use periods or colons instead
+- ❌ Uniform sentence length - vary short and long
+- ❌ Excessive hedging: "may", "might", "could" everywhere
+- ❌ Vague claims: "studies show", "experts say" (cite specific sources)
+- ❌ Generic intros: "In today's fast-paced world..."
+
 Write content that gets developers excited to try something new.`,
   },
 
@@ -172,6 +206,15 @@ SEO Checklist:
    - Article schema
    - Author info
    - Date published
+
+**E-E-A-T SEO SIGNALS (Critical for Google):**
+- Verify author byline exists with credentials
+- Check for "Last updated" date (freshness signal)
+- Ensure citations to authoritative sources (official docs, GitHub, Reddit)
+- Look for personal experience markers ("I tested", "We found")
+- Confirm specific data/metrics (not vague claims)
+- Check for honest limitations/trade-offs (trustworthiness)
+- Verify no AI slop phrases (delve, leverage, utilize, robust)
 
 Review format:
 {
@@ -597,6 +640,22 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
 
     result.approved = allApproved;
     result.publishReady = allApproved && publisherApproved && avgScore >= 8.0;
+
+    // Run AI slop detection
+    console.log(`\n🔍 Running AI Slop Detection...`);
+    const slopDetection = detectAISlop(result.finalContent);
+    result.slopDetection = slopDetection;
+    
+    // Print detailed slop report
+    printDetectionReport(slopDetection);
+    
+    // Adjust publish ready status based on slop detection
+    if (slopDetection.qualityScore < 6.0) {
+      result.publishReady = false;
+      console.log(`   ❌ Quality score too low (${slopDetection.qualityScore}/10) - NOT ready to publish`);
+    } else if (slopDetection.qualityScore < 8.0) {
+      console.log(`   ⚠️  Quality score needs improvement (${slopDetection.qualityScore}/10)`);
+    }
 
     console.log(`\n📊 Final Score: ${avgScore.toFixed(1)}/10`);
     console.log(`   Status: ${result.publishReady ? '✅ READY TO PUBLISH' : '⚠️ NEEDS REVISION'}`);
