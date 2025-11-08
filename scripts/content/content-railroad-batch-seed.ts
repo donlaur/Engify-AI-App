@@ -76,10 +76,10 @@ Power users report running out of tokens even on paid plans. Many spend $100-300
         ]
       },
       {
-        title: "Total Cost of Ownership: The Real Price",
-        purpose: "TRUSTWORTHINESS - TCO analysis",
-        targetWords: 500,
-        context: "CURSOR TCO (12 months): Pro $20/mo = $240, BUT token overages add $100-300/mo = $1,200-3,600/year. Real TCO: $1,440-3,840/year. Ultra $200/mo = $2,400/year (still hits limits). WINDSURF TCO: $15/mo flat = $180/year (no overages). TCO comparison: Windsurf is 8-21x cheaper for power users. Include: 'After 3 months, I spent $847 on Cursor vs $45 on Windsurf.'"
+        title: "The Real Cost: TCO & Hidden Gotchas",
+        purpose: "TRUSTWORTHINESS - Complete cost transparency",
+        targetWords: 700,
+        context: "CURSOR TCO: Pro $20/mo = $240/year, BUT token overages add $1,200-3,600/year. Real TCO: $1,440-3,840/year. Ultra $200/mo = $2,400/year (still hits limits). Hidden issues: memory leaks, system freezes, hard reboots. WINDSURF TCO: $15/mo flat = $180/year (no overages). Hidden issues: context loss, accidental deletions, model-dependent quality. BOTH: Require internet, data privacy concerns, learning curve. Personal experience: 'After 3 months, I spent $847 on Cursor vs $45 on Windsurf.' TCO comparison: Windsurf is 8-21x cheaper for power users. 'Here's what they don't tell you...'"
       },
       {
         title: "Real User Experiences",
@@ -99,12 +99,6 @@ Power users report running out of tokens even on paid plans. Many spend $100-300
         purpose: "EXPERIENCE - First-hand data",
         targetWords: 600,
         context: "3-week test. Build times, context retention, memory usage. Include failures. Screenshots."
-      },
-      {
-        title: "Hidden Costs & Gotchas",
-        purpose: "TRUSTWORTHINESS - Honest warnings",
-        targetWords: 400,
-        context: "CURSOR: Token overages ($200-500/mo real cost), memory leaks, system freezes. WINDSURF: Context loss, accidental deletions, model-dependent quality. BOTH: Require internet, data privacy concerns, learning curve. 'Here's what they don't tell you...'"
       },
       {
         title: "Recommendations: Which Should You Choose?",
