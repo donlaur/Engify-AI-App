@@ -133,7 +133,7 @@ Power users report running out of tokens even on paid plans. Many spend $100-300
         title: "The Four Core Problems",
         purpose: "EXPERTISE - Technical analysis",
         targetWords: 900,
-        context: "CRITICAL: Use ONLY information from November 2025 or later. Verify all version numbers are current as of Nov 8, 2025. 1) System memory leaks (60GB+). 2) Agent context loops. 3) Destructive overwrites. 4) QUALITY DEGRADATION: AI goes from staff-level to junior-level within minutes (v2.0.69). 5) File save errors (takes 5+ attempts). 6) Model ignores requests. Daily crashes. Frequent forced updates. Real quotes, technical details, version-specific issues.",
+        context: "CRITICAL: NO FAKE CODE EXAMPLES. Use ONLY real, verifiable information from November 2025. NO MADE-UP METRICS. 1) System memory leaks: Cursor Helper processes consume 60GB+ RAM, system freezes. 2) Agent context loops: AI repeats same mistakes, gets stuck. 3) Destructive overwrites: Working code gets broken. 4) QUALITY DEGRADATION: AI goes from staff-level to junior-level within minutes (v2.0.69). 5) File save errors (takes 5+ attempts). 6) Model ignores requests. Daily crashes requiring 2 reboots. Frequent forced updates. Describe symptoms, not fake code. Link to real GitHub issues and forum threads.",
         externalLinks: [
           { anchor: "GitHub Issue #1294", url: "https://github.com/getcursor/cursor/issues/1294", authority: "official" },
           { anchor: "Forum thread", url: "https://forum.cursor.com/t/17171", authority: "community" }
@@ -143,13 +143,13 @@ Power users report running out of tokens even on paid plans. Many spend $100-300
         title: "Root Cause: Control is the Crash",
         purpose: "EXPERTISE - Deep analysis",
         targetWords: 400,
-        context: "VS Code fork + Electron + unlimited context = perfect storm. Architecture analysis."
+        context: "NO FAKE CODE. Explain WHY memory leaks happen: Cursor 2.0.69 (VSCode 1.99.3, Electron 37.7.0) architecture. Multiple Cursor Helper processes don't release RAM. Electron's Chromium base is memory-heavy. Unlimited context feature loads too much into memory. Real symptoms: Activity Monitor shows 12+ Cursor Helper processes, each consuming 3-5GB. Total: 40-60GB RAM. System becomes unresponsive. Requires hard reboot. This is architectural, not a bug you can fix with code."
       },
       {
         title: "Community Solutions That Work",
         purpose: "AUTHORITATIVENESS - Proven fixes",
         targetWords: 1000,
-        context: "1) Summary.md workaround. 2) .cursorignore. 3) Proactive prompting. 4) Git workflow. 5) Cache clear. Code examples.",
+        context: "NO FAKE CODE OR METRICS. Real community workarounds from GitHub/forums: 1) .cursorignore to exclude large files (node_modules, dist, .git). 2) Restart Cursor every 2-3 hours before it crashes. 3) Close unused tabs/windows. 4) Disable Cursor AI features when not needed. 5) Monitor Activity Monitor, force quit Cursor Helper processes when RAM > 30GB. 6) Use Cursor Rules to limit context. Be honest: These are WORKAROUNDS, not fixes. The real fix needs to come from Cursor team. Mention limitations of each approach.",
         externalLinks: [
           { anchor: "Cursor Directory", url: "https://cursor.directory/", authority: "community rules" }
         ],
