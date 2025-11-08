@@ -3,6 +3,14 @@
 let selectedIntent = null;
 let selectedElement = null;
 let selectedMode = null;
+let isMinimized = false;
+
+// Minimize/restore functionality
+document.getElementById('minimize-btn').addEventListener('click', () => {
+  isMinimized = !isMinimized;
+  document.body.classList.toggle('minimized');
+  document.getElementById('minimize-btn').textContent = isMinimized ? 'Restore' : 'Minimize';
+});
 
 // Screen navigation
 function showScreen(screenId) {
