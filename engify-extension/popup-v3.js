@@ -61,18 +61,37 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // Check if element was already selected (from sessionStorage)
-window.addEventListener('load', () => {
-  chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-    chrome.tabs.sendMessage(tab.id, { type: 'get_selected_element' }, (response) => {
-      if (response && response.element) {
-        selectedElement = response.element;
-        showScreen('screen-form');
-        
-        const preview = document.getElementById('element-preview');
-        preview.textContent = `${selectedElement.tagName}${selectedElement.id ? '#' + selectedElement.id : ''}`;
+window.addEventListener('load', async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  
+  // Execute script to get sessionStorage
+  const results = await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    func: () => {
+      const data = sessionStorage.getItem('engifySelectedElement');
+      return data ? JSON.parse(data) : null;
+    }
+  });
+  
+  if (results && results[0] && results[0].result) {
+    selectedElement = results[0].result;
+    console.log('Found selected element in sessionStorage:', selectedElement);
+    
+    // Show form screen
+    showScreen('screen-form');
+    
+    // Update element preview
+    const preview = document.getElementById('element-preview');
+    preview.textContent = `${selectedElement.tagName}${selectedElement.id ? '#' + selectedElement.id : ''}${selectedElement.className ? '.' + selectedElement.className.split(' ')[0] : ''}`;
+    
+    // Clear sessionStorage so it doesn't persist
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        sessionStorage.removeItem('engifySelectedElement');
       }
     });
-  });
+  }
 });
 
 // Screen 3: Mode selection
