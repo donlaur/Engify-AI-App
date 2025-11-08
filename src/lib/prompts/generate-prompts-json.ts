@@ -99,8 +99,8 @@ export async function generatePromptsJson(): Promise<void> {
     updatedAt: prompt.updatedAt,
   }));
 
-  // Build export object
-  const exportData: PromptsExport = {
+  // Build new export object
+  const newExportData: PromptsExport = {
     version: '1.0',
     generatedAt: new Date().toISOString(),
     totalPrompts: prompts.length,
@@ -118,9 +118,34 @@ export async function generatePromptsJson(): Promise<void> {
   const dataDir = path.join(process.cwd(), 'public', 'data');
   await fs.mkdir(dataDir, { recursive: true });
 
-  // Write JSON file (minified for smaller file size)
   const jsonPath = path.join(dataDir, 'prompts.json');
-  const jsonContent = JSON.stringify(exportData); // Minified (no indentation)
 
-  await fs.writeFile(jsonPath, jsonContent, 'utf-8');
+  // Check if content has actually changed
+  let shouldWrite = true;
+  try {
+    const existingContent = await fs.readFile(jsonPath, 'utf-8');
+    const existingData: PromptsExport = JSON.parse(existingContent);
+    
+    // Compare everything except generatedAt timestamp
+    const existingWithoutTimestamp = { ...existingData, generatedAt: '' };
+    const newWithoutTimestamp = { ...newExportData, generatedAt: '' };
+    
+    if (JSON.stringify(existingWithoutTimestamp) === JSON.stringify(newWithoutTimestamp)) {
+      // Content hasn't changed, just update timestamp
+      existingData.generatedAt = new Date().toISOString();
+      await fs.writeFile(jsonPath, JSON.stringify(existingData), 'utf-8');
+      shouldWrite = false;
+      console.log('[Prompts JSON] Content unchanged, refreshed timestamp only');
+    }
+  } catch (error) {
+    // File doesn't exist or can't be read, write new file
+    shouldWrite = true;
+  }
+
+  // Write new content if it changed
+  if (shouldWrite) {
+    const jsonContent = JSON.stringify(newExportData);
+    await fs.writeFile(jsonPath, jsonContent, 'utf-8');
+    console.log('[Prompts JSON] Content changed, regenerated file');
+  }
 }
