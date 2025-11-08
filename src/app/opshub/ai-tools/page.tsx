@@ -23,10 +23,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
 import type { AITool } from '@/lib/db/schemas/ai-tool';
 import { generateSlug } from '@/lib/utils/slug';
+import { HubContentEditor } from '@/components/opshub/HubContentEditor';
 
 interface ToolDisplay extends AITool {
   _id?: string;
@@ -533,6 +535,7 @@ function ToolForm({
     reviewCount: tool?.reviewCount || 0,
     affiliateLink: tool?.affiliateLink || '',
     websiteUrl: tool?.websiteUrl || '',
+    hubContent: tool?.hubContent,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -542,6 +545,14 @@ function ToolForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <Tabs defaultValue="basic" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="basic">Basic Info</TabsTrigger>
+          <TabsTrigger value="details">Details & Pricing</TabsTrigger>
+          <TabsTrigger value="hub">Hub Content</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="basic" className="space-y-4 mt-4">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="id">ID *</Label>
@@ -682,83 +693,94 @@ function ToolForm({
           />
         </div>
       </div>
+        </TabsContent>
+        
+        <TabsContent value="details" className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="description">Description *</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Tool description..."
+              rows={4}
+              required
+            />
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Tool description..."
-          rows={4}
-          required
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="features">Features (one per line)</Label>
+            <Textarea
+              id="features"
+              value={formData.features?.join('\n') || ''}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  features: e.target.value.split('\n').filter((f) => f.trim()),
+                })
+              }
+              placeholder="Feature 1&#10;Feature 2"
+              rows={4}
+            />
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="features">Features (one per line)</Label>
-        <Textarea
-          id="features"
-          value={formData.features?.join('\n') || ''}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              features: e.target.value.split('\n').filter((f) => f.trim()),
-            })
-          }
-          placeholder="Feature 1&#10;Feature 2"
-          rows={4}
-        />
-      </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="pros">Pros (one per line)</Label>
+              <Textarea
+                id="pros"
+                value={formData.pros?.join('\n') || ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    pros: e.target.value.split('\n').filter((p) => p.trim()),
+                  })
+                }
+                placeholder="Pro 1&#10;Pro 2"
+                rows={3}
+              />
+            </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="pros">Pros (one per line)</Label>
-          <Textarea
-            id="pros"
-            value={formData.pros?.join('\n') || ''}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                pros: e.target.value.split('\n').filter((p) => p.trim()),
-              })
-            }
-            placeholder="Pro 1&#10;Pro 2"
-            rows={3}
+            <div className="space-y-2">
+              <Label htmlFor="cons">Cons (one per line)</Label>
+              <Textarea
+                id="cons"
+                value={formData.cons?.join('\n') || ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    cons: e.target.value.split('\n').filter((c) => c.trim()),
+                  })
+                }
+                placeholder="Con 1&#10;Con 2"
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags (comma-separated)</Label>
+            <Input
+              id="tags"
+              value={formData.tags?.join(', ') || ''}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean),
+                })
+              }
+              placeholder="ide, vscode, claude, paid"
+            />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="hub" className="space-y-4 mt-4">
+          <HubContentEditor
+            tool={formData}
+            onChange={(hubContent) => setFormData({ ...formData, hubContent })}
           />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="cons">Cons (one per line)</Label>
-          <Textarea
-            id="cons"
-            value={formData.cons?.join('\n') || ''}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                cons: e.target.value.split('\n').filter((c) => c.trim()),
-              })
-            }
-            placeholder="Con 1&#10;Con 2"
-            rows={3}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="tags">Tags (comma-separated)</Label>
-        <Input
-          id="tags"
-          value={formData.tags?.join(', ') || ''}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean),
-            })
-          }
-          placeholder="ide, vscode, claude, paid"
-        />
-      </div>
+        </TabsContent>
+      </Tabs>
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>

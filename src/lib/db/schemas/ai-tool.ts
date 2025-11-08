@@ -51,8 +51,76 @@ export const AIToolSchema = z.object({
   tags: z.array(z.string()).default([]),
   icon: z.string().optional(), // Icon name/key
   organizationId: z.string().optional(), // Multi-tenant support (null = system-wide)
+  
+  // Hub Content (for SEO content hubs)
+  hubContent: z.object({
+    // Section 5: Related Prompts
+    relatedPrompts: z.array(z.string()).default([]), // Prompt IDs
+    promptsHeading: z.string().optional(),
+    
+    // Section 6: Related Patterns
+    relatedPatterns: z.array(z.string()).default([]), // Pattern IDs
+    patternsHeading: z.string().optional(),
+    
+    // Section 7: Problems & Solutions
+    problems: z.array(z.object({
+      id: z.string(),
+      title: z.string(),
+      issue: z.string(),
+      impact: z.string(),
+      engifySolution: z.string(),
+      order: z.number(),
+    })).default([]),
+    problemsHeading: z.string().optional(),
+    
+    // Section 8: Articles
+    articles: z.array(z.object({
+      id: z.string(),
+      title: z.string(),
+      description: z.string(),
+      slug: z.string().optional(), // When published
+      status: z.enum(['coming_soon', 'published']).default('coming_soon'),
+      order: z.number(),
+    })).default([]),
+    articlesHeading: z.string().optional(),
+    
+    // Section 9: Getting Started
+    gettingStarted: z.array(z.object({
+      id: z.string(),
+      title: z.string(),
+      description: z.string(),
+      order: z.number(),
+    })).default([]),
+    gettingStartedHeading: z.string().optional(),
+    gettingStartedProTip: z.string().optional(),
+    
+    // Section 10: Community Resources
+    officialResources: z.array(z.object({
+      id: z.string(),
+      title: z.string(),
+      url: z.string(),
+      description: z.string().optional(),
+      order: z.number(),
+    })).default([]),
+    communityResources: z.array(z.object({
+      id: z.string(),
+      title: z.string(),
+      url: z.string(),
+      description: z.string().optional(),
+      order: z.number(),
+    })).default([]),
+    communityHeading: z.string().optional(),
+    communityCallout: z.string().optional(),
+  }).optional(), // Optional so existing tools don't break
+  
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
 
 export type AITool = z.infer<typeof AIToolSchema>;
+
+// Export sub-types for convenience
+export type HubProblem = NonNullable<AITool['hubContent']>['problems'][number];
+export type HubArticle = NonNullable<AITool['hubContent']>['articles'][number];
+export type HubGettingStartedStep = NonNullable<AITool['hubContent']>['gettingStarted'][number];
+export type HubResource = NonNullable<AITool['hubContent']>['officialResources'][number];
