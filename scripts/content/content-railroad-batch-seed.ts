@@ -133,7 +133,7 @@ Power users report running out of tokens even on paid plans. Many spend $100-300
         title: "The Four Core Problems",
         purpose: "EXPERTISE - Technical analysis",
         targetWords: 900,
-        context: "1) System memory leaks (60GB+). 2) Agent context loops. 3) Destructive overwrites. 4) QUALITY DEGRADATION: AI goes from staff-level to junior-level within minutes (Nov 2025, v2.0.69). Daily crashes. Frequent forced updates. Real quotes, technical details, version-specific issues.",
+        context: "CRITICAL: Use ONLY information from November 2025 or later. Verify all version numbers are current as of Nov 8, 2025. 1) System memory leaks (60GB+). 2) Agent context loops. 3) Destructive overwrites. 4) QUALITY DEGRADATION: AI goes from staff-level to junior-level within minutes (v2.0.69). 5) File save errors (takes 5+ attempts). 6) Model ignores requests. Daily crashes. Frequent forced updates. Real quotes, technical details, version-specific issues.",
         externalLinks: [
           { anchor: "GitHub Issue #1294", url: "https://github.com/getcursor/cursor/issues/1294", authority: "official" },
           { anchor: "Forum thread", url: "https://forum.cursor.com/t/17171", authority: "community" }
