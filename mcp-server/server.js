@@ -21,16 +21,73 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/engify')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Bug Schema
+// Bug Schema (MVP - Intent-Based Capture)
 const BugSchema = new mongoose.Schema({
-  file: { type: String, required: true },
-  line: { type: Number, required: true },
-  column: { type: Number, required: true },
-  screenshot: { type: String },
+  // Core identification
+  title: { type: String, required: true },
+  intent: { 
+    type: String, 
+    enum: ['bug_report', 'explain_code', 'debug_technical', 'design_feedback'],
+    default: 'bug_report'
+  },
+  
+  // Location context
+  file: { type: String },
+  line: { type: Number },
+  column: { type: Number },
+  url: { type: String, required: true },
+  
+  // User input
   description: { type: String },
+  notes: { type: String },
+  
+  // Captured data (intent-specific)
+  capturedData: {
+    consoleLogs: [{ 
+      type: { type: String }, // 'error' | 'warn'
+      message: { type: String },
+      timestamp: { type: Date }
+    }],
+    networkRequests: [{
+      url: { type: String },
+      method: { type: String },
+      status: { type: Number },
+      error: { type: String }
+    }],
+    domSnapshot: { type: String }, // HTML snapshot
+    computedStyles: { type: Object }, // CSS for clicked element
+    screenshot: { type: String } // Base64
+  },
+  
+  // Browser context
+  browserInfo: {
+    userAgent: { type: String },
+    viewport: { 
+      width: { type: Number },
+      height: { type: Number }
+    }
+  },
+  
+  // Workflow
+  status: { 
+    type: String, 
+    enum: ['new', 'reviewed', 'sent_to_ide', 'resolved'],
+    default: 'new'
+  },
+  markedForIDE: { type: Boolean, default: false },
+  tags: [{ type: String }],
+  priority: { 
+    type: String, 
+    enum: ['low', 'medium', 'high'],
+    default: 'medium'
+  },
+  
+  // Metadata
+  userId: { type: String, default: 'anonymous' },
   timestamp: { type: Date, default: Date.now },
-  url: { type: String },
-  userId: { type: String }
+  updatedAt: { type: Date, default: Date.now }
+}, {
+  timestamps: true // Auto-manage createdAt/updatedAt
 });
 
 const Bug = mongoose.model('Bug', BugSchema);
@@ -181,15 +238,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 // HTTP endpoint for Chrome extension
 app.post('/api/bug', async (req, res) => {
   try {
-    const { file, line, column, screenshot, description, url, userId } = req.body;
-    
-    const bug = new Bug({
+    const { 
+      title,
+      intent,
       file,
       line,
       column,
-      screenshot,
-      description,
       url,
+      description,
+      notes,
+      capturedData,
+      browserInfo,
+      userId 
+    } = req.body;
+    
+    const bug = new Bug({
+      title: title || 'Untitled Bug Report',
+      intent: intent || 'bug_report',
+      file,
+      line,
+      column,
+      url,
+      description,
+      notes,
+      capturedData: capturedData || {},
+      browserInfo: browserInfo || {},
       userId: userId || 'anonymous'
     });
     
@@ -198,7 +271,14 @@ app.post('/api/bug', async (req, res) => {
     res.json({ 
       success: true, 
       message: 'Bug context stored successfully',
-      id: bug._id 
+      id: bug._id,
+      bug: {
+        id: bug._id,
+        title: bug.title,
+        intent: bug.intent,
+        status: bug.status,
+        timestamp: bug.timestamp
+      }
     });
   } catch (error) {
     console.error('Error storing bug:', error);
@@ -212,19 +292,66 @@ app.post('/api/bug', async (req, res) => {
 // Get bug history
 app.get('/api/bugs', async (req, res) => {
   try {
-    const { file, userId, limit = 10 } = req.query;
+    const { file, userId, status, intent, limit = 10 } = req.query;
     const query = {};
     
     if (file) query.file = file;
     if (userId) query.userId = userId;
+    if (status) query.status = status;
+    if (intent) query.intent = intent;
     
     const bugs = await Bug.find(query)
       .sort({ timestamp: -1 })
       .limit(parseInt(limit));
       
-    res.json({ success: true, bugs });
+    res.json({ success: true, bugs, count: bugs.length });
   } catch (error) {
     console.error('Error getting bugs:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Get single bug by ID
+app.get('/api/bugs/:id', async (req, res) => {
+  try {
+    const bug = await Bug.findById(req.params.id);
+    
+    if (!bug) {
+      return res.status(404).json({ success: false, message: 'Bug not found' });
+    }
+    
+    res.json({ success: true, bug });
+  } catch (error) {
+    console.error('Error getting bug:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Update bug (for dashboard)
+app.patch('/api/bugs/:id', async (req, res) => {
+  try {
+    const { status, markedForIDE, notes, tags, priority } = req.body;
+    
+    const updateData = { updatedAt: new Date() };
+    if (status) updateData.status = status;
+    if (markedForIDE !== undefined) updateData.markedForIDE = markedForIDE;
+    if (notes) updateData.notes = notes;
+    if (tags) updateData.tags = tags;
+    if (priority) updateData.priority = priority;
+    
+    const bug = await Bug.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+    
+    if (!bug) {
+      return res.status(404).json({ success: false, message: 'Bug not found' });
+    }
+    
+    res.json({ success: true, bug });
+  } catch (error) {
+    console.error('Error updating bug:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
