@@ -42,26 +42,40 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'element_clicked') {
     console.log('🎯 Element was clicked:', message.element);
     
-    // Send to MCP server with enhanced context
+    // Send to MCP server with MVP schema
     fetch('http://localhost:3001/api/bug', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        file: 'test.css',
-        line: 42,
-        column: 0,
+        // Core fields
+        title: `Element clicked: ${message.element.tagName}${message.element.id ? '#' + message.element.id : ''}`,
+        intent: 'design_feedback', // Element clicks are design feedback
+        url: message.element.pageUrl || window.location.href,
         description: `Clicked element: ${message.element.tagName}`,
-        issues: message.element.issues || [],
-        dimensions: message.element.dimensions || {},
-        styles: message.element.styles || {},
-        elementInfo: {
-          tagName: message.element.tagName,
-          id: message.element.id,
-          className: message.element.className,
-          textContent: message.element.textContent
-        }
+        
+        // Captured data
+        capturedData: {
+          domSnapshot: message.element.selector || '',
+          computedStyles: message.element.styles || {},
+          screenshot: message.element.screenshot || null,
+          consoleLogs: [], // Will be captured separately
+          networkRequests: [] // Will be captured separately
+        },
+        
+        // Browser context
+        browserInfo: {
+          userAgent: navigator.userAgent,
+          viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight
+          }
+        },
+        
+        // Additional context
+        notes: message.element.issues?.join(', ') || '',
+        tags: ['element-click', message.element.tagName.toLowerCase()]
       })
     })
     .then(response => response.json())
@@ -70,20 +84,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({
         success: true,
         message: `Clicked: ${message.element.tagName}`,
-        file: 'test.css',
-        line: 42,
-        column: 0,
+        bugId: result.id,
         mcpResult: result
       });
     })
     .catch(error => {
       console.error('❌ MCP server error:', error);
       sendResponse({
-        success: true,
-        message: `Clicked: ${message.element.tagName}`,
-        file: 'test.css',
-        line: 42,
-        column: 0,
+        success: false,
+        message: `Failed to capture: ${error.message}`,
         mcpError: error.message
       });
     });
@@ -94,34 +103,61 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'element_submitted') {
     console.log('🎯 Element submitted to IDE:', message);
     
-    // Send to MCP server with enhanced context
+    // Determine intent based on action type
+    const intentMap = {
+      'bug': 'bug_report',
+      'explain': 'explain_code',
+      'debug': 'debug_technical',
+      'design': 'design_feedback'
+    };
+    const intent = intentMap[message.actionType] || 'bug_report';
+    
+    // Send to MCP server with MVP schema
     fetch('http://localhost:3001/api/bug', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        file: 'test.css', // Will be replaced with real CSS source later
-        line: 42,
-        column: 0,
+        // Core fields
+        title: message.description || `${message.actionType}: ${message.elementInfo.tagName}`,
+        intent: intent,
+        url: message.elementInfo.pageUrl || message.url || window.location.href,
         description: message.description,
-        actionType: message.actionType || 'other',
-        issues: message.elementInfo.issues || [],
-        dimensions: message.elementInfo.dimensions || {},
-        styles: message.elementInfo.styles || {},
-        elementInfo: {
-          tagName: message.elementInfo.tagName,
-          id: message.elementInfo.id,
-          className: message.elementInfo.className,
-          textContent: message.elementInfo.textContent,
-          selector: message.elementInfo.selector
+        
+        // Location context (optional for design feedback)
+        file: message.file || null,
+        line: message.line || null,
+        column: message.column || null,
+        
+        // Captured data
+        capturedData: {
+          domSnapshot: message.elementInfo.selector || '',
+          computedStyles: message.elementInfo.styles || {},
+          screenshot: message.elementInfo.screenshot || null,
+          consoleLogs: [], // TODO: Capture from DevTools
+          networkRequests: [] // TODO: Capture from DevTools
         },
-        screenshot: message.elementInfo.screenshot,
-        pageUrl: message.elementInfo.pageUrl,
-        pageTitle: message.elementInfo.pageTitle,
-        timestamp: message.elementInfo.timestamp,
-        url: message.url || 'unknown',
-        source: 'chrome-extension'
+        
+        // Browser context
+        browserInfo: {
+          userAgent: navigator.userAgent,
+          viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight
+          }
+        },
+        
+        // Additional context
+        notes: message.elementInfo.issues?.join(', ') || '',
+        tags: [
+          message.actionType || 'other',
+          message.elementInfo.tagName?.toLowerCase() || 'unknown'
+        ],
+        
+        // Mark for IDE if submitted
+        markedForIDE: true,
+        status: 'new'
       })
     })
     .then(response => response.json())
@@ -130,6 +166,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({
         success: true,
         message: 'Submitted to IDE successfully',
+        bugId: result.id,
         mcpResult: result
       });
     })
