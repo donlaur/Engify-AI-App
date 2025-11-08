@@ -130,13 +130,35 @@ Power users report running out of tokens even on paid plans. Many spend $100-300
         context: "REAL EXPERIENCE (Nov 8, 2025): Cursor 2.0.69 crashes DAILY requiring 2 reboots. Quality degrades from 'genius staff engineer' to 'high school student' within minutes. Frequent updates every few days. '64GB RAM drained in an hour.' System freezes. Hard reboots. This is destroying productivity."
       },
       {
-        title: "The Four Core Problems",
+        title: "The Three Core Problems",
         purpose: "EXPERTISE - Technical analysis",
         targetWords: 900,
-        context: "CRITICAL: NO FAKE CODE EXAMPLES. Use ONLY real, verifiable information from November 2025. NO MADE-UP METRICS. 1) System memory leaks: Cursor Helper processes consume 60GB+ RAM, system freezes. 2) Agent context loops: AI repeats same mistakes, gets stuck. 3) Destructive overwrites: Working code gets broken. 4) QUALITY DEGRADATION: AI goes from staff-level to junior-level within minutes (v2.0.69). 5) File save errors (takes 5+ attempts). 6) Model ignores requests. Daily crashes requiring 2 reboots. Frequent forced updates. Describe symptoms, not fake code. Link to real GitHub issues and forum threads.",
+        context: `USE REAL RESEARCH DATA:
+
+**Problem 1: System-Wide Memory Leaks**
+- Multiple Cursor Helper processes consume >60GB RAM
+- System-wide freezes, requires hard reboot
+- REAL QUOTE: "64 GB of RAM is drained within an hour, leading to freezes. Started a week ago or so" - Forum user
+- REAL QUOTE: "Lol my prod server just had oom kills… I was looking at my code as culprit... turns out, cursor had somehow eat >60gb of ram" - Forum user
+- Source: Forum thread 17171
+
+**Problem 2: Agent-Level Context Loops**
+- AI "repeatedly entered endless loops", "lost track of the current objective"
+- Forces users to "start a new chat", wastes time
+- REAL QUOTE: "Cursor went totally stupid for all day and it started tearing my project apart because it was looping conversations and 'fixing' wrong things!" - Forum user
+- Source: GitHub issue #2733
+
+**Problem 3: Destructive Code Overwrites**
+- AI "inadvertently break or overwrite older, already functional parts of the code"
+- Loss of working features, requires git rollback
+- REAL QUOTE: "This repetitive cycle is becoming a major inconvenience." - Forum user
+- Source: Forum thread 30741
+
+NO FAKE CODE. Use these REAL quotes and sources.`,
         externalLinks: [
-          { anchor: "GitHub Issue #1294", url: "https://github.com/getcursor/cursor/issues/1294", authority: "official" },
-          { anchor: "Forum thread", url: "https://forum.cursor.com/t/17171", authority: "community" }
+          { anchor: "GitHub Issue #2733", url: "https://github.com/getcursor/cursor/issues/2733", authority: "official" },
+          { anchor: "Forum thread 17171", url: "https://forum.cursor.com/t/17171", authority: "community" },
+          { anchor: "Forum thread 30741", url: "https://forum.cursor.com/t/30741", authority: "community" }
         ]
       },
       {
@@ -149,7 +171,44 @@ Power users report running out of tokens even on paid plans. Many spend $100-300
         title: "Community Solutions That Work",
         purpose: "AUTHORITATIVENESS - Proven fixes",
         targetWords: 1000,
-        context: "NO FAKE CODE OR METRICS. Real community workarounds from GitHub/forums: 1) .cursorignore to exclude large files (node_modules, dist, .git). 2) Restart Cursor every 2-3 hours before it crashes. 3) Close unused tabs/windows. 4) Disable Cursor AI features when not needed. 5) Monitor Activity Monitor, force quit Cursor Helper processes when RAM > 30GB. 6) Use Cursor Rules to limit context. Be honest: These are WORKAROUNDS, not fixes. The real fix needs to come from Cursor team. Mention limitations of each approach.",
+        context: `USE REAL SOLUTIONS FROM RESEARCH:
+
+**Solution 1: The "Summary.md" Workaround** (Source: Forum thread 17171)
+1. Create summary.md in project root
+2. Ask AI: "Summarize our conversation and save it to summary.md"
+3. Verify summary is complete
+4. Wipe chat log or start new chat
+5. @-mention summary.md to restore context
+
+**Solution 2: The .cursorignore File**
+\`\`\`
+# .cursorignore
+node_modules/
+dist/
+build/
+*.log
+.git/
+\`\`\`
+Why it works: Reduces context volume
+Trade-off: Limits "unlimited context" value prop
+
+**Solution 3: Proactive Prompting & Rules**
+Add to .cursorrules: "Before making any changes, study the existing code and add detailed comments explaining what each section does."
+Why it works: Forces AI to "study" code, creates durable context
+
+**Solution 4: Defensive Git Workflow**
+\`\`\`bash
+git add .
+git commit -m "Pre-AI checkpoint"
+# After AI makes changes
+git diff
+git checkout -- <file>  # Rollback if needed
+\`\`\`
+
+**Solution 5: Force Kill & Cache Clear**
+Mac: rm -rf ~/Library/Application\\ Support/Cursor/Cache
+
+Be honest: These are WORKAROUNDS, not fixes.`,
         externalLinks: [
           { anchor: "Cursor Directory", url: "https://cursor.directory/", authority: "community rules" }
         ],
