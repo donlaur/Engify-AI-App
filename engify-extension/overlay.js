@@ -420,6 +420,7 @@ function showScreen(screenId) {
 // Handle element selection
 function handleElementSelected(element) {
   selectedElement = element;
+  console.log('Overlay received element:', element);
   
   // Show success briefly
   const statusBox = document.querySelector('#engify-screen-select .engify-status-box');
@@ -431,7 +432,9 @@ function handleElementSelected(element) {
   setTimeout(() => {
     showScreen('engify-screen-form');
     const preview = document.getElementById('engify-element-preview');
-    preview.textContent = `${element.tagName}${element.id ? '#' + element.id : ''}${element.className ? '.' + element.className.split(' ')[0] : ''}`;
+    const previewText = element.selector || 
+      `${element.tagName}${element.id ? '#' + element.id : ''}${element.className ? '.' + element.className.split(' ')[0] : ''}`;
+    preview.textContent = previewText;
   }, 500);
 }
 
@@ -461,17 +464,20 @@ async function handleSubmit() {
 
 // Format report as AI prompt
 function formatReport() {
+  console.log('Formatting report with selectedElement:', selectedElement);
   const intentEmoji = { bug: '🐛', learn: '💡', debug: '📊', design: '🎨' };
   const description = document.getElementById('engify-description').value;
   
   // Build element context
-  const selector = selectedElement.selector || 'N/A';
-  const text = selectedElement.textContent ? 
+  const selector = selectedElement?.selector || 'N/A';
+  const text = selectedElement?.textContent ? 
     `"${selectedElement.textContent.substring(0, 150)}${selectedElement.textContent.length > 150 ? '...' : ''}"` : 
     'No text content';
-  const size = selectedElement.dimensions ? 
+  const size = selectedElement?.dimensions ? 
     `${selectedElement.dimensions.width}x${selectedElement.dimensions.height}px` : 
     'Unknown';
+  
+  console.log('Formatted data:', { selector, text, size });
   
   // Format as AI-ready prompt
   if (selectedIntent === 'bug') {
