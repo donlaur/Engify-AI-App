@@ -1,14 +1,14 @@
 # Engify MCP Server
 
-Model Context Protocol server for Engify - provides memory and context for AI coding assistants.
+Model Context Protocol server for Engify - connects Cursor IDE to bug reports from the Chrome extension.
 
 ## Features
 
-- Store and retrieve bug context from Chrome extension
-- Memory layer for preventing repeat mistakes
-- MCP tools for IDE integration
-- MongoDB persistence
-- HTTP API for Chrome extension communication
+- Get new bug reports from MongoDB
+- View bug report details in Cursor
+- Mark bugs as sent to IDE
+- Automatic status tracking
+- Works with engify.ai/api/bug-reports
 
 ## Installation
 
@@ -51,36 +51,41 @@ The server also exposes HTTP endpoints for the Chrome extension:
 
 ## MCP Tools
 
-### store_bug_context
+### get_new_bug_reports
 
-Store bug context from Chrome extension.
-
-**Parameters:**
-- `file` (string): Source file path
-- `line` (number): Line number
-- `column` (number): Column number
-- `screenshot` (string, optional): Base64 screenshot
-- `description` (string, optional): Bug description
-- `url` (string, optional): Page URL
-- `userId` (string, optional): User ID
-
-### get_bug_history
-
-Get bug history for a file or user.
+Get new bug reports from the dashboard that need attention.
 
 **Parameters:**
-- `file` (string, optional): Source file path
-- `userId` (string, optional): User ID
 - `limit` (number, optional): Maximum results (default: 10)
 
-### search_similar_bugs
+**Example in Cursor:**
+```
+Use get_new_bug_reports to see what bugs users reported
+```
 
-Search for similar bugs.
+### get_bug_report_details
+
+Get full details of a specific bug report by ID.
 
 **Parameters:**
-- `file` (string, optional): Source file path
-- `description` (string, optional): Bug description
-- `limit` (number, optional): Maximum results (default: 5)
+- `id` (string, required): Bug report ID
+
+**Example in Cursor:**
+```
+Use get_bug_report_details with id "673e5f8a1234567890abcdef"
+```
+
+### mark_bug_sent_to_ide
+
+Mark a bug report as sent to IDE (changes status from 'new' to 'sent_to_ide').
+
+**Parameters:**
+- `id` (string, required): Bug report ID
+
+**Example in Cursor:**
+```
+Use mark_bug_sent_to_ide with id "673e5f8a1234567890abcdef"
+```
 
 ## API Endpoints
 
