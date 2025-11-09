@@ -86,7 +86,7 @@ async function restorePrompts(): Promise<void> {
       };
     });
     
-    const result = await db.collection('prompts').insertMany(promptsToInsert);
+    const result = await db.collection('prompts').insertMany(promptsToInsert as any);
     console.log(`✅ Inserted ${result.insertedCount} prompts into MongoDB`);
     
     // Verify
@@ -120,7 +120,7 @@ async function restorePrompts(): Promise<void> {
         };
       });
       
-      const patternsResult = await db.collection('patterns').insertMany(patternsToInsert);
+      const patternsResult = await db.collection('patterns').insertMany(patternsToInsert as any);
       console.log(`✅ Inserted ${patternsResult.insertedCount} patterns into MongoDB`);
     }
     

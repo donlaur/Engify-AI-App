@@ -71,7 +71,7 @@ async function restorePrompts(): Promise<void> {
       updatedAt: prompt.updatedAt ? new Date(prompt.updatedAt) : new Date(),
     }));
     
-    const result = await db.collection('prompts').insertMany(promptsToInsert);
+    const result = await db.collection('prompts').insertMany(promptsToInsert as any);
     console.log(`✅ Inserted ${result.insertedCount} prompts into MongoDB`);
     
     // Verify
