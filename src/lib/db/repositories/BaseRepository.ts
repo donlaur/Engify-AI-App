@@ -22,14 +22,14 @@
  */
 
 import { getDb } from '@/lib/mongodb';
-import type { Db, Collection, Filter, FindOptions } from 'mongodb';
+import type { Db, Collection, Filter, FindOptions, Document, WithId } from 'mongodb';
 import { logger } from '@/lib/logging/logger';
 
 /**
  * Base Repository - Handles MongoDB connection
  * Single connection instance shared across all repositories
  */
-export abstract class BaseRepository<T> {
+export abstract class BaseRepository<T extends Document> {
   protected collectionName: string;
   protected dbName: string = 'engify';
 
@@ -84,7 +84,7 @@ export abstract class BaseRepository<T> {
         ...restOptions,
         maxTimeMS: 15000, // 15 second timeout for queries that return multiple docs
       } as FindOptions<T>;
-      return collection.find(filter, queryOptions).toArray();
+      return collection.find(filter, queryOptions).toArray() as T[];
     } catch (error) {
       // During build, return empty array to avoid build failures
       if (error instanceof Error && error.message.includes('BUILD_MODE')) {
@@ -120,7 +120,7 @@ export abstract class BaseRepository<T> {
         ...restOptions,
         maxTimeMS: 5000, // 5 second timeout (critical for build)
       } as FindOptions<T>;
-      return collection.findOne(filter, queryOptions);
+      return collection.findOne(filter, queryOptions) as T | null;
     } catch (error) {
       // During build, return null to avoid build failures
       if (error instanceof Error && error.message.includes('BUILD_MODE')) {
@@ -163,13 +163,18 @@ export abstract class BaseRepository<T> {
   /**
    * Aggregate pipeline
    */
-  protected async aggregate<TResult = T>(
+  protected async aggregate<TResult extends Document = T>(
     pipeline: unknown[]
   ): Promise<TResult[]> {
     try {
       const collection = await this.getCollection();
-      return collection.aggregate<TResult>(pipeline).toArray();
+      return collection.aggregate<TResult>(pipeline).toArray() as TResult[];
     } catch (error) {
+      // During build, return empty array to avoid build failures
+      if (error instanceof Error && error.message.includes('BUILD_MODE')) {
+        logger.warn(`Build mode detected, returning empty array for ${this.collectionName} aggregation`);
+        return [];
+      }
       logger.error(`Error aggregating in ${this.collectionName}`, { error });
       throw error;
     }
