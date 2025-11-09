@@ -45,7 +45,16 @@ export interface LearningResource {
  * @deprecated Use learningResourceRepository.getAll() instead
  */
 export async function getAllLearningResources(): Promise<LearningResource[]> {
-  return learningResourceRepository.getAll();
+  try {
+    return learningResourceRepository.getAll();
+  } catch (error) {
+    // During build, return empty array to avoid build failures
+    if (error instanceof Error && error.message.includes('BUILD_MODE')) {
+      console.warn('Build mode detected, returning empty learning resources array');
+      return [];
+    }
+    throw error;
+  }
 }
 
 /**
@@ -55,5 +64,14 @@ export async function getAllLearningResources(): Promise<LearningResource[]> {
 export async function getLearningResourceBySlug(
   slug: string
 ): Promise<LearningResource | null> {
-  return learningResourceRepository.getBySlug(slug);
+  try {
+    return learningResourceRepository.getBySlug(slug);
+  } catch (error) {
+    // During build, return null to avoid build failures
+    if (error instanceof Error && error.message.includes('BUILD_MODE')) {
+      console.warn('Build mode detected, returning null for learning resource lookup');
+      return null;
+    }
+    throw error;
+  }
 }

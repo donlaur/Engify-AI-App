@@ -80,6 +80,12 @@ function getMongoUri(): string {
   if (!process.env.MONGODB_URI) {
     throw new Error('Please add your MONGODB_URI to .env.local');
   }
+  
+  // During build, use mock data to avoid M0 connection limits
+  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV) {
+    throw new Error('BUILD_MODE: Using static data during build to avoid M0 limits');
+  }
+  
   return process.env.MONGODB_URI;
 }
 

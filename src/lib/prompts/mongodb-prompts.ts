@@ -27,7 +27,17 @@ export async function getAllPrompts(): Promise<Prompt[]> {
     logger.debug('Using MongoDB fallback for prompts', {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
-    return promptRepository.getAll();
+    
+    try {
+      return promptRepository.getAll();
+    } catch (mongoError) {
+      // During build, return empty array to avoid build failures
+      if (mongoError instanceof Error && mongoError.message.includes('BUILD_MODE')) {
+        logger.warn('Build mode detected, returning empty prompts array');
+        return [];
+      }
+      throw mongoError;
+    }
   }
 }
 
@@ -44,6 +54,12 @@ export async function getPromptById(idOrSlug: string): Promise<Prompt | null> {
   try {
     return await promptRepository.getById(idOrSlug);
   } catch (error) {
+    // During build, return null to avoid build failures
+    if (error instanceof Error && error.message.includes('BUILD_MODE')) {
+      logger.warn('Build mode detected, returning null for prompt lookup');
+      return null;
+    }
+    
     logger.error('MongoDB lookup failed for prompt', {
       idOrSlug,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -64,7 +80,16 @@ export async function getPromptsByCategory(
     return prompts.filter((p) => p.category === category);
   } catch (error) {
     // Fallback to MongoDB
-    return promptRepository.getByCategory(category);
+    try {
+      return promptRepository.getByCategory(category);
+    } catch (mongoError) {
+      // During build, return empty array to avoid build failures
+      if (mongoError instanceof Error && mongoError.message.includes('BUILD_MODE')) {
+        logger.warn('Build mode detected, returning empty category prompts array');
+        return [];
+      }
+      throw mongoError;
+    }
   }
 }
 
@@ -78,6 +103,15 @@ export async function getPromptsByRole(role: string): Promise<Prompt[]> {
     return prompts.filter((p) => p.role === role);
   } catch (error) {
     // Fallback to MongoDB
-    return promptRepository.getByRole(role);
+    try {
+      return promptRepository.getByRole(role);
+    } catch (mongoError) {
+      // During build, return empty array to avoid build failures
+      if (mongoError instanceof Error && mongoError.message.includes('BUILD_MODE')) {
+        logger.warn('Build mode detected, returning empty role prompts array');
+        return [];
+      }
+      throw mongoError;
+    }
   }
 }
