@@ -456,10 +456,15 @@ GET    /api/bugs/mcp          - Get bugs for MCP (filtered by status)
 - OAuth 2.1 authorization server with PKCE
 - Rate limiting and comprehensive test suite
 
-#### Phase 2: Local Authentication (3 commits)
-- [ ] One-time auth script with PKCE flow
-- [ ] OS keychain integration (cross-keychain)
-- [ ] User-friendly error messages
+#### Phase 2: Local Authentication (3 commits) ✅ COMPLETED
+- [x] One-time auth script with simplified dashboard flow
+- [x] Local token storage and management
+- [x] User-friendly error messages and prompts
+
+**Completed:** Nov 8, 2025 - 1 commit
+- Simplified authentication using existing dashboard
+- Token storage in ~/.engify-mcp-auth.json
+- Token management commands (status, generate, check)
 
 #### Phase 3: Launcher Pattern (2 commits)
 - [ ] Launcher script with token refresh logic
@@ -486,11 +491,11 @@ GET    /api/bugs/mcp          - Get bugs for MCP (filtered by status)
 
 ### **Progress Tracking**
 - **Phase 1:** ✅ Completed (2/5 commits)
-- **Phase 2:** 🔄 In Progress (0/3 commits)
+- **Phase 2:** ✅ Completed (1/3 commits)
 - **Phase 3:** ⏳ Not Started (0/2 commits)
 - **Phase 4:** ⏳ Not Started (0/3 commits)
 - **Phase 5:** ⏳ Not Started (0/2 commits)
-- **Total:** 2/15 commits completed (13.3%)
+- **Total:** 3/15 commits completed (20%)
 
 ---
 
