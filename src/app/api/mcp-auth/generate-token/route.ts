@@ -7,7 +7,7 @@ import { nanoid } from 'nanoid';
 // This endpoint creates a JWT that the MCP server can use to access bug reports
 
 const JWT_SECRET = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!);
-const TOKEN_EXPIRY = 3600; // 1 hour
+const TOKEN_EXPIRY = 7 * 24 * 60 * 60; // 7 days
 const CLIENT_ID = 'engify-mcp-client';
 
 export async function POST() {
