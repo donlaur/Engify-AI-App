@@ -209,7 +209,7 @@ export async function getClient(): Promise<MongoClient> {
     const connectionAge = Date.now() - (globalWithMongo._connectionTime || 0);
     if (connectionAge > 30000) {
       try {
-        await client.db('admin').command({ ping: 1 }, { maxTimeMS: 2000 });
+        await client.db('admin').command({ ping: 1 }, { timeoutMS: 2000 });
         globalWithMongo._connectionTime = Date.now(); // Update last check
       } catch (pingError) {
         // Connection might be stale, try to reconnect
