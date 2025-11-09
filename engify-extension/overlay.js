@@ -493,8 +493,37 @@ async function handleSubmit() {
     await navigator.clipboard.writeText(report);
     showScreen('engify-screen-success');
   } else if (selectedMode === 'dashboard') {
-    // TODO: Send to dashboard API
-    alert('Dashboard integration coming soon!');
+    // Send to dashboard API
+    try {
+      const response = await fetch('https://www.engify.ai/api/bug-reports', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          intent: selectedIntent,
+          description: description,
+          pageUrl: window.location.href,
+          selector: selectedElement?.selector || 'N/A',
+          elementText: selectedElement?.textContent || null,
+          elementSize: selectedElement?.dimensions ? 
+            `${selectedElement.dimensions.width}x${selectedElement.dimensions.height}px` : null,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showScreen('engify-screen-success');
+      } else {
+        alert('Failed to send to dashboard: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Dashboard error:', error);
+      alert('Failed to send to dashboard. Please try again.');
+    }
   }
 }
 
