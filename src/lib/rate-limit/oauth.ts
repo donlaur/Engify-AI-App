@@ -22,12 +22,12 @@ export async function checkOAuthRateLimit(
   const windowStart = now - limit.window * 1000;
   
   // Get existing requests in window
-  const requests = await kv.zrangebyscore(key, windowStart, now);
+  const requests = await kv.zrange(key, windowStart, Date.now());
   
   if (requests.length >= limit.max) {
     // Rate limit exceeded
     const oldestRequest = await kv.zrange(key, 0, 0, { withScores: true });
-    const resetTime = oldestRequest.length > 0 ? Math.ceil(oldestRequest[0][1] / 1000) + limit.window : 0;
+    const resetTime = oldestRequest.length > 0 ? Math.ceil((oldestRequest[0] as any).score / 1000) + limit.window : 0;
     
     return {
       success: false,

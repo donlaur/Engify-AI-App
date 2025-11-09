@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { kv } from '@vercel/kv';
-import { SignJWT, jwtVerify } from 'jose';
-import { nanoid } from 'nanoid';
+import { SignJWT } from 'jose';
 import { checkOAuthRateLimit } from '@/lib/rate-limit/oauth';
 
 // OAuth 2.1 Token Endpoint with RFC 8707 Resource Indicators
@@ -19,9 +18,12 @@ const RESOURCE_AUDIENCE_MAP: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting by IP
-    const ip = request.ip || 'unknown';
-    const rateLimitResult = await checkOAuthRateLimit('token', ip);
+    // Rate limiting by IP or fallback to user agent
+    const identifier = request.headers.get('x-forwarded-for') || 
+                       request.headers.get('x-real-ip') || 
+                       request.headers.get('user-agent') || 
+                       'unknown';
+    const rateLimitResult = await checkOAuthRateLimit('token', identifier);
     
     if (!rateLimitResult.success) {
       return NextResponse.json(

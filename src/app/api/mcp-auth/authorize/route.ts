@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
+import { auth } from '@/lib/auth';
 import { kv } from '@vercel/kv';
 import { nanoid } from 'nanoid';
 import { checkOAuthRateLimit } from '@/lib/rate-limit/oauth';
@@ -14,9 +13,12 @@ const AUTH_CODE_EXPIRY = 300; // 5 minutes
 
 export async function GET(request: NextRequest) {
   try {
-    // Rate limiting by IP
-    const ip = request.ip || 'unknown';
-    const rateLimitResult = await checkOAuthRateLimit('authorize', ip);
+    // Rate limiting by IP or fallback to user agent
+    const identifier = request.headers.get('x-forwarded-for') || 
+                       request.headers.get('x-real-ip') || 
+                       request.headers.get('user-agent') || 
+                       'unknown';
+    const rateLimitResult = await checkOAuthRateLimit('authorize', identifier);
     
     if (!rateLimitResult.success) {
       return NextResponse.json(
@@ -76,7 +78,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is authenticated with NextAuth
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user?.id) {
       // User not logged in - redirect to login with original params preserved

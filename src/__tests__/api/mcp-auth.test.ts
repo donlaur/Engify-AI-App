@@ -12,17 +12,15 @@ jest.mock('@vercel/kv', () => ({
     get: jest.fn(),
     del: jest.fn(),
     keys: jest.fn(),
+    zrange: jest.fn(),
+    zadd: jest.fn(),
+    expire: jest.fn(),
   },
 }));
 
 // Mock NextAuth
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
-}));
-
-// Mock nanoid
-jest.mock('nanoid', () => ({
-  nanoid: jest.fn(() => 'mock-auth-code'),
+jest.mock('@/lib/auth', () => ({
+  auth: jest.fn(),
 }));
 
 describe('OAuth 2.1 Authorization Server', () => {

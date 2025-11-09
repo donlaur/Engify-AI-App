@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-import { exportJWK, importPKCS8, importSPKI, SignJWT } from 'jose';
-import { jwtVerify } from 'jose';
 import { checkOAuthRateLimit } from '@/lib/rate-limit/oauth';
 
 // JWKS endpoint for public key distribution
@@ -26,9 +24,12 @@ async function getPublicKey() {
 
 export async function GET(request: NextRequest) {
   try {
-    // Rate limiting by IP
-    const ip = request.ip || 'unknown';
-    const rateLimitResult = await checkOAuthRateLimit('jwks', ip);
+    // Rate limiting by IP or fallback to user agent
+    const identifier = request.headers.get('x-forwarded-for') || 
+                       request.headers.get('x-real-ip') || 
+                       request.headers.get('user-agent') || 
+                       'unknown';
+    const rateLimitResult = await checkOAuthRateLimit('jwks', identifier);
     
     if (!rateLimitResult.success) {
       return NextResponse.json(

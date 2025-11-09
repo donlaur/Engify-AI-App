@@ -17,9 +17,12 @@ const OBO_RESOURCES = {
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting by IP
-    const ip = request.ip || 'unknown';
-    const rateLimitResult = await checkOAuthRateLimit('obo', ip);
+    // Rate limiting by IP or fallback to user agent
+    const identifier = request.headers.get('x-forwarded-for') || 
+                       request.headers.get('x-real-ip') || 
+                       request.headers.get('user-agent') || 
+                       'unknown';
+    const rateLimitResult = await checkOAuthRateLimit('obo', identifier);
     
     if (!rateLimitResult.success) {
       return NextResponse.json(
