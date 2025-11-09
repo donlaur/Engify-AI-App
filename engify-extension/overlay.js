@@ -366,10 +366,11 @@ function setupEventListeners() {
   
   // Close
   document.getElementById('engify-close').addEventListener('click', () => {
+    // Turn off selection mode first
+    window.postMessage({ type: 'engify_toggle_inspect' }, '*');
+    // Then remove overlay
     overlayContainer.remove();
     overlayContainer = null;
-    // Turn off selection mode
-    chrome.runtime.sendMessage({ type: 'toggle_inspect' });
   });
   
   // Intent selection
