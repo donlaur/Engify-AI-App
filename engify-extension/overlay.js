@@ -466,17 +466,33 @@ function handleElementSelected(element) {
   }, 500);
 }
 
+// Show error message in overlay
+function showError(message) {
+  const statusBox = document.querySelector('#engify-screen-form .engify-form-group');
+  const existingError = document.getElementById('engify-error');
+  if (existingError) existingError.remove();
+  
+  const errorDiv = document.createElement('div');
+  errorDiv.id = 'engify-error';
+  errorDiv.style.cssText = 'background: #fee; border: 1px solid #fcc; color: #c33; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px;';
+  errorDiv.textContent = message;
+  statusBox.parentElement.insertBefore(errorDiv, statusBox);
+  
+  // Auto-remove after 3 seconds
+  setTimeout(() => errorDiv.remove(), 3000);
+}
+
 // Handle submit
 async function handleSubmit() {
   const description = document.getElementById('engify-description').value.trim();
   
   if (!description) {
-    alert('Please add a description');
+    showError('Please add a description');
     return;
   }
   
   if (!selectedMode) {
-    alert('Please select where to send');
+    showError('Please select where to send');
     return;
   }
   
@@ -518,11 +534,11 @@ async function handleSubmit() {
       if (data.success) {
         showScreen('engify-screen-success');
       } else {
-        alert('Failed to send to dashboard: ' + (data.error || 'Unknown error'));
+        showError('Failed to send to dashboard: ' + (data.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Dashboard error:', error);
-      alert('Failed to send to dashboard. Please try again.');
+      showError('Failed to send to dashboard. Please check your connection and try again.');
     }
   }
 }
