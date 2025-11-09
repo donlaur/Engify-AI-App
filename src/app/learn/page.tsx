@@ -21,14 +21,8 @@ import { learningResourceRepository } from '@/lib/db/repositories/ContentService
 import { learningPathways } from '@/data/learning-pathways'; // Still hardcoded for now
 
 export default async function LearnPage() {
-  // Fetch learning resources from MongoDB with fallback
-  let learningResources = [];
-  try {
-    learningResources = await getAllLearningResources();
-  } catch (error) {
-    console.error('Failed to fetch learning resources, using fallback:', error);
-    // Use empty array as fallback during build
-  }
+  // Fetch learning resources from MongoDB
+  const learningResources = await getAllLearningResources();
   
   // Verify articles exist in DB for pathway links
   const verifyArticleExists = async (slug: string): Promise<boolean> => {
@@ -36,7 +30,6 @@ export default async function LearnPage() {
       const article = await learningResourceRepository.getBySlug(slug);
       return article !== null;
     } catch {
-      // During build, assume articles don't exist to avoid timeouts
       return false;
     }
   };

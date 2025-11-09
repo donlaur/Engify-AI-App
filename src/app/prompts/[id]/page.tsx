@@ -96,17 +96,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     // Try JSON first (fast), then MongoDB fallback (reliable)
-    // During build, use fallback to avoid timeouts
-    let prompt;
-    try {
-      prompt = await getPromptById(params.id);
-    } catch (error) {
-      console.error('Failed to get prompt for metadata, using fallback:', error);
-      return {
-        title: 'AI Prompt | Engify.ai',
-        description: 'Professional AI prompts for software engineers, product managers, and technical leaders.',
-      };
-    }
+    const prompt = await getPromptById(params.id);
 
     if (!prompt) {
       return {
@@ -493,15 +483,15 @@ export default async function PromptPage({
             {/* Includes: useCases, bestPractices, examples, caseStudies, bestTimeToUse, 
                 recommendedModel, whenNotToUse, difficulty, estimatedTime */}
             <PromptEnrichment
-              caseStudies={prompt.caseStudies?.filter(cs => cs.scenario) || []}
+              caseStudies={prompt.caseStudies}
               bestTimeToUse={prompt.bestTimeToUse}
-              recommendedModel={prompt.recommendedModel?.filter(rm => rm.provider) || []}
+              recommendedModel={prompt.recommendedModel}
               useCases={prompt.useCases}
-              examples={prompt.examples?.filter(ex => ex.title) || []}
+              examples={prompt.examples}
               bestPractices={prompt.bestPractices}
               whenNotToUse={prompt.whenNotToUse}
-              difficulty={typeof prompt.difficulty === 'string' ? prompt.difficulty : undefined}
-              estimatedTime={typeof prompt.estimatedTime === 'string' ? prompt.estimatedTime : undefined}
+              difficulty={prompt.difficulty}
+              estimatedTime={prompt.estimatedTime}
             />
 
             {/* Meta Description Summary - SEO-optimized description */}
