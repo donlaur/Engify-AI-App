@@ -93,9 +93,9 @@ function getMongoOptions() {
   return {
     maxPoolSize: 1, // FREE TIER: Limit to 1 connection per serverless function
     minPoolSize: 0, // FREE TIER: Don't maintain minimum connections
-    serverSelectionTimeoutMS: 5000, // Faster timeout for M0
-    socketTimeoutMS: 10000, // Shorter socket timeout
-    connectTimeoutMS: 5000, // Faster connection timeout
+    serverSelectionTimeoutMS: 15000, // Build: Allow more time for M0
+    socketTimeoutMS: 20000, // Build: Longer socket timeout
+    connectTimeoutMS: 10000, // Build: More connection time
     retryWrites: true,
     retryReads: true,
     w: 'majority' as const,
@@ -142,11 +142,11 @@ async function createClientWithRetry(): Promise<MongoClient> {
     try {
       const client = new MongoClient(uri, options);
 
-      // Attempt connection with shorter timeout for M0
+      // Attempt connection with longer timeout for build
       await Promise.race([
         client.connect(),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Connection timeout')), 5000)
+          setTimeout(() => reject(new Error('Connection timeout')), 15000)
         ),
       ]);
 
