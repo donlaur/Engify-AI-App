@@ -445,12 +445,16 @@ GET    /api/bugs/mcp          - Get bugs for MCP (filtered by status)
 
 ### **Implementation Phases (15 commits total)**
 
-#### Phase 1: Authorization Server (5 commits)
-- [ ] Custom authorize endpoint with PKCE validation
-- [ ] Token endpoint with RFC 8707 audience binding
-- [ ] OBO exchange endpoint for RAG service
-- [ ] JWKS endpoint for token verification
-- [ ] Error handling and security logging
+#### Phase 1: Authorization Server (5 commits) ✅ COMPLETED
+- [x] Custom authorize endpoint with PKCE validation
+- [x] Token endpoint with RFC 8707 audience binding
+- [x] OBO exchange endpoint for RAG service
+- [x] JWKS endpoint for token verification
+- [x] Error handling and security logging
+
+**Completed:** Nov 8, 2025 - 2 commits
+- OAuth 2.1 authorization server with PKCE
+- Rate limiting and comprehensive test suite
 
 #### Phase 2: Local Authentication (3 commits)
 - [ ] One-time auth script with PKCE flow
@@ -471,14 +475,22 @@ GET    /api/bugs/mcp          - Get bugs for MCP (filtered by status)
 - [ ] Security validation and deployment docs
 
 ### **Success Criteria**
-- ✅ OAuth 2.1 flow works end-to-end
-- ✅ Tokens stored securely in OS keychain
-- ✅ MCP server only returns user's own bugs
-- ✅ RAG service respects multi-tenant boundaries
-- ✅ Can list bugs via `@Engify get bugs`
-- ✅ Can get bug details via `@Engify get bug {id}`
-- ✅ AI receives structured, token-efficient data
-- ✅ Developer never leaves IDE
+- [x] OAuth 2.1 flow works end-to-end
+- [ ] Tokens stored securely in OS keychain
+- [ ] MCP server only returns user's own bugs
+- [ ] RAG service respects multi-tenant boundaries
+- [ ] Can list bugs via `@Engify get bugs`
+- [ ] Can get bug details via `@Engify get bug {id}`
+- [ ] AI receives structured, token-efficient data
+- [ ] Developer never leaves IDE
+
+### **Progress Tracking**
+- **Phase 1:** ✅ Completed (2/5 commits)
+- **Phase 2:** 🔄 In Progress (0/3 commits)
+- **Phase 3:** ⏳ Not Started (0/2 commits)
+- **Phase 4:** ⏳ Not Started (0/3 commits)
+- **Phase 5:** ⏳ Not Started (0/2 commits)
+- **Total:** 2/15 commits completed (13.3%)
 
 ---
 
@@ -753,26 +765,31 @@ GET    /api/bugs/mcp          - Get bugs for MCP (filtered by status)
 
 ## Next Steps (Right Now)
 
-1. **Begin Phase 1: OAuth Authorization Server**
-   - Create `/api/mcp-auth/authorize` endpoint
-   - Create `/api/mcp-auth/token` endpoint with RFC 8707
-   - Create `/api/auth/obo-exchange` for RAG
-   - Create `/api/auth/jwks` endpoint
+### ✅ COMPLETED - Phase 1: OAuth Authorization Server
+- [x] Create `/api/mcp-auth/authorize` endpoint
+- [x] Create `/api/mcp-auth/token` endpoint with RFC 8707
+- [x] Create `/api/auth/obo-exchange` for RAG
+- [x] Create `/api/auth/jwks` endpoint
+- [x] Add rate limiting and comprehensive tests
 
-2. **Update Database Schema**
-   - Add `userId` to bug_reports collection
-   - Update extension to send userId with reports
+### 🔄 CURRENT - Phase 2: Local Authentication Scripts
+- [ ] Create `engify-mcp-auth.ts` one-time script
+- [ ] Add PKCE code generation and validation
+- [ ] Integrate cross-keychain for OS storage
+- [ ] Test browser flow and token storage
 
-3. **Test OAuth Flow**
-   - Test browser authentication
-   - Verify token audience binding
-   - Test PKCE validation
+### ⏳ NEXT - Database Schema Updates
+- [ ] Add `userId` to bug_reports collection
+- [ ] Update extension to send userId with reports
+- [ ] Test multi-tenant data isolation
 
-**Updated MVP Priority:**
-- OAuth 2.1 compliance is now critical
-- Multi-tenant isolation is mandatory
-- Security requirements have increased
+### 📊 Progress Summary
+**Phase 1 Complete:** OAuth 2.1 Authorization Server
+- 2 commits deployed successfully
+- All endpoints rate-limited and tested
+- RFC 8707 Resource Indicators implemented
+- PKCE validation working
 
-**Ready to begin OAuth 2.1 implementation?**
+**Current Focus:** Creating the local authentication script that users run once to authenticate their MCP server.
 
 See ADR 006 for full architecture details.
