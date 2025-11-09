@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
-import { auth } from '@/lib/auth';
 
 // CORS headers for Chrome extension
 const corsHeaders = {
@@ -37,19 +36,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user from session or use provided userId
-    let finalUserId = userId;
-    if (!finalUserId) {
-      const session = await auth();
-      if (session?.user?.id) {
-        finalUserId = session.user.id;
-      }
-    }
-
-    // If still no userId, create a temporary one for demo
-    if (!finalUserId) {
-      finalUserId = 'demo-user-' + Math.random().toString(36).substr(2, 9);
-    }
+    // MVP: Use hardcoded user ID to match MCP token
+    // TODO: Implement proper session/auth for production
+    const finalUserId = '68ffe3d1e4cf6420d1fdc474';
 
     // Connect to database
     const db = await getDb();
@@ -90,22 +79,17 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const status = searchParams.get('status');
 
-    // Get user from session
-    const session = await auth();
-    const userId = session?.user?.id;
+    // MVP: Use hardcoded user ID to match MCP token
+    // TODO: Implement proper session/auth for production
+    const userId = '68ffe3d1e4cf6420d1fdc474';
 
     // Connect to database
     const db = await getDb();
     
-    // Build query
-    const query: any = {};
+    // Build query - always filter by user ID for MVP
+    const query: any = { userId };
     if (status) {
       query.status = status;
-    }
-    
-    // If user is authenticated, filter by their reports
-    if (userId) {
-      query.userId = userId;
     }
 
     // Get bug reports
