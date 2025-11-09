@@ -8,6 +8,8 @@ import { type NextAuthConfig } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
+import { MongoDBAdapter } from '@auth/mongodb-adapter';
+import { getClient } from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import type { Session, User } from 'next-auth';
@@ -26,8 +28,7 @@ const loginSchema = z.object({
 const USE_COGNITO = !!process.env.COGNITO_USER_POOL_ID;
 
 export const authOptions: NextAuthConfig = {
-  // TODO: Fix adapter version mismatch - temporarily disabled for build
-  // adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(getClient()),
 
   providers: [
     // Email/Password authentication
