@@ -459,31 +459,76 @@ async function handleSubmit() {
   // TODO: Add dashboard and IDE modes
 }
 
-// Format report
+// Format report as AI prompt
 function formatReport() {
   const intentEmoji = { bug: '🐛', learn: '💡', debug: '📊', design: '🎨' };
   const description = document.getElementById('engify-description').value;
   
-  // Build element info
-  const elementInfo = [];
-  elementInfo.push(`Selector: ${selectedElement.selector || 'N/A'}`);
-  if (selectedElement.textContent) {
-    elementInfo.push(`Text: "${selectedElement.textContent.substring(0, 100)}${selectedElement.textContent.length > 100 ? '...' : ''}"`);
-  }
-  if (selectedElement.dimensions) {
-    elementInfo.push(`Size: ${selectedElement.dimensions.width}x${selectedElement.dimensions.height}px`);
-  }
+  // Build element context
+  const selector = selectedElement.selector || 'N/A';
+  const text = selectedElement.textContent ? 
+    `"${selectedElement.textContent.substring(0, 150)}${selectedElement.textContent.length > 150 ? '...' : ''}"` : 
+    'No text content';
+  const size = selectedElement.dimensions ? 
+    `${selectedElement.dimensions.width}x${selectedElement.dimensions.height}px` : 
+    'Unknown';
   
-  return `${intentEmoji[selectedIntent]} ${selectedIntent.toUpperCase()} REPORT
+  // Format as AI-ready prompt
+  if (selectedIntent === 'bug') {
+    return `${intentEmoji[selectedIntent]} Fix this bug on my website:
 
-Description:
+**Issue:**
 ${description}
 
-Element:
-${elementInfo.join('\n')}
+**Element Details:**
+- Selector: \`${selector}\`
+- Current text: ${text}
+- Size: ${size}
+- Page: ${window.location.href}
 
-Page: ${window.location.href}
-Timestamp: ${new Date().toISOString()}`;
+**What I need:**
+Please help me fix this issue. Provide the exact code changes needed.`;
+  } else if (selectedIntent === 'learn') {
+    return `${intentEmoji[selectedIntent]} Help me understand this code:
+
+**What I want to learn:**
+${description}
+
+**Element I'm looking at:**
+- Selector: \`${selector}\`
+- Content: ${text}
+- Page: ${window.location.href}
+
+**Please explain:**
+How does this element work? What's the code doing here?`;
+  } else if (selectedIntent === 'design') {
+    return `${intentEmoji[selectedIntent]} Design feedback for my website:
+
+**Feedback:**
+${description}
+
+**Element:**
+- Selector: \`${selector}\`
+- Current text: ${text}
+- Current size: ${size}
+- Page: ${window.location.href}
+
+**What I need:**
+CSS/HTML changes to improve this element's design.`;
+  } else {
+    return `${intentEmoji[selectedIntent]} ${selectedIntent.toUpperCase()}
+
+**Request:**
+${description}
+
+**Element:**
+- Selector: \`${selector}\`
+- Content: ${text}
+- Size: ${size}
+- Page: ${window.location.href}
+
+**Help me with this.**`;
+  }
 }
 
 // Listen for messages
