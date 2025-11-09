@@ -7,10 +7,15 @@ let selectedMode = null;
 
 // Create overlay
 function createOverlay() {
-  if (overlayContainer) return;
+  // Remove existing overlay if present
+  if (overlayContainer) {
+    overlayContainer.remove();
+    overlayContainer = null;
+  }
   
-  overlayContainer = document.createElement('div');
-  overlayContainer.id = 'engify-overlay';
+  try {
+    overlayContainer = document.createElement('div');
+    overlayContainer.id = 'engify-overlay';
   overlayContainer.innerHTML = `
     <style>
       #engify-overlay {
@@ -314,13 +319,17 @@ function createOverlay() {
     </div>
   `;
   
-  document.body.appendChild(overlayContainer);
-  
-  // Make draggable
-  makeDraggable();
-  
-  // Add event listeners
-  setupEventListeners();
+    document.body.appendChild(overlayContainer);
+    
+    // Make draggable
+    makeDraggable();
+    
+    // Add event listeners
+    setupEventListeners();
+  } catch (error) {
+    console.error('Error creating overlay:', error);
+    overlayContainer = null;
+  }
 }
 
 // Make overlay draggable
@@ -360,6 +369,7 @@ function makeDraggable() {
 function setupEventListeners() {
   // Minimize
   document.getElementById('engify-minimize').addEventListener('click', () => {
+    if (!overlayContainer) return;
     overlayContainer.classList.toggle('minimized');
     document.getElementById('engify-minimize').textContent = 
       overlayContainer.classList.contains('minimized') ? 'Restore' : 'Minimize';
