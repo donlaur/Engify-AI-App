@@ -40,7 +40,7 @@ export async function GET(_request: NextRequest) {
       await db.collection('user_stats').updateOne(
         { userId },
         { 
-          $push: { loginDates: new Date() },
+          $push: { loginDates: { $each: [new Date()] } },
           $set: { 
             lastLoginDate: new Date(),
             updatedAt: new Date()
