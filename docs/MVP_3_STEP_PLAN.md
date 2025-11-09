@@ -294,35 +294,109 @@ GET    /api/bugs/mcp          - Get bugs for MCP (filtered by status)
 
 ---
 
-## Step 3: MCP Server (Query & Deliver to IDE)
+## Step 3: MCP Server (OAuth 2.1 Authenticated & Multi-Tenant)
+
+### **Critical Update (November 8, 2025)**
+**MCP spec requires OAuth 2.1 with RFC 8707 Resource Indicators**
+- stdio transport cannot use HTTP-based OAuth directly
+- Must use hybrid "CLI-style" authentication pattern
+- See ADR 006: `/docs/adr/006-mcp-oauth-architecture.md`
 
 ### **Core Features (Must Have)**
 
-1. **MCP Server Setup**
-   - Node.js server (already exists)
-   - Implements MCP protocol
-   - Connects to MongoDB (same as dashboard)
-
-2. **MCP Tools**
+1. **OAuth 2.1 Authorization Server (Next.js)**
    ```typescript
-   // Tool 1: Get all bugs
+   // Custom endpoints in Next.js app
+   /api/mcp-auth/authorize    // PKCE flow, RFC 8707 resource
+   /api/mcp-auth/token        // Exchange code for JWT tokens
+   /api/auth/obo-exchange     // RFC 8693 token exchange for RAG
+   /api/auth/jwks            // Public keys for token verification
+   ```
+
+2. **One-Time Authentication Script**
+   ```bash
+   # User runs once to authenticate
+   npx engify-mcp-auth
+   
+   # Flow:
+   # 1. Generate PKCE code_verifier/challenge
+   # 2. Open browser to engify.ai/auth
+   # 3. User authenticates with NextAuth
+   # 4. Exchange code for tokens
+   # 5. Store refresh_token in OS Keychain
+   ```
+
+3. **Launcher Script Pattern**
+   ```typescript
+   // engify-mcp-launcher.ts
+   // Cursor runs this, not server directly
+   
+   1. Retrieve refresh_token from OS Keychain
+   2. Exchange for fresh access_token
+   3. Validate token (audience, issuer, expiry)
+   4. Spawn MCP server with userId + token as argv
+   5. Pipe stdio transparently
+   ```
+
+4. **Cursor Configuration**
+   ```json
+   // ~/.cursor/mcp.json
+   {
+     "mcpServers": {
+       "engify-bug-reporter": {
+         "command": "npx",
+         "args": ["ts-node", "/path/to/engify-mcp-launcher.ts"],
+         "transport": "stdio"
+       }
+     }
+   }
+   ```
+
+5. **Authenticated MCP Server**
+   ```typescript
+   // server.ts - reads credentials from launcher
+   const authContext = {
+     userId: process.argv[2],    // From validated JWT
+     token: process.argv[3],     // Short-lived access token
+   };
+   
+   // All tools MUST use authContext.userId
+   server.registerTool('getBugs', async (filters) => {
+     return await getBugReports({
+       ...filters,
+       userId: authContext.userId, // MULTI-TENANT ISOLATION
+     });
+   });
+   ```
+
+6. **MCP Tools (Multi-Tenant)**
+   ```typescript
+   // Tool 1: Get user's bugs only
    async function getBugs(filters?: {
      status?: string,
      intent?: string,
      limit?: number
    }): Promise<Bug[]>
    
-   // Tool 2: Get specific bug
+   // Tool 2: Get specific bug (user must own)
    async function getBug(bugId: string): Promise<Bug>
    
-   // Tool 3: Mark bug as fixed
-   async function markFixed(bugId: string): Promise<void>
+   // Tool 3: Mark bug as sent to IDE
+   async function markSentToIDE(bugId: string): Promise<void>
+   
+   // Tool 4: Semantic search (with OBO flow)
+   async function searchSimilarBugs(description: string): Promise<Bug[]>
    ```
 
-3. **Developer Workflow**
+7. **Developer Workflow**
    ```
-   Developer in VS Code:
+   First time setup:
+   > npx engify-mcp-auth
+   [Browser opens to engify.ai]
+   [Login with Google/GitHub]
+   ✅ Authenticated! Refresh token stored.
    
+   Every IDE session:
    > @Engify get bugs
    
    AI Response:
@@ -352,55 +426,59 @@ GET    /api/bugs/mcp          - Get bugs for MCP (filtered by status)
    Suggested fix: Check if form ref exists before calling submit()"
    ```
 
-4. **Data Format for AI**
-   ```typescript
-   // Optimized for AI consumption
-   interface BugContextForAI {
-     id: string;
-     summary: string;           // One-line description
-     intent: string;
-     element: {
-       selector: string;
-       file: string;            // Inferred from selector
-       line: number;            // Estimated
-     };
-     error: string;             // Primary error message
-     stackTrace?: string;
-     environment: string;       // Condensed
-     screenshot_url?: string;   // Reference, not inline
-     notes?: {
-       rootCause: string;
-       prevention: string;
-     };
-   }
-   ```
-
-5. **MCP Configuration**
-   ```json
-   // ~/.config/Code/User/globalStorage/mcp-servers.json
-   {
-     "engify": {
-       "command": "node",
-       "args": ["/path/to/engify-mcp-server/index.js"],
-       "env": {
-         "MONGODB_URI": "mongodb://localhost:27017/engify",
-         "API_URL": "https://engify.ai"
-       }
-     }
-   }
-   ```
+8. **Security Requirements**
+   - ✅ OAuth 2.1 Authorization Code with PKCE
+   - ✅ RFC 8707 Resource Indicators (`aud: urn:mcp:bug-reporter`)
+   - ✅ Short-lived access tokens (1 hour)
+   - ✅ OS Keychain storage for refresh tokens
+   - ✅ Multi-tenant data isolation (userId filtering)
+   - ✅ OBO token exchange for RAG service
+   - ✅ Audience validation on all tokens
 
 ### **Technical Stack**
-- Node.js with MCP SDK
-- MongoDB client (same connection as dashboard)
-- Express for health check endpoint
+- **Authorization Server**: Next.js + custom OAuth endpoints
+- **Auth Scripts**: Node.js with PKCE + cross-keychain
+- **MCP Server**: @modelcontextprotocol/sdk + stdio
+- **Token Storage**: OS Keychain (macOS Keychain, Windows Vault)
+- **Database**: MongoDB with userId filtering
+- **RAG Service**: Python with OBO token validation
+
+### **Implementation Phases (15 commits total)**
+
+#### Phase 1: Authorization Server (5 commits)
+- [ ] Custom authorize endpoint with PKCE validation
+- [ ] Token endpoint with RFC 8707 audience binding
+- [ ] OBO exchange endpoint for RAG service
+- [ ] JWKS endpoint for token verification
+- [ ] Error handling and security logging
+
+#### Phase 2: Local Authentication (3 commits)
+- [ ] One-time auth script with PKCE flow
+- [ ] OS keychain integration (cross-keychain)
+- [ ] User-friendly error messages
+
+#### Phase 3: Launcher Pattern (2 commits)
+- [ ] Launcher script with token refresh logic
+- [ ] Token validation before server spawn
+
+#### Phase 4: Server Security (3 commits)
+- [ ] Update MCP server to consume credentials from argv
+- [ ] Add userId filtering to all operations
+- [ ] Implement OBO flow for RAG calls
+
+#### Phase 5: Testing & Documentation (2 commits)
+- [ ] End-to-end OAuth flow testing
+- [ ] Security validation and deployment docs
 
 ### **Success Criteria**
-- ✅ MCP server can query MongoDB
+- ✅ OAuth 2.1 flow works end-to-end
+- ✅ Tokens stored securely in OS keychain
+- ✅ MCP server only returns user's own bugs
+- ✅ RAG service respects multi-tenant boundaries
 - ✅ Can list bugs via `@Engify get bugs`
 - ✅ Can get bug details via `@Engify get bug {id}`
 - ✅ AI receives structured, token-efficient data
-- ✅ Developer can work without leaving IDE
+- ✅ Developer never leaves IDE
 
 ---
 
@@ -529,54 +607,53 @@ GET    /api/bugs/mcp          - Get bugs for MCP (filtered by status)
 
 ### **Day 3 (Sunday) - 6-8 hours**
 
-**Priority 1: MCP Server Tools (3 hours)**
-- [ ] Update `/mcp-server/index.js`
-- [ ] Implement `getBugs()` tool
-- [ ] Implement `getBug(id)` tool
-- [ ] Implement `markFixed(id)` tool
-- [ ] Connect to MongoDB (same connection)
-- [ ] Test tools with MCP inspector
+**Priority 1: OAuth 2.1 Authorization Server (3 hours)**
+- [ ] Create `/api/mcp-auth/authorize` endpoint with PKCE
+- [ ] Create `/api/mcp-auth/token` endpoint with RFC 8707
+- [ ] Create `/api/auth/obo-exchange` for RAG service
+- [ ] Create `/api/auth/jwks` endpoint
+- [ ] Test OAuth flow with browser
 
-**Priority 2: MCP Configuration (1 hour)**
-- [ ] Create MCP config for VS Code/Cursor
-- [ ] Test connection to MCP server
-- [ ] Verify tools are discoverable
+**Priority 2: Local Authentication Scripts (2 hours)**
+- [ ] Create `engify-mcp-auth.ts` one-time script
+- [ ] Add PKCE code generation and validation
+- [ ] Integrate cross-keychain for OS storage
+- [ ] Test browser flow and token storage
 
-**Priority 3: IDE Integration Test (2 hours)**
-- [ ] Test `@Engify get bugs` in IDE
-- [ ] Test `@Engify get bug {id}` in IDE
-- [ ] Verify AI receives structured data
-- [ ] Test marking bug as fixed
+**Priority 3: Launcher Script (1 hour)**
+- [ ] Create `engify-mcp-launcher.ts`
+- [ ] Add token refresh from keychain
+- [ ] Add token validation before server spawn
+- [ ] Test stdio piping to MCP server
 
-**Priority 4: Polish & Documentation (2 hours)**
-- [ ] Add loading states to dashboard
-- [ ] Add success/error toasts
-- [ ] Write README for extension setup
-- [ ] Write README for MCP setup
-- [ ] Record demo video (3-5 min)
+**Priority 4: Update MCP Server (2 hours)**
+- [ ] Update server to read credentials from argv
+- [ ] Add userId filtering to all operations
+- [ ] Implement OBO flow for RAG calls
+- [ ] Test multi-tenant isolation
 
-**Goal:** Full end-to-end flow working
+**Goal:** OAuth 2.1 flow working end-to-end
 
 **End of Day Checkpoint:**
-- ✅ Extension → Dashboard → MCP → IDE works
-- ✅ Can query bugs from IDE
-- ✅ AI gets proper context
-- ✅ Demo-ready
+- ✅ OAuth authentication works
+- ✅ Tokens stored in OS keychain
+- ✅ MCP server only returns user's bugs
+- ✅ Multi-tenant isolation verified
 
 ---
 
 ### **Day 4 (Monday - Optional Polish) - 2-4 hours**
 
 **If Time Allows:**
-- [ ] Test with 3-5 real bugs
-- [ ] Fix any critical issues
-- [ ] Improve error messages
-- [ ] Add keyboard shortcuts
-- [ ] Improve dashboard UI
-- [ ] Write setup documentation
-- [ ] Create troubleshooting guide
+- [ ] Test OAuth flow with multiple users
+- [ ] Test RAG OBO token exchange
+- [ ] Fix any security issues
+- [ ] Improve error messages in auth scripts
+- [ ] Add token expiry warnings
+- [ ] Write OAuth setup documentation
+- [ ] Create security troubleshooting guide
 
-**Goal:** Production-ready MVP
+**Goal:** Production-ready OAuth 2.1 MCP server
 
 ---
 
@@ -650,31 +727,52 @@ GET    /api/bugs/mcp          - Get bugs for MCP (filtered by status)
           route.ts          # New: Add notes
       mcp/
         route.ts            # New: MCP query endpoint
+    mcp-auth/
+      authorize/
+        route.ts            # New: OAuth authorize endpoint
+      token/
+        route.ts            # New: OAuth token endpoint
+    auth/
+      obo-exchange/
+        route.ts            # New: OBO token exchange
+      jwks/
+        route.ts            # New: JWKS endpoint
 
 /mcp-server/
-  index.js                  # Update: Add MCP tools
+  server.ts                 # Update: Authenticated MCP server
+  engify-mcp-auth.ts        # New: One-time auth script
+  engify-mcp-launcher.ts    # New: Launcher script
   tools/
-    getBugs.js              # New: List bugs tool
-    getBug.js               # New: Get bug tool
+    getBugs.ts              # New: Multi-tenant list bugs
+    getBug.ts               # New: Multi-tenant get bug
+    markSentToIDE.ts        # New: Update bug status
+    searchSimilarBugs.ts    # New: RAG semantic search
 ```
 
 ---
 
 ## Next Steps (Right Now)
 
-1. **Test Current Extension**
-   - Reload extension
-   - Test on test-enhanced.html
-   - Fix any errors
+1. **Begin Phase 1: OAuth Authorization Server**
+   - Create `/api/mcp-auth/authorize` endpoint
+   - Create `/api/mcp-auth/token` endpoint with RFC 8707
+   - Create `/api/auth/obo-exchange` for RAG
+   - Create `/api/auth/jwks` endpoint
 
-2. **Create Dashboard API**
-   - `/api/bugs/report` endpoint
-   - Test with Postman/curl
+2. **Update Database Schema**
+   - Add `userId` to bug_reports collection
+   - Update extension to send userId with reports
 
-3. **Create Dashboard Page**
-   - Basic list view
-   - Test receiving data
+3. **Test OAuth Flow**
+   - Test browser authentication
+   - Verify token audience binding
+   - Test PKCE validation
 
-**Let's start with Step 1: Test the extension.**
+**Updated MVP Priority:**
+- OAuth 2.1 compliance is now critical
+- Multi-tenant isolation is mandatory
+- Security requirements have increased
 
-Ready to test?
+**Ready to begin OAuth 2.1 implementation?**
+
+See ADR 006 for full architecture details.
