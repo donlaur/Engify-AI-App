@@ -11,26 +11,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
-import { ACHIEVEMENTS } from '@/lib/gamification/achievements';
-import { getPromptSlug } from '@/lib/utils/slug';
-import { MCPAuthModal } from '@/components/dashboard/MCPAuthModal';
-
-interface GamificationStats {
-  xp: number;
-  level: number;
-  xpForNextLevel: number;
-  dailyStreak: number;
-  achievements: string[];
-  stats: {
-    promptsUsed: number;
-    patternsCompleted: number;
-    skillsTracked: number;
-    skillsMastered: number;
-    timeSaved: number;
-    promptsShared: number;
-    favoritesReceived: number;
-  };
-}
 
 interface FavoritePrompt {
   id: string;
@@ -41,72 +21,19 @@ interface FavoritePrompt {
 }
 
 export default function DashboardPage() {
-  // Real gamification data from API
-  const [gamificationData, setGamificationData] =
-    useState<GamificationStats | null>(null);
-  const [totalPrompts, setTotalPrompts] = useState(0);
-  const [totalPatterns, setTotalPatterns] = useState(0);
-  const [bugReports, setBugReports] = useState<any[]>([]);
-  const [loadingBugReports, setLoadingBugReports] = useState(false);
+  const [favoritesCount, setFavoritesCount] = useState(0);
+  const [favoritePrompts, setFavoritePrompts] = useState<FavoritePrompt[]>([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(true);
 
   useEffect(() => {
-    async function fetchGamificationStats() {
-      try {
-        const response = await fetch('/api/gamification/stats');
-        if (response.ok) {
-          const result = await response.json();
-          setGamificationData(result.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch gamification stats:', error);
-      }
-    }
-
-    async function fetchStats() {
-      try {
-        const response = await fetch('/api/stats');
-        if (response.ok) {
-          const data = await response.json();
-          setTotalPrompts(data.stats?.prompts || 0);
-          setTotalPatterns(data.stats?.patterns || 0);
-        }
-      } catch (error) {
-        console.error('Failed to fetch stats:', error);
-      } finally {
-        console.log('Stats fetch complete');
-      }
-    }
-
     async function fetchFavorites() {
+      setLoadingFavorites(true);
       try {
-        setLoadingFavorites(true);
         const response = await fetch('/api/favorites');
         if (response.ok) {
           const data = await response.json();
           setFavoritesCount(data.count || 0);
-
-          // Fetch details for each favorite prompt
-          if (data.favorites && data.favorites.length > 0) {
-            const promptDetails = await Promise.all(
-              data.favorites.slice(0, 5).map(async (promptId: string) => {
-                try {
-                  const promptResponse = await fetch(`/api/prompts/${promptId}`);
-                  if (promptResponse.ok) {
-                    const promptData = await promptResponse.json();
-                    return promptData.prompt || null;
-                  }
-                  return null;
-                } catch (err) {
-                  // Silently fail - don't show error for individual prompt fetch failures
-                  return null;
-                }
-              })
-            );
-
-            setFavoritePrompts(
-              promptDetails.filter((p): p is FavoritePrompt => p !== null)
-            );
-          }
+          setFavoritePrompts(data.favorites || []);
         }
       } catch (error) {
         console.error('Failed to fetch favorites:', error);
@@ -115,562 +42,104 @@ export default function DashboardPage() {
       }
     }
 
-    fetchGamificationStats();
-    fetchStats();
-    fetchBugReports();
+    fetchFavorites();
   }, []);
-
-  // Fetch bug reports
-  async function fetchBugReports() {
-    setLoadingBugReports(true);
-    try {
-      const response = await fetch('/api/bug-reports?limit=5');
-      if (response.ok) {
-        const result = await response.json();
-        setBugReports(result.reports || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch bug reports:', error);
-    } finally {
-      setLoadingBugReports(false);
-    }
-  }
-
-  // Use real data if available, otherwise show defaults
-  const stats = gamificationData
-    ? {
-        promptsUsed: gamificationData.stats.promptsUsed,
-        totalPrompts,
-        favoritePrompts: favoritesCount, // Use real favorites count from API
-        patternsLearned: gamificationData.stats.patternsCompleted,
-        totalPatterns,
-        streak: gamificationData.dailyStreak,
-        totalViews: 0,
-      }
-    : {
-        promptsUsed: 0,
-        totalPrompts,
-        favoritePrompts: 0,
-        patternsLearned: 0,
-        totalPatterns,
-        streak: 0,
-        totalViews: 0,
-      };
-
-  const user = gamificationData
-    ? {
-        name: 'Explorer',
-        level: gamificationData.level,
-        xp: gamificationData.xp,
-        xpToNextLevel: gamificationData.xpForNextLevel,
-      }
-    : {
-        name: 'Explorer',
-        level: 1,
-        xp: 0,
-        xpToNextLevel: 500,
-      };
-
-  // Calculate XP percentage
-  const xpPercentage =
-    user.xpToNextLevel > 0 ? (user.xp / user.xpToNextLevel) * 100 : 0;
-
-  // Recent activity - will populate as user uses the app
-  const recentActivity: Array<{
-    id: string;
-    type: string;
-    promptTitle: string;
-    timestamp: Date;
-  }> = [];
-
-  // Format timestamp
-  const formatTimestamp = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffHours < 1) return 'Just now';
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays === 1) return 'Yesterday';
-    return `${diffDays}d ago`;
-  };
-
-  // Get activity icon
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'used':
-        return Icons.zap;
-      case 'favorited':
-        return Icons.heart;
-      case 'learned':
-        return Icons.sparkles;
-      default:
-        return Icons.check;
-    }
-  };
-
-  // Get activity color
-  const getActivityColor = (type: string) => {
-    switch (type) {
-      case 'used':
-        return 'text-blue-600';
-      case 'favorited':
-        return 'text-red-600';
-      case 'learned':
-        return 'text-purple-600';
-      default:
-        return 'text-gray-600';
-    }
-  };
 
   return (
     <MainLayout>
-      <div className="container py-8">
-        {/* Header */}
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="mb-2 text-4xl font-bold">Dashboard</h1>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome back, {user.name}! Track your progress and continue
-            learning.
+            Your favorite prompts
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {/* Prompts Used */}
+        <div className="grid gap-6 lg:grid-cols-1">
+          {/* My Favorites */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Prompts Used
-              </CardTitle>
-              <Icons.zap className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.promptsUsed}</div>
-              <p className="text-xs text-muted-foreground">
-                of {stats.totalPrompts} available
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Favorites */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Favorites</CardTitle>
-              <Icons.heart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.favoritePrompts}</div>
-              <p className="text-xs text-muted-foreground">saved prompts</p>
-            </CardContent>
-          </Card>
-
-          {/* Patterns Learned */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Patterns Learned
-              </CardTitle>
-              <Icons.sparkles className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.patternsLearned}</div>
-              <p className="text-xs text-muted-foreground">
-                of {stats.totalPatterns} patterns
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Streak */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Current Streak
-              </CardTitle>
-              <Icons.trophy className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.streak} days</div>
-              <p className="text-xs text-muted-foreground">Keep it going! 🔥</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Main Content - 2 columns */}
-          <div className="space-y-6 lg:col-span-2">
-            {/* Level Progress */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Level Progress</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>My Favorites</CardTitle>
                 <CardDescription>
-                  Level {user.level} • {user.xp} / {user.xpToNextLevel} XP
+                  {favoritesCount} saved prompts
                 </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Progress Bar */}
-                  <div className="relative h-4 w-full overflow-hidden rounded-full bg-secondary">
-                    <div
-                      className="h-full bg-primary transition-all duration-500"
-                      style={{ width: `${xpPercentage}%` }}
-                    />
-                  </div>
-
-                  {/* XP Info */}
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {user.xpToNextLevel - user.xp} XP to Level{' '}
-                      {user.level + 1}
-                    </span>
-                    <span className="font-medium">
-                      {Math.round(xpPercentage)}%
-                    </span>
-                  </div>
-
-                  {/* How to Earn XP */}
-                  <div className="space-y-2 rounded-lg bg-muted p-4">
-                    <p className="text-sm font-medium">How to earn XP:</p>
-                    <ul className="space-y-1 text-sm text-muted-foreground">
-                      <li>• Use a prompt: +10 XP</li>
-                      <li>• Learn a new pattern: +25 XP</li>
-                      <li>• Complete a challenge: +100 XP</li>
-                      <li>• Daily login: +5 XP</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Stats</CardTitle>
-                <CardDescription>
-                  Your bug tracking activity
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-lg bg-orange-50 p-4">
-                    <div className="flex items-center gap-2">
-                      <Icons.alertTriangle className="h-5 w-5 text-orange-600" />
-                      <span className="text-2xl font-bold text-orange-900">
-                        {bugReports.length}
-                      </span>
-                    </div>
-                    <p className="text-sm text-orange-700">Bug Reports</p>
-                  </div>
-                  <div className="rounded-lg bg-blue-50 p-4">
-                    <div className="flex items-center gap-2">
-                      <Icons.code className="h-5 w-5 text-blue-600" />
-                      <span className="text-2xl font-bold text-blue-900">1</span>
-                    </div>
-                    <p className="text-sm text-blue-700">IDE Connected</p>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground">
-                    Use the Chrome extension to capture bugs and @Engify in your IDE to fix them
-                  </p>
-                </div>
               </div>
-              </CardContent>
-            </Card>
-
-            {/* My Favorites */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>My Favorites</CardTitle>
-                  <CardDescription>
-                    {favoritesCount} saved prompts
-                  </CardDescription>
-                </div>
-                {favoritesCount > 0 && (
-                  <Link
-                    href="/prompts?filter=favorites"
-                    className="text-sm text-primary hover:underline"
-                  >
-                    View All
-                  </Link>
-                )}
-              </CardHeader>
-              <CardContent>
-                {loadingFavorites ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex animate-pulse gap-3">
-                        <div className="h-12 w-12 rounded bg-muted" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-4 w-3/4 rounded bg-muted" />
-                          <div className="h-3 w-full rounded bg-muted" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : favoritePrompts.length > 0 ? (
-                  <div className="space-y-3">
-                    {favoritePrompts.map((prompt) => (
-                      <Link
-                        key={prompt.id}
-                        href={`/prompts/${getPromptSlug(prompt)}`}
-                        className="flex items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
-                      >
-                        <div className="mt-1">
-                          <Icons.heart className="h-5 w-5 fill-red-600 text-red-600" />
-                        </div>
-                        <div className="flex-1 space-y-1 overflow-hidden">
-                          <p className="line-clamp-1 text-sm font-medium leading-tight">
-                            {prompt.title}
-                          </p>
-                          <p className="line-clamp-2 text-xs text-muted-foreground">
-                            {prompt.description}
-                          </p>
-                          <div className="mt-1 flex gap-2">
-                            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                              {prompt.category}
-                            </span>
-                            <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
-                              {prompt.role}
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                    {favoritesCount > 5 && (
-                      <Link
-                        href="/prompts?filter=favorites"
-                        className="block py-2 text-center text-sm text-primary hover:underline"
-                      >
-                        + {favoritesCount - 5} more favorites
-                      </Link>
-                    )}
-                  </div>
-                ) : (
-                  <div className="py-8 text-center">
-                    <div className="mb-4 flex justify-center">
-                      <div className="rounded-full bg-muted p-4">
-                        <Icons.heart className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                    </div>
-                    <p className="mb-2 text-sm font-medium">No favorites yet</p>
-                    <p className="mb-4 text-xs text-muted-foreground">
-                      Start saving prompts you love to access them quickly
-                    </p>
-                    <Link
-                      href="/prompts"
-                      className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                      <Icons.library className="h-4 w-4" />
-                      Browse Prompts
-                    </Link>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Bug Reports */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icons.alertTriangle className="h-5 w-5" />
-                    Bug Reports
-                  </CardTitle>
-                  <CardDescription>
-                    Recent issues captured via Chrome extension
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {loadingBugReports ? (
-                  <div className="space-y-3">
-                    <div className="h-4 w-3/4 animate-pulse rounded bg-muted"></div>
-                    <div className="h-4 w-1/2 animate-pulse rounded bg-muted"></div>
-                    <div className="h-4 w-2/3 animate-pulse rounded bg-muted"></div>
-                  </div>
-                ) : bugReports.length > 0 ? (
-                  <div className="space-y-3">
-                    {bugReports.map((report) => (
-                      <div
-                        key={report._id}
-                        className="flex items-start gap-3 rounded-lg border p-3"
-                      >
-                        <div className="mt-1">
-                          <Icons.alertTriangle className="h-4 w-4 text-orange-600" />
-                        </div>
-                        <div className="flex-1 space-y-1">
-                          <p className="text-sm font-medium line-clamp-2">
-                            {report.description}
-                          </p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className="rounded bg-orange-100 px-1.5 py-0.5 text-orange-800">
-                              {report.intent}
-                            </span>
-                            <span>{new URL(report.pageUrl).hostname}</span>
-                            <span>•</span>
-                            <span>{new Date(report.createdAt).toLocaleDateString()}</span>
-                          </div>
-                          <a
-                            href={report.pageUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-blue-600 hover:underline"
-                          >
-                            View Page →
-                          </a>
-                        </div>
-                      </div>
-                    ))}
-                    {bugReports.length > 0 && (
-                      <div className="pt-2 text-center">
-                        <p className="text-xs text-muted-foreground">
-                          Use @Engify in your IDE to interact with these reports
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="py-8 text-center">
-                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                      <Icons.alertTriangle className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <p className="mb-2 text-sm font-medium">No bug reports yet</p>
-                    <p className="mb-4 text-xs text-muted-foreground">
-                      Install the Chrome extension to start capturing bugs
-                    </p>
-                    <Link
-                      href="/dashboard?ref=mcp-auth"
-                      className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                    >
-                      <Icons.download className="h-4 w-4" />
-                      Configure MCP
-                    </Link>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar - 1 column */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Link
-                  href="/prompts"
-                  className="flex w-full items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
-                >
-                  <Icons.library className="h-5 w-5 text-primary" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium">Prompt Playbook</p>
-                    <p className="text-xs text-muted-foreground">
-                      Browse all prompts
-                    </p>
-                  </div>
-                </Link>
-
+              {favoritesCount > 0 && (
                 <Link
                   href="/prompts?filter=favorites"
-                  className="flex w-full items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
+                  className="text-sm text-primary hover:underline"
                 >
-                  <Icons.heart className="h-5 w-5 text-red-600" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium">My Favorites</p>
-                    <p className="text-xs text-muted-foreground">
-                      {stats.favoritePrompts} saved
-                    </p>
-                  </div>
+                  View All
                 </Link>
-
-                <Link
-                  href="/patterns"
-                  className="flex w-full items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
-                >
-                  <Icons.sparkles className="h-5 w-5 text-purple-600" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium">Learn Patterns</p>
-                    <p className="text-xs text-muted-foreground">
-                      {stats.patternsLearned}/{stats.totalPatterns} learned
-                    </p>
-                  </div>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Achievements Preview */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Achievements</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {gamificationData &&
-                gamificationData.achievements &&
-                gamificationData.achievements.length > 0 ? (
-                  gamificationData.achievements
-                    .slice(0, 3)
-                    .map((achievementId: string) => {
-                      const achievement = ACHIEVEMENTS.find(
-                        (a) => a.id === achievementId
-                      );
-                      if (!achievement) return null;
-
-                      const iconBgMap: Record<string, string> = {
-                        common: 'bg-gray-100',
-                        rare: 'bg-blue-100',
-                        epic: 'bg-purple-100',
-                        legendary: 'bg-yellow-100',
-                      };
-
-                      return (
-                        <div
-                          key={achievementId}
-                          className="flex items-center gap-3"
-                        >
-                          <div
-                            className={`flex h-10 w-10 items-center justify-center rounded-full ${iconBgMap[achievement.rarity] || 'bg-gray-100'} text-lg`}
-                          >
-                            {achievement.icon}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">
-                              {achievement.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {achievement.description}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })
-                ) : (
-                  <div className="py-8 text-center">
-                    <p className="mb-4 text-sm text-muted-foreground">
-                      No achievements yet - start exploring prompts to unlock
-                      badges!
-                    </p>
+              )}
+            </CardHeader>
+            <CardContent>
+              {loadingFavorites ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex animate-pulse gap-3">
+                      <div className="h-12 w-12 rounded bg-muted" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-3/4 rounded bg-muted" />
+                        <div className="h-3 w-full rounded bg-muted" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : favoritePrompts.length > 0 ? (
+                <div className="space-y-3">
+                  {favoritePrompts.map((prompt) => (
                     <Link
-                      href="/prompts"
-                      className="text-primary hover:underline"
+                      key={prompt.id}
+                      href={`/prompts/${prompt.id}`}
+                      className="flex items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-accent"
                     >
-                      Browse Prompts
+                      <div className="mt-1">
+                        <Icons.heart className="h-5 w-5 fill-red-600 text-red-600" />
+                      </div>
+                      <div className="flex-1 space-y-1 overflow-hidden">
+                        <p className="line-clamp-1 text-sm font-medium leading-tight">
+                          {prompt.title}
+                        </p>
+                        <p className="line-clamp-2 text-xs text-muted-foreground">
+                          {prompt.description}
+                        </p>
+                        <div className="mt-1 flex gap-2">
+                          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-800">
+                            {prompt.category}
+                          </span>
+                          <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-800">
+                            {prompt.role}
+                          </span>
+                        </div>
+                      </div>
+                      <Icons.chevronRight className="mt-1 h-4 w-4 flex-shrink-0 text-muted-foreground" />
                     </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center">
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                    <Icons.heart className="h-6 w-6 text-muted-foreground" />
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  <p className="mb-2 text-sm font-medium">No favorites yet</p>
+                  <p className="mb-4 text-xs text-muted-foreground">
+                    Start saving prompts you love to access them quickly
+                  </p>
+                  <Link
+                    href="/prompts"
+                    className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                  >
+                    <Icons.library className="h-4 w-4" />
+                    Browse Prompts
+                  </Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
-      
-      {/* MCP Auth Modal - appears when ?ref=mcp-auth */}
-      <MCPAuthModal />
     </MainLayout>
   );
 }
