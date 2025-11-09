@@ -2,7 +2,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { PatternsClient } from './patterns-client';
 import { patternRepository } from '@/lib/db/repositories/ContentService';
 import { promptRepository } from '@/lib/db/repositories/ContentService';
-import type { Pattern } from '@/lib/schemas/pattern';
+import type { Pattern } from '@/lib/db/schemas/pattern';
 import type { Prompt } from '@/lib/schemas/prompt';
 
 export default async function PatternsPage() {
