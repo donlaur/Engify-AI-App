@@ -101,10 +101,19 @@ class TokenManager {
     }
 
     console.log(chalk.cyan('\n📋 Follow these steps:'));
-    console.log(chalk.white('1. Visit: https://engify.ai/dashboard'));
-    console.log(chalk.white('2. Go to Settings → API Keys'));
-    console.log(chalk.white('3. Click "Generate MCP Token"'));
-    console.log(chalk.white('4. Copy the token\n'));
+    console.log(chalk.white('1. Opening browser to generate MCP token...'));
+    
+    // Open browser with MCP referral
+    const authUrl = 'https://engify.ai/dashboard?ref=mcp-auth';
+    console.log(chalk.gray(`If browser doesn't open, visit: ${authUrl}\n`));
+    
+    try {
+      // Try to open browser (optional dependency)
+      const { default: open } = await import('open');
+      await open(authUrl);
+    } catch {
+      // Browser opening failed, user will open manually
+    }
 
     const { token } = await inquirer.prompt([{
       type: 'input',

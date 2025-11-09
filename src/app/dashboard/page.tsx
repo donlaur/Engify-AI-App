@@ -13,6 +13,7 @@ import {
 import { Icons } from '@/lib/icons';
 import { ACHIEVEMENTS } from '@/lib/gamification/achievements';
 import { getPromptSlug } from '@/lib/utils/slug';
+import { MCPAuthModal } from '@/components/dashboard/MCPAuthModal';
 
 interface GamificationStats {
   xp: number;
@@ -581,6 +582,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      
+      {/* MCP Auth Modal - appears when ?ref=mcp-auth */}
+      <MCPAuthModal />
     </MainLayout>
   );
 }
