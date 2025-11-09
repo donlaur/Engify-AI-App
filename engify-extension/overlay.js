@@ -18,13 +18,15 @@ function createOverlay() {
         top: 20px;
         right: 20px;
         width: 380px;
-        max-height: 600px;
+        max-height: calc(100vh - 40px);
         background: white;
         border-radius: 12px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         z-index: 999999;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
       }
       
       #engify-overlay.minimized {
@@ -73,8 +75,27 @@ function createOverlay() {
       
       .engify-content {
         padding: 16px;
-        max-height: 520px;
+        flex: 1;
         overflow-y: auto;
+        overflow-x: hidden;
+      }
+      
+      .engify-content::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      .engify-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+      
+      .engify-content::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+      }
+      
+      .engify-content::-webkit-scrollbar-thumb:hover {
+        background: #555;
       }
       
       #engify-overlay.minimized .engify-content {
@@ -171,6 +192,8 @@ function createOverlay() {
         cursor: pointer;
         margin-bottom: 8px;
         transition: all 0.2s;
+        font-size: 13px;
+        color: #212529;
       }
       
       .engify-mode-option:hover {
