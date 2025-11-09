@@ -1,37 +1,27 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PatternsClient } from './patterns-client';
-import { patternRepository } from '@/lib/db/repositories/ContentService';
-import { promptRepository } from '@/lib/db/repositories/ContentService';
+import { loadPatternsFromJson } from '@/lib/patterns/load-patterns-from-json';
+import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
 import type { Pattern } from '@/lib/db/schemas/pattern';
 import type { Prompt } from '@/lib/schemas/prompt';
 
 export default async function PatternsPage() {
-  // Add timeout and better error handling for MongoDB connections
+  // Use JSON loader with triple fallback: JSON → Backup → MongoDB
   let patterns: Pattern[] = [];
   try {
-    patterns = await Promise.race([
-      patternRepository.getAll(),
-      new Promise<Pattern[]>((_, reject) =>
-        setTimeout(() => reject(new Error('Patterns fetch timeout')), 10000)
-      ),
-    ]);
+    patterns = await loadPatternsFromJson();
   } catch (error) {
-    console.error('Failed to fetch patterns from database, using fallback:', error);
-    // Use empty array as fallback during build or timeouts
+    console.error('Failed to load patterns (all fallbacks failed):', error);
+    // Use empty array as absolute last resort
   }
   
-  // Add timeout and better error handling for prompts
+  // Use JSON loader with triple fallback for prompts too
   let allPrompts: Prompt[] = [];
   try {
-    allPrompts = await Promise.race([
-      promptRepository.getAll(),
-      new Promise<Prompt[]>((_, reject) =>
-        setTimeout(() => reject(new Error('Prompts fetch timeout')), 10000)
-      ),
-    ]);
+    allPrompts = await loadPromptsFromJson();
   } catch (error) {
-    console.error('Failed to fetch prompts from database, using fallback:', error);
-    // Use empty array as fallback during build or timeouts
+    console.error('Failed to load prompts (all fallbacks failed):', error);
+    // Use empty array as absolute last resort
   }
   
   // Count prompts per pattern
