@@ -10,7 +10,7 @@ const JWT_SECRET = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!);
 const TOKEN_EXPIRY = 3600; // 1 hour
 const CLIENT_ID = 'engify-mcp-client';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Verify user is authenticated
     const session = await auth();
