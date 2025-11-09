@@ -354,15 +354,16 @@ function setupEventListeners() {
     card.addEventListener('click', () => {
       selectedIntent = card.dataset.intent;
       showScreen('engify-screen-select');
-      // Tell content script to start selection
-      chrome.runtime.sendMessage({ type: 'toggle_inspect' });
+      // Tell content script to start selection mode
+      window.postMessage({ type: 'engify_toggle_inspect' }, '*');
     });
   });
   
   // Cancel
   document.getElementById('engify-cancel').addEventListener('click', () => {
     showScreen('engify-screen-intent');
-    chrome.runtime.sendMessage({ type: 'toggle_inspect' });
+    // Turn off selection mode
+    window.postMessage({ type: 'engify_toggle_inspect' }, '*');
   });
   
   // Mode selection

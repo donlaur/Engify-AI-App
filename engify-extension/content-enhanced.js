@@ -273,6 +273,22 @@ function handleMouseMove(event) {
   updateHighlight(event.target);
 }
 
+// Listen for messages from overlay via postMessage
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'engify_toggle_inspect') {
+    isInspectMode = !isInspectMode;
+    
+    if (isInspectMode) {
+      document.body.style.cursor = 'crosshair';
+      console.log('✅ Element selection mode ON');
+    } else {
+      document.body.style.cursor = 'default';
+      removeHighlight();
+      console.log('❌ Element selection mode OFF');
+    }
+  }
+});
+
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('🔥 Enhanced content script received message:', message);
