@@ -13,6 +13,142 @@ interface AIModelDetailSectionsProps {
   model: AIModel;
 }
 
+type SupportedParam = NonNullable<AIModel['supportedParameters']>[keyof NonNullable<AIModel['supportedParameters']>];
+type RangeParam = SupportedParam & { min?: number; max?: number; default?: number };
+
+function isRangeParam(param: SupportedParam): param is RangeParam {
+  return (
+    typeof param === 'object' &&
+    param !== null &&
+    ('min' in param || 'max' in param || 'default' in param)
+  );
+}
+
+export function ParameterSupportSection({ model }: AIModelDetailSectionsProps) {
+  if (!model.supportedParameters) return null;
+
+  const parameters: {
+    name: string;
+    data: SupportedParam | undefined;
+    renderValue?: (param: RangeParam) => string;
+  }[] = [
+    {
+      name: 'Temperature',
+      data: model.supportedParameters.temperature,
+      renderValue: (param) => {
+        const parts: string[] = [];
+        if (param.min !== undefined) parts.push(`Min: ${param.min}`);
+        if (param.max !== undefined) parts.push(`Max: ${param.max}`);
+        if (param.default !== undefined) parts.push(`Default: ${param.default}`);
+        return parts.join(' • ');
+      },
+    },
+    {
+      name: 'Max Tokens',
+      data: model.supportedParameters.maxTokens,
+      renderValue: (param) => {
+        const parts: string[] = [];
+        if (param.min !== undefined) parts.push(`Min: ${param.min.toLocaleString()}`);
+        if (param.max !== undefined) parts.push(`Max: ${param.max.toLocaleString()}`);
+        if (param.default !== undefined)
+          parts.push(`Default: ${param.default.toLocaleString()}`);
+        return parts.join(' • ');
+      },
+    },
+    {
+      name: 'Stream',
+      data: model.supportedParameters.stream,
+    },
+    {
+      name: 'System Prompt',
+      data: model.supportedParameters.systemPrompt,
+    },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Parameter Support</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {parameters.map((parameter) => {
+          if (!parameter.data) return null;
+
+          return (
+            <div key={parameter.name} className="flex flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">{parameter.name}</span>
+                <Badge variant="outline">
+                  {parameter.data.supported ? 'Supported' : 'Not supported'}
+                </Badge>
+              </div>
+              {parameter.data.supported && (
+                <div className="text-sm text-muted-foreground">
+                  {isRangeParam(parameter.data) && parameter.renderValue
+                    ? parameter.renderValue(parameter.data) || parameter.data.notes || 'Supported'
+                    : parameter.data.notes || 'Supported in API requests'}
+                </div>
+              )}
+              {parameter.data.notes && isRangeParam(parameter.data) && (
+                <div className="text-xs text-muted-foreground">{parameter.data.notes}</div>
+              )}
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}
+
+export function ParameterFailureAlerts({ model }: AIModelDetailSectionsProps) {
+  if (!model.parameterFailures || model.parameterFailures.length === 0) {
+    return null;
+  }
+
+  const recentFailures = model.parameterFailures
+    .slice()
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+    .slice(0, 3);
+
+  return (
+    <Card className="border-orange-500/30 bg-orange-500/5">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-400">
+          <Icons.alertTriangle className="h-4 w-4" />
+          Recent Parameter Failures
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <p className="text-muted-foreground">
+          These parameters failed recently when testing or running automated audits.
+          Adjust your requests or review provider documentation before retrying.
+        </p>
+        <div className="space-y-3">
+          {recentFailures.map((failure, index) => (
+            <div key={`${failure.parameter}-${index}`} className="space-y-1 rounded-md border border-orange-500/20 p-3">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">{failure.parameter}</span>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(failure.timestamp).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="text-muted-foreground">{failure.error}</div>
+              {failure.attemptedValue !== undefined && (
+                <div className="text-xs text-muted-foreground">
+                  Attempted value: <code>{JSON.stringify(failure.attemptedValue)}</code>
+                </div>
+              )}
+              {failure.source && (
+                <div className="text-xs text-muted-foreground">Source: {failure.source}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function PerformanceMetrics({ model }: AIModelDetailSectionsProps) {
   if (!model.performanceMetrics) return null;
 

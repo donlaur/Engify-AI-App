@@ -27,6 +27,7 @@ interface PromptsJsonData {
 }
 
 const JSON_FILE_URL = '/data/prompts.json'; // Public URL path
+const BACKUP_JSON_PATH = '/data/prompts-backup.json'; // Immutable backup (committed to git)
 const MAX_AGE_MS = 3600000; // 1 hour - consider JSON stale after this
 
 /**
@@ -48,16 +49,9 @@ export async function loadPromptsFromJson(): Promise<Prompt[]> {
         const fileContent = await fs.readFile(jsonPath, 'utf-8');
         const data: PromptsJsonData = JSON.parse(fileContent);
         
-        // Check if JSON is stale (older than 1 hour)
-        const generatedAt = new Date(data.generatedAt);
-        const ageMs = Date.now() - generatedAt.getTime();
-        
-        if (ageMs > MAX_AGE_MS) {
-          logger.warn('Prompts JSON is stale, falling back to MongoDB', {
-            ageHours: (ageMs / 3600000).toFixed(2),
-          });
-          throw new Error('JSON is stale');
-        }
+        // NO STALENESS CHECK - Content rarely changes, so age doesn't matter
+        // If content changes, regenerate JSON manually or via cron
+        // This prevents false "stale" errors that waste Vercel builds
         
         logger.debug('Loaded prompts from static JSON', {
           count: data.prompts.length,
@@ -75,12 +69,41 @@ export async function loadPromptsFromJson(): Promise<Prompt[]> {
     // JSON loading from client-side requires fetch which can have auth issues
     throw new Error('Client-side JSON loading disabled - use MongoDB');
   } catch (error) {
-    // Fallback to MongoDB if JSON unavailable
-    logger.warn('Failed to load prompts from JSON, using MongoDB fallback', {
+    // Fallback to immutable backup (FAST, RELIABLE)
+    // M0 tier: Avoid MongoDB when possible due to connection limits
+    logger.warn('Failed to load prompts from JSON, using immutable backup', {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
 
-    return promptRepository.getAll();
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const backupPath = path.join(process.cwd(), 'public', 'data', 'prompts-backup.json');
+      const backupContent = await fs.readFile(backupPath, 'utf-8');
+      const backupData: PromptsJsonData = JSON.parse(backupContent);
+      
+      logger.info('Successfully loaded prompts from backup', {
+        count: backupData.prompts.length,
+        backupGeneratedAt: backupData.generatedAt,
+      });
+      
+      return backupData.prompts;
+    } catch (backupError) {
+      // LAST RESORT: Use MongoDB
+      logger.error('Backup fallback failed, using MongoDB', {
+        backupError: backupError instanceof Error ? backupError.message : 'Unknown error',
+      });
+      
+      try {
+        return await promptRepository.getAll();
+      } catch (dbError) {
+        logger.error('CRITICAL: All fallbacks failed', {
+          dbError: dbError instanceof Error ? dbError.message : 'Unknown error',
+        });
+        // Return empty array as absolute last resort to prevent site crash
+        return [];
+      }
+    }
   }
 }
 

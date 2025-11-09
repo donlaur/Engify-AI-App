@@ -99,15 +99,15 @@ function getMongoOptions() {
   return {
     maxPoolSize: 1, // FREE TIER: Limit to 1 connection per serverless function
     minPoolSize: 0, // FREE TIER: Don't maintain minimum connections
-    serverSelectionTimeoutMS: 15000, // Build: Allow more time for M0
-    socketTimeoutMS: 20000, // Build: Longer socket timeout
-    connectTimeoutMS: 10000, // Build: More connection time
+    serverSelectionTimeoutMS: 10000, // M0: Reduced from 15s - fail faster
+    socketTimeoutMS: 15000, // M0: Reduced from 20s - close faster
+    connectTimeoutMS: 8000, // M0: Reduced from 10s - fail faster
     retryWrites: true,
     retryReads: true,
     w: 'majority' as const,
-    maxIdleTimeMS: 10000, // M0: Close idle connections quickly (10s)
+    maxIdleTimeMS: 5000, // M0: AGGRESSIVE - Close idle connections after 5s (was 10s)
     maxConnecting: 1, // M0: Limit concurrent connection attempts
-    waitQueueTimeoutMS: 5000, // M0: Don't wait long for connections
+    waitQueueTimeoutMS: 3000, // M0: AGGRESSIVE - Don't wait long (was 5s)
     family: 4, // Force IPv4 to avoid DNS issues
     // SSL/TLS options for MongoDB Atlas
     ...(isSrvUri

@@ -27,6 +27,7 @@ interface PatternsJsonData {
 }
 
 const JSON_FILE_PATH = path.join(process.cwd(), 'public', 'data', 'patterns.json');
+const BACKUP_JSON_PATH = path.join(process.cwd(), 'public', 'data', 'patterns-backup.json'); // Immutable backup
 const MAX_AGE_MS = 3600000; // 1 hour - consider JSON stale after this
 
 /**
@@ -40,17 +41,9 @@ export async function loadPatternsFromJson(): Promise<Pattern[]> {
     const fileContent = await fs.readFile(JSON_FILE_PATH, 'utf-8');
     const data: PatternsJsonData = JSON.parse(fileContent);
     
-    // Check if JSON is stale (older than 1 hour)
-    const generatedAt = new Date(data.generatedAt);
-    const ageMs = Date.now() - generatedAt.getTime();
-    
-    if (ageMs > MAX_AGE_MS) {
-      logger.warn('Patterns JSON is stale, falling back to MongoDB', {
-        ageHours: (ageMs / 3600000).toFixed(2),
-      });
-      // Fall through to MongoDB fallback
-      throw new Error('JSON is stale');
-    }
+    // NO STALENESS CHECK - Content rarely changes, so age doesn't matter
+    // If content changes, regenerate JSON manually or via cron
+    // This prevents false "stale" errors that waste Vercel builds
 
     logger.debug('Loaded patterns from static JSON', {
       count: data.patterns.length,
@@ -59,12 +52,38 @@ export async function loadPatternsFromJson(): Promise<Pattern[]> {
     
     return data.patterns;
   } catch (error) {
-    // Fallback to MongoDB if JSON unavailable
-    logger.warn('Failed to load patterns from JSON, using MongoDB fallback', {
+    // Fallback to immutable backup (FAST, RELIABLE)
+    // M0 tier: Avoid MongoDB when possible due to connection limits
+    logger.warn('Failed to load patterns from JSON, using immutable backup', {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
     
-    return patternRepository.getAll();
+    try {
+      const backupContent = await fs.readFile(BACKUP_JSON_PATH, 'utf-8');
+      const backupData: PatternsJsonData = JSON.parse(backupContent);
+      
+      logger.info('Successfully loaded patterns from immutable backup', {
+        count: backupData.patterns.length,
+        backupGeneratedAt: backupData.generatedAt,
+      });
+      
+      return backupData.patterns;
+    } catch (backupError) {
+      // LAST RESORT: Try MongoDB (M0 tier unreliable, may hit connection limits)
+      logger.error('Backup failed, trying MongoDB as last resort', {
+        backupError: backupError instanceof Error ? backupError.message : 'Unknown error',
+      });
+      
+      try {
+        return await patternRepository.getAll();
+      } catch (dbError) {
+        logger.error('CRITICAL: All fallbacks failed (JSON, Backup, MongoDB)', {
+          dbError: dbError instanceof Error ? dbError.message : 'Unknown error',
+        });
+        // Return empty array as absolute last resort to prevent site crash
+        return [];
+      }
+    }
   }
 }
 

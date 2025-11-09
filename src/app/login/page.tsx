@@ -25,6 +25,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,6 +58,18 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setOauthLoading(true);
+      setError('');
+      await signIn('google', { callbackUrl: '/dashboard' });
+    } catch (err) {
+      console.error('🔐 [LOGIN] Google sign-in failed:', err);
+      setError('Google sign-in failed. Please try again.');
+      setOauthLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Card className="w-full max-w-md">
@@ -72,6 +85,29 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleGoogleSignIn}
+            disabled={isLoading || oauthLoading}
+            aria-busy={oauthLoading}
+          >
+            {oauthLoading ? (
+              <>
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                Signing in with Google...
+              </>
+            ) : (
+              <>
+                <Icons.sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
+                Continue with Google
+              </>
+            )}
+          </Button>
+          <div className="relative py-2 text-center text-sm text-muted-foreground">
+            <span className="bg-background px-2">or continue with</span>
+          </div>
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Label

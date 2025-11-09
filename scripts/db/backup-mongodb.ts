@@ -8,7 +8,8 @@
  * Or via cron: 0 * * * * cd /path/to/repo && pnpm exec tsx scripts/db/backup-mongodb.ts
  */
 
-import { getMongoDb } from '@/lib/db/mongodb';
+import 'dotenv/config';
+import { MongoClient } from 'mongodb';
 import fs from 'fs';
 import path from 'path';
 
@@ -147,12 +148,15 @@ async function backupDatabase() {
   }
   
   try {
-    const db = await getMongoDb();
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/engify';
+    const client = new MongoClient(uri);
+    await client.connect();
+    const db = client.db();
     console.log('✅ Connected to MongoDB');
     
     // Get all collection names
     const collections = await db.listCollections().toArray();
-    const collectionNames = collections.map(c => c.name);
+    const collectionNames = collections.map((c: any) => c.name);
     
     console.log(`📊 Found ${collectionNames.length} collections to backup\n`);
     

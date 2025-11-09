@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
+import { ModelIdCopy } from '@/components/features/ModelIdCopy';
 import { aiModelService } from '@/lib/services/AIModelService';
 import { generateSlug } from '@/lib/utils/slug';
 import { logger } from '@/lib/logging/logger';
@@ -24,6 +25,8 @@ import {
   EndpointsSection,
   SnapshotsSection,
   RateLimitsSection,
+  ParameterSupportSection,
+  ParameterFailureAlerts,
 } from '@/components/features/AIModelDetailSections';
 
 export const dynamic = 'force-dynamic';
@@ -170,7 +173,7 @@ export default async function AIModelDetailPage({ params }: PageProps) {
           </nav>
 
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-8 space-y-3">
             <div className="mb-4 flex items-center gap-3">
               <h1 className="text-4xl font-bold">{model.displayName}</h1>
               {model.isDefault && (
@@ -194,6 +197,7 @@ export default async function AIModelDetailPage({ params }: PageProps) {
             <p className="mt-2 text-lg text-muted-foreground">
               {providerLabel} • {model.capabilities.join(' • ')}
             </p>
+            <ModelIdCopy id={model.id} label="Provider ID" />
             {model.description && (
               <p className="mt-3 text-muted-foreground">{model.description}</p>
             )}
@@ -373,6 +377,9 @@ export default async function AIModelDetailPage({ params }: PageProps) {
               {/* Modalities */}
               <ModalitiesSection model={model} />
 
+              {/* Parameter Support */}
+              <ParameterSupportSection model={model} />
+
               {/* Features */}
               <FeaturesSection model={model} />
 
@@ -391,6 +398,9 @@ export default async function AIModelDetailPage({ params }: PageProps) {
 
             {/* Sidebar */}
             <div className="space-y-6">
+              {/* Parameter Failures */}
+              <ParameterFailureAlerts model={model} />
+
               {/* Pricing */}
               <Card>
                 <CardHeader>

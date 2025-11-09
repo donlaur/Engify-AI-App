@@ -12,8 +12,8 @@ importers:
         specifier: ^0.67.0
         version: 0.67.1(zod@3.25.76)
       '@auth/mongodb-adapter':
-        specifier: ^3.0.0
-        version: 3.11.1(mongodb@6.20.0(socks@2.8.7))
+        specifier: ^3.10.0
+        version: 3.10.0(mongodb@6.20.0(socks@2.8.7))
       '@auth/prisma-adapter':
         specifier: ^2.11.1
         version: 2.11.1(@prisma/client@6.18.0(prisma@6.18.0(magicast@0.3.5)(typescript@5.9.3))(typescript@5.9.3))
@@ -402,8 +402,8 @@ packages:
       nodemailer:
         optional: true
 
-  '@auth/mongodb-adapter@3.11.1':
-    resolution: {integrity: sha512-xY+VUkC3CNXct8UwQgBAQqXASqolSlIARg6oAm1378CtRN2650tQUCOEnGLNLmroVefUeP73M6t+TpGXq72vwQ==}
+  '@auth/mongodb-adapter@3.10.0':
+    resolution: {integrity: sha512-xDBeDDaCwY8yABrF0Nsb31I3MkuZJ57DCby2ikcOu9ydvCG7gKs2aNZf90J8rUj1sXXiIxIAY1WP0+KM8jJB7Q==}
     peerDependencies:
       mongodb: ^6
 
@@ -7146,9 +7146,9 @@ snapshots:
       preact: 10.24.3
       preact-render-to-string: 6.5.11(preact@10.24.3)
 
-  '@auth/mongodb-adapter@3.11.1(mongodb@6.20.0(socks@2.8.7))':
+  '@auth/mongodb-adapter@3.10.0(mongodb@6.20.0(socks@2.8.7))':
     dependencies:
-      '@auth/core': 0.41.1
+      '@auth/core': 0.40.0
       mongodb: 6.20.0(socks@2.8.7)
     transitivePeerDependencies:
       - '@simplewebauthn/browser'
