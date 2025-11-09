@@ -527,6 +527,11 @@ async function handleSubmit() {
         }),
       });
 
+      // Check if response is OK before parsing JSON
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
       
       if (data.success) {
