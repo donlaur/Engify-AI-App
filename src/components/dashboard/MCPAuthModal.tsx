@@ -120,7 +120,7 @@ export function MCPAuthModal() {
               <CardHeader>
                 <CardTitle className="text-lg">Generate MCP Token</CardTitle>
                 <CardDescription>
-                  Tokens expire after 1 hour for security
+                  Tokens expire after 7 days for your convenience
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -172,15 +172,141 @@ export function MCPAuthModal() {
                   </Button>
                 </div>
 
-                {/* Instructions */}
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <h4 className="font-medium text-green-900 mb-2">Next Steps:</h4>
-                  <ol className="text-sm text-green-800 space-y-1 list-decimal list-inside">
-                    <li>Return to your terminal window</li>
-                    <li>Paste the token when prompted</li>
-                    <li>Your MCP server will be configured</li>
-                    <li>Start using @Engify in your IDE!</li>
-                  </ol>
+                {/* IDE Configuration */}
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2">Configure Your IDE:</h4>
+                  <p className="text-sm text-blue-800 mb-3">
+                    Choose your IDE and follow the instructions below:
+                  </p>
+                  
+                  {/* IDE Tabs */}
+                  <div className="space-y-3">
+                    {/* Windsurf */}
+                    <details className="bg-white p-3 rounded border">
+                      <summary className="font-medium cursor-pointer flex items-center gap-2">
+                        <Icons.code className="h-4 w-4" />
+                        Windsurf
+                      </summary>
+                      <div className="mt-3 space-y-2">
+                        <p className="text-sm text-gray-600">
+                          <strong>Option 1: AI-Assisted (Recommended)</strong>
+                        </p>
+                        <div className="bg-gray-100 p-2 rounded">
+                          <p className="text-xs font-mono mb-2">Copy this prompt and paste it in Windsurf Cascade:</p>
+                          <textarea 
+                            readOnly
+                            className="w-full h-24 text-xs font-mono p-2 border rounded"
+                            value={`Please update my MCP configuration file at ~/.codeium/windsurf/mcp_config.json to add the Engify server. Add this server configuration:
+
+"engify": {
+  "command": "pnpm",
+  "args": ["start"],
+  "cwd": "${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}".replace('http://localhost:3000', '/Users/donlaur/dev/Engify-AI-App') + "/mcp-server",
+  "disabled": false
+}
+
+Add it to the existing mcpServers object, keeping the existing servers.`}
+                            onClick={(e) => e.currentTarget.select()}
+                          />
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            const prompt = `Please update my MCP configuration file at ~/.codeium/windsurf/mcp_config.json to add the Engify server. Add this server configuration:
+
+"engify": {
+  "command": "pnpm",
+  "args": ["start"],
+  "cwd": "/Users/donlaur/dev/Engify-AI-App/mcp-server",
+  "disabled": false
+}
+
+Add it to the existing mcpServers object, keeping the existing servers.`;
+                            navigator.clipboard.writeText(prompt);
+                            toast.success('Prompt copied to clipboard!');
+                          }}
+                        >
+                          <Icons.copy className="mr-2 h-3 w-3" />
+                          Copy Prompt
+                        </Button>
+                        
+                        <p className="text-sm text-gray-600 mt-3">
+                          <strong>Option 2: Manual Configuration</strong>
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Edit <code className="bg-gray-200 px-1 rounded">~/.codeium/windsurf/mcp_config.json</code> and add the server configuration above.
+                        </p>
+                      </div>
+                    </details>
+
+                    {/* Cursor */}
+                    <details className="bg-white p-3 rounded border">
+                      <summary className="font-medium cursor-pointer flex items-center gap-2">
+                        <Icons.cursor className="h-4 w-4" />
+                        Cursor
+                      </summary>
+                      <div className="mt-3 space-y-2">
+                        <p className="text-sm text-gray-600">
+                          <strong>AI-Assisted (Recommended)</strong>
+                        </p>
+                        <div className="bg-gray-100 p-2 rounded">
+                          <p className="text-xs font-mono mb-2">Copy this prompt and paste it in Cursor:</p>
+                          <textarea 
+                            readOnly
+                            className="w-full h-24 text-xs font-mono p-2 border rounded"
+                            value={`Please update my MCP configuration file at ~/Library/Application Support/Claude/claude_desktop_config.json to add the Engify server. Add this server configuration:
+
+"engify": {
+  "command": "pnpm",
+  "args": ["start"],
+  "cwd": "/Users/donlaur/dev/Engify-AI-App/mcp-server"
+}
+
+Add it to the existing mcpServers object, keeping the existing servers.`}
+                            onClick={(e) => e.currentTarget.select()}
+                          />
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            const prompt = `Please update my MCP configuration file at ~/Library/Application Support/Claude/claude_desktop_config.json to add the Engify server. Add this server configuration:
+
+"engify": {
+  "command": "pnpm",
+  "args": ["start"],
+  "cwd": "/Users/donlaur/dev/Engify-AI-App/mcp-server"
+}
+
+Add it to the existing mcpServers object, keeping the existing servers.`;
+                            navigator.clipboard.writeText(prompt);
+                            toast.success('Prompt copied to clipboard!');
+                          }}
+                        >
+                          <Icons.copy className="mr-2 h-3 w-3" />
+                          Copy Prompt
+                        </Button>
+                      </div>
+                    </details>
+
+                    {/* VS Code */}
+                    <details className="bg-white p-3 rounded border">
+                      <summary className="font-medium cursor-pointer flex items-center gap-2">
+                        <Icons.vscode className="h-4 w-4" />
+                        VS Code
+                      </summary>
+                      <div className="mt-3">
+                        <p className="text-sm text-gray-600">
+                          VS Code MCP support is coming soon. For now, use Cursor or Windsurf.
+                        </p>
+                      </div>
+                    </details>
+                  </div>
+                  
+                  <p className="text-xs text-blue-700 mt-3">
+                    After configuration, restart your IDE and try: <code className="bg-blue-100 px-1 rounded">@Engify get new bug reports</code>
+                  </p>
                 </div>
               </CardContent>
             </Card>
