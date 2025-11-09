@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generatePromptsJson } from '@/lib/prompts/generate-prompts-json';
 import { generatePatternsJson } from '@/lib/patterns/generate-patterns-json';
 import { logger } from '@/lib/logging/logger';
-import { checkRateLimit } from '@/lib/rate-limit';
+import {
+  checkRateLimit,
+  getClientIp,
+  type RateLimitResult,
+} from '@/lib/rate-limit';
+import { sanitizeText } from '@/lib/security/sanitize';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -18,16 +23,35 @@ export const maxDuration = 60;
  * Headers: Authorization: Bearer <WEBHOOK_SECRET>
  * Body: { type: 'prompts' | 'patterns' | 'learning' | 'all' }
  */
+const ALLOWED_TYPES = new Set(['prompts', 'patterns', 'learning', 'all']);
+
+async function enforceRateLimit(request: NextRequest) {
+  const identifier = `webhook:${getClientIp(request)}`;
+  const result = await checkRateLimit(identifier, 'authenticated');
+  if (!result.allowed) {
+    return NextResponse.json(
+      { error: result.reason ?? 'Rate limit exceeded' },
+      {
+        status: 429,
+        headers: buildRateLimitHeaders(result),
+      }
+    );
+  }
+  return null;
+}
+
+function buildRateLimitHeaders(result: RateLimitResult) {
+  return {
+    'Retry-After': '60',
+    'X-RateLimit-Remaining': Math.max(result.remaining, 0).toString(),
+    'X-RateLimit-Reset': result.resetAt.toISOString(),
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting (10 requests per minute for webhooks)
-    const rateLimitResult = await checkRateLimit(request, { limit: 10, window: 60 });
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        { error: 'Rate limit exceeded' },
-        { status: 429 }
-      );
-    }
+    const rateLimitResponse = await enforceRateLimit(request);
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Verify webhook secret
     const authHeader = request.headers.get('authorization');
@@ -41,8 +65,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { type = 'all' } = body;
+    const rawBody = await request.json();
+    const rawType = typeof rawBody?.type === 'string' ? rawBody.type : 'all';
+    const type = sanitizeText(rawType).toLowerCase() || 'all';
+
+    if (!ALLOWED_TYPES.has(type)) {
+      return NextResponse.json(
+        { error: 'Invalid content type' },
+        { status: 400 }
+      );
+    }
 
     logger.info('Content updated webhook triggered', { type });
 
