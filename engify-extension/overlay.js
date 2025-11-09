@@ -310,6 +310,15 @@ function createOverlay() {
         <button class="engify-btn engify-btn-primary" id="engify-submit">Submit</button>
         <button class="engify-btn engify-btn-secondary" id="engify-back">Back</button>
       </div>
+      
+      <!-- Screen 4: Success -->
+      <div class="engify-screen" id="engify-screen-success">
+        <div class="engify-status-box" style="border-color: #28a745;">
+          <div class="engify-status-icon">✅</div>
+          <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Copied to clipboard!</div>
+          <div style="font-size: 13px; color: #6c757d;">Paste it into ChatGPT, Cursor, or anywhere you need help</div>
+        </div>
+      </div>
     </div>
   `;
   
@@ -455,9 +464,17 @@ async function handleSubmit() {
   if (selectedMode === 'clipboard') {
     const report = formatReport();
     await navigator.clipboard.writeText(report);
-    alert('✅ Copied to clipboard!');
-    overlayContainer.remove();
-    overlayContainer = null;
+    
+    // Show success in overlay
+    showScreen('engify-screen-success');
+    
+    // Auto-close after 2 seconds
+    setTimeout(() => {
+      if (overlayContainer) {
+        overlayContainer.remove();
+        overlayContainer = null;
+      }
+    }, 2000);
   }
   // TODO: Add dashboard and IDE modes
 }
@@ -481,19 +498,21 @@ function formatReport() {
   
   // Format as AI-ready prompt
   if (selectedIntent === 'bug') {
-    return `${intentEmoji[selectedIntent]} Fix this bug on my website:
+    return `As an end user, I found this bug on your website:
 
-**Issue:**
+**Page:** ${window.location.href}
+
+**What's wrong:**
 ${description}
 
-**Element Details:**
-- Selector: \`${selector}\`
-- Current text: ${text}
-- Size: ${size}
-- Page: ${window.location.href}
+**Element that's broken:**
+${text}
 
-**What I need:**
-Please help me fix this issue. Provide the exact code changes needed.`;
+**Technical details:**
+- Selector: \`${selector}\`
+- Size: ${size}
+
+Can you help me fix this?`;
   } else if (selectedIntent === 'learn') {
     return `${intentEmoji[selectedIntent]} Help me understand this code:
 
