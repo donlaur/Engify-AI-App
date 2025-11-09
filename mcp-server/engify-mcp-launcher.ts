@@ -12,7 +12,7 @@
  * Used by IDEs (Cursor/VS Code) to start authenticated MCP server.
  */
 
-import { readFileSync, existsSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import { spawn } from 'child_process';
