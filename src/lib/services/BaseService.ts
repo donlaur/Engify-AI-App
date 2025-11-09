@@ -22,8 +22,16 @@ export abstract class BaseService<T extends { _id?: ObjectId }> {
    * Get MongoDB collection
    */
   protected async getCollection(): Promise<Collection<T>> {
-    const db = await getDb();
-    return db.collection<T>(this.collectionName);
+    try {
+      const db = await getDb();
+      return db.collection<T>(this.collectionName);
+    } catch (error) {
+      // During build, throw a more specific error that can be caught
+      if (error instanceof Error && error.message.includes('BUILD_MODE')) {
+        throw error;
+      }
+      throw error;
+    }
   }
 
   /**

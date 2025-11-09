@@ -50,8 +50,16 @@ export abstract class BaseRepository<T> {
    * Get collection (lazy, only when needed)
    */
   protected async getCollection(): Promise<Collection<T>> {
-    const db = await this.getDb();
-    return db.collection<T>(this.collectionName);
+    try {
+      const db = await this.getDb();
+      return db.collection<T>(this.collectionName);
+    } catch (error) {
+      // During build, throw a more specific error that can be caught
+      if (error instanceof Error && error.message.includes('BUILD_MODE')) {
+        throw error;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -78,6 +86,11 @@ export abstract class BaseRepository<T> {
       } as FindOptions<T>;
       return collection.find(filter, queryOptions).toArray();
     } catch (error) {
+      // During build, return empty array to avoid build failures
+      if (error instanceof Error && error.message.includes('BUILD_MODE')) {
+        logger.warn(`Build mode detected, returning empty array for ${this.collectionName}`);
+        return [];
+      }
       logger.error(`Error finding documents in ${this.collectionName}`, {
         error,
       });
@@ -109,6 +122,11 @@ export abstract class BaseRepository<T> {
       } as FindOptions<T>;
       return collection.findOne(filter, queryOptions);
     } catch (error) {
+      // During build, return null to avoid build failures
+      if (error instanceof Error && error.message.includes('BUILD_MODE')) {
+        logger.warn(`Build mode detected, returning null for ${this.collectionName}`);
+        return null;
+      }
       logger.error(`Error finding document in ${this.collectionName}`, {
         error,
       });
