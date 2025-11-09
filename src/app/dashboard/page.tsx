@@ -48,6 +48,8 @@ export default function DashboardPage() {
   const [totalPatterns, setTotalPatterns] = useState(0);
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [favoritePrompts, setFavoritePrompts] = useState<FavoritePrompt[]>([]);
+  const [bugReports, setBugReports] = useState<any[]>([]);
+  const [loadingBugReports, setLoadingBugReports] = useState(false);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
 
   useEffect(() => {
@@ -117,7 +119,24 @@ export default function DashboardPage() {
     fetchGamificationStats();
     fetchStats();
     fetchFavorites();
+    fetchBugReports();
   }, []);
+
+  // Fetch bug reports
+  async function fetchBugReports() {
+    setLoadingBugReports(true);
+    try {
+      const response = await fetch('/api/bug-reports?limit=5');
+      if (response.ok) {
+        const result = await response.json();
+        setBugReports(result.reports || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch bug reports:', error);
+    } finally {
+      setLoadingBugReports(false);
+    }
+  }
 
   // Use real data if available, otherwise show defaults
   const stats = gamificationData
@@ -462,6 +481,88 @@ export default function DashboardPage() {
                     >
                       <Icons.library className="h-4 w-4" />
                       Browse Prompts
+                    </Link>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Bug Reports */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icons.alertTriangle className="h-5 w-5" />
+                    Bug Reports
+                  </CardTitle>
+                  <CardDescription>
+                    Recent issues captured via Chrome extension
+                  </CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loadingBugReports ? (
+                  <div className="space-y-3">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-muted"></div>
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-muted"></div>
+                    <div className="h-4 w-2/3 animate-pulse rounded bg-muted"></div>
+                  </div>
+                ) : bugReports.length > 0 ? (
+                  <div className="space-y-3">
+                    {bugReports.map((report) => (
+                      <div
+                        key={report._id}
+                        className="flex items-start gap-3 rounded-lg border p-3"
+                      >
+                        <div className="mt-1">
+                          <Icons.alertTriangle className="h-4 w-4 text-orange-600" />
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-medium line-clamp-2">
+                            {report.description}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className="rounded bg-orange-100 px-1.5 py-0.5 text-orange-800">
+                              {report.intent}
+                            </span>
+                            <span>{new URL(report.pageUrl).hostname}</span>
+                            <span>•</span>
+                            <span>{new Date(report.createdAt).toLocaleDateString()}</span>
+                          </div>
+                          <a
+                            href={report.pageUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            View Page →
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                    {bugReports.length > 0 && (
+                      <div className="pt-2 text-center">
+                        <p className="text-xs text-muted-foreground">
+                          Use @Engify in your IDE to interact with these reports
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                      <Icons.alertTriangle className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="mb-2 text-sm font-medium">No bug reports yet</p>
+                    <p className="mb-4 text-xs text-muted-foreground">
+                      Install the Chrome extension to start capturing bugs
+                    </p>
+                    <Link
+                      href="/dashboard?ref=mcp-auth"
+                      className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                    >
+                      <Icons.download className="h-4 w-4" />
+                      Configure MCP
                     </Link>
                   </div>
                 )}
