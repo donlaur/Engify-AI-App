@@ -29,8 +29,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/engify')
+// MongoDB connection with M0-optimized settings
+const mongoOptions = {
+  maxPoolSize: 1, // M0: Limit connections
+  minPoolSize: 0, // M0: Don't maintain pool
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 10000,
+  connectTimeoutMS: 5000,
+  maxIdleTimeMS: 10000, // M0: Close idle connections quickly
+  bufferMaxEntries: 0, // M0: Disable buffering
+  bufferCommands: false, // M0: Disable command buffering
+};
+
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/engify', mongoOptions)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => {
     console.error('MongoDB connection error:', err);

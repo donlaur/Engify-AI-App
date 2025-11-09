@@ -93,13 +93,15 @@ function getMongoOptions() {
   return {
     maxPoolSize: 1, // FREE TIER: Limit to 1 connection per serverless function
     minPoolSize: 0, // FREE TIER: Don't maintain minimum connections
-    serverSelectionTimeoutMS: 10000,
-    socketTimeoutMS: 30000,
-    connectTimeoutMS: 10000,
+    serverSelectionTimeoutMS: 5000, // Faster timeout for M0
+    socketTimeoutMS: 10000, // Shorter socket timeout
+    connectTimeoutMS: 5000, // Faster connection timeout
     retryWrites: true,
     retryReads: true,
     w: 'majority' as const,
-    maxIdleTimeMS: 60000, // FREE TIER: Keep connections alive longer
+    maxIdleTimeMS: 10000, // M0: Close idle connections quickly (10s)
+    maxConnecting: 1, // M0: Limit concurrent connection attempts
+    waitQueueTimeoutMS: 5000, // M0: Don't wait long for connections
     family: 4, // Force IPv4 to avoid DNS issues
     // SSL/TLS options for MongoDB Atlas
     ...(isSrvUri
@@ -124,6 +126,7 @@ function getMongoOptions() {
 const globalWithMongo = global as typeof globalThis & {
   _mongoClientPromise?: Promise<MongoClient>;
   _mongoClient?: MongoClient;
+  _connectionTime?: number;
 };
 
 /**
@@ -132,23 +135,28 @@ const globalWithMongo = global as typeof globalThis & {
 async function createClientWithRetry(): Promise<MongoClient> {
   const uri = getMongoUri();
   const options = getMongoOptions();
-  let retries = 3;
+  let retries = 2; // M0: Fewer retries to avoid connection buildup
   let lastError: Error | null = null;
 
   while (retries > 0) {
     try {
       const client = new MongoClient(uri, options);
 
-      // Attempt connection with timeout
+      // Attempt connection with shorter timeout for M0
       await Promise.race([
         client.connect(),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Connection timeout')), 10000)
+          setTimeout(() => reject(new Error('Connection timeout')), 5000)
         ),
       ]);
 
-      // Verify connection works
-      await client.db('admin').command({ ping: 1 });
+      // Verify connection works with timeout
+      await Promise.race([
+        client.db('admin').command({ ping: 1 }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Ping timeout')), 3000)
+        ),
+      ]);
 
       return client;
     } catch (error) {
@@ -156,8 +164,8 @@ async function createClientWithRetry(): Promise<MongoClient> {
       retries--;
 
       if (retries > 0) {
-        // Exponential backoff: wait 1s, 2s, 4s
-        const delay = Math.pow(2, 3 - retries) * 1000;
+        // Faster backoff for M0: wait 500ms, 1s
+        const delay = (3 - retries) * 500;
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
@@ -173,6 +181,7 @@ function getClientPromise(): Promise<MongoClient> {
   if (!clientPromise) {
     clientPromise = createClientWithRetry();
     globalWithMongo._mongoClientPromise = clientPromise;
+    globalWithMongo._connectionTime = Date.now();
 
     // Store client reference for cleanup
     clientPromise.then((client) => {
@@ -195,21 +204,28 @@ export async function getClient(): Promise<MongoClient> {
   try {
     const client = await getClientPromise();
 
-    // Quick health check
-    try {
-      await client.db('admin').command({ ping: 1 }, { maxTimeMS: 5000 });
-    } catch (pingError) {
-      // Connection might be stale, try to reconnect
-      console.warn('MongoDB ping failed, attempting reconnect...');
-      delete globalWithMongo._mongoClientPromise;
-      delete globalWithMongo._mongoClient;
-      clientPromise = null; // Reset so it recreates
+    // Skip health check for M0 to reduce connection overhead
+    // Only check if we suspect connection is stale (older than 30s)
+    const connectionAge = Date.now() - (globalWithMongo._connectionTime || 0);
+    if (connectionAge > 30000) {
+      try {
+        await client.db('admin').command({ ping: 1 }, { maxTimeMS: 2000 });
+        globalWithMongo._connectionTime = Date.now(); // Update last check
+      } catch (pingError) {
+        // Connection might be stale, try to reconnect
+        console.warn('MongoDB ping failed, attempting reconnect...');
+        delete globalWithMongo._mongoClientPromise;
+        delete globalWithMongo._mongoClient;
+        delete globalWithMongo._connectionTime;
+        clientPromise = null; // Reset so it recreates
 
-      clientPromise = createClientWithRetry();
-      globalWithMongo._mongoClientPromise = clientPromise;
-      globalWithMongo._mongoClient = await clientPromise;
+        clientPromise = createClientWithRetry();
+        globalWithMongo._mongoClientPromise = clientPromise;
+        globalWithMongo._mongoClient = await clientPromise;
+        globalWithMongo._connectionTime = Date.now();
 
-      return await clientPromise;
+        return await clientPromise;
+      }
     }
 
     return client;
