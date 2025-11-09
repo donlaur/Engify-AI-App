@@ -1,214 +1,302 @@
 # Engify MCP Server
 
-Model Context Protocol server for Engify - connects Cursor IDE to bug reports from the Chrome extension.
+OAuth 2.1 authenticated Model Context Protocol (MCP) server for Engify bug reporting and context management.
 
-## Features
+## 🚀 Quick Start
 
-- Get new bug reports from MongoDB
-- View bug report details in Cursor
-- Mark bugs as sent to IDE
-- Automatic status tracking
-- Works with engify.ai/api/bug-reports
+### Prerequisites
+- Node.js 18+ installed
+- Engify account (Google, GitHub, or email)
+- MongoDB connection (local or cloud)
 
-## Installation
-
-1. Clone this repository
-2. Navigate to `mcp-server` directory
-3. Copy `.env.example` to `.env`
-4. Update `.env` with your MongoDB connection string
-5. Install dependencies: `npm install`
-6. Start server: `npm start`
-
-## Configuration
-
-Create `.env` file:
-
-```env
-MONGODB_URI=mongodb+srv://your_username:your_password@cluster.mongodb.net/engify
-PORT=3001
-HOST=localhost
-MCP_SERVER_NAME=engify-mcp-server
-MCP_SERVER_VERSION=1.0.0
-```
-
-## Usage
-
-### As MCP Server
-
-The server runs on stdio transport for MCP clients (IDEs, AI assistants):
+### Installation
 
 ```bash
-npm start
+# Clone the repository
+git clone https://github.com/donlaur/Engify-AI-App.git
+cd Engify-AI-App/mcp-server
+
+# Install dependencies
+pnpm install
+
+# Set up environment
+cp .env.example .env
+# Edit .env with your configuration
+
+# Authenticate the server
+pnpm auth
+
+# Start the MCP server
+pnpm start
 ```
 
-### As HTTP Server
+### IDE Configuration
 
-The server also exposes HTTP endpoints for the Chrome extension:
-
-- `POST /api/bug` - Store bug context
-- `GET /api/bugs` - Get bug history
-- `GET /health` - Health check
-
-## MCP Tools
-
-### get_new_bug_reports
-
-Get new bug reports from the dashboard that need attention.
-
-**Parameters:**
-- `limit` (number, optional): Maximum results (default: 10)
-
-**Example in Cursor:**
-```
-Use get_new_bug_reports to see what bugs users reported
-```
-
-### get_bug_report_details
-
-Get full details of a specific bug report by ID.
-
-**Parameters:**
-- `id` (string, required): Bug report ID
-
-**Example in Cursor:**
-```
-Use get_bug_report_details with id "673e5f8a1234567890abcdef"
-```
-
-### mark_bug_sent_to_ide
-
-Mark a bug report as sent to IDE (changes status from 'new' to 'sent_to_ide').
-
-**Parameters:**
-- `id` (string, required): Bug report ID
-
-**Example in Cursor:**
-```
-Use mark_bug_sent_to_ide with id "673e5f8a1234567890abcdef"
-```
-
-## API Endpoints
-
-### POST /api/bug
-
-Store bug context from Chrome extension.
-
-**Request:**
-```json
-{
-  "file": "src/components/Button.tsx",
-  "line": 42,
-  "column": 3,
-  "screenshot": "data:image/png;base64,...",
-  "description": "Button text is white on white background",
-  "url": "http://localhost:3000",
-  "userId": "user123"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Bug context stored successfully",
-  "id": "507f1f77bcf86cd799439011"
-}
-```
-
-### GET /api/bugs
-
-Get bug history.
-
-**Query Parameters:**
-- `file` (optional): Filter by file
-- `userId` (optional): Filter by user
-- `limit` (optional): Maximum results (default: 10)
-
-**Response:**
-```json
-{
-  "success": true,
-  "bugs": [
-    {
-      "_id": "507f1f77bcf86cd799439011",
-      "file": "src/components/Button.tsx",
-      "line": 42,
-      "column": 3,
-      "timestamp": "2025-11-08T10:30:00.000Z",
-      "description": "Button text is white on white background"
-    }
-  ]
-}
-```
-
-## Database Schema
-
-### Bugs Collection
-
-```javascript
-{
-  _id: ObjectId,
-  file: String,
-  line: Number,
-  column: Number,
-  screenshot: String,
-  description: String,
-  timestamp: Date,
-  url: String,
-  userId: String
-}
-```
-
-## Development
-
-### Running in Development
-
-```bash
-npm run dev
-```
-
-### Testing MCP Tools
-
-Use an MCP client to test tools:
-
-```bash
-echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "store_bug_context", "arguments": {"file": "test.js", "line": 1, "column": 1}}}' | npm start
-```
-
-### Testing HTTP API
-
-```bash
-# Health check
-curl http://localhost:3001/health
-
-# Store bug
-curl -X POST http://localhost:3001/api/bug \
-  -H "Content-Type: application/json" \
-  -d '{"file": "test.js", "line": 1, "column": 1, "description": "Test bug"}'
-
-# Get bugs
-curl http://localhost:3001/api/bugs
-```
-
-## Integration with Chrome Extension
-
-The Chrome extension sends bug context to `/api/bug`. The server stores it in MongoDB and makes it available via MCP tools for IDE integration.
-
-## Integration with IDEs
-
-Configure your IDE (VS Code, Cursor) to connect to this MCP server:
+Add to your Cursor or VS Code settings:
 
 ```json
 {
   "mcpServers": {
     "engify": {
-      "command": "node",
-      "args": ["/path/to/mcp-server/server.js"]
+      "command": "pnpm",
+      "args": ["start"],
+      "cwd": "/path/to/engify-mcp-server"
     }
   }
 }
 ```
 
-## License
+Restart your IDE and start using:
+```
+@Engify get new bug reports
+@Engify get bug report details with id "your-bug-id"
+```
 
-MIT
+## 📋 Available Tools
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `get_new_bug_reports` | Get new bug reports from your dashboard | `limit` (optional, default: 10) |
+| `get_bug_report_details` | Get full details of a specific bug report | `id` (required) |
+| `mark_bug_sent_to_ide` | Mark a bug report as sent to IDE | `id` (required) |
+| `search_similar_bugs` | Search for similar bug reports | `description` (required), `limit` (optional) |
+
+## 🔐 Authentication
+
+The MCP server uses OAuth 2.1 with PKCE for secure authentication:
+
+1. **Run `pnpm auth`** - Opens dashboard with `?ref=mcp-auth`
+2. **Generate token** - Click "Generate MCP Token" in modal
+3. **Auto-copy** - Token copied to clipboard automatically
+4. **Stored locally** - Token saved in `~/.engify-mcp-auth.json`
+5. **Auto-refresh** - Prompts for new token when expired
+
+### Token Management
+
+```bash
+# Check authentication status
+pnpm auth status
+
+# Generate new token
+pnpm auth generate
+
+# Check/refresh existing token
+pnpm auth check
+```
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   IDE (Cursor)  │───▶│  MCP Launcher    │───▶│  OAuth Server   │
+│                 │    │                  │    │                  │
+│ @Engify commands│    │ Token validation │    │ Token generation│
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │   MCP Server    │
+                       │                  │
+                       │ Bug report tools│
+                       │ Multi-tenant DB │
+                       └─────────────────┘
+```
+
+### Security Features
+
+- ✅ **OAuth 2.1 Compliance**: Full PKCE implementation
+- ✅ **Multi-tenant Isolation**: Users only access their own data
+- ✅ **JWT Token Security**: 1-hour expiry, signature validation
+- ✅ **Secure Storage**: Tokens stored locally, never in environment
+- ✅ **Rate Limiting**: Protection against abuse
+- ✅ **Input Validation**: All parameters validated
+
+## 🛠️ Development
+
+### Project Structure
+
+```
+mcp-server/
+├── engify-mcp-auth.ts          # Authentication script
+├── engify-mcp-launcher.ts      # Server launcher with validation
+├── server.js                   # Main MCP server
+├── test-setup.js              # Quick validation script
+├── package.json               # Dependencies and scripts
+├── .env.example               # Environment template
+├── README.md                  # This file
+├── AUTH_SETUP.md              # Authentication guide
+├── LAUNCHER.md                # Launcher documentation
+├── TEST_END_TO_END.md         # Testing guide
+└── DEPLOYMENT.md              # Production deployment
+```
+
+### Scripts
+
+```bash
+# Start MCP server (with launcher)
+pnpm start
+
+# Start server directly (advanced)
+pnpm start:server
+
+# Authentication
+pnpm auth              # Interactive authentication
+pnpm auth status       # Check status
+pnpm auth generate     # Generate new token
+
+# Testing
+pnpm test              # Run test setup
+node test-setup.js     # Quick validation
+
+# Development
+pnpm dev               # Development mode
+```
+
+### Environment Variables
+
+```bash
+# JWT Configuration
+NEXTAUTH_SECRET=your-secret-here
+NEXTAUTH_URL=https://engify.ai
+
+# Database
+MONGODB_URI=mongodb://localhost:27017/engify
+
+# Server
+MCP_SERVER_NAME=engify-mcp-server
+MCP_SERVER_VERSION=1.0.0
+PORT=3001
+```
+
+## 🧪 Testing
+
+### Quick Test
+
+```bash
+# Run the setup test
+node test-setup.js
+
+# Follow the comprehensive test guide
+# See TEST_END_TO_END.md
+```
+
+### Manual Testing
+
+1. **Authentication Test**
+   ```bash
+   pnpm auth status
+   ```
+
+2. **Server Startup Test**
+   ```bash
+   pnpm start
+   # Should start successfully with valid token
+   ```
+
+3. **Tool Test**
+   ```
+   @Engify get new bug reports
+   ```
+
+## 📊 Monitoring
+
+### Health Checks
+
+```bash
+# Authentication status
+pnpm auth status
+
+# Server startup test
+timeout 5 pnpm start
+
+# Database connection
+node -e "require('mongoose').connect(process.env.MONGODB_URI)"
+```
+
+### Logging
+
+```bash
+# Enable debug logging
+DEBUG=* pnpm start
+
+# Log to file
+pnpm start 2>&1 | tee engify-mcp.log
+```
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| "No authentication found" | Run `pnpm auth` |
+| "Token expired" | Run `pnpm auth generate` |
+| "Server won't start" | Check Node.js version, dependencies, MongoDB |
+| "No data returned" | Verify userId in database, check token expiry |
+| "IDE connection issues" | Check MCP configuration, restart IDE |
+
+### Debug Commands
+
+```bash
+# Validate JWT token
+node -e "
+const { jwtVerify } = require('jose');
+const token = 'your-token';
+jwtVerify(token, new TextEncoder().encode(process.env.NEXTAUTH_SECRET))
+  .then(() => console.log('✅ Token valid'))
+  .catch(err => console.log('❌ Token invalid:', err));
+"
+
+# Test database connection
+node -e "
+const mongoose = require('mongoose');
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ DB connected'))
+  .catch(err => console.log('❌ DB failed:', err));
+"
+```
+
+## 🚀 Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete production deployment guide.
+
+### Production Checklist
+
+- [ ] Strong JWT secret configured
+- [ ] MongoDB with authentication enabled
+- [ ] Rate limiting configured
+- [ ] SSL/TLS enabled
+- [ ] Backup procedures in place
+- [ ] Monitoring and logging set up
+- [ ] Security audit completed
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - see [LICENSE](../LICENSE) file for details.
+
+## 🆘 Support
+
+- 📖 [Documentation](./)
+- 🔐 [Authentication Guide](./AUTH_SETUP.md)
+- 🚀 [Launcher Guide](./LAUNCHER.md)
+- 🧪 [Testing Guide](./TEST_END_TO_END.md)
+- 📦 [Deployment Guide](./DEPLOYMENT.md)
+- 🐛 [Issues](https://github.com/donlaur/Engify-AI-App/issues)
+
+## 🔗 Related Projects
+
+- [Engify Dashboard](../src/app/dashboard/) - Main web application
+- [Chrome Extension](../src/chrome-extension/) - Visual bug reporting
+- [OAuth Server](../src/app/api/mcp-auth/) - Authentication endpoints
+
+---
+
+**Built with ❤️ for the developer community**

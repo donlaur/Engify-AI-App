@@ -8,8 +8,9 @@
     "start:server": "node server.js",
     "dev": "tsx engify-mcp-launcher.ts",
     "auth": "tsx engify-mcp-auth.ts",
-    "example": "node example.js",
-    "test": "node example.js"
+    "test": "node test-setup.js",
+    "test:e2e": "echo 'Run TEST_END_TO_END.md steps manually'",
+    "example": "node example.js"
   },
   "keywords": [
     "mcp",
