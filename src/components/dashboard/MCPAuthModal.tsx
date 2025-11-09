@@ -243,7 +243,7 @@ Add it to the existing mcpServers object, keeping the existing servers.`;
                     {/* Cursor */}
                     <details className="bg-white p-3 rounded border">
                       <summary className="font-medium cursor-pointer flex items-center gap-2">
-                        <Icons.cursor className="h-4 w-4" />
+                        <Icons.terminal className="h-4 w-4" />
                         Cursor
                       </summary>
                       <div className="mt-3 space-y-2">
@@ -293,7 +293,7 @@ Add it to the existing mcpServers object, keeping the existing servers.`;
                     {/* VS Code */}
                     <details className="bg-white p-3 rounded border">
                       <summary className="font-medium cursor-pointer flex items-center gap-2">
-                        <Icons.vscode className="h-4 w-4" />
+                        <Icons.code className="h-4 w-4" />
                         VS Code
                       </summary>
                       <div className="mt-3">
