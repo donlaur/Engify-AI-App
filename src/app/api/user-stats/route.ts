@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
 import { getDb } from '@/lib/mongodb';
 
 // GET /api/user-stats - Get user statistics
@@ -11,11 +10,13 @@ export async function GET(_request: NextRequest) {
     const db = await getDb();
     
     // Get or create user stats
-    let userStats = await db.collection('user_stats').findOne({ userId });
+    const userStats = await db.collection('user_stats').findOne({ userId });
+    
+    let statsData: any;
     
     if (!userStats) {
       // Create initial stats
-      userStats = {
+      const initialStats = {
         userId,
         daysLoggedIn: 0,
         lastLoginDate: null,
@@ -24,12 +25,15 @@ export async function GET(_request: NextRequest) {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      await db.collection('user_stats').insertOne(userStats);
+      await db.collection('user_stats').insertOne(initialStats);
+      statsData = initialStats;
+    } else {
+      statsData = userStats;
     }
     
     // Check if user has logged in today
     const today = new Date().toDateString();
-    const lastLogin = userStats.lastLoginDate ? new Date(userStats.lastLoginDate).toDateString() : null;
+    const lastLogin = statsData.lastLoginDate ? new Date(statsData.lastLoginDate).toDateString() : null;
     
     if (lastLogin !== today) {
       // New day login - increment days
@@ -48,9 +52,9 @@ export async function GET(_request: NextRequest) {
         }
       );
       
-      userStats.daysLoggedIn += 1;
-      userStats.totalSessions += 1;
-      userStats.lastLoginDate = new Date();
+      statsData.daysLoggedIn += 1;
+      statsData.totalSessions += 1;
+      statsData.lastLoginDate = new Date();
     } else {
       // Same day login - just increment sessions
       await db.collection('user_stats').updateOne(
@@ -61,16 +65,16 @@ export async function GET(_request: NextRequest) {
         }
       );
       
-      userStats.totalSessions += 1;
+      statsData.totalSessions += 1;
     }
     
     return NextResponse.json({
       success: true,
       data: {
-        daysLoggedIn: userStats.daysLoggedIn,
-        totalSessions: userStats.totalSessions,
-        lastLoginDate: userStats.lastLoginDate,
-        streak: calculateStreak(userStats.loginDates || []),
+        daysLoggedIn: statsData.daysLoggedIn,
+        totalSessions: statsData.totalSessions,
+        lastLoginDate: statsData.lastLoginDate,
+        streak: calculateStreak(statsData.loginDates || []),
       }
     });
     
