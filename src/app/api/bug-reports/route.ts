@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
       elementSize,
       timestamp,
       userAgent,
-      userId, // Optional: can be sent from extension
     } = body;
 
     // Validate required fields
