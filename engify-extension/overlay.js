@@ -509,7 +509,7 @@ async function handleSubmit() {
   } else if (selectedMode === 'dashboard') {
     // Send to dashboard API
     try {
-      const response = await fetch('https://www.engify.ai/api/bug-reports', {
+      const response = await fetch('http://localhost:3000/api/bug-reports', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
