@@ -8,6 +8,7 @@
  */
 
 const mongoose = require('mongoose');
+const auth = require('./auth');
 require('dotenv').config();
 
 // Same schema as server.js
@@ -34,6 +35,20 @@ const BugReport = mongoose.model('BugReport', BugReportSchema, 'bug_reports');
 async function main() {
   console.log('🚀 Engify MCP Server - Working Example\n');
 
+  // Check authentication
+  if (!auth.isAuthenticated()) {
+    console.log('Not authenticated. Starting login flow...\n');
+    try {
+      await auth.authenticate();
+    } catch (error) {
+      console.error('❌ Authentication failed:', error.message);
+      process.exit(1);
+    }
+  } else {
+    const user = auth.getUserInfo();
+    console.log(`✅ Authenticated as: ${user.name || user.email}\n`);
+  }
+
   // Connect to MongoDB
   try {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/engify');
@@ -42,6 +57,10 @@ async function main() {
     console.error('❌ MongoDB connection failed:', error.message);
     process.exit(1);
   }
+  
+  // Get user's bug reports only
+  const user = auth.getUserInfo();
+  const userFilter = { userId: user.userId };
 
   // Example 1: Get new bug reports (simulates get_new_bug_reports tool)
   console.log('📋 Example 1: Get New Bug Reports');
