@@ -4,8 +4,9 @@
   "description": "MCP server for Engify - AI accountability platform",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
+    "start": "tsx engify-mcp-launcher.ts",
+    "start:server": "node server.js",
+    "dev": "tsx engify-mcp-launcher.ts",
     "auth": "tsx engify-mcp-auth.ts",
     "example": "node example.js",
     "test": "node example.js"
@@ -26,6 +27,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "inquirer": "^12.11.0",
+    "jose": "^6.1.0",
     "mongodb": "^7.0.0",
     "mongoose": "^8.0.0",
     "open": "^10.2.0"

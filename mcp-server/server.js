@@ -11,6 +11,19 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+// Get credentials from command line arguments or environment
+const args = process.argv.slice(2);
+const userId = args[0] || process.env.ENGIFY_USER_ID;
+const accessToken = args[1] || process.env.ENGIFY_ACCESS_TOKEN;
+
+// Validate credentials
+if (!userId || !accessToken) {
+  console.error('❌ Missing credentials. Use engify-mcp-launcher.ts to start server.');
+  process.exit(1);
+}
+
+console.log(`🚀 Starting Engify MCP Server for user: ${userId}`);
+
 // Express app for Chrome extension
 const app = express();
 app.use(cors());
@@ -19,10 +32,14 @@ app.use(express.json());
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/engify')
   .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
 
 // Bug Report Schema (matches /api/bug-reports)
 const BugReportSchema = new mongoose.Schema({
+  userId: { type: String, required: true, index: true }, // Multi-tenant support
   intent: { type: String, required: true }, // 'bug', 'learn', 'debug', 'design'
   description: { type: String, required: true },
   pageUrl: { type: String, required: true },
@@ -55,13 +72,16 @@ const server = new Server(
   },
 );
 
+// Helper function to filter by user ID
+const userFilter = { userId };
+
 // MCP Tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
         name: 'get_new_bug_reports',
-        description: 'Get new bug reports from the dashboard that need attention',
+        description: 'Get new bug reports from your dashboard that need attention',
         inputSchema: {
           type: 'object',
           properties: {
@@ -113,7 +133,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     switch (name) {
       case 'get_new_bug_reports':
-        const reports = await BugReport.find({ status: 'new' })
+        const reports = await BugReport.find({ 
+          ...userFilter, 
+          status: 'new' 
+        })
           .sort({ createdAt: -1 })
           .limit(args.limit || 10);
           
@@ -143,24 +166,25 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
 
       case 'get_bug_report_details':
-        const report = await BugReport.findById(args.id);
+        const report = await BugReport.findOne({ 
+          ...userFilter, 
+          _id: args.id 
+        });
         
         if (!report) {
-          throw new Error('Bug report not found');
+          throw new Error('Bug report not found or access denied');
         }
-        
+
         return {
           content: [
             {
               type: 'text',
-              text: `🐛 Bug Report Details\n\n` +
+              text: `Bug Report Details:\n\n` +
                     `ID: ${report._id}\n` +
                     `Page: ${report.pageUrl}\n` +
                     `Description: ${report.description}\n` +
                     `Element: ${report.selector || 'N/A'}\n` +
                     `Element Text: ${report.elementText || 'N/A'}\n` +
-                    `Size: ${report.elementSize || 'N/A'}\n` +
-                    `User Agent: ${report.userAgent || 'N/A'}\n` +
                     `Status: ${report.status}\n` +
                     `Created: ${report.createdAt}\n`
             }
@@ -168,61 +192,57 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
 
       case 'mark_bug_sent_to_ide':
-        const updated = await BugReport.findByIdAndUpdate(
-          args.id,
-          { status: 'sent_to_ide', updatedAt: new Date() },
-          { new: true }
+        const updateResult = await BugReport.updateOne(
+          { 
+            ...userFilter, 
+            _id: args.id 
+          },
+          { 
+            status: 'sent_to_ide',
+            updatedAt: new Date()
+          }
         );
         
-        if (!updated) {
-          throw new Error('Bug report not found');
+        if (updateResult.matchedCount === 0) {
+          throw new Error('Bug report not found or access denied');
         }
-        
+
         return {
           content: [
             {
               type: 'text',
-              text: `✅ Bug report ${args.id} marked as sent to IDE`
+              text: `Bug report ${args.id} marked as sent to IDE`
             }
           ]
         };
 
       case 'search_similar_bugs':
-        // Use RAG to find similar bugs
-        const ragUrl = process.env.RAG_API_URL || 'http://localhost:8000';
-        const searchResponse = await fetch(`${ragUrl}/search`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: args.description })
-        });
-        
-        if (!searchResponse.ok) {
-          throw new Error('RAG search failed');
-        }
-        
-        const searchData = await searchResponse.json();
-        const similarBugs = searchData.results || [];
-        
-        if (similarBugs.length === 0) {
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `No similar bugs found for: "${args.description}"`
-              }
-            ]
-          };
-        }
-        
+        // For now, simple text search. Later integrate with RAG service
+        const searchResults = await BugReport.find({
+          ...userFilter,
+          description: { $regex: args.description, $options: 'i' }
+        })
+          .sort({ createdAt: -1 })
+          .limit(args.limit || 5);
+
+        const searchFormatted = searchResults.map(r => ({
+          id: r._id,
+          description: r.description,
+          page: r.pageUrl,
+          status: r.status,
+          createdAt: r.createdAt
+        }));
+
         return {
           content: [
             {
               type: 'text',
-              text: `Found ${similarBugs.length} similar bug(s):\n\n` +
-                    similarBugs.slice(0, args.limit || 5).map((bug, i) =>
-                      `${i + 1}. [Score: ${(bug.score * 100).toFixed(1)}%]\n` +
-                      `   ${bug.content}\n` +
-                      `   ID: ${bug._id}\n`
+              text: `Found ${searchFormatted.length} similar bug reports:\n\n` +
+                    searchFormatted.map((r, i) => 
+                      `${i + 1}. [${r.id}] ${r.status}\n` +
+                      `   Issue: ${r.description}\n` +
+                      `   Page: ${r.page}\n` +
+                      `   Time: ${r.createdAt}\n`
                     ).join('\n')
             }
           ]
@@ -244,28 +264,46 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-// Health check (MCP server status)
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    mcp: 'running',
-    message: 'MCP server is running. Use MCP tools to interact with bug reports.'
-  });
+// Express routes for Chrome extension (still needed)
+app.get('/api/bug-reports', async (req, res) => {
+  try {
+    const reports = await BugReport.find(userFilter)
+      .sort({ createdAt: -1 })
+      .limit(50);
+    res.json(reports);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-// Start Express server (just for health check)
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`MCP server health endpoint: http://localhost:${PORT}/health`);
-  console.log(`Bug reports are managed via main API at engify.ai/api/bug-reports`);
+app.post('/api/bug-reports', async (req, res) => {
+  try {
+    const bugReport = new BugReport({
+      ...req.body,
+      userId // Add user ID for multi-tenant support
+    });
+    await bugReport.save();
+    res.status(201).json(bugReport);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-// Start MCP server
+// Start servers
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('MCP server running on stdio');
+  
+  // Start Express server for Chrome extension
+  const port = process.env.PORT || 3001;
+  app.listen(port, () => {
+    console.log(`🌐 Express server listening on port ${port}`);
+  });
+  
+  console.error('✅ Engify MCP Server started successfully');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error('❌ Failed to start server:', error);
+  process.exit(1);
+});
