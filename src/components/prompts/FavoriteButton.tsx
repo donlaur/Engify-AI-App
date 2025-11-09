@@ -53,14 +53,16 @@ export function FavoriteButton({
         setIsFavorited(true);
         onToggle?.(true);
 
-        // Track analytics
-        await fetch('/api/analytics/track', {
+        // Track in Redis (fast, non-blocking)
+        fetch('/api/analytics/track', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             promptId,
             event: 'favorite',
           }),
+        }).catch(() => {
+          // Silent fail - analytics shouldn't break favorites
         });
       }
     } catch (error) {

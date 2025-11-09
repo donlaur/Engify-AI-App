@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generatePromptsJson } from '@/lib/prompts/generate-prompts-json';
 import { generatePatternsJson } from '@/lib/patterns/generate-patterns-json';
 import { logger } from '@/lib/logging/logger';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -19,6 +20,15 @@ export const maxDuration = 60;
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting (10 requests per minute for webhooks)
+    const rateLimitResult = await checkRateLimit(request, { limit: 10, window: 60 });
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429 }
+      );
+    }
+
     // Verify webhook secret
     const authHeader = request.headers.get('authorization');
     const expectedAuth = `Bearer ${process.env.WEBHOOK_SECRET || process.env.CRON_SECRET}`;
