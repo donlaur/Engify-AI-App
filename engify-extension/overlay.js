@@ -255,26 +255,16 @@ function createOverlay() {
     </div>
     
     <div class="engify-content">
-      <!-- Screen 1: Intent -->
+      <!-- Screen 1: Choose Intent (Bug Only for MVP) -->
       <div class="engify-screen active" id="engify-screen-intent">
-        <h3 style="margin: 0 0 16px 0; font-size: 16px; text-align: center;">What do you want to do?</h3>
-        <div class="engify-intent-grid">
-          <div class="engify-intent-card" data-intent="bug">
-            <div class="engify-intent-icon">🐛</div>
-            <div class="engify-intent-title">Report Bug</div>
+        <h3 style="margin: 0 0 16px 0; font-size: 16px; text-align: center;">Report a Bug</h3>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 48px; margin-bottom: 12px;">🐛</div>
+          <div style="font-size: 14px; color: #6c757d; margin-bottom: 20px;">
+            Click an element on the page to report an issue
           </div>
-          <div class="engify-intent-card" data-intent="learn">
-            <div class="engify-intent-icon">💡</div>
-            <div class="engify-intent-title">Learn Code</div>
-          </div>
-          <div class="engify-intent-card" data-intent="debug">
-            <div class="engify-intent-icon">📊</div>
-            <div class="engify-intent-title">Debug Issue</div>
-          </div>
-          <div class="engify-intent-card" data-intent="design">
-            <div class="engify-intent-icon">🎨</div>
-            <div class="engify-intent-title">Design Feedback</div>
-          </div>
+          <button class="engify-btn engify-btn-primary" id="engify-start-bug-report">Start Bug Report</button>
         </div>
       </div>
       
@@ -384,14 +374,12 @@ function setupEventListeners() {
     overlayContainer = null;
   });
   
-  // Intent selection
-  document.querySelectorAll('.engify-intent-card').forEach(card => {
-    card.addEventListener('click', () => {
-      selectedIntent = card.dataset.intent;
-      showScreen('engify-screen-select');
-      // Tell content script to start selection mode
-      window.postMessage({ type: 'engify_toggle_inspect' }, '*');
-    });
+  // Start bug report button
+  document.getElementById('engify-start-bug-report').addEventListener('click', () => {
+    selectedIntent = 'bug'; // Always bug for MVP
+    showScreen('engify-screen-select');
+    // Tell content script to start selection mode
+    window.postMessage({ type: 'engify_toggle_inspect' }, '*');
   });
   
   // Cancel
@@ -543,10 +531,9 @@ async function handleSubmit() {
   }
 }
 
-// Format report as AI prompt
+// Format report as AI prompt (Bug reports only for MVP)
 function formatReport() {
   console.log('Formatting report with selectedElement:', selectedElement);
-  const intentEmoji = { bug: '🐛', learn: '💡', debug: '📊', design: '🎨' };
   const description = document.getElementById('engify-description').value;
   
   // Build element context
@@ -560,9 +547,8 @@ function formatReport() {
   
   console.log('Formatted data:', { selector, text, size });
   
-  // Format as AI-ready prompt
-  if (selectedIntent === 'bug') {
-    return `As an end user, I found this bug on your website:
+  // Format as bug report
+  return `🐛 Bug Report
 
 **Page:** ${window.location.href}
 
@@ -577,47 +563,6 @@ ${text}
 - Size: ${size}
 
 Can you help me fix this?`;
-  } else if (selectedIntent === 'learn') {
-    return `${intentEmoji[selectedIntent]} Help me understand this code:
-
-**What I want to learn:**
-${description}
-
-**Element I'm looking at:**
-- Selector: \`${selector}\`
-- Content: ${text}
-- Page: ${window.location.href}
-
-**Please explain:**
-How does this element work? What's the code doing here?`;
-  } else if (selectedIntent === 'design') {
-    return `${intentEmoji[selectedIntent]} Design feedback for my website:
-
-**Feedback:**
-${description}
-
-**Element:**
-- Selector: \`${selector}\`
-- Current text: ${text}
-- Current size: ${size}
-- Page: ${window.location.href}
-
-**What I need:**
-CSS/HTML changes to improve this element's design.`;
-  } else {
-    return `${intentEmoji[selectedIntent]} ${selectedIntent.toUpperCase()}
-
-**Request:**
-${description}
-
-**Element:**
-- Selector: \`${selector}\`
-- Content: ${text}
-- Size: ${size}
-- Page: ${window.location.href}
-
-**Help me with this.**`;
-  }
 }
 
 // Listen for messages
