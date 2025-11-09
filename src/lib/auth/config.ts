@@ -28,7 +28,7 @@ const loginSchema = z.object({
 const USE_COGNITO = !!process.env.COGNITO_USER_POOL_ID;
 
 export const authOptions: NextAuthConfig = {
-  adapter: MongoDBAdapter(getClient()) as any,
+  adapter: MongoDBAdapter(getClient()),
 
   providers: [
     // Email/Password authentication
@@ -183,6 +183,11 @@ export const authOptions: NextAuthConfig = {
         secure: process.env.NODE_ENV === 'production',
       },
     },
+  },
+
+  session: {
+    strategy: 'jwt',
+    maxAge: adminSessionMaxAgeSeconds, // 1 hour for admin sessions
   },
 
   pages: {
