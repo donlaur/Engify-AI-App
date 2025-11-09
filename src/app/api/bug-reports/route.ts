@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
+import { authOptions } from '@/lib/auth/config';
 
 // CORS headers for Chrome extension
 const corsHeaders = {
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     // Get user from session or use provided userId
     let finalUserId = userId;
     if (!finalUserId) {
-      const session = await getServerSession(authOptions);
+      const session = await auth();
       if (session?.user?.id) {
         finalUserId = session.user.id;
       }
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
 
     // Get user from session
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     const userId = session?.user?.id;
 
     // Connect to database
