@@ -32,13 +32,11 @@ app.use(express.json());
 // MongoDB connection with M0-optimized settings
 const mongoOptions = {
   maxPoolSize: 1, // M0: Limit connections
-  minPoolSize: 0, // M0: Don't maintain pool
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 10000,
-  connectTimeoutMS: 5000,
+  minPoolSize: 0,
   maxIdleTimeMS: 10000, // M0: Close idle connections quickly
-  bufferMaxEntries: 0, // M0: Disable buffering
-  bufferCommands: false, // M0: Disable command buffering
+  serverSelectionTimeoutMS: 5000, // M0: Faster timeout
+  socketTimeoutMS: 10000, // M0: Faster socket timeout
+  connectTimeoutMS: 5000, // M0: Faster connect timeout
 };
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/engify', mongoOptions)

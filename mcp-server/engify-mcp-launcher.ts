@@ -12,6 +12,7 @@
  * Used by IDEs (Cursor/VS Code) to start authenticated MCP server.
  */
 
+import 'dotenv/config';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
