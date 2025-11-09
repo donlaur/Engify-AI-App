@@ -22,7 +22,7 @@
  */
 
 import { getDb } from '@/lib/mongodb';
-import type { Db, Collection, Filter, FindOptions, Document, WithId } from 'mongodb';
+import type { Db, Collection, Filter, FindOptions, Document } from 'mongodb';
 import { logger } from '@/lib/logging/logger';
 
 /**
@@ -84,7 +84,7 @@ export abstract class BaseRepository<T extends Document> {
         ...restOptions,
         maxTimeMS: 15000, // 15 second timeout for queries that return multiple docs
       } as FindOptions<T>;
-      return collection.find(filter, queryOptions).toArray() as T[];
+      return collection.find(filter, queryOptions).toArray() as unknown as T[];
     } catch (error) {
       // During build, return empty array to avoid build failures
       if (error instanceof Error && error.message.includes('BUILD_MODE')) {
@@ -120,7 +120,7 @@ export abstract class BaseRepository<T extends Document> {
         ...restOptions,
         maxTimeMS: 5000, // 5 second timeout (critical for build)
       } as FindOptions<T>;
-      return collection.findOne(filter, queryOptions) as T | null;
+      return collection.findOne(filter, queryOptions) as unknown as T | null;
     } catch (error) {
       // During build, return null to avoid build failures
       if (error instanceof Error && error.message.includes('BUILD_MODE')) {
@@ -164,11 +164,11 @@ export abstract class BaseRepository<T extends Document> {
    * Aggregate pipeline
    */
   protected async aggregate<TResult extends Document = T>(
-    pipeline: unknown[]
+    pipeline: Document[]
   ): Promise<TResult[]> {
     try {
       const collection = await this.getCollection();
-      return collection.aggregate<TResult>(pipeline).toArray() as TResult[];
+      return collection.aggregate<TResult>(pipeline).toArray() as unknown as TResult[];
     } catch (error) {
       // During build, return empty array to avoid build failures
       if (error instanceof Error && error.message.includes('BUILD_MODE')) {
