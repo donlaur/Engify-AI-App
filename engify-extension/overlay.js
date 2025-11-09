@@ -462,13 +462,25 @@ async function handleSubmit() {
 // Format report
 function formatReport() {
   const intentEmoji = { bug: '🐛', learn: '💡', debug: '📊', design: '🎨' };
+  const description = document.getElementById('engify-description').value;
+  
+  // Build element info
+  const elementInfo = [];
+  elementInfo.push(`Selector: ${selectedElement.selector || 'N/A'}`);
+  if (selectedElement.textContent) {
+    elementInfo.push(`Text: "${selectedElement.textContent.substring(0, 100)}${selectedElement.textContent.length > 100 ? '...' : ''}"`);
+  }
+  if (selectedElement.dimensions) {
+    elementInfo.push(`Size: ${selectedElement.dimensions.width}x${selectedElement.dimensions.height}px`);
+  }
+  
   return `${intentEmoji[selectedIntent]} ${selectedIntent.toUpperCase()} REPORT
 
 Description:
-${document.getElementById('engify-description').value}
+${description}
 
 Element:
-${selectedElement.tagName}${selectedElement.id ? '#' + selectedElement.id : ''}
+${elementInfo.join('\n')}
 
 Page: ${window.location.href}
 Timestamp: ${new Date().toISOString()}`;
