@@ -870,11 +870,44 @@ our
 - ❌ Video recording
 - ❌ Performance monitoring
 - ❌ Accessibility scanning
+- ❌ MCP marketplace listing
+- ❌ IDE configuration helpers (JSON validator, auto-setup)
+- ❌ One-click MCP installer
 
 ### **Why Not Now?**
 - Need to validate core workflow first
 - Can add incrementally after MVP works
 - Don't want to over-engineer before usage
+
+---
+
+## Phase 2: MCP Marketplace Strategy
+
+### **Marketplace Opportunity**
+The MCP ecosystem is new (Oct 2024) and growing rapidly. Being early provides:
+- First-mover advantage in bug reporting category
+- Visibility to early adopters
+- Feedback loop for product improvement
+- Potential acquisition by IDE vendors
+
+### **Marketplace Requirements**
+1. **Package the MCP server** as npm package
+2. **Simplified installation** - no manual auth scripts
+3. **Auto-configuration** for major IDEs
+4. **Free tier** with limited features
+5. **Pro upgrade path** via dashboard
+
+### **Implementation Plan**
+- **Week 1**: Package MCP server as `@engify/mcp-server`
+- **Week 2**: Create installer script with auto-setup
+- **Week 3**: Submit to MCP marketplace
+- **Week 4**: Launch with documentation
+
+### **Competitive Advantage**
+- Only bug reporter with OAuth 2.1 security
+- Multi-tenant support (others are single-user)
+- Built-in memory/learning system
+- Enterprise-ready from day one
 
 ---
 
