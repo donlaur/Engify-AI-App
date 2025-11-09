@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { auth } from '@/lib/auth';
-import { authOptions } from '@/lib/auth/config';
 
 // CORS headers for Chrome extension
 const corsHeaders = {
