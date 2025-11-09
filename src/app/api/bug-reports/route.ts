@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 
+// CORS headers for Chrome extension
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -46,12 +57,12 @@ export async function POST(request: NextRequest) {
       success: true,
       reportId: result.insertedId,
       message: 'Bug report submitted successfully',
-    });
+    }, { headers: corsHeaders });
   } catch (error) {
     console.error('Error submitting bug report:', error);
     return NextResponse.json(
       { error: 'Failed to submit bug report' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -83,12 +94,12 @@ export async function GET(request: NextRequest) {
       success: true,
       reports,
       count: reports.length,
-    });
+    }, { headers: corsHeaders });
   } catch (error) {
     console.error('Error fetching bug reports:', error);
     return NextResponse.json(
       { error: 'Failed to fetch bug reports' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
