@@ -248,12 +248,15 @@ function handleSelectionClick(event) {
   };
   sessionStorage.setItem('engifySelectedElement', JSON.stringify(compactElementInfo));
   
-  // Send to popup (if it's open) and background
+  // Send to overlay
+  if (window.engifyOverlay) {
+    window.engifyOverlay.handleElementSelected(compactElementInfo);
+  }
+  
+  // Also send to background
   chrome.runtime.sendMessage({
     type: 'element_selected',
     element: elementInfo
-  }, (response) => {
-    console.log('Element sent to popup:', response);
   });
   
   // Turn off inspect mode
@@ -261,8 +264,7 @@ function handleSelectionClick(event) {
   document.body.style.cursor = 'default';
   removeHighlight();
   
-  // Don't show notification - popup will update instead
-  console.log('✅ Element selected, sent to popup');
+  console.log('✅ Element selected, sent to overlay');
 }
 
 // Handle mouse move for hover effect

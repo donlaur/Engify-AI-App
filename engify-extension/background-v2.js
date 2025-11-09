@@ -2,36 +2,19 @@
 
 console.log('🚀 Engify background script v2 loaded');
 
-// Listen for extension icon click
+// Listen for extension icon click - show overlay instead of popup
 chrome.action.onClicked.addListener(async (tab) => {
   console.log('Extension icon clicked on tab:', tab.id);
   
   try {
-    // Send message to content script
+    // Send message to show overlay
     const response = await chrome.tabs.sendMessage(tab.id, {
-      type: 'toggle_inspect'
+      type: 'show_overlay'
     });
     
-    console.log('Content script response:', response);
+    console.log('Overlay shown:', response);
   } catch (error) {
-    console.error('Error sending message to content script:', error);
-    
-    // Try to inject content script
-    try {
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['content-simple.js']
-      });
-      
-      // Try again after injection
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        type: 'toggle_inspect'
-      });
-      
-      console.log('Content script response after injection:', response);
-    } catch (injectError) {
-      console.error('Failed to inject content script:', injectError);
-    }
+    console.error('Error showing overlay:', error);
   }
 });
 

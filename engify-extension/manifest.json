@@ -14,11 +14,10 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content-enhanced.js"]
+      "js": ["overlay.js", "content-enhanced.js"]
     }
   ],
   "action": {
-    "default_popup": "popup-v3.html",
     "default_title": "Engify - Visual Bug Reporter"
   },
   "icons": {
