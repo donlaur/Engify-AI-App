@@ -8,13 +8,14 @@ chrome.action.onClicked.addListener(async (tab) => {
   
   try {
     // Send message to show overlay
-    const response = await chrome.tabs.sendMessage(tab.id, {
+    await chrome.tabs.sendMessage(tab.id, {
       type: 'show_overlay'
     });
     
-    console.log('Overlay shown:', response);
+    console.log('Overlay shown');
   } catch (error) {
-    console.error('Error showing overlay:', error);
+    // Silently fail - content script will handle it
+    console.log('Content script not ready yet, overlay will show on page load');
   }
 });
 
