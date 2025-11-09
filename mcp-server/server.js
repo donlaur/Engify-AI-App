@@ -90,6 +90,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
           required: ['id']
         }
+      },
+      {
+        name: 'search_similar_bugs',
+        description: 'Search for similar bug reports using semantic search (RAG)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            description: { type: 'string', description: 'Bug description to search for', required: true },
+            limit: { type: 'number', description: 'Maximum number of results (default: 5)' }
+          },
+          required: ['description']
+        }
       }
     ]
   };
@@ -171,6 +183,47 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: `✅ Bug report ${args.id} marked as sent to IDE`
+            }
+          ]
+        };
+
+      case 'search_similar_bugs':
+        // Use RAG to find similar bugs
+        const ragUrl = process.env.RAG_API_URL || 'http://localhost:8000';
+        const searchResponse = await fetch(`${ragUrl}/search`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: args.description })
+        });
+        
+        if (!searchResponse.ok) {
+          throw new Error('RAG search failed');
+        }
+        
+        const searchData = await searchResponse.json();
+        const similarBugs = searchData.results || [];
+        
+        if (similarBugs.length === 0) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `No similar bugs found for: "${args.description}"`
+              }
+            ]
+          };
+        }
+        
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Found ${similarBugs.length} similar bug(s):\n\n` +
+                    similarBugs.slice(0, args.limit || 5).map((bug, i) =>
+                      `${i + 1}. [Score: ${(bug.score * 100).toFixed(1)}%]\n` +
+                      `   ${bug.content}\n` +
+                      `   ID: ${bug._id}\n`
+                    ).join('\n')
             }
           ]
         };
