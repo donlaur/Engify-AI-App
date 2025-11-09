@@ -46,11 +46,8 @@ export default function DashboardPage() {
     useState<GamificationStats | null>(null);
   const [totalPrompts, setTotalPrompts] = useState(0);
   const [totalPatterns, setTotalPatterns] = useState(0);
-  const [favoritesCount, setFavoritesCount] = useState(0);
-  const [favoritePrompts, setFavoritePrompts] = useState<FavoritePrompt[]>([]);
   const [bugReports, setBugReports] = useState<any[]>([]);
   const [loadingBugReports, setLoadingBugReports] = useState(false);
-  const [loadingFavorites, setLoadingFavorites] = useState(true);
 
   useEffect(() => {
     async function fetchGamificationStats() {
@@ -75,6 +72,8 @@ export default function DashboardPage() {
         }
       } catch (error) {
         console.error('Failed to fetch stats:', error);
+      } finally {
+        console.log('Stats fetch complete');
       }
     }
 
@@ -118,7 +117,6 @@ export default function DashboardPage() {
 
     fetchGamificationStats();
     fetchStats();
-    fetchFavorites();
     fetchBugReports();
   }, []);
 
@@ -348,50 +346,37 @@ export default function DashboardPage() {
             {/* Recent Activity */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
+                <CardTitle>Quick Stats</CardTitle>
                 <CardDescription>
-                  Your latest actions and achievements
+                  Your bug tracking activity
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {recentActivity.length > 0 ? (
-                  <div className="space-y-4">
-                    {recentActivity.map((activity) => {
-                      const Icon = getActivityIcon(activity.type);
-                      const colorClass = getActivityColor(activity.type);
-
-                      return (
-                        <div
-                          key={activity.id}
-                          className="flex items-start gap-4 border-b pb-4 last:border-0 last:pb-0"
-                        >
-                          <div className={`mt-1 ${colorClass}`}>
-                            <Icon className="h-5 w-5" />
-                          </div>
-                          <div className="flex-1 space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                              {activity.type === 'used' && 'Used prompt'}
-                              {activity.type === 'favorited' && 'Favorited'}
-                              {activity.type === 'learned' && 'Learned'}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {activity.promptTitle}
-                            </p>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {formatTimestamp(activity.timestamp)}
-                          </div>
-                        </div>
-                      );
-                    })}
+                <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-lg bg-orange-50 p-4">
+                    <div className="flex items-center gap-2">
+                      <Icons.alertTriangle className="h-5 w-5 text-orange-600" />
+                      <span className="text-2xl font-bold text-orange-900">
+                        {bugReports.length}
+                      </span>
+                    </div>
+                    <p className="text-sm text-orange-700">Bug Reports</p>
                   </div>
-                ) : (
-                  <div className="py-8 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      No recent activity - start exploring prompts!
-                    </p>
+                  <div className="rounded-lg bg-blue-50 p-4">
+                    <div className="flex items-center gap-2">
+                      <Icons.code className="h-5 w-5 text-blue-600" />
+                      <span className="text-2xl font-bold text-blue-900">1</span>
+                    </div>
+                    <p className="text-sm text-blue-700">IDE Connected</p>
                   </div>
-                )}
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">
+                    Use the Chrome extension to capture bugs and @Engify in your IDE to fix them
+                  </p>
+                </div>
+              </div>
               </CardContent>
             </Card>
 
