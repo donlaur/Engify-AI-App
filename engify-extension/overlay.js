@@ -316,8 +316,10 @@ function createOverlay() {
         <div class="engify-status-box" style="border-color: #28a745;">
           <div class="engify-status-icon">✅</div>
           <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Copied to clipboard!</div>
-          <div style="font-size: 13px; color: #6c757d;">Paste it into ChatGPT, Cursor, or anywhere you need help</div>
+          <div style="font-size: 13px; color: #6c757d; margin-bottom: 16px;">Paste it into ChatGPT, Cursor, or anywhere you need help</div>
         </div>
+        <button class="engify-btn engify-btn-primary" id="engify-report-another">Report Another</button>
+        <button class="engify-btn engify-btn-secondary" id="engify-close-success">Close</button>
       </div>
     </div>
   `;
@@ -418,6 +420,23 @@ function setupEventListeners() {
     selectedElement = null;
     selectedMode = null;
   });
+  
+  // Report Another
+  document.getElementById('engify-report-another').addEventListener('click', () => {
+    // Reset form but keep overlay open
+    showScreen('engify-screen-intent');
+    selectedIntent = null;
+    selectedElement = null;
+    selectedMode = null;
+    document.getElementById('engify-description').value = '';
+    document.querySelectorAll('.engify-mode-option').forEach(o => o.classList.remove('selected'));
+  });
+  
+  // Close from success
+  document.getElementById('engify-close-success').addEventListener('click', () => {
+    overlayContainer.remove();
+    overlayContainer = null;
+  });
 }
 
 // Show screen
@@ -467,16 +486,16 @@ async function handleSubmit() {
     
     // Show success in overlay
     showScreen('engify-screen-success');
-    
-    // Auto-close after 2 seconds
-    setTimeout(() => {
-      if (overlayContainer) {
-        overlayContainer.remove();
-        overlayContainer = null;
-      }
-    }, 2000);
+  } else if (selectedMode === 'ide') {
+    // TODO: Send to MCP server
+    // For now, just copy to clipboard
+    const report = formatReport();
+    await navigator.clipboard.writeText(report);
+    showScreen('engify-screen-success');
+  } else if (selectedMode === 'dashboard') {
+    // TODO: Send to dashboard API
+    alert('Dashboard integration coming soon!');
   }
-  // TODO: Add dashboard and IDE modes
 }
 
 // Format report as AI prompt
