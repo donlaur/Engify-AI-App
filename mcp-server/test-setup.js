@@ -5,6 +5,9 @@
  * Validates that everything is working without requiring full IDE setup
  */
 
+// Load environment variables
+require('dotenv').config();
+
 const { spawn } = require('child_process');
 const { existsSync } = require('fs');
 const { join } = require('path');
@@ -43,10 +46,31 @@ if (existsSync(CONFIG_FILE)) {
 // Test 2: Check dependencies
 console.log('\n2. Checking dependencies...');
 try {
-  require('@modelcontextprotocol/sdk');
-  require('jose');
-  require('chalk');
-  console.log('✅ All dependencies installed');
+  // Check if node_modules exists and has the required packages
+  const fs = require('fs');
+  const path = require('path');
+  
+  const requiredPackages = [
+    '@modelcontextprotocol/sdk',
+    'jose',
+    'chalk'
+  ];
+  
+  let allFound = true;
+  for (const pkg of requiredPackages) {
+    const pkgPath = path.join(__dirname, 'node_modules', pkg);
+    if (!fs.existsSync(pkgPath)) {
+      console.log(`❌ Missing ${pkg}`);
+      allFound = false;
+    }
+  }
+  
+  if (allFound) {
+    console.log('✅ All dependencies installed');
+  } else {
+    console.log('❌ Missing dependencies - run "pnpm install"');
+    process.exit(1);
+  }
 } catch (error) {
   console.log('❌ Missing dependencies - run "pnpm install"');
   process.exit(1);

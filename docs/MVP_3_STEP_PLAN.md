@@ -515,9 +515,170 @@ our
 - **Phase 3:** ✅ Completed (1/2 commits)
 - **Phase 4:** ✅ Completed (2/3 commits - done in Phase 3)
 - **Phase 5:** ✅ Completed (2/2 commits)
+- **QA Testing:** 📋 In Progress (0/5 phases completed)
 - **Total:** 8/15 commits completed (53%)
 
 **🏆 MVP DELIVERED: OAuth 2.1 MCP Authentication System**
+
+---
+
+## QA Testing Plan
+
+### **Phase 1: Authentication Testing**
+
+#### 1.1 OAuth 2.1 Flow
+- [ ] Visit `/dashboard?ref=mcp-auth`
+- [ ] Click "Generate MCP Token"
+- [ ] Verify token is generated with correct claims:
+  - `sub`: User ID
+  - `email`: User email
+  - `aud`: "urn:mcp:bug-reporter"
+  - `exp`: 1 hour from now
+- [ ] Copy token to clipboard
+- [ ] Run `pnpm auth` in mcp-server directory
+- [ ] Paste token when prompted
+- [ ] Verify token stored in `~/.engify-mcp-auth.json`
+
+#### 1.2 Token Validation
+- [ ] Run `pnpm test` in mcp-server
+- [ ] Verify all checks pass:
+  - Authentication config found
+  - Token is valid (not expired)
+  - All dependencies installed
+  - Launcher starts successfully
+
+#### 1.3 Token Expiry
+- [ ] Wait 1 hour for token to expire
+- [ ] Run `pnpm test` - should show expired
+- [ ] Run `pnpm auth` to refresh
+- [ ] Verify new token works
+
+### **Phase 2: MCP Server Testing**
+
+#### 2.1 Server Startup
+- [ ] Run `pnpm start` in mcp-server
+- [ ] Verify server starts without errors
+- [ ] Check console shows user ID
+- [ ] Verify MongoDB connection established
+
+#### 2.2 Multi-tenant Isolation
+- [ ] Create test bug reports for User A
+- [ ] Create test bug reports for User B
+- [ ] Run MCP server as User A
+- [ ] Execute `@Engify get new bug reports`
+- [ ] Verify only User A's bugs are returned
+- [ ] Repeat for User B
+
+#### 2.3 MCP Tools Testing
+- [ ] Test `get_new_bug_reports`:
+  - Returns array of bugs with userId filtered
+  - Each bug has required fields (id, description, pageUrl, etc.)
+- [ ] Test `get_bug_report_details`:
+  - Pass valid bug ID
+  - Returns full bug details
+  - Pass invalid ID - returns null/error
+- [ ] Test `mark_bug_sent_to_ide`:
+  - Mark bug as sent
+  - Verify status changes to 'sent_to_ide'
+- [ ] Test `search_similar_bugs`:
+  - Search with description
+  - Returns semantically similar bugs
+  - Limited to user's bugs only
+
+### **Phase 3: Integration Testing**
+
+#### 3.1 IDE Integration (Cursor/VS Code)
+- [ ] Configure MCP server in IDE settings
+- [ ] Add server configuration with correct path
+- [ ] Restart IDE
+- [ ] Test `@Engify get new bug reports`
+- [ ] Test `@Engify get bug report details [id]`
+- [ ] Verify responses are scrollable (height < 400px)
+
+#### 3.2 Chrome Extension Integration
+- [ ] Install Chrome extension
+- [ ] Navigate to any page
+- [ ] Click "Report Bug" button
+- [ ] Fill out bug report form
+- [ ] Submit report
+- [ ] Verify report appears in MCP query
+- [ ] Check userId is correctly set
+
+#### 3.3 End-to-End Flow
+- [ ] User logs into Engify dashboard
+- [ ] User generates MCP token
+- [ ] User configures IDE with MCP server
+- [ ] User reports bug via Chrome extension
+- [ ] User retrieves bug in IDE via MCP
+- [ ] User marks bug as sent to IDE
+- [ ] Status updates correctly
+
+### **Phase 4: Performance & Security Testing**
+
+#### 4.1 Connection Limits (M0)
+- [ ] Run build with MCP server active
+- [ ] Monitor MongoDB connections
+- [ ] Verify connections don't exceed 500
+- [ ] Check for connection leaks
+
+#### 4.2 Security Validation
+- [ ] Verify JWT signature validation works
+- [ ] Test with invalid token - should fail
+- [ ] Test with expired token - should fail
+- [ ] Test with wrong audience - should fail
+- [ ] Verify userId filtering prevents data leakage
+
+#### 4.3 Error Handling
+- [ ] Disconnect MongoDB during MCP operation
+- [ ] Verify graceful error messages
+- [ ] Test with missing environment variables
+- [ ] Verify helpful error messages
+
+### **Phase 5: Production Readiness**
+
+#### 5.1 Documentation Verification
+- [ ] Follow TEST_END_TO_END.md step-by-step
+- [ ] Follow DEPLOYMENT.md for production setup
+- [ ] Verify README.md is accurate
+- [ ] Check all environment variables documented
+
+#### 5.2 Monitoring & Logging
+- [ ] Verify server logs include user ID
+- [ ] Check MongoDB query logging
+- [ ] Test error reporting
+- [ ] Verify performance metrics collection
+
+#### 5.3 Deployment Testing
+- [ ] Deploy to staging environment
+- [ ] Run full test suite on staging
+- [ ] Verify OAuth flow works in production
+- [ ] Test MCP server with production database
+
+### **Test Results Summary**
+
+| Test Category | Status | Notes |
+|---------------|--------|-------|
+| Authentication | | |
+| MCP Server | | |
+| IDE Integration | | |
+| Multi-tenant Security | | |
+| Performance | | |
+| Documentation | | |
+
+### **Known Issues & Limitations**
+
+1. **M0 Connection Limits**: Build may timeout with high concurrent connections
+   - Mitigation: Promise.race timeouts implemented
+   - Long-term: Upgrade to M10 or optimize further
+
+2. **Token Storage**: Currently stored in local file
+   - Future: OS keychain integration for better security
+
+3. **RAG Integration**: OBO flow not yet implemented
+   - Phase 2 feature for semantic search enhancement
+
+4. **IDE Display**: Response height may need adjustment per IDE
+   - Solution: Configure response height in IDE settings
 
 ---
 
