@@ -20,29 +20,45 @@ interface FavoritePrompt {
   role: string;
 }
 
+interface UserStats {
+  daysLoggedIn: number;
+  totalSessions: number;
+  lastLoginDate: string;
+  streak: number;
+}
+
 export default function DashboardPage() {
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [favoritePrompts, setFavoritePrompts] = useState<FavoritePrompt[]>([]);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
 
   useEffect(() => {
-    async function fetchFavorites() {
+    async function fetchData() {
       setLoadingFavorites(true);
       try {
-        const response = await fetch('/api/favorites');
-        if (response.ok) {
-          const data = await response.json();
+        // Fetch favorites
+        const favoritesResponse = await fetch('/api/favorites');
+        if (favoritesResponse.ok) {
+          const data = await favoritesResponse.json();
           setFavoritesCount(data.count || 0);
           setFavoritePrompts(data.favorites || []);
         }
+        
+        // Fetch user stats
+        const statsResponse = await fetch('/api/user-stats');
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setUserStats(statsData.data);
+        }
       } catch (error) {
-        console.error('Failed to fetch favorites:', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoadingFavorites(false);
       }
     }
 
-    fetchFavorites();
+    fetchData();
   }, []);
 
   return (
@@ -56,6 +72,43 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-1">
+          {/* User Stats */}
+          {userStats && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Progress</CardTitle>
+                <CardDescription>
+                  Track your learning journey
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="rounded-lg bg-blue-50 p-4 text-center">
+                    <Icons.calendar className="mx-auto h-5 w-5 text-blue-600 mb-2" />
+                    <div className="text-2xl font-bold text-blue-900">
+                      {userStats.daysLoggedIn}
+                    </div>
+                    <p className="text-sm text-blue-700">Days Logged In</p>
+                  </div>
+                  <div className="rounded-lg bg-green-50 p-4 text-center">
+                    <Icons.zap className="mx-auto h-5 w-5 text-green-600 mb-2" />
+                    <div className="text-2xl font-bold text-green-900">
+                      {userStats.streak}
+                    </div>
+                    <p className="text-sm text-green-700">Current Streak</p>
+                  </div>
+                  <div className="rounded-lg bg-purple-50 p-4 text-center">
+                    <Icons.heart className="mx-auto h-5 w-5 text-purple-600 mb-2" />
+                    <div className="text-2xl font-bold text-purple-900">
+                      {favoritesCount}
+                    </div>
+                    <p className="text-sm text-purple-700">Favorites</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* My Favorites */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
