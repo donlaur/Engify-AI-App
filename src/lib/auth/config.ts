@@ -28,7 +28,8 @@ const loginSchema = z.object({
 const USE_COGNITO = !!process.env.COGNITO_USER_POOL_ID;
 
 export const authOptions: NextAuthConfig = {
-  adapter: MongoDBAdapter(getClient()) as any,
+  // TODO: Fix adapter version mismatch - temporarily disabled for build
+  // adapter: MongoDBAdapter(getClient()),
 
   providers: [
     // Email/Password authentication
