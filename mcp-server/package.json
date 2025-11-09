@@ -26,11 +26,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "inquirer": "^12.11.0",
-    "keychain": "^1.5.0",
     "mongodb": "^7.0.0",
-    "mongoose": "^8.0.0",
-    "open": "^10.2.0",
-    "ora": "^9.0.0"
+    "mongoose": "^8.0.0"
   },
   "engines": {
     "node": ">=16.0.0"
