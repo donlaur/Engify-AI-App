@@ -114,8 +114,7 @@ export async function generateMetadata({
 
   const title = `${roleInfo.title} Prompts - Prompt Engineering Library | Engify.ai`;
   const description = `${roleInfo.description} Browse ${rolePrompts.length} prompt${rolePrompts.length !== 1 ? 's' : ''} designed for ${roleInfo.title.toLowerCase()}.`;
-  // Fix canonical URL to match actual route: /prompts/role/[role] not /library/role/[role]
-  const url = `${APP_URL}/prompts/role/${encodeURIComponent(role)}`;
+  const url = `${APP_URL}/library/role/${encodeURIComponent(role)}`;
 
   return {
     title,
@@ -170,7 +169,7 @@ export default async function RolePage({
     '@type': 'CollectionPage',
     name: `${roleInfo.title} Prompts`,
     description: roleInfo.description,
-      url: `${APP_URL}/prompts/role/${encodeURIComponent(role)}`,
+    url: `${APP_URL}/library/role/${encodeURIComponent(role)}`,
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: rolePrompts.length,

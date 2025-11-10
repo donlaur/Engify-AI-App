@@ -53,18 +53,8 @@ async function getPromptsByTag(tag: string) {
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   try {
-    // Decode URL-encoded tag first (handles spaces and special characters)
-    // This fixes URLs like /tags/CI/CD integration which have spaces
-    let decodedTag = params.tag;
-    try {
-      decodedTag = decodeURIComponent(params.tag);
-    } catch {
-      // If decoding fails, use original tag
-      decodedTag = params.tag;
-    }
-    
     // Validate tag URL format
-    if (!isValidTagUrl(decodedTag)) {
+    if (!isValidTagUrl(params.tag)) {
       return {
         title: 'Invalid Tag | Engify.ai',
         description: 'The requested tag URL is invalid.',
@@ -72,11 +62,10 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
     }
 
     // Decode and normalize tag from URL
-    const { decoded, normalized } = decodeTagFromUrl(decodedTag);
+    const { decoded, normalized } = decodeTagFromUrl(params.tag);
     
     // Get all tag variations for database lookup
-    // Use decodedTag to handle URL-encoded tags with spaces and special characters
-    const tagVariations = getTagVariations(decodedTag);
+    const tagVariations = getTagVariations(params.tag);
     
     // Try to find prompts with any of the tag variations
     const allPrompts = [];
@@ -141,28 +130,17 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
 
 export default async function TagPage({ params }: { params: { tag: string } }) {
   try {
-    // Decode URL-encoded tag first (handles spaces and special characters)
-    // This fixes URLs like /tags/CI/CD integration which have spaces
-    let decodedTag = params.tag;
-    try {
-      decodedTag = decodeURIComponent(params.tag);
-    } catch {
-      // If decoding fails, use original tag
-      decodedTag = params.tag;
-    }
-    
     // Validate tag URL format
-    if (!isValidTagUrl(decodedTag)) {
-      console.warn('Invalid tag URL format', { tag: decodedTag });
+    if (!isValidTagUrl(params.tag)) {
+      console.warn('Invalid tag URL format', { tag: params.tag });
       notFound();
     }
 
     // Decode and normalize tag from URL
-    const { decoded, normalized } = decodeTagFromUrl(decodedTag);
+    const { decoded, normalized } = decodeTagFromUrl(params.tag);
     
     // Get all tag variations for database lookup
-    // Use decodedTag to handle URL-encoded tags with spaces and special characters
-    const tagVariations = getTagVariations(decodedTag);
+    const tagVariations = getTagVariations(params.tag);
     
     // Try to find prompts with any of the tag variations
     const allPrompts = [];

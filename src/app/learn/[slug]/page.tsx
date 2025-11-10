@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { notFound, permanentRedirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
@@ -17,16 +17,6 @@ interface PageProps {
 }
 
 export const dynamic = 'force-dynamic';
-
-// Handle legacy learn page URLs that don't exist
-const LEGACY_REDIRECTS: Record<string, string> = {
-  'chain-of-thought': '/learn/chain-of-thought-guide',
-  'few-shot-learning': '/learn',
-  'ai-patterns': '/patterns',
-  'prompt-engineering-101': '/learn/prompt-engineering-masterclass',
-  'prompt-optimization': '/learn',
-  'kernel-framework': '/learn',
-};
 
 async function getArticle(slug: string) {
   const client = await getClient();
@@ -52,17 +42,6 @@ async function getArticle(slug: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  // Handle legacy redirects first
-  if (LEGACY_REDIRECTS[params.slug]) {
-    return {
-      title: 'Redirecting... | Engify.ai',
-      robots: {
-        index: false,
-        follow: true,
-      },
-    };
-  }
-
   const article = await getArticle(params.slug);
 
   if (!article) {
@@ -98,11 +77,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ArticlePage({ params }: PageProps) {
   try {
-    // Handle legacy redirects first
-    if (LEGACY_REDIRECTS[params.slug]) {
-      permanentRedirect(LEGACY_REDIRECTS[params.slug]);
-    }
-
     const article = await getArticle(params.slug);
 
     if (!article) {

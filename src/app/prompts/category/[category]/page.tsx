@@ -104,8 +104,7 @@ export async function generateMetadata({
 
   const title = `${categoryInfo.title} Prompts - Prompt Engineering Library | Engify.ai`;
   const description = `${categoryInfo.description} Browse ${categoryPrompts.length} prompt${categoryPrompts.length !== 1 ? 's' : ''} in this category.`;
-  // Fix canonical URL to match actual route: /prompts/category/[category] not /library/category/[category]
-  const url = `${APP_URL}/prompts/category/${encodeURIComponent(category)}`;
+  const url = `${APP_URL}/library/category/${encodeURIComponent(category)}`;
 
   return {
     title,
@@ -159,7 +158,7 @@ export default async function CategoryPage({
     '@type': 'CollectionPage',
     name: `${categoryInfo.title} Prompts`,
     description: categoryInfo.description,
-    url: `${APP_URL}/prompts/category/${encodeURIComponent(category)}`,
+    url: `${APP_URL}/library/category/${encodeURIComponent(category)}`,
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: categoryPrompts.length,

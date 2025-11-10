@@ -95,19 +95,6 @@ export async function generateMetadata({
   params: { id: string };
 }): Promise<Metadata> {
   try {
-    // Early check: Generated prompts are temporary and should return 404
-    // This prevents 5xx errors when Google crawls these URLs
-    if (params.id.startsWith('generated-')) {
-      return {
-        title: 'Prompt Not Found | Engify.ai',
-        description: 'The requested prompt could not be found.',
-        robots: {
-          index: false,
-          follow: false,
-        },
-      };
-    }
-
     // Try JSON first (fast), then MongoDB fallback (reliable)
     const prompt = await getPromptById(params.id);
 
@@ -127,29 +114,7 @@ export async function generateMetadata({
 
     // Use new programmatic metadata utility
     // Pass metaDescription and seoKeywords if available for SEO optimization
-    const currentUrl = `${APP_URL}/prompts/${encodeURIComponent(params.id)}`;
-    
-    // Determine the canonical URL (final destination)
-    // If prompt has a valid slug and we're accessing via ID, canonical should point to slug URL
-    // This ensures Google indexes the slug URL (final destination) even if accessed via ID
-    const slug = getPromptSlug(prompt);
-    const isValidSlug = slug && 
-                        slug !== 'untitled' && 
-                        slug !== prompt.id &&
-                        slug.length > 0 &&
-                        slug.length <= 100 &&
-                        /^[a-z0-9-]+$/.test(slug) &&
-                        !slug.startsWith('-') &&
-                        !slug.endsWith('-') &&
-                        !slug.includes('--');
-    
-    // Canonical URL: Use slug URL if valid and different from ID, otherwise use current URL
-    // This ensures Google indexes the final destination (slug) even when accessed via ID
-    const canonicalUrl = (isValidSlug && slug !== params.id) 
-      ? `${APP_URL}/prompts/${encodeURIComponent(slug)}`
-      : currentUrl;
-    
-    const metadata = generatePromptMetadata(
+    return generatePromptMetadata(
       {
         ...prompt,
         metaDescription: prompt.metaDescription || null,
@@ -163,19 +128,6 @@ export async function generateMetadata({
       roleLabel,
       patternLabel
     );
-    
-    // Set canonical URL to final destination (slug URL if valid, otherwise current URL)
-    // This ensures Google indexes the correct URL even when redirects occur
-    return {
-      ...metadata,
-      alternates: {
-        canonical: canonicalUrl,
-      },
-      openGraph: {
-        ...metadata.openGraph,
-        url: canonicalUrl, // Use canonical URL for Open Graph too
-      },
-    };
   } catch (error) {
     // Log error but return fallback metadata
     logger.warn('Failed to fetch prompt for metadata', {

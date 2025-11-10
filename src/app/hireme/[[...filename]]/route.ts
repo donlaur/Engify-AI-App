@@ -30,8 +30,7 @@ export async function GET(
     }
 
     // Security: Prevent directory traversal
-    // Allow underscores and hyphens in filenames, but prevent path traversal
-    if (filename.includes('..')) {
+    if (filename.includes('..') || filename.includes('/')) {
       return NextResponse.json(
         { error: 'Invalid filename' },
         { status: 400 }
