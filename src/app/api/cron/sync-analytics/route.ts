@@ -7,11 +7,26 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { syncStatsToMongoDB } from '@/lib/analytics/redis-tracker';
+import { checkRateLimit, type RateLimitResult } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 export async function GET(request: NextRequest) {
+  const rateLimit = await checkRateLimit('cron:analytics-sync', 'pro');
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: rateLimit.reason ?? 'Rate limit exceeded',
+      },
+      {
+        status: 429,
+        headers: buildRateLimitHeaders(rateLimit),
+      }
+    );
+  }
+
   // Verify cron secret
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -37,4 +52,12 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function buildRateLimitHeaders(result: RateLimitResult) {
+  return {
+    'Retry-After': '60',
+    'X-RateLimit-Remaining': Math.max(result.remaining, 0).toString(),
+    'X-RateLimit-Reset': result.resetAt.toISOString(),
+  };
 }

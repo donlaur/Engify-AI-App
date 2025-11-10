@@ -16,7 +16,7 @@ Chrome Extension → Engify Dashboard → MCP Server → IDE
 - ✅ MongoDB setup
 - ✅ Dashboard UI foundation
 - ✅ MCP server skeleton
-- ✅ Extension code (needs testing)
+- ✅ Extension code (now maintained in private repository: Engify-MCP-Platform, previously here)
 
 **What We Need to Build:**
 - Step 1: Extension (fix bugs, add auth, test)
