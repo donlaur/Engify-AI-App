@@ -45,7 +45,7 @@ echo ""
 echo "🧪 Running tests for staged files..."
 if [ -n "$STAGED_TEST_FILES" ] && [ "$SKIP_TESTS" != "true" ]; then
     echo "  Running tests for: $(echo $STAGED_TEST_FILES | tr '\n' ' ')"
-    npm run test:run -- $STAGED_TEST_FILES
+    pnpm test:run -- $STAGED_TEST_FILES
     if [ $? -ne 0 ]; then
         echo "❌ Tests failed. Fix errors before committing."
         echo "   To skip tests (not recommended): SKIP_TESTS=true git commit"
@@ -106,7 +106,7 @@ echo ""
 # 6.5. TypeScript type checking (NEW - CRITICAL)
 echo "🔍 Running TypeScript type check..."
 if [ "$SKIP_TYPE_CHECK" != "true" ]; then
-    npm run typecheck
+    pnpm typecheck
     if [ $? -ne 0 ]; then
         echo "❌ Type errors found. Fix errors before committing."
         echo "   To skip type check (not recommended): SKIP_TYPE_CHECK=true git commit"
