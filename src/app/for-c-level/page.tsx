@@ -11,10 +11,35 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { RoleSelector } from '@/components/roles/RoleSelector';
 import Link from 'next/link';
+import { Metadata } from 'next';
+import { APP_URL } from '@/lib/constants';
 
 // ISR: Regenerate every hour, don't generate at build time
 export const revalidate = 3600; // 1 hour
 export const dynamic = 'force-static';
+
+export const metadata: Metadata = {
+  title: 'For C-Level Executives - AI-Powered Engineering Transformation | Engify.ai',
+  description:
+    'Strategic AI adoption framework for engineering organizations. Measurable ROI, enterprise governance, competitive advantage. Transform your organization and lead the AI revolution.',
+  alternates: {
+    canonical: `${APP_URL}/for-c-level`,
+  },
+  openGraph: {
+    title: 'For C-Level Executives - AI-Powered Engineering Transformation | Engify.ai',
+    description:
+      'Strategic AI adoption framework for engineering organizations. Measurable ROI, enterprise governance, competitive advantage.',
+    url: `${APP_URL}/for-c-level`,
+    type: 'website',
+    siteName: 'Engify.ai',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'For C-Level Executives - AI-Powered Engineering Transformation | Engify.ai',
+    description:
+      'Strategic AI adoption framework for engineering organizations. Measurable ROI, enterprise governance, competitive advantage.',
+  },
+};
 
 export default function ForCLevelPage() {
   const executiveChallenges = [

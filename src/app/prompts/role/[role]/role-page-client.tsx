@@ -143,7 +143,7 @@ export default function RolePageClient({ role, roleInfo, rolePrompts }: RolePage
                       key={r.id}
                       variant="outline"
                       size="sm"
-                      onClick={() => router.push(`/library/role/${encodeURIComponent(r.id)}`)}
+                      onClick={() => router.push(`/prompts/role/${encodeURIComponent(r.id)}`)}
                     >
                       <Icons.user className="mr-1 h-3 w-3" />
                       {r.label}
