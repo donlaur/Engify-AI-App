@@ -23,6 +23,8 @@ Engify's differentiator is an agentic senior-engineer experience with institutio
 
 Each markdown file in this folder drills into those gaps so we can execute methodically.
 
+> **Note:** Implementation code now lives in the private `Engify-MCP-Platform` repo; these docs remain publicly visible for architecture and planning.
+
 ## Reference Implementations & Inspiration
 
 To accelerate execution we are explicitly borrowing patterns from mature open-source MCP projects:
