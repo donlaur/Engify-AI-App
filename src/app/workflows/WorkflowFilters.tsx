@@ -13,24 +13,28 @@ interface WorkflowFiltersProps {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  'code-quality': 'Code Quality',
-  security: 'Security',
   'ai-behavior': 'AI Behavior',
-  memory: 'Memory & Knowledge',
-  'risk-management': 'Risk Management',
-  process: 'Process & Delivery',
-  governance: 'Governance',
-  enablement: 'Enablement',
+  'code-quality': 'Code Quality',
+  communication: 'Communication',
   community: 'Community',
+  enablement: 'Enablement',
+  governance: 'Governance',
+  memory: 'Memory & Knowledge',
+  process: 'Process & Delivery',
+  'risk-management': 'Risk Management',
+  security: 'Security',
 };
 
 const AUDIENCE_LABELS: Record<string, string> = {
+  analysts: 'Analysts',
+  architects: 'Architects',
   engineers: 'Engineers',
   'engineering-managers': 'Engineering Managers',
+  executives: 'Executives',
+  platform: 'Platform',
   'product-managers': 'Product Managers',
-  analysts: 'Analysts',
-  security: 'Security',
   qa: 'QA',
+  security: 'Security',
 };
 
 export function WorkflowFilters({ categories, audiences }: WorkflowFiltersProps) {

@@ -17,16 +17,23 @@ import { formatDate } from '@/lib/utils';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
+const APP_SECTION_LABELS: Record<'prompts' | 'patterns' | 'learn', string> = {
+  prompts: 'Related Prompts',
+  patterns: 'Patterns',
+  learn: 'Further Reading',
+};
+
 const CATEGORY_LABELS: Record<string, string> = {
-  'code-quality': 'Code Quality',
-  security: 'Security',
   'ai-behavior': 'AI Behavior',
-  memory: 'Memory & Knowledge',
-  'risk-management': 'Risk Management',
-  process: 'Process & Delivery',
-  governance: 'Governance',
-  enablement: 'Enablement',
+  'code-quality': 'Code Quality',
+  communication: 'Communication',
   community: 'Community',
+  enablement: 'Enablement',
+  governance: 'Governance',
+  memory: 'Memory & Knowledge',
+  process: 'Process & Delivery',
+  'risk-management': 'Risk Management',
+  security: 'Security',
 };
 
 const CATEGORY_DESCRIPTIONS: Record<string, string> = {
@@ -38,6 +45,7 @@ const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   governance: 'Give platform and security teams a single source of truth for AI policy.',
   'risk-management': 'Spot downstream blast radius—metrics, dashboards, and compliance.',
   enablement: 'Upskill juniors and stakeholders without letting skills atrophy.',
+  communication: 'Keep stakeholders, customers, and reviewers aligned with AI-assisted updates.',
   community: 'Community-tested workflows contributed by Engify builders.',
 };
 
@@ -50,17 +58,23 @@ const CATEGORY_SECTION_ORDER: string[] = [
   'governance',
   'risk-management',
   'enablement',
+  'communication',
   'community',
 ];
 
 const AUDIENCE_LABELS: Record<string, string> = {
+  analysts: 'Analysts',
+  architects: 'Architects',
   engineers: 'Engineers',
   'engineering-managers': 'Engineering Managers',
+  executives: 'Executives',
+  platform: 'Platform',
   'product-managers': 'Product Managers',
-  analysts: 'Analysts',
-  security: 'Security',
   qa: 'QA',
+  security: 'Security',
 };
+
+type WorkflowsSearchParams = Record<string, string | string[] | undefined>;
 
 export const revalidate = 3600; // Revalidate once per hour
 
@@ -99,10 +113,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface WorkflowsPageProps {
-  searchParams?: {
-    category?: string;
-    audience?: string;
-  };
+  searchParams?: WorkflowsSearchParams | Promise<WorkflowsSearchParams>;
 }
 
 export default async function WorkflowsPage({ searchParams }: WorkflowsPageProps) {
@@ -113,11 +124,15 @@ export default async function WorkflowsPage({ searchParams }: WorkflowsPageProps
     getWorkflowsMetadata(),
   ]);
 
-  const selectedCategory = searchParams?.category;
+  const resolvedSearchParams = ((await searchParams) ?? {}) as WorkflowsSearchParams;
 
-  const selectedAudience = isWorkflowAudience(searchParams?.audience)
-    ? searchParams?.audience
-    : undefined;
+  const getParamValue = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value);
+
+  const selectedCategory = getParamValue(resolvedSearchParams.category);
+
+  const selectedAudienceValue = getParamValue(resolvedSearchParams.audience);
+
+  const selectedAudience = isWorkflowAudience(selectedAudienceValue) ? selectedAudienceValue : undefined;
 
   const lastUpdatedLabel = metadata.generatedAt
     ? formatDate(metadata.generatedAt)
