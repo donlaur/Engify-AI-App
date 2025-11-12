@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Icons } from '@/lib/icons';
+import { EngifyLogo } from '@/components/branding/EngifyLogo';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -40,6 +41,7 @@ interface HeaderProps {
 const navigationLinks = [
   { href: '/prompts', label: 'Prompts' },
   { href: '/patterns', label: 'Patterns' },
+  { href: '/workflows', label: 'Workflows' },
   { href: '/learn/ai-tools', label: 'Tools' },
   { href: '/learn', label: 'Learn' },
   { href: '/workbench', label: 'Workbench' },
@@ -61,9 +63,8 @@ export function Header({ user }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <Icons.sparkles className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">Engify.ai</span>
+        <Link href="/" className="flex items-center space-x-2" aria-label="Engify.ai home">
+          <EngifyLogo className="text-xl" />
         </Link>
 
         {/* Desktop Navigation */}
@@ -101,6 +102,17 @@ export function Header({ user }: HeaderProps) {
             )}
           >
             Patterns
+          </Link>
+          <Link
+            href="/workflows"
+            className={cn(
+              'text-sm font-medium transition-colors',
+              isActive('/workflows')
+                ? 'text-primary'
+                : 'text-foreground/80 hover:text-primary dark:text-foreground/80'
+            )}
+          >
+            Workflows
           </Link>
           <Link
             href="/learn/ai-tools"

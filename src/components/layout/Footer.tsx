@@ -9,7 +9,7 @@
  */
 
 import Link from 'next/link';
-import { Icons } from '@/lib/icons';
+import { EngifyLogo } from '@/components/branding/EngifyLogo';
 import { Separator } from '@/components/ui/separator';
 
 const footerLinks = {
@@ -60,9 +60,8 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-6">
           {/* Brand */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-2">
-            <Link href="/" className="mb-4 flex items-center space-x-2">
-              <Icons.sparkles className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">Engify.ai</span>
+            <Link href="/" className="mb-4 flex items-center space-x-2" aria-label="Engify.ai home">
+              <EngifyLogo className="text-xl" />
             </Link>
             <p className="mb-4 max-w-xs text-sm text-muted-foreground sm:mb-0">
               Master prompt engineering with AI-powered learning and
