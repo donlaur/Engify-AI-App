@@ -113,3 +113,46 @@ export function trackLearningView(resourceId: string, resourceTitle: string) {
     resource_title: resourceTitle,
   });
 }
+
+/**
+ * Track workflow event in Google Analytics
+ */
+export function trackWorkflowEvent(
+  action: 'view' | 'click' | 'filter',
+  workflowId?: string,
+  workflowTitle?: string,
+  metadata?: Record<string, any>
+) {
+  if (typeof window === 'undefined' || !window.gtag) {
+    return;
+  }
+
+  window.gtag('event', action, {
+    event_category: 'workflow_interaction',
+    event_label: workflowId || 'workflows_page',
+    workflow_id: workflowId,
+    workflow_title: workflowTitle,
+    ...metadata,
+  });
+}
+
+/**
+ * Track workflow view (call on workflow detail page load)
+ */
+export function trackWorkflowView(workflowId: string, workflowTitle: string, category?: string) {
+  trackWorkflowEvent('view', workflowId, workflowTitle, { category });
+}
+
+/**
+ * Track workflow click (call when user clicks on a workflow)
+ */
+export function trackWorkflowClick(workflowId: string, workflowTitle: string, category?: string) {
+  trackWorkflowEvent('click', workflowId, workflowTitle, { category });
+}
+
+/**
+ * Track workflow filter (call when user filters by category or audience)
+ */
+export function trackWorkflowFilter(filterType: 'category' | 'audience', filterValue: string) {
+  trackWorkflowEvent('filter', undefined, undefined, { filter_type: filterType, filter_value: filterValue });
+}
