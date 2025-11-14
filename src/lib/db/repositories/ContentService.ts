@@ -8,11 +8,12 @@
 import { promptRepository } from './PromptRepository';
 import { patternRepository } from './PatternRepository';
 import { learningResourceRepository } from './LearningResourceRepository';
+import { workflowRepository } from './WorkflowRepository';
 
 /**
  * Content Type Enum
  */
-export type ContentType = 'prompts' | 'patterns' | 'learning';
+export type ContentType = 'prompts' | 'patterns' | 'learning' | 'workflows';
 
 /**
  * Unified Content Service
@@ -30,6 +31,8 @@ export class ContentService {
         return patternRepository;
       case 'learning':
         return learningResourceRepository;
+      case 'workflows':
+        return workflowRepository;
       default:
         throw new Error(`Unknown content type: ${type}`);
     }
@@ -79,17 +82,19 @@ export class ContentService {
    * Get stats for all content types
    */
   async getStats() {
-    const [prompts, patterns, learning] = await Promise.all([
+    const [prompts, patterns, learning, workflows] = await Promise.all([
       promptRepository.count(),
       patternRepository.count(),
       learningResourceRepository.count(),
+      workflowRepository.count(),
     ]);
 
     return {
       prompts,
       patterns,
       learning,
-      total: prompts + patterns + learning,
+      workflows,
+      total: prompts + patterns + learning + workflows,
     };
   }
 }
@@ -98,4 +103,4 @@ export class ContentService {
 export const contentService = new ContentService();
 
 // Export individual repositories for direct access when needed
-export { promptRepository, patternRepository, learningResourceRepository };
+export { promptRepository, patternRepository, learningResourceRepository, workflowRepository };

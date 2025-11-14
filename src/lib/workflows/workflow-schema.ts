@@ -55,6 +55,8 @@ export const WorkflowRelatedResourcesSchema = z.object({
 export const WorkflowResearchCitationSchema = z.object({
   source: z.string().min(1, 'Citation source is required'),
   summary: z.string().min(1, 'Citation summary is required'),
+  url: z.string().url().optional(), // Verified source URL for SEO
+  verified: z.boolean().default(false), // Whether the source has been verified
 });
 
 export const WorkflowSeoStrategySchema = z.object({

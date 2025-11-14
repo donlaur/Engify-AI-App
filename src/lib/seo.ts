@@ -17,24 +17,24 @@ export interface SEOConfig {
 }
 
 export const defaultSEO: SEOConfig = {
-  title: 'Engify.ai - Research-Backed Prompt Engineering Platform',
+  title: 'Engify.ai - AI Guardrail Platform with Institutional Memory',
   description:
-    'Master prompt engineering with our KERNEL framework, 15 proven patterns, 4-provider testing, and free audit tool. Research-backed by MIT, Wharton, and Vanderbilt.',
+    'Operationalize AI guardrails across code, security, and delivery. Engify pairs documented workflows with automation hooks and memory so teams ship faster without regressions.',
   canonical: 'https://engify.ai',
   ogImage: 'https://engify.ai/og-image.png',
   ogType: 'website',
   twitterCard: 'summary_large_image',
   keywords: [
-    'prompt engineering',
-    'AI prompts',
-    'ChatGPT prompts',
-    'Claude prompts',
-    'KERNEL framework',
-    'prompt patterns',
-    'prompt audit',
-    'AI tools',
-    'prompt optimization',
-    'GPT-4 prompts',
+    'AI guardrails',
+    'guardrail automation',
+    'engineering governance',
+    'prompt governance',
+    'ai risk management',
+    'incident prevention',
+    'software delivery controls',
+    'compliance automation',
+    'institutional memory',
+    'engify',
   ],
   author: 'Engify.ai',
 };
@@ -42,18 +42,16 @@ export const defaultSEO: SEOConfig = {
 export const pageSEO: Record<string, SEOConfig> = {
   home: {
     title:
-      'Engify.ai - Master Prompt Engineering with Research-Backed Patterns',
+      'Engify.ai - Operationalize AI Guardrails with Engify Workflows',
     description:
-      '100+ prompts, 15 patterns, KERNEL framework with 94% success rate. Free prompt audit tool. Test across OpenAI, Claude, Gemini, and Groq. Academic validation from MIT & Wharton.',
+      'Documented guardrail workflows, automation hooks, and institutional memory that prevent AI regressions. Ship responsibly with Engify.',
     keywords: [
-      'prompt engineering platform',
-      'AI prompt library',
-      'KERNEL framework',
-      'prompt patterns',
-      'ChatGPT prompts',
-      'Claude AI',
-      'prompt optimization',
-      'AI tools comparison',
+      'AI guardrails',
+      'guardrail automation',
+      'engineering governance',
+      'prompt governance',
+      'ai risk management',
+      'institutional memory',
     ],
   },
 

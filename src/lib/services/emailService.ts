@@ -4,9 +4,17 @@ import {
   type ApiKeyAlertTemplateData,
 } from '@/lib/email/templates';
 
+function resolveSendGridApiKey(): string | undefined {
+  return (
+    process.env.SENDGRID_API_KEY ||
+    process.env.SENDGRID_API ||
+    process.env.ID_API
+  );
+}
+
 // Initialize SendGrid
-// Support both SENDGRID_API and SENDGRID_API_KEY for flexibility
-const sendGridApiKey = process.env.SENDGRID_API_KEY || process.env.SENDGRID_API;
+// Support both SENDGRID_API and legacy ID_API variable for flexibility
+const sendGridApiKey = resolveSendGridApiKey();
 if (sendGridApiKey) {
   sgMail.setApiKey(sendGridApiKey);
 }
@@ -32,8 +40,7 @@ export interface EmailResponse {
  */
 export async function sendEmail(emailData: EmailData): Promise<EmailResponse> {
   try {
-    const sendGridApiKey =
-      process.env.SENDGRID_API_KEY || process.env.SENDGRID_API;
+    const sendGridApiKey = resolveSendGridApiKey();
     if (!sendGridApiKey) {
       throw new Error(
         'SendGrid API key not configured. Set SENDGRID_API_KEY or SENDGRID_API environment variable.'

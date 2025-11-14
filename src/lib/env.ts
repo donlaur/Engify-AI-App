@@ -49,6 +49,22 @@ const envSchema = z.object({
 
   // Python Services (Optional for development)
   PYTHON_API_URL: z.string().url().optional(),
+
+  // Email (SendGrid)
+  SENDGRID_API_KEY: z.string().optional(),
+  SENDGRID_API: z.string().optional(),
+  SENDGRID_FROM_EMAIL: z.string().email().optional(),
+  SENDGRID_FROM_NAME: z.string().optional(),
+  SENDGRID_REPLY_TO: z.string().email().optional(),
+  SENDGRID_WEBHOOK_PUBLIC_KEY: z.string().optional(),
+  SENDGRID_WELCOME_TEMPLATE_ID: z.string().optional(),
+  SENDGRID_PASSWORD_RESET_TEMPLATE_ID: z.string().optional(),
+  SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID: z.string().optional(),
+  SENDGRID_PROMPT_SHARED_TEMPLATE_ID: z.string().optional(),
+  SENDGRID_CONTACT_FORM_TEMPLATE_ID: z.string().optional(),
+  SENDGRID_API_KEY_ALERT_TEMPLATE_ID: z.string().optional(),
+  SENDGRID_WEEKLY_DIGEST_TEMPLATE_ID: z.string().optional(),
+  SENDGRID_AI_CONTENT_READY_TEMPLATE_ID: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
