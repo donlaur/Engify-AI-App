@@ -1,3 +1,4 @@
+import '@rushstack/eslint-patch/modern-module-resolution.js';
 import { FlatCompat } from '@eslint/eslintrc';
 import globals from 'globals';
 import { fileURLToPath } from 'node:url';
