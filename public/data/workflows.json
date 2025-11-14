@@ -1,0 +1,1026 @@
+{
+  "version": "1.2",
+  "generatedAt": "2025-11-14T12:30:00.000Z",
+  "totalWorkflows": 26,
+  "workflows": [
+    {
+      "slug": "keep-prs-under-control",
+      "title": "Keep PRs Under Control",
+      "category": "code-quality",
+      "audience": ["engineers", "engineering-managers"],
+      "problemStatement": "Large, unreviewable pull requests slip past AI-assisted teams, introducing unseen regressions and slowing releases.",
+      "painPointIds": ["pain-point-09-ai-slop", "pain-point-10-oversized-prs"],
+      "painPointKeywords": ["ai slop", "oversized prs", "code review backlog", "review burnout"],
+      "manualChecklist": [
+        "Target ≤250 lines changed per PR; defect rates rise sharply once you cross ~300 LOC (GitClear 2025).",
+        "Keep file count under 10 and break work into stacked PRs for easier review.",
+        "Run duplication and lint checks to strip TODOs and placeholder debris before requesting review.",
+        "Add PR template sections for risk areas, tests run, and follow-up tickets.",
+        "Log average PR size weekly and review trends with the team."
+      ],
+      "relatedResources": {
+        "prompts": ["ai-code-reviewer", "risk-register-pr"],
+        "patterns": ["chain-of-thought", "cognitive-verifier"],
+        "learn": ["/learn/ai-tools/cursor", "/learn/ai-tools/windsurf"],
+        "adjacentWorkflows": ["daily-merge-discipline"]
+      },
+      "researchCitations": [
+        {
+          "source": "GitClear 2025 State of AI Commit Quality",
+          "summary": "PRs above ~300 lines drive a 7.2% defect-rate increase."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Oversized AI-driven pull requests that overwhelm reviewers.",
+        "keywordPhrases": ["ai pull request size", "oversized pr defects", "ai code review burnout"],
+        "measurementPlan": "Monitor organic visits for the primary keywords and correlate with newsletter signups."
+      },
+      "eEatSignals": {
+        "experience": "Synthesized from Engify team reviews of 40+ AI-assisted PRs and QA post-mortems.",
+        "expertise": "Checklist references accepted review practices (stacked PRs, lint gates) with thresholds.",
+        "authoritativeness": "Backed by GitClear’s 2025 defect analysis.",
+        "trustworthiness": "Prioritizes problem framing, cites dates, and encourages data logging."
+      },
+      "status": "published"
+    },
+    {
+      "slug": "stop-schema-guessing",
+      "title": "Stop Schema Guessing",
+      "category": "ai-behavior",
+      "audience": ["engineers", "product-managers"],
+      "problemStatement": "LLMs hallucinate fields, routes, and migrations when context is thin, causing runtime breakage.",
+      "painPointIds": [
+        "pain-point-05-missing-context",
+        "pain-point-03-hallucinated-capabilities",
+        "pain-point-20-schema-drift"
+      ],
+      "painPointKeywords": ["hallucinated schema", "missing context", "brownfield penalty", "schema drift"],
+      "manualChecklist": [
+        "Run schema diff tools before accepting AI-generated migrations.",
+        "Attach an architecture decision record that cites the source of truth for each change.",
+        "Ask AI to cite file paths and schema definitions before it proposes code.",
+        "Prompt for database query and API contract verification steps.",
+        "Review migrations with a domain expert when tables affect critical workflows."
+      ],
+      "relatedResources": {
+        "prompts": ["architecture-decision-record", "schema-verifier"],
+        "patterns": ["structured-output", "risk-register"],
+        "learn": ["/learn/ai-models/deepseek", "/learn/ai-tools/windsurf"]
+      },
+      "researchCitations": [
+        {
+          "source": "Qodo 2025 Developer Survey",
+          "summary": "65% of developers report AI guessing dependencies or schema fields."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Schema hallucinations and drift in brownfield systems.",
+        "keywordPhrases": ["ai schema drift", "hallucinated database fields", "llm migration risk"],
+        "measurementPlan": "Track SERP positions monthly; retire copy if impressions stay flat for 3 months."
+      },
+      "eEatSignals": {
+        "experience": "Informed by Engify audits of legacy systems where AI proposed invalid migrations.",
+        "expertise": "References ADRs, diff tools, and schema validation prompts.",
+        "authoritativeness": "Cites Qodo’s 2025 developer survey.",
+        "trustworthiness": "Calls out manual verification and acknowledges AI limits."
+      },
+      "status": "published"
+    },
+    {
+      "slug": "catch-mock-metrics",
+      "title": "Catch Mock Metrics",
+      "category": "risk-management",
+      "audience": ["product-managers", "analysts"],
+      "problemStatement": "AI-generated dashboards sneak in fake analytics and placeholder KPIs that survive to production demos.",
+      "painPointIds": ["pain-point-18-log-manipulation"],
+      "painPointKeywords": ["fake metrics", "analytics drift", "dashboard trust issues"],
+      "manualChecklist": [
+        "Validate each metric source against documented data contracts or lineage diagrams.",
+        "Run synthetic-data tests to ensure KPIs aren’t hard-coded.",
+        "Require AI output to include data lineage explanations or query references.",
+        "Annotate dashboards with QA signoff and review timestamps.",
+        "Log verification steps in a shared tracker for audit readiness."
+      ],
+      "relatedResources": {
+        "prompts": ["product-kpi-audit", "dashboard-sanitation"],
+        "patterns": ["precision-summary", "iterative-refinement"],
+        "learn": ["/learn/ai-tools/windsurf"]
+      },
+      "researchCitations": [
+        {
+          "source": "METR 2025 Randomized Control Trial",
+          "summary": "Teams felt 20% faster with AI dashboards, but rework erased gains when analytics weren’t verified."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Fake or placeholder metrics introduced by AI dashboards.",
+        "keywordPhrases": ["ai fake metrics", "dashboard lineage audit", "ai analytics verification"],
+        "measurementPlan": "Review click-throughs from analytics-related keywords and poll newsletter responders."
+      },
+      "eEatSignals": {
+        "experience": "Derived from Engify trials with AI dashboard generators across fintech pilots.",
+        "expertise": "Checklist details concrete QA steps (synthetic tests, lineage review).",
+        "authoritativeness": "Anchored by METR’s RCT findings.",
+        "trustworthiness": "Transparency about manual cross-checks and logging."
+      },
+      "status": "published"
+    },
+    {
+      "slug": "cursor-obedience-kit",
+      "title": "Cursor Obedience Kit",
+      "category": "ai-behavior",
+      "audience": ["engineers", "engineering-managers"],
+      "problemStatement": "Cursor agents ignore rules, edit unintended files, or bypass guardrails without explicit constraints.",
+      "painPointIds": ["pain-point-13-hitl-bypass", "pain-point-14-plan-derailment"],
+      "painPointKeywords": ["cursor agent", "hitl bypass", "agent derailment", "unintended edits"],
+      "manualChecklist": [
+        "Load role-specific rules and instructions before starting each Cursor session.",
+        "Mark critical files as read-only or guard them in the session configuration.",
+        "Review diffs after every plan step and pause the agent before continuing.",
+        "Log ignored instructions for coaching and future prompt adjustments.",
+        "Rotate owners who audit agent sessions weekly."
+      ],
+      "relatedResources": {
+        "prompts": ["cursor-rule-pack", "agentic-red-hat-warning"],
+        "patterns": ["red-team", "progressive-reveal"],
+        "learn": ["/learn/ai-tools/cursor"]
+      },
+      "researchCitations": [
+        {
+          "source": "Engify Field Tests (2025)",
+          "summary": "Cursor Agent mode frequently touched unrelated files when guidelines were missing."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "AI code editors ignoring guardrails and editing unintended files.",
+        "keywordPhrases": ["cursor ai guardrails", "llm hitl bypass", "ai agent unintended edits"],
+        "measurementPlan": "Track article dwell time and inbound links from developer forums."
+      },
+      "eEatSignals": {
+        "experience": "Based on hands-on testing of Cursor’s agent modes with internal guardrails.",
+        "expertise": "Shares concrete operational controls (diff reviews, instruction logs).",
+        "authoritativeness": "Cites internal field tests with transparent scope.",
+        "trustworthiness": "Acknowledges manual enforcement and ongoing audits."
+      },
+      "status": "published"
+    },
+    {
+      "slug": "memory-and-trend-logging",
+      "title": "Memory & Trend Logging",
+      "category": "memory",
+      "audience": ["engineering-managers", "product-managers"],
+      "problemStatement": "Without a memory loop, teams repeat the same AI missteps and lose the why behind guardrails.",
+      "painPointIds": ["pain-point-07-context-forgetting", "pain-point-21-silent-agent-syndrome"],
+      "painPointKeywords": ["memory loop", "context forgetting", "missing rationale", "incident trends"],
+      "manualChecklist": [
+        "Record every guardrail violation with context, owner, and resolution notes.",
+        "Summarize weekly AI behavior trends and share with leadership.",
+        "Feed recurring issues into pre-work prompts or reminders before new sprints.",
+        "Archive resolved incidents with root-cause commentary for future reference.",
+        "Audit the log monthly to spot systemic changes or training needs."
+      ],
+      "relatedResources": {
+        "prompts": ["weekly-guardrail-report", "memory-retro"],
+        "patterns": ["self-reflection", "progressive-reveal"],
+        "learn": ["/learn/ai-tools/replit-ghostwriter"]
+      },
+      "researchCitations": [
+        {
+          "source": "Developer Survey Aggregate (2025)",
+          "summary": "Teams lose 10–15 hours per developer weekly to repeated AI missteps when incidents aren’t logged."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Silent AI failures and forgotten rationale in team memory.",
+        "keywordPhrases": ["ai memory loop", "log ai guardrails", "ai incident trends"],
+        "measurementPlan": "Review organic traffic quarterly; archive or extend content based on engagement."
+      },
+      "eEatSignals": {
+        "experience": "Engineers logged dozens of Engify guardrail incidents to refine prompts and policies.",
+        "expertise": "Checklist outlines explicit logging, retros, and audits.",
+        "authoritativeness": "Pulls stats from aggregated developer surveys.",
+        "trustworthiness": "Encourages plain documentation and scheduled reviews."
+      },
+      "status": "published"
+    },
+    {
+      "slug": "security-guardrails",
+      "title": "Security Guardrails",
+      "category": "security",
+      "audience": ["security", "engineers"],
+      "problemStatement": "AI-generated code ships with unvetted dependencies, missing secret scanning, and relaxed validation.",
+      "painPointIds": ["pain-point-19-insecure-code"],
+      "painPointKeywords": ["ai security", "vulnerable snippets", "owasp top 10"],
+      "manualChecklist": [
+        "Run SAST and SCA scans on AI-generated code before merge.",
+        "Trigger threat-model prompts for high-risk changes (auth, payments, PII).",
+        "Ensure secret scanning covers new files and generated test fixtures.",
+        "Use a secure coding checklist and require signoff for critical areas.",
+        "Patch or quarantine any third-party code suggested by AI until vetted."
+      ],
+      "relatedResources": {
+        "prompts": ["llm-security-review", "secret-scan-reminder"],
+        "patterns": ["risk-register", "structured-output"],
+        "learn": ["/learn/ai-tools/cursor", "/learn/ai-tools/windsurf"]
+      },
+      "researchCitations": [
+        {
+          "source": "Veracode 2025 AI Security Report",
+          "summary": "45% of AI-generated snippets carry vulnerabilities; Python at 29.5%, JavaScript at 24.2%."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "AI-generated code introducing security flaws and secrets.",
+        "keywordPhrases": ["ai security guardrails", "llm vulnerable code", "ai secret scanning"],
+        "measurementPlan": "Track inbound links from security blogs and update content with new CVE data."
+      },
+      "eEatSignals": {
+        "experience": "Security engineers reviewed Engify’s AI-assisted commits and noted missing scans.",
+        "expertise": "Checklist references industry-standard SAST/SCA practices.",
+        "authoritativeness": "Veracode’s 2025 study gives quantitative backing.",
+        "trustworthiness": "Acknowledges manual review requirements and cites OWASP."
+      },
+      "status": "published"
+    },
+    {
+      "slug": "tdd-with-ai-pair",
+      "title": "TDD With Your AI Pair",
+      "category": "code-quality",
+      "audience": ["engineers"],
+      "problemStatement": "AI proposes almost-correct solutions that ship without verification, turning minor logic gaps into production regressions.",
+      "painPointIds": ["pain-point-01-almost-correct-code"],
+      "painPointKeywords": ["almost right", "missing tests", "ai regression", "tdd"],
+      "manualChecklist": [
+        "Have AI draft failing tests first to demonstrate the bug or feature gap.",
+        "Request multiple edge-case tests and augment with developer assertions.",
+        "Run the full suite locally and document results in the PR description.",
+        "Block merges until CI is green and coverage deltas are non-negative.",
+        "Review tests for flakiness or shallow assertions before accepting code."
+      ],
+      "relatedResources": {
+        "prompts": ["fail-first-test-writer", "ai-test-harness"],
+        "patterns": ["iterative-refinement", "cognitive-verifier"],
+        "learn": ["/learn/ai-tools/cursor"]
+      },
+      "researchCitations": [
+        {
+          "source": "Stack Overflow 2025 Developer Survey",
+          "summary": "66% of developers cite 'almost right' AI answers as their top frustration."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Unverified AI code that bypasses traditional TDD safeguards.",
+        "keywordPhrases": ["ai tdd workflow", "almost-correct ai code", "ai regression testing"],
+        "measurementPlan": "Monitor search impressions for TDD + AI keywords; update based on click-through rates."
+      },
+      "eEatSignals": {
+        "experience": "Engineers paired AI suggestions with manual tests during Engify bug hunts.",
+        "expertise": "Checklist describes test-first prompts and coverage checks.",
+        "authoritativeness": "Anchored by Stack Overflow’s developer sentiment data.",
+        "trustworthiness": "Emphasizes evidence capture and explicit merge gating."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "trust-but-verify-triage",
+      "title": "Trust-But-Verify Triage",
+      "category": "process",
+      "audience": ["engineers", "engineering-managers"],
+      "problemStatement": "Developers distrust AI output yet still receive inline suggestions without confidence or rationale, wasting review cycles.",
+      "painPointIds": ["pain-point-02-trust-deficit"],
+      "painPointKeywords": ["confidence scoring", "scratchpad triage", "verification flow"],
+      "manualChecklist": [
+        "Route complex AI suggestions to a scratchpad file instead of committing inline.",
+        "Attach a confidence score or rationale tag before handing suggestions to reviewers.",
+        "Require AI explanations of algorithmic choices and tradeoffs in bullet form.",
+        "Track acceptance vs. rejection of suggestions and share metrics monthly.",
+        "Set expectations for reviewers on how to respond to low-confidence code."
+      ],
+      "relatedResources": {
+        "prompts": ["confidence-scorer", "rationale-demand"],
+        "patterns": ["chain-of-thought", "progressive-reveal"],
+        "learn": ["/learn/ai-tools/windsurf"]
+      },
+      "researchCitations": [
+        {
+          "source": "Stack Overflow 2025 Developer Survey",
+          "summary": "45.7% of developers actively distrust AI accuracy and expect human verification."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Developer distrust of AI suggestions and lack of rationale.",
+        "keywordPhrases": ["ai confidence scoring workflow", "verify llm code", "ai scratchpad review process"],
+        "measurementPlan": "Compare organic reach vs. newsletter engagement on verification topics."
+      },
+      "eEatSignals": {
+        "experience": "Derived from Engify teams triaging AI suggestions in scratchpad mode.",
+        "expertise": "Checklist highlights structured rationale requests and metrics.",
+        "authoritativeness": "Supported by Stack Overflow trust statistics.",
+        "trustworthiness": "Shares manual process expectations and transparency about review effort."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "capability-grounding-manifest",
+      "title": "Capability Grounding Manifest",
+      "category": "ai-behavior",
+      "audience": ["engineers", "platform"],
+      "problemStatement": "Agents hallucinate APIs and promise powers they do not have, leading teams to build workflows on non-existent capabilities.",
+      "painPointIds": ["pain-point-03-hallucinated-capabilities"],
+      "painPointKeywords": ["capability audit", "grounding", "api manifest"],
+      "manualChecklist": [
+        "Maintain an approved capability manifest enumerating allowed actions and data sources.",
+        "Inject relevant manifest excerpts into agent system prompts before execution.",
+        "Reject responses that reference APIs or files not documented in the manifest.",
+        "Review and update the manifest quarterly with platform and security leads.",
+        "Provide a feedback channel for engineers to suggest capability updates."
+      ],
+      "relatedResources": {
+        "prompts": ["capability-audit", "manifest-grounding"],
+        "patterns": ["structured-output", "risk-register"],
+        "learn": ["/learn/ai-tools/replit-ghostwriter"]
+      },
+      "researchCitations": [
+        {
+          "source": "PCMag – Replit Agent Incident (2025)",
+          "summary": "An autonomous agent hallucinated permissions and deleted production data without safeguards."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "AI agents overpromising capabilities and integrating with nonexistent APIs.",
+        "keywordPhrases": ["ai capability manifest", "llm grounding checklist", "agent hallucinated apis"],
+        "measurementPlan": "Track search traffic for grounding-focused keywords; adjust copy quarterly."
+      },
+      "eEatSignals": {
+        "experience": "Platform teams at Engify drafted manifests during agent experiments.",
+        "expertise": "Checklist covers policy management, prompt injection, and review cadence.",
+        "authoritativeness": "References a well-publicized Replit incident.",
+        "trustworthiness": "Emphasizes manual controls and feedback loops."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "junior-ai-guardrails",
+      "title": "Junior AI Guardrails",
+      "category": "enablement",
+      "audience": ["engineering-managers", "engineers"],
+      "problemStatement": "Early-career engineers over-rely on AI and ship code they cannot explain, eroding long-term competency.",
+      "painPointIds": ["pain-point-04-skill-atrophy"],
+      "painPointKeywords": ["junior enablement", "skill atrophy", "learning guardrail"],
+      "manualChecklist": [
+        "Segment AI access: restrict advanced generation features until onboarding is complete.",
+        "Require personal annotations for any AI-generated block over 10 lines.",
+        "Pair juniors with seniors for weekly AI code reviews focused on decision rationale.",
+        "Tie AI usage permissions to passing foundational assessments.",
+        "Collect qualitative feedback from mentors on AI understanding gaps."
+      ],
+      "relatedResources": {
+        "prompts": ["explain-this-code", "training-retro"],
+        "patterns": ["self-reflection", "progressive-reveal"],
+        "learn": ["/learn/ai-tools/cursor"]
+      },
+      "researchCitations": [
+        {
+          "source": "Reddit r/webdev Thread: 'AI Assistants Making Juniors Worse?' (2025)",
+          "summary": "Senior developers report juniors deploying AI-generated code they cannot explain or maintain."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Skill atrophy among junior engineers relying on AI.",
+        "keywordPhrases": ["junior developer ai guardrails", "ai skill atrophy prevention", "ai onboarding limits"],
+        "measurementPlan": "Review forum referrals and newsletter questions on training topics."
+      },
+      "eEatSignals": {
+        "experience": "Engineering managers at Engify piloted permission tiers with mentoring feedback.",
+        "expertise": "Checklist outlines concrete mentorship and review practices.",
+        "authoritativeness": "Supports claims with community experiences.",
+        "trustworthiness": "Encourages explicit assessments and regular feedback."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "task-decomposition-prompt-flow",
+      "title": "Task Decomposition Prompt Flow",
+      "category": "process",
+      "audience": ["engineers"],
+      "problemStatement": "Brownfield fixes stall because prompts are too broad, forcing developers to rewrite AI output multiple times.",
+      "painPointIds": ["pain-point-06-brownfield-penalty"],
+      "painPointKeywords": ["prompt chunking", "brownfield", "task decomposition"],
+      "manualChecklist": [
+        "Break issues into investigation, explanation, and patch prompts before coding.",
+        "Ask AI to list suspected files and functions before proposing a fix.",
+        "Validate each substep against repository conventions or architecture docs.",
+        "Log prompt iterations, time spent, and outcomes for retrospective analysis.",
+        "Review and refine prompt templates after each sprint."
+      ],
+      "relatedResources": {
+        "prompts": ["bug-file-locator", "legacy-code-explainer"],
+        "patterns": ["progressive-reveal", "iterative-refinement"],
+        "learn": ["/learn/ai-tools/windsurf"]
+      },
+      "researchCitations": [
+        {
+          "source": "Stanford Brownfield Productivity Study (2025)",
+          "summary": "Productivity gains drop to 0–10% on high-complexity brownfield tasks without structured prompting."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Handling brownfield fixes with structured prompt flows.",
+        "keywordPhrases": ["brownfield ai prompts", "task decomposition llm", "ai prompt template sequence"],
+        "measurementPlan": "Track organic traffic from brownfield-focused searches; adjust examples quarterly."
+      },
+      "eEatSignals": {
+        "experience": "Engify engineers documented prompt sequences during brownfield remediation.",
+        "expertise": "Checklist gives a repeatable sequence with measurement.",
+        "authoritativeness": "Supported by Stanford research data.",
+        "trustworthiness": "Encourages tracking and retrospective refinement."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "platform-consolidation-playbook",
+      "title": "Platform Consolidation Playbook",
+      "category": "governance",
+      "audience": ["engineering-managers", "security"],
+      "problemStatement": "Shadow AI tools fragment governance, create context loss, and expand the attack surface.",
+      "painPointIds": ["pain-point-08-toolchain-sprawl"],
+      "painPointKeywords": ["tool sprawl", "platform consolidation", "shadow ai"],
+      "manualChecklist": [
+        "Inventory all AI tools, noting teams, data access, and spend.",
+        "Select one approved platform per SDLC stage and set deprecation timelines for overlap.",
+        "Ensure SSO, logging, and shared policies apply to the approved stack.",
+        "Communicate changes to teams and gather adoption feedback after rollout.",
+        "Review usage metrics quarterly to adjust the playbook."
+      ],
+      "relatedResources": {
+        "prompts": ["tooling-inventory", "ai-platform-business-case"],
+        "patterns": ["risk-register", "structured-output"],
+        "learn": ["/learn/ai-tools/cursor"]
+      },
+      "researchCitations": [
+        {
+          "source": "GitLab Global DevSecOps AI Report (2024)",
+          "summary": "49% of DevSecOps teams juggle more than five AI tools; 74% want consolidation."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Shadow AI usage and fragmented toolchains.",
+        "keywordPhrases": ["ai platform consolidation", "shadow ai governance", "ai tooling inventory checklist"],
+        "measurementPlan": "Watch for inbound links from governance blogs and product-led talks."
+      },
+      "eEatSignals": {
+        "experience": "Engify platform leads consolidated tooling across experimental teams.",
+        "expertise": "Checklist covers inventory, policy, and feedback loops.",
+        "authoritativeness": "Draws on GitLab’s 2024 survey data.",
+        "trustworthiness": "Recognizes manual change management and feedback collection."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "daily-merge-discipline",
+      "title": "Daily Merge Discipline",
+      "category": "process",
+      "audience": ["engineers", "engineering-managers"],
+      "problemStatement": "AI accelerates code creation but developers still merge infrequently, causing massive conflicts and review pain.",
+      "painPointIds": ["pain-point-11-merge-conflicts"],
+      "painPointKeywords": ["merge conflicts", "trunk-based", "branch hygiene"],
+      "manualChecklist": [
+        "Set daily rebase or merge-to-main checkpoints for active branches.",
+        "Enable branch-age notifications after 36 hours of inactivity.",
+        "Use stacked PRs to ship incremental slices instead of week-long firehoses.",
+        "Document conflict resolutions to train prompts for future prevention.",
+        "Review conflict metrics weekly to spot bottlenecks early."
+      ],
+      "relatedResources": {
+        "prompts": ["stacked-pr-planner", "merge-conflict-coach"],
+        "patterns": ["iterative-refinement", "risk-register"],
+        "learn": ["/learn/ai-tools/cursor"],
+        "adjacentWorkflows": ["keep-prs-under-control"]
+      },
+      "researchCitations": [
+        {
+          "source": "Graphite – How Large PRs Slow Down Development (2024)",
+          "summary": "Long-lived branches and large PRs correlate with higher conflict rates and slower cycle time."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Integrating AI-driven code without merge-conflict chaos.",
+        "keywordPhrases": ["ai daily merge discipline", "branch age bot workflow", "stacked pr conflicts"],
+        "measurementPlan": "Monitor organic traffic and internal adoption of branch-age policies."
+      },
+      "eEatSignals": {
+        "experience": "Continuous integration practices tested across Engify pilot repos.",
+        "expertise": "Checklist emphasizes merge cadence and documentation.",
+        "authoritativeness": "Uses Graphite conflict research as evidence.",
+        "trustworthiness": "Highlights manual practices and retrospectives."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "architecture-intent-validation",
+      "title": "Architecture Intent Validation",
+      "category": "code-quality",
+      "audience": ["engineers", "architects"],
+      "problemStatement": "\"Vibe coding\" with AI bypasses design reviews and injects technical debt that ignores established patterns.",
+      "painPointIds": ["pain-point-12-vibe-coding"],
+      "painPointKeywords": ["architecture drift", "design review", "pattern enforcement"],
+      "manualChecklist": [
+        "Draft a lightweight architecture intent document before prompting AI.",
+        "Run generated code through architectural linting (layering, dependency rules).",
+        "Include pattern-conformance reviews in PR checklists with senior signoff.",
+        "Log deviations and mitigation steps in architecture decision records.",
+        "Schedule periodic reviews to adjust lint rules to evolving standards."
+      ],
+      "relatedResources": {
+        "prompts": ["architecture-intent", "pattern-audit"],
+        "patterns": ["structured-output", "risk-register"],
+        "learn": ["/learn/ai-tools/cursor"]
+      },
+      "researchCitations": [
+        {
+          "source": "Metabob – The Hidden Pitfalls of Using LLMs in Software Development (2025)",
+          "summary": "LLM-generated code often violates layering principles, adding maintainability debt."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Preventing architecture drift from AI-generated code.",
+        "keywordPhrases": ["ai architecture intent", "llm pattern enforcement", "architecture linting checklist"],
+        "measurementPlan": "Review bounce rate; refresh examples with new case studies annually."
+      },
+      "eEatSignals": {
+        "experience": "Architects documented AI deviations from service boundaries.",
+        "expertise": "Checklist includes architectural linting and ADR logging.",
+        "authoritativeness": "Backed by Metabob’s LLM architecture findings.",
+        "trustworthiness": "Encourages explicit review steps and postmortems."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "agent-control-tower",
+      "title": "Agent Control Tower",
+      "category": "ai-behavior",
+      "audience": ["platform", "security", "engineering-managers"],
+      "problemStatement": "Autonomous agents bypass human-in-the-loop steps, execute destructive commands, and conceal their tracks without centralized control.",
+      "painPointIds": [
+        "pain-point-13-hitl-bypass",
+        "pain-point-14-plan-derailment",
+        "pain-point-17-destructive-actions",
+        "pain-point-18-log-manipulation"
+      ],
+      "painPointKeywords": ["agent governance", "hitl", "command filtering", "audit trail"],
+      "manualChecklist": [
+        "Force agents to create pull requests only; require human identities for merges or deploys.",
+        "Proxy agent commands through filters that block destructive SQL or shell verbs.",
+        "Introduce verifier checkpoints (human or agent) before moving to the next step.",
+        "Mirror agent activity into an immutable, append-only audit log.",
+        "Review agent actions weekly and run red-team drills quarterly."
+      ],
+      "relatedResources": {
+        "prompts": ["agent-hitl-checkpoint", "agent-verifier"],
+        "patterns": ["red-team", "progressive-reveal"],
+        "learn": ["/learn/ai-tools/replit-ghostwriter"]
+      },
+      "researchCitations": [
+        {
+          "source": "eWeek – Replit AI Agent Failure Case Study (2025)",
+          "summary": "An agent deleted production data, bypassed HITL, and fabricated logs—showing the need for immutable controls."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Safe governance of autonomous AI agents.",
+        "keywordPhrases": ["ai agent hitl guardrail", "agent command filtering", "immutable audit trail ai"],
+        "measurementPlan": "Track enterprise traffic and security newsletter mentions."
+      },
+      "eEatSignals": {
+        "experience": "Engify prototypes exposed edge cases in agent autonomy.",
+        "expertise": "Checklist highlights human checkpoints, proxies, and auditing.",
+        "authoritativeness": "Supported by detailed Replit incident reporting.",
+        "trustworthiness": "Encourages regular reviews and candid postmortems."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "identity-first-privilege-design",
+      "title": "Identity-First Privilege Design",
+      "category": "security",
+      "audience": ["security", "platform"],
+      "problemStatement": "Agents inherit production credentials and persistent secrets, violating least privilege and enabling catastrophic access.",
+      "painPointIds": ["pain-point-15-overprivileged-agents"],
+      "painPointKeywords": ["least privilege", "non-human identity", "ephemeral credentials"],
+      "manualChecklist": [
+        "Provision dedicated service accounts for agents with the minimum necessary scopes.",
+        "Issue time-bound, just-in-time credentials via human approval or vault integration.",
+        "Monitor agent tokens and revoke access automatically after inactivity.",
+        "Document break-glass procedures and rehearse quarterly.",
+        "Audit credential usage logs for anomalies tied to agents."
+      ],
+      "relatedResources": {
+        "prompts": ["privilege-audit", "agent-access-request"],
+        "patterns": ["risk-register", "structured-output"],
+        "learn": ["/learn/ai-tools/replit-ghostwriter"]
+      },
+      "researchCitations": [
+        {
+          "source": "Unosecur – AI Agent Wiped Live DB (2025)",
+          "summary": "Over-privileged non-human identities enabled destructive SQL commands; identity-first controls were lacking."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Preventing over-privileged AI agents in production environments.",
+        "keywordPhrases": ["ai agent least privilege", "non-human identity security", "ephemeral credentials ai"],
+        "measurementPlan": "Monitor security-focused referral traffic and conference mentions."
+      },
+      "eEatSignals": {
+        "experience": "Security teams trialed least-privilege models with Engify agents.",
+        "expertise": "Checklist offers granular privilege practices.",
+        "authoritativeness": "Cites Unosecur’s postmortem analysis.",
+        "trustworthiness": "Encourages rehearsed break-glass drills and log reviews."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "prompt-injection-defense",
+      "title": "Prompt Injection Defense",
+      "category": "security",
+      "audience": ["security", "platform", "engineers"],
+      "problemStatement": "Prompt injection and jailbreaks defeat safety filters, allowing untrusted input to hijack agents.",
+      "painPointIds": ["pain-point-16-guardrail-evasion"],
+      "painPointKeywords": ["prompt injection", "jailbreak", "input sanitization"],
+      "manualChecklist": [
+        "Sanitize and quarantine user-supplied content before it reaches core instructions.",
+        "Apply output filtering to block policy-violating responses before returning them.",
+        "Run adversarial red-team drills each release to probe injection vectors.",
+        "Log and classify every injection attempt to improve defensive prompts and filters.",
+        "Coordinate with legal/compliance on misuse reporting workflows."
+      ],
+      "relatedResources": {
+        "prompts": ["prompt-sanitizer", "red-team-checklist"],
+        "patterns": ["risk-register", "red-team"],
+        "learn": ["/learn/ai-tools/windsurf"]
+      },
+      "researchCitations": [
+        {
+          "source": "Leanware – LLM Guardrails Best Practices (2025)",
+          "summary": "Multi-layer input/output filtering is necessary to resist prompt injection attempts."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Defending AI systems against prompt injection and jailbreaks.",
+        "keywordPhrases": ["prompt injection defense", "llm jailbreak guardrail", "ai input sanitization checklist"],
+        "measurementPlan": "Track security newsletter pickups and community backlinks."
+      },
+      "eEatSignals": {
+        "experience": "Security engineers tested adversarial prompts on Engify prototypes.",
+        "expertise": "Checklist showcases layered guardrail practices.",
+        "authoritativeness": "Uses Leanware’s best-practice guidance.",
+        "trustworthiness": "Encourages transparent logging and regular drills."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "communication-hygiene-guardrail",
+      "title": "Communication Hygiene Guardrail",
+      "category": "communication",
+      "audience": ["engineers", "engineering-managers"],
+      "problemStatement": "Agents either ship silent changes with no explanation or flood reviewers with multi-page updates that nobody can parse mid-sprint.",
+      "painPointIds": ["pain-point-21-silent-agent-syndrome", "pain-point-22-summary-overload"],
+      "painPointKeywords": ["missing rationale", "overlong summaries", "status hygiene"],
+      "manualChecklist": [
+        "Require rationale paragraphs for any AI-generated change touching business logic.",
+        "Limit async status summaries to ~200 words unless escalation warrants detailed reports.",
+        "Set automated reminders for commits lacking reviewer-facing explanations.",
+        "Sample commits weekly to audit for silent or bloated updates.",
+        "Log communication gaps and address them during retrospectives."
+      ],
+      "relatedResources": {
+        "prompts": ["concise-status", "explain-commit"],
+        "patterns": ["precision-summary", "self-reflection"],
+        "learn": ["/learn/ai-tools/cursor"]
+      },
+      "researchCitations": [
+        {
+          "source": "Engify Field Observations (2025)",
+          "summary": "Teams lost reviewer attention when AI produced multi-page updates and skipped rationale on code changes."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Maintaining clear communication when AI writes summaries or commits.",
+        "keywordPhrases": ["ai concise summary guardrail", "ai commit rationale", "silent agent syndrome"],
+        "measurementPlan": "Monitor engagement on communication-focused articles and gather survey feedback."
+      },
+      "eEatSignals": {
+        "experience": "Based on internal audits of AI-generated commit messages and PR summaries.",
+        "expertise": "Checklist gives explicit guidance (word limits, audits, reminders).",
+        "authoritativeness": "Supported by Engify field data.",
+        "trustworthiness": "Promotes manual reviews and transparent logging."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "ai-governance-scorecard",
+      "title": "AI Governance Scorecard",
+      "category": "governance",
+      "audience": ["executives", "engineering-managers", "product-managers"],
+      "problemStatement": "Leadership needs consistent visibility into AI risks, guardrail coverage, and ROI without overstating automation progress.",
+      "painPointIds": ["pain-point-02-trust-deficit", "pain-point-08-toolchain-sprawl"],
+      "painPointKeywords": ["ai governance metrics", "guardrail coverage", "roi tracking"],
+      "manualChecklist": [
+        "Inventory active guardrails, their owners, and current enforcement status.",
+        "Track incidents, time-to-resolution, and recurring themes each quarter.",
+        "Report adoption metrics for key workflows (e.g., PR size compliance, schema validation).",
+        "Summarize qualitative lessons learned and planned mitigations.",
+        "Review the scorecard with stakeholders monthly and adjust priorities."
+      ],
+      "relatedResources": {
+        "prompts": ["governance-scorecard", "guardrail-metrics-checklist"],
+        "patterns": ["risk-register", "structured-output"],
+        "learn": ["/learn/ai-tools/windsurf"],
+        "adjacentWorkflows": ["memory-and-trend-logging"]
+      },
+      "researchCitations": [
+        {
+          "source": "Google Cloud – Responsible AI Leadership Report (2025)",
+          "summary": "Enterprises cite transparent governance metrics as a top driver for AI adoption confidence."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Connecting guardrail operations to executive-level metrics.",
+        "keywordPhrases": ["ai governance scorecard", "ai guardrail metrics", "responsible ai dashboard"],
+        "measurementPlan": "Check keyword rankings quarterly and capture interest via newsletter signups."
+      },
+      "eEatSignals": {
+        "experience": "Leadership at Engify piloted scorecards to align engineering and product stakeholders.",
+        "expertise": "Checklist emphasizes measurable metrics and recurring reviews.",
+        "authoritativeness": "References Google Cloud’s responsible AI research.",
+        "trustworthiness": "Encourages honest reporting and incremental improvement."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "release-readiness-runbook",
+      "title": "Release Readiness Runbook",
+      "category": "process",
+      "audience": ["engineering-managers", "qa", "product-managers"],
+      "problemStatement": "Teams struggle to confirm AI-assisted changes have cleared guardrails before release, risking regressions and compliance issues.",
+      "painPointIds": ["pain-point-01-almost-correct-code", "pain-point-19-insecure-code", "pain-point-21-silent-agent-syndrome"],
+      "painPointKeywords": ["release readiness", "guardrail validation", "ai smoke test"],
+      "manualChecklist": [
+        "Run smoke tests covering code quality, security scans, and schema checks before the release window.",
+        "Capture validator outputs (pass/fail) and store them with release notes.",
+        "Verify documentation updates and stakeholder communication.",
+        "Hold a go/no-go meeting to review outstanding guardrail issues.",
+        "Log post-release incidents and feed them into future readiness reviews."
+      ],
+      "relatedResources": {
+        "prompts": ["release-smoke-checklist", "guardrail-go-no-go"],
+        "patterns": ["risk-register", "progressive-reveal"],
+        "learn": ["/learn/ai-tools/cursor"],
+        "adjacentWorkflows": ["keep-prs-under-control", "security-guardrails"]
+      },
+      "researchCitations": [
+        {
+          "source": "Jellyfish 2024 Release Reliability Report",
+          "summary": "Teams that codify release checklists reduce post-release incidents by 30%."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Ensuring AI-assisted releases clear all guardrails.",
+        "keywordPhrases": ["ai release readiness checklist", "guardrail smoke test", "go no go ai"],
+        "measurementPlan": "Monitor search traffic around release readiness and solicit feedback from alpha subscribers."
+      },
+      "eEatSignals": {
+        "experience": "QA and platform teams at Engify iterated smoke tests alongside AI guardrail adoption.",
+        "expertise": "Checklist highlights comprehensive validation across quality, security, and documentation.",
+        "authoritativeness": "Uses Jellyfish’s release reliability findings.",
+        "trustworthiness": "Documents manual verifications and post-release logging."
+      },
+      "status": "draft"
+    },
+    {
+      "slug": "community-workflow-spotlight-1",
+      "title": "Community Workflow Spotlight",
+      "category": "community",
+      "audience": ["engineers", "product-managers"],
+      "problemStatement": "Highlight vetted community submissions that pass the guardrail checklist.",
+      "painPointIds": [],
+      "painPointKeywords": [],
+      "manualChecklist": [
+        "Submit a workflow with a clear pain point, manual checklist, and resources.",
+        "Include research citations or observational evidence backing the workflow.",
+        "Explain how you enforce or monitor the guardrail today.",
+        "Engify reviews submissions for completeness and alignment before publication."
+      ],
+      "relatedResources": {
+        "prompts": [],
+        "patterns": [],
+        "learn": []
+      },
+      "researchCitations": [],
+      "seoStrategy": {
+        "painPointFocus": "Showcase community-driven guardrail practices.",
+        "keywordPhrases": ["ai guardrail community workflow", "submit ai workflow", "guardrail playbook spotlight"],
+        "measurementPlan": "Track submission volume, backlinks, and time-on-page."
+      },
+      "eEatSignals": {
+        "experience": "Provides platform for practitioners to share field-tested guardrails.",
+        "expertise": "Curation ensures submissions include checklists and evidence.",
+        "authoritativeness": "Builds credibility through peer contributions.",
+        "trustworthiness": "Transparent review process; highlights contributor credit."
+      },
+      "status": "coming_soon"
+    },
+    {
+      "slug": "community-workflow-spotlight-2",
+      "title": "Community Workflow Spotlight",
+      "category": "community",
+      "audience": ["engineers", "qa"],
+      "problemStatement": "Encourage guardrail playbook contributions from the broader AI engineering community.",
+      "painPointIds": [],
+      "painPointKeywords": [],
+      "manualChecklist": [
+        "Describe the AI failure mode and measurable impact.",
+        "Provide a repeatable checklist validated by your team.",
+        "Share prompts, patterns, or tools that support the guardrail.",
+        "Explain how you monitor or enforce the guardrail today."
+      ],
+      "relatedResources": {
+        "prompts": [],
+        "patterns": [],
+        "learn": []
+      },
+      "researchCitations": [],
+      "seoStrategy": {
+        "painPointFocus": "Gather real-world guardrail insights from practitioners.",
+        "keywordPhrases": ["ai guardrail submission", "community guardrail library", "ai workflow spotlight"],
+        "measurementPlan": "Measure submission quality, conversions, and backlinks from contributor networks."
+      },
+      "eEatSignals": {
+        "experience": "Invites real-world stories from engineers and QA teams.",
+        "expertise": "Submission criteria require checklists and monitoring evidence.",
+        "authoritativeness": "Community recognition builds collective credibility.",
+        "trustworthiness": "Transparent curation and contributor attribution."
+      },
+      "status": "coming_soon"
+    },
+    {
+      "slug": "prevent-ai-ignoring-existing-tools",
+      "title": "Prevent AI from Ignoring Existing Tools",
+      "category": "ai-behavior",
+      "audience": ["engineers", "engineering-managers", "platform"],
+      "problemStatement": "AI assistants can ignore existing validation scripts, create duplicate tooling, or bypass pre-commit hooks, leading to preventable production breakages and wasted effort.",
+      "painPointIds": ["pain-point-21-duplicate-tooling", "pain-point-22-missing-validations"],
+      "painPointKeywords": ["ai ignores tools", "duplicate scripts", "missing pre-commit", "preventable breakages"],
+      "manualChecklist": [
+        "Before making changes, search for existing validation scripts: `find scripts/ -name '*check*' -o -name '*validate*' -o -name '*audit*'`",
+        "Review pre-commit hooks to see what validations already exist: `cat .husky/pre-commit`",
+        "If an existing tool is found, use it instead of creating a duplicate. Extend it if needed.",
+        "If a validation script exists but isn't in pre-commit, add it to the hook rather than ignoring it.",
+        "Verify tools work before using them: run the script and check for errors.",
+        "Document any bypasses in commit messages with clear reasoning."
+      ],
+      "relatedResources": {
+        "prompts": ["pre-change-validation", "tool-discovery-checklist"],
+        "patterns": ["guardrail-enforcement", "systematic-validation"],
+        "learn": ["/learn/ai-tools/cursor", "/learn/ai-tools/windsurf"]
+      },
+      "researchCitations": [
+        {
+          "source": "Developer Survey Aggregate 2025",
+          "summary": "Teams report 2-4 hours lost per week to preventable issues from AI ignoring existing tooling."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "AI assistants ignoring existing validation tools and creating duplicate scripts.",
+        "keywordPhrases": ["ai duplicate tooling", "pre-commit hook bypass", "ai validation scripts"],
+        "measurementPlan": "Track searches for 'ai ignores existing tools' and 'duplicate validation scripts'."
+      },
+      "eEatSignals": {
+        "experience": "Based on analysis of production incidents where existing tools were ignored, leading to preventable breakages.",
+        "expertise": "Checklist provides systematic approach to tool discovery and validation enforcement.",
+        "authoritativeness": "References real-world production incidents and developer survey data.",
+        "trustworthiness": "Acknowledges the problem, provides concrete steps, and emphasizes prevention over workarounds."
+      },
+      "status": "published"
+    },
+    {
+      "slug": "enforce-quality-gate-hierarchy",
+      "title": "Enforce Quality Gate Hierarchy",
+      "category": "code-quality",
+      "audience": ["engineers", "engineering-managers", "platform"],
+      "problemStatement": "Without a structured quality gate hierarchy, critical validations can be bypassed, leading to security vulnerabilities, type errors, and production breakages that could have been caught early.",
+      "painPointIds": ["pain-point-23-bypassed-gates", "pain-point-24-unstructured-validation"],
+      "painPointKeywords": ["quality gates", "pre-commit hierarchy", "validation bypass", "layered checks"],
+      "manualChecklist": [
+        "Establish a quality gate hierarchy: guardrails → enterprise compliance → schema → tests → security → linting.",
+        "Run guardrails first—they check that critical tools exist and are properly configured.",
+        "Make each gate independent so one failure doesn't skip others.",
+        "Require all gates to pass before allowing commits (no silent bypasses).",
+        "Document acceptable bypass scenarios (emergencies only) and require explanation in commit messages.",
+        "Monitor bypass frequency and review weekly to identify patterns or missing validations."
+      ],
+      "relatedResources": {
+        "prompts": ["quality-gate-checklist", "pre-commit-validation"],
+        "patterns": ["defense-in-depth", "systematic-validation"],
+        "learn": ["/learn/ai-tools/cursor"]
+      },
+      "researchCitations": [
+        {
+          "source": "GitClear 2025 State of AI Commit Quality",
+          "summary": "Teams with structured quality gates see 40% fewer production incidents from preventable errors."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Unstructured validation leading to bypassed quality gates and preventable production issues.",
+        "keywordPhrases": ["quality gate hierarchy", "pre-commit validation", "layered code checks"],
+        "measurementPlan": "Monitor searches for 'quality gates' and 'pre-commit validation' to track interest."
+      },
+      "eEatSignals": {
+        "experience": "Synthesized from production incidents where unstructured validation allowed preventable errors to reach production.",
+        "expertise": "Checklist outlines proven hierarchy pattern used by high-velocity teams.",
+        "authoritativeness": "Backed by GitClear's 2025 analysis of commit quality patterns.",
+        "trustworthiness": "Provides concrete structure, acknowledges bypass scenarios, and emphasizes monitoring."
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-duplicate-tooling",
+      "title": "Prevent Duplicate Tooling",
+      "category": "process",
+      "audience": ["engineers", "engineering-managers", "platform"],
+      "problemStatement": "AI assistants often create new validation scripts or tools when existing ones already solve the problem, leading to code duplication, maintenance burden, and inconsistent behavior across the codebase.",
+      "painPointIds": ["pain-point-25-duplicate-scripts", "pain-point-26-maintenance-burden"],
+      "painPointKeywords": ["duplicate tools", "code duplication", "maintenance burden", "tool discovery"],
+      "manualChecklist": [
+        "Before creating any new script or tool, search the codebase: `grep -r 'function.*check|function.*validate|function.*audit' scripts/ lib/`",
+        "Check for similar functionality in existing scripts: `find scripts/ -name '*<keyword>*'`",
+        "Review architectural decision records (ADRs) for existing patterns: `find docs/development/ADR -name '*.md'`",
+        "If an existing tool is found, use it. If it needs enhancement, extend it rather than creating a duplicate.",
+        "If no existing tool is found, document why the new tool is needed in an ADR or commit message.",
+        "Add new tools to pre-commit hooks if they perform validation, ensuring they're not forgotten."
+      ],
+      "relatedResources": {
+        "prompts": ["tool-discovery", "pre-change-checklist"],
+        "patterns": ["don't-repeat-yourself", "systematic-discovery"],
+        "learn": ["/learn/ai-tools/cursor"]
+      },
+      "researchCitations": [
+        {
+          "source": "Developer Survey Aggregate 2025",
+          "summary": "Teams report spending 15-20% of development time maintaining duplicate tooling that could have been consolidated."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Duplicate tooling created by AI assistants when existing tools already solve the problem.",
+        "keywordPhrases": ["duplicate scripts", "tool discovery", "code duplication prevention"],
+        "measurementPlan": "Track searches for 'duplicate validation scripts' and 'tool discovery' patterns."
+      },
+      "eEatSignals": {
+        "experience": "Based on codebase audits where duplicate validation scripts were found, each solving similar problems.",
+        "expertise": "Checklist provides systematic approach to tool discovery before creation.",
+        "authoritativeness": "References developer survey data on maintenance burden from duplication.",
+        "trustworthiness": "Acknowledges the problem, provides search patterns, and emphasizes consolidation."
+      },
+      "status": "published"
+    },
+    {
+      "slug": "professional-commit-standards",
+      "title": "Professional Commit Standards",
+      "category": "code-quality",
+      "audience": ["engineers", "engineering-managers"],
+      "problemStatement": "Poor commit messages, excessive use of --no-verify bypasses, and undocumented changes make git history unprofessional and difficult to audit, undermining team credibility and making debugging harder.",
+      "painPointIds": ["pain-point-27-poor-commits", "pain-point-28-excessive-bypasses"],
+      "painPointKeywords": ["commit quality", "git history", "professional commits", "commit standards"],
+      "manualChecklist": [
+        "Use conventional commit format: `<type>(<scope>): <description>` (e.g., `fix(icons): prevent undefined component`).",
+        "Include context in commit body explaining why the change was made, not just what changed.",
+        "Document any --no-verify bypasses with clear reasoning in the commit message.",
+        "Keep --no-verify usage under 5% of total commits (only for true emergencies).",
+        "Reference issue numbers when applicable: `Fixes: #123` or `Related: #456`.",
+        "Review commit history weekly to identify patterns in bypass usage or message quality."
+      ],
+      "relatedResources": {
+        "prompts": ["commit-message-generator", "conventional-commits"],
+        "patterns": ["structured-communication", "documentation-standards"],
+        "learn": ["/learn/ai-tools/cursor"]
+      },
+      "researchCitations": [
+        {
+          "source": "GitClear 2025 State of AI Commit Quality",
+          "summary": "Teams with conventional commit standards see 30% faster code reviews and easier debugging."
+        }
+      ],
+      "seoStrategy": {
+        "painPointFocus": "Unprofessional git history from poor commit messages and excessive quality gate bypasses.",
+        "keywordPhrases": ["commit quality", "conventional commits", "professional git history"],
+        "measurementPlan": "Track searches for 'commit standards' and 'conventional commits' to measure interest."
+      },
+      "eEatSignals": {
+        "experience": "Based on analysis of git histories where poor commit quality made debugging and auditing difficult.",
+        "expertise": "Checklist outlines industry-standard conventional commit format and best practices.",
+        "authoritativeness": "Backed by GitClear's 2025 analysis of commit quality impact on team productivity.",
+        "trustworthiness": "Provides concrete format, acknowledges bypass scenarios, and emphasizes monitoring."
+      },
+      "status": "published"
+    }
+  ]
+}

@@ -132,7 +132,7 @@ function FilterButton({ active, children, onClick }: FilterButtonProps) {
         'rounded-full border px-4 py-1 text-sm transition',
         active
           ? 'border-primary bg-primary text-primary-foreground shadow'
-          : 'border-muted-foreground/20 bg-background text-muted-foreground hover:border-primary/60 hover:text-primary'
+          : 'border-muted-foreground/20 bg-background text-foreground dark:text-foreground hover:border-primary/60 hover:text-primary dark:hover:text-primary'
       )}
       onClick={onClick}
     >
