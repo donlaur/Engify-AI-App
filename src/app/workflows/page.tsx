@@ -2,79 +2,19 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { WorkflowFilters } from './WorkflowFilters';
+import { Icons } from '@/lib/icons';
+import { WorkflowsClient } from './WorkflowsClient';
+import { WorkflowTracking } from './WorkflowTracking';
 import {
   listWorkflowAudiences,
   listWorkflowCategories,
   loadWorkflowsFromJson,
   getWorkflowsMetadata,
 } from '@/lib/workflows/load-workflows-from-json';
-import type { Workflow } from '@/lib/workflows/workflow-schema';
-import { WORKFLOW_AUDIENCES } from '@/lib/workflows/workflow-schema';
-import { formatDate } from '@/lib/utils';
+import { getPainPointsMetadata } from '@/lib/workflows/load-pain-points-from-json';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
-
-const APP_SECTION_LABELS: Record<'prompts' | 'patterns' | 'learn', string> = {
-  prompts: 'Related Prompts',
-  patterns: 'Patterns',
-  learn: 'Further Reading',
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-  'ai-behavior': 'AI Behavior',
-  'code-quality': 'Code Quality',
-  communication: 'Communication',
-  community: 'Community',
-  enablement: 'Enablement',
-  governance: 'Governance',
-  memory: 'Memory & Knowledge',
-  process: 'Process & Delivery',
-  'risk-management': 'Risk Management',
-  security: 'Security',
-};
-
-const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  'code-quality': 'Prevent almost-right code and oversized PRs before they leave review.',
-  security: 'Ship AI-assisted changes without opening new attack surfaces or leaking secrets.',
-  'ai-behavior': 'Keep agents, copilots, and planners inside the guardrails you set.',
-  memory: 'Build organizational memory so incidents and lessons don’t get forgotten.',
-  process: 'Tame AI velocity with delivery cadences that reduce conflict and churn.',
-  governance: 'Give platform and security teams a single source of truth for AI policy.',
-  'risk-management': 'Spot downstream blast radius—metrics, dashboards, and compliance.',
-  enablement: 'Upskill juniors and stakeholders without letting skills atrophy.',
-  communication: 'Keep stakeholders, customers, and reviewers aligned with AI-assisted updates.',
-  community: 'Community-tested workflows contributed by Engify builders.',
-};
-
-const CATEGORY_SECTION_ORDER: string[] = [
-  'code-quality',
-  'security',
-  'ai-behavior',
-  'memory',
-  'process',
-  'governance',
-  'risk-management',
-  'enablement',
-  'communication',
-  'community',
-];
-
-const AUDIENCE_LABELS: Record<string, string> = {
-  analysts: 'Analysts',
-  architects: 'Architects',
-  engineers: 'Engineers',
-  'engineering-managers': 'Engineering Managers',
-  executives: 'Executives',
-  platform: 'Platform',
-  'product-managers': 'Product Managers',
-  qa: 'QA',
-  security: 'Security',
-};
-
-type WorkflowsSearchParams = Record<string, string | string[] | undefined>;
 
 export const revalidate = 3600; // Revalidate once per hour
 
@@ -112,521 +52,266 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-interface WorkflowsPageProps {
-  searchParams?: WorkflowsSearchParams | Promise<WorkflowsSearchParams>;
-}
-
-export default async function WorkflowsPage({ searchParams }: WorkflowsPageProps) {
-  const [workflows, categories, audiences, metadata] = await Promise.all([
+export default async function WorkflowsPage() {
+  const [workflows, categories, audiences, metadata, painPointsMetadata] = await Promise.all([
     loadWorkflowsFromJson(),
     listWorkflowCategories(),
     listWorkflowAudiences(),
     getWorkflowsMetadata(),
+    getPainPointsMetadata(),
   ]);
 
-  const resolvedSearchParams = ((await searchParams) ?? {}) as WorkflowsSearchParams;
+  // Filter out coming_soon workflows
+  const visibleWorkflows = workflows.filter((workflow) => workflow.status !== 'coming_soon');
 
-  const getParamValue = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value);
-
-  const selectedCategory = getParamValue(resolvedSearchParams.category);
-
-  const selectedAudienceValue = getParamValue(resolvedSearchParams.audience);
-
-  const selectedAudience = isWorkflowAudience(selectedAudienceValue) ? selectedAudienceValue : undefined;
-
-  const lastUpdatedLabel = metadata.generatedAt
-    ? formatDate(metadata.generatedAt)
-    : 'Unspecified';
-
-  const filteredWorkflows = workflows.filter((workflow) => {
-    if (selectedCategory && workflow.category !== selectedCategory) {
-      return false;
-    }
-
-    if (selectedAudience && !workflow.audience.includes(selectedAudience)) {
-      return false;
-    }
-
-    return workflow.status !== 'coming_soon';
-  });
-
-  const activeCategoryLabel = selectedCategory
-    ? CATEGORY_LABELS[selectedCategory] ?? formatLabel(selectedCategory)
-    : 'All Categories';
-
-  const activeAudienceLabel = selectedAudience
-    ? AUDIENCE_LABELS[selectedAudience] ?? formatLabel(selectedAudience)
-    : 'All Audiences';
-
-  const groupedWorkflows = filteredWorkflows.reduce<Record<string, Workflow[]>>((acc, workflow) => {
-    acc[workflow.category] = acc[workflow.category] ?? [];
-    acc[workflow.category].push(workflow);
+  // Calculate stats
+  const categoryStats = visibleWorkflows.reduce((acc, workflow) => {
+    acc[workflow.category] = (acc[workflow.category] || 0) + 1;
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
 
-  const orderedCategories = [...CATEGORY_SECTION_ORDER];
-  Object.keys(groupedWorkflows)
-    .filter((category) => !CATEGORY_SECTION_ORDER.includes(category))
-    .forEach((category) => orderedCategories.push(category));
+  const audienceStats = visibleWorkflows.reduce((acc, workflow) => {
+    workflow.audience.forEach((aud) => {
+      acc[aud] = (acc[aud] || 0) + 1;
+    });
+    return acc;
+  }, {} as Record<string, number>);
 
-  const summaryRows = workflows.map((workflow) => {
-    const painPoint = workflow.seoStrategy?.painPointFocus ?? workflow.title;
-    const checklistHighlight = workflow.manualChecklist[0] ?? 'See checklist in detail view';
-
-    return {
-      id: `${workflow.category}-${workflow.slug}`,
-      painPoint,
-      checklistHighlight,
-      status: formatSolutionStatus(workflow),
-    };
-  });
+  // Generate JSON-LD structured data for SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'AI Guardrail Workflows',
+    description: `Browse ${metadata.totalWorkflows || visibleWorkflows.length} industry-proven workflows and guardrails that prevent AI-assisted teams from shipping regressions.`,
+    url: `${APP_URL}/workflows`,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: visibleWorkflows.length,
+      itemListElement: visibleWorkflows.slice(0, 50).map((workflow, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'HowTo',
+          name: workflow.title,
+          description: workflow.problemStatement,
+          url: `${APP_URL}/workflows/${workflow.category}/${workflow.slug}`,
+          about: {
+            '@type': 'Thing',
+            name: workflow.category,
+          },
+        },
+      })),
+    },
+    about: {
+      '@type': 'Thing',
+      name: 'AI Guardrails and Engineering Workflows',
+    },
+  };
 
   return (
-    <MainLayout>
-      <div className="container py-10">
+    <>
+      <script
+        type="application/ld+json"
+        // SECURITY: JSON-LD is safe - it's JSON.stringify of our own data, no user input
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <MainLayout>
+        <WorkflowTracking />
+        <div className="container py-10">
         <header className="mb-12 rounded-xl border bg-gradient-to-br from-primary/10 via-background to-background p-10 text-center">
           <div className="mx-auto max-w-3xl space-y-4">
-            <Badge variant="secondary" className="uppercase tracking-wider">
-              Guardrail Library
-            </Badge>
             <h1 className="text-4xl font-bold md:text-5xl">
               Industry-Proven AI Guardrails &amp; Workflows
             </h1>
             <p className="text-lg text-muted-foreground">
-              Precisely documented checklists that teams can run today—and a preview of the automated
-              Engify guardrails rolling out through our private beta. Pick a failure mode, follow the
-              manual steps, and see how Engify turns them into always-on protection.
+              Precisely documented checklists that teams can run today. Pick a failure mode, follow the
+              manual steps, and see how these workflows help prevent common AI-assisted development issues.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg">
                 <Link href="#workflow-library">Explore workflows &amp; guardrails</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="/waitlist/guardrails">Join the guardrail beta</Link>
+                <Link href="/workflows/pain-points">View pain points</Link>
               </Button>
             </div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              Private beta: Guardrail automation cohort applications now open
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Catalog last updated {lastUpdatedLabel} · {metadata.totalWorkflows} workflows published
-            </p>
           </div>
         </header>
 
+        {/* Brief intro - Workflows & Guardrails Cards */}
+        <section className="mb-8 grid gap-6 md:grid-cols-2">
+          {/* Workflows Card */}
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <h2 className="mb-4 text-2xl font-bold">Workflows</h2>
+            <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
+              <p>
+                <strong className="text-foreground">Workflows</strong> are step-by-step checklists that address specific <Link href="/workflows/pain-points" className="text-primary hover:underline">pain points</Link> in AI-assisted development. Each workflow transforms a pain point into a preventable pattern with actionable steps your team can implement today.
+              </p>
+              <p>
+                These are <strong className="text-foreground">manual processes</strong> you can start using immediately—no automation required. They're battle-tested patterns backed by industry research and real-world production incidents.
+              </p>
+            </div>
+          </div>
+
+          {/* Guardrails Card */}
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <h2 className="mb-4 text-2xl font-bold">Guardrails</h2>
+            <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
+              <p>
+                <strong className="text-foreground">Guardrails</strong> are automated quality gates that enforce workflow checklists automatically. They transform manual processes into always-on automation that prevents <Link href="/workflows/pain-points" className="text-primary hover:underline">pain points</Link> before code reaches production.
+              </p>
+              <p>
+                While workflows are manual checklists you can use today, <strong className="text-foreground">guardrails automate these workflows</strong> to catch issues before they become incidents. Automated guardrails turn pain points into prevented patterns at every commit.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* How we select and maintain workflows & Evolution Path - 2 Cards */}
         <section className="mb-12 grid gap-6 md:grid-cols-2">
-          {WHY_GUARDRAILS_MATTER.map((item) => (
-            <div key={item.title} className="rounded-lg border bg-card p-6 shadow-sm">
-              <h2 className="mb-2 text-xl font-semibold">{item.title}</h2>
-              <p className="text-sm text-muted-foreground">{item.description}</p>
-              <p className="mt-3 text-xs uppercase tracking-wide text-muted-foreground">
-                Source: {item.source}
+          {/* How we select and maintain workflows */}
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <h2 className="mb-3 text-xl font-bold">How we select and maintain workflows</h2>
+            <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+              Every guardrail originates from repeated audit findings and real-world production incidents.
+              We document the pain point, provide the manual checklist, and cite third-party research.
+              These workflows are battle-tested patterns that teams can implement today.
+            </p>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                <strong className="text-foreground">Selection Criteria:</strong>
               </p>
+              <ul className="ml-6 list-disc space-y-2">
+                <li>Addresses a failure mode that appears in multiple production incidents or audit reports</li>
+                <li>Has measurable impact (defect rates, security vulnerabilities, time lost)</li>
+                <li>Can be implemented manually with existing tools (no proprietary dependencies)</li>
+                <li>Backed by third-party research or industry-standard practices</li>
+                <li>Includes clear, actionable checklist steps that teams can follow immediately</li>
+              </ul>
             </div>
-          ))}
-        </section>
+          </div>
 
-        <section className="mb-10 rounded-lg border bg-card/70 p-6">
-          <h2 className="mb-3 text-2xl font-bold">How we select and maintain workflows</h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Every guardrail originates from repeated audit findings inside Engify or across partner
-            repos. We document the pain point, ship the manual checklist, cite third-party research,
-            and only label items “Live” once the Engify automation is in production. Nothing is
-            aspirational. Status badges show what’s manual, what’s in design, and what’s shipping in
-            the beta.
-          </p>
-        </section>
-
-        <section className="mb-12">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold">Guardrail delivery tracker</h2>
+          {/* From Manual Checklists to Automated Guardrails */}
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <h2 className="mb-3 text-xl font-bold">From Manual Checklists to Automated Guardrails</h2>
+            <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
+              <p>
+                Each workflow provides a <strong className="text-foreground">manual checklist</strong> you can implement today. These are the foundation of guardrail automation—proven patterns that work when executed manually, ready to be codified into pre-commit hooks, CI/CD gates, and automated validation.
+              </p>
+              <p>
+                <strong className="text-foreground">The Evolution Path:</strong>
+              </p>
+              <ol className="ml-6 list-decimal space-y-2">
+                <li><strong className="text-foreground">Start Manual:</strong> Use the checklist in code reviews and PR templates</li>
+                <li><strong className="text-foreground">Add Automation:</strong> Convert checklist steps into pre-commit hooks and CI checks</li>
+                <li><strong className="text-foreground">Scale with Platform:</strong> Deploy guardrail automation that runs across all commits and PRs</li>
+              </ol>
               <p className="text-xs text-muted-foreground">
-                Pain point → current manual checklist → Engify automation status
+                Teams can start with manual checklists and evolve to automated enforcement as patterns mature and tooling becomes available.
               </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Showing <strong>{filteredWorkflows.length}</strong> workflows · Category: {activeCategoryLabel} · Audience: {activeAudienceLabel}
-            </p>
-          </div>
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="min-w-full divide-y divide-border text-sm">
-              <thead className="bg-muted/50 text-left uppercase tracking-wide text-xs text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3">Pain point focus</th>
-                  <th className="px-4 py-3">Checklist highlight</th>
-                  <th className="px-4 py-3">Engify solution</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border bg-background">
-                {summaryRows.map((row) => (
-                  <tr key={row.id}>
-                    <td className="px-4 py-3 align-top font-medium text-foreground">
-                      {row.painPoint}
-                    </td>
-                    <td className="px-4 py-3 align-top text-muted-foreground">
-                      {row.checklistHighlight}
-                    </td>
-                    <td className="px-4 py-3 align-top text-muted-foreground">
-                      {row.status}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </section>
 
+        {/* Workflow Library - Search and Cards */}
+        <section id="workflow-library" className="mb-16">
+          <WorkflowsClient
+            initialWorkflows={visibleWorkflows}
+            categoryStats={categoryStats}
+            audienceStats={audienceStats}
+            uniqueCategories={categories}
+            uniqueAudiences={audiences}
+          />
+        </section>
+
+        {/* Why These Pain Points Matter */}
         <section className="mb-12">
-          <WorkflowFilters categories={categories} audiences={audiences} />
-        </section>
-
-        <section id="workflow-library" className="mb-16 space-y-10">
-          {orderedCategories.map((category) => {
-            const items = groupedWorkflows[category];
-            if (!items || items.length === 0) {
-              return null;
-            }
-
-            return (
-              <div key={category} className="space-y-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-2xl font-semibold">
-                      {CATEGORY_LABELS[category] ?? formatLabel(category)}
-                    </h3>
-                    {CATEGORY_DESCRIPTIONS[category] && (
-                      <p className="text-sm text-muted-foreground">
-                        {CATEGORY_DESCRIPTIONS[category]}
-                      </p>
-                    )}
-                  </div>
-                  <Badge variant="outline" className="text-xs uppercase">
-                    {items.length} workflows
-                  </Badge>
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                  {items.map((workflow) => (
-                    <WorkflowCard key={`${workflow.category}-${workflow.slug}`} workflow={workflow} />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </section>
-
-        {filteredWorkflows.length === 0 && (
-          <div className="mb-16 rounded-lg border border-dashed bg-muted/40 p-8 text-center">
-            <p className="text-lg font-semibold">No workflows match these filters yet.</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Try clearing the filters or subscribe to the guardrail beta to be notified first.
+          <div className="mb-6 text-center">
+            <h2 className="mb-2 text-2xl font-bold">Why These Pain Points Matter</h2>
+            <p className="text-sm text-muted-foreground">
+              These are the most common failure modes we see in AI-assisted development. Each represents real production incidents and audit findings from engineering teams.
             </p>
           </div>
-        )}
-
-        <section className="mb-16 rounded-lg border bg-card p-8">
-          <h2 className="mb-4 text-2xl font-semibold">How Engify runs guardrails today</h2>
-          <p className="mb-6 text-sm text-muted-foreground">
-            These are not theoretical. They are the guardrails we enforce on every Engify commit.
-            Detailed playbooks live in{' '}
-            <Link href="/docs/showcase/AI_WORKFLOW_GUARDRAILS" className="text-primary underline">
-              AI Workflow Guardrails
-            </Link>
-            .
-          </p>
-          <div className="grid gap-4 md:grid-cols-2">
-            {LIVE_PRACTICES.map((practice) => (
-              <div key={practice.title} className="rounded-lg border border-dashed bg-background p-5">
-                <h3 className="mb-2 text-sm font-semibold uppercase text-muted-foreground">
-                  {practice.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">{practice.description}</p>
+          <div className="grid gap-6 md:grid-cols-2">
+            {WHY_GUARDRAILS_MATTER.map((item) => (
+              <div key={item.title} className="rounded-lg border bg-card p-6 shadow-sm">
+                <h3 className="mb-3 text-xl font-semibold">{item.title}</h3>
+                <p className="mb-3 text-sm text-muted-foreground">{item.description}</p>
+                {item.explanation && (
+                  <div className="mb-3 rounded-md border-l-4 border-primary/30 bg-primary/5 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Why This Matters</p>
+                    <p className="text-xs text-muted-foreground">{item.explanation}</p>
+                  </div>
+                )}
+                {item.example && (
+                  <div className="mb-3 rounded-md border-l-4 border-muted bg-muted/30 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Example</p>
+                    <p className="text-xs italic text-muted-foreground">{item.example}</p>
+                  </div>
+                )}
+                <p className="mt-3 text-xs uppercase tracking-wide text-muted-foreground">
+                  Source:{' '}
+                  {item.sourceUrl ? (
+                    <Link
+                      href={item.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {item.source}
+                    </Link>
+                  ) : (
+                    item.source
+                  )}
+                </p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mb-16 grid gap-6 md:grid-cols-2">
-          <div className="rounded-lg border bg-card p-6">
-            <h2 className="mb-3 text-2xl font-semibold">Deeper engagement</h2>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              {DEEPER_ENGAGEMENT.map((item) => (
-                <li key={item.title}>
-                  <strong>{item.title}:</strong> {item.description}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Button asChild>
-                <Link href="/downloads/engify-guardrail-checklist.pdf">Download quality checklist</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/waitlist/guardrails">Join the guardrail beta</Link>
-              </Button>
-            </div>
-          </div>
-
-          <div className="rounded-lg border bg-card p-6">
-            <h2 className="mb-3 text-2xl font-semibold">Community guardrail submissions</h2>
-            <p className="text-sm text-muted-foreground">
-              Engify is building the largest open library of guardrail workflows. Share yours and we
-              will review it for publication with full attribution.
-            </p>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              {COMMUNITY_CRITERIA.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Button asChild variant="outline">
-                <Link href="https://github.com/engify-ai/engify-ai-app/issues/new?template=workflow-submission.md">
-                  Submit via GitHub
-                </Link>
-              </Button>
-              <Button asChild>
-                <Link href="https://forms.gle/engify-guardrail-submission">Share via form</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-      </div>
-    </MainLayout>
+        </div>
+      </MainLayout>
+    </>
   );
 }
 
 const WHY_GUARDRAILS_MATTER = [
   {
-    title: 'Productivity without regressions',
+    title: 'Productivity Without Regressions',
     description:
-      'GitClear’s 2025 State of AI Commit Quality shows PR defect rates jump 7.2% when reviews cross ~300 changed lines. Our workflows force small, reviewable slices.',
-    source: 'GitClear 2025, Engify internal PR audits',
+      "GitClear's 2025 State of AI Commit Quality shows PR defect rates jump 7.2% when reviews cross ~300 changed lines. Our workflows force small, reviewable slices.",
+    explanation: 'Large pull requests are harder to review thoroughly, leading to defects that slip into production. This pain point affects every team using AI to generate code at scale.',
+    example: 'A developer asks AI to refactor a feature, and the AI generates a 400-line PR that touches 15 files. Reviewers miss critical edge cases, and the feature breaks in production.',
+    source: 'GitClear 2025 State of AI Commit Quality',
+    sourceUrl: 'https://www.gitclear.com/blog/state-of-ai-commit-quality-2025',
   },
   {
-    title: 'Quality & verification discipline',
+    title: 'Quality & Verification Discipline',
     description:
-      'Stack Overflow’s 2025 survey reports 66% of developers struggle with “almost-right” AI answers. TDD, scratchpads, and confidence scoring workflows reclaim review time.',
+      "Stack Overflow's 2025 survey reports 66% of developers struggle with \"almost-right\" AI answers. TDD, scratchpads, and confidence scoring workflows reclaim review time.",
+    explanation: 'AI-generated code often looks correct but contains subtle bugs that only appear in edge cases. Without verification workflows, teams waste time debugging production issues.',
+    example: 'AI generates a function that handles 90% of cases correctly but fails on null inputs or empty arrays. The code passes initial review but causes production incidents.',
     source: 'Stack Overflow 2025 Developer Survey',
+    sourceUrl: 'https://survey.stackoverflow.co/2025',
   },
   {
-    title: 'Security and compliance resilience',
+    title: 'Security and Compliance Resilience',
     description:
-      'Veracode’s AI Security Report found 45% of AI-generated snippets ship with vulnerabilities. Engify’s guardrails require SAST/SCA and secret scanning before merge.',
+      "Veracode's AI Security Report found 45% of AI-generated snippets ship with vulnerabilities. Our workflows require SAST/SCA and secret scanning before merge.",
+    explanation: 'AI assistants don\'t understand security implications by default. They may generate code with SQL injection risks, hardcoded secrets, or missing authentication checks.',
+    example: 'An AI generates a database query using string concatenation instead of parameterized queries, creating a SQL injection vulnerability that passes code review.',
     source: 'Veracode 2025 AI Security Report',
+    sourceUrl: 'https://www.veracode.com/resources/reports/ai-security-report',
   },
   {
-    title: 'Context drift containment',
+    title: 'Context Drift Containment',
     description:
-      'Developer surveys show teams lose 10–15 hours per week when AI incidents aren’t logged. Memory workflows document cause, impact, and resolution so lessons persist.',
-    source: 'Developer Survey Aggregate 2025',
+      "Teams lose significant time when AI incidents aren't logged and lessons aren't documented. Memory workflows document cause, impact, and resolution so lessons persist across incidents.",
+    explanation: 'When AI causes production issues, teams often fix them without documenting what went wrong. The same mistakes repeat because there\'s no institutional memory.',
+    example: 'An AI agent deletes a production database table. The team restores from backup but doesn\'t document why the agent had destructive permissions. Three months later, it happens again.',
+    source: 'Industry Best Practices',
+    sourceUrl: undefined,
+    notes: 'Based on incident response best practices and team productivity research - needs specific citation',
   },
 ];
-
-const LIVE_PRACTICES = [
-  {
-    title: 'Pre-commit guardrail enforcement',
-    description:
-      'scripts/ai/enforce-guardrails.ts blocks commits that skip icon validation, schema checks, or compliance scripts. No silent bypasses.',
-  },
-  {
-    title: 'Mandatory pre-change checklist',
-    description:
-      'Before edits, we run ./scripts/ai/pre-change-check.sh to surface existing tools, confirm hooks, and prevent duplicate automation.',
-  },
-  {
-    title: 'Quality gate hierarchy',
-    description:
-      'Enterprise compliance → schema → tests → icons → security → linting. Each gate is independent, so one failure cannot skip the rest.',
-  },
-  {
-    title: 'Commit discipline metrics',
-    description:
-      'We monitor --no-verify usage, enforce conventional commits, and keep branch age under 36 hours to avoid merge debt.',
-  },
-];
-
-const DEEPER_ENGAGEMENT = [
-  {
-    title: 'Install the guardrail quality checklist',
-    description: 'Bundle the manual steps into your own pre-commit hooks with our ready-to-run script.',
-  },
-  {
-    title: 'Join the private beta cohort',
-    description: 'Access Engify’s automation engine that turns these manual workflows into MCP-powered guardrails.',
-  },
-  {
-    title: 'Book a governance workshop',
-    description: 'Walk through failure modes with Engify advisors and build your own guardrail backlog.',
-  },
-];
-
-const COMMUNITY_CRITERIA = [
-  'Must document the failure mode, manual checklist, and verification steps.',
-  'Cite research or production incidents that prove the guardrail is needed.',
-  'Share results after 30 days so we can publish measurable impact.',
-];
-
-function WorkflowCard({ workflow }: { workflow: Workflow }) {
-  const audienceBadges = workflow.audience.map((aud) => (
-    <Badge key={aud} variant="secondary" className="capitalize">
-      {AUDIENCE_LABELS[aud] ?? formatLabel(aud)}
-    </Badge>
-  ));
-
-  const checklistPreview = workflow.manualChecklist.slice(0, 3);
-
-  return (
-    <article className="group flex h-full flex-col justify-between rounded-lg border bg-card p-6 shadow-sm transition hover:border-primary/60 hover:shadow-md">
-      <div className="space-y-4">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-              {CATEGORY_LABELS[workflow.category] ?? formatLabel(workflow.category)}
-            </p>
-            <h3 className="text-2xl font-semibold group-hover:text-primary">
-              <Link href={`/workflows/${workflow.category}/${workflow.slug}`}>
-                {workflow.title}
-              </Link>
-            </h3>
-          </div>
-          <Badge variant={workflow.status === 'published' ? 'secondary' : 'outline'} className="text-xs uppercase">
-            {workflow.status.replace('-', ' ')}
-          </Badge>
-        </div>
-
-        <p className="text-sm text-muted-foreground">{workflow.problemStatement}</p>
-
-        <div className="flex flex-wrap gap-2">{audienceBadges}</div>
-
-        <div>
-          <h4 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-            Manual checklist highlight
-          </h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            {checklistPreview.map((item, index) => (
-              <li key={index} className="flex gap-2">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary"></span>
-                <span>{item}</span>
-              </li>
-            ))}
-            {workflow.manualChecklist.length > checklistPreview.length && (
-              <li className="text-xs uppercase tracking-wide text-muted-foreground">
-                +{workflow.manualChecklist.length - checklistPreview.length} more steps inside
-              </li>
-            )}
-          </ul>
-        </div>
-
-        {workflow.relatedResources && hasRelatedResources(workflow) && (
-          <div>
-            <h4 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-              Related Engify assets
-            </h4>
-            <div className="flex flex-wrap gap-2 text-xs text-primary">
-              {(['prompts', 'patterns', 'learn'] as const).map((key) => {
-                const entries = workflow.relatedResources?.[key];
-                if (!entries || entries.length === 0) {
-                  return null;
-                }
-
-                return entries.slice(0, 2).map((entry) => (
-                  <Link key={`${key}-${entry}`} href={resolveRelatedLink(key, entry)} className="rounded-full border border-primary/40 px-2 py-1 hover:border-primary">
-                    {APP_SECTION_LABELS[key]} · {entry}
-                  </Link>
-                ));
-              })}
-            </div>
-          </div>
-        )}
-
-        {workflow.painPointKeywords.length > 0 && (
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-            {workflow.painPointKeywords.slice(0, 5).map((keyword) => (
-              <span key={keyword} className="rounded-full bg-muted px-2 py-1">
-                #{formatKeyword(keyword)}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm">
-        <Link href={`/workflows/${workflow.category}/${workflow.slug}`} className="font-medium text-primary hover:underline">
-          View workflow →
-        </Link>
-        <p className="text-xs text-muted-foreground">{formatSolutionStatus(workflow)}</p>
-      </div>
-
-      {workflow.cta?.label || workflow.automationTeaser ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {workflow.cta?.label && workflow.cta.href && (
-            <Button asChild size="sm">
-              <Link href={workflow.cta.href} target={workflow.cta.type === 'external' ? '_blank' : undefined} rel={workflow.cta.type === 'external' ? 'noopener noreferrer' : undefined}>
-                {workflow.cta.label}
-              </Link>
-            </Button>
-          )}
-          {workflow.automationTeaser && (
-            <Badge variant="outline" className="text-xs uppercase">
-              {workflow.automationTeaser}
-            </Badge>
-          )}
-        </div>
-      ) : null}
-    </article>
-  );
-}
-
-function formatKeyword(keyword: string): string {
-  return keyword.replace(/[-_]/g, ' ').toLowerCase();
-}
-
-function isWorkflowAudience(value: string | undefined): value is Workflow['audience'][number] {
-  if (!value) {
-    return false;
-  }
-
-  return (WORKFLOW_AUDIENCES as readonly string[]).includes(value);
-}
-
-function formatSolutionStatus(workflow: Workflow): string {
-  const statusLabel = workflow.status === 'coming_soon'
-    ? 'Planned'
-    : workflow.status === 'draft'
-      ? 'In design'
-      : 'Live';
-
-  if (workflow.automationTeaser) {
-    return `${statusLabel}: ${workflow.automationTeaser}`;
-  }
-
-  if (workflow.cta?.label) {
-    return `${statusLabel}: ${workflow.cta.label}`;
-  }
-
-  return statusLabel;
-}
-
-function formatLabel(value: string): string {
-  return value.replace(/[-_]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function hasRelatedResources(workflow: Workflow): boolean {
-  return Boolean(
-    workflow.relatedResources?.prompts?.length ||
-      workflow.relatedResources?.patterns?.length ||
-      workflow.relatedResources?.learn?.length
-  );
-}
-
-function resolveRelatedLink(section: 'prompts' | 'patterns' | 'learn', identifier: string) {
-  if (section === 'prompts') {
-    return `/prompts/${identifier}`;
-  }
-
-  if (section === 'patterns') {
-    return `/patterns/${identifier}`;
-  }
-
-  return identifier.startsWith('/') ? identifier : `/learn/${identifier}`;
-}

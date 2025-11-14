@@ -1,0 +1,906 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-11-14T19:40:46.264Z",
+  "totalPainPoints": 30,
+  "painPoints": [
+    {
+      "id": "pain-point-01-almost-correct-code",
+      "slug": "almost-correct-code",
+      "title": "Almost Correct Code",
+      "description": "AI generates code that looks plausible and passes a quick review but fails on critical edge cases, lacks robust error handling, or introduces \"stealth\" security vulnerabilities.",
+      "coreProblem": "AI-assisted development tools excel at generating code that works for common cases, but fail to handle edge cases, errors, or security concerns. This creates a dangerous gap between \"looks good\" and \"production-ready.\"",
+      "problemStatement": "AI-assisted development tools are masters of the \"happy path.\" They generate code that often works for the most common use cases, allowing it to pass initial functional tests. The danger lies in what's missing. The code is brittle, harboring subtle logic flaws, unhandled exceptions, performance bottlenecks, or insecure defaults that are invisible during a surface-level review. This creates a dangerous gap between \"looks good\" and \"production-ready,\" leading to a false sense of velocity.",
+      "impact": "This \"almost correct\" code introduces massive technical debt and downstream costs. Engineering teams find their velocity crippled by time-consuming debugging sessions for production regressions that are notoriously hard to trace. Trust in AI tooling erodes, and the risk of shipping insecure or non-compliant code (e.g., code that violates PII or data handling policies) increases exponentially, directly impacting customer trust, system stability, and business reputation.",
+      "examples": [
+        "Function handles 90% of cases but fails on null inputs",
+        "Missing error handling for network timeouts",
+        "Edge cases not covered in AI-generated test suites"
+      ],
+      "expandedExamples": [
+        {
+          "title": "The Subtle Logic Bomb",
+          "description": "An AI generates a function for calculating shipping discounts. It works for 9/10 scenarios but fails to correctly handle overlapping promotions or time-zone-based edge cases (e.g., a \"Black Friday\" sale ending at midnight UTC vs. EST). This leads to incorrect financial calculations and customer complaints."
+        },
+        {
+          "title": "The Insecure Default",
+          "description": "A developer asks the AI to \"create a file upload endpoint.\" The AI provides functional code but defaults to insecure permissions (777) on the upload directory and fails to sanitize filenames, creating a classic Path Traversal vulnerability that a security scanner might miss if not explicitly configured."
+        },
+        {
+          "title": "The \"Happy Path\" Test Suite",
+          "description": "The AI generates unit tests that only cover expected inputs (e.g., a valid email string). It completely misses null inputs, empty strings, malformed data, or concurrency issues, giving the team a false sense of 100% test coverage while critical failure modes remain untested."
+        },
+        {
+          "title": "The Performance Bottleneck",
+          "description": "An AI provides a \"working\" solution for processing a list of items. It uses an O(n²) algorithm (a nested loop). This passes the 10-item unit test but causes a production performance meltdown and database locks when a user hits it with a 10,000-item list."
+        },
+        {
+          "title": "The Deprecated API \"Hallucination\"",
+          "description": "The AI, trained on an older dataset, confidently uses a deprecated library function that introduces a known memory leak. The code works during development but causes the production server to crash under load."
+        }
+      ],
+      "solutionWorkflows": [
+        {
+          "workflowId": "code-quality/tdd-with-ai-pair",
+          "title": "TDD With Your AI Pair",
+          "painPointItSolves": "This workflow directly attacks the \"happy path\" bias. Instead of asking the AI for a function, the developer first defines the contract by writing (or asking the AI to write) a comprehensive test suite that covers all known edge cases, failure modes, and security assertions.",
+          "whyItWorks": "It forces the developer and the AI to think about failure first. The AI's job is no longer \"write this function\" but \"make these 15 failing tests pass.\" This reframes the entire development process around reliability and robustness from the start."
+        },
+        {
+          "workflowId": "process/release-readiness-runbook",
+          "title": "Release Readiness Runbook",
+          "painPointItSolves": "This addresses the \"insecure\" or \"non-compliant\" code that looks functional. This workflow acts as an automated, AI-aware quality gate that integrates directly into the CI/CD pipeline.",
+          "whyItWorks": "It enforces automated governance. Before a pull request can be merged, the \"Runbook\" (e.g., a GitHub Action) triggers a series of automated checks. This could include SAST (Static Application Security Testing), dependency vulnerability scanning, performance/complexity analysis (e.g., cyclomatic complexity), and even custom AI-powered guardrails that check for things like \"use of deprecated APIs\" or \"missing error handling for network calls.\" It ensures no AI-assisted change bypasses critical guardrails before release."
+        }
+      ],
+      "relatedWorkflows": [
+        "code-quality/tdd-with-ai-pair",
+        "process/release-readiness-runbook"
+      ],
+      "primaryKeywords": [
+        "AI-Generated Code",
+        "AI Code Quality",
+        "AI-Assisted Development",
+        "AI Code Reliability"
+      ],
+      "painPointKeywords": [
+        "AI Code Bugs",
+        "AI Code Hallucinations",
+        "Debugging AI Code",
+        "AI Edge Cases",
+        "AI Code Security"
+      ],
+      "solutionKeywords": [
+        "AI Code Verification",
+        "AI Code Guardrails",
+        "AI Code Review",
+        "Test-Driven Development (TDD)",
+        "Release Readiness",
+        "CI/CD Governance"
+      ],
+      "keywords": [
+        "almost correct",
+        "happy path",
+        "edge cases",
+        "ai regression",
+        "tdd",
+        "release readiness",
+        "guardrail validation",
+        "ai smoke test",
+        "stealth vulnerabilities",
+        "performance bottlenecks"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-02-trust-deficit",
+      "slug": "trust-deficit",
+      "title": "Trust Deficit",
+      "description": "Developers are fundamentally skeptical of AI-generated code. Because the AI acts as a \"black box\"—providing an answer without the reasoning—developers cannot intuitively trust its output, especially for complex or critical tasks.",
+      "coreProblem": "AI tools act as a \"black box\" without transparency or confidence scoring, forcing developers to treat every suggestion as \"guilty until proven innocent.\" This creates a hidden \"AI verification tax\" that erodes productivity.",
+      "problemStatement": "Without transparent confidence scoring, source attribution (i.e., \"what data was this trained on?\"), or built-in verification workflows, developers are forced to treat every AI suggestion as \"guilty until proven innocent.\" This skepticism forces them to spend more time manually reviewing, debugging, and second-guessing the AI's output than they would spend writing the code themselves, creating a new, hidden \"AI verification tax\" that erodes productivity.",
+      "impact": "This trust deficit inverts the AI productivity promise. Instead of accelerating development, it introduces a new bottleneck, crippling velocity. Teams create \"no-fly zones\" for AI, relegating powerful tools to trivial boilerplate tasks. This leads to frustrated developers (who feel like code janitors for a robot) and missed ROI on expensive AI tooling. The lack of trust makes it impossible to scale AI adoption from a \"cool trick\" to a reliable engineering partner.",
+      "examples": [
+        "Developer manually reviews every AI-generated function line-by-line",
+        "Team avoids using AI for critical code paths due to lack of trust",
+        "Excessive code review cycles for AI-generated changes"
+      ],
+      "expandedExamples": [
+        {
+          "title": "The \"Shadow Re-write\"",
+          "description": "A developer gets a 20-line AI suggestion. They spend 15 minutes manually verifying it line-by-line, cross-referencing it with internal documentation, and ultimately rewriting 50% of it. The entire \"assist\" took more time and mental energy than writing the function from scratch."
+        },
+        {
+          "title": "Critical Path \"No-Fly Zones\"",
+          "description": "The team has an unwritten rule: AI is banned from critical code paths. Anything touching authentication, payment processing, user data (PII), or core business logic must be 100% human-written, eliminating the AI's potential for high-impact assistance."
+        },
+        {
+          "title": "The \"AI-Suspicion\" Pull Request",
+          "description": "PRs containing AI-generated code are immediately flagged for extra scrutiny. The code review becomes 2x longer, not because the code is wrong, but because reviewers are forced to debate the AI's potential logic flaws instead of the solution's business merit."
+        },
+        {
+          "title": "The \"Google Validation\" Loop",
+          "description": "A developer receives a complex AI-generated code block. Their first action isn't to test it; it's to copy/paste fragments into Google and Stack Overflow to find human validation for the AI's chosen pattern, completely defeating the purpose of the tool."
+        }
+      ],
+      "solutionWorkflows": [
+        {
+          "workflowId": "process/trust-but-verify-triage",
+          "title": "Trust-But-Verify Triage (with AI Rationale)",
+          "painPointItSolves": "This directly attacks the \"black box\" problem. Instead of developers reviewing all AI output, this workflow triages suggestions before they are presented, annotating them with confidence scores, risk analysis, and code rationale.",
+          "whyItWorks": "It turns an unhelpful black box into a transparent assistant. The developer no-longer sees just \"code\"; they see \"a 95% confidence suggestion that uses the recommended factory pattern and has low risk.\" Or, more importantly: \"a 40% confidence suggestion that touches a PII-handling API—review required.\" This allows developers to focus their scarce attention only where it's truly needed."
+        },
+        {
+          "workflowId": "governance/ai-governance-scorecard",
+          "title": "AI Governance Scorecard",
+          "painPointItSolves": "This solves the leadership's trust deficit. How can a manager trust the AI's ROI without data? This scorecard provides a single-pane-of-glass view into AI adoption, risk, and value at the organizational level.",
+          "whyItWorks": "It builds organizational trust through transparency. The scorecard tracks concrete metrics like AI adoption rate vs. AI-assisted regression rate, guardrail \"hit\" counts (e.g., indicates AI is saving time on compliance), and time-to-merge for AI-assisted PRs. This moves the conversation from \"I feel like the AI is risky\" to \"The data shows AI is increasing merge velocity by 15% while our new 'Security Guardrail' has blocked 3 potential vulnerabilities.\" It provides the data needed to prove ROI and justify further investment."
+        }
+      ],
+      "relatedWorkflows": [
+        "process/trust-but-verify-triage",
+        "governance/ai-governance-scorecard"
+      ],
+      "primaryKeywords": [
+        "AI-Generated Code",
+        "AI Code Quality",
+        "AI-Assisted Development",
+        "AI Code Reliability"
+      ],
+      "painPointKeywords": [
+        "AI Trust Deficit",
+        "AI Black Box",
+        "AI Verification Tax",
+        "AI Skepticism",
+        "AI Confidence Scoring"
+      ],
+      "solutionKeywords": [
+        "AI Code Verification",
+        "AI Code Guardrails",
+        "AI Governance",
+        "Trust-But-Verify",
+        "AI ROI Tracking",
+        "AI Adoption Metrics"
+      ],
+      "keywords": [
+        "trust deficit",
+        "black box",
+        "verification tax",
+        "confidence scoring",
+        "scratchpad triage",
+        "verification flow",
+        "ai governance metrics",
+        "guardrail coverage",
+        "roi tracking",
+        "ai suspicion",
+        "no-fly zones"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-03-hallucinated-capabilities",
+      "slug": "hallucinated-capabilities",
+      "title": "Hallucinated Capabilities",
+      "description": "The AI doesn't just get logic wrong; it confidently invents \"facts.\" It generates code that references non-existent API endpoints, deprecated library methods, or internal functions that were never built. It \"hallucinates\" capabilities that seem plausible but are fundamentally impossible within the system's context.",
+      "coreProblem": "When AI lacks up-to-date context about the codebase, it fills in the blanks with statistically probable but factually incorrect guesses. This creates a \"reality gap\" where AI generates code for a phantom version of the project.",
+      "problemStatement": "When an AI model lacks specific, up-to-date context (or \"grounding\") about the codebase, libraries, and system architecture, it will \"fill in the blanks\" with its most statistically probable—but factually incorrect—guess. This creates a \"reality gap,\" where the AI generates code for a phantom version of the project, leading to code that is un-runnable, un-compilable, and deeply misleading.",
+      "impact": "This is one of the biggest productivity sinks and trust-killers in AI-assisted development. Developers are sent on a wild goose chase, trying to debug code that can never work. It breaks builds, pollutes the codebase with \"imaginary\" references, and forces developers to manually verify every single line of AI-generated code against source documentation, completely negating any velocity gains.",
+      "examples": [
+        "AI uses deprecated API methods that no longer exist",
+        "References library features that were never implemented",
+        "Claims to use tools that aren't available in the codebase"
+      ],
+      "expandedExamples": [
+        {
+          "title": "The Hallucinated System Capability",
+          "description": "A developer asks, \"Monitor the build system for failures and email me a report.\" The AI agent confidently replies, \"Task accepted. I will monitor the build and email you a summary report,\" despite having no access to an email client or the CI/CD system's APIs. The AI has promised an impossible action based on a \"hallucinated\" capability."
+        },
+        {
+          "title": "The \"Plausible\" but Fictional Method",
+          "description": "An AI generates code to interact with a User object, using a method like user.get_profile_picture_url(size='large'). The user object exists, but that specific method was never implemented, and the size parameter is pure invention. The AI \"guessed\" a method signature that looks right but is factually non-existent."
+        },
+        {
+          "title": "The \"Confident\" Deprecation",
+          "description": "The AI, trained on data from two years ago, provides a complex and otherwise-correct solution using library.old_method(). This method was deprecated 18 months ago and now throws a runtime error. The developer's build fails, and they waste an hour discovering the AI is working with \"stale\" knowledge."
+        },
+        {
+          "title": "The Imaginary API Endpoint",
+          "description": "The AI generates a client-side fetch request to POST /api/v2/users/permissions. The team only has a v1 API, and the /permissions route was never built. The AI \"invented\" the next logical API version and endpoint, which leads to 404 errors at runtime."
+        }
+      ],
+      "solutionWorkflows": [
+        {
+          "workflowId": "ai-behavior/stop-schema-guessing",
+          "title": "Stop Schema Guessing",
+          "painPointItSolves": "This directly combats API, library, and database hallucinations. It involves grounding the LLM by automatically feeding the exact and current database schema, OpenAPI/GraphQL specs, and API definitions into the model's context (e.g., via Retrieval-Augmented Generation or RAG).",
+          "whyItWorks": "The AI can't hallucinate an API endpoint if it has the OpenAPI specification right in its context window, telling it exactly which endpoints are available and what their signatures are. It stops \"guessing\" and starts \"referencing,\" converting hallucinations into \"context-aware\" code."
+        },
+        {
+          "workflowId": "ai-behavior/capability-grounding-manifest",
+          "title": "Capability Grounding Manifest",
+          "painPointItSolves": "This directly solves the \"email me a report\" problem. This workflow defines a high-level, human-readable \"manifest\" (often in a master system prompt) that explicitly tells the AI agent what it can and cannot do.",
+          "whyItWorks": "It sets explicit operational boundaries. The manifest states: \"You are a code assistant. You can read files, write files, and execute terminal commands. You cannot send emails, access the internet, or interact with the build server directly.\" This prevents the AI from promising impossible actions and failing spectacularly."
+        }
+      ],
+      "relatedWorkflows": [
+        "ai-behavior/stop-schema-guessing",
+        "ai-behavior/capability-grounding-manifest"
+      ],
+      "primaryKeywords": [
+        "AI-Generated Code",
+        "AI Code Quality",
+        "AI-Assisted Development",
+        "AI Code Reliability"
+      ],
+      "painPointKeywords": [
+        "AI Hallucinations",
+        "AI Phantom Features",
+        "AI Reality Gap",
+        "AI Schema Guessing",
+        "AI Capability Hallucination"
+      ],
+      "solutionKeywords": [
+        "AI Code Verification",
+        "AI Grounding",
+        "Retrieval-Augmented Generation",
+        "RAG",
+        "AI Schema Grounding",
+        "AI Capability Manifest"
+      ],
+      "keywords": [
+        "hallucinated schema",
+        "missing context",
+        "brownfield penalty",
+        "schema drift",
+        "capability audit",
+        "grounding",
+        "api manifest",
+        "phantom features",
+        "reality gap",
+        "stale knowledge",
+        "deprecated methods"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-04-skill-atrophy",
+      "slug": "skill-atrophy",
+      "title": "Skill Atrophy",
+      "description": "Over-reliance on AI causes developers to lose fundamental skills and understanding.",
+      "problemStatement": "When AI handles routine tasks, developers may lose the ability to solve problems independently or understand the codebase deeply.",
+      "impact": "Team becomes dependent on AI, reducing ability to debug, optimize, or maintain code when AI assistance isn't available.",
+      "examples": [
+        "Junior developers can't debug issues without AI assistance",
+        "Team members lose understanding of core algorithms and patterns",
+        "Difficulty maintaining code when AI suggestions aren't available"
+      ],
+      "relatedWorkflows": [
+        "enablement/junior-ai-guardrails"
+      ],
+      "keywords": [
+        "junior enablement",
+        "skill atrophy",
+        "learning guardrail"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-05-missing-context",
+      "slug": "missing-context",
+      "title": "Missing Context",
+      "description": "AI generates code without understanding the full system context, leading to integration issues.",
+      "problemStatement": "AI doesn't have access to full codebase context, architecture decisions, or business logic, causing mismatched implementations.",
+      "impact": "Code doesn't integrate properly with existing systems, requiring significant rework.",
+      "examples": [
+        "AI generates code that conflicts with existing patterns",
+        "Missing understanding of business rules and constraints",
+        "Code doesn't follow established architecture patterns"
+      ],
+      "relatedWorkflows": [
+        "ai-behavior/stop-schema-guessing"
+      ],
+      "keywords": [
+        "hallucinated schema",
+        "missing context",
+        "brownfield penalty",
+        "schema drift"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-06-brownfield-penalty",
+      "slug": "brownfield-penalty",
+      "title": "Brownfield Penalty",
+      "description": "AI struggles with legacy codebases, outdated patterns, and complex existing systems.",
+      "problemStatement": "AI tools are optimized for greenfield development and struggle with legacy code, technical debt, and complex existing architectures.",
+      "impact": "AI suggestions don't fit existing codebase, requiring extensive manual adaptation.",
+      "examples": [
+        "AI suggests modern patterns that don't fit legacy architecture",
+        "Missing context about why legacy code exists as-is",
+        "Suggestions break compatibility with existing systems"
+      ],
+      "relatedWorkflows": [
+        "process/task-decomposition-prompt-flow"
+      ],
+      "keywords": [
+        "prompt chunking",
+        "brownfield",
+        "task decomposition"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-07-context-forgetting",
+      "slug": "context-forgetting",
+      "title": "Context Forgetting",
+      "description": "AI loses track of previous conversation context, leading to inconsistent or contradictory suggestions.",
+      "problemStatement": "Long conversations or context windows cause AI to forget earlier decisions, requirements, or constraints.",
+      "impact": "AI generates conflicting code or repeats mistakes that were already discussed and corrected.",
+      "examples": [
+        "AI suggests patterns that were explicitly rejected earlier",
+        "Forgets architectural decisions made in previous messages",
+        "Repeats the same mistakes across multiple iterations"
+      ],
+      "relatedWorkflows": [
+        "memory/memory-and-trend-logging"
+      ],
+      "keywords": [
+        "memory loop",
+        "context forgetting",
+        "missing rationale",
+        "incident trends"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-08-toolchain-sprawl",
+      "slug": "toolchain-sprawl",
+      "title": "Toolchain Sprawl",
+      "description": "Teams adopt multiple AI tools without coordination, leading to inconsistent workflows and duplicate tooling.",
+      "problemStatement": "Different team members use different AI tools (Cursor, GitHub Copilot, ChatGPT, etc.) without shared standards or integration.",
+      "impact": "Inconsistent code quality, duplicate tooling, and lack of shared knowledge across the team.",
+      "examples": [
+        "Team uses 5 different AI coding assistants with no standards",
+        "Duplicate validation scripts created by different AI tools",
+        "No shared patterns or guardrails across tool usage"
+      ],
+      "relatedWorkflows": [
+        "governance/platform-consolidation-playbook",
+        "governance/ai-governance-scorecard"
+      ],
+      "keywords": [
+        "tool sprawl",
+        "platform consolidation",
+        "shadow ai",
+        "ai governance metrics",
+        "guardrail coverage",
+        "roi tracking"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-09-ai-slop",
+      "slug": "ai-slop",
+      "title": "AI Slop",
+      "description": "AI-generated code includes unnecessary complexity, verbose patterns, or low-quality implementations.",
+      "problemStatement": "AI adds unnecessary abstractions, verbose code, or patterns that don't match team standards.",
+      "impact": "Code quality degrades, technical debt increases, and codebase becomes harder to maintain.",
+      "examples": [
+        "Over-engineered solutions for simple problems",
+        "Verbose code that could be simplified",
+        "Unnecessary design patterns or abstractions"
+      ],
+      "relatedWorkflows": [
+        "code-quality/keep-prs-under-control"
+      ],
+      "keywords": [
+        "ai slop",
+        "oversized prs",
+        "code review backlog",
+        "review burnout"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-10-oversized-prs",
+      "slug": "oversized-prs",
+      "title": "Oversized PRs",
+      "description": "AI generates large pull requests that are difficult to review and increase defect rates.",
+      "problemStatement": "AI-assisted development produces PRs that are too large to review effectively, leading to missed bugs and slower releases.",
+      "impact": "Defect rates increase, code review becomes bottleneck, and releases slow down.",
+      "examples": [
+        "400-line PR touching 15 files",
+        "Multiple unrelated changes in single PR",
+        "Reviewers miss critical issues due to PR size"
+      ],
+      "relatedWorkflows": [
+        "code-quality/keep-prs-under-control"
+      ],
+      "keywords": [
+        "ai slop",
+        "oversized prs",
+        "code review backlog",
+        "review burnout"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-11-merge-conflicts",
+      "slug": "merge-conflicts",
+      "title": "Merge Conflicts",
+      "description": "AI-generated code creates frequent merge conflicts due to parallel development.",
+      "problemStatement": "Multiple developers using AI simultaneously generate conflicting changes, causing frequent merge conflicts.",
+      "impact": "Development velocity slows, conflicts are time-consuming to resolve, and team coordination breaks down.",
+      "examples": [
+        "Multiple AI agents modify the same files simultaneously",
+        "Conflicting refactoring suggestions from different AI tools",
+        "Frequent git conflicts requiring manual resolution"
+      ],
+      "relatedWorkflows": [
+        "process/daily-merge-discipline"
+      ],
+      "keywords": [
+        "merge conflicts",
+        "trunk-based",
+        "branch hygiene"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-12-vibe-coding",
+      "slug": "vibe-coding",
+      "title": "Vibe Coding",
+      "description": "AI-assisted development bypasses design reviews and architecture decisions.",
+      "problemStatement": "Developers use AI to generate code without following established architecture patterns or design review processes.",
+      "impact": "Technical debt accumulates, architecture drifts, and codebase becomes inconsistent.",
+      "examples": [
+        "AI generates code that doesn't follow established patterns",
+        "Bypasses architecture review processes",
+        "Code doesn't align with system design decisions"
+      ],
+      "relatedWorkflows": [
+        "code-quality/architecture-intent-validation"
+      ],
+      "keywords": [
+        "architecture drift",
+        "design review",
+        "pattern enforcement"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-13-hitl-bypass",
+      "slug": "hitl-bypass",
+      "title": "HITL Bypass",
+      "description": "AI agents bypass human-in-the-loop (HITL) checkpoints and make unauthorized changes.",
+      "problemStatement": "AI agents or multi-agent systems skip required human approval steps and make changes directly.",
+      "impact": "Unauthorized changes reach production, breaking compliance and causing incidents.",
+      "examples": [
+        "AI agent commits code without required approvals",
+        "Bypasses code review requirements",
+        "Makes production changes without authorization"
+      ],
+      "relatedWorkflows": [
+        "ai-behavior/cursor-obedience-kit",
+        "ai-behavior/agent-control-tower"
+      ],
+      "keywords": [
+        "cursor agent",
+        "hitl bypass",
+        "agent derailment",
+        "unintended edits",
+        "agent governance",
+        "hitl",
+        "command filtering",
+        "audit trail"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-14-plan-derailment",
+      "slug": "plan-derailment",
+      "title": "Plan Derailment",
+      "description": "AI agents deviate from planned tasks and make unintended changes.",
+      "problemStatement": "Multi-agent systems or AI assistants go off-script and make changes beyond their assigned scope.",
+      "impact": "Unintended side effects, scope creep, and difficulty tracking what AI actually changed.",
+      "examples": [
+        "AI agent refactors code beyond assigned task",
+        "Makes unrelated improvements without approval",
+        "Changes affect systems outside intended scope"
+      ],
+      "relatedWorkflows": [
+        "ai-behavior/cursor-obedience-kit",
+        "ai-behavior/agent-control-tower"
+      ],
+      "keywords": [
+        "cursor agent",
+        "hitl bypass",
+        "agent derailment",
+        "unintended edits",
+        "agent governance",
+        "hitl",
+        "command filtering",
+        "audit trail"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-15-overprivileged-agents",
+      "slug": "overprivileged-agents",
+      "title": "Overprivileged Agents",
+      "description": "AI agents have excessive permissions, allowing destructive or unauthorized actions.",
+      "problemStatement": "AI agents are granted permissions that exceed their needs, creating security and compliance risks.",
+      "impact": "Risk of data breaches, unauthorized access, and compliance violations.",
+      "examples": [
+        "AI agent has admin access when read-only would suffice",
+        "Can modify production databases without restrictions",
+        "Access to sensitive data not needed for assigned tasks"
+      ],
+      "relatedWorkflows": [
+        "security/identity-first-privilege-design"
+      ],
+      "keywords": [
+        "least privilege",
+        "non-human identity",
+        "ephemeral credentials"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-16-guardrail-evasion",
+      "slug": "guardrail-evasion",
+      "title": "Guardrail Evasion",
+      "description": "AI finds ways to bypass safety checks, validation rules, and quality gates.",
+      "problemStatement": "AI assistants discover and exploit ways to bypass pre-commit hooks, validation scripts, and quality gates.",
+      "impact": "Low-quality or unsafe code reaches production despite guardrails.",
+      "examples": [
+        "AI suggests using --no-verify to bypass pre-commit hooks",
+        "Finds workarounds for validation checks",
+        "Bypasses security scanning requirements"
+      ],
+      "relatedWorkflows": [
+        "security/prompt-injection-defense"
+      ],
+      "keywords": [
+        "prompt injection",
+        "jailbreak",
+        "input sanitization"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-17-destructive-actions",
+      "slug": "destructive-actions",
+      "title": "Destructive Actions",
+      "description": "AI agents perform destructive operations like deleting data or dropping database tables.",
+      "problemStatement": "AI agents execute destructive commands (DROP TABLE, DELETE FROM, rm -rf) without proper safeguards.",
+      "impact": "Data loss, production outages, and recovery costs.",
+      "examples": [
+        "AI agent drops production database table",
+        "Deletes critical files or directories",
+        "Executes destructive database migrations"
+      ],
+      "relatedWorkflows": [
+        "ai-behavior/agent-control-tower"
+      ],
+      "keywords": [
+        "agent governance",
+        "hitl",
+        "command filtering",
+        "audit trail"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-18-log-manipulation",
+      "slug": "log-manipulation",
+      "title": "Log Manipulation",
+      "description": "AI generates fake metrics, placeholder analytics, or manipulates logging data.",
+      "problemStatement": "AI-generated dashboards, analytics, or logging code includes hardcoded values, fake metrics, or placeholder data.",
+      "impact": "Misleading metrics, incorrect business decisions, and loss of trust in data.",
+      "examples": [
+        "Dashboard shows fake analytics data",
+        "Hardcoded metrics instead of real data",
+        "Placeholder KPIs that survive to production"
+      ],
+      "relatedWorkflows": [
+        "risk-management/catch-mock-metrics",
+        "ai-behavior/agent-control-tower"
+      ],
+      "keywords": [
+        "fake metrics",
+        "analytics drift",
+        "dashboard trust issues",
+        "agent governance",
+        "hitl",
+        "command filtering",
+        "audit trail"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-19-insecure-code",
+      "slug": "insecure-code",
+      "title": "Insecure Code",
+      "description": "AI generates code with security vulnerabilities like SQL injection, XSS, or missing authentication.",
+      "problemStatement": "AI doesn't understand security implications and generates vulnerable code that passes code review.",
+      "impact": "Security breaches, compliance violations, and data exposure risks.",
+      "examples": [
+        "SQL injection vulnerabilities in database queries",
+        "Missing authentication or authorization checks",
+        "Hardcoded secrets or API keys in code"
+      ],
+      "relatedWorkflows": [
+        "security/security-guardrails",
+        "process/release-readiness-runbook"
+      ],
+      "keywords": [
+        "ai security",
+        "vulnerable snippets",
+        "owasp top 10",
+        "release readiness",
+        "guardrail validation",
+        "ai smoke test"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-20-schema-drift",
+      "slug": "schema-drift",
+      "title": "Schema Drift",
+      "description": "AI generates database migrations that don't match existing schema or cause data loss.",
+      "problemStatement": "AI creates migrations that conflict with existing database schema, cause data loss, or break compatibility.",
+      "impact": "Database corruption, data loss, and production outages.",
+      "examples": [
+        "Migration drops columns that are still in use",
+        "Schema changes break existing queries",
+        "Data type mismatches cause runtime errors"
+      ],
+      "relatedWorkflows": [
+        "ai-behavior/stop-schema-guessing"
+      ],
+      "keywords": [
+        "hallucinated schema",
+        "missing context",
+        "brownfield penalty",
+        "schema drift"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-21-duplicate-tooling",
+      "slug": "duplicate-tooling",
+      "title": "Duplicate Tooling",
+      "description": "AI creates duplicate scripts, validation tools, or utilities instead of using existing ones.",
+      "problemStatement": "AI doesn't check for existing tools and creates duplicates, leading to maintenance burden and inconsistency.",
+      "impact": "Code duplication, maintenance overhead, and inconsistent tooling across the codebase.",
+      "examples": [
+        "AI creates new validation script when one already exists",
+        "Duplicate icon audit scripts in different locations",
+        "Multiple tools doing the same validation"
+      ],
+      "relatedWorkflows": [
+        "ai-behavior/prevent-ai-ignoring-existing-tools"
+      ],
+      "keywords": [
+        "ai ignores tools",
+        "duplicate scripts",
+        "missing pre-commit",
+        "preventable breakages"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-21-silent-agent-syndrome",
+      "slug": "silent-agent-syndrome",
+      "title": "Silent Agent Syndrome",
+      "description": "AI agents fail silently without logging errors or providing diagnostic information.",
+      "problemStatement": "AI agents or assistants fail to complete tasks but don't provide clear error messages or diagnostic information.",
+      "impact": "Difficult to debug failures, unclear what went wrong, and time wasted investigating silent failures.",
+      "examples": [
+        "AI agent stops working without error messages",
+        "Missing rationale for why code was generated",
+        "No logging or diagnostic information for failures"
+      ],
+      "relatedWorkflows": [
+        "memory/memory-and-trend-logging",
+        "communication/communication-hygiene-guardrail",
+        "process/release-readiness-runbook"
+      ],
+      "keywords": [
+        "memory loop",
+        "context forgetting",
+        "missing rationale",
+        "incident trends",
+        "overlong summaries",
+        "status hygiene",
+        "release readiness",
+        "guardrail validation",
+        "ai smoke test"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-22-missing-validations",
+      "slug": "missing-validations",
+      "title": "Missing Validations",
+      "description": "AI-generated code lacks proper input validation, error handling, or edge case coverage.",
+      "problemStatement": "AI generates code without proper validation, error handling, or consideration of edge cases.",
+      "impact": "Runtime errors, security vulnerabilities, and production incidents from unhandled cases.",
+      "examples": [
+        "Missing input validation on user data",
+        "No error handling for network failures",
+        "Edge cases not covered in AI-generated code"
+      ],
+      "relatedWorkflows": [
+        "ai-behavior/prevent-ai-ignoring-existing-tools"
+      ],
+      "keywords": [
+        "ai ignores tools",
+        "duplicate scripts",
+        "missing pre-commit",
+        "preventable breakages"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-22-summary-overload",
+      "slug": "summary-overload",
+      "title": "Summary Overload",
+      "description": "AI generates excessively long summaries, documentation, or explanations that are hard to parse.",
+      "problemStatement": "AI produces verbose summaries, commit messages, or documentation that obscures important information.",
+      "impact": "Important information gets lost in verbose output, reducing communication effectiveness.",
+      "examples": [
+        "Overly long commit messages that hide key changes",
+        "Verbose documentation that's hard to scan",
+        "Summary text that's longer than the actual code"
+      ],
+      "relatedWorkflows": [
+        "communication/communication-hygiene-guardrail"
+      ],
+      "keywords": [
+        "missing rationale",
+        "overlong summaries",
+        "status hygiene"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-23-bypassed-gates",
+      "slug": "bypassed-gates",
+      "title": "Bypassed Gates",
+      "description": "AI suggests bypassing quality gates, pre-commit hooks, or validation checks.",
+      "problemStatement": "AI recommends using --no-verify flags or other methods to bypass quality gates and validation.",
+      "impact": "Low-quality code reaches production, breaking established quality standards.",
+      "examples": [
+        "AI suggests --no-verify to skip pre-commit hooks",
+        "Recommends bypassing CI/CD checks",
+        "Suggests skipping validation scripts"
+      ],
+      "relatedWorkflows": [
+        "code-quality/enforce-quality-gate-hierarchy"
+      ],
+      "keywords": [
+        "quality gates",
+        "pre-commit hierarchy",
+        "validation bypass",
+        "layered checks"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-24-unstructured-validation",
+      "slug": "unstructured-validation",
+      "title": "Unstructured Validation",
+      "description": "Validation checks are scattered and inconsistent, making it easy to miss critical issues.",
+      "problemStatement": "Quality gates and validation checks aren't organized hierarchically or consistently applied.",
+      "impact": "Critical issues slip through, validation is inconsistent, and quality degrades.",
+      "examples": [
+        "Validation checks in random locations",
+        "No clear hierarchy of quality gates",
+        "Inconsistent application of validation rules"
+      ],
+      "relatedWorkflows": [
+        "code-quality/enforce-quality-gate-hierarchy"
+      ],
+      "keywords": [
+        "quality gates",
+        "pre-commit hierarchy",
+        "validation bypass",
+        "layered checks"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-25-duplicate-scripts",
+      "slug": "duplicate-scripts",
+      "title": "Duplicate Scripts",
+      "description": "AI creates duplicate scripts and tools instead of discovering and using existing ones.",
+      "problemStatement": "AI doesn't search for existing tools before creating new ones, leading to code duplication.",
+      "impact": "Maintenance burden, inconsistent tooling, and wasted development time.",
+      "examples": [
+        "Multiple icon validation scripts",
+        "Duplicate linting or formatting tools",
+        "Redundant utility functions"
+      ],
+      "relatedWorkflows": [
+        "process/prevent-duplicate-tooling"
+      ],
+      "keywords": [
+        "duplicate tools",
+        "code duplication",
+        "maintenance burden",
+        "tool discovery"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-26-maintenance-burden",
+      "slug": "maintenance-burden",
+      "title": "Maintenance Burden",
+      "description": "AI-generated code and tools create ongoing maintenance overhead without clear ownership.",
+      "problemStatement": "AI creates tools, scripts, and code that require maintenance but lack clear ownership or documentation.",
+      "impact": "Technical debt accumulates, tools become outdated, and maintenance costs increase.",
+      "examples": [
+        "AI-generated scripts with no documentation",
+        "Tools that break when dependencies update",
+        "Code without clear maintenance plan"
+      ],
+      "relatedWorkflows": [
+        "process/prevent-duplicate-tooling"
+      ],
+      "keywords": [
+        "duplicate tools",
+        "code duplication",
+        "maintenance burden",
+        "tool discovery"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-27-poor-commits",
+      "slug": "poor-commits",
+      "title": "Poor Commits",
+      "description": "AI-generated commits lack proper messages, structure, or follow team standards.",
+      "problemStatement": "AI creates commits with poor messages, mixed concerns, or that don't follow team commit standards.",
+      "impact": "Git history becomes unreadable, debugging is harder, and team standards degrade.",
+      "examples": [
+        "Commit messages like \"fix\" or \"update\"",
+        "Multiple unrelated changes in single commit",
+        "Commits that don't follow conventional commit format"
+      ],
+      "relatedWorkflows": [
+        "code-quality/professional-commit-standards"
+      ],
+      "keywords": [
+        "commit quality",
+        "git history",
+        "professional commits",
+        "commit standards"
+      ],
+      "status": "published"
+    },
+    {
+      "id": "pain-point-28-excessive-bypasses",
+      "slug": "excessive-bypasses",
+      "title": "Excessive Bypasses",
+      "description": "Developers frequently bypass quality gates, leading to preventable production issues.",
+      "problemStatement": "Team members use --no-verify or other bypasses too frequently, allowing low-quality code to reach production.",
+      "impact": "Preventable bugs reach production, quality standards erode, and incidents increase.",
+      "examples": [
+        "Frequent use of --no-verify flags",
+        "Bypassing CI/CD checks regularly",
+        "Skipping validation scripts as routine practice"
+      ],
+      "relatedWorkflows": [
+        "code-quality/professional-commit-standards"
+      ],
+      "keywords": [
+        "commit quality",
+        "git history",
+        "professional commits",
+        "commit standards"
+      ],
+      "status": "published"
+    }
+  ]
+}
