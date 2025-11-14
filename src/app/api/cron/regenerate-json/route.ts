@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generatePromptsJson } from '@/lib/prompts/generate-prompts-json';
 import { generatePatternsJson } from '@/lib/patterns/generate-patterns-json';
+import { generateWorkflowsJson } from '@/lib/workflows/generate-workflows-json';
 import { logger } from '@/lib/logging/logger';
 
 export const runtime = 'nodejs';
@@ -26,6 +27,10 @@ export async function GET(request: NextRequest) {
     // Generate patterns JSON
     await generatePatternsJson();
     logger.info('[Cron] Patterns JSON generated');
+
+    // Generate workflows JSON
+    await generateWorkflowsJson();
+    logger.info('[Cron] Workflows JSON generated');
 
     return NextResponse.json({
       success: true,
