@@ -11,10 +11,6 @@ export default async function AboutPage() {
       <div className="container py-16">
         {/* Hero */}
         <div className="mx-auto mb-16 max-w-3xl text-center">
-          <Badge variant="secondary" className="mb-4">
-            <Icons.sparkles className="mr-2 h-3 w-3" />
-            About Engify.ai
-          </Badge>
           <h1 className="mb-4 text-4xl font-bold">
             Empowering Teams to Master AI
           </h1>

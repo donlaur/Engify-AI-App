@@ -100,10 +100,6 @@ export default function DemoPage() {
       <div className="container py-8">
         {/* Header */}
         <div className="mb-8 text-center">
-          <Badge variant="secondary" className="mb-4">
-            <Icons.sparkles className="mr-2 h-3 w-3" />
-            Interactive Demo
-          </Badge>
           <h1 className="mb-2 text-4xl font-bold">AI Workbench Demo</h1>
           <p className="text-xl text-muted-foreground">
             See how prompt patterns improve your AI interactions

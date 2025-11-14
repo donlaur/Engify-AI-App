@@ -23,10 +23,7 @@ export default function GuardrailChecklistDownloadPage() {
     <MainLayout>
       <div className="container py-12">
         <header className="mx-auto mb-10 max-w-3xl text-center">
-          <Badge variant="secondary" className="uppercase tracking-wide">
-            Guardrail Checklist
-          </Badge>
-          <h1 className="mt-4 text-4xl font-bold md:text-5xl">Engify Guardrail Quality Checklist</h1>
+          <h1 className="text-4xl font-bold md:text-5xl">Engify Guardrail Quality Checklist</h1>
           <p className="mt-4 text-lg text-muted-foreground">
             Use this checklist to validate AI guardrail coverage before every large release. For a
             customized version mapped to your SDLC tools, reach out and we\'ll tailor the steps for your team.

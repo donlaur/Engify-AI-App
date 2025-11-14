@@ -16,10 +16,7 @@ export default function GuardrailWaitlistPage() {
     <MainLayout>
       <div className="container py-12">
         <header className="mx-auto mb-12 max-w-3xl text-center">
-          <Badge variant="secondary" className="uppercase tracking-wide">
-            Guardrail Beta Waitlist
-          </Badge>
-          <h1 className="mt-4 text-4xl font-bold md:text-5xl">Partner with Engify on Guardrail Automation</h1>
+          <h1 className="text-4xl font-bold md:text-5xl">Partner with Engify on Guardrail Automation</h1>
           <p className="mt-4 text-lg text-muted-foreground">
             We\'re onboarding a limited cohort of engineering teams to co-build Engify\'s automated guardrail engine.
             Share a few details about your current guardrail challenges and we\'ll reach out within 24 hours.

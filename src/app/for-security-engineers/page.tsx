@@ -23,14 +23,6 @@ export default function ForSecurityEngineersPage() {
 
         <div className="container relative py-24">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
-            <Badge
-              variant="secondary"
-              className="mb-4 border-white/20 bg-white/10 text-white"
-            >
-              <Icons.shield className="mr-2 h-3 w-3" />
-              For Security Engineers
-            </Badge>
-
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-6xl">
               Combat Alert Fatigue.
               <br />

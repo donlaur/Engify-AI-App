@@ -108,10 +108,6 @@ ${data.preventionSteps}
       <div className="container max-w-4xl py-8">
         {/* Header */}
         <div className="mb-8 text-center">
-          <Badge variant="secondary" className="mb-4">
-            <Icons.document className="mr-2 h-3 w-3" />
-            Interactive Builder
-          </Badge>
           <h1 className="mb-2 text-4xl font-bold">RCA / Postmortem Builder</h1>
           <p className="text-xl text-muted-foreground">
             Step-by-step guide to create comprehensive incident reports
