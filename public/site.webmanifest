@@ -1,0 +1,21 @@
+{
+  "name": "Engify.ai - AI Prompt Engineering Platform",
+  "short_name": "Engify",
+  "description": "From AI Fear to AI Fluency. Learn prompt engineering with 67+ expert prompts and 15 proven patterns.",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#9333ea",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}

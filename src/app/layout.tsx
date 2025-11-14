@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { Analytics } from '@vercel/analytics/next';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
+import { Toaster } from '@/components/ui/toaster';
 
 // Validate environment variables at startup (Red Hat Review - Critical Fix #1)
 import '@/lib/env';
@@ -12,20 +13,20 @@ import '@/lib/env';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Engify.ai - AI Prompt Engineering Education Platform',
+  title: 'Engify.ai - AI Guardrail Platform for Engineering Teams',
   description:
-    'Transform your team into AI power users with 100+ expert prompts, 18 proven patterns, and gamified learning. Start free!',
+    'Operationalize AI guardrails across code, security, and delivery. Ship faster without shipping regressions using Engify workflows, automation, and institutional memory.',
   keywords: [
-    'AI prompt engineering',
-    'prompt templates',
-    'AI education',
-    'prompt patterns',
-    'ChatGPT prompts',
-    'AI learning platform',
-    'prompt library',
-    'engineering prompts',
-    'Claude',
-    'Gemini',
+    'AI guardrails',
+    'engineering governance',
+    'software delivery guardrails',
+    'ai risk management',
+    'guardrail automation',
+    'compliance automation',
+    'prompt governance',
+    'engineering enablement',
+    'mcp guardrails',
+    'engify',
   ],
   applicationName: 'Engify.ai',
   authors: [{ name: 'Engify.ai Team' }],
@@ -36,9 +37,9 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://engify.ai',
     siteName: 'Engify.ai',
-    title: 'Engify.ai - Master AI Prompt Engineering',
+    title: 'Engify.ai - AI Guardrail Platform for Engineering Teams',
     description:
-      'Transform engineers into AI power users. 100+ expert prompts, 18 battle-tested patterns, gamified learning. Free forever.',
+      'Operationalize AI guardrails with production-ready workflows, automation hooks, and institutional memory. Ship responsibly with Engify.',
     images: [
       {
         url: 'https://engify.ai/og-image.png',
@@ -50,9 +51,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Engify.ai - Master AI Prompt Engineering',
+    title: 'Engify.ai - AI Guardrail Platform for Engineering Teams',
     description:
-      'Transform engineers into AI power users. 100+ expert prompts, 18 battle-tested patterns. Free forever.',
+      'Operationalize AI guardrails with Engify workflows, automation hooks, and institutional memory.',
     images: ['https://engify.ai/og-image.png'],
     creator: '@engifyai',
   },
@@ -81,8 +82,12 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   icons: {
-    icon: '/icon-192.png',
-    apple: '/apple-icon-180.png',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
     shortcut: '/favicon.ico',
   },
   category: 'education',
@@ -111,7 +116,10 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <link rel="apple-touch-icon" href="/apple-icon-180.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="manifest" href="/site.webmanifest" />
         <link rel="alternate" type="application/rss+xml" title="Engify.ai RSS Feed" href="https://engify.ai/feed" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
@@ -127,6 +135,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <Toaster />
             {children}
             <Analytics />
           </ThemeProvider>
