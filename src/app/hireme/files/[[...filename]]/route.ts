@@ -14,25 +14,31 @@ export async function GET(
   { params }: { params: { filename?: string[] } }
 ) {
   try {
-    const filename = params.filename?.join('/') || '';
-    
-    if (!filename) {
+    const segments = params.filename ?? [];
+
+    if (segments.length === 0) {
       // Redirect to /hireme page if no filename
       return NextResponse.redirect(new URL('/hireme', request.url), 301);
     }
+
+    // Security: Ensure no traversal characters in any segment
+    const hasInvalidSegment = segments.some(
+      (segment) => segment.includes('..') || segment.includes('/')
+    );
+
+    if (hasInvalidSegment) {
+      return NextResponse.json(
+        { error: 'Invalid filename' },
+        { status: 400 }
+      );
+    }
+
+    const filename = segments.join('/');
 
     // Security: Only allow PDF files
     if (!filename.endsWith('.pdf')) {
       return NextResponse.json(
         { error: 'Only PDF files are allowed' },
-        { status: 400 }
-      );
-    }
-
-    // Security: Prevent directory traversal
-    if (filename.includes('..') || filename.includes('/')) {
-      return NextResponse.json(
-        { error: 'Invalid filename' },
         { status: 400 }
       );
     }
