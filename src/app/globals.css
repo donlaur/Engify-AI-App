@@ -13,7 +13,7 @@
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary-foreground: 222.2 84% 4.9%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 210 40% 96.1%;
@@ -43,9 +43,9 @@
     --primary: 217 91% 60%;           /* Vibrant blue #3B82F6 */
     --primary-foreground: 0 0% 100%;  /* White on primary */
     
-    /* Secondary: Lighter gray for body text */
-    --secondary: 215 20% 85%;         /* Lighter body text #D1D5DB */
-    --secondary-foreground: 215 40% 22%;
+    /* Secondary: Lighter gray for badges/buttons */
+    --secondary: 215 20% 85%;         /* Light gray background #D1D5DB */
+    --secondary-foreground: 222.2 84% 4.9%; /* Dark text for contrast on light bg */
     
     /* Muted: Lighter tertiary text */
     --muted: 215 15% 65%;             /* Lighter tertiary #9CA3AF */

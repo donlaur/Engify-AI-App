@@ -14,13 +14,17 @@ import { Separator } from '@/components/ui/separator';
 
 const footerLinks = {
   product: [
-    { href: '/workbench', label: 'AI Workbench' },
+    { href: '/prompts', label: 'Prompts' },
     { href: '/patterns', label: 'Patterns' },
-    { href: '/prompts', label: 'Prompt Library' },
+    { href: '/workflows', label: 'Workflows' },
+    { href: '/learn/ai-tools', label: 'Tools' },
+    { href: '/learn', label: 'Learn' },
+    { href: '/workbench', label: 'Workbench' },
   ],
   company: [
     { href: '/about', label: 'About' },
     { href: '/built-in-public', label: 'Built in Public' },
+    { href: '/hireme', label: 'Hire Donnie Laur' },
     { href: '/contact', label: 'Contact' },
   ],
   resources: [
@@ -64,8 +68,8 @@ export function Footer() {
               <EngifyLogo className="text-xl" />
             </Link>
             <p className="mb-4 max-w-xs text-sm text-muted-foreground sm:mb-0">
-              Master prompt engineering with AI-powered learning and
-              gamification.
+              Operationalize AI guardrails with Engify workflows, automation, and
+              institutional memory.
             </p>
           </div>
 

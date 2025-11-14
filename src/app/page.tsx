@@ -19,91 +19,104 @@ import {
 } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { getServerStats } from '@/lib/server-stats';
+import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
 import type { Metadata } from 'next';
 import { PreloadContentJson } from '@/components/features/PreloadContentJson';
 
 export const metadata: Metadata = {
-  title: 'Engify.ai - AI-Powered Processes for Engineering Teams',
+  title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
   description:
-    'Stop reinventing workflows. Start amplifying them. 300+ battle-tested prompts, 19 role-specific playbooks, automated guardrails. Built with engineering discipline.',
+    'Document the manual guardrails you run today and automate them tomorrow. Engify pairs production-ready workflows, enforcement hooks, and incident memory so teams ship responsibly.',
   keywords: [
-    'AI training platform',
-    'engineering teams',
-    'prompt engineering training',
-    'developer training',
-    'corporate AI training',
-    'AI upskilling',
-    'engineering team training',
-    'AI training for engineers',
+    'AI guardrails',
+    'guardrail automation',
+    'engineering governance',
+    'prompt governance',
+    'ai risk management',
+    'institutional memory',
+    'software delivery controls',
+    'compliance automation',
   ],
   openGraph: {
-    title: 'Engify.ai - AI-Powered Processes for Engineering Teams',
+    title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
     description:
-      'Stop reinventing workflows. Start amplifying them. 300+ battle-tested prompts, 19 role-specific playbooks, automated guardrails.',
+      'Production guardrail workflows, automation handoffs, and incident memory—everything you need to prevent AI regressions.',
     type: 'website',
     siteName: 'Engify.ai',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Engify.ai - AI-Powered Processes for Engineering Teams',
+    title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
     description:
-      'Stop reinventing workflows. Start amplifying them. 300+ battle-tested prompts, 19 role-specific playbooks.',
+      'Production guardrail workflows, automation handoffs, and incident memory—everything you need to prevent AI regressions.',
     creator: '@engifyai',
   },
 };
 
 const features = [
   {
-    icon: Icons.sparkles,
-    title: 'AI-Powered Learning',
+    icon: Icons.shield,
+    title: 'Production Guardrails',
     description:
-      'Master prompt engineering with intelligent guidance and real-time feedback.',
-    gradient: 'from-purple-500 to-pink-500',
+      'Documented workflows anchored in audits, incidents, and daily engineering practice.',
+    gradient: 'from-blue-500 to-indigo-500',
   },
   {
-    icon: Icons.target,
-    title: 'Battle-Tested Patterns',
+    icon: Icons.gitCompare,
+    title: 'Automation Hooks',
     description:
-      'Learn proven patterns used by top AI practitioners worldwide.',
-    gradient: 'from-blue-500 to-cyan-500',
+      'Pre-built handoffs for pre-commit, CI/CD, and MCP agents so enforcement is a toggle, not a rewrite.',
+    gradient: 'from-purple-500 to-fuchsia-500',
   },
   {
-    icon: Icons.trophy,
-    title: 'Gamified Progress',
-    description: 'Unlock achievements, level up, and compete with your team.',
-    gradient: 'from-orange-500 to-red-500',
+    icon: Icons.database,
+    title: 'Institutional Memory',
+    description:
+      'Capture every incident, checklist decision, and regression warning—then surface it when teams need it.',
+    gradient: 'from-teal-500 to-emerald-500',
   },
   {
-    icon: Icons.zap,
-    title: 'Instant Results',
+    icon: Icons.flag,
+    title: 'Compliance Evidence',
     description:
-      'See your prompts in action with multi-provider AI integration.',
-    gradient: 'from-green-500 to-emerald-500',
+      'Research citations, audit trails, and coverage views that satisfy security, platform, and leadership.',
+    gradient: 'from-amber-500 to-orange-500',
   },
 ];
 
-export default async function Home() {
-  const data = await getServerStats();
-  const allowSignup = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
+const allowSignup = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
 
-  // Build stats for display - matching new hero messaging
+export default async function Home() {
+  const [data, workflows] = await Promise.all([getServerStats(), loadWorkflowsFromJson()]);
+
+  const guardrailCount = workflows.length || 20;
+  const manualChecklistSteps = workflows.reduce((acc, workflow) => acc + workflow.manualChecklist.length, 0);
+  const automationHooks = workflows.filter((workflow) => Boolean(workflow.automationTeaser)).length;
+  const researchCitations = workflows.reduce(
+    (acc, workflow) => acc + (workflow.researchCitations?.length ?? 0),
+    0
+  );
+
   const stats = [
     {
-      label: 'Prompts',
-      value: `${data.prompts?.total || data.stats?.prompts || 300}+`,
+      label: 'Guardrail Workflows',
+      value: `${guardrailCount}`,
     },
     {
-      label: 'Roles',
-      value: '19',
+      label: 'Checklist Steps Documented',
+      value: `${manualChecklistSteps}+`,
     },
     {
-      label: 'Patterns',
-      value: `${data.patterns?.total || data.stats?.patterns || 23}`,
+      label: 'Automation Hooks Ready',
+      value: `${Math.max(automationHooks, 1)}`,
     },
-    { label: 'Production-Ready', value: '✓' },
+    {
+      label: 'Research Citations',
+      value: `${Math.max(researchCitations, 1)}+`,
+    },
   ];
 
-  // Build role stats from data
+  // Build role stats from data (kept for compatibility with downstream sections)
   const roleIcons = {
     Engineers: Icons.code,
     Managers: Icons.users,
@@ -127,11 +140,6 @@ export default async function Home() {
         { name: 'PMs', icon: Icons.target, count: '0 prompts' },
       ];
 
-  const siteStats = {
-    totalPrompts: data.prompts?.total || data.stats?.prompts || 0,
-    totalPatterns: data.patterns?.total || data.stats?.patterns || 0,
-  };
-
   return (
     <MainLayout>
       <PreloadContentJson />
@@ -142,52 +150,29 @@ export default async function Home() {
 
         <div className="container relative z-10 py-24 md:py-32">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
-            <Badge
-              variant="secondary"
-              className="mb-4 border-white/30 bg-black/30 backdrop-blur-sm"
-            >
-              <Icons.sparkles className="mr-2 h-3 w-3 text-white" />
-              <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text font-bold text-transparent">
-                BETA
-              </span>
-              <span className="ml-2 text-white">Free</span>
-            </Badge>
-
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
-              AI-Powered Processes for Engineering Teams
+              Ship AI Guardrails With Institutional Memory
             </h1>
 
             <p className="mx-auto max-w-3xl text-xl font-semibold leading-relaxed text-white sm:text-2xl">
-              Stop reinventing workflows. Start amplifying them.
+              Stop AI slop before it merges. Turn manual guardrails into always-on automation.
             </p>
 
             <p className="mx-auto max-w-3xl text-lg leading-relaxed text-white/90">
-              300+ battle-tested prompts • 19 role-specific playbooks • Automated guardrails • Built with engineering discipline.
+              {`${guardrailCount}+ production guardrails • automation hooks for CI/CD • incident recall built in.`}
             </p>
 
             <div className="flex justify-center pt-8">
-              <div className="flex w-full max-w-md flex-col gap-4 sm:w-auto sm:flex-row">
-                <Button
-                  size="lg"
-                  className="w-full bg-gradient-to-r from-green-500 to-cyan-500 font-bold text-black hover:from-green-600 hover:to-cyan-600 sm:w-auto"
-                  asChild
-                >
-                  <Link href="/prompts">
-                    Explore Platform
-                    <Icons.arrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full border-white/30 text-white hover:bg-white/10 sm:w-auto"
-                  asChild
-                >
-                  <Link href="/built-in-public">
-                    Built in Public →
-                  </Link>
-                </Button>
-              </div>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-green-500 to-cyan-500 font-bold text-black hover:from-green-600 hover:to-cyan-600"
+                asChild
+              >
+                <Link href="/workflows">
+                  Explore Guardrail Library
+                  <Icons.arrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -465,8 +450,8 @@ export default async function Home() {
                 Ready to Transform Your Team?
               </h2>
               <p className="mx-auto max-w-2xl text-lg text-gray-200 sm:text-xl">
-                Master AI with {siteStats.totalPrompts} expert prompts. Start
-                free today—no credit card required.
+                Master AI guardrails with {guardrailCount}+ production workflows and
+                automation hooks ready to deploy.
               </p>
               <Button
                 size="lg"
