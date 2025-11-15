@@ -10,7 +10,6 @@ import { NextRequest } from 'next/server';
 import {
   GET,
   POST,
-  resetCQRSForTesting,
 } from '../../../app/api/v2/users/route';
 import { getUserService } from '../../di/Container';
 import { UserService } from '../../services/UserService';
@@ -51,7 +50,6 @@ describe('/api/v2/users CQRS Integration', () => {
 
     // Reset CQRS bus and initialization flag
     cqrsBus.reset();
-    resetCQRSForTesting();
 
     mockUserService = createMockUserService();
 

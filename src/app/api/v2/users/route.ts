@@ -31,9 +31,8 @@ import { getUserService } from '@/lib/di/Container';
 import { RBACPresets } from '@/lib/middleware/rbac';
 
 // For V2 tests, we directly use UserService methods (DI) instead of CQRS
-export function resetCQRSForTesting(): void {
-  // No-op: kept for backward-compatibility with tests
-}
+// Note: resetCQRSForTesting removed - Next.js route files can only export route handlers
+// Tests should use UserService directly via dependency injection
 
 // Request validation schemas
 const createUserSchema = z.object({
