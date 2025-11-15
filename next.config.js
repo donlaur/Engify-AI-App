@@ -2,33 +2,19 @@
 const path = require('path');
 const nextConfig = {
   reactStrictMode: true,
-  
-  // Disable ESLint during build for emergency deployment
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  
-  // Disable TypeScript errors during build for emergency deployment
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  
-  // Experimental features
-  experimental: {
-    // Add experimental features here as needed
-    // Exclude server-only packages from client bundles
-    // This prevents MongoDB and other server-only packages from being bundled into client-side JavaScript
-    serverComponentsExternalPackages: [
-      'mongodb',
-      'bson',
-      '@mongodb/client-encryption',
-      'mongodb-client-encryption',
-      'kerberos',
-      'snappy',
-      'gcp-metadata',
-      'aws4',
-    ],
-  },
+
+  // Exclude server-only packages from client bundles
+  // This prevents MongoDB and other server-only packages from being bundled into client-side JavaScript
+  serverExternalPackages: [
+    'mongodb',
+    'bson',
+    '@mongodb/client-encryption',
+    'mongodb-client-encryption',
+    'kerberos',
+    'snappy',
+    'gcp-metadata',
+    'aws4',
+  ],
   
   // Environment variables available to the browser
   env: {

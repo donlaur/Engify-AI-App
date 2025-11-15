@@ -35,6 +35,7 @@ const ALGORITHM = 'aes-256-gcm';
 
 /**
  * Get encryption key from AWS Secrets Manager or environment variable
+ * Fails fast if key is missing in production - no insecure defaults
  */
 async function getEncryptionKey(): Promise<string> {
   try {
@@ -44,16 +45,28 @@ async function getEncryptionKey(): Promise<string> {
       'API_KEY_ENCRYPTION_KEY'
     );
   } catch (error) {
-    // Fallback to environment variable or default (dev only)
-    const fallback =
-      process.env.API_KEY_ENCRYPTION_KEY || 'default-key-change-in-production';
+    // Fallback to environment variable (dev only)
+    const envKey = process.env.API_KEY_ENCRYPTION_KEY;
+
+    // Production: Fail fast - no insecure defaults
     if (process.env.NODE_ENV === 'production') {
-      console.error(
-        'CRITICAL: Encryption key not found in AWS Secrets Manager!',
-        error
+      if (!envKey) {
+        throw new Error(
+          'CRITICAL: API_KEY_ENCRYPTION_KEY not found in AWS Secrets Manager or environment variables. ' +
+          'Cannot encrypt/decrypt API keys without proper encryption key.'
+        );
+      }
+    }
+
+    // Development: Require env var, but allow startup without it
+    if (!envKey) {
+      throw new Error(
+        'API_KEY_ENCRYPTION_KEY environment variable is required. ' +
+        'Generate a secure key with: openssl rand -base64 32'
       );
     }
-    return fallback;
+
+    return envKey;
   }
 }
 

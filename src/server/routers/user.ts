@@ -19,7 +19,7 @@ export const userRouter = createTRPCRouter({
       throw new Error('User not found');
     }
     return {
-      id: user.id,
+      id: user._id?.toString() || user.email,
       email: user.email,
       name: user.name,
     };

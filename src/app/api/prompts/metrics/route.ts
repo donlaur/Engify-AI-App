@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const db = await getMongoDb();
 
     // Get prompt metrics from prompts collection
-    let query: Record<string, unknown> = { active: { $ne: false } };
+    const query: Record<string, unknown> = { active: { $ne: false } };
     
     if (promptIdsParam) {
       const promptIds = promptIdsParam.split(',').map((id) => id.trim());
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
     }));
 
     // Sort by requested metric
-    let sorted = [...promptsWithMetrics];
+    const sorted = [...promptsWithMetrics];
     if (metric === 'views') {
       sorted.sort((a, b) => b.views - a.views);
     } else if (metric === 'favorites') {

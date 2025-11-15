@@ -93,7 +93,7 @@ function parseJSONSafely(jsonText: string): any {
   } catch (error) {
     // Try to repair common issues
     try {
-      let repaired = jsonText.replace(/,(\s*[}\]])/g, '$1');
+      const repaired = jsonText.replace(/,(\s*[}\]])/g, '$1');
       return JSON.parse(repaired);
     } catch {
       return null;

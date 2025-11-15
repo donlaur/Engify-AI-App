@@ -1117,7 +1117,7 @@ Provide your review in JSON format as specified in your system prompt.
               const modelId = agent.preferredModelId || agent.model;
               
               // Find model, filtering out deprecated ones
-              let dbModel = availableModels.find(m => {
+              const dbModel = availableModels.find(m => {
                 const status = ('status' in m ? m.status : 'active');
                 const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
                 if (status !== 'active' || isAllowed === false) return false;

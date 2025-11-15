@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkOAuthRateLimit } from '@/lib/rate-limit/oauth';
+import { logger } from '@/lib/logging/logger';
 
 // JWKS endpoint for public key distribution
 // MCP servers and clients use this to verify JWT signatures
@@ -44,7 +45,10 @@ export async function GET(request: NextRequest) {
       keys: [publicKey],
     });
   } catch (error) {
-    console.error('[JWKS] Error generating keys:', error);
+    logger.error('JWKS key generation failed', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       { error: 'Unable to generate keys' },
       { status: 500 }

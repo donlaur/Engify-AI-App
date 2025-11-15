@@ -144,10 +144,22 @@ export async function checkRateLimit(
     };
   } catch (error) {
     console.error('Rate limit check error:', error);
-    // Fail open - allow request but log error
+
+    // Production: Fail closed - deny requests if rate limiting is unavailable
+    // This prevents abuse if database is down or compromised
+    if (process.env.NODE_ENV === 'production') {
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAt: new Date(Date.now() + 60 * 60 * 1000),
+        reason: 'Rate limit service temporarily unavailable. Please try again in a few moments.',
+      };
+    }
+
+    // Development: Fail open to allow testing without database
     return {
       allowed: true,
-      remaining: 0,
+      remaining: 999,
       resetAt: new Date(Date.now() + 60 * 60 * 1000),
     };
   }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { randomBytes } from 'crypto';
+import { logger } from '@/lib/logging/logger';
 
 const TOKEN_EXPIRY = 24 * 60 * 60; // 24 hours in seconds
 
@@ -28,7 +29,10 @@ export async function POST() {
       name: session.user.name,
     });
   } catch (error) {
-    console.error('Error generating MCP token:', error);
+    logger.error('MCP token generation failed', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       { error: 'Failed to generate token' },
       { status: 500 }
