@@ -6,17 +6,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { logger } from '@/lib/logging/logger';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * GET /api/prompts/metrics
  * Get metrics for prompts
- * 
+ *
  * Query params:
  * - promptIds: comma-separated list of prompt IDs (optional)
  * - limit: number of top prompts to return (default: 10)
  * - metric: 'views' | 'favorites' | 'shares' (default: 'views')
  */
 export async function GET(request: NextRequest) {
+  // Rate limiting for public API
+  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+  const rateLimit = await checkRateLimit(ip, 'anonymous');
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: rateLimit.reason || 'Too many requests' },
+      { status: 429 }
+    );
+  }
   try {
     const { searchParams } = new URL(request.url);
     const promptIdsParam = searchParams.get('promptIds');
@@ -26,7 +37,7 @@ export async function GET(request: NextRequest) {
     const db = await getMongoDb();
 
     // Get prompt metrics from prompts collection
-    let query: Record<string, unknown> = { active: { $ne: false } };
+    const query: Record<string, unknown> = { active: { $ne: false } };
     
     if (promptIdsParam) {
       const promptIds = promptIdsParam.split(',').map((id) => id.trim());
@@ -107,7 +118,7 @@ export async function GET(request: NextRequest) {
     }));
 
     // Sort by requested metric
-    let sorted = [...promptsWithMetrics];
+    const sorted = [...promptsWithMetrics];
     if (metric === 'views') {
       sorted.sort((a, b) => b.views - a.views);
     } else if (metric === 'favorites') {

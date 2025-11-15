@@ -22,6 +22,7 @@ export default [
       '**/dist/**',
       '**/.vercel/**',
       '**/coverage/**',
+      'scripts/.archived/**',
     ],
   },
   ...compat.extends('next/core-web-vitals', 'plugin:@typescript-eslint/recommended'),

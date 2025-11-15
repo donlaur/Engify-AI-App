@@ -20,6 +20,7 @@
 import Redis from 'ioredis';
 import { Redis as UpstashRedis } from '@upstash/redis';
 import type { User } from '@/lib/db/schema';
+import { logger } from '@/lib/logging/logger';
 
 // Cache keys
 const CACHE_KEYS = {
@@ -63,14 +64,15 @@ function getRedisClient(): Redis | UpstashRedis | null {
         url: upstashUrl,
         token: upstashToken,
       });
-      console.log('✅ Redis enabled: Using Upstash (REST API)');
+      logger.info('Redis cache enabled', { provider: 'Upstash', mode: 'REST' });
       return redisClient;
     }
 
     // In production/serverless: NO local Redis fallback
     // Redis is optional - auth will work fine without it (just slower)
-    console.log('⚠️  Redis disabled: No Upstash credentials configured');
-    console.log('    Auth will use MongoDB directly (no caching)');
+    logger.warn('Redis cache disabled - no credentials configured', {
+      fallback: 'MongoDB direct queries',
+    });
     redisDisabled = true;
     return null;
   }
@@ -147,7 +149,10 @@ export class RedisAuthCache {
       }
     } catch (error) {
       // Silently fail - MongoDB is fallback
-      console.warn('Redis cache error (user by email):', error);
+      logger.warn('Redis cache write failed', {
+        operation: 'cacheUserByEmail',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
   }
 
@@ -179,7 +184,10 @@ export class RedisAuthCache {
       return parsed as User;
     } catch (error) {
       // Silently fail - fall back to MongoDB
-      console.warn('Redis cache read error (user by email):', error);
+      logger.warn('Redis cache read failed', {
+        operation: 'getUserByEmail',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       return undefined;
     }
   }
@@ -205,7 +213,10 @@ export class RedisAuthCache {
         await (this.redis as Redis).setex(key, CACHE_TTL.userData, value);
       }
     } catch (error) {
-      console.warn('Redis cache error (user by id):', error);
+      logger.warn('Redis cache write failed', {
+        operation: 'cacheUserById',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
   }
 
@@ -225,7 +236,10 @@ export class RedisAuthCache {
 
       return JSON.parse(cached) as User;
     } catch (error) {
-      console.warn('Redis cache read error (user by id):', error);
+      logger.warn('Redis cache read failed', {
+        operation: 'getUserById',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       return null;
     }
   }
@@ -250,7 +264,10 @@ export class RedisAuthCache {
         await Promise.all(keys.map((key) => (this.redis as Redis).del(key)));
       }
     } catch (error) {
-      console.warn('Redis cache invalidation error:', error);
+      logger.warn('Redis cache invalidation failed', {
+        operation: 'invalidateUser',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
   }
 
@@ -283,7 +300,10 @@ export class RedisAuthCache {
 
       return attempts;
     } catch (error) {
-      console.warn('Redis rate limit error:', error);
+      logger.warn('Redis rate limit operation failed', {
+        operation: 'incrementLoginAttempts',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       return 0;
     }
   }
@@ -302,7 +322,10 @@ export class RedisAuthCache {
         await (this.redis as Redis).del(key);
       }
     } catch (error) {
-      console.warn('Redis reset attempts error:', error);
+      logger.warn('Redis rate limit reset failed', {
+        operation: 'resetLoginAttempts',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
   }
 
@@ -319,7 +342,10 @@ export class RedisAuthCache {
         : await (this.redis as Redis).get(key);
       return attempts ? parseInt(attempts, 10) : 0;
     } catch (error) {
-      console.warn('Redis get attempts error:', error);
+      logger.warn('Redis rate limit read failed', {
+        operation: 'getLoginAttempts',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       return 0;
     }
   }
@@ -340,7 +366,10 @@ export class RedisAuthCache {
         await (this.redis as Redis).setex(key, CACHE_TTL.session, value);
       }
     } catch (error) {
-      console.warn('Redis session cache error:', error);
+      logger.warn('Redis session cache write failed', {
+        operation: 'cacheSession',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
   }
 
@@ -360,7 +389,10 @@ export class RedisAuthCache {
 
       return JSON.parse(cached);
     } catch (error) {
-      console.warn('Redis session read error:', error);
+      logger.warn('Redis session cache read failed', {
+        operation: 'getSession',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
       return null;
     }
   }
@@ -379,7 +411,10 @@ export class RedisAuthCache {
         await (this.redis as Redis).del(key);
       }
     } catch (error) {
-      console.warn('Redis session invalidation error:', error);
+      logger.warn('Redis session invalidation failed', {
+        operation: 'invalidateSession',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
   }
 }

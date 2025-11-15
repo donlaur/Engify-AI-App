@@ -10,6 +10,7 @@ import {
   AdminSetUserPasswordCommand,
   ForgotPasswordCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
+import { logger } from '@/lib/logging/logger';
 
 const COGNITO_REGION = process.env.COGNITO_REGION || 'us-east-1';
 const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID;
@@ -50,7 +51,10 @@ export async function cognitoForgotPassword(email: string): Promise<{
       message: 'Password reset code sent to your email',
     };
   } catch (error) {
-    console.error('Cognito forgot password error:', error);
+    logger.error('Cognito password reset request failed', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
 
     // Don't reveal if user exists
     return {
@@ -91,7 +95,10 @@ export async function cognitoAdminResetPassword(email: string): Promise<{
       message: 'Password reset code sent to your email',
     };
   } catch (error) {
-    console.error('Cognito admin reset password error:', error);
+    logger.error('Cognito admin password reset failed', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return {
       success: false,
       error:
@@ -132,7 +139,10 @@ export async function cognitoAdminSetPassword(
       success: true,
     };
   } catch (error) {
-    console.error('Cognito admin set password error:', error);
+    logger.error('Cognito admin set password failed', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to set password',

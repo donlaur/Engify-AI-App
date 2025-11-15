@@ -359,8 +359,8 @@ async function syncFromOpenRouter() {
     const modelsToSync: Partial<AIModel>[] = [];
     let duplicatesFound = 0;
     let matchedByExactId = 0;
-    let matchedByProviderName = 0;
-    let matchedBySlug = 0;
+    const matchedByProviderName = 0;
+    const matchedBySlug = 0;
 
     for (const openRouterModel of openRouterModels) {
       try {

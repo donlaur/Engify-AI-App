@@ -14,6 +14,7 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import { z } from 'zod';
 import { createHmac } from 'crypto';
+import { logger } from '@/lib/logging/logger';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -88,7 +89,9 @@ export function CognitoProvider() {
           try {
             authParams.SECRET_HASH = generateSecretHash(email);
           } catch (error) {
-            console.error('Failed to generate SECRET_HASH:', error);
+            logger.error('Failed to generate Cognito SECRET_HASH', {
+              error: error instanceof Error ? error.message : 'Unknown error',
+            });
             throw new Error('Cognito client secret configuration error');
           }
         }
@@ -141,7 +144,12 @@ export function CognitoProvider() {
           emailVerified: emailVerifiedAttr ? new Date() : null,
         };
       } catch (error) {
-        console.error('Cognito auth error:', error);
+        const emailDomain = credentials?.email ? String(credentials.email).split('@')[1] : 'unknown';
+        logger.error('Cognito authentication failed', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          emailDomain,
+        });
         return null;
       }
     },
@@ -165,7 +173,11 @@ export async function getCognitoUserByEmail(email: string) {
     const response = await cognitoClient.send(command);
     return response;
   } catch (error) {
-    console.error('Error getting Cognito user:', error);
+    const emailDomain = email.split('@')[1];
+    logger.error('Failed to get Cognito user', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      emailDomain,
+    });
     return null;
   }
 }

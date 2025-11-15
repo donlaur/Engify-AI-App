@@ -65,11 +65,12 @@ export async function generateMetadata({
 
   const providerLabel = PROVIDER_LABELS[model.provider] || model.provider;
   const statusBadge = model.status === 'deprecated' ? ' (Deprecated)' : '';
-  const costPer1M = model.costPer1kInputTokens * 1000;
+  const costPer1M = model.costPer1kInputTokens ? model.costPer1kInputTokens * 1000 : 0;
+  const contextInfo = model.contextWindow ? `Context window: ${model.contextWindow.toLocaleString()} tokens. ` : '';
 
   return {
     title: `${model.displayName}${statusBadge} - AI Model Guide | Engify.ai`,
-    description: `${model.displayName} from ${providerLabel}. Context window: ${model.contextWindow.toLocaleString()} tokens. Pricing: $${costPer1M.toFixed(2)}/1M tokens. ${model.capabilities.join(', ')}.`,
+    description: `${model.displayName} from ${providerLabel}. ${contextInfo}Pricing: $${costPer1M.toFixed(2)}/1M tokens. ${model.capabilities?.join(', ') || 'Various capabilities'}.`,
     keywords: [
       model.displayName,
       model.name,
@@ -81,7 +82,7 @@ export async function generateMetadata({
     ],
     openGraph: {
       title: `${model.displayName} - AI Model Guide`,
-      description: `${model.displayName} from ${providerLabel}. ${model.contextWindow.toLocaleString()} token context window.`,
+      description: `${model.displayName} from ${providerLabel}. ${model.contextWindow ? `${model.contextWindow.toLocaleString()} token context window.` : 'Advanced AI model.'}`,
       type: 'article',
     },
   };
@@ -263,14 +264,16 @@ export default async function AIModelDetailPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-sm font-medium text-muted-foreground">
-                        Context Window
+                    {model.contextWindow && (
+                      <div>
+                        <div className="text-sm font-medium text-muted-foreground">
+                          Context Window
+                        </div>
+                        <div className="text-lg font-semibold">
+                          {model.contextWindow.toLocaleString()} tokens
+                        </div>
                       </div>
-                      <div className="text-lg font-semibold">
-                        {model.contextWindow.toLocaleString()} tokens
-                      </div>
-                    </div>
+                    )}
                     {model.maxOutputTokens && (
                       <div>
                         <div className="text-sm font-medium text-muted-foreground">

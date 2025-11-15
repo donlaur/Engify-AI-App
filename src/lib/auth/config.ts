@@ -18,6 +18,7 @@ import { userService } from '@/lib/services/UserService';
 import { adminSessionMaxAgeSeconds } from '@/lib/env';
 import { getAuthCache } from '@/lib/auth/RedisAuthCache';
 import { CognitoProvider } from './providers/CognitoProvider';
+import { logger } from '@/lib/logging/logger';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -44,25 +45,29 @@ export const authOptions: NextAuthConfig = {
             },
             async authorize(credentials) {
               try {
-                console.log('🔐 [AUTH] Starting login attempt...');
+                logger.info('Authentication attempt started');
 
                 // Validate input
                 const { email, password } = loginSchema.parse(credentials);
-                console.log(`🔐 [AUTH] Email validated: ${email}`);
+                const emailDomain = email.split('@')[1];
+                logger.info('Login credentials validated', { emailDomain });
 
                 const authCache = getAuthCache();
 
                 // Rate limiting: Check login attempts
                 const loginAttempts = await authCache.getLoginAttempts(email);
                 const MAX_LOGIN_ATTEMPTS = 5;
-                console.log(
-                  `🔐 [AUTH] Login attempts: ${loginAttempts}/${MAX_LOGIN_ATTEMPTS}`
-                );
+                logger.info('Login rate limit check', {
+                  attempts: loginAttempts,
+                  maxAttempts: MAX_LOGIN_ATTEMPTS,
+                  emailDomain,
+                });
 
                 if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-                  console.warn(
-                    `🔐 [AUTH] ❌ Too many login attempts for ${email}`
-                  );
+                  logger.warn('Login rate limit exceeded', {
+                    emailDomain,
+                    attempts: loginAttempts,
+                  });
                   return null; // Don't reveal if user exists
                 }
 
@@ -73,13 +78,12 @@ export const authOptions: NextAuthConfig = {
                   | null
                   | undefined = await authCache.getUserByEmail(email);
 
-                console.log(
-                  `🔐 [AUTH] Redis cache result: ${user === undefined ? 'not cached' : user === null ? 'cached as null' : 'cached user found'}`
-                );
+                const cacheStatus = user === undefined ? 'miss' : user === null ? 'negative_hit' : 'hit';
+                logger.debug('Cache lookup completed', { cacheStatus, emailDomain });
 
                 // If not in cache (undefined), fall back to MongoDB (with timeout)
                 if (user === undefined) {
-                  console.log('🔐 [AUTH] Querying MongoDB...');
+                  logger.debug('Querying database for user', { emailDomain });
                   const timeoutPromise = new Promise((_, reject) => {
                     setTimeout(
                       () => reject(new Error('Authentication timeout')),
@@ -95,36 +99,46 @@ export const authOptions: NextAuthConfig = {
                     ReturnType<typeof userService.findByEmail>
                   > | null;
 
-                  console.log(
-                    `🔐 [AUTH] MongoDB result: ${user ? 'user found' : 'user not found'}`
-                  );
+                  logger.debug('Database query completed', {
+                    userFound: !!user,
+                    emailDomain,
+                  });
                 }
 
                 if (!user) {
-                  console.log('🔐 [AUTH] ❌ User not found');
+                  logger.warn('Authentication failed - user not found', { emailDomain });
                   await authCache.incrementLoginAttempts(email);
                   return null;
                 }
 
                 if (!user.password) {
-                  console.log('🔐 [AUTH] ❌ User has no password set');
+                  logger.warn('Authentication failed - no password set', {
+                    emailDomain,
+                    userId: user._id.toString(),
+                  });
                   await authCache.incrementLoginAttempts(email);
                   return null;
                 }
 
                 // Verify password with bcrypt
-                console.log('🔐 [AUTH] Verifying password...');
+                logger.debug('Verifying password', { emailDomain });
                 const isValid = await bcrypt.compare(password, user.password);
-                console.log(`🔐 [AUTH] Password valid: ${isValid}`);
 
                 if (!isValid) {
-                  console.log('🔐 [AUTH] ❌ Invalid password');
+                  logger.warn('Authentication failed - invalid password', {
+                    emailDomain,
+                    userId: user._id.toString(),
+                  });
                   await authCache.incrementLoginAttempts(email);
                   return null;
                 }
 
                 // Success! Reset login attempts
-                console.log('🔐 [AUTH] ✅ Login successful!');
+                logger.info('Authentication successful', {
+                  userId: user._id.toString(),
+                  emailDomain,
+                  role: user.role,
+                });
                 await authCache.resetLoginAttempts(email);
 
                 // Return user object
@@ -136,16 +150,11 @@ export const authOptions: NextAuthConfig = {
                   organizationId: user.organizationId?.toString() || null,
                 };
               } catch (error) {
-                console.error('🔐 [AUTH] ❌ Auth error:', error);
-                // Return more specific error for debugging
-                if (
-                  error instanceof Error &&
-                  error.message === 'Authentication timeout'
-                ) {
-                  console.error(
-                    '🔐 [AUTH] ❌ MongoDB connection timeout during login'
-                  );
-                }
+                logger.error('Authentication error occurred', {
+                  error: error instanceof Error ? error.message : 'Unknown error',
+                  stack: error instanceof Error ? error.stack : undefined,
+                  isTimeout: error instanceof Error && error.message === 'Authentication timeout',
+                });
                 return null;
               }
             },
@@ -198,9 +207,6 @@ export const authOptions: NextAuthConfig = {
     },
 
     async redirect({ url, baseUrl }) {
-      // Log redirect attempts for debugging
-      console.log('🔀 [REDIRECT] url:', url, 'baseUrl:', baseUrl);
-
       // Normalize URLs to remove www for consistency
       const normalizeUrl = (u: string) => u.replace('://www.', '://');
       const normalizedUrl = normalizeUrl(url);
@@ -209,28 +215,27 @@ export const authOptions: NextAuthConfig = {
       // If url is relative, make it absolute with baseUrl
       if (url.startsWith('/')) {
         const redirectUrl = `${normalizedBaseUrl}${url}`;
-        console.log('🔀 [REDIRECT] Redirecting to:', redirectUrl);
+        logger.debug('Auth redirect - relative path', { path: url });
         return redirectUrl;
       }
 
       // If url is on the same origin (after normalization), allow it
       if (normalizedUrl.startsWith(normalizedBaseUrl)) {
-        console.log('🔀 [REDIRECT] Same origin redirect to:', normalizedUrl);
+        logger.debug('Auth redirect - same origin', { url: normalizedUrl });
         return normalizedUrl;
       }
 
       // Otherwise redirect to dashboard
       const dashboardUrl = `${normalizedBaseUrl}/dashboard`;
-      console.log('🔀 [REDIRECT] Default redirect to:', dashboardUrl);
+      logger.debug('Auth redirect - default to dashboard');
       return dashboardUrl;
     },
 
     async jwt({ token, user }: { token: JWT; user: User }) {
       // Add user info to JWT on login
       if (user) {
-        console.log('🔐 [JWT] Adding user data to JWT:', {
-          id: user.id,
-          email: user.email,
+        logger.debug('JWT token created for user', {
+          userId: user.id,
           role: user.role || 'free',
         });
         token.id = user.id;
@@ -240,8 +245,8 @@ export const authOptions: NextAuthConfig = {
           user as unknown as { mfaVerified?: boolean }
         ).mfaVerified;
       } else {
-        console.log('🔐 [JWT] Refreshing JWT for existing session:', {
-          id: token.id,
+        logger.debug('JWT token refreshed', {
+          userId: token.id,
           role: token.role,
         });
       }
@@ -251,22 +256,16 @@ export const authOptions: NextAuthConfig = {
     async session({ session, token }: { session: Session; token: JWT }) {
       // Add user info to session
       if (session.user) {
-        console.log('🔐 [SESSION] Building session from JWT:', {
-          jwtId: token.id,
-          jwtRole: token.role,
-          jwtMfaVerified: token.mfaVerified,
+        logger.debug('Session created from JWT', {
+          userId: token.id,
+          role: token.role,
+          mfaVerified: token.mfaVerified,
         });
         Object.assign(session.user, {
           id: token.id,
           role: token.role,
           organizationId: token.organizationId,
           mfaVerified: Boolean(token.mfaVerified),
-        });
-        console.log('🔐 [SESSION] Session built:', {
-          userId: session.user.id,
-          userRole: (session.user as { role?: string }).role,
-          userMfaVerified: (session.user as { mfaVerified?: boolean })
-            .mfaVerified,
         });
       }
       return session;

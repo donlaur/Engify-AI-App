@@ -391,12 +391,11 @@ export function canImpersonate(_actualRole: Role, _targetRole: Role): boolean {
 }
 
 export function getImpersonationInsights(
-  actualRole: Role,
+  _actualRole: Role,
   targetRole: Role
 ): string[] {
-  const _actualDef = ROLE_DEFINITIONS[actualRole];
   const targetDef = ROLE_DEFINITIONS[targetRole];
-  
+
   return [
     `As a ${targetDef.title}, you'll focus on: ${targetDef.typicalChallenges[0]}`,
     `Try using these patterns: ${targetDef.recommendedPatterns.join(', ')}`,

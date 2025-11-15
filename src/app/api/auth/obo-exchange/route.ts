@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify, SignJWT } from 'jose';
 import { kv } from '@vercel/kv';
 import { checkOAuthRateLimit } from '@/lib/rate-limit/oauth';
+import { logger } from '@/lib/logging/logger';
 
 // RFC 8693: OAuth 2.0 Token Exchange
 // Exchanges user's MCP access token for downstream service token
@@ -122,7 +123,11 @@ export async function POST(request: NextRequest) {
       .setExpirationTime(Math.floor(Date.now() / 1000) + OBO_TOKEN_EXPIRY)
       .sign(JWT_SECRET);
 
-    console.log(`[OBO] Generated token for user ${payload.sub} to ${audience}`);
+    logger.info('OBO token exchange successful', {
+      userId: payload.sub,
+      targetAudience: audience,
+      scope,
+    });
 
     // Return RFC 8693 token exchange response
     return NextResponse.json({
@@ -134,8 +139,12 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('[OBO] Token exchange error:', error);
-    
+    logger.error('OBO token exchange failed', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      errorCode: error?.code,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
     // Handle JWT verification errors
     if (error.code === 'ERR_JWT_EXPIRED') {
       return NextResponse.json(

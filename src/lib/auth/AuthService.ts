@@ -22,6 +22,7 @@ import {
   type Action,
 } from './rbac';
 import type { User } from '@/lib/db/schema';
+import { logger } from '@/lib/logging/logger';
 
 // Validation schemas
 const registerSchema = z.object({
@@ -112,7 +113,10 @@ export class AuthService {
         verificationToken,
       };
     } catch (error) {
-      console.error('Registration error:', error);
+      logger.error('User registration failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Registration failed',
@@ -182,7 +186,10 @@ export class AuthService {
         sessionToken,
       };
     } catch (error) {
-      console.error('Login error:', error);
+      logger.error('User login failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Login failed',
@@ -226,7 +233,10 @@ export class AuthService {
         sessionToken,
       };
     } catch (error) {
-      console.error('OAuth login error:', error);
+      logger.error('OAuth login failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'OAuth login failed',
@@ -268,7 +278,10 @@ export class AuthService {
         user,
       };
     } catch (error) {
-      console.error('Email verification error:', error);
+      logger.error('Email verification failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return {
         success: false,
         error: 'Email verification failed',
@@ -301,7 +314,10 @@ export class AuthService {
         success: true,
       };
     } catch (error) {
-      console.error('Password reset request error:', error);
+      logger.error('Password reset request failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return {
         success: false,
         error: 'Password reset request failed',
@@ -342,7 +358,10 @@ export class AuthService {
         user,
       };
     } catch (error) {
-      console.error('Password reset error:', error);
+      logger.error('Password reset failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return {
         success: false,
         error: 'Password reset failed',
@@ -394,7 +413,10 @@ export class AuthService {
         user,
       };
     } catch (error) {
-      console.error('Change password error:', error);
+      logger.error('Password change failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return {
         success: false,
         error: 'Password change failed',

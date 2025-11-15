@@ -184,7 +184,7 @@ export function detectAISlop(text: string): SlopDetectionResult {
   const slopWeight = Math.min(0.3, slopCount * 0.02); // Slop phrases add up to 30%
   const uniformityWeight = stdDev < 5 ? 0.2 : 0;
 
-  let aiProbability = Math.min(1.0, flagWeight + slopWeight + uniformityWeight);
+  const aiProbability = Math.min(1.0, flagWeight + slopWeight + uniformityWeight);
 
   // Calculate quality score (inverse of AI probability)
   let qualityScore = Math.max(0, 10 - aiProbability * 10);
