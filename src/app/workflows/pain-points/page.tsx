@@ -50,7 +50,9 @@ export default async function PainPointsPage() {
     getPainPointsMetadata(),
   ]);
 
-  const publishedPainPoints = painPoints.filter(pp => pp.status === 'published');
+  const publishedPainPoints = painPoints
+    .filter(pp => pp.status === 'published')
+    .sort((a, b) => a.title.localeCompare(b.title));
 
   // Generate JSON-LD structured data
   const jsonLd = {
@@ -96,7 +98,7 @@ export default async function PainPointsPage() {
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <Button asChild size="lg">
-                  <Link href="/workflows">Explore Workflows</Link>
+                  <Link href="/workflows#workflow-library">Explore workflows &amp; guardrails</Link>
                 </Button>
               </div>
             </div>
@@ -151,10 +153,11 @@ export default async function PainPointsPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button asChild>
-                <Link href="/workflows">Explore Workflows</Link>
+                <Link href="/workflows#workflow-library">Explore workflows &amp; guardrails</Link>
               </Button>
             </div>
           </div>
+
         </div>
       </MainLayout>
     </>

@@ -269,7 +269,6 @@ export default async function WorkflowsPage() {
             ))}
           </div>
         </section>
-
         </div>
       </MainLayout>
     </>

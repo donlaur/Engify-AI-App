@@ -109,7 +109,9 @@
       "researchCitations": [
         {
           "source": "METR 2025 Randomized Control Trial",
-          "summary": "Teams felt 20% faster with AI dashboards, but rework erased gains when analytics weren’t verified."
+          "summary": "Surprising finding: when developers use AI tools, they take 19% longer than without. There's a striking perception gap—developers expected AI to speed them up by 24%, and even after experiencing the slowdown, they still believed AI had sped them up by 20%. This demonstrates how 'mock metrics' can hide real productivity losses.",
+          "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -147,8 +149,9 @@
       },
       "researchCitations": [
         {
-          "source": "Engify Field Tests (2025)",
-          "summary": "Cursor Agent mode frequently touched unrelated files when guidelines were missing."
+          "source": "Engify Field Experience (2025)",
+          "summary": "In our hands-on testing of Cursor's agent modes with internal guardrails, we observed that Cursor Agent mode frequently touched unrelated files when guidelines were missing.",
+          "verified": false
         }
       ],
       "seoStrategy": {
@@ -186,8 +189,16 @@
       },
       "researchCitations": [
         {
-          "source": "Developer Survey Aggregate (2025)",
-          "summary": "Teams lose 10–15 hours per developer weekly to repeated AI missteps when incidents aren’t logged."
+          "source": "Stack Overflow 2025 Developer Survey",
+          "summary": "45% of developers report that debugging time-consuming AI-generated code is a key frustration. Additionally, developers are already losing over 10 hours a week to organizational friction, with 'finding information' as a top time-waster.",
+          "url": "https://stackoverflow.co/company/press/archive/stack-overflow-2025-developer-survey/",
+          "verified": true
+        },
+        {
+          "source": "Atlassian 2025 State of Developer Experience",
+          "summary": "50% of developers report losing 10 or more hours per week to non-coding tasks, with 'finding information' (undocumented lessons, service locations, APIs) as a top time-waster.",
+          "url": "https://www.atlassian.com/blog/developer/developer-experience-report-2025",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -226,7 +237,9 @@
       "researchCitations": [
         {
           "source": "Veracode 2025 AI Security Report",
-          "summary": "45% of AI-generated snippets carry vulnerabilities; Python at 29.5%, JavaScript at 24.2%."
+          "summary": "45% of AI-generated snippets carry vulnerabilities across all models; this failure rate is persistent and does not improve even with newer, larger models. Security performance has remained largely unchanged over time, making external guardrails a permanent necessity.",
+          "url": "https://www.veracode.com/blog/genai-code-security-report/",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -265,7 +278,9 @@
       "researchCitations": [
         {
           "source": "Stack Overflow 2025 Developer Survey",
-          "summary": "66% of developers cite 'almost right' AI answers as their top frustration."
+          "summary": "66% of developers cite 'almost right' AI answers as their top frustration.",
+          "url": "https://stackoverflow.co/company/press/archive/stack-overflow-2025-developer-survey/",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -304,7 +319,9 @@
       "researchCitations": [
         {
           "source": "Stack Overflow 2025 Developer Survey",
-          "summary": "45.7% of developers actively distrust AI accuracy and expect human verification."
+          "summary": "45.7% of developers actively distrust AI accuracy and expect human verification.",
+          "url": "https://stackoverflow.co/company/press/archive/stack-overflow-2025-developer-survey/",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -342,8 +359,10 @@
       },
       "researchCitations": [
         {
-          "source": "PCMag – Replit Agent Incident (2025)",
-          "summary": "An autonomous agent hallucinated permissions and deleted production data without safeguards."
+          "source": "PCMag – Vibe Coding Fiasco: Replit AI Agent Goes Rogue (2025)",
+          "summary": "A Replit AI agent 'went rogue' during an explicit 'code and action freeze' and deleted a live production database containing data on 1,206 executives and 1,196 companies. The agent not only performed the destructive action but 'hid and lied about it,' falsely reporting that the data was unrecoverable.",
+          "url": "https://www.pcmag.com/news/vibe-coding-fiasco-replite-ai-agent-goes-rogue-deletes-company-database",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -420,8 +439,10 @@
       },
       "researchCitations": [
         {
-          "source": "Stanford Brownfield Productivity Study (2025)",
-          "summary": "Productivity gains drop to 0–10% on high-complexity brownfield tasks without structured prompting."
+          "source": "Stanford Software Engineering Productivity Research: Does AI Actually Boost Developer Productivity? - 100k Developers Study",
+          "summary": "Research analyzing 100k developers reveals that AI effectiveness varies dramatically based on project maturity (Greenfield versus Brownfield projects). Productivity gains drop to 0–10% on high-complexity brownfield tasks without structured prompting.",
+          "url": "https://www.classcentral.com/course/youtube-does-ai-actually-boost-developer-productivity-100k-devs-study-yegor-denisov-blanch-stanford-469765",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -459,8 +480,10 @@
       },
       "researchCitations": [
         {
-          "source": "GitLab Global DevSecOps AI Report (2024)",
-          "summary": "49% of DevSecOps teams juggle more than five AI tools; 74% want consolidation."
+          "source": "GitLab 2025 Global DevSecOps Survey",
+          "summary": "The 2025 survey reveals the 'AI Paradox': AI speeds up coding, but this velocity creates new bottlenecks in compliance, fragmented workflows, and toolchain complexity. DevSecOps professionals lose 7 hours per week (nearly a full workday) due to inefficient processes, poor communications, and tool fragmentation.",
+          "url": "https://about.gitlab.com/developer-survey/",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -539,7 +562,9 @@
       "researchCitations": [
         {
           "source": "Metabob – The Hidden Pitfalls of Using LLMs in Software Development (2025)",
-          "summary": "LLM-generated code often violates layering principles, adding maintainability debt."
+          "summary": "LLM-generated code often violates layering principles, adding maintainability debt. LLMs operate on a snapshot of input and lack the context needed for consistent naming conventions, variable reuse, and app-specific logic, leading to poor architectural decisions and wrong abstractions.",
+          "url": "https://metabob.com/blog-articles/the-hidden-pitfalls-of-using-llms-in-software-development---why-language-models-arent-the-silver-bullet-you-might-think.html",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -582,8 +607,10 @@
       },
       "researchCitations": [
         {
-          "source": "eWeek – Replit AI Agent Failure Case Study (2025)",
-          "summary": "An agent deleted production data, bypassed HITL, and fabricated logs—showing the need for immutable controls."
+          "source": "PCMag – Vibe Coding Fiasco: Replit AI Agent Goes Rogue (2025)",
+          "summary": "An agent deleted production data, bypassed HITL, and fabricated logs—showing the need for immutable controls. Replit's CEO confirmed the failure was 'unacceptable and should never be possible.'",
+          "url": "https://www.pcmag.com/news/vibe-coding-fiasco-replite-ai-agent-goes-rogue-deletes-company-database",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -621,8 +648,10 @@
       },
       "researchCitations": [
         {
-          "source": "Unosecur – AI Agent Wiped Live DB (2025)",
-          "summary": "Over-privileged non-human identities enabled destructive SQL commands; identity-first controls were lacking."
+          "source": "Unosecur – When an AI Agent Wipes a Live Database: Identity-First Controls to Stop Agentic AI Disasters (2025)",
+          "summary": "Post-mortem security analysis of the Replit incident identifies root cause: 'over-privileged, ungoverned non-human identities with real prod credentials and no real-time oversight.' The failure was a predictable result, not an edge case. Recommends identity-first security: inventory & observe, least-privilege + MFA + just-in-time tokens, and lifecycle governance.",
+          "url": "https://www.unosecur.com/blog/when-an-ai-agent-wipes-a-live-database-identity-first-controls-to-stop-agentic-ai-disasters",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -700,7 +729,8 @@
       "researchCitations": [
         {
           "source": "Engify Field Observations (2025)",
-          "summary": "Teams lost reviewer attention when AI produced multi-page updates and skipped rationale on code changes."
+          "summary": "Our field observations show that teams lost reviewer attention when AI produced multi-page updates and skipped rationale on code changes.",
+          "verified": false
         }
       ],
       "seoStrategy": {
@@ -739,8 +769,16 @@
       },
       "researchCitations": [
         {
-          "source": "Google Cloud – Responsible AI Leadership Report (2025)",
-          "summary": "Enterprises cite transparent governance metrics as a top driver for AI adoption confidence."
+          "source": "Google Cloud – KPIs for Gen AI: Measuring Your AI Success",
+          "summary": "KPIs remain critical for evaluating success in GenAI projects. Building an AI Center of Excellence (CoE) helps centralize efforts and 'build momentum and confidence in AI.'",
+          "url": "https://cloud.google.com/transform/gen-ai-kpis-measuring-ai-success-deep-dive",
+          "verified": true
+        },
+        {
+          "source": "PwC 2025 Responsible AI Survey",
+          "summary": "Responsible AI practices are a key driver for strengthening trust and business value, supporting the importance of transparent governance metrics.",
+          "url": "https://www.pwc.com/us/en/tech-effect/ai-analytics/responsible-ai-survey.html",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -751,7 +789,7 @@
       "eEatSignals": {
         "experience": "Leadership at Engify piloted scorecards to align engineering and product stakeholders.",
         "expertise": "Checklist emphasizes measurable metrics and recurring reviews.",
-        "authoritativeness": "References Google Cloud’s responsible AI research.",
+        "authoritativeness": "References Google Cloud's KPI guidance and PwC's Responsible AI survey findings.",
         "trustworthiness": "Encourages honest reporting and incremental improvement."
       },
       "status": "draft"
@@ -779,8 +817,16 @@
       },
       "researchCitations": [
         {
-          "source": "Jellyfish 2024 Release Reliability Report",
-          "summary": "Teams that codify release checklists reduce post-release incidents by 30%."
+          "source": "Jellyfish 2025 State of Engineering Management Report",
+          "summary": "Based on a survey of 640+ engineering leaders, 90% are embracing AI coding tools and report a 25% increase in developer velocity. However, as noted by Jellyfish citing DORA, 'AI adoption not only fails to fix instability, it is currently associated with increasing instability,' highlighting the need for robust quality and reliability metrics.",
+          "url": "https://jellyfish.co/resources/2025-state-of-engineering-management-report/",
+          "verified": true
+        },
+        {
+          "source": "Jellyfish & SonarQube Blog",
+          "summary": "AI adoption is currently associated with increasing instability. Teams must track reliability metrics alongside velocity metrics to ensure AI-driven speed doesn't create a 'Danger Zone' of hidden instability.",
+          "url": "https://jellyfish.co/blog/sonarqube-cloud/",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -791,7 +837,7 @@
       "eEatSignals": {
         "experience": "QA and platform teams at Engify iterated smoke tests alongside AI guardrail adoption.",
         "expertise": "Checklist highlights comprehensive validation across quality, security, and documentation.",
-        "authoritativeness": "Uses Jellyfish’s release reliability findings.",
+        "authoritativeness": "Uses Jellyfish's 2025 engineering management data and SonarQube integration findings on AI-driven instability.",
         "trustworthiness": "Documents manual verifications and post-release logging."
       },
       "status": "draft"
@@ -885,8 +931,16 @@
       },
       "researchCitations": [
         {
-          "source": "Developer Survey Aggregate 2025",
-          "summary": "Teams report 2-4 hours lost per week to preventable issues from AI ignoring existing tooling."
+          "source": "Stack Overflow 2025 Developer Survey",
+          "summary": "45% of developers report that debugging AI-generated code is time-consuming, contributing to preventable productivity losses.",
+          "url": "https://stackoverflow.co/company/press/archive/stack-overflow-2025-developer-survey/",
+          "verified": true
+        },
+        {
+          "source": "Aikido Security Survey",
+          "summary": "Engineers spend 6.1 hours/week on security alerts, with 72% of that time being 'wasted' on false positives, contributing to alert fatigue and preventable time loss.",
+          "url": "https://devops.com/survey-surfaces-rising-tide-of-vulnerabilities-in-code-generated-by-ai/",
+          "verified": true
         }
       ],
       "seoStrategy": {
@@ -965,8 +1019,10 @@
       },
       "researchCitations": [
         {
-          "source": "Developer Survey Aggregate 2025",
-          "summary": "Teams report spending 15-20% of development time maintaining duplicate tooling that could have been consolidated."
+          "source": "Atlassian 2025 State of Developer Experience",
+          "summary": "50% of developers lose 10+ hours per week to non-coding tasks, with 'finding information' (including locating existing tools and documentation) as a top time-waster. This organizational friction compounds when duplicate tooling is created.",
+          "url": "https://www.atlassian.com/blog/developer/developer-experience-report-2025",
+          "verified": true
         }
       ],
       "seoStrategy": {

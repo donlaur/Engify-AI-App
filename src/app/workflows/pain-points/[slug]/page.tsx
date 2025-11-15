@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { getPainPointBySlug, loadPainPointsFromJson } from '@/lib/workflows/load-pain-points-from-json';
 import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
+import { AuthorAttribution } from '@/components/workflows/AuthorAttribution';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -237,9 +238,14 @@ export default async function PainPointPage({ params }: PainPointPageProps) {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button asChild>
-                <Link href="/workflows">Explore Workflows</Link>
+                <Link href="/workflows#workflow-library">Explore workflows &amp; guardrails</Link>
               </Button>
             </div>
+          </div>
+
+          {/* Author Attribution */}
+          <div className="mt-12">
+            <AuthorAttribution showFull={true} />
           </div>
         </div>
       </MainLayout>

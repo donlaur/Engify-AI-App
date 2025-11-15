@@ -24,8 +24,12 @@ const footerLinks = {
   company: [
     { href: '/about', label: 'About' },
     { href: '/built-in-public', label: 'Built in Public' },
-    { href: '/hireme', label: 'Hire Donnie Laur' },
     { href: '/contact', label: 'Contact' },
+    {
+      href: 'https://www.linkedin.com/company/109804095',
+      label: 'LinkedIn',
+      external: true,
+    },
   ],
   resources: [
     { href: '/learn', label: 'Documentation' },
@@ -96,12 +100,23 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {link.label}
-                  </Link>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

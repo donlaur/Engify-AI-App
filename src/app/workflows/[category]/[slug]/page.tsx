@@ -18,6 +18,7 @@ import { loadPainPointsFromJson } from '@/lib/workflows/load-pain-points-from-js
 import type { Workflow } from '@/lib/workflows/workflow-schema';
 import { WORKFLOW_AUDIENCES } from '@/lib/workflows/workflow-schema';
 import { getVerifiedSourceUrl } from '@/lib/workflows/verified-sources';
+import { AuthorAttribution } from '@/components/workflows/AuthorAttribution';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -397,6 +398,11 @@ export default async function WorkflowDetailPage({
               </Link>
             </Button>
           )}
+        </div>
+
+        {/* Author Attribution */}
+        <div className="mt-12">
+          <AuthorAttribution showFull={true} />
         </div>
       </div>
       </MainLayout>
