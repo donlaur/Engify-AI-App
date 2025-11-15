@@ -1,11 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { randomBytes } from 'crypto';
 import { logger } from '@/lib/logging/logger';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 const TOKEN_EXPIRY = 24 * 60 * 60; // 24 hours in seconds
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
     // Check if user is authenticated
     const session = await auth();
@@ -14,6 +15,16 @@ export async function POST() {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting for authenticated users (prevent token abuse)
+    const rateLimit = await checkRateLimit(session.user.id, 'authenticated');
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: rateLimit.reason || 'Too many token requests. Please try again later.' },
+        { status: 429 }
       );
     }
 

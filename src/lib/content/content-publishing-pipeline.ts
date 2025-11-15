@@ -19,6 +19,13 @@ import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFac
 import { getModelsByProvider, getModel } from '@/lib/services/AIModelRegistry';
 import { detectAISlop, printDetectionReport, type SlopDetectionResult } from './ai-slop-detector';
 import { getMongoDb } from '@/lib/db/mongodb';
+import { getModelById } from '@/lib/config/ai-models';
+
+// Recommended models for content publishing (centralized configuration)
+const RECOMMENDED_MODELS = {
+  GPT_4O: 'gpt-4o',                          // Best balance cost/performance
+  CLAUDE_SONNET: 'claude-3-5-sonnet-20250219', // Latest Sonnet for quality
+} as const;
 
 /**
  * BUSINESS CONTEXT for Content Generation
@@ -89,7 +96,7 @@ export const CONTENT_AGENTS: ContentPublishingAgent[] = [
   {
     role: 'content_generator',
     name: 'Content Generator',
-    model: 'gpt-4o',
+    model: RECOMMENDED_MODELS.GPT_4O,
     provider: 'openai',
     temperature: 0.7,
     maxTokens: 4000, // Increased for longer sections (pillar pages need 1000+ words per section)
@@ -163,7 +170,7 @@ Write content that gets developers excited to try something new.`,
   {
     role: 'seo_specialist',
     name: 'SEO Specialist',
-    model: 'claude-3-5-sonnet-20250219',
+    model: RECOMMENDED_MODELS.CLAUDE_SONNET,
     provider: 'claude-sonnet',
     temperature: 0.3,
     maxTokens: 3000, // Increased to prevent JSON truncation
@@ -236,7 +243,7 @@ Balance SEO with readability - never stuff keywords awkwardly.`,
   {
     role: 'human_tone_editor',
     name: 'Human Tone Editor',
-    model: 'gpt-4o',
+    model: RECOMMENDED_MODELS.GPT_4O,
     provider: 'openai',
     temperature: 0.6,
     maxTokens: 2000,
@@ -282,7 +289,7 @@ Make it sound like a real developer wrote this, not an AI.`,
   {
     role: 'learning_expert',
     name: 'Learning & Education Expert',
-    model: 'claude-3-5-sonnet-20250219',
+    model: RECOMMENDED_MODELS.CLAUDE_SONNET,
     provider: 'claude-sonnet',
     temperature: 0.4,
     maxTokens: 3000, // Increased to prevent JSON truncation
@@ -343,7 +350,7 @@ Remember: If they can't DO something after reading, it's not good enough.`,
   {
     role: 'tech_accuracy_sme',
     name: 'Technical Accuracy SME',
-    model: 'gpt-4o',
+    model: RECOMMENDED_MODELS.GPT_4O,
     provider: 'openai',
     temperature: 0.2,
     maxTokens: 3000, // Increased to prevent JSON truncation
@@ -399,7 +406,7 @@ Be thorough but practical. Flag serious errors, not nitpicks.`,
   {
     role: 'web_designer',
     name: 'Web Designer',
-    model: 'claude-3-5-sonnet-20250219',
+    model: RECOMMENDED_MODELS.CLAUDE_SONNET,
     provider: 'claude-sonnet',
     temperature: 0.4,
     maxTokens: 3000, // Increased to prevent JSON truncation
@@ -488,7 +495,7 @@ Remember: Content should be beautiful AND functional. Formatting should enhance 
   {
     role: 'final_publisher',
     name: 'Final Publisher',
-    model: 'claude-3-5-sonnet-20250219',
+    model: RECOMMENDED_MODELS.CLAUDE_SONNET,
     provider: 'claude-sonnet',
     temperature: 0.2,
     maxTokens: 2500, // Increased to prevent JSON truncation

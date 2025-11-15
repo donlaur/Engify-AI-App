@@ -12,10 +12,10 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   _request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const client = await getClient();
     const db = client.db('engify');

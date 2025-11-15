@@ -6,17 +6,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { logger } from '@/lib/logging/logger';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * GET /api/prompts/metrics
  * Get metrics for prompts
- * 
+ *
  * Query params:
  * - promptIds: comma-separated list of prompt IDs (optional)
  * - limit: number of top prompts to return (default: 10)
  * - metric: 'views' | 'favorites' | 'shares' (default: 'views')
  */
 export async function GET(request: NextRequest) {
+  // Rate limiting for public API
+  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+  const rateLimit = await checkRateLimit(ip, 'anonymous');
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: rateLimit.reason || 'Too many requests' },
+      { status: 429 }
+    );
+  }
   try {
     const { searchParams } = new URL(request.url);
     const promptIdsParam = searchParams.get('promptIds');
