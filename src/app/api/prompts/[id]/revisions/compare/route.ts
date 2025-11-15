@@ -9,11 +9,12 @@ import { auth } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
     const db = await getMongoDb();
+    const { id } = await params;
     
     // Get query parameters
     const { searchParams } = new URL(request.url);
@@ -30,9 +31,9 @@ export async function GET(
     // Find prompt by id or slug
     const prompt = await db.collection('prompts').findOne({
       $or: [
-        { id: params.id },
-        { slug: params.id },
-        { _id: params.id },
+        { id },
+        { slug: id },
+        { _id: id },
       ],
     });
 

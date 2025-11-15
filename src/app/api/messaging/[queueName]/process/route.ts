@@ -53,14 +53,15 @@ function getQueue(queueName: string): QStashMessageQueue {
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { queueName: string } }
+  { params }: { params: Promise<{ queueName: string }> }
 ) {
   const startTime = Date.now();
   let messageId = 'unknown';
   let queueName = 'unknown';
 
   try {
-    queueName = params.queueName;
+    const { queueName: queueNameParam } = await params;
+    queueName = queueNameParam;
     const queue = getQueue(queueName);
 
     // Parse and validate the QStash message

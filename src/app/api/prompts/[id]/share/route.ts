@@ -20,10 +20,10 @@ const ShareTrackingSchema = z.object({
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: promptId } = params;
+    const { id: promptId } = await params;
     const body = await request.json().catch(() => ({}));
     const data = ShareTrackingSchema.parse(body);
 

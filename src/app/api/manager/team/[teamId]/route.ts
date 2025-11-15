@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { teamId: string } }
+  { params }: { params: Promise<{ teamId: string }> }
 ) {
   // Authentication required
   const authResult = await requireAuth(request);
@@ -50,7 +50,7 @@ export async function GET(
   }
 
   try {
-    const { teamId } = params;
+    const { teamId } = await params;
 
     // TODO: Verify user is actually manager of THIS specific team
     // For now, any manager can view any team (will add team ownership check later)

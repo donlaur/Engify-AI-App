@@ -13,7 +13,7 @@ import { auditLog } from '@/lib/logging/audit';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { keyId: string } }
+  { params }: { params: Promise<{ keyId: string }> }
 ) {
   // RBAC: users:write permission (users can revoke their own API keys)
   const rbacCheck = await RBACPresets.requireUserWrite()(request);
@@ -21,6 +21,7 @@ export async function POST(
 
   try {
     const session = await auth();
+    const { keyId } = await params;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -28,7 +29,7 @@ export async function POST(
 
     await apiKeyService.revokeKey(
       session.user.id,
-      params.keyId,
+      keyId,
       session.user.id
     );
 
@@ -38,17 +39,18 @@ export async function POST(
       userId: session.user.id,
       severity: 'warning', // Important security event
       details: {
-        keyId: params.keyId,
+        keyId,
       },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     const session = await auth();
-    logger.apiError(`/api/v2/users/api-keys/${params.keyId}/revoke`, error, {
+    const { keyId } = await params;
+    logger.apiError(`/api/v2/users/api-keys/${keyId}/revoke`, error, {
       userId: session?.user?.id,
       method: 'POST',
-      keyId: params.keyId,
+      keyId,
     });
 
     // Try to get userId from session for audit log
@@ -66,7 +68,7 @@ export async function POST(
       userId,
       severity: 'warning',
       details: {
-        keyId: params.keyId,
+        keyId,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
     });

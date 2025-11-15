@@ -25,7 +25,7 @@ function getClientIP(request: NextRequest): string {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Rate limiting
@@ -37,16 +37,16 @@ export async function GET(
       );
     }
 
+    const { id } = await params;
+
     // Validate input
-    const idValidation = promptIdSchema.safeParse(params.id);
+    const idValidation = promptIdSchema.safeParse(id);
     if (!idValidation.success) {
       return NextResponse.json(
         { error: 'Invalid prompt ID format' },
         { status: 400 }
       );
     }
-
-    const { id } = params;
     const session = await auth();
     const db = await getDb();
     

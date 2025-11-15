@@ -12,10 +12,10 @@ import { auth } from '@/lib/auth';
  */
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Try MongoDB first
     try {
@@ -113,14 +113,14 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // RBAC: prompts:write permission required
   const rbacCheck = await RBACPresets.requirePromptWrite()(request);
   if (rbacCheck) return rbacCheck;
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const session = await auth();
 
@@ -204,14 +204,14 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // RBAC: prompts:write permission required
   const rbacCheck = await RBACPresets.requirePromptWrite()(request);
   if (rbacCheck) return rbacCheck;
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

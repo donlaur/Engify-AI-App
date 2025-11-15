@@ -19,7 +19,7 @@ const ViewTrackingSchema = z.object({
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Rate limiting: 30 views per minute per IP (generous for browsing)
@@ -41,7 +41,7 @@ export async function POST(
       );
     }
 
-    const { id: promptId } = params;
+    const { id: promptId } = await params;
 
     // Validate prompt ID
     ViewTrackingSchema.parse({ promptId });

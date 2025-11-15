@@ -18,10 +18,10 @@ import { auditLog } from '@/lib/logging/audit';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { queueName: string } }
+  { params }: { params: Promise<{ queueName: string }> }
 ) {
   try {
-    const queueName = params.queueName;
+    const { queueName } = await params;
     const callbackData = await request.json();
     const messageId = callbackData.messageId || callbackData.id || 'unknown';
 
@@ -58,11 +58,12 @@ export async function POST(
       error instanceof Error ? error.message : 'Unknown error';
 
     // Log error for monitoring
+    const { queueName: errorQueueName } = await params;
     await auditLog({
       action: 'callback_processing_error',
       severity: 'error',
       details: {
-        queueName: params.queueName,
+        queueName: errorQueueName,
         error: errorMessage,
       },
     });
