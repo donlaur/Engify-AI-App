@@ -83,9 +83,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: WorkflowDetailParams;
+  params: Promise<WorkflowDetailParams>;
 }): Promise<Metadata> {
-  const workflow = await getWorkflowByCategoryAndSlug(params.category, params.slug);
+  const { category, slug } = await params;
+  const workflow = await getWorkflowByCategoryAndSlug(category, slug);
 
   if (!workflow) {
     return {
@@ -128,9 +129,10 @@ export async function generateMetadata({
 export default async function WorkflowDetailPage({
   params,
 }: {
-  params: WorkflowDetailParams;
+  params: Promise<WorkflowDetailParams>;
 }) {
-  const workflow = await getWorkflowByCategoryAndSlug(params.category, params.slug);
+  const { category, slug } = await params;
+  const workflow = await getWorkflowByCategoryAndSlug(category, slug);
 
   if (!workflow) {
     notFound();
