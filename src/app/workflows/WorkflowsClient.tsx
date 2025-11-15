@@ -11,6 +11,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Icons } from '@/lib/icons';
 import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/features/EmptyState';
+import { FileQuestion } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { WorkflowCardClient } from './WorkflowCardClient';
 import type { Workflow } from '@/lib/workflows/workflow-schema';
@@ -38,10 +39,28 @@ const CATEGORY_LABELS: Record<string, string> = {
   community: 'Community',
   enablement: 'Enablement',
   governance: 'Governance',
+  guardrails: 'Guardrails',
   memory: 'Memory & Knowledge',
   process: 'Process & Delivery',
   'risk-management': 'Risk Management',
   security: 'Security',
+};
+
+const SUBCATEGORY_LABELS: Record<string, string> = {
+  'data-integrity': 'Data Integrity',
+  security: 'Security',
+  performance: 'Performance',
+  availability: 'Availability',
+  financial: 'Financial',
+  integration: 'Integration',
+  testing: 'Testing',
+};
+
+const SEVERITY_COLORS: Record<string, 'destructive' | 'default' | 'secondary'> = {
+  critical: 'destructive',
+  high: 'destructive',
+  medium: 'default',
+  low: 'secondary',
 };
 
 const AUDIENCE_LABELS: Record<string, string> = {
@@ -318,6 +337,7 @@ export function WorkflowsClient({
       {/* IMPORTANT: All workflows are rendered for SEO, but we hide the extra ones with CSS */}
       {filteredWorkflows.length === 0 ? (
         <EmptyState
+          icon={FileQuestion}
           title="No workflows found"
           description="Try adjusting your search or filters to find what you're looking for."
         />

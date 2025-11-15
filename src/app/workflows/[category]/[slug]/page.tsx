@@ -29,6 +29,24 @@ const CATEGORY_LABELS: Record<string, string> = {
   memory: 'Memory & Knowledge',
   security: 'Security',
   community: 'Community',
+  guardrails: 'Guardrail',
+};
+
+const SUBCATEGORY_LABELS: Record<string, string> = {
+  'data-integrity': 'Data Integrity',
+  security: 'Security',
+  performance: 'Performance',
+  availability: 'Availability',
+  financial: 'Financial',
+  integration: 'Integration',
+  testing: 'Testing',
+};
+
+const SEVERITY_COLORS: Record<string, 'destructive' | 'default' | 'secondary'> = {
+  critical: 'destructive',
+  high: 'destructive',
+  medium: 'default',
+  low: 'secondary',
 };
 
 const AUDIENCE_LABELS: Record<string, string> = {
@@ -201,6 +219,16 @@ export default async function WorkflowDetailPage({
             <div>
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{categoryLabel}</Badge>
+                {workflow.subcategory && (
+                  <Badge variant="outline">
+                    {SUBCATEGORY_LABELS[workflow.subcategory] ?? formatLabel(workflow.subcategory)}
+                  </Badge>
+                )}
+                {workflow.severity && (
+                  <Badge variant={SEVERITY_COLORS[workflow.severity] || 'default'}>
+                    {workflow.severity.toUpperCase()}
+                  </Badge>
+                )}
               </div>
               <h1 className="text-4xl font-bold">{workflow.title}</h1>
             </div>
@@ -262,13 +290,52 @@ export default async function WorkflowDetailPage({
         )}
 
         <section className="mb-12">
-          <h2 className="mb-4 text-2xl font-semibold">Manual checklist</h2>
+          <h2 className="mb-4 text-2xl font-semibold">
+            {workflow.category === 'guardrails' ? 'Prevention checklist' : 'Manual checklist'}
+          </h2>
           <ol className="list-decimal space-y-3 pl-6 text-muted-foreground">
             {workflow.manualChecklist.map((item, index) => (
               <li key={index}>{item}</li>
             ))}
           </ol>
         </section>
+
+        {workflow.earlyDetection && (workflow.earlyDetection.cicd || workflow.earlyDetection.static || workflow.earlyDetection.runtime) && (
+          <section className="mb-12">
+            <h2 className="mb-4 text-2xl font-semibold">Early detection</h2>
+            <div className="space-y-4 rounded-lg border bg-card p-6">
+              {workflow.earlyDetection.cicd && (
+                <div>
+                  <h3 className="mb-2 font-semibold text-foreground">CI/CD</h3>
+                  <p className="text-sm text-muted-foreground">{workflow.earlyDetection.cicd}</p>
+                </div>
+              )}
+              {workflow.earlyDetection.static && (
+                <div>
+                  <h3 className="mb-2 font-semibold text-foreground">Static Analysis</h3>
+                  <p className="text-sm text-muted-foreground">{workflow.earlyDetection.static}</p>
+                </div>
+              )}
+              {workflow.earlyDetection.runtime && (
+                <div>
+                  <h3 className="mb-2 font-semibold text-foreground">Runtime</h3>
+                  <p className="text-sm text-muted-foreground">{workflow.earlyDetection.runtime}</p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {workflow.mitigation && workflow.mitigation.length === 3 && (
+          <section className="mb-12">
+            <h2 className="mb-4 text-2xl font-semibold">Mitigation</h2>
+            <ol className="list-decimal space-y-3 pl-6 text-muted-foreground">
+              {workflow.mitigation.map((step, index) => (
+                <li key={index}>{step}</li>
+              ))}
+            </ol>
+          </section>
+        )}
 
 
         {workflow.researchCitations.length > 0 && (

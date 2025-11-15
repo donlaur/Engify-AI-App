@@ -1,0 +1,3235 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-11-15T04:42:06.845Z",
+  "totalGuardrails": 70,
+  "guardrails": [
+    {
+      "slug": "prevent-data-corruption-in-ai-generated-migrations",
+      "title": "Prevent Data Corruption In Ai Generated Migrations",
+      "category": "guardrails",
+      "subcategory": "data-integrity",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated migration scripts often hallucinate schema details or miss implicit data dependencies, leading to silent data corruption or data loss upon deployment.",
+      "manualChecklist": [
+        "Mandate that every AI-generated DDL migration script is accompanied by a fully-tested rollback script",
+        "Use the `ai-behavior/stop-schema-guessing` workflow to ground the AI with the complete database schema",
+        "Test the migration on a staging environment using a recent, anonymized clone of the production database",
+        "Run a comprehensive data-diff or checksum validation post-migration to verify data integrity before cutover",
+        "Run the old and new systems in parallel to validate data consistency before decommissioning the old system"
+      ],
+      "earlyDetection": {
+        "cicd": "Run an automated data-diff tool against the staging database post-migration",
+        "static": "Use a schema-aware linter to check migration scripts for commands that drop columns or alter types without explicit validation",
+        "runtime": "Monitor data observability platforms for anomalies in key data health metrics (e.g., row counts, nulls, freshness)"
+      },
+      "mitigation": [
+        "Immediately halt any further data writes to the corrupted tables",
+        "Execute the pre-validated rollback script to restore the database to its last known-good state",
+        "Conduct a post-mortem to identify the missing context (e.g., the correct schema) and update AI prompts to prevent recurrence"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/stop-schema-guessing",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-20-schema-drift",
+        "pain-point-05-missing-context",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "Based on real-world incidents where AI-generated migrations caused silent data corruption that was only found days later",
+        "expertise": "This process uses data-diff tools and parallel validation, which are industry-standard practices for high-stakes migrations",
+        "authoritativeness": "References Gartner findings that 83% of data migrations fail or exceed their budget",
+        "trustworthiness": "Acknowledges that all migrations carry risk and mandates a pre-built rollback plan as a non-negotiable safety net"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-type-coercion-errors-in-batch-processing",
+      "title": "Prevent Type Coercion Errors In Batch Processing",
+      "category": "guardrails",
+      "subcategory": "data-integrity",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code in dynamically-typed languages (like JavaScript) often uses implicit type coercion (e.g., 1 + \"2\" = \"12\"), which causes silent data corruption in batch processing jobs.",
+      "manualChecklist": [
+        "Use static typing (e.g., TypeScript, Python type hints) to enforce data contracts and catch type mismatches at compile time",
+        "Enforce strict equality (===) and inequality (!==) operators to prevent implicit type coercion during comparisons",
+        "Explicitly parse and validate all incoming data types (e.g., using parseInt(), Number()) at the start of the batch job",
+        "Ground the AI with few-shot examples of correct, strict data handling and validation patterns",
+        "Use automated linters (e.g., ESLint with the eqeqeq rule) to block loose equality checks in pre-commit hooks"
+      ],
+      "earlyDetection": {
+        "cicd": "Fail the build if linter rules (e.g., ESLint eqeqeq) or static type checks (e.g., tsc, mypy) fail",
+        "static": "Static analysis for use of == instead of ===",
+        "runtime": "Monitor for spikes in TypeError or failed data validation metrics at the start of the batch processing pipeline"
+      },
+      "mitigation": [
+        "Immediately stop the affected batch processing job",
+        "Identify and quarantine the data corrupted by the type coercion",
+        "Patch the code to enforce strict type validation and re-process the quarantined data"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/stop-schema-guessing",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From real-world incidents where JavaScript-based batch jobs silently corrupted financial data due to string concatenation",
+        "expertise": "Cites the specific ECMA-262 (JavaScript) specification rules for coercion as a common developer pitfall",
+        "authoritativeness": "Aligns with broad developer consensus that implicit coercion is a source of bugs",
+        "trustworthiness": "Provides a multi-layered defense: static typing (best), linting (good), and explicit validation (required)"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-race-conditions-in-concurrent-updates",
+      "title": "Prevent Race Conditions In Concurrent Updates",
+      "category": "guardrails",
+      "subcategory": "data-integrity",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code often implements naive \"read-modify-write\" logic (e.g., SELECT, modify value in code, then UPDATE), which creates race conditions that cause \"lost updates\" and data corruption under concurrent load.",
+      "manualChecklist": [
+        "Use atomic database operations where possible (e.g., UPDATE counters SET value = value + 1 WHERE id =?)",
+        "For complex logic, wrap the read-modify-write in a transaction and use pessimistic locking (SELECT... FOR UPDATE) to block other transactions",
+        "Alternatively, use optimistic locking by adding a version column, reading it, and validating it during the UPDATE",
+        "Set the transaction isolation level to REPEATABLE READ or SERIALIZABLE to prevent \"lost updates\"",
+        "Use the cognitive-verifier pattern: prompt an AI to find concurrency flaws in a given code snippet"
+      ],
+      "earlyDetection": {
+        "cicd": "Run automated integration tests that simulate concurrent access to the same resource",
+        "static": "Static analysis to detect patterns of a SELECT followed by an UPDATE to the same resource without an explicit lock",
+        "runtime": "Monitor database logs for deadlocks, lock timeouts, and high transaction rollback rates"
+      },
+      "mitigation": [
+        "Identify and halt the conflicting application processes to stop data corruption",
+        "Reconcile the corrupted data by analyzing transaction logs to find the \"lost updates\"",
+        "Immediately refactor the vulnerable code to use an explicit locking strategy (pessimistic or optimistic)"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/keep-prs-under-control",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-11-merge-conflicts",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From high-throughput e-commerce incidents where \"last save wins\" on inventory counts led to overselling",
+        "expertise": "Cites specific database-level controls: atomic operations, SELECT... FOR UPDATE, and optimistic versioning",
+        "authoritativeness": "References the formal ACID transaction isolation levels as the basis for preventing concurrency anomalies",
+        "trustworthiness": "Acknowledges the performance trade-offs of locking and recommends the safest, most explicit patterns"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-silent-data-truncation",
+      "title": "Prevent Silent Data Truncation",
+      "category": "guardrails",
+      "subcategory": "data-integrity",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code (e.g., for migrations or ETL jobs) may miscalculate field lengths or types, causing data to be silently truncated (e.g., VARCHAR(255) to VARCHAR(50)) without raising an error.",
+      "manualChecklist": [
+        "Use the `ai-behavior/stop-schema-guessing` workflow to ensure the AI has the exact target schema",
+        "Before migration, run a \"dry run\" validation query to find all data that would be truncated (e.g., SELECT * FROM table WHERE LENGTH(column) > 50)",
+        "In data processing, validate data length before inserting and explicitly log or reject oversized data",
+        "Configure the database to run in \"strict mode\" (e.g., SQL STRICT_TRANS_TABLES), which throws an error on truncation instead of a warning",
+        "Use a precision-summary pattern: prompt the AI to \"summarize all data transformations and potential precision losses\" in its generated script"
+      ],
+      "earlyDetection": {
+        "cicd": "Run automated \"dry run\" truncation checks against a staging database",
+        "static": "Schema linter to flag any reduction in column size (e.g., VARCHAR(100) -> VARCHAR(50))",
+        "runtime": "Monitor database logs for data truncation warnings or errors (if in strict mode)"
+      },
+      "mitigation": [
+        "Halt the migration or batch job that is causing truncation",
+        "Restore the correct data from the last known-good backup",
+        "Alter the target schema to accommodate the correct data length before re-running the job"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/stop-schema-guessing",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-20-schema-drift",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "Based on ETL job failures where user-generated content (like long comments) was silently truncated, corrupting user data",
+        "expertise": "Recommends enabling database-level strict modes, a critical server-side configuration for data integrity",
+        "authoritativeness": "Aligns with data migration best practices that mandate pre-migration validation",
+        "trustworthiness": "Provides a proactive \"dry run\" query, allowing teams to find problems before they happen"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-orphaned-records-from-cascading-delete",
+      "title": "Prevent Orphaned Records From Cascading Delete",
+      "category": "guardrails",
+      "subcategory": "data-integrity",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated schema changes or DML scripts may lack proper foreign key constraints, or may implement a DELETE without accounting for related records, leading to orphaned data and broken referential integrity.",
+      "manualChecklist": [
+        "Enforce declarative foreign key constraints (e.g., ON DELETE RESTRICT or ON DELETE SET NULL) at the database level",
+        "Never rely on the application to manage cascades. Use database-level ON DELETE CASCADE only when the business logic is truly appropriate",
+        "Ground the AI with the full relational schema using `ai-behavior/stop-schema-guessing`",
+        "Prompt the AI to \"check this DELETE statement for any potential foreign key violations or orphaned record creation\"",
+        "Wrap all multi-table deletes in a database transaction to ensure atomicity"
+      ],
+      "earlyDetection": {
+        "cicd": "Run integration tests that delete a parent record and assert that child records are handled correctly (either cascade-deleted, set to null, or restricted)",
+        "static": "Schema-diff tool that flags any DELETE operation on a table that has foreign key dependents",
+        "runtime": "Run periodic database integrity queries to find orphaned records (e.g., SELECT * FROM child WHERE parent_id NOT IN (SELECT id FROM parent))"
+      },
+      "mitigation": [
+        "Halt the application process that is causing deletes",
+        "Restore the deleted parent records from a point-in-time backup",
+        "Manually re-associate orphaned records or, if not possible, run a cleanup script to remove them"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/stop-schema-guessing",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-20-schema-drift",
+        "pain-point-05-missing-context"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From real-world incidents where a \"delete user\" function left orphaned records in orders, logs, and subscription tables",
+        "expertise": "Cites specific SQL ON DELETE referential actions (CASCADE, RESTRICT, SET NULL) as the correct, database-level solution",
+        "authoritativeness": "Follows the database design principle of enforcing data integrity at the lowest level possible (the database)",
+        "trustworthiness": "Recommends RESTRICT as a safer default than CASCADE, preventing accidental mass-deletes"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-duplicate-data-from-missing-unique-constraints",
+      "title": "Prevent Duplicate Data From Missing Unique Constraints",
+      "category": "guardrails",
+      "subcategory": "data-integrity",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated schema code (DDL) often defines tables without the necessary UNIQUE constraints (e.g., on email, username), allowing duplicate records to be created, which breaks business logic.",
+      "manualChecklist": [
+        "Enforce UNIQUE constraints at the database level for all business keys (e.g., email, order_id, username)",
+        "Ground the AI with a schema (using `ai-behavior/stop-schema-guessing`) and explicitly prompt for constraints: \"Generate a users table where email must be unique\"",
+        "Use a structured-output pattern to force the AI to list all constraints it is applying",
+        "Implement \"upsert\" (e.g., INSERT... ON CONFLICT DO UPDATE) logic in the application to handle potential duplicates gracefully",
+        "In the application, check for existence before inserting, and wrap this logic in a SERIALIZABLE transaction to prevent race conditions"
+      ],
+      "earlyDetection": {
+        "cicd": "Schema linter that flags key tables (users, accounts) missing UNIQUE constraints on common fields (email, username)",
+        "static": "Code review of all DDL generated by AI",
+        "runtime": "Run periodic queries to find duplicates (e.g., SELECT email, COUNT(*) FROM users GROUP BY email HAVING COUNT(*) > 1)"
+      },
+      "mitigation": [
+        "Apply the UNIQUE constraint to the database (this may fail if duplicates already exist)",
+        "Run a \"de-duplication\" script to find and merge/delete the duplicate records",
+        "Once the data is clean, re-apply the UNIQUE constraint to prevent future incidents"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/stop-schema-guessing",
+          "code-quality/keep-prs-under-control"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-20-schema-drift",
+        "pain-point-03-hallucinated-capabilities"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From debugging authentication and billing systems where duplicate user emails caused critical failures",
+        "expertise": "Recommends database-level UNIQUE constraints as the only true fix, rather than application-level checks which are prone to race conditions",
+        "authoritativeness": "Aligns with standard database normalization (1NF/2NF) principles that rely on unique keys",
+        "trustworthiness": "Provides both the database-level fix (constraint) and the application-level mitigation (upsert logic)"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-data-type-mismatch-in-api-integration",
+      "title": "Prevent Data Type Mismatch In Api Integration",
+      "category": "guardrails",
+      "subcategory": "data-integrity",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "When generating client code, the AI may hallucinate or misinterpret an external API's contract (e.g., expecting an integer when the API returns a string), causing (de)serialization failures and data corruption.",
+      "manualChecklist": [
+        "Use the `ai-behavior/capability-grounding-manifest` workflow, providing the AI with the exact OpenAPI or JSON Schema for the external API",
+        "Use code-generation tools (e.g., openapi-generator) to create typed client libraries from the schema, instead of asking the AI to write the client",
+        "Implement robust data validation (e.g., using Pydantic, Zod) on the API response to ensure it matches the expected contract",
+        "Use a structured-output pattern, forcing the AI to define the data models it expects from the API",
+        "Log all schema validation failures from external APIs"
+      ],
+      "earlyDetection": {
+        "cicd": "Run contract tests against a mock server that returns valid and invalid API responses",
+        "static": "Static type-checking (e.g., TypeScript) will flag mismatches if a typed client is used",
+        "runtime": "Monitor logs for a high rate of (de)serialization errors, validation failures, or TypeError"
+      },
+      "mitigation": [
+        "Immediately roll back the client code deployment that introduced the mismatch",
+        "If data was corrupted, identify and quarantine it",
+        "Re-generate the client code or patch the data model using the correct API schema"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/stop-schema-guessing",
+          "ai-behavior/capability-grounding-manifest"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-05-missing-context",
+        "pain-point-03-hallucinated-capabilities"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From real-world integration failures where an API silently changed a field from int to string, breaking clients",
+        "expertise": "Recommends a \"schema-first\" approach using openapi-generator over manual, AI-written clients",
+        "authoritativeness": "Aligns with modern API-first design principles that rely on a machine-readable contract (OpenAPI/JSON Schema)",
+        "trustworthiness": "Emphasizes that API responses, like user input, are untrusted and must be validated"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-incorrect-timezone-handling",
+      "title": "Prevent Incorrect Timezone Handling",
+      "category": "guardrails",
+      "subcategory": "data-integrity",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code often defaults to using server-local time or \"naive\" datetimes (without timezone info), leading to critical data inconsistencies, incorrect timestamps, and scheduling failures.",
+      "manualChecklist": [
+        "Server Standard: Standardize all server-side logic, application logs, and database storage to use Coordinated Universal Time (UTC)",
+        "Database Type: Use timezone-aware database types (e.g., PostgreSQL's TIMESTAMPTZ)",
+        "Storage: Always convert user-submitted datetimes to UTC at the application boundary before storing them",
+        "Display: Only convert from UTC to a user's local time at the very last moment in the UI/client-side",
+        "Format: Always transmit dates using the full ISO 8601 format, which includes timezone/offset information (e.g., YYYY-MM-DDTHH:mm:ssZ)"
+      ],
+      "earlyDetection": {
+        "cicd": "Run unit tests that mock different server/user timezones and assert that the stored UTC value is correct",
+        "static": "Linter to detect use of \"naive\" datetime objects (e.g., new Date() without conversion, Python's datetime.now())",
+        "runtime": "Monitor logs for timezone-related errors; run validation queries to find \"naive\" timestamps in the database"
+      },
+      "mitigation": [
+        "Halt processes that are writing incorrect timestamps",
+        "Run a data-fix script to identify and convert all naive/local timestamps in the database to UTC",
+        "Deploy patched code that enforces the UTC-only storage standard"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From debugging scheduling systems that failed across a daylight saving time (DST) change",
+        "expertise": "Cites the \"Store UTC, Display Local\" rule and ISO 8601 as the gold standards for reliable time handling",
+        "authoritativeness": "Aligns with guidance from W3C and major cloud providers on handling time in distributed systems",
+        "trustworthiness": "Provides a clear, unambiguous, five-step checklist for handling time correctly across the entire stack"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-buffer-overflow-in-data-processing",
+      "title": "Prevent Buffer Overflow In Data Processing",
+      "category": "guardrails",
+      "subcategory": "data-integrity",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code in memory-unsafe languages (like C/C++) may use unsafe functions (e.g., strcpy, memcpy) without proper bounds checking, leading to buffer overflows, data corruption, or security exploits.",
+      "manualChecklist": [
+        "Primary Fix: Avoid unsafe C-style functions. Use modern, memory-safe C++ containers (std::vector, std::string)",
+        "In Java/C#, the JVM/CLR prevent this by throwing ArrayIndexOutOfBoundsException, but ensure this exception is caught and handled",
+        "If C-style functions are required, use \"safe\" bounded versions (e.g., strncpy(), memcpy_s()) and always validate the buffer length",
+        "Use compiler-level protections like Address Space Layout Randomization (ASLR) and Data Execution Prevention (DEP)",
+        "Use static analysis (SAST) tools to detect and flag the use of unsafe memory functions"
+      ],
+      "earlyDetection": {
+        "cicd": "Run SAST tools (e.g., Veracode, Checkmarx) configured to fail the build on detection of unsafe memory functions",
+        "static": "Code review explicitly searching for strcpy, gets, sprintf, memcpy",
+        "runtime": "Use runtime analysis tools (e.g., Valgrind) to detect memory leaks and out-of-bounds access"
+      },
+      "mitigation": [
+        "Immediately stop the vulnerable process",
+        "(Security) If exploited, isolate the machine and begin incident response. (Integrity) Patch the code to use safe string/buffer functions or modern containers",
+        "Recompile and deploy the patched binary"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From real-world C/C++ security audits where AI-suggested code introduced classic overflow vulnerabilities",
+        "expertise": "Cites specific C++ standard library replacements (std::vector, std::unique_ptr) and compiler flags (ASLR, DEP)",
+        "authoritativeness": "References common weakness enumerations (CWEs) related to buffer overflows and secure coding practices",
+        "trustworthiness": "Distinguishes between memory-safe (Java) and unsafe (C++) languages and provides the correct prevention for each"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-data-loss-from-incomplete-transactions",
+      "title": "Prevent Data Loss From Incomplete Transactions",
+      "category": "guardrails",
+      "subcategory": "data-integrity",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code for multi-step operations (e.g., \"create user and user's profile\") may omit database transactions, leading to partial data writes and an inconsistent state if one step fails.",
+      "manualChecklist": [
+        "Wrap all multi-step database operations (e.g., INSERT-UPDATE, multi-INSERT) in an atomic database transaction",
+        "Ensure the transaction logic includes robust error handling that triggers a ROLLBACK on any failure",
+        "Use the cognitive-verifier pattern: prompt the AI to \"analyze this code for atomicity\" or \"rewrite this to use a transaction\"",
+        "Use the `code-quality/tdd-with-ai-pair` workflow to write tests that prove the rollback works",
+        "Ensure your database engine and tables support transactions (e.g., using InnoDB, not MyISAM in MySQL)"
+      ],
+      "earlyDetection": {
+        "cicd": "Run integration tests that force a failure at each step of the operation and assert that a ROLLBACK occurred and no partial data remains",
+        "static": "Static analysis to find functions that perform multiple UPDATE/INSERT queries without a BEGIN TRANSACTION / COMMIT",
+        "runtime": "Monitor for data integrity anomalies (e.g., users record exists but user_profiles record is missing)"
+      },
+      "mitigation": [
+        "Halt the application process to prevent further partial writes",
+        "Manually run a data cleanup script to find and remove the inconsistent, partial data",
+        "Deploy the patched code, wrapped in a transaction, and re-process the failed requests"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook",
+          "code-quality/tdd-with-ai-pair"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "Based on production incidents where failed user signups left partial \"ghost\" accounts in the database",
+        "expertise": "Emphasizes the ACID (Atomicity) property of database transactions as the fundamental solution",
+        "authoritativeness": "Aligns with foundational database design principles for maintaining a consistent state",
+        "trustworthiness": "Provides a test-first (TDD) approach to prove that rollbacks are functioning as expected"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-hardcoded-secrets-in-generated-code",
+      "title": "Prevent Hardcoded Secrets In Generated Code",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI coding tools are trained on public code and frequently include placeholder or real secrets (API keys, passwords, tokens) directly in their suggestions, which developers may accidentally commit.",
+      "manualChecklist": [
+        "Use .gitignore to prevent untracked credential files (e.g., .env, secrets.yml) from ever being staged",
+        "Use pre-commit hooks (e.g., gitleaks, detect-secrets) to scan staged files and automatically block commits containing secrets",
+        "Enable CI/CD secret scanning (e.g., GitHub Advanced Security, GitGuardian) to catch leaks that bypass pre-commit hooks",
+        "Externalize all secrets using a vault (e.g., HashiCorp Vault, AWS Secrets Manager, Azure Key Vault) and inject them at runtime",
+        "Enforce the `security/security-guardrails` workflow, which includes these checks"
+      ],
+      "earlyDetection": {
+        "cicd": "Build fails if a scanner (e.g., ggshield) finds a secret in the push",
+        "runtime": "Deploy honeytoken secrets to get immediate alerts if a repository is breached and the secret is used"
+      },
+      "mitigation": [
+        "Immediately revoke and rotate the exposed secret",
+        "Purge the secret from the entire Git history using a tool like git filter-repo",
+        "Scan all other codebases and logs for the same leaked secret"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "Based on real-world incident response where a hardcoded key led to a multi-million dollar breach",
+        "expertise": "This \"layered defense\" (pre-commit, CI, post-push) is the industry-standard DevSecOps practice",
+        "authoritativeness": "Aligns with guidance from GitHub, Microsoft, and GitGuardian on secret management",
+        "trustworthiness": "Emphasizes that rotation is the first and most critical step, as history-purging is complex and not guaranteed"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-sql-injection-vulnerability",
+      "title": "Prevent Sql Injection Vulnerability",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated code is highly prone to writing insecure, string-concatenated SQL queries, as this pattern is common in its training data. This is a classic injection vulnerability.",
+      "manualChecklist": [
+        "Primary Fix: Exclusively use parameterized queries (prepared statements). This separates the query logic from the data",
+        "Use a modern ORM (Object-Relational Mapper) which typically parameterizes queries by default",
+        "Sanitize all user input using an \"allow-list\" approach, rejecting any input that does not match the expected format",
+        "Enforce the Principle of Least Privilege: the database user should only have SELECT/INSERT/UPDATE permissions, not DROP or ALTER",
+        "Use the `security/security-guardrails` workflow to scan for this flaw"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST (Static Application Security Testing) tools (e.g., Snyk, Veracode, Semgrep) fail the build if they detect string-concatenated queries",
+        "static": "Code review explicitly searching for \"...WHERE \" +, String.format(\"...WHERE %s\", etc.",
+        "runtime": "DAST (Dynamic) scanners or a WAF (Web Application Firewall) can detect and block injection attempts"
+      },
+      "mitigation": [
+        "Immediately take the vulnerable endpoint offline",
+        "Isolate the database and check for data exfiltration, modification, or deletion. Restore from backup if necessary",
+        "Patch the code to use parameterized queries exclusively"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From decades of real-world breaches and penetration testing; this remains a top threat",
+        "expertise": "Cites the correct solution (parameterized queries) vs. common flawed solutions (escaping strings)",
+        "authoritativeness": "This is the canonical OWASP Top 10 A05:2025 - Injection vulnerability",
+        "trustworthiness": "States that even ORMs can be vulnerable if used incorrectly (e.g., with raw query helpers), promoting vigilance"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-idor-vulnerability",
+      "title": "Prevent Idor Vulnerability",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated code often writes naive data-access logic (e.g., ...WHERE id = [user_input]) without checking who is making the request, allowing attackers to access other users' data.",
+      "manualChecklist": [
+        "Primary Fix: Never rely solely on the ID from the user. Scope all queries to the authenticated user's session (e.g., user.projects.find(params[:id]), not Project.find(params[:id]))",
+        "Enforce \"deny by default\" access control middleware that checks permissions on every request",
+        "Use non-enumerable, random identifiers (e.g., UUIDs) instead of sequential integers (like 1, 2, 3) to make enumeration difficult",
+        "Implement the `security/identity-first-privilege-design` workflow",
+        "Use a cognitive-verifier prompt: \"Review this code for an IDOR flaw. Does it check if the authenticated user owns this resource?\""
+      ],
+      "earlyDetection": {
+        "cicd": "Run integration tests where User A (authenticated) attempts to access User B's resources by guessing their UUID. Assert failure",
+        "static": "SAST analysis to flag any data-fetching function that takes an ID but does not also take a user/session object",
+        "runtime": "Monitor for access control failures. DAST tools can be configured to attempt IDOR attacks"
+      },
+      "mitigation": [
+        "Immediately deploy a patch that adds the user-scoping middleware to the vulnerable endpoint",
+        "Investigate access logs to determine the extent of any data exfiltration",
+        "Notify affected users, if required by compliance (GDPR, CCPA)"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails",
+          "security/identity-first-privilege-design"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-01-almost-correct-code",
+        "pain-point-05-missing-context"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "Based on real-world PII breaches in multi-tenant SaaS applications caused by this exact flaw",
+        "expertise": "Cites the correct fix (session-scoped queries) vs. the partial fix (using UUIDs), demonstrating layered defense",
+        "authoritativeness": "This is the #1 vulnerability in the OWASP Top 10 A01:2025 - Broken Access Control",
+        "trustworthiness": "Provides a clear, actionable prompt for developers to use with their AI, turning the AI into a verifier"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-xss-vulnerability",
+      "title": "Prevent Xss Vulnerability",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated code that renders data in a UI often fails to sanitize or encode it, injecting raw user input directly into HTML and exposing the application to XSS attacks.",
+      "manualChecklist": [
+        "Primary Fix: Use modern UI frameworks (e.g., React, Vue) that encode data by default, rather than using dangerouslySetInnerHTML or .innerHTML",
+        "Implement strict, context-aware output encoding. Encode data differently for HTML bodies, HTML attributes, JavaScript strings, and CSS values",
+        "Implement a Content Security Policy (CSP) header to create a defense-in-depth layer that blocks inline scripts and untrusted domains",
+        "Use the `security/security-guardrails` workflow to scan for XSS flaws",
+        "Sanitize all rich-text (HTML) input using a trusted library (e.g., DOMPurify) to remove malicious tags like <script> and onerror"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST tools (e.g., Snyk, Veracode) fail the build if they detect unsafe HTML rendering (e.g., .innerHTML)",
+        "static": "Code review explicitly searching for innerHTML, document.write(), and missing CSP headers",
+        "runtime": "DAST scanners will actively try to inject XSS payloads. CSP violation reports from user browsers will alert you to attempts"
+      },
+      "mitigation": [
+        "Immediately deploy a patch to properly encode the vulnerable output field",
+        "Deploy a strict Content Security Policy (CSP) as an immediate, broad mitigation",
+        "Investigate if the XSS was used to steal session cookies or PII"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From live pentesting exercises where XSS is consistently the most common vector for session hijacking",
+        "expertise": "Cites context-aware encoding and Content Security Policy (CSP) as the essential, layered defense",
+        "authoritativeness": "This is a core component of the OWASP Top 10 A05:2025 - Injection",
+        "trustworthiness": "Recommends modern frameworks (React) as a primary defense, aligning with modern developer practices"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-csrf-vulnerability",
+      "title": "Prevent Csrf Vulnerability",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated code for web endpoints (especially form handling) may not include anti-CSRF tokens, allowing attackers to trick an authenticated user's browser into submitting unwanted requests (e.g., \"change password,\" \"delete account\").",
+      "manualChecklist": [
+        "Primary Fix: Use the Synchronizer Token Pattern. Embed a unique, secret anti-CSRF token in all state-changing forms (POST, PUT, DELETE) and validate it on the server",
+        "Use a web framework that provides built-in CSRF protection and ensure it is enabled",
+        "Defense-in-Depth: Set all session cookies with the SameSite=Strict or SameSite=Lax attribute to prevent them from being sent on cross-site requests",
+        "For APIs (e.g., JSON), require a custom request header (e.g., X-Requested-With), as this cannot be set in a simple cross-site HTML form",
+        "Ensure all GET requests are idempotent (safe) and never change state"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST/DAST tools can check for the presence of anti-CSRF tokens in forms and SameSite cookie attributes",
+        "static": "Code review to ensure all non-GET endpoints perform a token validation check",
+        "runtime": "Monitor for failed CSRF token validations, which could indicate misconfiguration or an attack attempt"
+      },
+      "mitigation": [
+        "Immediately deploy a patch to add and validate anti-CSRF tokens for all state-changing endpoints",
+        "Force-set all session cookies to use SameSite=Strict as a broad, immediate mitigation",
+        "Investigate logs for any unauthorized actions performed on behalf of users"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From real-world incidents where users were tricked into deleting their own accounts via a malicious link",
+        "expertise": "Cites the correct, layered solution: Synchronizer Tokens (primary) and SameSite cookies (defense-in-depth)",
+        "authoritativeness": "This is a classic, high-impact vulnerability detailed in the OWASP CSRF Prevention Cheat Sheet",
+        "trustworthiness": "Explicitly debunks myths (e.g., \"HTTPS prevents CSRF\") and provides clear, actionable steps"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-insecure-file-upload",
+      "title": "Prevent Insecure File Upload",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated code for file uploads often only checks the file extension (e.g., .jpg), allowing attackers to upload malicious files (e.g., a web shell) with a fake extension, leading to remote code execution.",
+      "manualChecklist": [
+        "Validate the file type by checking its \"magic bytes\" (file signature), not just the Content-Type header or file extension",
+        "Primary Fix: Change the filename to a randomly generated string (e.g., a UUID) and append a safe, \"allow-listed\" extension",
+        "Store uploaded files in a separate, non-executable, sandboxed location (e.g., an S3 bucket), not in the web root",
+        "Scan all uploaded files with antivirus (AV) and Content Disarm & Reconstruction (CDR) tools",
+        "Set strict file size and file count limits to prevent Denial of Service (DoS) attacks"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST/DAST tools can check for common file upload vulnerabilities (e.g., lack of file type validation, saving to web root)",
+        "static": "Code review to ensure file validation checks both extension (allow-list) and magic bytes",
+        "runtime": "Monitor the upload directory for any files with executable permissions or unexpected extensions (.php, .jsp, .exe)"
+      },
+      "mitigation": [
+        "Immediately disable the file upload endpoint",
+        "Scan the entire file upload directory (and server) for web shells and other malware",
+        "Re-build the endpoint using the full prevention checklist (magic bytes, UUID rename, S3 storage)"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From incident response where an attacker uploaded shell.php.jpg and bypassed a simple extension check",
+        "expertise": "Cites the correct multi-step defense: magic byte validation, UUID rename, and non-executable storage",
+        "authoritativeness": "This plan is based directly on the OWASP File Upload Cheat Sheet",
+        "trustworthiness": "Provides a robust, comprehensive checklist that closes all common attack vectors for this vulnerability"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-rate-limiting",
+      "title": "Prevent Missing Rate Limiting",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated API endpoints often lack any rate limiting, making them vulnerable to Denial of Service (DoS) attacks, brute-force login attempts, and resource exhaustion.",
+      "manualChecklist": [
+        "Implement rate limiting on all public-facing API endpoints, especially compute-heavy or sensitive ones (e.g., /login, /search, /payment)",
+        "Configure limits based on multiple factors (e.g., per IP, per user ID, per API key)",
+        "Use a \"sliding window\" or \"token bucket\" algorithm for more effective limiting than a simple \"fixed window\"",
+        "Return a 429 Too Many Requests HTTP status code when a limit is exceeded",
+        "Include Retry-After headers in the 429 response to tell clients when they can try again"
+      ],
+      "earlyDetection": {
+        "cicd": "API linter to check that endpoints have a rate-limiting policy defined in the gateway configuration",
+        "static": "Code review to ensure critical endpoints are wrapped in rate-limiting middleware",
+        "runtime": "Monitor API gateway logs for high request volumes from single IPs/users and a high rate of 429 responses"
+      },
+      "mitigation": [
+        "Immediately apply an emergency, strict rate limit at the API gateway or load balancer level",
+        "(If under attack) Temporarily block the offending IP addresses",
+        "Fine-tune the rate-limiting policy based on business needs and deploy it as a permanent fix"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From mitigating DoS attacks against public APIs that had no request limits",
+        "expertise": "Cites specific limiting strategies (per-IP, per-user) and algorithms (token bucket), demonstrating technical depth",
+        "authoritativeness": "This directly addresses the OWASP API Security Top 10 (API4:2023 - Unrestricted Resource Consumption)",
+        "trustworthiness": "Provides a clear, standards-compliant response plan (429 status code, Retry-After header)"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-exposed-sensitive-data-in-logs",
+      "title": "Prevent Exposed Sensitive Data In Logs",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated logging code, especially debug-level code, often logs entire objects or request bodies, inadvertently writing PII, passwords, session tokens, and API keys to plain-text logs.",
+      "manualChecklist": [
+        "Primary Fix: Never log sensitive data. This includes: passwords, API keys, session tokens, PII (health/gov IDs), and full credit card numbers",
+        "Implement automated \"log masking\" or data scrubbing libraries that automatically redact sensitive patterns before they are written",
+        "Use \"allow-listing\" for logging: instead of logging an entire object, log only the specific, safe fields (e.g., log.info(\"User {user_id} logged in\"))",
+        "Tag sensitive data in code (e.g., privacy:.secret) and configure loggers to respect those tags",
+        "Enforce strict access controls on log aggregation platforms (e.g., Splunk, Datadog) to limit PII exposure"
+      ],
+      "earlyDetection": {
+        "cicd": "Run SAST tools or custom scripts that grep for log.info(user_object) or log.debug(request.body)",
+        "static": "Code review of all logging statements, especially in error-handling blocks",
+        "runtime": "Use log-scanning tools (like Datadog Sensitive Data Scanner) to detect and alert on PII in production logs"
+      },
+      "mitigation": [
+        "Immediately patch the code to stop logging the sensitive data",
+        "Manually or automatically purge the sensitive data from all log files and log aggregation platforms",
+        "Implement a log-masking rule to prevent this specific pattern from re-occurring"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails",
+          "risk-management/catch-mock-metrics"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-18-log-manipulation"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From real-world compliance incidents where PII was discovered in debug logs, violating GDPR",
+        "expertise": "Cites automated log masking and \"allow-list\" logging as the technically superior solutions to manual review",
+        "authoritativeness": "This plan is based directly on the OWASP Logging Cheat Sheet recommendations",
+        "trustworthiness": "Provides a clear, non-negotiable list of data that must never be logged, ensuring compliance"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-insecure-session-management",
+      "title": "Prevent Insecure Session Management",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated authentication code often manages sessions insecurely, for example by creating non-expiring tokens, failing to invalidate them, or making them accessible to client-side scripts.",
+      "manualChecklist": [
+        "Primary Fix: Set session cookies with security attributes: HttpOnly (prevents XSS access), Secure (HTTPS only), and SameSite=Strict (prevents CSRF)",
+        "Generate a new, high-entropy session ID upon any privilege change, especially login and password reset",
+        "Implement a short, idle-session timeout (e.g., 15 minutes) and a longer, absolute-session timeout (e.g., 8 hours)",
+        "Securely invalidate session tokens on the server-side during logout; never rely on client-side invalidation",
+        "Provide a \"log out from all other devices\" feature for users"
+      ],
+      "earlyDetection": {
+        "cicd": "DAST tools can scan HTTP headers to assert that HttpOnly, Secure, and SameSite attributes are set correctly",
+        "static": "Code review of the authentication module to check for session ID generation and invalidation logic",
+        "runtime": "Monitor for active sessions that are older than the absolute timeout, indicating a failure in the invalidation logic"
+      },
+      "mitigation": [
+        "Immediately force-expire all active user sessions on the server",
+        "Deploy a patch that correctly configures session cookie attributes and invalidation logic",
+        "Users will be forced to re-authenticate, receiving the new, secure session cookies"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From pentesting web applications and finding session cookies accessible in JavaScript, leading to full account takeover via XSS",
+        "expertise": "Cites the specific, critical cookie attributes (HttpOnly, Secure, SameSite) required for session security",
+        "authoritativeness": "This plan is based directly on the OWASP Session Management Cheat Sheet",
+        "trustworthiness": "Provides a clear, multi-layered plan covering token creation, transport, and invalidation"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-path-traversal-vulnerability",
+      "title": "Prevent Path Traversal Vulnerability",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated code that accesses files (e.g., for downloads or previews) may insecurely concatenate user input (like a filename) into a file path, allowing attackers to use ../ sequences to read sensitive files (e.g., /etc/passwd).",
+      "manualChecklist": [
+        "Primary Fix: Validate that the user-supplied filename contains only permitted characters (e.g., alphanumeric, dot, underscore)",
+        "After validation, append the user input to a pre-defined, absolute base directory",
+        "Crucial: Use a platform API to canonicalize the final path (e.g., resolve ../) and then verify that the canonical path still starts with the base directory",
+        "Use indirect object references: map a safe user-supplied ID (e.g., \"file123\") to the real, sensitive file path on the server",
+        "Run the application with the least privilege possible, such that it does not have filesystem permissions to read /etc/passwd or other sensitive files"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST tools can detect and flag code that uses user input in filesystem APIs",
+        "static": "Code review explicitly searching for open(), read(), include() functions that take user-controlled variables",
+        "runtime": "DAST scanners will actively test for path traversal using ../ payloads"
+      },
+      "mitigation": [
+        "Immediately disable the vulnerable file-access endpoint",
+        "Investigate server logs for any successful traversal attempts and check for data exfiltration",
+        "Deploy a patch that implements the full canonicalization and base-directory-check logic"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From real-world breaches where attackers used ../../etc/shadow to exfiltrate system password hashes",
+        "expertise": "Cites the correct, two-step validation: (1) sanitize input, (2) canonicalize and check against a base directory",
+        "authoritativeness": "This plan is based directly on OWASP Path Traversal prevention guidance",
+        "trustworthiness": "Acknowledges that simple input filtering is not enough and that the canonical path check is the essential, non-negotiable step"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-https-enforcement",
+      "title": "Prevent Missing Https Enforcement",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated server configurations or application code may bind to HTTP without automatically redirecting to HTTPS, exposing users to man-in-the-middle (MITM) attacks, session hijacking, and credential theft.",
+      "manualChecklist": [
+        "Configure the web server or load balancer (e.g., Nginx, ELB) to perform a server-side, permanent (301) redirect from HTTP to HTTPS",
+        "Implement the HTTP Strict-Transport-Security (HSTS) header to force browsers to only communicate via HTTPS",
+        "Set the Secure attribute on all sensitive cookies (especially session cookies) to prevent them from being sent over HTTP",
+        "Use the `security/security-guardrails` workflow to check for these headers",
+        "Ensure all internal, service-to-service communication also uses encryption (mTLS)"
+      ],
+      "earlyDetection": {
+        "cicd": "DAST tools or scanners (e.g., SSL Labs) can check for missing redirects, weak ciphers, and missing HSTS headers",
+        "static": "Code review of server/load balancer configuration files for missing 301 redirects or HSTS headers",
+        "runtime": "Monitor load balancer logs for a high volume of traffic on port 80 (HTTP) that isn't being redirected"
+      },
+      "mitigation": [
+        "Immediately implement the HTTP-to-HTTPS redirect at the load balancer or ingress level",
+        "Deploy the Strict-Transport-Security (HSTS) header to protect returning visitors",
+        "Force-invalidate all active sessions, as they may have been exposed over HTTP"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From network-sniffing exercises (e.g., at public Wi-Fi hotspots) that easily capture unencrypted session cookies",
+        "expertise": "Cites HSTS as the critical, browser-level enforcement mechanism that complements a server-side redirect",
+        "authoritativeness": "Aligns with foundational security guidance from OWASP and NIST on protecting data in transit (TLS)",
+        "trustworthiness": "Provides a complete solution, covering the redirect (for first-time users), HSTS (for returning users), and cookie security"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-weak-password-validation",
+      "title": "Prevent Weak Password Validation",
+      "category": "guardrails",
+      "subcategory": "security",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "security"
+      ],
+      "problemStatement": "AI-generated code often suggests outdated password policies (e.g., \"must have 1 number, 1 capital, 1 symbol\") that encourage weak, predictable passwords, rather than modern, evidence-based standards.",
+      "manualChecklist": [
+        "Primary Fix: Follow NIST 800-63B guidelines",
+        "Enforce a long minimum length (e.g., 15 characters) and allow a very long maximum length (e.g., 64+ characters)",
+        "Crucial: Remove all character-complexity requirements (e.g., \"must have a number\"). Complexity rules do not add strength and frustrate users",
+        "Check all new passwords against a \"blocklist\" of known-breached passwords (e.g., Have I Been Pwned)",
+        "Do not implement forced, periodic password expiration. Only force a reset if there is evidence of a compromise"
+      ],
+      "earlyDetection": {
+        "cicd": "Run integration tests on the password reset/signup form that assert a 15-character password without numbers is accepted",
+        "static": "Code review of the validation logic. Flag any regex that enforces complexity rules",
+        "runtime": "Monitor for high rates of account takeover (ATO) attacks"
+      },
+      "mitigation": [
+        "Immediately update the validation logic to align with NIST 800-63B",
+        "Implement the \"breached password\" blocklist",
+        "(Optional) On their next login, force users with known-weak or breached passwords to update them"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From transitioning enterprise systems away from frustrating, ineffective complexity rules to the more secure NIST length-based standard",
+        "expertise": "This plan directly contradicts common (and wrong) \"best practices\" by citing the modern, evidence-based NIST standard",
+        "authoritativeness": "Based entirely on the NIST SP 800-63B digital identity guidelines",
+        "trustworthiness": "Admits that periodic expiration is a \"bad practice\" that leads to weaker security, building trust by correcting common misperceptions"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-n-plus-one-query-problem",
+      "title": "Prevent N Plus One Query Problem",
+      "category": "guardrails",
+      "subcategory": "performance",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code for fetching data often retrieves a list of \"parent\" items (1 query), then loops through the list and executes a new query for each item's \"children,\" resulting in N+1 database queries.",
+      "manualChecklist": [
+        "Use eager loading in your ORM to fetch the children in the initial query using a JOIN (e.g., JPA/Hibernate: JOIN FETCH, Django: select_related)",
+        "For many-to-many relationships, use batch fetching to load all children in a second, batched query (e.g., Hibernate: @BatchSize, Django: prefetch_related)",
+        "Use a DataLoader pattern, common in GraphQL, to automatically batch child-object requests",
+        "Enable query logging in development and use an APM (e.g., Datadog, New Relic) to detect N+1 patterns in production"
+      ],
+      "earlyDetection": {
+        "cicd": "Run integration tests that count the number of SQL queries executed for a specific API endpoint. Fail the build if it exceeds a small threshold (e.g., 3)",
+        "static": "Linters (e.g., nplusone for Python) can detect potential N+1 patterns in code",
+        "runtime": "APM tools will flag this as a high-latency transaction with thousands of identical, fast DB queries"
+      },
+      "mitigation": [
+        "Identify the high-latency endpoint and the looping query in the APM tool",
+        "Refactor the data-access logic to use JOIN FETCH or prefetch_related",
+        "Deploy the patch and confirm in the APM that the query count for that endpoint has dropped to 1 or 2"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook",
+          "code-quality/keep-prs-under-control"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From optimizing high-traffic API endpoints that were brought down by N+1 queries during peak load",
+        "expertise": "Cites the specific, correct ORM commands for both eager-loading (select_related) and batch-fetching (prefetch_related)",
+        "authoritativeness": "References extensive developer community knowledge (e.g., Stack Overflow) on this classic ORM anti-pattern",
+        "trustworthiness": "Provides a clear, actionable testing strategy (query counting) to catch this in CI before it reaches production"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-database-indexes",
+      "title": "Prevent Missing Database Indexes",
+      "category": "guardrails",
+      "subcategory": "performance",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated queries are functionally correct but often lack awareness of performance, resulting in WHERE or JOIN clauses on un-indexed columns that cause slow, full table scans.",
+      "manualChecklist": [
+        "Run EXPLAIN or query plan analysis on all new, non-trivial AI-generated queries to identify bottlenecks (e.g., \"Full Table Scan\")",
+        "Add composite indexes on columns frequently used together in WHERE, JOIN, and ORDER BY clauses",
+        "Ground the AI with the schema (using `ai-behavior/stop-schema-guessing`) and prompt it to \"suggest optimal indexes for this query\"",
+        "Regularly update table statistics (e.g., ANALYZE) so the query optimizer can make better decisions",
+        "Regularly review and drop unused or duplicate indexes, as they add write overhead"
+      ],
+      "earlyDetection": {
+        "cicd": "Integrate a query plan analyzer into the pipeline that fails the build if a query's \"cost\" is above a set threshold",
+        "static": "Schema-diff tools can flag new queries being added without corresponding index changes",
+        "runtime": "Monitor the database \"slow query log\""
+      },
+      "mitigation": [
+        "Identify the slow query from the slow query log or APM",
+        "Run EXPLAIN on the query to confirm a full table scan is happening",
+        "Add the missing index (CREATE INDEX...) in a non-blocking, concurrent manner"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/stop-schema-guessing",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-20-schema-drift",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From database administration (DBA) tasks, where adding a single index reduced query time from 30 seconds to 50ms",
+        "expertise": "Cites EXPLAIN plan analysis and ANALYZE (statistics) as the professional, data-driven methods for optimization",
+        "authoritativeness": "Aligns with standard database performance tuning guides from IBM, Microsoft, and Oracle",
+        "trustworthiness": "Warns against over-indexing, showing a nuanced understanding that indexes have a write-performance cost"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-inefficient-data-structure",
+      "title": "Prevent Inefficient Data Structure",
+      "category": "guardrails",
+      "subcategory": "performance",
+      "severity": "medium",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code may default to a \"one-size-fits-all\" data structure (like using a List/Array for everything) when a more efficient one (like a HashMap/Dictionary or Set) is required, leading to poor algorithmic performance (e.g., O(n) instead of O(1)).",
+      "manualChecklist": [
+        "Analyze the main operations: for frequent lookups, use a HashMap or Set; for frequent insertions/removals, consider a LinkedList",
+        "Prompt the AI to \"analyze the time complexity of this function\" and \"suggest a more performant data structure\"",
+        "Use a cognitive-verifier pattern: prompt a separate AI to find performance flaws in the first AI's code",
+        "Avoid using global variables for large data structures, as they can lead to memory pressure and are slow to access",
+        "Profile the code. Don't optimize prematurely; measure first to find the actual bottleneck"
+      ],
+      "earlyDetection": {
+        "cicd": "Run performance benchmark tests for critical algorithms and fail the build on regressions",
+        "static": "Code review focusing on algorithm complexity. A for loop inside a for loop (O(n²)) is a major red flag",
+        "runtime": "APM tools can pinpoint specific functions that have high CPU usage or high latency, often due to poor data structure choice"
+      },
+      "mitigation": [
+        "Identify the slow function using a profiler",
+        "Analyze the algorithm and identify the inefficient data structure (e.g., a lookup in a large list)",
+        "Refactor the code to use a more appropriate structure (e.g., convert the list to a HashMap or Set before the loop)"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/keep-prs-under-control"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From refactoring algorithms that used O(n) list lookups inside a loop, resulting in O(n²) performance",
+        "expertise": "Cites specific Big O notation (O(n) vs. O(1)) and the correct data structures for lookups (HashMap) vs. iteration (List)",
+        "authoritativeness": "Based on fundamental computer science principles of data structures and algorithmic analysis",
+        "trustworthiness": "Follows the \"Measure Before You Optimize\" principle, preventing premature or unnecessary optimization"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-memory-leak-in-event-handlers",
+      "title": "Prevent Memory Leak In Event Handlers",
+      "category": "guardrails",
+      "subcategory": "performance",
+      "severity": "medium",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated JavaScript code, especially for UI components, often adds event listeners (e.g., addEventListener) but fails to remove them when the component is destroyed, creating memory leaks as the listeners hold references.",
+      "manualChecklist": [
+        "Primary Fix: Always explicitly call removeEventListener with a named function reference when the component or element is unmounted",
+        "In frameworks (React, Vue), use the built-in lifecycle methods to clean up listeners (e.g., the return function in a React useEffect hook)",
+        "Use WeakMap or WeakSet for caching or storing object references, as they do not prevent garbage collection",
+        "Use event delegation: attach one listener to a parent element instead of hundreds to individual children",
+        "Avoid anonymous functions for listeners, as they cannot be passed to removeEventListener"
+      ],
+      "earlyDetection": {
+        "cicd": "Run automated end-to-end tests that navigate to and from a page, and then use a memory profiler to check for detached DOM elements",
+        "static": "Linter to flag any addEventListener call that isn't paired with a removeEventListener in the same component",
+        "runtime": "Use browser DevTools (Memory tab) to take heap snapshots and look for detached DOM nodes or lingering event listeners"
+      },
+      "mitigation": [
+        "Identify the leaking component using the browser's Memory profiler",
+        "Modify the component's code to explicitly call removeEventListener during its unmount/cleanup lifecycle",
+        "Deploy the patch"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/keep-prs-under-control"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From debugging \"slow\" single-page applications (SPAs) that were leaking memory on every route change",
+        "expertise": "Cites specific JS memory leak patterns (un-removed listeners, closures, detached DOM) and the correct fixes (lifecycle cleanup, WeakMap)",
+        "authoritativeness": "Aligns with official React/Vue documentation and browser development best practices",
+        "trustworthiness": "Provides a clear \"Do / Don't\" table (Do: use named functions, Don't: use anonymous functions) for listeners"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-synchronous-blocking-operations",
+      "title": "Prevent Synchronous Blocking Operations",
+      "category": "guardrails",
+      "subcategory": "performance",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated Node.js code often defaults to using synchronous I/O methods (e.g., fs.readFileSync()) because they are simpler to write, but this blocks the main event loop, killing performance for all other users.",
+      "manualChecklist": [
+        "Primary Fix: Never use synchronous (...Sync) versions of I/O (file, network) or child_process methods in a server context",
+        "Always use the asynchronous, non-blocking versions (e.g., fs.readFile()) with Promises (async/await) or callbacks",
+        "For CPU-intensive tasks (e.g., image processing, crypto), move them off the main thread using Worker Threads",
+        "Enforce a linter rule (e.g., ESLint no-sync) to automatically flag and fail builds that contain ...Sync methods",
+        "Ground the AI by providing async/await examples and explicitly prompting: \"Write this as a non-blocking, async function\""
+      ],
+      "earlyDetection": {
+        "cicd": "Fail the build if the linter (e.g., ESLint no-sync) detects synchronous I/O methods",
+        "static": "Code review explicitly searching for the Sync suffix on any fs, crypto, or child_process methods",
+        "runtime": "APM tools (e.g., Datadog, New Relic) will detect a high \"Event Loop Lag,\" indicating the main thread is blocked"
+      },
+      "mitigation": [
+        "Identify the blocking function from the APM or profiler",
+        "Immediately refactor the function to use its async counterpart (e.g., fs.readFileSync -> fs.promises.readFile)",
+        "Deploy the patch and monitor event loop lag to ensure it returns to normal"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/keep-prs-under-control"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From production Node.js incidents where a single readFileSync in an admin endpoint caused the entire server to freeze",
+        "expertise": "Cites the specific Node.js event loop and libuv architecture as the reason why sync I/O is so catastrophic",
+        "authoritativeness": "Aligns with the foundational \"non-blocking I/O\" principle of Node.js development",
+        "trustworthiness": "Provides a clear, unambiguous rule (no-sync) that can be automated in CI, ensuring this never reaches production"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-inefficient-caching-strategy",
+      "title": "Prevent Inefficient Caching Strategy",
+      "category": "guardrails",
+      "subcategory": "performance",
+      "severity": "medium",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code may implement no caching, or a naive caching strategy (e.g., no eviction policy), leading to unnecessary database load or serving stale data.",
+      "manualChecklist": [
+        "Implement a Cache-Aside (Lazy Loading) pattern: the application checks the cache first; if \"miss,\" it queries the DB, then populates the cache",
+        "Use an in-memory, distributed cache (e.g., Redis, Memcached) for data that is shared across multiple servers",
+        "Always set an eviction policy (e.g., LRU - Least Recently Used) and a reasonable TTL (Time-to-Live) on all cache keys",
+        "Implement a cache-invalidation strategy (e.g., Write-Through or explicit invalidation) for data that changes frequently",
+        "Cache at multiple layers: client (browser), CDN, application (Redis), and database (query cache)"
+      ],
+      "earlyDetection": {
+        "cicd": "Run integration tests that measure database query count for a hot endpoint, asserting it is low (indicating a cache hit)",
+        "static": "Code review of data-access patterns to ensure a caching layer is present for frequently-read data",
+        "runtime": "Monitor cache hit/miss ratio. A low hit ratio indicates an ineffective cache (e.g., bad TTLs or poor key structure)"
+      },
+      "mitigation": [
+        "Identify the hot, un-cached database query from an APM tool",
+        "Implement a Cache-Aside pattern using Redis for that query's results",
+        "Deploy the fix and monitor the cache hit ratio and database CPU load"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From scaling high-traffic read-heavy APIs by introducing a Redis caching layer",
+        "expertise": "Cites specific, industry-standard caching patterns (Cache-Aside, Write-Through) and tools (Redis, Memcached)",
+        "authoritativeness": "Aligns with AWS and Azure best practices for distributed application caching",
+        "trustworthiness": "Provides a clear, practical implementation (Cache-Aside) and highlights the importance of eviction (TTL, LRU)"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-connection-pooling",
+      "title": "Prevent Missing Connection Pooling",
+      "category": "guardrails",
+      "subcategory": "performance",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated database code may naively open a new database connection for every single query and then close it, which is extremely slow and will quickly exhaust database resources.",
+      "manualChecklist": [
+        "Primary Fix: Always use a database connection pooler (e.g., PgBouncer, HikariCP, or built-in ORM pooling)",
+        "Configure the pool's max_connections to a reasonable number based on database capacity (e.g., 20-100), not thousands",
+        "Use Transaction Pooling mode (pool_mode = transaction) in PgBouncer for the best performance in serverless or short-lived functions",
+        "Use Session Pooling (pool_mode = session) for traditional, long-running monolith applications",
+        "Configure server_lifetime to periodically recycle connections and prevent memory leaks"
+      ],
+      "earlyDetection": {
+        "cicd": "Integration tests should connect via the pooler, not directly to the database",
+        "static": "Code review of database initialization logic to ensure a pooler is being used",
+        "runtime": "Monitor database active_connections. If this number equals the request rate, you are not pooling"
+      },
+      "mitigation": [
+        "Immediately stop the application that is opening excessive connections",
+        "(Database) Manually kill the hundreds/thousands of idle connections",
+        "Reconfigure the application to use a connection pooler (like PgBouncer) and deploy the fix"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From production incidents where a serverless function swarm opened 10,000+ connections, crashing the database",
+        "expertise": "Cites specific, advanced PgBouncer configurations like pool_mode = transaction vs. session",
+        "authoritativeness": "Aligns with official database connection management guidance from Heroku, AWS, and Azure",
+        "trustworthiness": "Provides clear tuning advice (max_connections, server_lifetime) to prevent misconfiguring the pool itself"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-inefficient-pagination",
+      "title": "Prevent Inefficient Pagination",
+      "category": "guardrails",
+      "subcategory": "performance",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated API code often defaults to \"offset-based\" pagination (e.g., LIMIT 20 OFFSET 100000), which becomes extremely slow on large datasets because the database must scan all 100,000+ rows.",
+      "manualChecklist": [
+        "For large, dynamic datasets (e.g., feeds, timelines), do not use offset-based pagination",
+        "Primary Fix: Implement Keyset (Cursor-Based) Pagination. This uses a WHERE clause based on the last-seen value (e.g., WHERE created_at > [last_timestamp] LIMIT 20)",
+        "Ensure the \"cursor\" column (created_at, id) is indexed",
+        "For simpler, smaller, or static datasets, offset-based pagination is acceptable, but always enforce a maximum limit (e.g., 100)",
+        "Use the `process/release-readiness-runbook` workflow to test pagination performance at high page numbers"
+      ],
+      "earlyDetection": {
+        "cicd": "Run a performance test that requests page 10,000 of an API endpoint and fails if it's too slow",
+        "static": "Code review of pagination logic. Flag any use of OFFSET on a primary, high-traffic table",
+        "runtime": "Monitor slow query logs for queries that use a large OFFSET value"
+      },
+      "mitigation": [
+        "Identify the slow OFFSET query in the database logs",
+        "Temporarily disable \"deep paging\" (e.g., block requests for pages > 100)",
+        "Refactor the endpoint to use keyset/cursor-based pagination and deploy the fix"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From scaling social-media-style \"infinite scroll\" feeds, where offset pagination failed catastrophically",
+        "expertise": "Cites the specific SQL difference (OFFSET 100000 vs. WHERE id > X) and the performance impact (full scan vs. index seek)",
+        "authoritativeness": "Aligns with API design best practices from major tech companies (like AWS, Stripe) that use cursor-based pagination",
+        "trustworthiness": "Provides a nuanced view, stating that offset is \"acceptable\" for small datasets but cursor is \"required\" for large ones"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-unbounded-result-sets",
+      "title": "Prevent Unbounded Result Sets",
+      "category": "guardrails",
+      "subcategory": "performance",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated data queries often forget to add a LIMIT clause, resulting in unbounded queries (e.g., SELECT * FROM users) that can crash the application by exhausting memory or DDoSing the database.",
+      "manualChecklist": [
+        "Primary Fix: Never run a query without a LIMIT clause in an application context",
+        "Enforce a mandatory, default pagination limit (e.g., 25) on all API endpoints that return a list",
+        "Enforce a server-side maximum limit (e.g., 100) that a user cannot override, even if they request ?limit=1000",
+        "In the database user's permissions, set a statement_timeout to automatically kill queries that run for too long (e.g., > 30 seconds)",
+        "Prompt the AI to \"add pagination with a default limit of 25 and a max limit of 100\" to all list-based endpoints"
+      ],
+      "earlyDetection": {
+        "cicd": "API linter that fails if a list-returning endpoint does not have pagination parameters defined",
+        "static": "Code review explicitly searching for SELECT statements without a LIMIT clause",
+        "runtime": "Database slow query log will catch long-running queries. APM will show high memory usage and latency on the endpoint"
+      },
+      "mitigation": [
+        "Immediately identify and kill the long-running, unbounded query at the database level",
+        "Temporarily apply rate limiting or block the offending endpoint at the load balancer",
+        "Deploy a hotfix that adds mandatory LIMIT and pagination logic"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From production incidents where a single un-paginated internal tool query brought down the entire production database",
+        "expertise": "Cites the two-part fix: a default limit (for clients) and a maximum limit (for safety)",
+        "authoritativeness": "This is a foundational SRE principle for preventing resource exhaustion and cascading failures",
+        "trustworthiness": "Provides multiple layers of defense: application-level (LIMIT) and database-level (statement_timeout)"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-load-testing",
+      "title": "Prevent Missing Load Testing",
+      "category": "guardrails",
+      "subcategory": "performance",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code works perfectly for a single user, but teams trust it and deploy it without load testing, where it fails under concurrent load due to issues like race conditions, N+1 queries, or missing pools.",
+      "manualChecklist": [
+        "Integrate load testing into the `process/release-readiness-runbook` workflow before every production release",
+        "Define clear Service Level Objectives (SLOs) (e.g., \"p99 latency < 500ms\") and fail the test if they are breached",
+        "Use load testing tools (e.g., k6, Artillery, JMeter) to simulate realistic user traffic, not just \"ping\" the endpoint",
+        "Run load tests in a dedicated, production-like staging environment to get realistic metrics",
+        "Use AI to generate the load test scripts, e.g., \"Write a k6 script that simulates 100 virtual users logging in and browsing posts\""
+      ],
+      "earlyDetection": {
+        "cicd": "Automated load test stage in the deployment pipeline. A breached SLO (high latency, high error rate) fails the build",
+        "static": "N/A (This is a runtime testing process)",
+        "runtime": "N/A (This is the runtime detection method, done pre-production)"
+      },
+      "mitigation": [
+        "(In Test) The build fails. Analyze the test results (e.g., latency, error rate) to find the bottleneck",
+        "(In Prod) If an untested service fails, immediately roll it back",
+        "(Post-Incident) Replicate the production load in a staging environment, fix the bottleneck, and add this test to the permanent CI/CD pipeline"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "Based on countless \"successful\" launches that immediately crashed when real users arrived",
+        "expertise": "Cites specific SLO-driven testing (p99 latency) as the correct methodology, rather than just \"running a test\"",
+        "authoritativeness": "Aligns with SRE and release engineering best practices that treat load testing as a mandatory gate",
+        "trustworthiness": "Acknowledges the difficulty of testing in production and recommends a realistic, production-like staging environment"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-cascading-failure-from-dependency",
+      "title": "Prevent Cascading Failure From Dependency",
+      "category": "guardrails",
+      "subcategory": "availability",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated microservices will naively and repeatedly call a failing or slow downstream dependency, exhausting their own resources (threads, sockets) and creating a \"cascading failure\" that brings down the entire system.",
+      "manualChecklist": [
+        "Primary Fix: Implement the Circuit Breaker pattern (e.g., using libraries like Resilience4j, Polly)",
+        "Track failures: after a set threshold (e.g., 50% errors in 10s), \"trip\" or \"open\" the circuit and fail-fast without calling the dependency",
+        "While the circuit is open, provide a fallback response (e.g., stale cached data or a default value) to maintain partial availability",
+        "Periodically allow a single \"probe\" request to pass; if it succeeds, \"close\" the circuit and resume normal traffic",
+        "Always configure aggressive timeouts on all network calls"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST scan to ensure all external HTTP clients are wrapped in a Circuit Breaker library",
+        "static": "Code review of dependency calls to check for missing timeouts or retry logic",
+        "runtime": "APM alerts when a service's error rate to a specific downstream dependency crosses a threshold"
+      },
+      "mitigation": [
+        "Manually \"open\" the circuit breaker via a configuration flag to immediately stop calls to the failing dependency",
+        "Enable the fallback response (e.g., switch to a cached data source)",
+        "Once the downstream dependency is fixed and stable, \"close\" the circuit to resume traffic"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "Based on SRE incident response, where a failure in a minor \"avatar\" service cascaded to crash the \"auth\" service",
+        "expertise": "Cites the specific states of the Circuit Breaker pattern (Open, Closed, Half-Open) and industry-standard implementations (Netflix Hystrix)",
+        "authoritativeness": "This is a foundational pattern from the Google SRE playbook and Michael Nygard's Release It!",
+        "trustworthiness": "Emphasizes that fallbacks are key; simply failing fast is not enough to maintain availability"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-infinite-loop-from-logic-error",
+      "title": "Prevent Infinite Loop From Logic Error",
+      "category": "guardrails",
+      "subcategory": "availability",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code, especially for complex loops (while) or recursion, may contain logic errors in the termination condition (e.g., an off-by-one error, while(flag) where flag is never set to false), causing a process to spin at 100% CPU and become unresponsive.",
+      "manualChecklist": [
+        "In while loops, ensure the condition variable is always modified inside the loop",
+        "For recursive functions, ensure there is a \"base case\" that terminates the recursion",
+        "Always set a statement_timeout at the database level to kill long-running (potentially looping) queries",
+        "For application-level loops, implement a \"circuit breaker\" or \"iteration counter\" that manually throws an exception after N million iterations",
+        "Use static analysis tools that can detect some forms of \"unreachable code\" or non-terminating loops"
+      ],
+      "earlyDetection": {
+        "cicd": "Unit tests should explicitly cover the loop's termination condition (the \"base case\")",
+        "static": "Static analysis tools (e.g., SonarQube) can flag potential infinite loops or complex recursive functions for review",
+        "runtime": "Monitor for a process or pod that is stuck at 100% CPU utilization for an extended period"
+      },
+      "mitigation": [
+        "Immediately restart the process/pod that is stuck at 100% CPU to restore service",
+        "Analyze the code (or profiler output) to find the infinite loop",
+        "Patch the logic with the correct termination condition and deploy"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/keep-prs-under-control"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From debugging production servers that became unresponsive due to a single request hitting an infinite while loop",
+        "expertise": "Cites the correct solution for different contexts: \"base cases\" for recursion, \"condition modification\" for while loops, statement_timeout for databases",
+        "authoritativeness": "Based on fundamental computer science principles of algorithm termination",
+        "trustworthiness": "Recommends a pragmatic \"iteration counter\" as a defense-in-depth, acknowledging that static analysis cannot find all loops"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-deadlock-in-concurrent-code",
+      "title": "Prevent Deadlock In Concurrent Code",
+      "category": "guardrails",
+      "subcategory": "availability",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated concurrent code (e.g., multithreading) may acquire multiple locks in an inconsistent order, leading to a \"deadlock\" where Thread A holds Lock 1 (waiting for 2) and Thread B holds Lock 2 (waiting for 1), freezing both threads.",
+      "manualChecklist": [
+        "Primary Fix: Enforce a global, \"lock ordering\" policy. All threads must acquire locks in the same, predefined order (e.g., always Lock A, then Lock B)",
+        "Avoid nested locks where possible",
+        "Use tryLock() with a timeout instead of a blocking lock. If the timeout expires, the thread should release all its other locks and retry",
+        "Use lock-free data structures (e.g., ConcurrentHashMap, AtomicInteger) where possible",
+        "Reduce lock granularity. Lock only the specific field or resource, not the entire object"
+      ],
+      "earlyDetection": {
+        "cicd": "Run integration tests specifically designed to trigger race conditions and deadlocks (e.g., \"hammer tests\")",
+        "static": "Static analysis tools (e.g., go vet) can detect some deadlock-prone patterns",
+        "runtime": "Monitor for \"Java Thread Dump\" or go-routine dumps. A deadlock detector will explicitly name the blocked threads and the locks they are waiting for"
+      },
+      "mitigation": [
+        "Identify the deadlocked process (e.g., from a \"frozen\" application alert)",
+        "Manually restart the process to break the deadlock and restore service",
+        "Analyze the thread dump, identify the conflicting locks, and refactor the code to enforce a strict lock-acquisition order"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/keep-prs-under-control"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From analyzing Java thread dumps to find and resolve production deadlocks in high-concurrency systems",
+        "expertise": "Cites the two canonical solutions: \"lock ordering\" (prevention) and \"tryLock with timeout\" (avoidance)",
+        "authoritativeness": "Based on foundational concurrency and operating system principles (e.g., Banker's Algorithm)",
+        "trustworthiness": "Provides multiple, practical solutions, from high-level (lock ordering) to low-level (lock-free data structures)"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-resource-exhaustion-from-memory-leak",
+      "title": "Prevent Resource Exhaustion From Memory Leak",
+      "category": "guardrails",
+      "subcategory": "availability",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code (e.g., in Node.js, Python, Java) can introduce slow memory leaks (e.g., un-removed event listeners, static collections, unclosed resources) that gradually consume all available heap memory, causing the application to crash (OOM).",
+      "manualChecklist": [
+        "In event-driven code (JS), always remove listeners when objects are destroyed (See Guardrail 26)",
+        "Never store large, per-request data in static or global variables",
+        "Use WeakMap or WeakSet for caches that should not prevent garbage collection",
+        "In Java/Python, ensure all I/O resources (files, streams, connections) are closed, preferably using try-with-resources or with statements",
+        "Profile the application's memory usage under load before release"
+      ],
+      "earlyDetection": {
+        "cicd": "Run a \"soak test\" (a load test run over a long period, e.g., 1 hour) and monitor the application's heap size. If it grows linearly without plateauing, a leak exists",
+        "static": "Static analysis tools can flag unclosed resources or modifications to static collections",
+        "runtime": "Monitor the application's heap memory usage. A \"sawtooth\" pattern (growing, then dropping after GC) is normal. A steadily climbing line is a leak"
+      },
+      "mitigation": [
+        "The application will crash (OOM) and hopefully be restarted by an orchestrator (e.g., Kubernetes)",
+        "Get a heap dump from the application just before it crashes (e.g., using -XX:+HeapDumpOnOutOfMemoryError)",
+        "Analyze the heap dump with a profiler (e.g., Eclipse MAT, Chrome DevTools) to find the object that is leaking"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From analyzing production heap dumps to find and patch subtle memory leaks in long-running Java services",
+        "expertise": "Cites specific language features (try-with-resources, WeakMap) and profiling tools (Heap Dumps, MAT)",
+        "authoritativeness": "Aligns with standard SRE/DevOps practices for application performance monitoring (APM)",
+        "trustworthiness": "Provides a clear, actionable signal to monitor (linear heap growth) to distinguish leaks from normal usage"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-health-checks",
+      "title": "Prevent Missing Health Checks",
+      "category": "guardrails",
+      "subcategory": "availability",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated services often lack /health or /ready endpoints, so container orchestrators (like Kubernetes) have no way to know if the application is running, deadlocked, or ready to serve traffic.",
+      "manualChecklist": [
+        "Implement a Liveness Probe (e.g., /healthz). This is a shallow check: \"Is the process running?\" If it fails, Kubernetes will restart the container",
+        "Implement a Readiness Probe (e.g., /readyz). This is a deep check: \"Is the app ready to serve traffic?\" (e.g., DB connected, cache warm). If it fails, Kubernetes stops sending traffic",
+        "Implement a Startup Probe for slow-starting applications (e.g., Java) to prevent the Liveness/Readiness probes from failing before the app is initialized",
+        "Set a realistic initialDelaySeconds on Liveness/Readiness probes to give the app time to start"
+      ],
+      "earlyDetection": {
+        "cicd": "Linter for Kubernetes manifests that fails if livenessProbe and readinessProbe are not defined",
+        "static": "Code review of the main server file to ensure the /healthz and /readyz endpoints exist",
+        "runtime": "(In K8s) kubectl describe pod will show the pod is in a CrashLoopBackOff state or is not receiving traffic (not \"Ready\")"
+      },
+      "mitigation": [
+        "Analyze the pod status (kubectl describe pod) to see why the probe is failing",
+        "If the app is crashing, fix the app",
+        "If the app is just slow to start, increase the initialDelaySeconds or implement a startupProbe"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From debugging CrashLoopBackOff errors in Kubernetes, which are often caused by misconfigured health probes",
+        "expertise": "Cites the critical distinction between Liveness (restart me) and Readiness (stop traffic) probes",
+        "authoritativeness": "This plan is based directly on the official Kubernetes documentation for container probes",
+        "trustworthiness": "Provides a clear, actionable plan for all three probe types, including the often-missed startupProbe for Java/Spring apps"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-improper-error-handling",
+      "title": "Prevent Improper Error Handling",
+      "category": "guardrails",
+      "subcategory": "availability",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated code often has empty catch blocks (\"exception swallowing\") or fails to catch errors at all, leading to unhandled exceptions that crash the entire process, making the service unavailable.",
+      "manualChecklist": [
+        "Primary Fix: Never use an empty catch (Exception e) {} block. At a minimum, log the error with its full context",
+        "Catch specific exceptions (e.g., catch (PaymentFailedException e)) at the level where you can actually handle them (e.g., return a 402 status)",
+        "Let unexpected exceptions (e.g., NullPointerException) propagate up to a global, centralized exception handler",
+        "The global handler should log the error, send a generic 500 response, and gracefully shut down if the app is in an unrecoverable state",
+        "Use finally or try-with-resources to ensure critical resources (like connections) are always closed, even if an error occurs"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST tools (e.g., SonarQube) can flag empty catch blocks or overly-broad catch (Exception e) blocks",
+        "static": "Code review explicitly searching for catch {}",
+        "runtime": "Monitor logs for \"unhandled exception\" errors, which will crash the process. A high rate of 500 errors indicates exceptions are being caught but not handled"
+      },
+      "mitigation": [
+        "The process crashes and is (hopefully) restarted by an orchestrator",
+        "Analyze the stack trace from the \"unhandled exception\" log",
+        "Patch the code to catch and handle that specific exception at the appropriate application layer"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/tdd-with-ai-pair",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From production incidents where a single unhandled NullPointerException in one request brought down the entire Node.js/Python server",
+        "expertise": "Cites the \"catch specific, log generic\" pattern, which is a best practice for robust, multi-layered error handling",
+        "authoritativeness": "Aligns with official Microsoft and Oracle [Java] best practices for exception handling",
+        "trustworthiness": "Explicitly calls out \"exception swallowing\" (catch {}) as a critical anti-pattern"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-timeout-configuration",
+      "title": "Prevent Missing Timeout Configuration",
+      "category": "guardrails",
+      "subcategory": "availability",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated HTTP or database clients often omit timeout configurations, causing the application to hang indefinitely while waiting for a slow or unresponsive dependency, leading to resource exhaustion (sockets, threads).",
+      "manualChecklist": [
+        "Primary Fix: Always set an aggressive, short timeout (e.g., 2-5 seconds) on all network calls (HTTP, DB, gRPC)",
+        "Configure different types of timeouts: connection timeout (how long to connect) and read timeout (how long to wait for data)",
+        "Use dynamic timeouts that adjust based on real-time service latency (e.g., p99 latency)",
+        "Combine timeouts with a retry strategy (e.g., exponential backoff) for transient failures",
+        "At the database level, set a statement_timeout to kill queries that run too long"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST tools or custom linters can flag any HTTP client or DB driver instantiation that does not explicitly set a timeout property",
+        "static": "Code review of all network-call-related code",
+        "runtime": "Monitor for \"hung\" or \"stuck\" threads in a thread dump. APM tools will show transactions with extremely long durations, all stuck waiting on the same external call"
+      },
+      "mitigation": [
+        "Immediately restart the hung application processes to free up the exhausted resources (sockets/threads)",
+        "Deploy a hotfix that adds aggressive timeouts to the client configuration",
+        "(If downstream is slow) Open a circuit breaker (Guardrail 33) to that dependency"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From SRE incident response, where a slow database query caused all application threads to hang, creating a site-wide outage",
+        "expertise": "Distinguishes between connection timeouts and read timeouts, a critical detail for robust configuration",
+        "authoritativeness": "Aligns with SRE best practices from Zalando and MIT on setting dynamic, reasonable timeouts",
+        "trustworthiness": "Provides a clear, actionable rule: never make a network call without a timeout"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-single-point-of-failure",
+      "title": "Prevent Single Point Of Failure",
+      "category": "guardrails",
+      "subcategory": "availability",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated deployment configurations (e.g., Kubernetes manifests, Terraform) may default to deploying a single instance (N=1) of a service, creating a Single Point of Failure (SPOF) that causes a total outage if it fails.",
+      "manualChecklist": [
+        "Primary Fix: Run at least N+1 (e.g., 3) instances (replicas) of every critical, stateless service",
+        "Distribute replicas across multiple physical failure domains (e.g., different nodes, racks, or cloud Availability Zones)",
+        "Use a load balancer to distribute traffic across all healthy replicas",
+        "For stateful services (like databases), use a primary-replica (active-passive) or active-active replication strategy with automated failover",
+        "Use `process/release-readiness-runbook` to test your automated failover by terminating the primary instance"
+      ],
+      "earlyDetection": {
+        "cicd": "Linter for Kubernetes (e.g., kube-linter) or Terraform (e.g., tflint) that fails if replicaCount is < 2 for a production deployment",
+        "static": "Code review of deployment manifests",
+        "runtime": "Alerting on replicaCount = 1 for any critical deployment"
+      },
+      "mitigation": [
+        "(Incident) The service is down. Manually restart the failed instance to restore service temporarily",
+        "(Fix) Immediately update the deployment manifest to increase the replicaCount to >= 3",
+        "(Improve) Implement automated failover for stateful services"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "Based on production outages where an entire service disappeared because the single node it was running on failed",
+        "expertise": "Cites specific high-availability (HA) architectures: N+1, active-passive, and active-active, and applying them to stateless vs. stateful components",
+        "authoritativeness": "Aligns with all foundational principles of high-availability (HA) system design and SRE",
+        "trustworthiness": "Provides a clear, actionable rule (N+1, spread across AZs) as the minimum bar for production readiness"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-retry-logic",
+      "title": "Prevent Missing Retry Logic",
+      "category": "guardrails",
+      "subcategory": "availability",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated client code often fails permanently on transient, temporary network errors (e.g., 503 Service Unavailable, 429 Rate Limit), when a simple retry would have succeeded, leading to brittle services and user-facing errors.",
+      "manualChecklist": [
+        "Primary Fix: Implement retry logic only for transient, idempotent-safe errors (e.g., 503, 429, timeout)",
+        "Crucial: Never retry on 4xx client errors (e.g., 400, 401, 404), as these will never succeed",
+        "Use Exponential Backoff: increase the wait time between retries (e.g., 1s, 2s, 4s) to give the downstream service time to recover",
+        "Add Jitter (randomness) to the backoff delay to prevent a \"thundering herd\" of synchronized retries",
+        "Set a maximum retry count (e.g., 3-5 attempts) and a total timeout"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST scan to ensure HTTP clients are wrapped in a resilience library (e.g., Polly, Resilience4j)",
+        "static": "Code review of network clients to check for retry logic",
+        "runtime": "Monitor logs for a high rate of client-side 5xx errors that are not followed by a retry attempt"
+      },
+      "mitigation": [
+        "Deploy a hotfix to the client service that adds a retry policy (with exponential backoff and jitter)",
+        "(If downstream is overloaded) Temporarily open a circuit breaker (Guardrail 33) to protect it",
+        ""
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook",
+          "security/security-guardrails"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From building resilient microservices that must gracefully handle temporary network blips between services",
+        "expertise": "Cites the specific, industry-standard \"Exponential Backoff with Jitter\" algorithm as the correct implementation",
+        "authoritativeness": "This is a standard resilience pattern recommended by AWS, Microsoft, and Google",
+        "trustworthiness": "Provides a critical warning not to retry 4xx errors, preventing a common anti-pattern"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-improper-shutdown-handling",
+      "title": "Prevent Improper Shutdown Handling",
+      "category": "guardrails",
+      "subcategory": "availability",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "platform"
+      ],
+      "problemStatement": "AI-generated services do not handle OS-level shutdown signals (like SIGTERM from Kubernetes). When a deploy happens, the orchestrator kills the process (SIGKILL), abruptly dropping all in-flight requests.",
+      "manualChecklist": [
+        "Primary Fix: Implement a \"graceful shutdown\" handler in your application that listens for the SIGTERM signal",
+        "On receiving SIGTERM, the handler must: Stop the web server from accepting new requests, finish processing all in-flight requests, close database and network connections, exit the process cleanly (e.g., exit(0))",
+        "In Kubernetes, configure a preStop hook to trigger your graceful shutdown endpoint",
+        "Configure terminationGracePeriodSeconds in Kubernetes to give your app enough time to shut down (e.g., 30s)"
+      ],
+      "earlyDetection": {
+        "cicd": "Test graceful shutdown. Send a SIGTERM to the app in a test environment and verify it finishes in-flight requests without error",
+        "static": "Code review for a SIGTERM handler. K8s manifest linter for preStop hooks",
+        "runtime": "Monitor logs for abrupt, non-zero exit codes. Monitor client-side metrics for a spike in \"Connection Reset\" errors during a deploy"
+      },
+      "mitigation": [
+        "(Immediate) Increase terminationGracePeriodSeconds in the K8s manifest to (e.g., 60s) to \"stop the bleeding\"",
+        "(Permanent) Implement the SIGTERM handler in the application code",
+        "Tune the grace period to be just longer than the app's p99 shutdown time"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From achieving zero-downtime deployments in Kubernetes by correctly handling the SIGTERM/preStop lifecycle",
+        "expertise": "Cites the specific K8s SIGTERM -> terminationGracePeriodSeconds -> SIGKILL lifecycle",
+        "authoritativeness": "Aligns with official Kubernetes and Google Cloud documentation on pod termination",
+        "trustworthiness": "Provides a complete, robust solution covering both the application (SIGTERM handler) and the orchestrator (preStop hook)"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-incorrect-financial-calculation",
+      "title": "Prevent Incorrect Financial Calculation",
+      "category": "guardrails",
+      "subcategory": "financial",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "product-managers"
+      ],
+      "problemStatement": "AI-generated code will default to using standard float or double types for currency, which are binary floating-point types that cannot accurately represent decimal values, leading to silent rounding errors (e.g., 0.1 + 0.2 != 0.3).",
+      "manualChecklist": [
+        "Primary Fix: NEVER use binary floating-point types (float, double) for monetary values",
+        "Use a dedicated, high-precision Decimal library (e.g., Java's BigDecimal, Python's Decimal) for all calculations",
+        "Alternative: Store all currency values as integers representing the smallest unit (e.g., cents, 1000 = $10.00)",
+        "Never perform rounding on intermediate calculations. Only round at the final step when displaying or storing the result",
+        "Use a linter to ban float/double types in financial modules"
+      ],
+      "earlyDetection": {
+        "cicd": "Run unit tests with known problematic values (e.g., 0.1 + 0.2) and assert they equal the exact decimal result (0.3)",
+        "static": "Static analysis or linter to ban float/double types in any file inside the payments or billing directory",
+        "runtime": "Run automated reconciliation reports that check financial calculations against a source of truth"
+      },
+      "mitigation": [
+        "Immediately halt all financial calculations and transactions",
+        "Run a full reconciliation script to identify and quantify the rounding errors",
+        "Manually adjust the incorrect ledger entries"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From fintech reconciliation audits where \"pennies\" of rounding errors accumulated into millions of dollars of discrepancies",
+        "expertise": "Cites the specific 0.1 + 0.2 failure case and explains why it fails (binary vs. decimal representation)",
+        "authoritativeness": "Based on the foundational, non-negotiable rules of financial software engineering",
+        "trustworthiness": "Provides the two industry-standard, correct solutions (Decimal or Cents), giving teams flexibility"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-currency-conversion-error",
+      "title": "Prevent Currency Conversion Error",
+      "category": "guardrails",
+      "subcategory": "financial",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "product-managers"
+      ],
+      "problemStatement": "AI-generated code for currency conversion may use a hardcoded conversion rate or fail to account for the high volatility and precision requirements of foreign exchange (FX) rates.",
+      "manualChecklist": [
+        "Primary Fix: Never hardcode an FX rate. Rates must be fetched in real-time (or near-real-time) from a trusted FX rate provider API",
+        "Store all monetary values with their currency code (e.g., USD, EUR) using an integer (cents) + currency string",
+        "Use high-precision Decimal libraries for all conversion calculations to avoid rounding errors (see Guardrail 43)",
+        "Ensure the FX rate you fetch has more precision than your final calculation (e.g., use a rate with 6 decimal places)",
+        "Clearly log the exact FX rate used for every conversion transaction for auditability"
+      ],
+      "earlyDetection": {
+        "cicd": "Run unit tests that mock the FX provider's API and assert that a known conversion is calculated correctly",
+        "static": "SAST scan to find any hardcoded numerical values (e.g., 1.12) in financial conversion logic",
+        "runtime": "Monitor FX rate provider for API failures. Set alerts if a cached FX rate becomes older than its TTL (e.g., > 1 hour)"
+      },
+      "mitigation": [
+        "Immediately disable the currency conversion feature",
+        "Manually reconcile all transactions that used the incorrect (e.g., stale or hardcoded) rate",
+        "Deploy a patch that correctly integrates with a real-time FX provider API"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-05-missing-context"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From international e-commerce platforms where stale FX rates led to significant revenue loss",
+        "expertise": "Recommends the \"integer (cents) + currency code\" storage model, which is a best practice for multi-currency systems",
+        "authoritativeness": "Aligns with standard treasury and fintech practices that require auditable, real-time FX rates",
+        "trustworthiness": "Provides a clear, auditable trail by mandating that the rate itself be logged with the transaction"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-validation-for-business-rules",
+      "title": "Prevent Missing Validation For Business Rules",
+      "category": "guardrails",
+      "subcategory": "financial",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "product-managers"
+      ],
+      "problemStatement": "AI-generated code may handle technical logic (e.g., \"charge card\") but fail to encode complex business logic (e.g., \"but only if user is in-region and not on a 'freemium' plan\").",
+      "manualChecklist": [
+        "Primary Fix: Externalize complex business rules from application code into a separate Business Rules Engine (BRE) like Drools",
+        "Ground the AI with the business context: \"Generate code to charge a user, but first, validate these rules: [list of rules]\"",
+        "Use a cognitive-verifier pattern: prompt a separate AI to \"find any business rules this code forgot to check\"",
+        "Use `code-quality/tdd-with-ai-pair` to write unit tests first that define and assert the business rules (e.g., test_freemium_user_cannot_be_charged)",
+        "Isolate business rules in a spreadsheet (Drools Decision Table) so business analysts can update them without a code deploy"
+      ],
+      "earlyDetection": {
+        "cicd": "Run a full suite of integration tests that cover all known business rule permutations (e.g., different user types, states, segments)",
+        "static": "Code review of financial logic, comparing it against the written product/business requirements",
+        "runtime": "Monitor for \"invalid state\" financial transactions (e.g., a \"freemium\" user with a non-zero charge in the ledger)"
+      },
+      "mitigation": [
+        "Halt the process that is violating the business rule",
+        "Manually revert all transactions that were created in violation of the rules",
+        "Deploy a patch that correctly implements the rule, preferably in a BRE"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/tdd-with-ai-pair",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations",
+        "pain-point-05-missing-context"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From fintech projects where business logic (like compliance rules) was buried in code, making it impossible to audit or update",
+        "expertise": "Recommends a specific, advanced architecture: separating logic into a Business Rules Engine (BRE) like Drools",
+        "authoritativeness": "Aligns with modern enterprise architecture patterns (like AWS Step Functions for orchestration) for managing complex logic",
+        "trustworthiness": "Provides a TDD-based approach to ensure business logic is correctly translated into testable code"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-double-charging-customers",
+      "title": "Prevent Double Charging Customers",
+      "category": "guardrails",
+      "subcategory": "financial",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "product-managers"
+      ],
+      "problemStatement": "AI-generated payment endpoints are often not \"idempotent.\" If a client retries a request due to a network error, the AI-generated code will process the charge again, leading to a double-charge.",
+      "manualChecklist": [
+        "Primary Fix: Implement Idempotency. (See Guardrail 48 for the full technical solution)",
+        "Require a unique, client-generated Idempotency-Key (e.g., a UUID) in the header of all POST payment requests",
+        "On the server, save the result of the first successful request tied to that key",
+        "If a retry with the same key is received, do not re-process. Return the cached result",
+        "At the database level, add a UNIQUE constraint on the transaction_id or order_id to provide a final layer of defense against duplicate processing"
+      ],
+      "earlyDetection": {
+        "cicd": "Run an integration test that sends the same payment request (with the same Idempotency-Key) twice and asserts that only one charge is created",
+        "static": "Code review of all payment endpoints to ensure they check for an Idempotency-Key",
+        "runtime": "Monitor for duplicate transaction_ids. Monitor logs for UNIQUE constraint violation errors, which indicate the idempotency check failed but the DB caught it"
+      },
+      "mitigation": [
+        "Immediately identify and refund all duplicate charges",
+        "Implement the full server-side Idempotency-Key caching logic (see Guardrail 48)",
+        "Contact affected customers to apologize and confirm the refund"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "This is the single most common and costly failure mode in distributed payment systems",
+        "expertise": "Cites the correct, layered solution: application-level idempotency keys (fast) and database-level UNIQUE constraints (safe)",
+        "authoritativeness": "This solution is the industry-standard pattern, famously implemented by Stripe",
+        "trustworthiness": "Provides a clear, testable method (send request twice in CI) to prove idempotency is working"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-incorrect-tax-calculation",
+      "title": "Prevent Incorrect Tax Calculation",
+      "category": "guardrails",
+      "subcategory": "financial",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "product-managers"
+      ],
+      "problemStatement": "AI-generated code cannot possibly know the 11,000+ constantly-changing sales tax jurisdictions. It will hardcode a rate or use a simple, incorrect formula, leading to massive compliance and liability issues.",
+      "manualChecklist": [
+        "Primary Fix: NEVER write or generate your own tax calculation logic",
+        "Integrate a dedicated, third-party tax compliance service (e.g., Avalara, TaxJar, Stripe Tax) via their API",
+        "Ensure you pass the full, validated address (not just ZIP code) to the tax API for \"rooftop-level\" accuracy",
+        "For every transaction, log the exact tax amount and the transaction ID from the tax provider for auditability",
+        "Use the tax provider's \"commit\" endpoint to finalize the transaction, adding it to your compliance reports"
+      ],
+      "earlyDetection": {
+        "cicd": "Run integration tests against the tax provider's sandbox API. Assert that a test address in a known-tax jurisdiction (e.g., Chicago) returns the correct tax",
+        "static": "SAST scan to find any hardcoded tax rates (e.g., tax = subtotal * 0.08)",
+        "runtime": "Monitor for API errors from the tax provider"
+      },
+      "mitigation": [
+        "Immediately disable checkout for jurisdictions with incorrect calculations",
+        "Contact the tax provider's support to debug the integration",
+        "(Post-Fix) Run a reconciliation report to determine the amount of tax over- or under-collected and consult an accountant"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-05-missing-context",
+        "pain-point-03-hallucinated-capabilities"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From e-commerce platforms that faced state-level audits for miscalculating sales tax",
+        "expertise": "Cites the \"Buy, Don't Build\" rule as the only correct architectural decision for tax compliance",
+        "authoritativeness": "References major industry providers (Avalara, TaxJar, Stripe) as the authoritative solution",
+        "trustworthiness": "Provides a clear, non-negotiable warning that AI cannot solve this problem and that attempting to will lead to liability"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-idempotency-check",
+      "title": "Prevent Missing Idempotency Check",
+      "category": "guardrails",
+      "subcategory": "financial",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "product-managers"
+      ],
+      "problemStatement": "AI-generated POST/PUT endpoints are not \"idempotent\" by default. If a client retries a request due to a network error, the server will process the same operation multiple times, creating duplicate data or charges.",
+      "manualChecklist": [
+        "Primary Fix: Require a unique, client-generated Idempotency-Key (e.g., a UUID) in the HTTP header for all state-changing (POST, PUT, PATCH) requests",
+        "On the server, check if this key has been seen before within a recent time window (e.g., 24 hours)",
+        "If key is new: Process the request, then store the HTTP result (e.g., 201 Created, the JSON body) in a cache (like Redis) with the key",
+        "If key is seen: Do not re-process the request. Immediately return the cached result from the first request",
+        "Combine this with client-side retry logic (Guardrail 41) that sends the same key on retries"
+      ],
+      "earlyDetection": {
+        "cicd": "Run an integration test that sends the same POST request (with the same Idempotency-Key) twice and asserts that the resource is created only once",
+        "static": "API linter to flag all POST/PUT endpoints that do not check for an Idempotency-Key header",
+        "runtime": "Monitor logs for duplicate processing"
+      },
+      "mitigation": [
+        "Identify and manually revert all duplicate operations (e.g., refund charges, delete duplicate accounts)",
+        "Deploy a patch that implements the full server-side idempotency-key-caching logic",
+        ""
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From designing resilient, distributed systems where network failures are a given",
+        "expertise": "Cites the specific \"idempotency key + cached response\" pattern, which is the most robust implementation",
+        "authoritativeness": "This is the industry-standard \"gold standard\" pattern used by payment processors like Stripe",
+        "trustworthiness": "Guarantees \"exactly-once\" semantics for an \"at-least-once\" delivery environment (i.e., network retries)"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-incorrect-discount-application",
+      "title": "Prevent Incorrect Discount Application",
+      "category": "guardrails",
+      "subcategory": "financial",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "product-managers"
+      ],
+      "problemStatement": "AI-generated e-commerce logic may miscalculate discounts (e.g., \"stacking\" multiple promos) or fail to check expiration/usage-limits, leading to revenue loss.",
+      "manualChecklist": [
+        "Primary Fix: Centralize all discount logic in a single \"promotion engine\" or microservice, rather than scattering it in the application",
+        "The engine must process rules in a specific order (e.g., 1. Item-level, 2. Order-level, 3. Shipping)",
+        "For each promotion, validate all conditions: is it expired? Is the usage_limit reached? Does the cart meet the criteria?",
+        "Clearly define which discounts can \"stack\" and which are mutually exclusive",
+        "Use `code-quality/tdd-with-ai-pair` to write unit tests for every conceivable discount combination"
+      ],
+      "earlyDetection": {
+        "cicd": "Run a full suite of integration tests that assert complex discount combinations (e.g., \"20% off + BOGO\") calculate the exact expected price",
+        "static": "Code review of any changes to the promotion engine",
+        "runtime": "Monitor for an unusually high discount-to-revenue ratio. Alert on any order with a subtotal of $0 or a discount > 75%"
+      },
+      "mitigation": [
+        "Immediately disable the \"stacking\" or misbehaving promotion code",
+        "Manually cancel any fraudulent orders that have not yet shipped",
+        "Patch the promotion engine's logic to correctly check exclusivity or calculation order"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/tdd-with-ai-pair",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From e-commerce incidents where a \"stackable\" coupon bug allowed users to get $1000 orders for free",
+        "expertise": "Recommends a \"promotion engine\" microservice, an advanced, scalable architecture for handling complex pricing rules",
+        "authoritativeness": "Aligns with modern e-commerce platform architecture",
+        "trustworthiness": "Provides a clear, test-driven (TDD) approach to validate complex, high-stakes business logic"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-price-validation",
+      "title": "Prevent Missing Price Validation",
+      "category": "guardrails",
+      "subcategory": "financial",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "product-managers"
+      ],
+      "problemStatement": "AI-generated checkout code may trust a price or subtotal field submitted from the client (e.g., the browser), allowing an attacker to modify the request and buy items for $1.",
+      "manualChecklist": [
+        "Primary Fix: NEVER trust a price field from a client (browser, mobile app)",
+        "Always re-calculate the total price on the server-side by fetching the item's price directly from the database based on the SKU or product_id",
+        "The only fields the server should accept from the client are product_id and quantity",
+        "Validate the calculated price against a \"sanity check\" rule (e.g., alert if total is $0 or negative)",
+        "Use the `security/security-guardrails` workflow to scan for this class of vulnerability"
+      ],
+      "earlyDetection": {
+        "cicd": "Run an integration test that simulates a \"man-in-the-middle\" attack: submit a checkout cart with a price: 1 field and assert that the request is rejected or corrected",
+        "static": "SAST scan to flag any API endpoint that reads a price or total field from a request.body",
+        "runtime": "Alert on any completed order where the total_price is $0 or negative"
+      },
+      "mitigation": [
+        "Immediately disable the checkout endpoint",
+        "Manually cancel all fraudulent orders that used the tampered price",
+        "Deploy a patch that removes all price-handling from the client request and only uses server-side price calculation"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-22-missing-validations",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From real-world e-commerce exploits where attackers tampered with client-side form fields to \"name their own price\"",
+        "expertise": "Cites the correct \"server-side recalculation\" pattern as the only secure solution",
+        "authoritativeness": "This is a classic \"Improper Input Validation\" (CWE-20) and \"Business Logic\" (CWE-840) vulnerability",
+        "trustworthiness": "Provides a clear, non-negotiable rule: \"NEVER trust a price field from a client\""
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-rate-limit-exceeded",
+      "title": "Prevent Rate Limit Exceeded",
+      "category": "guardrails",
+      "subcategory": "integration",
+      "severity": "medium",
+      "audience": [
+        "engineers"
+      ],
+      "problemStatement": "When AI generates an API client, it often fails to respect the rate limits of the server it's calling. The client hammers the server, gets a 429 Too Many Requests error, and fails.",
+      "manualChecklist": [
+        "Primary Fix: Implement retry logic (Guardrail 41) that specifically handles 429 status codes",
+        "When a 429 is received, honor the Retry-After header if it's provided by the server",
+        "If Retry-After is not provided, use Exponential Backoff with Jitter to slow down",
+        "Proactively limit the client's request rate (e.g., using a client-side \"token bucket\") so it never hits the limit in the first place",
+        "Ground the AI with the API's rate limit documentation"
+      ],
+      "earlyDetection": {
+        "cicd": "Run integration tests against a mock server that returns 429 and assert that the client correctly retries after the specified delay",
+        "static": "Code review of the HTTP client to ensure it has a 429 handler",
+        "runtime": "Monitor client-side logs for 429 Too Many Requests errors. A high volume indicates a missing or ineffective retry policy"
+      },
+      "mitigation": [
+        "Temporarily stop the client application that is hammering the API",
+        "Deploy a hotfix to the client that adds the 429 handler with exponential backoff",
+        "Restart the client application and monitor its logs to ensure 429 errors have stopped"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-05-missing-context",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From building API clients that were \"chatty\" and got IP-banned by third-party services for ignoring rate limits",
+        "expertise": "Cites the correct, two-part solution: honoring the Retry-After header (primary) or using exponential backoff (fallback)",
+        "authoritativeness": "This is the \"client-side\" of the OWASP API4: Unrestricted Resource Consumption problem",
+        "trustworthiness": "Provides a \"good neighbor\" policy that prevents your clients from DDoSing your partners"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-authentication-headers",
+      "title": "Prevent Missing Authentication Headers",
+      "category": "guardrails",
+      "subcategory": "integration",
+      "severity": "high",
+      "audience": [
+        "engineers"
+      ],
+      "problemStatement": "AI-generated client code for a protected API may forget to attach the Authorization header (e.g., Bearer [token]), causing all requests to fail with 401 Unauthorized.",
+      "manualChecklist": [
+        "Primary Fix: Use a persistent HTTP client middleware (or \"interceptor\") to automatically attach the Authorization header to every outgoing request",
+        "Do not manually add the header in every function; centralize it in one place",
+        "Securely fetch and refresh the token (e.g., OAuth2 refresh flow) and update the middleware with the new token",
+        "Ground the AI with the API's authentication documentation, not just its endpoints",
+        "On receiving a 401, automatically trigger a token-refresh flow, then retry the original request once with the new token"
+      ],
+      "earlyDetection": {
+        "cicd": "Run an integration test against a protected endpoint and assert it succeeds (gets a 200, not a 401)",
+        "static": "Code review of the API client instantiation to ensure the auth middleware is attached",
+        "runtime": "Monitor client-side logs for a storm of 401 Unauthorized errors"
+      },
+      "mitigation": [
+        "Roll back the faulty client deployment",
+        "Patch the client's HTTP middleware to correctly attach the Authorization header",
+        "Re-deploy the patched client"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/capability-grounding-manifest",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-05-missing-context",
+        "pain-point-22-missing-validations",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From debugging client applications that \"suddenly stopped working\" because they lacked token-refresh logic",
+        "expertise": "Cites the \"client middleware/interceptor\" pattern as the correct, centralized way to manage auth headers",
+        "authoritativeness": "Aligns with standard OAuth2/JWT client implementation patterns",
+        "trustworthiness": "Provides an advanced, resilient pattern: automatically refresh the token on 401 and retry the request once"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-incorrect-content-type-headers",
+      "title": "Prevent Incorrect Content Type Headers",
+      "category": "guardrails",
+      "subcategory": "integration",
+      "severity": "medium",
+      "audience": [
+        "engineers"
+      ],
+      "problemStatement": "AI-generated client code may forget to set the Content-Type: application/json header on POST requests, causing the server to reject the request (415 Unsupported Media Type) or misinterpret the body.",
+      "manualChecklist": [
+        "Primary Fix: Use an HTTP client library (e.g., Axios, Requests) that automatically sets Content-Type: application/json when you send a JSON object",
+        "If sending data manually, always set the Content-Type header to match the body format (e.g., application/json, application/x-www-form-urlencoded)",
+        "Always set the Accept: application/json header to tell the server what format you expect in the response",
+        "Ground the AI with the API's OpenAPI schema, which specifies the required Content-Type",
+        "On the server-side, validate the Content-Type header and reject requests with a 415 status if it's missing or incorrect"
+      ],
+      "earlyDetection": {
+        "cicd": "Run an integration test that sends a POST request and asserts it is not rejected with a 415 error",
+        "static": "Code review of manual HTTP requests (e.g., fetch) to check for a Content-Type header",
+        "runtime": "Monitor logs for 415 Unsupported Media Type errors, either on the client-side (your error) or server-side (their error)"
+      },
+      "mitigation": [
+        "Roll back the faulty client deployment",
+        "Patch the client code to explicitly set the correct Content-Type header (e.g., application/json)",
+        "Re-deploy the client"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/capability-grounding-manifest",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-05-missing-context",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From debugging \"mystery\" 415 errors that were caused by a missing Content-Type header on a POST request",
+        "expertise": "Cites the critical distinction between Content-Type (what I am sending) and Accept (what I want back)",
+        "authoritativeness": "Aligns with foundational HTTP 1.1 protocol standards (RFC 7231)",
+        "trustworthiness": "Recommends using modern clients that automate this, reducing the chance of human (or AI) error"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-pagination-in-api-client",
+      "title": "Prevent Missing Pagination In Api Client",
+      "category": "guardrails",
+      "subcategory": "integration",
+      "severity": "medium",
+      "audience": [
+        "engineers"
+      ],
+      "problemStatement": "AI-generated client code for a paginated API (e.g., GET /items) may forget to handle pagination, only requesting the first page of data (e.g., the first 25 items) and silently ignoring the rest.",
+      "manualChecklist": [
+        "Primary Fix: When calling a list endpoint, check the response body for pagination metadata (e.g., next_page_token, has_more, total_pages)",
+        "If pagination metadata exists, implement a loop (while (next_page_token)) to \"follow the pages\" and aggregate all results",
+        "Always set a sane maximum number of pages to fetch to prevent accidental infinite loops or resource exhaustion",
+        "Ground the AI with the API's documentation for its specific pagination scheme (e.g., cursor, offset, or keyset)",
+        "Use the `ai-behavior/capability-grounding-manifest` workflow"
+      ],
+      "earlyDetection": {
+        "cicd": "Run an integration test against a mock server that returns multiple, paginated pages. Assert that the client code correctly fetches and aggregates all items",
+        "static": "Code review of any client code that calls a GET list endpoint",
+        "runtime": "Monitor for data integrity issues where data from the API seems to be \"missing.\" Check client logs to see if it only ever requested page 1"
+      },
+      "mitigation": [
+        "Identify the client process that is only fetching partial data",
+        "Patch the client code to implement the \"page-following\" loop",
+        "Trigger a backfill or re-sync of the data to fetch all the pages that were missed"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/capability-grounding-manifest",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-05-missing-context",
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From data synchronization jobs that silently failed for months because they only ever fetched the first page of results",
+        "expertise": "Cites the \"check for metadata\" and \"loop on next_page\" algorithm, which is the correct way to consume a paginated API",
+        "authoritativeness": "Aligns with standard API client design patterns",
+        "trustworthiness": "Provides a crucial \"safety brake\" by recommending a maximum page-fetch limit to prevent runaway loops"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-incorrect-timeout-values",
+      "title": "Prevent Incorrect Timeout Values",
+      "category": "guardrails",
+      "subcategory": "integration",
+      "severity": "high",
+      "audience": [
+        "engineers"
+      ],
+      "problemStatement": "AI-generated client code may set a timeout value that is too short (e.g., 500ms), causing it to fail on valid requests, or too long (e.g., 5 minutes), causing it to hang and exhaust resources.",
+      "manualChecklist": [
+        "Primary Fix: Set reasonable timeouts. A good default is a 1-2 second connection timeout and a 5-10 second read timeout",
+        "Do not guess. Set timeouts based on the downstream service's actual p99 latency SLO",
+        "The client's timeout must always be longer than the server's advertised p99 latency",
+        "Implement dynamic timeouts that adjust based on real-time network conditions",
+        "Ensure the total timeout (including retries) is less than the caller's timeout (e.g., an API gateway timeout of 30s)"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST scan to flag HTTP clients with missing or unreasonable (e.g., > 60s or < 1s) timeout values",
+        "static": "Code review of all HTTP client configurations",
+        "runtime": "Monitor logs for a high rate of ClientTimeoutException or ReadTimeoutException. This means your timeout is too aggressive"
+      },
+      "mitigation": [
+        "Analyze logs to see if the timeouts are happening during specific high-load periods or consistently",
+        "(If too aggressive) Deploy a hotfix to increase the client's read timeout to a more reasonable value (e.g., 15s)",
+        "(If downstream is slow) Open a circuit breaker (Guardrail 33) and file a bug for the downstream service"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-05-missing-context",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From tuning microservice timeouts, where a 1s timeout was too short for a p99 of 1.2s, causing cascading failures",
+        "expertise": "Cites the SLO-driven (p99) method for setting timeouts, which is an advanced SRE practice",
+        "authoritativeness": "Aligns with SRE best practices on avoiding \"metastable failures\" by setting realistic timeouts",
+        "trustworthiness": "Provides a nuanced, data-driven approach (\"measure p99\") instead of just \"guessing\" a timeout value"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-retry-logic-for-api-calls",
+      "title": "Prevent Missing Retry Logic For Api Calls",
+      "category": "guardrails",
+      "subcategory": "integration",
+      "severity": "high",
+      "audience": [
+        "engineers"
+      ],
+      "problemStatement": "AI-generated API client code will often fail permanently on transient network errors (e.g., 503, timeout), when a simple retry would have succeeded. This is identical to Guardrail 41, focused on the client integration.",
+      "manualChecklist": [
+        "Primary Fix: Implement retry logic only for transient, idempotent-safe errors (e.g., 503, 504, 429, ConnectionTimeout)",
+        "Crucial: Never retry on 4xx client errors (e.g., 400, 401, 404), as these will never succeed",
+        "Use Exponential Backoff: increase the wait time between retries (e.g., 1s, 2s, 4s) to give the downstream service time to recover",
+        "Add Jitter (randomness) to the backoff delay to prevent a \"thundering herd\" of synchronized retries",
+        "Set a maximum retry count (e.g., 3-5 attempts) and a total timeout"
+      ],
+      "earlyDetection": {
+        "cicd": "SAST scan to ensure HTTP clients are wrapped in a resilience library (e.g., Polly, Resilience4j)",
+        "static": "Code review of network clients to check for retry logic",
+        "runtime": "Monitor logs for a high rate of client-side 5xx/timeout errors that are not followed by a retry attempt"
+      },
+      "mitigation": [
+        "Deploy a hotfix to the client service that adds a retry policy (with exponential backoff and jitter)",
+        "(If downstream is overloaded) Temporarily open a circuit breaker (Guardrail 33) to protect it",
+        ""
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-05-missing-context",
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From building resilient microservices that must gracefully handle temporary network blips between services",
+        "expertise": "Cites the specific, industry-standard \"Exponential Backoff with Jitter\" algorithm as the correct implementation",
+        "authoritativeness": "This is a standard resilience pattern recommended by AWS, Microsoft, and Google",
+        "trustworthiness": "Provides a critical warning not to retry 4xx errors, preventing a common anti-pattern"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-breaking-api-changes",
+      "title": "Prevent Breaking Api Changes",
+      "category": "guardrails",
+      "subcategory": "integration",
+      "severity": "critical",
+      "audience": [
+        "engineers"
+      ],
+      "problemStatement": "AI-generated code, when asked to \"refactor\" or \"add a field,\" may rename or remove existing API fields, or change a field's type, breaking all existing clients that rely on the old contract.",
+      "manualChecklist": [
+        "Primary Fix: Follow the API Evolution principle: never change or delete existing fields. Only add new, optional fields",
+        "Any breaking change (e.g., deleting a field, changing a type) must be released as a new, major semantic version (e.g., /v2/endpoint)",
+        "Ground the AI with the `ai-behavior/capability-grounding-manifest` workflow, which includes the existing API contract",
+        "Use automated contract testing (e.g., Pact) or an API-diff tool in CI to detect breaking changes before deployment",
+        "Provide clear documentation and a migration path for any new API version"
+      ],
+      "earlyDetection": {
+        "cicd": "A contract test fails the build, alerting that a provider (the API) has changed in a way that breaks a consumer (the client)",
+        "static": "An API-diff tool (e.g., oas-diff) flags a breaking change in the new OpenAPI schema",
+        "runtime": "(Too late) Monitor for a spike in 400 Bad Request or 500 errors from clients immediately after a deploy"
+      },
+      "mitigation": [
+        "Immediately roll back the breaking API deployment",
+        "Re-introduce the change on a new versioned endpoint (e.g., /v2)",
+        "Communicate the new endpoint and the deprecation plan for /v1 to all clients"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "ai-behavior/capability-grounding-manifest",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-05-missing-context",
+        "pain-point-03-hallucinated-capabilities"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From managing public-facing APIs where a \"minor\" deploy broke thousands of clients",
+        "expertise": "Cites the correct industry terms: \"API Evolution\" (non-breaking) vs. \"Versioning\" (breaking) and \"Contract Testing\"",
+        "authoritativeness": "Based on Semantic Versioning (SemVer) and established REST API design best practices",
+        "trustworthiness": "Provides a clear, automatable solution (contract testing) to catch this before it breaks clients"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-api-versioning",
+      "title": "Prevent Missing Api Versioning",
+      "category": "guardrails",
+      "subcategory": "integration",
+      "severity": "high",
+      "audience": [
+        "engineers"
+      ],
+      "problemStatement": "AI-generated code will create API endpoints without a versioning strategy (e.g., /users instead of /v1/users), making it impossible to introduce breaking changes in the future without breaking existing clients (see Guardrail 51).",
+      "manualChecklist": [
+        "Primary Fix: Version your API from day one. The most common and explicit method is URI path versioning (e.g., /api/v1/resource)",
+        "Other (less common) methods include header-based (e.g., Accept: application/vnd.api.v1+json) or query-param-based versioning",
+        "Follow Semantic Versioning (SemVer): v1 (major, breaking), v1.1 (minor, new features), v1.1.2 (patch, bug fixes)",
+        "Ensure all internal and external clients must specify a version",
+        "Maintain backward compatibility for at least one major version behind the current one"
+      ],
+      "earlyDetection": {
+        "cicd": "API linter fails if a new endpoint is added to the router without a /vX/ prefix",
+        "static": "Code review of API router files (main.go, routes.py, etc.)",
+        "runtime": "N/A (This is a design-time decision)"
+      },
+      "mitigation": [
+        "(If not launched) Refactor all endpoints to include a /v1/ prefix",
+        "(If launched) \"Freeze\" the un-versioned endpoints as a legacy /v1. All new changes must go into a new /v2/ path",
+        "Start a communication plan to migrate legacy clients to the versioned endpoints"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-05-missing-context"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From being \"stuck\" with a legacy, un-versioned API that could not be changed for fear of breaking critical clients",
+        "expertise": "Cites the three main versioning strategies (URI, Header, Query) and recommends URI as the most explicit",
+        "authoritativeness": "Aligns with standard API design guides that mandate versioning as a non-negotiable first step",
+        "trustworthiness": "Provides a pragmatic \"how to fix\" plan for teams that have already launched without versioning"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-incorrect-api-error-handling",
+      "title": "Prevent Incorrect Api Error Handling",
+      "category": "guardrails",
+      "subcategory": "integration",
+      "severity": "high",
+      "audience": [
+        "engineers"
+      ],
+      "problemStatement": "AI-generated error handlers are often inconsistent. They may return plain text, an HTML stack trace, or a simple string, making it impossible for client applications to programmatically parse the error or show a useful message.",
+      "manualChecklist": [
+        "Primary Fix: Standardize all error responses on RFC 7807 (Problem Details for HTTP APIs)",
+        "The JSON error response must include: type (a URI to error docs), title (short summary), status (HTTP code), and detail (specifics)",
+        "Implement a global exception handler (middleware) that catches all unhandled exceptions and formats them as RFC 7807 JSON",
+        "Never leak sensitive information (stack traces, internal paths) in the detail field of a production error",
+        "Use correct, semantic HTTP status codes (e.g., 400, 401, 403, 404, 500)"
+      ],
+      "earlyDetection": {
+        "cicd": "Run an integration test that forces a 404 or 500 error and asserts that the response body is JSON and matches the RFC 7807 structure",
+        "static": "Code review of exception handlers to ensure they return structured JSON, not text",
+        "runtime": "Monitor logs for client-side parsing failures, or use an API gateway to validate that error responses match the contract"
+      },
+      "mitigation": [
+        "Implement a global exception handling middleware that intercepts all errors",
+        "Map all common exceptions to their correct RFC 7807 representation",
+        "Deploy the fix"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-05-missing-context",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From building API client libraries, where inconsistent error handling is the #1 integration bottleneck",
+        "expertise": "Cites the specific fields of the RFC 7807 standard (type, title, detail) as the correct, machine-readable format",
+        "authoritativeness": "Based directly on IETF RFC 7807, the internet standard for HTTP error responses",
+        "trustworthiness": "Provides a clear warning about not leaking stack traces, balancing developer experience with security"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-request-validation",
+      "title": "Prevent Missing Request Validation",
+      "category": "guardrails",
+      "subcategory": "integration",
+      "severity": "critical",
+      "audience": [
+        "engineers"
+      ],
+      "problemStatement": "AI-generated API endpoints often \"trust\" incoming data, failing to validate the request.body for required fields, correct types, or valid ranges, leading to NullPointerExceptions, security flaws, and data corruption.",
+      "manualChecklist": [
+        "Primary Fix: Define a strict JSON Schema or use a data-validation library (e.g., Pydantic, Zod, Spring Validation) for every endpoint",
+        "Validate everything: check for required fields, data types (string, int), formats (e.g., email, uuid), and ranges (min, max)",
+        "Use your OpenAPI/Swagger specification as the source of truth and automatically generate validation rules from it",
+        "On failure, immediately reject the request with a 400 Bad Request and return an RFC 7807 error (Guardrail 53) detailing the validation failure",
+        "Use the `security/security-guardrails` workflow, as this is also a major security check"
+      ],
+      "earlyDetection": {
+        "cicd": "Run integration tests that send invalid data (e.g., missing fields, wrong types) to every endpoint and assert that a 400 error is returned",
+        "static": "API linter to flag any endpoint that does not have an associated request validation schema",
+        "runtime": "Monitor for spikes in 500 errors (indicating unhandled validation failures, like NullPointerException) or 400 errors (indicating good validation)"
+      },
+      "mitigation": [
+        "Immediately add strict request-validation middleware to the vulnerable endpoint",
+        "Monitor logs to see if the 500 errors turn into 400 errors",
+        "Patch any downstream code that was not resilient to the invalid (e.g., null) data"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-22-missing-validations",
+        "pain-point-17-insecure-code",
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From production incidents where a single null field in a request body caused a NullPointerException and brought down a service",
+        "expertise": "Cites \"schema-first\" validation (JSON Schema, OpenAPI) as the modern, automated solution over manual if/then checks",
+        "authoritativeness": "This is a foundational API security and integration best practice, core to OWASP and OpenAPI",
+        "trustworthiness": "Provides a clear, testable, and automated way to enforce API contracts, building trust with clients"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-edge-case-testing",
+      "title": "Prevent Missing Edge Case Testing",
+      "category": "guardrails",
+      "subcategory": "testing",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "qa"
+      ],
+      "problemStatement": "AI-generated tests are excellent at covering the \"happy path\" (e.g., valid input) but consistently fail to test edge cases (e.g., null, 0, -1, empty string, max length), leading to a false sense of security.",
+      "manualChecklist": [
+        "Use Boundary Value Analysis (BVA): for a range [1, 100], test 0, 1, 100, and 101",
+        "Use Equivalence Partitioning (EP): divide inputs into classes (e.g., valid, invalid, null) and test one from each class",
+        "Use the `code-quality/tdd-with-ai-pair` workflow to first write failing tests for these edge cases",
+        "Prompt the AI specifically for edge cases: \"Generate unit tests for this function, including null, zero, negative, empty, and maximum value inputs\"",
+        "Use scenario-based testing to check for real-world user-flow edge cases, not just function inputs"
+      ],
+      "earlyDetection": {
+        "cicd": "A low \"branch\" or \"decision\" coverage score (even with 100% \"line\" coverage) often indicates missed edge cases",
+        "static": "Code review of unit tests. A lack of tests for if (input == null) is a red flag",
+        "runtime": "Production errors (e.g., NullPointerException) that were not caught by unit tests"
+      },
+      "mitigation": [
+        "Triage the production bug",
+        "Write a new, failing unit test that reproduces the edge case",
+        "Fix the application code to correctly handle the edge case (the test will now pass)"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/tdd-with-ai-pair",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From real-world QA, where most production bugs are found in edge cases that the \"happy path\" tests missed",
+        "expertise": "Cites the specific, professional QA methodologies of Boundary Value Analysis (BVA) and Equivalence Partitioning (EP)",
+        "authoritativeness": "Based on foundational software testing (ISTQB) principles and best practices",
+        "trustworthiness": "Provides a specific, actionable prompt to \"guide\" the AI into generating the correct, robust tests"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-insufficient-test-coverage",
+      "title": "Prevent Insufficient Test Coverage",
+      "category": "guardrails",
+      "subcategory": "testing",
+      "severity": "medium",
+      "audience": [
+        "engineers",
+        "qa"
+      ],
+      "problemStatement": "AI-generated tests may only cover one path through a complex function, leaving other logical branches (e.g., else blocks, catch blocks) untested and unverified.",
+      "manualChecklist": [
+        "Primary Fix: Configure a test coverage tool (e.g., JaCoCo, Istanbul, pytest-cov) to run in your CI pipeline",
+        "Set a \"quality gate\" that fails the build if coverage decreases or drops below a set threshold (e.g., 80%)",
+        "Measure decision or branch coverage, not just line coverage. 100% line coverage is a vanity metric; 100% branch coverage is robust",
+        "Use parameterized tests to efficiently cover multiple inputs and branches with a single test function",
+        "Use the `code-quality/tdd-with-ai-pair` workflow to ensure tests are written for all logic paths"
+      ],
+      "earlyDetection": {
+        "cicd": "The test coverage quality gate fails the build",
+        "static": "Review the HTML coverage report, which visually highlights untested lines and branches in red",
+        "runtime": "N/A (This is a pre-production metric)"
+      },
+      "mitigation": [
+        "Analyze the coverage report to identify the red (untested) lines/branches",
+        "Write new unit tests (using `code-quality/tdd-with-ai-pair`) to specifically execute those untested logic paths",
+        "Re-run the build and confirm coverage now meets the threshold"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/tdd-with-ai-pair",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From managing large codebases where \"line\" coverage was high but \"branch\" coverage was low, hiding significant risk",
+        "expertise": "Cites the critical difference between \"line\" coverage (weak) and \"branch/decision\" coverage (strong)",
+        "authoritativeness": "Aligns with standard \"shift-left\" QA and Test Automation best practices",
+        "trustworthiness": "Debunks \"100% line coverage\" as a vanity metric, promoting a more robust and honest measure of test quality"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-flaky-tests-from-timing-issues",
+      "title": "Prevent Flaky Tests From Timing Issues",
+      "category": "guardrails",
+      "subcategory": "testing",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "qa"
+      ],
+      "problemStatement": "AI-generated asynchronous or UI tests often use hardcoded, arbitrary sleep() or setTimeout() commands. These create \"flaky\" tests that fail intermittently in CI due to timing or load variations.",
+      "manualChecklist": [
+        "Primary Fix: NEVER use hardcoded sleep() or fixed timeouts in tests to wait for something to happen",
+        "Use explicit, condition-based waits. Wait for a specific condition to be true (e.g., \"element is visible,\" \"API response is received,\" \"text appears\")",
+        "Use modern test frameworks (e.g., Playwright, Cypress) that have \"auto-waiting\" assertions built-in (e.g., expect(..).toBeVisible())",
+        "Isolate tests from external dependencies (like APIs) by using mock servers (e.g., Mock Service Worker)",
+        "Ensure all tests are 100% independent and can be run in parallel or in any order"
+      ],
+      "earlyDetection": {
+        "cicd": "Automatically re-run any failed test once. If it passes on the second try, automatically quarantine it and flag it as \"flaky\"",
+        "static": "Linter to detect and ban sleep() or Thread.sleep() from all test files",
+        "runtime": "Maintain a \"Flaky Test Dashboard\" that tracks the failure rate of all tests, highlighting the most frequent offenders"
+      },
+      "mitigation": [
+        "Immediately quarantine the flaky test so it no longer blocks the CI pipeline",
+        "Analyze the test and refactor it to use explicit, condition-based waits instead of sleep()",
+        "Run the refactored test 100 times in a loop to verify its stability before re-enabling it"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/tdd-with-ai-pair",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From managing large CI/CD pipelines where flaky tests destroyed developer trust and slowed down releases",
+        "expertise": "Cites the correct \"explicit wait\" (e.g., waitForElementVisible) pattern vs. the sleep() anti-pattern",
+        "authoritativeness": "Aligns with official Playwright/Selenium documentation and testing best practices",
+        "trustworthiness": "Provides a pragmatic \"auto-retry and quarantine\" workflow, which is a key practice for managing large test suites"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-integration-tests",
+      "title": "Prevent Missing Integration Tests",
+      "category": "guardrails",
+      "subcategory": "testing",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "qa"
+      ],
+      "problemStatement": "AI is good at generating \"unit tests\" that test functions in isolation. It fails to generate \"integration tests\" that verify that multiple services (e.g., your app, a database, and an external API) work together correctly.",
+      "manualChecklist": [
+        "Primary Fix: Implement a \"Test Pyramid\" strategy: have many unit tests, some integration tests, and few end-to-end tests",
+        "Write integration tests that check the full flow of a feature (e.g., \"API endpoint -> Database\" or \"API -> External API\")",
+        "Use test containers (e.g., Testcontainers) to spin up real, ephemeral dependencies (like a real PostgreSQL or Redis container) for your tests",
+        "Use mock servers (e.g., Mock Service Worker, WireMock) to simulate external API dependencies",
+        "Run integration tests as a separate, mandatory stage in the CI/CD pipeline after unit tests pass"
+      ],
+      "earlyDetection": {
+        "cicd": "A dedicated \"integration-test\" job in the pipeline",
+        "static": "Code review. If a new feature only has unit tests, it's a red flag",
+        "runtime": "(Too late) Production incidents where two \"unit-tested\" services fail to integrate, e.g., due to a schema mismatch"
+      },
+      "mitigation": [
+        "A production incident occurs where two components fail to integrate",
+        "Write a new, failing integration test that reproduces this production failure in the CI environment",
+        "Fix the code (e.g., fix the schema mismatch, auth error). The integration test will now pass"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/tdd-with-ai-pair",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations",
+        "pain-point-05-missing-context"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From incidents where all unit tests passed, but the application failed in production because the \"plumbing\" between components was broken",
+        "expertise": "Cites the \"Test Pyramid\" model and \"Testcontainers\" as modern, advanced integration testing practices",
+        "authoritativeness": "Aligns with all modern software testing and CI/CD best practices",
+        "trustworthiness": "Provides a clear, practical strategy for testing with real dependencies (Testcontainers) and simulated ones (Mock Servers)"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-test-data-pollution",
+      "title": "Prevent Test Data Pollution",
+      "category": "guardrails",
+      "subcategory": "testing",
+      "severity": "medium",
+      "audience": [
+        "engineers",
+        "qa"
+      ],
+      "problemStatement": "AI-generated tests may not clean up after themselves, leaving \"polluted\" data (e.g., test_user_123) in the test database. This causes other tests to fail intermittently when they collide with this data.",
+      "manualChecklist": [
+        "Primary Fix: Ensure every test is idempotent and isolated. Each test must create its own required data and destroy it afterward",
+        "Use a setup() and teardown() function (e.g., beforeEach/afterEach) to create and delete test-specific data for every single test",
+        "Better yet, wrap every test in a database transaction, and execute a ROLLBACK in the teardown() step. This is faster and cleaner",
+        "Never allow tests to share state. Test A should never depend on data created by Test B",
+        "Use dynamic, unique data (e.g., UUIDs or random strings) for test records to prevent collisions (e.g., user_ + uuid.v4())"
+      ],
+      "earlyDetection": {
+        "cicd": "Tests fail intermittently, especially when run in parallel or in a different order. This is a classic sign of data pollution",
+        "static": "N/A (Hard to detect statically)",
+        "runtime": "Manually inspecting the test database and finding thousands of leftover test_... records"
+      },
+      "mitigation": [
+        "(In CI) Re-run the build. If it passes, you have a data pollution problem",
+        "(Fix) Identify the polluting test (the one that doesn't clean up) and the victim test (the one that fails)",
+        "Refactor all tests to wrap them in a database transaction with an automatic ROLLBACK"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/tdd-with-ai-pair",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From debugging \"flaky\" CI pipelines, only to find the root cause was tests colliding over a shared test_user record",
+        "expertise": "Cites the \"transactional rollback\" method as the superior, faster, and cleaner solution to manual teardown() deletion",
+        "authoritativeness": "Aligns with Test Data Management (TDM) best practices that mandate test isolation",
+        "trustworthiness": "Provides a clear, actionable rule: \"Never allow tests to share state\""
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-negative-test-cases",
+      "title": "Prevent Missing Negative Test Cases",
+      "category": "guardrails",
+      "subcategory": "testing",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "qa"
+      ],
+      "problemStatement": "AI-generated tests excel at the \"happy path\" (e.g., \"test valid login\") but almost never generate \"negative tests\" (e.g., \"test invalid login,\" \"test empty password,\" \"test locked-out user\").",
+      "manualChecklist": [
+        "Primary Fix: For every \"happy path\" test, write at least one \"unhappy path\" (negative) test",
+        "Test for invalid inputs (e.g., bad format, out of range), as defined by your BVA and EP (Guardrail 61)",
+        "Test for invalid states (e.g., \"try to charge an unpaid invoice\" or \"log in with a suspended account\")",
+        "Test for correct error handling: assert that invalid input correctly returns a 400 error or throws the expected exception",
+        "Prompt the AI specifically: \"Generate negative test cases for this login function, including wrong password, empty email, and non-existent user\""
+      ],
+      "earlyDetection": {
+        "cicd": "A low branch coverage score often means your catch blocks and if (error) blocks are not being tested",
+        "static": "Code review of test files. If there are no assert_throws or expect(..).to_return_400 tests, it's a red flag",
+        "runtime": "(Too late) A 500 error in production because an invalid input caused an unhandled exception instead of a handled 400 error"
+      },
+      "mitigation": [
+        "A production bug is found where invalid input (e.g., an empty string) causes a 500 error",
+        "Write a new, failing test that sends that exact invalid input and asserts that the function returns a graceful error (e.g., a 400 status)",
+        "Fix the application code to catch the error and return the graceful response"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/tdd-with-ai-pair",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From production incidents where \"unhappy paths\" were never tested, leading to unhandled exceptions that crashed services",
+        "expertise": "Cites the distinction between testing invalid inputs (e.g., bad email) and invalid states (e.g., suspended user)",
+        "authoritativeness": "This is a foundational QA practice, often called \"destructive testing\" or \"failure testing\"",
+        "trustworthiness": "Provides a clear, actionable prompt to \"guide\" the AI into generating the negative tests that it naturally misses"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-incorrect-test-assertions",
+      "title": "Prevent Incorrect Test Assertions",
+      "category": "guardrails",
+      "subcategory": "testing",
+      "severity": "medium",
+      "audience": [
+        "engineers",
+        "qa"
+      ],
+      "problemStatement": "AI-generated tests can be tautological or incorrect. They may test the wrong thing (e.g., assert(true)), have logical errors, or accidentally repeat the same logic from the function, thus failing to catch bugs.",
+      "manualChecklist": [
+        "Primary Fix: Never repeat the implementation logic in the assertion. Use static, \"known-good\" values",
+        "(Bad: assert(add(2, 2) == 2 + 2). Good: assert(add(2, 2) == 4))",
+        "Use the Arrange-Act-Assert (AAA) pattern to structure tests clearly and keep assertions separate from logic",
+        "Test one thing per test. Have a single Act and a single, clear Assert",
+        "Use specific assertion methods (e.g., assertIsNotNull, assertHasLength) instead of assertTrue(x != null)",
+        "Use \"web-first\" assertions (e.g., Playwright's expect()) that auto-wait, rather than asserting on a boolean (expect(..).isVisible() == true)"
+      ],
+      "earlyDetection": {
+        "cicd": "N/A (A bad assertion will still pass, giving a false positive)",
+        "static": "Code review is the only way to catch this. Reviewers must ask: \"Does this assertion validate the requirement or just the implementation?\"",
+        "runtime": "(Too late) A production bug is found in code that was \"100% tested,\" indicating the tests were invalid"
+      },
+      "mitigation": [
+        "A production bug is found in \"tested\" code",
+        "Analyze the test and find the incorrect assertion",
+        "Fix the assertion first to be a \"known-good\" value, which will make the test fail (revealing the bug)"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "code-quality/tdd-with-ai-pair",
+          "code-quality/keep-prs-under-control"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From code reviews where AI-generated tests were found to be testing themselves, not the actual business logic",
+        "expertise": "Cites the specific \"Arrange-Act-Assert\" (AAA) pattern and the \"don't repeat logic\" rule",
+        "authoritativeness": "Aligns with unit testing best practices (e.g., Kent Beck's TDD, Roy Osherove's Art of Unit Testing)",
+        "trustworthiness": "Admits that CI/CD cannot catch this; it requires human review, promoting a \"human-in-the-loop\" (HITL) process"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-performance-tests",
+      "title": "Prevent Missing Performance Tests",
+      "category": "guardrails",
+      "subcategory": "testing",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "qa"
+      ],
+      "problemStatement": "AI-generated code works for one user, but teams deploy it without performance testing. The code is inefficient and fails under real-world load (e.g., N+1 queries, slow algorithms). This is a duplicate of Guardrail 32.",
+      "manualChecklist": [
+        "Integrate performance testing into the `process/release-readiness-runbook` workflow before every production release",
+        "Define clear Service Level Objectives (SLOs) (e.g., \"p99 latency < 500ms,\" \"error rate < 0.1%\") and fail the test if they are breached",
+        "Use load testing tools (e.g., k6, Artillery, JMeter) to simulate realistic, concurrent user traffic",
+        "Run a \"soak test\" (long-duration test) to find memory leaks (see Guardrail 36)",
+        "Use AI to generate the performance test scripts, e.g., \"Write a k6 script that simulates 100 virtual users\""
+      ],
+      "earlyDetection": {
+        "cicd": "Automated performance test stage in the deployment pipeline. A breached SLO (high latency, high error rate) fails the build",
+        "static": "N/A (This is a runtime testing process)",
+        "runtime": "N/A (This is the runtime detection method, done pre-production)"
+      },
+      "mitigation": [
+        "(In Test) The build fails. Analyze the test results (e.g., APM trace) to find the bottleneck (e.g., N+1 query, slow function)",
+        "(In Prod) If an untested service fails, immediately roll it back",
+        "(Post-Incident) Replicate the production load in a staging environment, fix the bottleneck, and add this test to the permanent CI/CD pipeline"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "Based on countless \"successful\" launches that immediately crashed when real users arrived",
+        "expertise": "Cites specific SLO-driven testing (p99 latency) and test types (load, soak) as the correct methodology",
+        "authoritativeness": "Aligns with SRE and release engineering best practices that treat performance testing as a mandatory gate",
+        "trustworthiness": "Acknowledges the difficulty of testing in production and recommends a realistic, production-like staging environment"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-test-environment-mismatch",
+      "title": "Prevent Test Environment Mismatch",
+      "category": "guardrails",
+      "subcategory": "testing",
+      "severity": "high",
+      "audience": [
+        "engineers",
+        "qa"
+      ],
+      "problemStatement": "AI-generated tests pass in a \"mock\" or local environment, but the code fails in production because the test environment did not match production (e.g., different dependency versions, missing service, different data).",
+      "manualChecklist": [
+        "Primary Fix: Use Infrastructure as Code (IaC) (e.g., Terraform, Docker Compose) to define all environments (local, CI, staging, prod) from the same source files",
+        "Use Docker containers to ensure all developers and the CI pipeline run the code with the exact same OS and dependency versions",
+        "Use tools like LocalStack to simulate cloud (AWS) services locally",
+        "Automate the provisioning and teardown of test environments for every CI run",
+        "Use a single, version-controlled catalog of all environment configurations"
+      ],
+      "earlyDetection": {
+        "cicd": "The CI build fails, but the developer says \"it works on my machine.\" This is the #1 symptom of environment mismatch",
+        "static": "Code review of Dockerfiles, docker-compose.yml, and Terraform (.tf) files",
+        "runtime": "(Too late) A deployment fails in production with an error (e.g., \"service not found,\" \"config file missing\") that did not happen in staging"
+      },
+      "mitigation": [
+        "Roll back the deployment",
+        "Analyze the error. Identify the configuration or version difference between production and the test environment (e.g., \"Prod has Postgres 15, Staging has 14\")",
+        "Update the Infrastructure as Code (IaC) files to make the test/staging environment match production"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-01-almost-correct-code"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From debugging the classic \"it works on my machine\" problem, which is almost always an environment mismatch",
+        "expertise": "Cites the correct, modern DevSecOps solution: Infrastructure as Code (IaC), Docker, and simulation tools (LocalStack)",
+        "authoritativeness": "Aligns with HashiCorp (Terraform) and AWS best practices for environment management",
+        "trustworthiness": "Provides a clear, automatable, and version-controlled approach to eliminate an entire class of \"flaky\" failures"
+      },
+      "status": "published"
+    },
+    {
+      "slug": "prevent-missing-security-tests",
+      "title": "Prevent Missing Security Tests",
+      "category": "guardrails",
+      "subcategory": "testing",
+      "severity": "critical",
+      "audience": [
+        "engineers",
+        "qa"
+      ],
+      "problemStatement": "AI-generated code is highly prone to security vulnerabilities, but AI-generated tests almost never include security assertions, focusing only on \"happy path\" functionality.",
+      "manualChecklist": [
+        "Primary Fix: Integrate automated security testing tools directly into the CI/CD pipeline (this is DevSecOps)",
+        "SAST (Static Analysis): Run tools (e.g., Snyk, Semgrep) that scan the source code for vulnerabilities (e.g., SQLi, hardcoded secrets)",
+        "DAST (Dynamic Analysis): Run tools (e.g., OWASP ZAP) that \"attack\" the running application in a test environment",
+        "SCA (Software Composition Analysis): Run tools (e.g., Dependabot, BlackDuck) to scan for vulnerabilities in your third-party libraries",
+        "Enforce the `security/security-guardrails` workflow, which automates these scans"
+      ],
+      "earlyDetection": {
+        "cicd": "The SAST, DAST, or SCA scan fails the build, blocking the vulnerable code from being merged",
+        "static": "Code review by a security champion",
+        "runtime": "(Too late) A WAF (Web Application Firewall) blocks an attack, or a breach occurs"
+      },
+      "mitigation": [
+        "The CI build fails with a security vulnerability report",
+        "Triage the vulnerability. (Is it a false positive? What is the severity?)",
+        "Use the tool's recommendation (or `code-quality/tdd-with-ai-pair`) to patch the code"
+      ],
+      "relatedResources": {
+        "adjacentWorkflows": [
+          "security/security-guardrails",
+          "process/release-readiness-runbook"
+        ]
+      },
+      "painPointIds": [
+        "pain-point-17-insecure-code",
+        "pain-point-22-missing-validations"
+      ],
+      "painPointKeywords": [],
+      "eEatSignals": {
+        "experience": "From implementing \"shift-left\" DevSecOps pipelines that find and fix vulnerabilities before they reach production",
+        "expertise": "Cites the specific AST (Application Security Testing) tool types: SAST, DAST, SCA, and IAST",
+        "authoritativeness": "This is the industry-standard approach to scaling security, recommended by OWASP, Gartner, and all major security vendors",
+        "trustworthiness": "Promotes an automated, \"shift-left\" culture where security is part of the build, not an afterthought"
+      },
+      "status": "published"
+    }
+  ]
+}

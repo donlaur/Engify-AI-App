@@ -34,10 +34,28 @@ const CATEGORY_LABELS: Record<string, string> = {
   community: 'Community',
   enablement: 'Enablement',
   governance: 'Governance',
+  guardrails: 'Guardrail',
   memory: 'Memory & Knowledge',
   process: 'Process & Delivery',
   'risk-management': 'Risk Management',
   security: 'Security',
+};
+
+const SUBCATEGORY_LABELS: Record<string, string> = {
+  'data-integrity': 'Data Integrity',
+  security: 'Security',
+  performance: 'Performance',
+  availability: 'Availability',
+  financial: 'Financial',
+  integration: 'Integration',
+  testing: 'Testing',
+};
+
+const SEVERITY_COLORS: Record<string, 'destructive' | 'default' | 'secondary'> = {
+  critical: 'destructive',
+  high: 'destructive',
+  medium: 'default',
+  low: 'secondary',
 };
 
 const APP_SECTION_LABELS: Record<'prompts' | 'patterns' | 'learn', string> = {
@@ -105,9 +123,21 @@ export function WorkflowCardClient({ workflow }: WorkflowCardClientProps) {
             className="flex-1 space-y-1 pr-2 transition-colors hover:text-primary"
             onClick={handleClick}
           >
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {CATEGORY_LABELS[workflow.category] ?? formatLabel(workflow.category)}
-            </p>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {CATEGORY_LABELS[workflow.category] ?? formatLabel(workflow.category)}
+              </p>
+              {workflow.subcategory && (
+                <Badge variant="outline" className="text-xs">
+                  {SUBCATEGORY_LABELS[workflow.subcategory] ?? formatLabel(workflow.subcategory)}
+                </Badge>
+              )}
+              {workflow.severity && (
+                <Badge variant={SEVERITY_COLORS[workflow.severity] || 'default'} className="text-xs">
+                  {workflow.severity.toUpperCase()}
+                </Badge>
+              )}
+            </div>
             <CardTitle className="break-words text-lg leading-tight transition-colors group-hover:text-white dark:group-hover:text-white sm:text-xl">
               {workflow.title}
             </CardTitle>

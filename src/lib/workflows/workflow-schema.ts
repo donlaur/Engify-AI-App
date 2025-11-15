@@ -7,10 +7,28 @@ export const WORKFLOW_CATEGORIES = [
   'community',
   'enablement',
   'governance',
+  'guardrails',
   'memory',
   'process',
   'risk-management',
   'security',
+] as const;
+
+export const GUARDRAIL_SUBCATEGORIES = [
+  'data-integrity',
+  'security',
+  'performance',
+  'availability',
+  'financial',
+  'integration',
+  'testing',
+] as const;
+
+export const GUARDRAIL_SEVERITIES = [
+  'critical',
+  'high',
+  'medium',
+  'low',
 ] as const;
 
 export const WORKFLOW_AUDIENCES = [
@@ -72,6 +90,15 @@ export const WorkflowEEATSignalsSchema = z.object({
   trustworthiness: z.string().min(1).optional(),
 });
 
+// Guardrail-specific schemas
+export const GuardrailEarlyDetectionSchema = z.object({
+  cicd: z.string().optional(),
+  static: z.string().optional(),
+  runtime: z.string().optional(),
+});
+
+export const GuardrailMitigationSchema = z.array(z.string().min(1)).length(3);
+
 export const WorkflowSchema = z.object({
   slug: z
     .string()
@@ -79,6 +106,11 @@ export const WorkflowSchema = z.object({
     .regex(/^[a-z0-9-]+$/, 'Slug must be URL-safe (lowercase, numbers, hyphen)'),
   title: z.string().min(1, 'Workflow title is required'),
   category: z.enum(WORKFLOW_CATEGORIES),
+  // Guardrail-specific fields (optional for regular workflows)
+  subcategory: z.enum(GUARDRAIL_SUBCATEGORIES).optional(),
+  severity: z.enum(GUARDRAIL_SEVERITIES).optional(),
+  earlyDetection: GuardrailEarlyDetectionSchema.optional(),
+  mitigation: GuardrailMitigationSchema.optional(),
   audience: z.array(z.enum(WORKFLOW_AUDIENCES)).min(1, 'Specify at least one audience'),
   problemStatement: z.string().min(1, 'Problem statement is required'),
   manualChecklist: z

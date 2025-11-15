@@ -19,6 +19,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   community: 'Community',
   enablement: 'Enablement',
   governance: 'Governance',
+  guardrails: 'Guardrails',
   memory: 'Memory & Knowledge',
   process: 'Process & Delivery',
   'risk-management': 'Risk Management',

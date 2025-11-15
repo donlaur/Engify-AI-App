@@ -119,21 +119,24 @@ export default async function WorkflowsPage() {
       <MainLayout>
         <WorkflowTracking />
         <div className="container py-10">
-        <header className="mb-12 rounded-xl border bg-gradient-to-br from-primary/10 via-background to-background p-10 text-center">
+        <header className="mb-8 text-center">
           <div className="mx-auto max-w-3xl space-y-4">
-            <h1 className="text-4xl font-bold md:text-5xl">
+            <h1 className="mb-4 text-4xl font-bold">
               Industry-Proven AI Guardrails &amp; Workflows
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
               Precisely documented checklists that teams can run today. Pick a failure mode, follow the
               manual steps, and see how these workflows help prevent common AI-assisted development issues.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
               <Button asChild size="lg">
-                <Link href="#workflow-library">Explore workflows &amp; guardrails</Link>
+                <Link href="#workflow-library">Explore workflows</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link href="/workflows/pain-points">View pain points</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/workflows/recommendations">View recommendations</Link>
               </Button>
             </div>
           </div>
@@ -164,6 +167,13 @@ export default async function WorkflowsPage() {
               <p>
                 While workflows are manual checklists you can use today, <strong className="text-foreground">guardrails automate these workflows</strong> to catch issues before they become incidents. Automated guardrails turn pain points into prevented patterns at every commit.
               </p>
+              <div className="pt-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/guardrails">
+                    Browse all guardrails →
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </section>

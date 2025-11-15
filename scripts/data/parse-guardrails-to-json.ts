@@ -69,7 +69,11 @@ function parseGuardrailSection(section: string): GuardrailMarkdown | null {
   // Extract category and severity
   const categoryMatch = section.match(/\*\*Category:\*\* ([^|]+) \| \*\*Severity:\*\* (\w+)/);
   const category = categoryMatch?.[1]?.trim() || '';
-  const severity = (categoryMatch?.[2]?.trim() as any) || 'medium';
+  const severityRaw = categoryMatch?.[2]?.trim() || 'medium';
+  const severity: 'critical' | 'high' | 'medium' | 'low' = 
+    (severityRaw === 'critical' || severityRaw === 'high' || severityRaw === 'low') 
+      ? severityRaw 
+      : 'medium';
   
   // Extract problem
   const problemMatch = section.match(/\*\*Problem:\*\* (.+?)(?=\n\*\*Prevention|\n---|$)/s);
@@ -131,7 +135,12 @@ function parseGuardrailSection(section: string): GuardrailMarkdown | null {
   }
   
   // Extract E-E-A-T signals
-  const eEatSignals: any = {};
+  const eEatSignals: {
+    experience?: string;
+    expertise?: string;
+    authoritativeness?: string;
+    trustworthiness?: string;
+  } = {};
   const eEatStart = section.indexOf('**E-E-A-T Signals (SEO):**');
   if (eEatStart === -1) {
     // Try without (SEO)
@@ -212,7 +221,28 @@ function parseGuardrailSection(section: string): GuardrailMarkdown | null {
   };
 }
 
-function convertToWorkflowFormat(guardrail: GuardrailMarkdown, subcategory: string): any {
+function convertToWorkflowFormat(guardrail: GuardrailMarkdown, subcategory: string): {
+  slug: string;
+  title: string;
+  category: 'guardrails';
+  subcategory: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  audience: string[];
+  problemStatement: string;
+  manualChecklist: string[];
+  earlyDetection?: { cicd?: string; static?: string; runtime?: string };
+  mitigation?: [string, string, string];
+  relatedResources: { adjacentWorkflows: string[] };
+  painPointIds: string[];
+  painPointKeywords: string[];
+  eEatSignals?: {
+    experience?: string;
+    expertise?: string;
+    authoritativeness?: string;
+    trustworthiness?: string;
+  };
+  status: 'published' | 'draft';
+} {
   // Map guardrail subcategory to audience
   const audienceMap: Record<string, string[]> = {
     'data-integrity': ['engineers', 'platform'],
@@ -262,7 +292,28 @@ async function main() {
     'testing.md',
   ];
   
-  const allGuardrails: any[] = [];
+  const allGuardrails: Array<{
+    slug: string;
+    title: string;
+    category: 'guardrails';
+    subcategory: string;
+    severity: 'critical' | 'high' | 'medium' | 'low';
+    audience: string[];
+    problemStatement: string;
+    manualChecklist: string[];
+    earlyDetection?: { cicd?: string; static?: string; runtime?: string };
+    mitigation?: [string, string, string];
+    relatedResources: { adjacentWorkflows: string[] };
+    painPointIds: string[];
+    painPointKeywords: string[];
+    eEatSignals?: {
+      experience?: string;
+      expertise?: string;
+      authoritativeness?: string;
+      trustworthiness?: string;
+    };
+    status: 'published' | 'draft';
+  }> = [];
   
   for (const file of categoryFiles) {
     const filePath = path.join(GUARDRAIL_DIR, file);

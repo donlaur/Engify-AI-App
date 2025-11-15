@@ -64,28 +64,34 @@
 
 ---
 
-### 4. **Recommendations** (Best Practices & Guidance)
-**What:** Proactive best practices, strategic guidance, and "should do" advice for AI-assisted development.
+### 4. **Recommendations** (Strategic Guidance & Best Practices)
+**What:** Strategic guidance that explains WHY you should adopt certain practices, WHEN to apply them, and WHAT benefits they provide. Recommendations provide the rationale and context; workflows provide the HOW.
+
+**Key Distinction from Workflows:**
+- **Recommendations** = Strategic (WHY, WHEN, WHAT) - Focus on rationale, context, and business value
+- **Workflows** = Tactical (HOW) - Focus on step-by-step checklists and procedures
+- Recommendations often link to workflows that implement them (e.g., "You should enforce small PRs" → links to `keep-prs-under-control` workflow)
 
 **Examples:**
-- `start-with-few-shot-learning` - Beginner-friendly pattern recommendations
-- `use-guardrails-for-critical-paths` - When to implement automated guardrails
-- `choose-ai-model-by-task` - Model selection guidance
-- `structure-ai-prompt-library` - How to organize prompt libraries
+- `start-with-few-shot-learning` - WHY: Improves accuracy; WHEN: Complex tasks; links to `trust-but-verify-triage` workflow
+- `implement-guardrails-for-critical-paths` - WHY: Security at scale; WHEN: Day 1; links to security guardrail workflows
+- `choose-ai-model-by-task` - WHY: Cost optimization; WHEN: Tool selection; strategic guidance, not a checklist
+- `enforce-small-prs-for-ai-code` - WHY: Quality and velocity; WHEN: All teams; links to `keep-prs-under-control` workflow
 
 **Structure:**
-- Recommendation statement
-- Why this matters (business/technical rationale)
-- When to apply (context/scenarios)
-- Implementation guidance (optional)
-- Related workflows/guardrails/pain points
+- Recommendation statement (what you should do)
+- Why this matters (business/technical rationale - the core value)
+- When to apply (context/scenarios - timing and conditions)
+- Implementation guidance (high-level guidance, not detailed steps)
+- Related workflows/guardrails/pain points (links to HOW)
 - Keywords for SEO
 
 **Relationship:**
-- Recommendations inform workflows (strategic guidance)
-- Recommendations suggest guardrails (risk mitigation)
-- Recommendations help avoid pain points (proactive)
-- Each recommendation can link to multiple workflows/guardrails
+- Recommendations provide strategic rationale (WHY/WHEN/WHAT)
+- Workflows provide tactical implementation (HOW)
+- Recommendations often link to workflows that implement them
+- Some recommendations may have implementation guidance, but detailed step-by-step checklists belong in workflows
+- Recommendations help avoid pain points (proactive strategic guidance)
 
 ---
 
@@ -125,15 +131,16 @@
 
 | Type | Purpose | Focus | Examples |
 |------|---------|-------|----------|
-| **Workflows** | How to do something | Process/procedure | PR management, merge discipline, agent control |
+| **Workflows** | How to do something | Tactical/process/procedure | PR management (step-by-step checklist), merge discipline, agent control |
 | **Guardrails** | Prevent incidents | Prevention/detection | Prevent data corruption, prevent SQL injection |
 | **Pain Points** | Problems solved | Problem description | Almost correct code, trust deficit, schema drift |
-| **Recommendations** | Best practices & guidance | Strategic advice | Start with few-shot, use guardrails for critical paths |
+| **Recommendations** | Why/when/what to do | Strategic guidance/rationale | Start with few-shot (WHY: accuracy), use guardrails (WHY: security), enforce small PRs (WHY: quality) |
 
 **Key Insight:** 
 - Guardrails are workflows with prevention focus
 - Both workflows and guardrails solve pain points
-- Recommendations provide strategic guidance that informs workflows and guardrails
+- **Recommendations provide strategic guidance (WHY/WHEN/WHAT); workflows provide tactical implementation (HOW)**
+- Recommendations often link to workflows that implement them (e.g., "enforce small PRs" recommendation → `keep-prs-under-control` workflow)
 - Guardrails have additional fields (severity, incident pattern, detection, mitigation)
 
 ---
@@ -141,9 +148,11 @@
 ## Content Relationships
 
 ```
-Recommendation (Strategic Guidance)
-    ↓ (informs)
-Workflow/Guardrail (Solution)
+Recommendation (Strategic: WHY/WHEN/WHAT)
+    ↓ (provides rationale and context)
+    ↓ (links to)
+Workflow/Guardrail (Tactical: HOW)
+    ↓ (implements the recommendation)
     ↓ (solves)
 Pain Point (Problem)
     ↓ (uses)
@@ -151,11 +160,17 @@ Prompts, Patterns, Tools (Resources)
 ```
 
 **Example:**
-- Recommendation: `use-guardrails-for-critical-paths`
-- Pain Point: `almost-correct-code`
-- Workflow: `code-quality/keep-prs-under-control`
-- Guardrail: `guardrails/testing/prevent-missing-edge-case-tests`
-- Resources: Prompts, patterns, tools
+- **Recommendation**: `enforce-small-prs-for-ai-code` (WHY: Quality and velocity; WHEN: All teams)
+- **Workflow**: `code-quality/keep-prs-under-control` (HOW: Step-by-step checklist)
+- **Pain Point**: `oversized-prs` (Problem: Large PRs cause review fatigue)
+- **Guardrail**: (Optional automation of the workflow)
+- **Resources**: Prompts, patterns, tools
+
+**Key Pattern:**
+- Recommendations explain WHY/WHEN/WHAT (strategic guidance)
+- Workflows provide HOW (tactical checklists)
+- Recommendations often link to workflows that implement them
+- Some recommendations have high-level implementation guidance, but detailed steps belong in workflows
 
 ---
 
