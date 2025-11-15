@@ -15,7 +15,13 @@ const AUDIT_TOOL_VERSION = '1.1';
 async function getAuditor() {
   try {
     // Use the webpack alias configured in next.config.js
-    const auditModule = await import('@/scripts/content/audit-prompts-patterns');
+    // @ts-expect-error - Dynamic import may not exist at build time
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const auditModule = await import(
+      /* webpackIgnore: true */
+      '@/scripts/content/audit-prompts-patterns'
+    );
     return auditModule.PromptPatternAuditor;
   } catch (error) {
     console.error('Error importing auditor:', error);

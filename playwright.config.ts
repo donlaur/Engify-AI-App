@@ -1,3 +1,6 @@
+// @ts-nocheck - Playwright config, not part of Next.js build
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({

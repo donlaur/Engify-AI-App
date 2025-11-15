@@ -1,6 +1,5 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import { getStats } from '@/lib/stats-cache';
 

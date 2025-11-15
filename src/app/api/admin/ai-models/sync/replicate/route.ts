@@ -196,8 +196,10 @@ export async function POST(request: NextRequest) {
                    m.id.includes('gemini-2.5-flash') || // Latest Gemini model
                    m.id.includes('flux-1.1'),
       tier: m.costPer1kInput === 0 ? 'free' as const : 'affordable' as const,
+      isDefault: false,
       isAllowed: true,
       tags: [m.category, 'replicate'],
+      parameterFailures: [],
       lastVerified: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
