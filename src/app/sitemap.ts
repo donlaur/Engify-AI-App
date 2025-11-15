@@ -2,6 +2,9 @@ import { MetadataRoute } from 'next';
 import { APP_URL } from '@/lib/constants';
 import { getDb } from '@/lib/mongodb';
 import { getCompletePillarPages } from '@/lib/data/pillar-pages';
+import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
+import { loadPainPointsFromJson } from '@/lib/workflows/load-pain-points-from-json';
+import { loadRecommendationsFromJson } from '@/lib/workflows/load-recommendations-from-json';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
@@ -108,6 +111,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/workflows`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/guardrails`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/workflows/pain-points`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/workflows/recommendations`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
     },
   ];
 
@@ -502,6 +529,70 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Fallback to empty arrays if MongoDB fails
   }
 
+  // Workflows, Guardrails, Pain Points, and Recommendations pages
+  let workflowPages: MetadataRoute.Sitemap = [];
+  let guardrailPages: MetadataRoute.Sitemap = [];
+  let painPointPages: MetadataRoute.Sitemap = [];
+  let recommendationPages: MetadataRoute.Sitemap = [];
+
+  try {
+    // Load workflows (includes guardrails as a category)
+    const workflows = await loadWorkflowsFromJson();
+    const publishedWorkflows = workflows.filter((w) => w.status === 'published');
+
+    // Regular workflows: /workflows/[category]/[slug]
+    const regularWorkflows = publishedWorkflows.filter((w) => w.category !== 'guardrails');
+    workflowPages = regularWorkflows.map((workflow) => ({
+      url: `${baseUrl}/workflows/${workflow.category}/${workflow.slug}`,
+      lastModified: now, // TODO: Add updatedAt field to workflow schema
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    }));
+
+    // Guardrails: /workflows/guardrails/[slug] (same as regular workflows)
+    const guardrails = publishedWorkflows.filter((w) => w.category === 'guardrails');
+    guardrailPages = guardrails.map((guardrail) => ({
+      url: `${baseUrl}/workflows/${guardrail.category}/${guardrail.slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch workflows/guardrails for sitemap:', error);
+  }
+
+  try {
+    // Load pain points
+    const painPoints = await loadPainPointsFromJson();
+    const publishedPainPoints = painPoints.filter((pp) => pp.status === 'published');
+
+    // Pain points: /workflows/pain-points/[slug]
+    painPointPages = publishedPainPoints.map((painPoint) => ({
+      url: `${baseUrl}/workflows/pain-points/${painPoint.slug}`,
+      lastModified: now, // TODO: Add updatedAt field to pain point schema
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch pain points for sitemap:', error);
+  }
+
+  try {
+    // Load recommendations
+    const recommendations = await loadRecommendationsFromJson();
+    const publishedRecommendations = recommendations.filter((rec) => rec.status === 'published');
+
+    // Recommendations: /workflows/recommendations/[slug]
+    recommendationPages = publishedRecommendations.map((recommendation) => ({
+      url: `${baseUrl}/workflows/recommendations/${recommendation.slug}`,
+      lastModified: now, // TODO: Add updatedAt field to recommendation schema
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch recommendations for sitemap:', error);
+  }
+
   // Combine all URLs
   const allPages = [
     ...staticPages,
@@ -515,9 +606,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...learnPages,
     ...aiModelPages,
     ...aiToolPages,
+    ...workflowPages,
+    ...guardrailPages,
+    ...painPointPages,
+    ...recommendationPages,
   ];
 
   // Sitemap generated with allPages.length URLs
+  console.log(`Generated sitemap with ${allPages.length} URLs:
+    - Static pages: ${staticPages.length}
+    - Role pages: ${rolePages.length}
+    - Utility pages: ${utilityPages.length}
+    - Prompt pages: ${promptPages.length}
+    - Category pages: ${categoryPages.length}
+    - Role filter pages: ${roleFilterPages.length}
+    - Pattern pages: ${patternPages.length}
+    - Tag pages: ${tagPages.length}
+    - Learn pages: ${learnPages.length}
+    - AI model pages: ${aiModelPages.length}
+    - AI tool pages: ${aiToolPages.length}
+    - Workflow pages: ${workflowPages.length}
+    - Guardrail pages: ${guardrailPages.length}
+    - Pain point pages: ${painPointPages.length}
+    - Recommendation pages: ${recommendationPages.length}`);
 
   return allPages;
 }
