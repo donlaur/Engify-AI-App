@@ -11,10 +11,11 @@ import { existsSync } from 'fs';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename?: string[] } }
+  { params }: { params: Promise<{ filename?: string[] }> }
 ) {
   try {
-    const segments = params.filename ?? [];
+    const { filename: filenameArray } = await params;
+    const segments = filenameArray ?? [];
 
     if (segments.length === 0) {
       // Redirect to /hireme page if no filename

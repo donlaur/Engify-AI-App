@@ -14,10 +14,11 @@ import { logger } from '@/lib/logging/logger';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug?: string[] } }
+  { params }: { params: Promise<{ slug?: string[] }> }
 ) {
   try {
-    const slug = params.slug?.[0] || '';
+    const { slug: slugArray } = await params;
+    const slug = slugArray?.[0] || '';
     
     // If it's just a number (like /blog/11 or /blog/12), redirect to /learn
     if (/^\d+$/.test(slug)) {
