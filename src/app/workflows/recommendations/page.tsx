@@ -109,20 +109,23 @@ export default async function RecommendationsPage() {
       <MainLayout>
         <div className="container py-10">
           {/* Header */}
-          <header className="mb-12 rounded-xl border bg-gradient-to-br from-primary/10 via-background to-background p-10 text-center">
+          <header className="mb-8 text-center">
             <div className="mx-auto max-w-3xl space-y-4">
-              <h1 className="text-4xl font-bold md:text-5xl">
+              <h1 className="mb-4 text-4xl font-bold">
                 AI Development Recommendations
               </h1>
-              <p className="text-lg text-muted-foreground">
+              <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
                 Best practices and strategic guidance for AI-assisted development. Proactive recommendations that inform workflows and guardrails to help teams avoid pain points.
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <Button asChild size="lg">
-                  <Link href="/workflows#workflow-library">Explore workflows &amp; guardrails</Link>
-                </Button>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
                 <Button asChild size="lg" variant="outline">
                   <Link href="/workflows/pain-points">View pain points</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/workflows#workflow-library">Explore workflows</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/guardrails">View guardrails</Link>
                 </Button>
               </div>
             </div>

@@ -88,17 +88,23 @@ export default async function PainPointsPage() {
       <MainLayout>
         <div className="container py-10">
           {/* Header */}
-          <header className="mb-12 rounded-xl border bg-gradient-to-br from-primary/10 via-background to-background p-10 text-center">
+          <header className="mb-8 text-center">
             <div className="mx-auto max-w-3xl space-y-4">
-              <h1 className="text-4xl font-bold md:text-5xl">
+              <h1 className="mb-4 text-4xl font-bold">
                 AI Development Pain Points
               </h1>
-              <p className="text-lg text-muted-foreground">
+              <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
                 Common failure modes and challenges in AI-assisted development. Each pain point represents real production incidents and audit findings from engineering teams.
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <Button asChild size="lg">
-                  <Link href="/workflows#workflow-library">Explore workflows &amp; guardrails</Link>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/workflows#workflow-library">Explore workflows</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/guardrails">View guardrails</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/workflows/recommendations">View recommendations</Link>
                 </Button>
               </div>
             </div>
