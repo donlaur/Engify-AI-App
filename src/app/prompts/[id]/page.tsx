@@ -92,11 +92,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   try {
+    const { id } = await params;
     // Try JSON first (fast), then MongoDB fallback (reliable)
-    const prompt = await getPromptById(params.id);
+    const prompt = await getPromptById(id);
 
     if (!prompt) {
       return {
@@ -130,8 +131,9 @@ export async function generateMetadata({
     );
   } catch (error) {
     // Log error but return fallback metadata
+    const { id: errorId } = await params;
     logger.warn('Failed to fetch prompt for metadata', {
-      idOrSlug: params.id,
+      idOrSlug: errorId,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
 
@@ -146,22 +148,23 @@ export async function generateMetadata({
 export default async function PromptPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   try {
+    const { id } = await params;
     // Early detection: Generated prompts are temporary and may not exist
     // Return 404 gracefully to prevent 5xx errors
-    if (params.id.startsWith('generated-')) {
-      logger.warn('Generated prompt ID not found (temporary prompt)', { id: params.id });
+    if (id.startsWith('generated-')) {
+      logger.warn('Generated prompt ID not found (temporary prompt)', { id });
       notFound();
     }
 
     // Try JSON first (fast), then MongoDB fallback (reliable)
     // MongoDB is primary source for detail pages - more reliable in production
-    const prompt = await getPromptById(params.id);
+    const prompt = await getPromptById(id);
 
     if (!prompt) {
-      logger.warn('Prompt not found', { idOrSlug: params.id });
+      logger.warn('Prompt not found', { idOrSlug: id });
       notFound();
     }
 
@@ -188,7 +191,7 @@ export default async function PromptPage({
                         !slug.includes('--'); // No consecutive hyphens
 
     // Fallback redirect (middleware should handle this, but keep as safety net)
-    if (params.id !== slug && isValidSlug) {
+    if (id !== slug && isValidSlug) {
       // Additional validation: ensure slug forms a valid URL path
       try {
         const testUrl = new URL(`/prompts/${slug}`, APP_URL);
@@ -204,7 +207,7 @@ export default async function PromptPage({
             promptId: prompt.id, 
             slug,
             encodedPath: testUrl.pathname,
-            paramsId: params.id 
+            paramsId: id 
           });
         }
       } catch (error) {
@@ -212,16 +215,16 @@ export default async function PromptPage({
         logger.warn('Invalid slug detected, skipping redirect', { 
           promptId: prompt.id, 
           slug,
-          paramsId: params.id,
+          paramsId: id,
           error: error instanceof Error ? error.message : 'Unknown error'
         });
       }
-    } else if (!isValidSlug && params.id !== slug) {
+    } else if (!isValidSlug && id !== slug) {
       // Slug is invalid but URL doesn't match - log for debugging
       logger.debug('Skipping redirect due to invalid slug', {
         promptId: prompt.id,
         slug,
-        paramsId: params.id,
+        paramsId: id,
         reason: !slug ? 'empty' : 
                 slug === 'untitled' ? 'fallback-untitled' :
                 slug === prompt.id ? 'same-as-id' :

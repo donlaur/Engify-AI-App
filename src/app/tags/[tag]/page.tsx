@@ -51,10 +51,11 @@ async function getPromptsByTag(tag: string) {
   }
 }
 
-export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ tag: string }> }): Promise<Metadata> {
   try {
+    const { tag } = await params;
     // Validate tag URL format
-    if (!isValidTagUrl(params.tag)) {
+    if (!isValidTagUrl(tag)) {
       return {
         title: 'Invalid Tag | Engify.ai',
         description: 'The requested tag URL is invalid.',
@@ -128,19 +129,20 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
   }
 }
 
-export default async function TagPage({ params }: { params: { tag: string } }) {
+export default async function TagPage({ params }: { params: Promise<{ tag: string }> }) {
   try {
+    const { tag } = await params;
     // Validate tag URL format
-    if (!isValidTagUrl(params.tag)) {
-      console.warn('Invalid tag URL format', { tag: params.tag });
+    if (!isValidTagUrl(tag)) {
+      console.warn('Invalid tag URL format', { tag });
       notFound();
     }
 
     // Decode and normalize tag from URL
-    const { decoded, normalized } = decodeTagFromUrl(params.tag);
+    const { decoded, normalized } = decodeTagFromUrl(tag);
     
     // Get all tag variations for database lookup
-    const tagVariations = getTagVariations(params.tag);
+    const tagVariations = getTagVariations(tag);
     
     // Try to find prompts with any of the tag variations
     const allPrompts = [];

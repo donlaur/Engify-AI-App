@@ -32,13 +32,14 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const tool = await aiToolService.findBySlug(params.slug);
+  const { slug } = await params;
+  const tool = await aiToolService.findBySlug(slug);
 
   if (!tool) {
     return {
@@ -76,10 +77,11 @@ export async function generateMetadata({
 }
 
 export default async function AIToolDetailPage({ params }: PageProps) {
-  const tool = await aiToolService.findBySlug(params.slug);
+  const { slug } = await params;
+  const tool = await aiToolService.findBySlug(slug);
 
   if (!tool) {
-    logger.warn('AI tool not found', { slug: params.slug });
+    logger.warn('AI tool not found', { slug });
     notFound();
   }
 

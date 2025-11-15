@@ -98,9 +98,10 @@ async function getPromptsByRole(role: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: { role: string };
+  params: Promise<{ role: string }>;
 }): Promise<Metadata> {
-  const role = decodeURIComponent(params.role);
+  const { role: roleParam } = await params;
+  const role = decodeURIComponent(roleParam);
   const roleInfo = ROLE_INFO[role] || {
     title: role
       .split('-')
@@ -149,9 +150,10 @@ export async function generateMetadata({
 export default async function RolePage({
   params,
 }: {
-  params: { role: string };
+  params: Promise<{ role: string }>;
 }) {
-  const role = decodeURIComponent(params.role);
+  const { role: roleParam } = await params;
+  const role = decodeURIComponent(roleParam);
   const roleInfo = ROLE_INFO[role] || {
     title: role
       .split('-')

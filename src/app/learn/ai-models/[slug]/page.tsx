@@ -44,17 +44,18 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
   // Try slug first, then fallback to ID lookup (for backwards compatibility)
-  let model = await aiModelService.findBySlug(params.slug);
+  let model = await aiModelService.findBySlug(slug);
   if (!model) {
     // Fallback: try finding by ID in case slug doesn't exist
-    model = await aiModelService.findById(params.slug);
+    model = await aiModelService.findById(slug);
   }
 
   if (!model) {
@@ -89,29 +90,30 @@ export async function generateMetadata({
 }
 
 export default async function AIModelDetailPage({ params }: PageProps) {
+  const { slug } = await params;
   // Try slug first, then fallback to ID lookup (for backwards compatibility)
-  let model = await aiModelService.findBySlug(params.slug);
+  let model = await aiModelService.findBySlug(slug);
   if (!model) {
     // Fallback: try finding by ID in case slug doesn't exist
-    model = await aiModelService.findById(params.slug);
+    model = await aiModelService.findById(slug);
   }
 
   if (!model) {
-    logger.warn('AI model not found', { slug: params.slug });
+    logger.warn('AI model not found', { slug });
     notFound();
   }
   
   // If model found by ID but doesn't have slug, generate and save slug, then redirect
   if (model && !model.slug) {
-    const slug = generateSlug(model.name || model.displayName || model.id);
-    if (slug && slug !== 'untitled') {
+    const generatedSlug = generateSlug(model.name || model.displayName || model.id);
+    if (generatedSlug && generatedSlug !== 'untitled') {
       // Update the model with slug for future requests
-      await aiModelService.update(model.id, { slug });
+      await aiModelService.update(model.id, { slug: generatedSlug });
       
       // Redirect to slug URL (if current URL doesn't match slug)
-      if (params.slug !== slug) {
+      if (slug !== generatedSlug) {
         const { redirect } = await import('next/navigation');
-        redirect(`/learn/ai-models/${slug}`);
+        redirect(`/learn/ai-models/${generatedSlug}`);
       }
     }
   }

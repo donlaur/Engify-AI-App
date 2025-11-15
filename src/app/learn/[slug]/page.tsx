@@ -13,7 +13,7 @@ import { ArticleFeedback } from '@/components/article/ArticleFeedback';
 import { getClient } from '@/lib/mongodb';
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export const dynamic = 'force-dynamic';
@@ -42,7 +42,8 @@ async function getArticle(slug: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const article = await getArticle(params.slug);
+  const { slug } = await params;
+  const article = await getArticle(slug);
 
   if (!article) {
     return {
@@ -77,11 +78,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ArticlePage({ params }: PageProps) {
   try {
-    const article = await getArticle(params.slug);
+    const { slug } = await params;
+    const article = await getArticle(slug);
 
     if (!article) {
       // Log missing articles for SEO monitoring
-      console.warn('Article not found:', params.slug);
+      console.warn('Article not found:', slug);
       notFound();
     }
 

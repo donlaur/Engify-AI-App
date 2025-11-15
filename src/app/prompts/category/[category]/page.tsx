@@ -88,9 +88,10 @@ async function getPromptsByCategory(category: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: { category: string };
+  params: Promise<{ category: string }>;
 }): Promise<Metadata> {
-  const category = decodeURIComponent(params.category);
+  const { category: categoryParam } = await params;
+  const category = decodeURIComponent(categoryParam);
   const categoryInfo = CATEGORY_INFO[category] || {
     title: category
       .split('-')
@@ -138,9 +139,10 @@ export async function generateMetadata({
 export default async function CategoryPage({
   params,
 }: {
-  params: { category: string };
+  params: Promise<{ category: string }>;
 }) {
-  const category = decodeURIComponent(params.category);
+  const { category: categoryParam } = await params;
+  const category = decodeURIComponent(categoryParam);
   const categoryInfo = CATEGORY_INFO[category] || {
     title: category
       .split('-')

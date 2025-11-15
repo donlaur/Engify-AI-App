@@ -19,10 +19,11 @@ export const dynamicParams = true; // Allow dynamic params (patterns not pre-gen
 export async function generateMetadata({
   params,
 }: {
-  params: { pattern: string };
+  params: Promise<{ pattern: string }>;
 }): Promise<Metadata> {
   try {
-    const patternSlug = decodeURIComponent(params.pattern);
+    const { pattern: patternParam } = await params;
+    const patternSlug = decodeURIComponent(patternParam);
 
     // For detail pages, use MongoDB directly to avoid DYNAMIC_SERVER_USAGE
     const pattern = await patternRepository.getById(patternSlug);
@@ -52,10 +53,11 @@ export async function generateMetadata({
 export default async function PatternDetailPage({
   params,
 }: {
-  params: { pattern: string };
+  params: Promise<{ pattern: string }>;
 }) {
   try {
-    const patternSlug = decodeURIComponent(params.pattern);
+    const { pattern: patternParam } = await params;
+    const patternSlug = decodeURIComponent(patternParam);
 
     // For detail pages, use MongoDB directly to avoid DYNAMIC_SERVER_USAGE
     // JSON loading causes issues during static generation/ISR

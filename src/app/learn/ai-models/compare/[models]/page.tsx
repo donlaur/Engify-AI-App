@@ -38,13 +38,14 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 
 interface PageProps {
-  params: { models: string }; // e.g., "gpt-4o-vs-claude-3-5-sonnet"
+  params: Promise<{ models: string }>; // e.g., "gpt-4o-vs-claude-3-5-sonnet"
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const modelSlugs = params.models.split('-vs-');
+  const { models } = await params;
+  const modelSlugs = models.split('-vs-');
   if (modelSlugs.length !== 2) {
     return {
       title: 'AI Model Comparison | Engify.ai',
@@ -81,10 +82,11 @@ export async function generateMetadata({
 }
 
 export default async function AIModelComparisonPage({ params }: PageProps) {
-  const modelSlugs = params.models.split('-vs-');
+  const { models } = await params;
+  const modelSlugs = models.split('-vs-');
 
   if (modelSlugs.length !== 2) {
-    logger.warn('Invalid comparison format', { models: params.models });
+    logger.warn('Invalid comparison format', { models });
     notFound();
   }
 
