@@ -210,7 +210,7 @@ export async function DELETE(request: NextRequest) {
     const result = await db.collection('users').updateOne(
       { _id: new ObjectId(session.user.id) },
       {
-        $pull: { favoritePrompts: promptId } as Record<string, unknown>,
+        $pull: { favoritePrompts: promptId } as any,
         $set: { updatedAt: new Date() },
       }
     );

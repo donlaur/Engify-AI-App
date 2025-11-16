@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+// Temporarily disabled Google Fonts due to network issues
+// import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { SessionProvider } from '@/components/providers/SessionProvider';
@@ -10,7 +11,7 @@ import { Toaster } from '@/components/ui/toaster';
 // Validate environment variables at startup (Red Hat Review - Critical Fix #1)
 import '@/lib/env';
 
-const inter = Inter({ subsets: ['latin'] });
+// const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Engify.ai - AI Guardrail Platform for Engineering Teams',
@@ -126,7 +127,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className="font-sans" suppressHydrationWarning>
         <GoogleAnalytics />
         <SessionProvider>
           <ThemeProvider

@@ -5,17 +5,16 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
-import { auth } from '@/lib/auth';
+import { ObjectId } from 'mongodb';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth();
     const db = await getMongoDb();
     const { id } = await params;
-    
+
     // Get query parameters
     const { searchParams } = new URL(request.url);
     const revision1 = searchParams.get('revision1');
@@ -33,7 +32,7 @@ export async function GET(
       $or: [
         { id },
         { slug: id },
-        { _id: id },
+        ...(ObjectId.isValid(id) ? [{ _id: new ObjectId(id) }] : []),
       ],
     });
 
