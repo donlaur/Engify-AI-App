@@ -205,18 +205,18 @@ export function ContentQualityPanel() {
   );
 }
 
-function _categorizeByTitleAndTags(title: string, tags: string[]): string {
-  if (title.match(/code|function|class|api|component/) || tags.includes('code')) {
-    return 'code-generation';
-  } else if (title.match(/test|qa|bug/) || tags.includes('testing')) {
-    return 'testing';
-  } else if (title.match(/architect|design|system/) || tags.includes('architecture')) {
-    return 'architecture';
-  } else if (title.match(/product|feature|roadmap/) || tags.includes('product')) {
-    return 'product';
-  } else if (title.match(/leader|manage|team/) || tags.includes('leadership')) {
-    return 'leadership';
-  }
-  return 'general';
-}
+// function _categorizeByTitleAndTags(title: string, tags: string[]): string {
+//   if (title.match(/code|function|class|api|component/) || tags.includes('code')) {
+//     return 'code-generation';
+//   } else if (title.match(/test|qa|bug/) || tags.includes('testing')) {
+//     return 'testing';
+//   } else if (title.match(/architect|design|system/) || tags.includes('architecture')) {
+//     return 'architecture';
+//   } else if (title.match(/product|feature|roadmap/) || tags.includes('product')) {
+//     return 'product';
+//   } else if (title.match(/leader|manage|team/) || tags.includes('leadership')) {
+//     return 'leadership';
+//   }
+//   return 'general';
+// }
 

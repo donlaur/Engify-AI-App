@@ -28,7 +28,6 @@ interface GuardrailsClientProps {
 type SortOption = 'alphabetical' | 'subcategory' | 'severity';
 
 const INITIAL_VISIBLE_SUBCATEGORIES = 7;
-const INITIAL_VISIBLE_SEVERITIES = 4;
 const INITIAL_VISIBLE_GUARDRAILS = 12; // Show 12 initially (6 rows x 2 columns)
 const LOAD_MORE_INCREMENT = 12; // Load 12 more at a time
 
@@ -194,7 +193,7 @@ export function GuardrailsClient({
               onClick={() => {
                 setSelectedSubcategory(subcategory);
                 if (subcategory !== 'all') {
-                  trackFilterUsage('subcategory', subcategory, {
+                  trackFilterUsage('subcategory' as any, subcategory, {
                     result_count: filteredGuardrails.length,
                   });
                 }
@@ -209,7 +208,7 @@ export function GuardrailsClient({
           ))}
           {allSubcategories.length > INITIAL_VISIBLE_SUBCATEGORIES && (
             <Badge
-              variant="ghost"
+              variant="secondary"
               className="cursor-pointer text-primary hover:bg-primary/10"
               onClick={() => setShowAllSubcategories(!showAllSubcategories)}
             >
@@ -259,7 +258,7 @@ export function GuardrailsClient({
               onClick={() => {
                 setSelectedSeverity(severity);
                 if (severity !== 'all') {
-                  trackFilterUsage('severity', severity, {
+                  trackFilterUsage('severity' as any, severity, {
                     result_count: filteredGuardrails.length,
                   });
                 }

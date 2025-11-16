@@ -6,7 +6,6 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/lib/icons';
 import { getRecommendationBySlug, loadRecommendationsFromJson } from '@/lib/workflows/load-recommendations-from-json';
 import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
 import { AuthorAttribution } from '@/components/workflows/AuthorAttribution';
@@ -108,7 +107,7 @@ export default async function RecommendationPage({ params }: RecommendationPageP
         return path === workflowPath;
       });
     })
-    .filter(Boolean);
+    .filter((w): w is NonNullable<typeof w> => Boolean(w));
 
   // Find related guardrails
   const relatedGuardrails = recommendation.relatedGuardrails
@@ -122,7 +121,7 @@ export default async function RecommendationPage({ params }: RecommendationPageP
         return guardrailPath === path1 || guardrailPath === path2;
       });
     })
-    .filter(Boolean);
+    .filter((w): w is NonNullable<typeof w> => Boolean(w));
 
   return (
     <>

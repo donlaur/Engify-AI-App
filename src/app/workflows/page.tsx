@@ -3,7 +3,6 @@ import Link from 'next/link';
 
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/lib/icons';
 import { WorkflowsClient } from './WorkflowsClient';
 import { WorkflowTracking } from './WorkflowTracking';
 import {
@@ -53,7 +52,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function WorkflowsPage() {
-  const [workflows, categories, audiences, metadata, painPointsMetadata] = await Promise.all([
+  const [workflows, categories, audiences, metadata, _painPointsMetadata] = await Promise.all([
     loadWorkflowsFromJson(),
     listWorkflowCategories(),
     listWorkflowAudiences(),

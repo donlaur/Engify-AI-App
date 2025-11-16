@@ -483,18 +483,18 @@ export default async function PromptPage({
             </div>
 
             {/* Enrichment Details - Shows all enrichment fields if they exist in DB */}
-            {/* Includes: useCases, bestPractices, examples, caseStudies, bestTimeToUse, 
+            {/* Includes: useCases, bestPractices, examples, caseStudies, bestTimeToUse,
                 recommendedModel, whenNotToUse, difficulty, estimatedTime */}
             <PromptEnrichment
-              caseStudies={prompt.caseStudies}
+              caseStudies={prompt.caseStudies as any}
               bestTimeToUse={prompt.bestTimeToUse}
-              recommendedModel={prompt.recommendedModel}
-              useCases={prompt.useCases}
-              examples={prompt.examples}
-              bestPractices={prompt.bestPractices}
+              recommendedModel={prompt.recommendedModel as any}
+              useCases={prompt.useCases as any}
+              examples={prompt.examples as any}
+              bestPractices={prompt.bestPractices as any}
               whenNotToUse={prompt.whenNotToUse}
-              difficulty={prompt.difficulty}
-              estimatedTime={prompt.estimatedTime}
+              difficulty={prompt.difficulty as any}
+              estimatedTime={prompt.estimatedTime as any}
             />
 
             {/* Meta Description Summary - SEO-optimized description */}
@@ -548,8 +548,9 @@ export default async function PromptPage({
     );
   } catch (error) {
     // Log error for debugging
+    const { id } = await params;
     logger.error('Failed to fetch prompt', {
-      idOrSlug: params.id,
+      idOrSlug: id,
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
     });

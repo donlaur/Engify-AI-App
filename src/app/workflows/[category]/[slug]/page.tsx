@@ -16,7 +16,6 @@ import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
 import { loadPatternsFromJson } from '@/lib/patterns/load-patterns-from-json';
 import { loadPainPointsFromJson } from '@/lib/workflows/load-pain-points-from-json';
 import type { Workflow } from '@/lib/workflows/workflow-schema';
-import { WORKFLOW_AUDIENCES } from '@/lib/workflows/workflow-schema';
 import { getVerifiedSourceUrl } from '@/lib/workflows/verified-sources';
 import { AuthorAttribution } from '@/components/workflows/AuthorAttribution';
 
@@ -138,7 +137,7 @@ export default async function WorkflowDetailPage({
     notFound();
   }
 
-  const [metadata, allWorkflows, allPrompts, allPatterns, allPainPoints] = await Promise.all([
+  const [_metadata, allWorkflows, allPrompts, allPatterns, allPainPoints] = await Promise.all([
     getWorkflowsMetadata(),
     loadWorkflowsFromJson(),
     loadPromptsFromJson(),
@@ -509,9 +508,9 @@ function formatResourceDisplayText(
   return formatLabel(identifier);
 }
 
-function formatKeyword(keyword: string): string {
-  return keyword.replace(/[-_]/g, ' ').toLowerCase();
-}
+// function formatKeyword(keyword: string): string {
+//   return keyword.replace(/[-_]/g, ' ').toLowerCase();
+// }
 
 function resolveResourceUrl(
   section: 'prompts' | 'patterns' | 'learn',

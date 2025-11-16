@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/lib/icons';
 import { getPainPointBySlug, loadPainPointsFromJson } from '@/lib/workflows/load-pain-points-from-json';
 import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
 import { AuthorAttribution } from '@/components/workflows/AuthorAttribution';

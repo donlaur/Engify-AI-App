@@ -46,22 +46,22 @@ const CATEGORY_LABELS: Record<string, string> = {
   security: 'Security',
 };
 
-const SUBCATEGORY_LABELS: Record<string, string> = {
-  'data-integrity': 'Data Integrity',
-  security: 'Security',
-  performance: 'Performance',
-  availability: 'Availability',
-  financial: 'Financial',
-  integration: 'Integration',
-  testing: 'Testing',
-};
+// const SUBCATEGORY_LABELS: Record<string, string> = {
+//   'data-integrity': 'Data Integrity',
+//   security: 'Security',
+//   performance: 'Performance',
+//   availability: 'Availability',
+//   financial: 'Financial',
+//   integration: 'Integration',
+//   testing: 'Testing',
+// };
 
-const SEVERITY_COLORS: Record<string, 'destructive' | 'default' | 'secondary'> = {
-  critical: 'destructive',
-  high: 'destructive',
-  medium: 'default',
-  low: 'secondary',
-};
+// const SEVERITY_COLORS: Record<string, 'destructive' | 'default' | 'secondary'> = {
+//   critical: 'destructive',
+//   high: 'destructive',
+//   medium: 'default',
+//   low: 'secondary',
+// };
 
 const AUDIENCE_LABELS: Record<string, string> = {
   analysts: 'Analysts',
@@ -93,7 +93,7 @@ export function WorkflowsClient({
   );
 
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  // const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // Reset visible count when filters change
   useEffect(() => {
@@ -112,7 +112,7 @@ export function WorkflowsClient({
       const matchesCategory =
         selectedCategory === 'all' || workflow.category === selectedCategory;
       const matchesAudience =
-        selectedAudience === 'all' || workflow.audience.includes(selectedAudience);
+        selectedAudience === 'all' || workflow.audience.includes(selectedAudience as any);
 
       return matchesSearch && matchesCategory && matchesAudience;
     });
@@ -242,7 +242,7 @@ export function WorkflowsClient({
             ))}
             {allCategories.length > INITIAL_VISIBLE_CATEGORIES && (
               <Badge
-                variant="ghost"
+                variant="secondary"
                 className="cursor-pointer text-primary hover:bg-primary/10"
                 onClick={() => setShowAllCategories(!showAllCategories)}
               >
@@ -281,7 +281,7 @@ export function WorkflowsClient({
                 onClick={() => {
                   setSelectedAudience(audience);
                   if (audience !== 'all') {
-                    trackFilterUsage('audience', audience, {
+                    trackFilterUsage('audience' as any, audience, {
                       result_count: filteredWorkflows.length,
                     });
                   }
@@ -294,7 +294,7 @@ export function WorkflowsClient({
             ))}
             {allAudiences.length > INITIAL_VISIBLE_AUDIENCES && (
               <Badge
-                variant="ghost"
+                variant="secondary"
                 className="cursor-pointer text-primary hover:bg-primary/10"
                 onClick={() => setShowAllAudiences(!showAllAudiences)}
               >
