@@ -374,7 +374,7 @@ export default function ToolsPage() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {tools.map((tool) => {
-            const Icon = Icons[tool.icon];
+            const Icon = Icons[tool.icon as keyof typeof Icons];
             return (
               <Card
                 key={tool.name}

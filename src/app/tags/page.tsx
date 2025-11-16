@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
-import { getPromptSlug } from '@/lib/utils/slug';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -60,7 +59,7 @@ export default async function TagsDictionaryPage() {
   // Count tags
   const tagCounts: Record<string, number> = {};
   prompts.forEach((prompt) => {
-    (prompt.tags || []).forEach((tag) => {
+    (prompt.tags || []).forEach((tag: string) => {
       tagCounts[tag] = (tagCounts[tag] || 0) + 1;
     });
   });
