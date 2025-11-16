@@ -16,7 +16,6 @@ import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
 import { loadPatternsFromJson } from '@/lib/patterns/load-patterns-from-json';
 import { loadPainPointsFromJson } from '@/lib/workflows/load-pain-points-from-json';
 import type { Workflow } from '@/lib/workflows/workflow-schema';
-import { WORKFLOW_AUDIENCES } from '@/lib/workflows/workflow-schema';
 import { getVerifiedSourceUrl } from '@/lib/workflows/verified-sources';
 import { AuthorAttribution } from '@/components/workflows/AuthorAttribution';
 
