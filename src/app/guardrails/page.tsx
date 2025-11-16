@@ -72,8 +72,8 @@ export default async function GuardrailsPage() {
   }, {} as Record<string, number>);
 
   // Get unique subcategories and severities
-  const uniqueSubcategories = [...new Set(guardrails.map((g) => g.subcategory).filter(Boolean))].sort();
-  const uniqueSeverities = [...new Set(guardrails.map((g) => g.severity).filter(Boolean))].sort();
+  const uniqueSubcategories = [...new Set(guardrails.map((g) => g.subcategory).filter(Boolean))].sort() as string[];
+  const uniqueSeverities = [...new Set(guardrails.map((g) => g.severity).filter(Boolean))].sort() as string[];
 
   // Generate JSON-LD structured data for SEO
   const jsonLd = {
