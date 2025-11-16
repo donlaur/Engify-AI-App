@@ -3,7 +3,6 @@ import Link from 'next/link';
 
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/lib/icons';
 import { WorkflowsClient } from './WorkflowsClient';
 import { WorkflowTracking } from './WorkflowTracking';
 import {
