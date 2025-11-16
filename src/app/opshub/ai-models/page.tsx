@@ -406,7 +406,7 @@ export default function AIModelsAdminPage() {
                     {model.lastVerified && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Icons.check className="h-3 w-3 text-green-500" />
-                        Verified: {model.lastVerified}
+                        Verified: {new Date(model.lastVerified).toLocaleDateString()}
                       </div>
                     )}
 

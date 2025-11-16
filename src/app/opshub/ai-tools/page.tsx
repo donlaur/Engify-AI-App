@@ -129,31 +129,28 @@ export default function AIToolsAdminPage() {
     }
   }
 
-  async function deleteTool(id: string) {
-    if (!confirm('Are you sure you want to deprecate this tool?')) return;
-
-    try {
-      const response = await fetch(`/api/admin/ai-tools?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete tool');
-
-      toast({
-        title: 'Success',
-        description: 'Tool marked as deprecated',
-      });
-
-      await loadTools();
-    } catch (error) {
-      console.error('Error deleting tool:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to delete tool',
-        variant: 'destructive',
-      });
-    }
-  }
+  // Unused function - kept for reference
+  // async function deleteTool(id: string) {
+  //   if (!confirm('Are you sure you want to deprecate this tool?')) return;
+  //   try {
+  //     const response = await fetch(`/api/admin/ai-tools?id=${id}`, {
+  //       method: 'DELETE',
+  //     });
+  //     if (!response.ok) throw new Error('Failed to delete tool');
+  //     toast({
+  //       title: 'Success',
+  //       description: 'Tool marked as deprecated',
+  //     });
+  //     await loadTools();
+  //   } catch (error) {
+  //     console.error('Error deleting tool:', error);
+  //     toast({
+  //       title: 'Error',
+  //       description: 'Failed to delete tool',
+  //       variant: 'destructive',
+  //     });
+  //   }
+  // }
 
   async function toggleStatus(tool: ToolDisplay) {
     try {

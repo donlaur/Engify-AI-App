@@ -115,7 +115,7 @@ export default async function PromptEngineeringMasterclassPage() {
       };
     }
     return null;
-  }).filter((p): p is { id: string; name: string; category: string } => p !== null);
+  }).filter((p): p is NonNullable<typeof p> => p !== null);
 
   // Generate Course schema
   const courseSchema = generateCourseSchema(
