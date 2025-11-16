@@ -46,22 +46,22 @@ const CATEGORY_LABELS: Record<string, string> = {
   security: 'Security',
 };
 
-const SUBCATEGORY_LABELS: Record<string, string> = {
-  'data-integrity': 'Data Integrity',
-  security: 'Security',
-  performance: 'Performance',
-  availability: 'Availability',
-  financial: 'Financial',
-  integration: 'Integration',
-  testing: 'Testing',
-};
+// const SUBCATEGORY_LABELS: Record<string, string> = {
+//   'data-integrity': 'Data Integrity',
+//   security: 'Security',
+//   performance: 'Performance',
+//   availability: 'Availability',
+//   financial: 'Financial',
+//   integration: 'Integration',
+//   testing: 'Testing',
+// };
 
-const SEVERITY_COLORS: Record<string, 'destructive' | 'default' | 'secondary'> = {
-  critical: 'destructive',
-  high: 'destructive',
-  medium: 'default',
-  low: 'secondary',
-};
+// const SEVERITY_COLORS: Record<string, 'destructive' | 'default' | 'secondary'> = {
+//   critical: 'destructive',
+//   high: 'destructive',
+//   medium: 'default',
+//   low: 'secondary',
+// };
 
 const AUDIENCE_LABELS: Record<string, string> = {
   analysts: 'Analysts',
