@@ -32,7 +32,7 @@ export async function GET(
 
   // Role check: manager, director, or higher
   const allowedRoles = ['manager', 'director', 'enterprise_admin', 'super_admin'];
-  if (!allowedRoles.includes(user.role)) {
+  if (!user.role || !allowedRoles.includes(user.role)) {
     return NextResponse.json(
       { error: 'Forbidden - Manager role required' },
       { status: 403 }

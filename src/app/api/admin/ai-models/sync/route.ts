@@ -123,7 +123,7 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
           getOpenAIContextWindow(m.id),
           m.id.includes('gpt-4o') ? 16384 : m.id.includes('gpt-4') ? 8192 : 4096
         );
-        
+
         return {
           ...baseModel,
           id: m.id,
@@ -141,6 +141,8 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
           supportsVision: baseModel.supportsVision ?? false,
           isDefault: baseModel.isDefault ?? false,
           isAllowed: baseModel.isAllowed ?? true,
+          recommended: baseModel.recommended ?? false,
+          tags: getOpenAITags(m.id),
           parameterFailures: [],
           lastVerified: new Date(),
           createdAt: new Date(),
@@ -194,6 +196,9 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
       
       return {
         ...baseModel,
+        id: data.id,
+        name: data.id,
+        displayName: data.displayName,
         slug: generateSlug(data.id),
         provider: 'openai' as const,
         status: 'active' as const,
@@ -206,6 +211,7 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
         supportsVision: baseModel.supportsVision ?? false,
         isDefault: baseModel.isDefault ?? false,
         isAllowed: baseModel.isAllowed ?? true,
+        recommended: baseModel.recommended ?? false,
         parameterFailures: [],
         tags: getOpenAITags(data.id),
         lastVerified: new Date(),
@@ -255,9 +261,11 @@ async function syncAnthropicModels(): Promise<{ created: number; updated: number
     supportsVision: true,
     recommended: m.name.includes('3-5-sonnet') || m.name.includes('3-5-haiku'),
     tier: m.name.includes('haiku') ? 'affordable' as const : 'premium' as const,
+    isDefault: false,
     isAllowed: !m.deprecated, // Deprecated models not allowed by default
     tags: getAnthropicTags(m.name),
     replacementModel: m.deprecated ? 'claude-3-5-sonnet-20241022' : undefined, // Suggest 3.5 Sonnet as replacement
+    parameterFailures: [],
     lastVerified: m.deprecated ? undefined : new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -305,9 +313,11 @@ async function syncGoogleModels(): Promise<{ created: number; updated: number }>
     supportsVision: true,
     recommended: m.name.includes('2.0') && !m.deprecated,
     tier: getGoogleCost(m.name, 'input') === 0 ? 'free' as const : 'affordable' as const,
+    isDefault: false,
     isAllowed: !m.deprecated, // Deprecated models not allowed
     tags: ['fast', 'multimodal'],
     replacementModel: m.deprecated ? 'gemini-2.0-flash-exp' : undefined, // Suggest 2.0 Flash as replacement
+    parameterFailures: [],
     lastVerified: m.deprecated ? undefined : new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),

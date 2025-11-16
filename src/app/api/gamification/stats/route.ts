@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       data: {
         xp: gamification.xp,
         level: gamification.level,
-        xpForNextLevel: xpForNextLevel.xpRequired,
+        xpForNextLevel: xpForNextLevel,
         dailyStreak: gamification.dailyStreak,
         achievements: gamification.achievements,
         stats: gamification.stats,
