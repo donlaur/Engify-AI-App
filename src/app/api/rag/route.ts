@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Rate limiting
     const session = await auth();
     const tier = session?.user ? 'authenticated' : 'anonymous';
-    const identifier = session?.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || request.ip || 'unknown';
+    const identifier = session?.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
     
     const rateLimitResult = await checkRateLimit(identifier, tier);
     if (!rateLimitResult.allowed) {
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
   // Rate limiting for health check (lighter limit)
   const session = await auth();
   const tier = session?.user ? 'authenticated' : 'anonymous';
-  const identifier = session?.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || request.ip || 'unknown';
+  const identifier = session?.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
   
   const rateLimitResult = await checkRateLimit(identifier, tier);
   if (!rateLimitResult.allowed) {

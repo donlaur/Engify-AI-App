@@ -13,7 +13,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';

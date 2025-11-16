@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
 import { auth } from '@/lib/auth';
-import { fetchPlatformStats, STATS_CACHE_KEY } from '@/lib/stats/fetch-platform-stats';
+import { fetchPlatformStats } from '@/lib/stats/fetch-platform-stats';
 import { AI_RATE_LIMITS } from '@/lib/constants/rates';
 import { ERROR_MESSAGES } from '@/lib/constants/messages';
 
