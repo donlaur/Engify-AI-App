@@ -52,7 +52,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function WorkflowsPage() {
-  const [workflows, categories, audiences, metadata, painPointsMetadata] = await Promise.all([
+  const [workflows, categories, audiences, _metadata, _painPointsMetadata] = await Promise.all([
     loadWorkflowsFromJson(),
     listWorkflowCategories(),
     listWorkflowAudiences(),
