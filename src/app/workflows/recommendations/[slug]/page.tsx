@@ -107,7 +107,7 @@ export default async function RecommendationPage({ params }: RecommendationPageP
         return path === workflowPath;
       });
     })
-    .filter(Boolean);
+    .filter((w): w is NonNullable<typeof w> => Boolean(w));
 
   // Find related guardrails
   const relatedGuardrails = recommendation.relatedGuardrails
@@ -121,7 +121,7 @@ export default async function RecommendationPage({ params }: RecommendationPageP
         return guardrailPath === path1 || guardrailPath === path2;
       });
     })
-    .filter(Boolean);
+    .filter((w): w is NonNullable<typeof w> => Boolean(w));
 
   return (
     <>
