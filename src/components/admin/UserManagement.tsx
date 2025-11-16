@@ -119,24 +119,24 @@ export function UserManagement({ initialUsers = [] }: UserManagementProps) {
         <div className="grid grid-cols-4 gap-4 rounded-lg border bg-slate-50 p-4">
           <div>
             <div className="text-sm text-slate-600">Total Users</div>
-            <div className="text-2xl font-bold">{stats.total || 0}</div>
+            <div className="text-2xl font-bold">{(stats as any).total || 0}</div>
           </div>
           <div>
             <div className="text-sm text-slate-600">By Role</div>
             <div className="text-xs text-slate-500">
-              Admin: {stats.byRole?.admin || 0} | User:{' '}
-              {stats.byRole?.user || 0}
+              Admin: {(stats as any).byRole?.admin || 0} | User:{' '}
+              {(stats as any).byRole?.user || 0}
             </div>
           </div>
           <div>
             <div className="text-sm text-slate-600">By Plan</div>
             <div className="text-xs text-slate-500">
-              Free: {stats.byPlan?.free || 0} | Pro: {stats.byPlan?.pro || 0}
+              Free: {(stats as any).byPlan?.free || 0} | Pro: {(stats as any).byPlan?.pro || 0}
             </div>
           </div>
           <div>
             <div className="text-sm text-slate-600">Active</div>
-            <div className="text-2xl font-bold">{stats.active || 0}</div>
+            <div className="text-2xl font-bold">{(stats as any).active || 0}</div>
           </div>
         </div>
       )}
