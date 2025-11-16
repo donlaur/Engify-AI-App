@@ -24,7 +24,7 @@ export function ArticleRenderer({ content }: ArticleRendererProps) {
         ]}
         components={{
           // Code blocks with copy button
-          code({ node, inline, className, children, ...props }) {
+          code({ node, inline, className, children, ...props }: any) {
             if (inline) {
               return (
                 <code className="rounded bg-slate-100 px-1.5 py-0.5 text-sm font-mono text-slate-900 dark:bg-slate-800 dark:text-slate-100" {...props}>
