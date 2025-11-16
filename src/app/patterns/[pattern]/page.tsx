@@ -146,7 +146,7 @@ export default async function PatternDetailPage({
         <PatternDetailClient pattern={pattern}>
           {/* Server Component: CrossContentLinks fetches data server-side */}
           <CrossContentLinks
-            tags={pattern.tags || []}
+            tags={[]}
             category={pattern.category}
             excludeId={pattern.id}
           />

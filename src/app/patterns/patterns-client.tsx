@@ -16,27 +16,27 @@ import { Icons } from '@/lib/icons';
 import { PatternDetailDrawer } from '@/components/features/PatternDetailDrawer';
 import { PatternDetail } from '@/lib/db/schemas/pattern';
 
-// Icon mapping for patterns
+// Icon mapping for patterns (currently unused)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const iconMap: Record<string, any> = {
-  persona: Icons.user,
-  'audience-persona': Icons.users,
-  'cognitive-verifier': Icons.zap,
-  'chain-of-thought': Icons.arrowRight,
-  'question-refinement': Icons.search,
-  template: Icons.file,
-  'few-shot': Icons.copy,
-  'context-control': Icons.target,
-  'output-formatting': Icons.code,
-  constraint: Icons.shield,
-  'tree-of-thoughts': Icons.github,
-  react: Icons.refresh,
-  'self-consistency': Icons.check,
-  'meta-prompting': Icons.sparkles,
-  rag: Icons.database,
-  // Add default icon
-  default: Icons.sparkles,
-};
+// const iconMap: Record<string, any> = {
+//   persona: Icons.user,
+//   'audience-persona': Icons.users,
+//   'cognitive-verifier': Icons.zap,
+//   'chain-of-thought': Icons.arrowRight,
+//   'question-refinement': Icons.search,
+//   template: Icons.file,
+//   'few-shot': Icons.copy,
+//   'context-control': Icons.target,
+//   'output-formatting': Icons.code,
+//   constraint: Icons.shield,
+//   'tree-of-thoughts': Icons.github,
+//   react: Icons.refresh,
+//   'self-consistency': Icons.check,
+//   'meta-prompting': Icons.sparkles,
+//   rag: Icons.database,
+//   // Add default icon
+//   default: Icons.sparkles,
+// };
 
 const categories = [
   { name: 'All Patterns', value: 'all' },
@@ -278,7 +278,6 @@ export function PatternsClient({
       {/* Patterns Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
         {filteredPatterns.map((pattern) => {
-          const Icon = iconMap[pattern.id] || iconMap.default;
           return (
             <Card
               key={pattern.id}

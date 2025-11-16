@@ -483,10 +483,10 @@ export default async function PromptPage({
             </div>
 
             {/* Enrichment Details - Shows all enrichment fields if they exist in DB */}
-            {/* Includes: useCases, bestPractices, examples, caseStudies, bestTimeToUse, 
+            {/* Includes: useCases, bestPractices, examples, caseStudies, bestTimeToUse,
                 recommendedModel, whenNotToUse, difficulty, estimatedTime */}
             <PromptEnrichment
-              caseStudies={prompt.caseStudies}
+              caseStudies={prompt.caseStudies as any}
               bestTimeToUse={prompt.bestTimeToUse}
               recommendedModel={prompt.recommendedModel}
               useCases={prompt.useCases}
