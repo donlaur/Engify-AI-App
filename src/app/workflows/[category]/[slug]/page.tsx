@@ -137,7 +137,7 @@ export default async function WorkflowDetailPage({
     notFound();
   }
 
-  const [metadata, allWorkflows, allPrompts, allPatterns, allPainPoints] = await Promise.all([
+  const [_metadata, allWorkflows, allPrompts, allPatterns, allPainPoints] = await Promise.all([
     getWorkflowsMetadata(),
     loadWorkflowsFromJson(),
     loadPromptsFromJson(),
@@ -508,9 +508,9 @@ function formatResourceDisplayText(
   return formatLabel(identifier);
 }
 
-function formatKeyword(keyword: string): string {
-  return keyword.replace(/[-_]/g, ' ').toLowerCase();
-}
+// function formatKeyword(keyword: string): string {
+//   return keyword.replace(/[-_]/g, ' ').toLowerCase();
+// }
 
 function resolveResourceUrl(
   section: 'prompts' | 'patterns' | 'learn',
