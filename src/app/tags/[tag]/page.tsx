@@ -63,10 +63,10 @@ export async function generateMetadata({ params }: { params: Promise<{ tag: stri
     }
 
     // Decode and normalize tag from URL
-    const { decoded, normalized } = decodeTagFromUrl(params.tag);
-    
+    const { normalized } = decodeTagFromUrl(tag);
+
     // Get all tag variations for database lookup
-    const tagVariations = getTagVariations(params.tag);
+    const tagVariations = getTagVariations(tag);
     
     // Try to find prompts with any of the tag variations
     const allPrompts = [];
@@ -196,11 +196,12 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <TagPageClient tag={decoded} displayTag={displayTag} taggedPrompts={uniquePrompts} />
+      <TagPageClient tag={decoded} displayTag={displayTag} taggedPrompts={uniquePrompts as any} />
     </>
   );
   } catch (error) {
-    console.error('Error loading tag page:', params.tag, error);
+    const { tag: errorTag } = await params;
+    console.error('Error loading tag page:', errorTag, error);
     // Return 404 for invalid tags
     notFound();
   }

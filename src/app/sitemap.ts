@@ -303,7 +303,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Individual prompt pages: /prompts/[slug] - use slug for better SEO
   // Filter out prompts with invalid slugs (empty, 'untitled', or missing)
   const { getPromptSlug } = await import('@/lib/utils/slug');
-  const promptPages: MetadataRoute.Sitemap = prompts
+  const promptPages = prompts
     .map((prompt) => {
       // Skip prompts without valid ID
       if (!prompt.id) {
@@ -340,12 +340,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       };
     })
-    .filter((page): page is MetadataRoute.Sitemap[0] => 
-      page !== null && 
-      page.url && 
+    .filter((page): page is NonNullable<typeof page> =>
+      page !== null &&
+      Boolean(page.url) &&
       !page.url.includes('/untitled') &&
       !page.url.includes('generated-')
-    ); // Remove null entries and invalid URLs
+    ) as MetadataRoute.Sitemap; // Remove null entries and invalid URLs
 
   // Extract unique categories, roles, and tags from prompts
   const categories = Array.from(

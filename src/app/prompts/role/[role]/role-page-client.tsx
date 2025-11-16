@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import type { Prompt } from '@/data/seed-prompts';
+import type { Prompt } from '@/lib/schemas/prompt';
 
 interface RolePageClientProps {
   role: string;
