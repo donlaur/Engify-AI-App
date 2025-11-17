@@ -1,18 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 
+interface UserStats {
+  userId: string;
+  daysLoggedIn: number;
+  lastLoginDate: Date | null;
+  loginDates: Date[];
+  totalSessions: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // GET /api/user-stats - Get user statistics
 export async function GET(_request: NextRequest) {
   try {
     // For MVP, use hardcoded user ID
     const userId = '68ffe3d1e4cf6420d1fdc474';
-    
+
     const db = await getDb();
-    
+
     // Get or create user stats
     const userStats = await db.collection('user_stats').findOne({ userId });
-    
-    let statsData: any;
+
+    let statsData: UserStats;
     
     if (!userStats) {
       // Create initial stats
@@ -39,15 +49,15 @@ export async function GET(_request: NextRequest) {
       // New day login - increment days
       await db.collection('user_stats').updateOne(
         { userId },
-        { 
-          $push: { loginDates: new Date() } as any,
-          $set: { 
+        {
+          $push: { loginDates: new Date() },
+          $set: {
             lastLoginDate: new Date(),
             updatedAt: new Date()
           },
-          $inc: { 
+          $inc: {
             daysLoggedIn: 1,
-            totalSessions: 1 
+            totalSessions: 1
           }
         }
       );

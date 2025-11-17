@@ -84,9 +84,9 @@ export async function GET(request: NextRequest) {
 
     // Connect to database
     const db = await getDb();
-    
+
     // Build query - always filter by user ID for MVP
-    const query: any = { userId };
+    const query: { userId: string; status?: string } = { userId };
     if (status) {
       query.status = status;
     }

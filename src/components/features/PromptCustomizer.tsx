@@ -6,7 +6,8 @@
  * Feature-flagged and requires premium entitlement (currently free for all logged-in users)
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -225,7 +226,7 @@ export function PromptCustomizer({ promptId, promptTitle, originalContent, onCop
       const lines = content.split('\n');
       return lines.map((line, index) => {
         const isPlaceholder = placeholders.some(
-          (p) => content.substring(0, content.indexOf(line)).split('\n').length - 1 === index
+          (_p) => content.substring(0, content.indexOf(line)).split('\n').length - 1 === index
         );
         
         if (isPlaceholder) {

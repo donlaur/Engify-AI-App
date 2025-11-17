@@ -15,7 +15,6 @@ import { PromptCard } from '@/components/features/PromptCard';
 import { EmptyState } from '@/components/features/EmptyState';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
   SelectContent,

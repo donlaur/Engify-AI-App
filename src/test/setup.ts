@@ -142,7 +142,10 @@ vi.mock('@/lib/db/mongodb', () => {
 
 // Also mock MongoDB low-level client module if imported directly
 vi.mock('@/lib/db/client', () => {
-  type Doc = Record<string, unknown> & { _id?: string };
+  // Import ObjectId for proper type handling
+  const { ObjectId } = require('mongodb');
+
+  type Doc = Record<string, unknown> & { _id?: string | typeof ObjectId };
   const store = new Map<string, Doc[]>();
   const getList = (name: string) => store.get(name) || [];
   const setList = (name: string, list: Doc[]) => store.set(name, list);
@@ -308,11 +311,8 @@ vi.mock('@/lib/db/client', () => {
     })),
     insertOne: vi.fn(async (doc: Doc) => {
       const list = getList(name).slice();
-      const genHex = () =>
-        Array.from({ length: 24 }, () =>
-          Math.floor(Math.random() * 16).toString(16)
-        ).join('');
-      const insertedId = doc._id || genHex();
+      // Generate proper ObjectId instance for _id
+      const insertedId = doc._id || new ObjectId();
       list.push({ ...doc, _id: insertedId });
       setList(name, list);
       return { insertedId };

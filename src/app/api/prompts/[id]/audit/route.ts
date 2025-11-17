@@ -16,7 +16,7 @@ const AUDIT_TOOL_VERSION = '1.1';
 async function getAuditor() {
   try {
     // Use the webpack alias configured in next.config.js
-    // @ts-ignore - Dynamic import may not exist at build time
+    // @ts-expect-error - Dynamic import may not exist at build time
     const auditModule = await import(
       /* webpackIgnore: true */
       '@/scripts/content/audit-prompts-patterns'

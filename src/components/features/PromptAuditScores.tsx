@@ -235,8 +235,8 @@ export function PromptAuditScores({
                   const categoryKey = key as keyof typeof USER_FOCUSED_CATEGORIES;
                   const category = USER_FOCUSED_CATEGORIES[categoryKey];
                   if (!category) return null;
-                  
-                  const weight = categoryWeights[key as keyof AuditScores['categoryScores']];
+
+                  const _weight = categoryWeights[key as keyof AuditScores['categoryScores']];
                   return (
                     <div key={key}>
                       <div className="mb-2 flex items-center justify-between">

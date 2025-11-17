@@ -102,7 +102,7 @@ export function WorkflowsClient({
 
   // Filter workflows using useMemo to prevent recalculations
   const filteredWorkflows = useMemo(() => {
-    let filtered = initialWorkflows.filter((workflow) => {
+    const filtered = initialWorkflows.filter((workflow) => {
       const matchesSearch =
         workflow.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         workflow.problemStatement.toLowerCase().includes(searchQuery.toLowerCase()) ||
