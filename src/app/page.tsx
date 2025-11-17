@@ -25,31 +25,39 @@ import { PreloadContentJson } from '@/components/features/PreloadContentJson';
 import { PainPointJourneySlider } from '@/components/homepage/PainPointJourneySlider';
 
 export const metadata: Metadata = {
-  title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
+  title: 'Engify.ai - Amplify Your Engineering Org with AI-Native Workflows',
   description:
-    'Document the manual guardrails you run today and automate them tomorrow. Engify pairs production-ready workflows, enforcement hooks, and incident memory so teams ship responsibly.',
+    'Master AI-native software engineering with 96+ production workflows, patterns, and guardrails tailored to your role. From engineers to directors, learn to ship AI code with confidence.',
   keywords: [
+    'AI-Native Software Engineering',
+    'AI-SDLC',
     'AI guardrails',
-    'guardrail automation',
-    'engineering governance',
-    'prompt governance',
-    'ai risk management',
+    'AI code quality',
+    'AI hallucinations',
+    'autonomous engineering',
+    'AI code security',
+    'AI code bugs',
+    'AI-assisted development',
+    'engineering workflows',
+    'prompt engineering patterns',
+    'AI governance',
+    'schema drift',
+    'insecure AI code',
+    'AI code review',
     'institutional memory',
-    'software delivery controls',
-    'compliance automation',
   ],
   openGraph: {
-    title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
+    title: 'Engify.ai - Amplify Your Engineering Org with AI-Native Workflows',
     description:
-      'Production guardrail workflows, automation handoffs, and incident memory—everything you need to prevent AI regressions.',
+      '96+ workflows that turn "almost good" AI code into production-ready code. Learn the patterns and guardrails for AI-native software engineering.',
     type: 'website',
     siteName: 'Engify.ai',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
+    title: 'Engify.ai - Amplify Your Engineering Org with AI-Native Workflows',
     description:
-      'Production guardrail workflows, automation handoffs, and incident memory—everything you need to prevent AI regressions.',
+      '96+ workflows that turn "almost good" AI code into production-ready code. Learn the patterns and guardrails for AI-native software engineering.',
     creator: '@engifyai',
   },
 };
