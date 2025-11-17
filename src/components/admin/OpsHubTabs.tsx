@@ -36,7 +36,7 @@ export function OpsHubTabs() {
       >
         <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
-            <Icons.activity className="h-4 w-4" />
+            <Icons.barChart className="h-4 w-4" />
             <span className="hidden sm:inline">Dashboard</span>
           </TabsTrigger>
           <TabsTrigger value="content" className="flex items-center gap-2">
