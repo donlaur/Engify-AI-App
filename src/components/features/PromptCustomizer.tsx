@@ -115,7 +115,7 @@ export function PromptCustomizer({ promptId, promptTitle, originalContent, onCop
     const lines = text.split('\n');
     let offset = 0;
 
-    lines.forEach((line, index) => {
+    lines.forEach((line) => {
       const lineStart = offset;
       const lineEnd = offset + line.length;
 
