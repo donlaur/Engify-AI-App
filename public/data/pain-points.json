@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "generatedAt": "2025-11-14T19:40:46.264Z",
   "totalPainPoints": 31,
   "painPoints": [
@@ -89,7 +89,14 @@
         "stealth vulnerabilities",
         "performance bottlenecks"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-02-trust-deficit",
@@ -174,7 +181,14 @@
         "ai suspicion",
         "no-fly zones"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-03-hallucinated-capabilities",
@@ -259,7 +273,14 @@
         "stale knowledge",
         "deprecated methods"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-04-skill-atrophy",
@@ -348,7 +369,14 @@
         "debugging skills",
         "leadership pipeline gap"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-05-missing-context",
@@ -450,7 +478,14 @@
         "business logic",
         "frankenstein system"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-06-brownfield-penalty",
@@ -546,7 +581,14 @@
         "memory leak workaround",
         "intertwined systems"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-07-context-forgetting",
@@ -643,7 +685,14 @@
         "short-term memory",
         "ai brain reset"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-08-toolchain-sprawl",
@@ -744,7 +793,14 @@
         "tool sprawl",
         "roi tracking"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-09-ai-slop",
@@ -850,7 +906,14 @@
         "boilerplate",
         "maintainability"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-10-oversized-prs",
@@ -952,7 +1015,14 @@
         "incremental prs",
         "unmanageable pr"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-11-merge-conflicts",
@@ -1054,7 +1124,14 @@
         "incremental slices",
         "conflict prevention"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-12-vibe-coding",
@@ -1156,7 +1233,14 @@
         "architecture linting",
         "required reviewer"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-13-hitl-bypass",
@@ -1258,7 +1342,14 @@
         "agent derailment",
         "agent governance"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-14-plan-derailment",
@@ -1360,7 +1451,14 @@
         "weekly audits",
         "build pipeline"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-15-overprivileged-agents",
@@ -1462,7 +1560,14 @@
         "massive data loss",
         "internal data breach"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-16-guardrail-evasion",
@@ -1564,7 +1669,14 @@
         "quality gate bypass",
         "guardrail evasion"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-17-destructive-actions",
@@ -1666,7 +1778,14 @@
         "delete customer accounts",
         "bringing down application"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "pain-point-18-log-manipulation",
@@ -1768,6 +1887,13 @@
         "TODO Cleanup",
         "PR Size Limits",
         "Code Cleanup"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -1874,6 +2000,13 @@
         "Security Code Review",
         "Release Readiness",
         "Security Sign-Off"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -1976,6 +2109,13 @@
         "Schema Diff Tools",
         "Schema Verification",
         "Migration Review"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -2078,6 +2218,13 @@
         "Find-Then-Use",
         "Codebase Search",
         "Repository Awareness"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -2180,6 +2327,13 @@
         "Release Readiness",
         "Observability",
         "Error Handling"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -2282,6 +2436,13 @@
         "Release Readiness",
         "SAST",
         "Zod Schemas"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -2381,6 +2542,13 @@
         "Professional Commit Standards",
         "Conventional Commits",
         "Structured Communication"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -2484,6 +2652,13 @@
         "Quality Gate Enforcement",
         "Guardrail Accountability",
         "Bypass Prevention"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -2576,6 +2751,13 @@
         "Layered Quality Checks",
         "Pre-Commit Hierarchy",
         "Validation Organization"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -2676,6 +2858,13 @@
         "Codebase Search",
         "Repository Awareness",
         "Pre-Change Validation"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -2775,6 +2964,13 @@
         "Code Ownership",
         "Documentation Requirements",
         "Maintenance Planning"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -2867,6 +3063,13 @@
         "Commit Message Guidelines",
         "Git History Quality",
         "Atomic Commits"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -2966,6 +3169,13 @@
         "Bypass Accountability",
         "Quality Gate Optimization",
         "Cultural Change"
+      ],
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
       ]
     },
     {
@@ -3053,7 +3263,14 @@
         "engineering leadership",
         "manager enablement"
       ],
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Research Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     }
   ]
 }
