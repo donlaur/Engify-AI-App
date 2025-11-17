@@ -22,6 +22,7 @@ import { getServerStats } from '@/lib/server-stats';
 import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
 import type { Metadata } from 'next';
 import { PreloadContentJson } from '@/components/features/PreloadContentJson';
+import { PainPointJourneySlider } from '@/components/homepage/PainPointJourneySlider';
 
 export const metadata: Metadata = {
   title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
@@ -327,38 +328,19 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Roles Section */}
-      <section className="container bg-gradient-to-b from-white to-gray-50 py-12 dark:from-gray-950 dark:to-gray-900">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-8 text-center">
-            <h2 className="mb-4 text-4xl font-bold">Built for Every Role</h2>
+      {/* Pain Point Journey Section */}
+      <section className="container bg-gradient-to-b from-white to-gray-50 py-16 dark:from-gray-950 dark:to-gray-900">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-4xl font-bold">
+              From Pain Points to Production-Ready Code
+            </h2>
             <p className="text-xl text-gray-700 dark:text-gray-300">
-              Tailored prompts for your entire engineering organization
+              See how recommendations and guardrails solve real engineering problems
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-4">
-            {roles.map((role, i) => {
-              const Icon = role.icon;
-              return (
-                <Card
-                  key={role.name}
-                  className="group animate-fade-in border-2 transition-all duration-300 hover:-translate-y-2 hover:border-purple-200 hover:shadow-2xl"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <CardHeader className="pb-4 text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 transition-transform group-hover:scale-110">
-                      <Icon className="h-8 w-8 text-white" />
-                    </div>
-                    <CardTitle className="text-xl">{role.name}</CardTitle>
-                    <CardDescription className="font-semibold text-purple-600">
-                      {role.count}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              );
-            })}
-          </div>
+          <PainPointJourneySlider role="engineers" />
         </div>
       </section>
 
