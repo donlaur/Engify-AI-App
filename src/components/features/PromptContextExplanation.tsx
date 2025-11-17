@@ -121,7 +121,6 @@ function getContextExplanation(title: string, category: string): {
 export function PromptContextExplanation({
   title,
   category,
-  description,
   whatIs: dbWhatIs,
   whyUse: dbWhyUse,
 }: PromptContextExplanationProps) {

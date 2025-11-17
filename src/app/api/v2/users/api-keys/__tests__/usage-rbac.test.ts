@@ -22,7 +22,7 @@ describe('RBAC /api/v2/users/api-keys/usage', () => {
 
   it('denies GET when role lacks users:read permission', async () => {
     const { auth } = await import('@/lib/auth');
-    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } });
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } } as any);
 
     const req = new NextRequest(
       'http://localhost:3000/api/v2/users/api-keys/usage'
@@ -35,7 +35,7 @@ describe('RBAC /api/v2/users/api-keys/usage', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'admin', role: 'super_admin' },
-    });
+    } as any);
 
     const req = new NextRequest(
       'http://localhost:3000/api/v2/users/api-keys/usage'
@@ -50,7 +50,7 @@ describe('RBAC /api/v2/users/api-keys/usage', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'admin', role: 'super_admin' },
-    });
+    } as any);
 
     const req = new NextRequest(
       'http://localhost:3000/api/v2/users/api-keys/usage?days=7'

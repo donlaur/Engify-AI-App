@@ -89,7 +89,6 @@ export async function generatePatternsJson(): Promise<void> {
     commonMistakes: pattern.commonMistakes,
     relatedPatterns: pattern.relatedPatterns,
     icon: pattern.icon,
-    tags: pattern.tags,
     createdAt: pattern.createdAt,
     updatedAt: pattern.updatedAt,
     promptCount: promptsByPattern.get(pattern.id) || 0,

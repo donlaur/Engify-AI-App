@@ -46,7 +46,7 @@ describe('POST /api/v2/ai/execute', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'admin', role: 'super_admin' },
-    });
+    } as any);
     const { getWorkbenchToolContract } = await import(
       '@/lib/workbench/contracts'
     );
@@ -371,7 +371,7 @@ describe('GET /api/v2/ai/execute', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'admin', role: 'super_admin' },
-    });
+    } as any);
     const { getWorkbenchToolContract } = await import(
       '@/lib/workbench/contracts'
     );
@@ -404,7 +404,7 @@ describe('GET /api/v2/ai/execute', () => {
 describe('RBAC /api/v2/ai/execute', () => {
   it('denies POST when role lacks workbench:ai_execution', async () => {
     const { auth } = await import('@/lib/auth');
-    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } });
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } } as any);
     const { getWorkbenchToolContract } = await import(
       '@/lib/workbench/contracts'
     );
@@ -421,7 +421,7 @@ describe('RBAC /api/v2/ai/execute', () => {
 
   it('denies GET when role lacks workbench:ai_execution', async () => {
     const { auth } = await import('@/lib/auth');
-    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } });
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } } as any);
     const { getWorkbenchToolContract } = await import(
       '@/lib/workbench/contracts'
     );

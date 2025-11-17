@@ -29,7 +29,7 @@ vi.mock('@/components/ErrorBoundary', () => ({
 }));
 
 vi.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ open, children, onOpenChange }: { open: boolean; children: React.ReactNode; onOpenChange: () => void }) => 
+  Dialog: ({ open, children }: { open: boolean; children: React.ReactNode; onOpenChange?: () => void }) =>
     open ? <div data-testid="dialog">{children}</div> : null,
   DialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DialogDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

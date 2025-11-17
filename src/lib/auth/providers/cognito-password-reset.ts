@@ -92,7 +92,6 @@ export async function cognitoAdminResetPassword(email: string): Promise<{
     // It sends it via email. Use AdminSetUserPasswordCommand if you need to set it directly.
     return {
       success: true,
-      message: 'Password reset code sent to your email',
     };
   } catch (error) {
     logger.error('Cognito admin password reset failed', {

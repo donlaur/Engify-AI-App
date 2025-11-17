@@ -22,7 +22,7 @@ describe('RBAC PATCH /api/v2/users/[id]/last-login', () => {
 
   it('denies updating another user when role lacks elevation', async () => {
     const { auth } = await import('@/lib/auth');
-    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } });
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } } as any);
 
     const req = new NextRequest(
       'http://localhost:3000/api/v2/users/u2/last-login',
@@ -37,7 +37,7 @@ describe('RBAC PATCH /api/v2/users/[id]/last-login', () => {
 
   it('allows updating own last login', async () => {
     const { auth } = await import('@/lib/auth');
-    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } });
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } } as any);
 
     const req = new NextRequest(
       'http://localhost:3000/api/v2/users/u1/last-login',
@@ -54,7 +54,7 @@ describe('RBAC PATCH /api/v2/users/[id]/last-login', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'admin', role: 'super_admin' },
-    });
+    } as any);
 
     const req = new NextRequest(
       'http://localhost:3000/api/v2/users/u2/last-login',

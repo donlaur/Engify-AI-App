@@ -33,6 +33,8 @@ describe('PromptCard', () => {
     isPublic: true,
     isFeatured: false,
     active: true,
+    isPremium: false,
+    requiresAuth: false,
   };
 
   it('renders prompt information', () => {

@@ -3,12 +3,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { usePrompts, usePrompt, usePaginatedPrompts } from '../usePrompts';
 
 // Mock SWR
 vi.mock('swr', () => ({
-  default: vi.fn((key, fetcher, config) => {
+  default: vi.fn((_key, _fetcher, _config) => {
     // Simple mock implementation
     return {
       data: undefined,

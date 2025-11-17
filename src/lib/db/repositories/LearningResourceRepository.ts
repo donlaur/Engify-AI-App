@@ -115,7 +115,7 @@ export class LearningResourceRepository
    */
   async getById(id: string): Promise<LearningResource | null> {
     const document = await this.findOne({
-      $or: [{ id }, { _id: id }],
+      $or: [{ id }, { _id: id as any }],
       status: 'active',
     });
     return document ? this.processor.process(document) : null;

@@ -23,9 +23,7 @@ export interface ResearchBasedSection {
 /**
  * Get research-based sections for AI Upskilling Program pillar page
  */
-export function getAIUpskillingSections(config: PillarPageConfig): ResearchBasedSection[] {
-  const wordsPerSection = Math.ceil(config.targetWordCount / 10); // 10 sections for comprehensive coverage
-  
+export function getAIUpskillingSections(_config: PillarPageConfig): ResearchBasedSection[] {
   return [
     {
       id: 'introduction-strategic-imperative',
@@ -191,9 +189,7 @@ export function getAIUpskillingSections(config: PillarPageConfig): ResearchBased
 /**
  * Get research-based sections for AI-First Engineering Organization pillar page
  */
-export function getAIFirstOrganizationSections(config: PillarPageConfig): ResearchBasedSection[] {
-  const wordsPerSection = Math.ceil(config.targetWordCount / 10); // 10 sections
-  
+export function getAIFirstOrganizationSections(_config: PillarPageConfig): ResearchBasedSection[] {
   return [
     {
       id: 'ai-first-to-ai-native',
@@ -391,9 +387,7 @@ export function getAIFirstOrganizationSections(config: PillarPageConfig): Resear
 /**
  * Get research-based sections for Ultimate Guide to AI-Assisted Software Development pillar page
  */
-export function getAIAssistedDevelopmentSections(config: PillarPageConfig): ResearchBasedSection[] {
-  const wordsPerSection = Math.ceil(config.targetWordCount / 7); // 7 major sections + intro/conclusion
-  
+export function getAIAssistedDevelopmentSections(_config: PillarPageConfig): ResearchBasedSection[] {
   return [
     {
       id: 'introduction',

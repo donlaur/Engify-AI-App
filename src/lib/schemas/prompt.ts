@@ -120,7 +120,6 @@ export const PromptSchema = z.object({
   
   // Freemium fields
   isPremium: z.boolean().default(false), // Premium content behind firewall
-  isPublic: z.boolean().default(true), // Public or private
   requiresAuth: z.boolean().default(false), // Requires authentication to view
   
   // Revision tracking

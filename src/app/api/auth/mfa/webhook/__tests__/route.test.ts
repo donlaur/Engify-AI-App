@@ -31,7 +31,7 @@ describe('Twilio webhook', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     const { rateLimit } = await import('@/lib/middleware/rateLimit');
-    vi.mocked(rateLimit).mockReturnValue(true);
+    vi.mocked(rateLimit).mockReturnValue(Promise.resolve(true));
     const { resetTwilioWebhookState } = await import('@/lib/services/twilioWebhookState');
     resetTwilioWebhookState();
   });
@@ -70,7 +70,7 @@ describe('Twilio webhook', () => {
 
   it('returns 429 when rate limited', async () => {
     const { rateLimit } = await import('@/lib/middleware/rateLimit');
-    vi.mocked(rateLimit).mockReturnValueOnce(false);
+    vi.mocked(rateLimit).mockReturnValueOnce(Promise.resolve(false));
     const { hasProcessedMessage } = await import('@/lib/services/twilioWebhookState');
     const { POST } = await import('../route');
     const req = new NextRequest('http://localhost:3000/api/auth/mfa/webhook', {

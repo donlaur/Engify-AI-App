@@ -104,8 +104,8 @@ export class PromptService {
 
     // Generate slug from title if not provided
     // IMPORTANT: Do NOT append ID - slugs should be clean and SEO-friendly
-    const { generateSlug, generateUniqueSlug } = await import('@/lib/utils/slug');
-    
+    const { generateUniqueSlug } = await import('@/lib/utils/slug');
+
     // Check for existing slugs to ensure uniqueness
     const existingPrompts = await this.promptRepository.findAll();
     const existingSlugs = new Set(existingPrompts.map(p => p.slug).filter(Boolean) as string[]);
@@ -184,8 +184,8 @@ export class PromptService {
     // Regenerate slug if title changed (clean slug, no ID)
     const updateData = { ...promptData };
     if (promptData.title && existingPrompt.title !== promptData.title) {
-      const { generateSlug, generateUniqueSlug } = await import('@/lib/utils/slug');
-      
+      const { generateUniqueSlug } = await import('@/lib/utils/slug');
+
       // Check for existing slugs to ensure uniqueness
       const allPrompts = await this.promptRepository.findAll();
       const existingSlugs = new Set(

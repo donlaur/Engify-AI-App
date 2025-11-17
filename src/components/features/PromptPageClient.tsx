@@ -5,7 +5,6 @@
 
 'use client';
 
-import { useEffect } from 'react';
 import { usePromptView } from '@/hooks/use-prompt-view';
 
 interface PromptPageClientProps {
