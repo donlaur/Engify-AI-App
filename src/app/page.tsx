@@ -152,15 +152,15 @@ export default async function Home() {
         <div className="container relative z-10 py-24 md:py-32">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
-              Ship AI Guardrails With Institutional Memory
+              Master AI Guardrails That Scale From Manual to Automated
             </h1>
 
             <p className="mx-auto max-w-3xl text-xl font-semibold leading-relaxed text-white sm:text-2xl">
-              Stop AI slop before it merges. Turn manual guardrails into always-on automation.
+              AI coding assistants are powerful—but without guardrails, they create technical debt, security risks, and compliance gaps.
             </p>
 
             <p className="mx-auto max-w-3xl text-lg leading-relaxed text-white/90">
-              {`${guardrailCount}+ production guardrails • automation hooks for CI/CD • incident recall built in.`}
+              {`Learn the workflows, study the patterns, deploy the hooks. ${guardrailCount}+ production guardrails ready to explore.`}
             </p>
 
             <div className="flex justify-center pt-8">
