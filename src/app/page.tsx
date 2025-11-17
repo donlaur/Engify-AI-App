@@ -152,15 +152,15 @@ export default async function Home() {
         <div className="container relative z-10 py-24 md:py-32">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
             <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
-              AI Code Without Guardrails Creates Technical Debt
+              Learn Why Your AI Code Breaks—Before It Reaches Production
             </h1>
 
             <p className="mx-auto max-w-3xl text-xl font-semibold leading-relaxed text-white sm:text-2xl">
-              Copilot and Claude write fast—but hallucinate APIs, skip error handling, and ignore security best practices. Without guardrails, you ship bugs faster than you can review them.
+              Other AI tools write code fast. Engify teaches you to understand what can go wrong—and how to prevent it. Study {guardrailCount}+ workflows that turn &quot;almost good&quot; code into production-ready code.
             </p>
 
             <p className="mx-auto max-w-3xl text-lg leading-relaxed text-white/90">
-              {`Study ${guardrailCount}+ production workflows that catch AI mistakes before merge. Learn the patterns, practice the checklists, understand what to automate.`}
+              Learn the patterns behind each guardrail, practice the checklists, understand what to automate. Ship AI code with confidence, not just velocity.
             </p>
 
             <div className="flex justify-center pt-8">
@@ -170,7 +170,7 @@ export default async function Home() {
                 asChild
               >
                 <Link href="/workflows">
-                  Browse Free Guardrail Workflows
+                  Start Learning Free
                   <Icons.arrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
