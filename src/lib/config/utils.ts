@@ -122,10 +122,18 @@ export function validateConfig<T extends z.ZodType>(
 
 /**
  * Enforce production secrets validation
+ * Note: Skips validation during build phase to allow builds without runtime secrets
  */
 export function enforceProductionSecrets(config: Record<string, unknown>): void {
   const env = config.NODE_ENV as Environment;
   if (env !== 'production') return;
+
+  // Skip validation during Next.js build phase
+  // BUILD_MODE is set during Next.js builds
+  if (process.env.BUILD_MODE === '1' || process.env.NEXT_PHASE === 'phase-production-build') {
+    console.log('⚠️  Skipping production secret validation during build phase');
+    return;
+  }
 
   const criticalSecrets = [
     'NEXTAUTH_SECRET',
