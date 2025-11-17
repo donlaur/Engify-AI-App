@@ -8,7 +8,6 @@ const __dirname = dirname(__filename);
 async function main() {
   const eslint = new ESLint({
     cwd: __dirname,
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
     baseConfig: {
       extends: [
         'next/core-web-vitals',
