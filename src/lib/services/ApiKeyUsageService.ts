@@ -378,8 +378,8 @@ export class ApiKeyUsageService {
           const usersCollection = db.collection<User>('users');
           const apiKeysCollection = db.collection<ApiKey>('api_keys');
 
-          const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
-          const apiKey = await apiKeysCollection.findOne({ _id: new ObjectId(keyId) });
+          const user = await usersCollection.findOne({ _id: new ObjectId(userId) } as any);
+          const apiKey = await apiKeysCollection.findOne({ _id: new ObjectId(keyId) } as any);
 
           if (user && apiKey) {
             // Send notification via notification service
