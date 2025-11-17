@@ -154,7 +154,7 @@ const tips = [
       {
         title: 'Be specific about constraints',
         description:
-          'Tell AI what NOT to do. "Don\'t use any, keep it under 100 lines, use TypeScript strict mode"',
+          'Tell AI what NOT to do. &quot;Don&apos;t use any, keep it under 100 lines, use TypeScript strict mode&quot;',
       },
       {
         title: 'Provide examples',
@@ -162,7 +162,7 @@ const tips = [
           'Show the AI existing code style. It will match your patterns.',
       },
       {
-        title: "Iterate, don't perfect",
+        title: "Iterate, don&apos;t perfect",
         description:
           'Get 80% from AI, refine the 20% yourself. Faster than writing from scratch.',
       },
@@ -176,17 +176,17 @@ const tips = [
       {
         title: 'Ask for security review',
         description:
-          'Paste code and ask: "Review for security vulnerabilities, especially SQL injection and XSS"',
+          'Paste code and ask: &quot;Review for security vulnerabilities, especially SQL injection and XSS&quot;',
       },
       {
         title: 'Performance analysis',
         description:
-          'Ask: "Identify performance bottlenecks and suggest optimizations"',
+          'Ask: &quot;Identify performance bottlenecks and suggest optimizations&quot;',
       },
       {
         title: 'Best practices check',
         description:
-          'Ask: "Does this follow React/TypeScript best practices? What would you change?"',
+          'Ask: &quot;Does this follow React/TypeScript best practices? What would you change?&quot;',
       },
     ],
   },

@@ -258,7 +258,7 @@ export function PromptCustomizer({ promptId, promptTitle, originalContent, onCop
               <CardDescription>
                 {isEditing
                   ? 'Edit the prompt below. Placeholder sections are highlighted. You can customize any part and save it to your collection.'
-                  : 'Click "Customize" to edit this prompt and save your personalized version.'}
+                  : 'Click &quot;Customize&quot; to edit this prompt and save your personalized version.'}
               </CardDescription>
             </div>
             {!isEditing && (
