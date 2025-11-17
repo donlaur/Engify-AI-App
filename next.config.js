@@ -2,9 +2,9 @@
 const path = require('path');
 const nextConfig = {
   reactStrictMode: true,
-  // Temporarily disable ESLint during builds to avoid compatibility issues
+  // ESLint enabled during builds for code quality checks
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
 
   // Exclude server-only packages from client bundles
