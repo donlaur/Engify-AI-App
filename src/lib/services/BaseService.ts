@@ -87,17 +87,13 @@ export abstract class BaseService<T extends { _id?: ObjectId }> {
    */
   async insertOne(data: OptionalId<T>): Promise<T> {
     // Validate with Zod when schema provides parse (tests may use placeholder schema)
-    const hasParse =
-      typeof (this.schema as unknown as { parse?: unknown }).parse ===
-      'function';
-    const validated = hasParse
-      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (this.schema as any).parse(data)
+    const schemaWithParse = this.schema as unknown as { parse?: (data: unknown) => T };
+    const validated = typeof schemaWithParse.parse === 'function'
+      ? schemaWithParse.parse(data)
       : (data as T);
 
     const collection = await this.getCollection();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await collection.insertOne(validated as any); // MongoDB type mismatch with Zod
+    const result = await collection.insertOne(validated as OptionalId<T>);
 
     return {
       ...validated,
@@ -121,10 +117,11 @@ export abstract class BaseService<T extends { _id?: ObjectId }> {
   ): Promise<T | null> {
     const collection = await this.getCollection();
 
+    const updateDoc = { ...update, updatedAt: new Date() };
+
     const result = await collection.findOneAndUpdate(
       { _id: new ObjectId(id) } as Filter<T>,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { $set: { ...update, updatedAt: new Date() } as any }, // MongoDB update type complexity
+      { $set: updateDoc },
       { returnDocument: 'after' }
     );
 
