@@ -12,7 +12,7 @@ import { auth } from '@/lib/auth';
 import { getContentGenerationJobQueue } from '@/lib/services/jobs/ContentGenerationJobQueue';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ jobId: string }> }
 ) {
   try {
@@ -124,7 +124,7 @@ export async function GET(
  * Cancel a running job (if supported)
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ jobId: string }> }
 ) {
   try {
