@@ -352,21 +352,6 @@ export const secretsHelpers = {
 };
 
 /**
- * Export schemas for testing
- */
-export {
-  aiProviderSecretsSchema,
-  databaseSecretsSchema,
-  authSecretsSchema,
-  emailSecretsSchema,
-  smsSecretsSchema,
-  queueSecretsSchema,
-  cacheSecretsSchema,
-  securitySecretsSchema,
-  appSecretsSchema,
-};
-
-/**
  * Default export
  */
 export default {
