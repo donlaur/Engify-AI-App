@@ -22,6 +22,7 @@ import { getServerStats } from '@/lib/server-stats';
 import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
 import type { Metadata } from 'next';
 import { PreloadContentJson } from '@/components/features/PreloadContentJson';
+import { PainPointJourneySlider } from '@/components/homepage/PainPointJourneySlider';
 
 export const metadata: Metadata = {
   title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
@@ -150,30 +151,98 @@ export default async function Home() {
         <div className="absolute inset-0 -z-10 bg-black/20" />
 
         <div className="container relative z-10 py-24 md:py-32">
-          <div className="mx-auto max-w-4xl space-y-8 text-center">
-            <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
-              Ship AI Guardrails With Institutional Memory
-            </h1>
+          <div className="mx-auto max-w-5xl space-y-12 text-center">
+            <div className="space-y-6">
+              <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
+                Amplify Your Engineering Org with AI-Native Workflows
+              </h1>
 
-            <p className="mx-auto max-w-3xl text-xl font-semibold leading-relaxed text-white sm:text-2xl">
-              Stop AI slop before it merges. Turn manual guardrails into always-on automation.
-            </p>
+              <p className="mx-auto max-w-3xl text-xl font-semibold leading-relaxed text-white sm:text-2xl">
+                Whether you&apos;re an engineer shipping code or a director scaling teams, learn the patterns and guardrails for AI-native software engineering. Study {guardrailCount}+ workflows tailored to your role.
+              </p>
+            </div>
 
-            <p className="mx-auto max-w-3xl text-lg leading-relaxed text-white/90">
-              {`${guardrailCount}+ production guardrails • automation hooks for CI/CD • incident recall built in.`}
-            </p>
-
-            <div className="flex justify-center pt-8">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-green-500 to-cyan-500 font-bold text-black hover:from-green-600 hover:to-cyan-600"
-                asChild
+            {/* 4-Role Grid */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Engineers */}
+              <Link
+                href="/for-engineers"
+                className="group rounded-xl border-2 border-white/20 bg-white/10 p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
               >
-                <Link href="/workflows">
-                  Explore Guardrail Library
-                  <Icons.arrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+                <div className="mb-4 flex justify-center">
+                  <div className="rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 p-3">
+                    <Icons.code className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <h3 className="mb-2 text-xl font-bold text-white">Engineers</h3>
+                <p className="text-sm text-white/80">
+                  Ship AI code with confidence
+                </p>
+                <div className="mt-4 flex items-center justify-center text-white/60 transition-colors group-hover:text-white">
+                  <span className="text-sm font-semibold">Get Started</span>
+                  <Icons.arrowRight className="ml-1 h-4 w-4" />
+                </div>
+              </Link>
+
+              {/* Engineering Managers */}
+              <Link
+                href="/for-managers"
+                className="group rounded-xl border-2 border-white/20 bg-white/10 p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
+              >
+                <div className="mb-4 flex justify-center">
+                  <div className="rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 p-3">
+                    <Icons.users className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <h3 className="mb-2 text-xl font-bold text-white">Eng Managers</h3>
+                <p className="text-sm text-white/80">
+                  Lead AI-native teams with confidence
+                </p>
+                <div className="mt-4 flex items-center justify-center text-white/60 transition-colors group-hover:text-white">
+                  <span className="text-sm font-semibold">Get Started</span>
+                  <Icons.arrowRight className="ml-1 h-4 w-4" />
+                </div>
+              </Link>
+
+              {/* Directors/VPs */}
+              <Link
+                href="/for-engineering-directors"
+                className="group rounded-xl border-2 border-white/20 bg-white/10 p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
+              >
+                <div className="mb-4 flex justify-center">
+                  <div className="rounded-lg bg-gradient-to-br from-orange-500 to-red-500 p-3">
+                    <Icons.trendingUp className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <h3 className="mb-2 text-xl font-bold text-white">Directors & VPs</h3>
+                <p className="text-sm text-white/80">
+                  Scale org-wide AI adoption safely
+                </p>
+                <div className="mt-4 flex items-center justify-center text-white/60 transition-colors group-hover:text-white">
+                  <span className="text-sm font-semibold">Get Started</span>
+                  <Icons.arrowRight className="ml-1 h-4 w-4" />
+                </div>
+              </Link>
+
+              {/* Product Teams */}
+              <Link
+                href="/for-pms"
+                className="group rounded-xl border-2 border-white/20 bg-white/10 p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
+              >
+                <div className="mb-4 flex justify-center">
+                  <div className="rounded-lg bg-gradient-to-br from-green-500 to-teal-500 p-3">
+                    <Icons.target className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <h3 className="mb-2 text-xl font-bold text-white">Product Teams</h3>
+                <p className="text-sm text-white/80">
+                  Build faster with AI guardrails
+                </p>
+                <div className="mt-4 flex items-center justify-center text-white/60 transition-colors group-hover:text-white">
+                  <span className="text-sm font-semibold">Get Started</span>
+                  <Icons.arrowRight className="ml-1 h-4 w-4" />
+                </div>
+              </Link>
             </div>
           </div>
         </div>
@@ -259,38 +328,19 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Roles Section */}
-      <section className="container bg-gradient-to-b from-white to-gray-50 py-12 dark:from-gray-950 dark:to-gray-900">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-8 text-center">
-            <h2 className="mb-4 text-4xl font-bold">Built for Every Role</h2>
+      {/* Pain Point Journey Section */}
+      <section className="container bg-gradient-to-b from-white to-gray-50 py-16 dark:from-gray-950 dark:to-gray-900">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-4xl font-bold">
+              From Pain Points to Production-Ready Code
+            </h2>
             <p className="text-xl text-gray-700 dark:text-gray-300">
-              Tailored prompts for your entire engineering organization
+              See how recommendations and guardrails solve real engineering problems
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-4">
-            {roles.map((role, i) => {
-              const Icon = role.icon;
-              return (
-                <Card
-                  key={role.name}
-                  className="group animate-fade-in border-2 transition-all duration-300 hover:-translate-y-2 hover:border-purple-200 hover:shadow-2xl"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <CardHeader className="pb-4 text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 transition-transform group-hover:scale-110">
-                      <Icon className="h-8 w-8 text-white" />
-                    </div>
-                    <CardTitle className="text-xl">{role.name}</CardTitle>
-                    <CardDescription className="font-semibold text-purple-600">
-                      {role.count}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              );
-            })}
-          </div>
+          <PainPointJourneySlider role="engineers" />
         </div>
       </section>
 
