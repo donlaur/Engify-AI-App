@@ -23,7 +23,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Check admin role (adjust based on your auth system)
-    // @ts-expect-error - role might not be in session type
     if (session.user.role !== 'admin' && session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -100,7 +99,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check admin role
-    // @ts-expect-error - role might not be in session type
     if (session.user.role !== 'admin' && session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
