@@ -13,6 +13,9 @@ import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { auditLog } from '@/lib/logging/audit';
 import { logger } from '@/lib/logging/logger';
+import { apiUsageNotificationService } from './ApiUsageNotificationService';
+import type { User } from '@/lib/types/user';
+import type { ApiKey } from './ApiKeyService';
 
 export interface ApiKeyUsage {
   _id?: string;
@@ -370,7 +373,36 @@ export class ApiKeyUsageService {
 
       // Check if threshold exceeded
       if (currentValue >= alert.threshold) {
-        // TODO: Send notification (email/SMS via SendGrid/Twilio)
+        // Get user and API key information for notification
+        try {
+          const usersCollection = db.collection<User>('users');
+          const apiKeysCollection = db.collection<ApiKey>('api_keys');
+
+          const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+          const apiKey = await apiKeysCollection.findOne({ _id: new ObjectId(keyId) });
+
+          if (user && apiKey) {
+            // Send notification via notification service
+            await apiUsageNotificationService.sendNotification(user, {
+              userId,
+              keyId,
+              keyName: apiKey.keyName,
+              provider: _provider,
+              alertType: alert.alertType,
+              currentValue,
+              threshold: alert.threshold,
+              period: alert.period,
+              quota: apiKey.monthlyUsageLimit,
+            });
+          }
+        } catch (notificationError) {
+          logger.apiError('ApiKeyUsageService.sendNotification', notificationError, {
+            userId,
+            keyId,
+          });
+          // Continue even if notification fails - still mark alert as notified
+        }
+
         await alertsCollection.updateOne(
           { _id: alert._id },
           {

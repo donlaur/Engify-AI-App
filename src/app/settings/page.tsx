@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
+import { NotificationPreferences } from '@/components/settings/NotificationPreferences';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -189,6 +190,9 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* API Usage Notifications */}
+          {session?.user?.id && <NotificationPreferences userId={session.user.id} />}
 
           {/* Save Button */}
           <div className="flex justify-end">
