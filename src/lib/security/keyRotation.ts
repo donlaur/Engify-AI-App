@@ -33,7 +33,7 @@ export async function rotateApiKey(
       _id: keyId,
       userId,
       isActive: true,
-    });
+    } as any);
 
     if (!existingKey) {
       return {
@@ -65,7 +65,7 @@ export async function rotateApiKey(
 
     // Revoke old key
     await collection.updateOne(
-      { _id: keyId },
+      { _id: keyId } as any,
       {
         $set: {
           isActive: false,
@@ -130,7 +130,7 @@ export async function revokeApiKey(
     const collection = db.collection(Collections.API_KEYS as string);
 
     const result = await collection.updateOne(
-      { _id: keyId, userId, isActive: true },
+      { _id: keyId, userId, isActive: true } as any,
       {
         $set: {
           isActive: false,

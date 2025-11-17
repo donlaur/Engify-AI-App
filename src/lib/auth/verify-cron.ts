@@ -45,10 +45,13 @@ export async function verifyCronRequest(
     // QStash signature verification using @upstash/qstash
     try {
       const { Receiver } = await import('@upstash/qstash');
-      const receiver = new Receiver({
+      const receiverConfig: { currentSigningKey: string; nextSigningKey?: string } = {
         currentSigningKey: qstashSigningKey,
-        nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY,
-      });
+      };
+      if (process.env.QSTASH_NEXT_SIGNING_KEY) {
+        receiverConfig.nextSigningKey = process.env.QSTASH_NEXT_SIGNING_KEY;
+      }
+      const receiver = new Receiver(receiverConfig as any);
 
       const body = await request.text();
       const isValid = await receiver.verify({

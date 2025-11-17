@@ -15,6 +15,7 @@ import {
   assertFound,
   assertAuthorized,
   assertAuthenticated,
+  assertValidState,
   AppError,
 } from './index';
 
@@ -140,15 +141,16 @@ export async function example7_CustomErrorMetadata(request: NextRequest) {
     const result = await performComplexOperation();
 
     if (!result.success) {
-      throw ErrorFactory.businessLogic('Operation failed due to business rule violation', {
-        rule: 'max-concurrent-operations',
-        metadata: {
+      throw ErrorFactory.businessLogic(
+        'Operation failed due to business rule violation',
+        'max-concurrent-operations',
+        {
           currentOperations: result.currentCount,
           maxOperations: result.maxAllowed,
           userId: result.userId,
           timestamp: new Date(),
-        },
-      });
+        }
+      );
     }
 
     return NextResponse.json(result);
@@ -312,19 +314,19 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 // ==================== Helper Functions (Mock) ====================
 
 async function findUser(id: string) {
-  return { id, email: 'user@example.com', role: 'user', status: 'active' };
+  return { id, email: 'user@example.com', role: 'user', status: 'active', maxPrompts: 100, plan: 'free' };
 }
 
 async function fetchData() {
   return { data: 'example' };
 }
 
-async function getSession(request: NextRequest) {
+async function getSession(_request: NextRequest) {
   return { userId: '123' };
 }
 
 async function createUser(data: unknown) {
-  return { id: '123', ...data };
+  return { id: '123', ...(data as Record<string, any>) };
 }
 
 async function performComplexOperation() {
@@ -333,8 +335,8 @@ async function performComplexOperation() {
 
 async function getDatabase() {
   return {
-    collection: () => ({
-      insertOne: async () => ({ insertedId: '123' }),
+    collection: (_name: string) => ({
+      insertOne: async (_doc: any) => ({ insertedId: '123' }),
     }),
   };
 }
@@ -347,18 +349,18 @@ async function fetchDataFromDB() {
   return { data: 'example' };
 }
 
-function hasPermission(user: { role: string }, permission: string) {
+function hasPermission(user: { role: string }, _permission: string) {
   return user.role === 'admin';
 }
 
-async function getUserPromptCount(userId: string) {
+async function getUserPromptCount(_userId: string) {
   return 5;
 }
 
-async function findDuplicatePrompt(title: string, content: string) {
+async function findDuplicatePrompt(_title: string, _content: string): Promise<{ id: string; title: string } | null> {
   return null;
 }
 
 async function createPrompt(data: unknown) {
-  return { id: '123', ...data };
+  return { id: '123', ...(data as Record<string, any>) };
 }

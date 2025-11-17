@@ -33,7 +33,7 @@ interface PerformanceMetrics {
     p99QueryTime: number;
     byCollection: Record<string, { count: number; avgTime: number }>;
     byOperation: Record<string, { count: number; avgTime: number }>;
-    slowQueries: Array<{
+    slowQueryDetails: Array<{
       collection: string;
       operation: string;
       duration: number;

@@ -54,6 +54,9 @@ export const PainPointSchema = z.object({
   solutionKeywords: z.array(z.string()).default([]), // Solution keywords
   keywords: z.array(z.string()).default([]), // General keywords (for backwards compatibility)
   status: z.enum(['draft', 'published']).default('draft'),
+  // Metadata dates for SEO
+  datePublished: z.string().optional(),
+  dateModified: z.string().optional(),
 });
 
 export type PainPoint = z.infer<typeof PainPointSchema>;

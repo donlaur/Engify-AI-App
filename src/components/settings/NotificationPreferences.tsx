@@ -49,7 +49,7 @@ const defaultSettings: NotificationSettings = {
   phoneNumber: '',
 };
 
-export function NotificationPreferences({ userId }: NotificationPreferencesProps) {
+export function NotificationPreferences({ userId: _userId }: NotificationPreferencesProps) {
   const { toast } = useToast();
   const [settings, setSettings] = useState<NotificationSettings>(defaultSettings);
   const [isSaving, setIsSaving] = useState(false);

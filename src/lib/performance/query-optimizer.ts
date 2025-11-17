@@ -5,7 +5,7 @@
  * for MongoDB collections.
  */
 
-import { Collection, Document, IndexDescription } from 'mongodb';
+import { Collection, Document } from 'mongodb';
 import { getMongoDb } from '@/lib/mongodb';
 
 /**
@@ -72,7 +72,7 @@ export class QueryOptimizer {
   ): Promise<QueryAnalysis> {
     // Get explain plan
     const explain = await collection
-      .find(filter, options)
+      .find(filter as any, options as any)
       .explain('executionStats');
 
     const executionStats = explain.executionStats || {};
@@ -200,8 +200,8 @@ export class QueryOptimizer {
     const db = await getMongoDb();
     const collection = db.collection(collectionName);
 
-    const stats = await collection.stats();
-    const indexes = await collection.indexes();
+    const stats = await db.command({ collStats: collectionName }) as any;
+    const indexes = await collection.listIndexes().toArray();
 
     return {
       collection: collectionName,

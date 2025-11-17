@@ -156,7 +156,7 @@ export async function getToolAffiliateStats(toolKey: string): Promise<{
       weeklyPromises.push(redis.get(`affiliate:tool:${toolKey}:clicks:${dateStr}`));
     }
     const weeklyResults = await Promise.all(weeklyPromises);
-    const clicksThisWeek = weeklyResults.reduce((sum, val) => sum + (Number(val) || 0), 0);
+    const clicksThisWeek = weeklyResults.reduce((sum: number, val) => sum + (Number(val) || 0), 0);
 
     // Calculate monthly clicks
     const monthlyPromises = [];
@@ -167,7 +167,7 @@ export async function getToolAffiliateStats(toolKey: string): Promise<{
       monthlyPromises.push(redis.get(`affiliate:tool:${toolKey}:clicks:${dateStr}`));
     }
     const monthlyResults = await Promise.all(monthlyPromises);
-    const clicksThisMonth = monthlyResults.reduce((sum, val) => sum + (Number(val) || 0), 0);
+    const clicksThisMonth = monthlyResults.reduce((sum: number, val) => sum + (Number(val) || 0), 0);
 
     return {
       totalClicks: Number(totalClicks) || 0,

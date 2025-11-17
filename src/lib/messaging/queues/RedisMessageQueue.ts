@@ -622,12 +622,12 @@ export class RedisMessageQueue implements IMessageQueue {
       const now = new Date();
 
       // Store DLQ message with metadata
-      const dlqMessage: DeadLetterMessage = {
-        message,
-        reason,
-        failedAt: now,
-        originalQueue: this.name,
-      };
+      // const dlqMessage: DeadLetterMessage = {
+      //   message,
+      //   reason,
+      //   failedAt: now,
+      //   originalQueue: this.name,
+      // };
 
       // Store in Redis
       await this.redis.hset(dlqKey, {

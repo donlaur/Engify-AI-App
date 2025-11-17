@@ -63,6 +63,9 @@ export const RecommendationSchema = z.object({
   ])).min(1, 'Specify at least one audience'),
   priority: z.enum(['high', 'medium', 'low']).default('medium'),
   status: z.enum(['draft', 'published']).default('draft'),
+  // Metadata dates for SEO
+  datePublished: z.string().optional(),
+  dateModified: z.string().optional(),
 });
 
 export type Recommendation = z.infer<typeof RecommendationSchema>;
