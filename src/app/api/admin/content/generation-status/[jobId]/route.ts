@@ -140,10 +140,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { jobId } = await params;
+    const { jobId: _jobId } = await params;
 
     // For now, just return not implemented
     // In future: implement job cancellation
+    // TODO: Use _jobId to cancel the specific job
     return NextResponse.json(
       {
         error: 'Job cancellation not yet implemented',
