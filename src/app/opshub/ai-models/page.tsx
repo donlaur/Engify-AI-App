@@ -23,6 +23,8 @@ export default function AIModelsAdminPage() {
   // Load models from database
   useEffect(() => {
     loadModels();
+    // loadModels is only called once on mount - adding it to deps would cause unnecessary re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadModels() {

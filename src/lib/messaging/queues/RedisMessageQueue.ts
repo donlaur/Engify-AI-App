@@ -15,6 +15,8 @@ import {
   QueueStats,
   QueueConfig,
   MessageQueueError,
+  DeadLetterMessage,
+  DeadLetterError,
   // QueueConnectionError,
   // MessageProcessingError,
 } from '../types';
@@ -479,10 +481,10 @@ export class RedisMessageQueue implements IMessageQueue {
       await this.updateQueueStats('retrying');
     } else {
       // Move to dead letter queue
+      await this.moveToDLQ(message, error);
       await this.updateMessageStatus(message.id, 'dead_letter');
       await this.updateQueueStats('dead_letter');
 
-      // TODO: Implement dead letter queue
       logger.error('Message moved to dead letter queue', {
         queue: this.name,
         messageId: message.id,
@@ -600,6 +602,292 @@ export class RedisMessageQueue implements IMessageQueue {
 
   private getStatsKey(): string {
     return `mq:stats:${this.name}`;
+  }
+
+  private getDLQKey(messageId: string): string {
+    return `dlq:${this.name}:${messageId}`;
+  }
+
+  private getDLQSetKey(): string {
+    return `dlq:${this.name}:set`;
+  }
+
+  /**
+   * Move a message to the dead letter queue
+   */
+  async moveToDLQ(message: IMessage, reason: string): Promise<void> {
+    try {
+      const dlqKey = this.getDLQKey(message.id);
+      const dlqSetKey = this.getDLQSetKey();
+      const now = new Date();
+
+      // Store DLQ message with metadata
+      const dlqMessage: DeadLetterMessage = {
+        message,
+        reason,
+        failedAt: now,
+        originalQueue: this.name,
+      };
+
+      // Store in Redis
+      await this.redis.hset(dlqKey, {
+        messageId: message.id,
+        messageType: message.type,
+        priority: message.priority,
+        payload: JSON.stringify(message.payload),
+        metadata: JSON.stringify(message.metadata),
+        reason,
+        failedAt: now.toISOString(),
+        originalQueue: this.name,
+        retryCount: message.retryCount.toString(),
+        createdAt: message.createdAt.toISOString(),
+        correlationId: message.correlationId || '',
+      });
+
+      // Set TTL to 30 days (2592000 seconds)
+      await this.redis.expire(dlqKey, 2592000);
+
+      // Add to DLQ set with timestamp score for ordering
+      await this.redis.zadd(dlqSetKey, now.getTime(), message.id);
+
+      // Remove from main queue
+      const queueKey = this.getQueueKey();
+      await this.redis.zrem(queueKey, message.id);
+
+      logger.info('Message moved to DLQ', {
+        queue: this.name,
+        messageId: message.id,
+        reason,
+      });
+    } catch (error) {
+      throw new DeadLetterError(
+        `Failed to move message to DLQ: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message.id,
+        reason,
+        error instanceof Error ? error : undefined
+      );
+    }
+  }
+
+  /**
+   * Get messages from the dead letter queue
+   */
+  async getDLQMessages(limit: number = 50, offset: number = 0): Promise<DeadLetterMessage[]> {
+    try {
+      const dlqSetKey = this.getDLQSetKey();
+
+      // Get message IDs from sorted set (newest first)
+      const messageIds = await this.redis.zrevrange(
+        dlqSetKey,
+        offset,
+        offset + limit - 1
+      );
+
+      const dlqMessages: DeadLetterMessage[] = [];
+
+      for (const messageId of messageIds) {
+        const dlqKey = this.getDLQKey(messageId);
+        const data = await this.redis.hgetall(dlqKey);
+
+        if (Object.keys(data).length > 0) {
+          const message: IMessage = {
+            id: data.messageId,
+            type: data.messageType as import('../types').MessageType,
+            priority: data.priority as import('../types').MessagePriority,
+            status: 'dead_letter',
+            payload: JSON.parse(data.payload),
+            metadata: JSON.parse(data.metadata),
+            createdAt: new Date(data.createdAt),
+            updatedAt: new Date(data.failedAt),
+            correlationId: data.correlationId || undefined,
+            replyTo: undefined,
+            ttl: undefined,
+            retryCount: parseInt(data.retryCount),
+            maxRetries: this.config.maxRetries,
+          };
+
+          dlqMessages.push({
+            message,
+            reason: data.reason,
+            failedAt: new Date(data.failedAt),
+            originalQueue: data.originalQueue,
+          });
+        }
+      }
+
+      return dlqMessages;
+    } catch (error) {
+      throw new MessageQueueError(
+        `Failed to get DLQ messages: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'getDLQMessages',
+        this.name,
+        error instanceof Error ? error : undefined
+      );
+    }
+  }
+
+  /**
+   * Get DLQ statistics
+   */
+  async getDLQStats(): Promise<{
+    totalMessages: number;
+    oldestMessage: Date | null;
+    newestMessage: Date | null;
+  }> {
+    try {
+      const dlqSetKey = this.getDLQSetKey();
+
+      const total = await this.redis.zcard(dlqSetKey);
+
+      let oldestMessage: Date | null = null;
+      let newestMessage: Date | null = null;
+
+      if (total > 0) {
+        // Get oldest (lowest score)
+        const oldest = await this.redis.zrange(dlqSetKey, 0, 0, 'WITHSCORES');
+        if (oldest.length >= 2) {
+          oldestMessage = new Date(parseInt(oldest[1]));
+        }
+
+        // Get newest (highest score)
+        const newest = await this.redis.zrevrange(dlqSetKey, 0, 0, 'WITHSCORES');
+        if (newest.length >= 2) {
+          newestMessage = new Date(parseInt(newest[1]));
+        }
+      }
+
+      return {
+        totalMessages: total,
+        oldestMessage,
+        newestMessage,
+      };
+    } catch (error) {
+      throw new MessageQueueError(
+        `Failed to get DLQ stats: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'getDLQStats',
+        this.name,
+        error instanceof Error ? error : undefined
+      );
+    }
+  }
+
+  /**
+   * Replay a message from the dead letter queue
+   */
+  async replayFromDLQ(messageId: string): Promise<void> {
+    try {
+      const dlqKey = this.getDLQKey(messageId);
+      const dlqSetKey = this.getDLQSetKey();
+
+      // Get DLQ message data
+      const data = await this.redis.hgetall(dlqKey);
+
+      if (Object.keys(data).length === 0) {
+        throw new Error('Message not found in DLQ');
+      }
+
+      // Recreate the message with reset retry count
+      const message: IMessage = {
+        id: data.messageId,
+        type: data.messageType as import('../types').MessageType,
+        priority: data.priority as import('../types').MessagePriority,
+        status: 'pending',
+        payload: JSON.parse(data.payload),
+        metadata: JSON.parse(data.metadata),
+        createdAt: new Date(data.createdAt),
+        updatedAt: new Date(),
+        correlationId: data.correlationId || undefined,
+        replyTo: undefined,
+        ttl: undefined,
+        retryCount: 0, // Reset retry count
+        maxRetries: this.config.maxRetries,
+      };
+
+      // Publish back to the queue
+      await this.publish(message);
+
+      // Remove from DLQ
+      await this.redis.del(dlqKey);
+      await this.redis.zrem(dlqSetKey, messageId);
+
+      // Update stats
+      await this.updateQueueStats('dead_letter', -1);
+
+      logger.info('Message replayed from DLQ', {
+        queue: this.name,
+        messageId,
+      });
+    } catch (error) {
+      throw new DeadLetterError(
+        `Failed to replay message from DLQ: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        messageId,
+        'replay_failed',
+        error instanceof Error ? error : undefined
+      );
+    }
+  }
+
+  /**
+   * Delete a message from the dead letter queue
+   */
+  async deleteDLQMessage(messageId: string): Promise<boolean> {
+    try {
+      const dlqKey = this.getDLQKey(messageId);
+      const dlqSetKey = this.getDLQSetKey();
+
+      const deleted = await this.redis.del(dlqKey);
+      await this.redis.zrem(dlqSetKey, messageId);
+
+      if (deleted > 0) {
+        await this.updateQueueStats('dead_letter', -1);
+      }
+
+      return deleted > 0;
+    } catch (error) {
+      throw new MessageQueueError(
+        `Failed to delete DLQ message: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'deleteDLQMessage',
+        this.name,
+        error instanceof Error ? error : undefined
+      );
+    }
+  }
+
+  /**
+   * Purge all messages from the dead letter queue
+   */
+  async purgeDLQ(): Promise<void> {
+    try {
+      const dlqSetKey = this.getDLQSetKey();
+
+      // Get all message IDs
+      const messageIds = await this.redis.zrange(dlqSetKey, 0, -1);
+
+      if (messageIds.length > 0) {
+        // Delete all DLQ messages
+        const keys = messageIds.map((id) => this.getDLQKey(id));
+        await this.redis.del(...keys);
+
+        // Clear the DLQ set
+        await this.redis.del(dlqSetKey);
+
+        // Reset dead letter stats
+        const statsKey = this.getStatsKey();
+        await this.redis.hset(statsKey, 'deadLetterMessages', '0');
+      }
+
+      logger.info('DLQ purged', {
+        queue: this.name,
+        messagesDeleted: messageIds.length,
+      });
+    } catch (error) {
+      throw new MessageQueueError(
+        `Failed to purge DLQ: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        'purgeDLQ',
+        this.name,
+        error instanceof Error ? error : undefined
+      );
+    }
   }
 
   /**

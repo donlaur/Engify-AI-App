@@ -56,6 +56,8 @@ export default function AIToolsAdminPage() {
   // Load tools from database
   useEffect(() => {
     loadTools();
+    // loadTools is only called once on mount - adding it to deps would cause unnecessary re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadTools() {

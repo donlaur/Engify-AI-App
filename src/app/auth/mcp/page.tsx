@@ -26,6 +26,8 @@ export default function MCPAuthPage() {
     if (session && callback) {
       handleAuth();
     }
+    // handleAuth is stable and doesn't need to be in deps - it only runs once per auth flow
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status, callback]);
 
   async function handleAuth() {
