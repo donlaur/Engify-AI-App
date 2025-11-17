@@ -1633,7 +1633,7 @@
     },
     {
       "slug": "prevent-data-corruption-in-ai-generated-migrations",
-      "title": "Prevent Data Corruption In Ai Generated Migrations",
+      "title": "Prevent Data Corruption In AI Generated Migrations",
       "category": "guardrails",
       "subcategory": "data-integrity",
       "severity": "critical",
@@ -1661,8 +1661,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "process/release-readiness-runbook"
+          "stop-schema-guessing",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -1670,7 +1670,15 @@
         "pain-point-05-missing-context",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "data corruption",
+        "schema migration",
+        "ddl scripts",
+        "migration rollback",
+        "schema drift",
+        "data loss",
+        "database integrity"
+      ],
       "eEatSignals": {
         "experience": "Based on real-world incidents where AI-generated migrations caused silent data corruption that was only found days later",
         "expertise": "This process uses data-diff tools and parallel validation, which are industry-standard practices for high-stakes migrations",
@@ -1709,15 +1717,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "process/release-readiness-runbook"
+          "stop-schema-guessing",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "type coercion",
+        "implicit conversion",
+        "type safety",
+        "batch processing errors",
+        "data type validation",
+        "type casting bugs"
+      ],
       "eEatSignals": {
         "experience": "From real-world incidents where JavaScript-based batch jobs silently corrupted financial data due to string concatenation",
         "expertise": "Cites the specific ECMA-262 (JavaScript) specification rules for coercion as a common developer pitfall",
@@ -1756,15 +1771,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control",
-          "process/release-readiness-runbook"
+          "keep-prs-under-control",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-11-merge-conflicts",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "race conditions",
+        "concurrency issues",
+        "thread safety",
+        "atomic operations",
+        "concurrent updates",
+        "data consistency"
+      ],
       "eEatSignals": {
         "experience": "From high-throughput e-commerce incidents where \"last save wins\" on inventory counts led to overselling",
         "expertise": "Cites specific database-level controls: atomic operations, SELECT... FOR UPDATE, and optimistic versioning",
@@ -1803,15 +1825,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "process/release-readiness-runbook"
+          "stop-schema-guessing",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-20-schema-drift",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "data truncation",
+        "field length mismatch",
+        "schema migration",
+        "varchar overflow",
+        "data loss",
+        "column sizing"
+      ],
       "eEatSignals": {
         "experience": "Based on ETL job failures where user-generated content (like long comments) was silently truncated, corrupting user data",
         "expertise": "Recommends enabling database-level strict modes, a critical server-side configuration for data integrity",
@@ -1850,15 +1879,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "process/release-readiness-runbook"
+          "stop-schema-guessing",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-20-schema-drift",
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "orphaned records",
+        "cascading delete",
+        "referential integrity",
+        "foreign key constraints",
+        "data cleanup",
+        "relationship integrity"
+      ],
       "eEatSignals": {
         "experience": "From real-world incidents where a \"delete user\" function left orphaned records in orders, logs, and subscription tables",
         "expertise": "Cites specific SQL ON DELETE referential actions (CASCADE, RESTRICT, SET NULL) as the correct, database-level solution",
@@ -1897,15 +1933,23 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "code-quality/keep-prs-under-control"
+          "stop-schema-guessing",
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-20-schema-drift",
         "pain-point-03-hallucinated-capabilities"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "unique constraints",
+        "duplicate records",
+        "database uniqueness",
+        "schema design",
+        "data deduplication",
+        "constraint violation",
+        "database integrity"
+      ],
       "eEatSignals": {
         "experience": "From debugging authentication and billing systems where duplicate user emails caused critical failures",
         "expertise": "Recommends database-level UNIQUE constraints as the only true fix, rather than application-level checks which are prone to race conditions",
@@ -1916,7 +1960,7 @@
     },
     {
       "slug": "prevent-data-type-mismatch-in-api-integration",
-      "title": "Prevent Data Type Mismatch In Api Integration",
+      "title": "Prevent Data Type Mismatch In API Integration",
       "category": "guardrails",
       "subcategory": "data-integrity",
       "severity": "high",
@@ -1944,15 +1988,23 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "ai-behavior/capability-grounding-manifest"
+          "stop-schema-guessing",
+          "capability-grounding-manifest"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-03-hallucinated-capabilities"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "type mismatch",
+        "api contract",
+        "schema validation",
+        "data serialization",
+        "json parsing",
+        "type coercion",
+        "api client errors"
+      ],
       "eEatSignals": {
         "experience": "From real-world integration failures where an API silently changed a field from int to string, breaking clients",
         "expertise": "Recommends a \"schema-first\" approach using openapi-generator over manual, AI-written clients",
@@ -1991,14 +2043,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "timezone handling",
+        "datetime conversion",
+        "UTC time",
+        "timezone awareness",
+        "temporal data",
+        "date formatting",
+        "timezone bugs"
+      ],
       "eEatSignals": {
         "experience": "From debugging scheduling systems that failed across a daylight saving time (DST) change",
         "expertise": "Cites the \"Store UTC, Display Local\" rule and ISO 8601 as the gold standards for reliable time handling",
@@ -2037,14 +2097,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "buffer overflow",
+        "memory safety",
+        "unsafe functions",
+        "strcpy vulnerability",
+        "memory corruption",
+        "bounds checking",
+        "use after free"
+      ],
       "eEatSignals": {
         "experience": "From real-world C/C++ security audits where AI-suggested code introduced classic overflow vulnerabilities",
         "expertise": "Cites specific C++ standard library replacements (std::vector, std::unique_ptr) and compiler flags (ASLR, DEP)",
@@ -2083,15 +2151,23 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook",
-          "code-quality/tdd-with-ai-pair"
+          "release-readiness-runbook",
+          "tdd-with-ai-pair"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "transaction rollback",
+        "acid compliance",
+        "partial writes",
+        "data consistency",
+        "transaction boundary",
+        "atomicity",
+        "multi-step operations"
+      ],
       "eEatSignals": {
         "experience": "Based on production incidents where failed user signups left partial \"ghost\" accounts in the database",
         "expertise": "Emphasizes the ACID (Atomicity) property of database transactions as the fundamental solution",
@@ -2129,13 +2205,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "hardcoded secrets",
+        "api keys",
+        "credential scanning",
+        "environment variables",
+        "secret management",
+        "password leakage",
+        "security tokens"
+      ],
       "eEatSignals": {
         "experience": "Based on real-world incident response where a hardcoded key led to a multi-million dollar breach",
         "expertise": "This \"layered defense\" (pre-commit, CI, post-push) is the industry-standard DevSecOps practice",
@@ -2146,7 +2230,7 @@
     },
     {
       "slug": "prevent-sql-injection-vulnerability",
-      "title": "Prevent Sql Injection Vulnerability",
+      "title": "Prevent SQL Injection Vulnerability",
       "category": "guardrails",
       "subcategory": "security",
       "severity": "critical",
@@ -2174,15 +2258,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "SQL injection",
+        "parameterized queries",
+        "prepared statements",
+        "query sanitization",
+        "injection attacks",
+        "database security"
+      ],
       "eEatSignals": {
         "experience": "From decades of real-world breaches and penetration testing; this remains a top threat",
         "expertise": "Cites the correct solution (parameterized queries) vs. common flawed solutions (escaping strings)",
@@ -2193,7 +2284,7 @@
     },
     {
       "slug": "prevent-idor-vulnerability",
-      "title": "Prevent Idor Vulnerability",
+      "title": "Prevent IDOR Vulnerability",
       "category": "guardrails",
       "subcategory": "security",
       "severity": "critical",
@@ -2221,8 +2312,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "security/identity-first-privilege-design"
+          "security-guardrails",
+          "identity-first-privilege-design"
         ]
       },
       "painPointIds": [
@@ -2230,7 +2321,15 @@
         "pain-point-01-almost-correct-code",
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "idor",
+        "insecure direct object reference",
+        "authorization bypass",
+        "access control",
+        "privilege escalation",
+        "resource authorization",
+        "object-level security"
+      ],
       "eEatSignals": {
         "experience": "Based on real-world PII breaches in multi-tenant SaaS applications caused by this exact flaw",
         "expertise": "Cites the correct fix (session-scoped queries) vs. the partial fix (using UUIDs), demonstrating layered defense",
@@ -2241,7 +2340,7 @@
     },
     {
       "slug": "prevent-xss-vulnerability",
-      "title": "Prevent Xss Vulnerability",
+      "title": "Prevent XSS Vulnerability",
       "category": "guardrails",
       "subcategory": "security",
       "severity": "critical",
@@ -2269,15 +2368,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "XSS attacks",
+        "cross-site scripting",
+        "input sanitization",
+        "output encoding",
+        "HTML escaping",
+        "content security policy"
+      ],
       "eEatSignals": {
         "experience": "From live pentesting exercises where XSS is consistently the most common vector for session hijacking",
         "expertise": "Cites context-aware encoding and Content Security Policy (CSP) as the essential, layered defense",
@@ -2288,7 +2394,7 @@
     },
     {
       "slug": "prevent-csrf-vulnerability",
-      "title": "Prevent Csrf Vulnerability",
+      "title": "Prevent CSRF Vulnerability",
       "category": "guardrails",
       "subcategory": "security",
       "severity": "high",
@@ -2316,14 +2422,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "csrf attack",
+        "cross-site request forgery",
+        "anti-csrf tokens",
+        "form security",
+        "session hijacking",
+        "state-changing requests"
+      ],
       "eEatSignals": {
         "experience": "From real-world incidents where users were tricked into deleting their own accounts via a malicious link",
         "expertise": "Cites the correct, layered solution: Synchronizer Tokens (primary) and SameSite cookies (defense-in-depth)",
@@ -2362,14 +2475,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "file upload security",
+        "malicious file upload",
+        "file validation",
+        "file type checking",
+        "upload vulnerabilities",
+        "file content verification",
+        "upload attacks"
+      ],
       "eEatSignals": {
         "experience": "From incident response where an attacker uploaded shell.php.jpg and bypassed a simple extension check",
         "expertise": "Cites the correct multi-step defense: magic byte validation, UUID rename, and non-executable storage",
@@ -2408,15 +2529,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "rate limiting",
+        "throttling",
+        "quota management",
+        "request limiting",
+        "API throttling",
+        "abuse prevention"
+      ],
       "eEatSignals": {
         "experience": "From mitigating DoS attacks against public APIs that had no request limits",
         "expertise": "Cites specific limiting strategies (per-IP, per-user) and algorithms (token bucket), demonstrating technical depth",
@@ -2455,15 +2583,23 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "risk-management/catch-mock-metrics"
+          "security-guardrails",
+          "catch-mock-metrics"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-18-log-manipulation"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "sensitive data exposure",
+        "pii in logs",
+        "credential leakage",
+        "log sanitization",
+        "data masking",
+        "secret logging",
+        "privacy violation"
+      ],
       "eEatSignals": {
         "experience": "From real-world compliance incidents where PII was discovered in debug logs, violating GDPR",
         "expertise": "Cites automated log masking and \"allow-list\" logging as the technically superior solutions to manual review",
@@ -2502,13 +2638,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "session management",
+        "session security",
+        "session timeout",
+        "session expiration",
+        "authentication session",
+        "session hijacking",
+        "secure sessions"
+      ],
       "eEatSignals": {
         "experience": "From pentesting web applications and finding session cookies accessible in JavaScript, leading to full account takeover via XSS",
         "expertise": "Cites the specific, critical cookie attributes (HttpOnly, Secure, SameSite) required for session security",
@@ -2547,14 +2691,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "path traversal",
+        "directory traversal",
+        "file access vulnerability",
+        "path injection",
+        "filesystem security",
+        "file path validation"
+      ],
       "eEatSignals": {
         "experience": "From real-world breaches where attackers used ../../etc/shadow to exfiltrate system password hashes",
         "expertise": "Cites the correct, two-step validation: (1) sanitize input, (2) canonicalize and check against a base directory",
@@ -2565,7 +2716,7 @@
     },
     {
       "slug": "prevent-missing-https-enforcement",
-      "title": "Prevent Missing Https Enforcement",
+      "title": "Prevent Missing HTTPS Enforcement",
       "category": "guardrails",
       "subcategory": "security",
       "severity": "high",
@@ -2593,14 +2744,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "HTTPS enforcement",
+        "SSL/TLS",
+        "secure transport",
+        "HTTP to HTTPS redirect",
+        "transport security",
+        "secure connection",
+        "encryption in transit"
+      ],
       "eEatSignals": {
         "experience": "From network-sniffing exercises (e.g., at public Wi-Fi hotspots) that easily capture unencrypted session cookies",
         "expertise": "Cites HSTS as the critical, browser-level enforcement mechanism that complements a server-side redirect",
@@ -2639,14 +2798,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "password policy",
+        "password strength",
+        "authentication security",
+        "credential validation",
+        "password requirements",
+        "security best practices"
+      ],
       "eEatSignals": {
         "experience": "From transitioning enterprise systems away from frustrating, ineffective complexity rules to the more secure NIST length-based standard",
         "expertise": "This plan directly contradicts common (and wrong) \"best practices\" by citing the modern, evidence-based NIST standard",
@@ -2684,14 +2850,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook",
-          "code-quality/keep-prs-under-control"
+          "release-readiness-runbook",
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "N+1 query",
+        "query optimization",
+        "eager loading",
+        "database performance",
+        "ORM performance",
+        "query batching"
+      ],
       "eEatSignals": {
         "experience": "From optimizing high-traffic API endpoints that were brought down by N+1 queries during peak load",
         "expertise": "Cites the specific, correct ORM commands for both eager-loading (select_related) and batch-fetching (prefetch_related)",
@@ -2730,15 +2903,23 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "process/release-readiness-runbook"
+          "stop-schema-guessing",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-20-schema-drift",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "database indexes",
+        "query optimization",
+        "index design",
+        "query performance",
+        "database performance",
+        "slow queries",
+        "index strategy"
+      ],
       "eEatSignals": {
         "experience": "From database administration (DBA) tasks, where adding a single index reduced query time from 30 seconds to 50ms",
         "expertise": "Cites EXPLAIN plan analysis and ANALYZE (statistics) as the professional, data-driven methods for optimization",
@@ -2777,13 +2958,20 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control"
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "data structure selection",
+        "algorithmic complexity",
+        "performance optimization",
+        "big O notation",
+        "data structure efficiency",
+        "algorithm design"
+      ],
       "eEatSignals": {
         "experience": "From refactoring algorithms that used O(n) list lookups inside a loop, resulting in O(n²) performance",
         "expertise": "Cites specific Big O notation (O(n) vs. O(1)) and the correct data structures for lookups (HashMap) vs. iteration (List)",
@@ -2822,13 +3010,20 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control"
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "memory leak",
+        "event listener cleanup",
+        "memory management",
+        "event handler removal",
+        "JavaScript memory",
+        "garbage collection"
+      ],
       "eEatSignals": {
         "experience": "From debugging \"slow\" single-page applications (SPAs) that were leaking memory on every route change",
         "expertise": "Cites specific JS memory leak patterns (un-removed listeners, closures, detached DOM) and the correct fixes (lifecycle cleanup, WeakMap)",
@@ -2867,13 +3062,20 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control"
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "blocking I/O",
+        "event loop blocking",
+        "async operations",
+        "synchronous file operations",
+        "node.js performance",
+        "non-blocking code"
+      ],
       "eEatSignals": {
         "experience": "From production Node.js incidents where a single readFileSync in an admin endpoint caused the entire server to freeze",
         "expertise": "Cites the specific Node.js event loop and libuv architecture as the reason why sync I/O is so catastrophic",
@@ -2912,13 +3114,20 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "caching strategy",
+        "cache eviction",
+        "cache invalidation",
+        "cache performance",
+        "memory caching",
+        "cache design"
+      ],
       "eEatSignals": {
         "experience": "From scaling high-traffic read-heavy APIs by introducing a Redis caching layer",
         "expertise": "Cites specific, industry-standard caching patterns (Cache-Aside, Write-Through) and tools (Redis, Memcached)",
@@ -2957,13 +3166,20 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "connection pooling",
+        "database connections",
+        "connection management",
+        "pool exhaustion",
+        "database performance",
+        "connection limits"
+      ],
       "eEatSignals": {
         "experience": "From production incidents where a serverless function swarm opened 10,000+ connections, crashing the database",
         "expertise": "Cites specific, advanced PgBouncer configurations like pool_mode = transaction vs. session",
@@ -3002,13 +3218,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "pagination performance",
+        "offset pagination",
+        "cursor pagination",
+        "query performance",
+        "database pagination",
+        "pagination strategy",
+        "scalable pagination"
+      ],
       "eEatSignals": {
         "experience": "From scaling social-media-style \"infinite scroll\" feeds, where offset pagination failed catastrophically",
         "expertise": "Cites the specific SQL difference (OFFSET 100000 vs. WHERE id > X) and the performance impact (full scan vs. index seek)",
@@ -3047,14 +3271,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "query limits",
+        "result set pagination",
+        "memory exhaustion",
+        "unbounded queries",
+        "database performance",
+        "SELECT * problems"
+      ],
       "eEatSignals": {
         "experience": "From production incidents where a single un-paginated internal tool query brought down the entire production database",
         "expertise": "Cites the two-part fix: a default limit (for clients) and a maximum limit (for safety)",
@@ -3093,13 +3324,20 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "load testing",
+        "performance testing",
+        "stress testing",
+        "capacity planning",
+        "scalability testing",
+        "traffic simulation"
+      ],
       "eEatSignals": {
         "experience": "Based on countless \"successful\" launches that immediately crashed when real users arrived",
         "expertise": "Cites specific SLO-driven testing (p99 latency) as the correct methodology, rather than just \"running a test\"",
@@ -3138,14 +3376,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "cascading failure",
+        "circuit breaker",
+        "retry storm",
+        "service degradation",
+        "dependency timeout",
+        "bulkhead pattern",
+        "failure isolation"
+      ],
       "eEatSignals": {
         "experience": "Based on SRE incident response, where a failure in a minor \"avatar\" service cascaded to crash the \"auth\" service",
         "expertise": "Cites the specific states of the Circuit Breaker pattern (Open, Closed, Half-Open) and industry-standard implementations (Netflix Hystrix)",
@@ -3184,13 +3430,20 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control"
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "infinite loop",
+        "loop termination",
+        "recursion errors",
+        "loop logic",
+        "termination condition",
+        "endless loop"
+      ],
       "eEatSignals": {
         "experience": "From debugging production servers that became unresponsive due to a single request hitting an infinite while loop",
         "expertise": "Cites the correct solution for different contexts: \"base cases\" for recursion, \"condition modification\" for while loops, statement_timeout for databases",
@@ -3229,13 +3482,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control"
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "deadlock",
+        "lock ordering",
+        "mutex contention",
+        "race condition",
+        "thread safety",
+        "concurrent programming",
+        "resource starvation"
+      ],
       "eEatSignals": {
         "experience": "From analyzing Java thread dumps to find and resolve production deadlocks in high-concurrency systems",
         "expertise": "Cites the two canonical solutions: \"lock ordering\" (prevention) and \"tryLock with timeout\" (avoidance)",
@@ -3274,13 +3535,20 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "memory leak",
+        "resource exhaustion",
+        "memory management",
+        "heap overflow",
+        "memory consumption",
+        "resource cleanup"
+      ],
       "eEatSignals": {
         "experience": "From analyzing production heap dumps to find and patch subtle memory leaks in long-running Java services",
         "expertise": "Cites specific language features (try-with-resources, WeakMap) and profiling tools (Heap Dumps, MAT)",
@@ -3318,13 +3586,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "health checks",
+        "readiness probe",
+        "liveness probe",
+        "service health",
+        "health endpoint",
+        "container orchestration",
+        "availability monitoring"
+      ],
       "eEatSignals": {
         "experience": "From debugging CrashLoopBackOff errors in Kubernetes, which are often caused by misconfigured health probes",
         "expertise": "Cites the critical distinction between Liveness (restart me) and Readiness (stop traffic) probes",
@@ -3363,15 +3639,23 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "exception swallowing",
+        "empty catch blocks",
+        "error propagation",
+        "unhandled exceptions",
+        "error handling",
+        "silent failures",
+        "exception logging"
+      ],
       "eEatSignals": {
         "experience": "From production incidents where a single unhandled NullPointerException in one request brought down the entire Node.js/Python server",
         "expertise": "Cites the \"catch specific, log generic\" pattern, which is a best practice for robust, multi-layered error handling",
@@ -3410,14 +3694,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "timeout configuration",
+        "connection timeout",
+        "request timeout",
+        "timeout handling",
+        "timeout management",
+        "response timeout"
+      ],
       "eEatSignals": {
         "experience": "From SRE incident response, where a slow database query caused all application threads to hang, creating a site-wide outage",
         "expertise": "Distinguishes between connection timeouts and read timeouts, a critical detail for robust configuration",
@@ -3456,13 +3747,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "single point of failure",
+        "high availability",
+        "redundancy",
+        "replica count",
+        "deployment architecture",
+        "service outage",
+        "SPOF"
+      ],
       "eEatSignals": {
         "experience": "Based on production outages where an entire service disappeared because the single node it was running on failed",
         "expertise": "Cites specific high-availability (HA) architectures: N+1, active-passive, and active-active, and applying them to stateless vs. stateful components",
@@ -3494,17 +3793,29 @@
         "static": "Code review of network clients to check for retry logic",
         "runtime": "Monitor logs for a high rate of client-side 5xx errors that are not followed by a retry attempt"
       },
+      "mitigation": [
+        "Immediately stop or throttle the client application that is experiencing permanent failures due to transient errors",
+        "Deploy a hotfix implementing retry logic with exponential backoff and jitter for 5xx/timeout errors",
+        "Monitor application logs and metrics to verify retries are executing successfully and error rates have decreased"
+      ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook",
-          "security/security-guardrails"
+          "release-readiness-runbook",
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "retry logic",
+        "retry mechanism",
+        "failure recovery",
+        "exponential backoff",
+        "resilience patterns",
+        "automatic retries"
+      ],
       "eEatSignals": {
         "experience": "From building resilient microservices that must gracefully handle temporary network blips between services",
         "expertise": "Cites the specific, industry-standard \"Exponential Backoff with Jitter\" algorithm as the correct implementation",
@@ -3542,13 +3853,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "graceful shutdown",
+        "sigterm handling",
+        "connection draining",
+        "kubernetes termination",
+        "service lifecycle",
+        "in-flight requests",
+        "shutdown signals"
+      ],
       "eEatSignals": {
         "experience": "From achieving zero-downtime deployments in Kubernetes by correctly handling the SIGTERM/preStop lifecycle",
         "expertise": "Cites the specific K8s SIGTERM -> terminationGracePeriodSeconds -> SIGKILL lifecycle",
@@ -3587,13 +3906,20 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "floating point precision",
+        "currency calculation",
+        "decimal arithmetic",
+        "financial accuracy",
+        "money handling",
+        "rounding errors"
+      ],
       "eEatSignals": {
         "experience": "From fintech reconciliation audits where \"pennies\" of rounding errors accumulated into millions of dollars of discrepancies",
         "expertise": "Cites the specific 0.1 + 0.2 failure case and explains why it fails (binary vs. decimal representation)",
@@ -3632,14 +3958,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "currency conversion",
+        "exchange rate errors",
+        "hardcoded rates",
+        "financial accuracy",
+        "forex calculation",
+        "currency precision",
+        "rounding errors"
+      ],
       "eEatSignals": {
         "experience": "From international e-commerce platforms where stale FX rates led to significant revenue loss",
         "expertise": "Recommends the \"integer (cents) + currency code\" storage model, which is a best practice for multi-currency systems",
@@ -3678,8 +4012,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -3687,7 +4021,14 @@
         "pain-point-22-missing-validations",
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "business rule validation",
+        "business logic validation",
+        "rule enforcement",
+        "domain validation",
+        "constraint checking",
+        "business integrity"
+      ],
       "eEatSignals": {
         "experience": "From fintech projects where business logic (like compliance rules) was buried in code, making it impossible to audit or update",
         "expertise": "Recommends a specific, advanced architecture: separating logic into a Business Rules Engine (BRE) like Drools",
@@ -3726,14 +4067,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "idempotency",
+        "duplicate charges",
+        "payment retry",
+        "double billing",
+        "transaction deduplication",
+        "idempotency keys",
+        "payment processing"
+      ],
       "eEatSignals": {
         "experience": "This is the single most common and costly failure mode in distributed payment systems",
         "expertise": "Cites the correct, layered solution: application-level idempotency keys (fast) and database-level UNIQUE constraints (safe)",
@@ -3772,7 +4121,7 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -3780,7 +4129,15 @@
         "pain-point-05-missing-context",
         "pain-point-03-hallucinated-capabilities"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "tax calculation",
+        "sales tax",
+        "tax jurisdiction",
+        "tax compliance",
+        "regulatory compliance",
+        "tax rates",
+        "nexus determination"
+      ],
       "eEatSignals": {
         "experience": "From e-commerce platforms that faced state-level audits for miscalculating sales tax",
         "expertise": "Cites the \"Buy, Don't Build\" rule as the only correct architectural decision for tax compliance",
@@ -3812,16 +4169,28 @@
         "static": "API linter to flag all POST/PUT endpoints that do not check for an Idempotency-Key header",
         "runtime": "Monitor logs for duplicate processing"
       },
+      "mitigation": [
+        "Immediately disable or rate-limit the affected endpoint to prevent further duplicate processing of requests",
+        "Audit database records and transaction logs to identify and remediate duplicate charges or data entries",
+        "Deploy emergency fix implementing idempotency key validation and caching before re-enabling the endpoint"
+      ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "idempotency",
+        "duplicate prevention",
+        "transaction safety",
+        "replay protection",
+        "unique request handling",
+        "double processing"
+      ],
       "eEatSignals": {
         "experience": "From designing resilient, distributed systems where network failures are a given",
         "expertise": "Cites the specific \"idempotency key + cached response\" pattern, which is the most robust implementation",
@@ -3860,15 +4229,23 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "discount calculation",
+        "promo stacking",
+        "e-commerce logic",
+        "pricing errors",
+        "coupon validation",
+        "discount abuse",
+        "promotional logic"
+      ],
       "eEatSignals": {
         "experience": "From e-commerce incidents where a \"stackable\" coupon bug allowed users to get $1000 orders for free",
         "expertise": "Recommends a \"promotion engine\" microservice, an advanced, scalable architecture for handling complex pricing rules",
@@ -3907,8 +4284,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -3916,7 +4293,14 @@
         "pain-point-22-missing-validations",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "price validation",
+        "monetary validation",
+        "pricing logic",
+        "cost verification",
+        "amount validation",
+        "financial integrity"
+      ],
       "eEatSignals": {
         "experience": "From real-world e-commerce exploits where attackers tampered with client-side form fields to \"name their own price\"",
         "expertise": "Cites the correct \"server-side recalculation\" pattern as the only secure solution",
@@ -3954,14 +4338,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "rate limit errors",
+        "API quota",
+        "throttling errors",
+        "rate limit handling",
+        "quota exceeded",
+        "API limits"
+      ],
       "eEatSignals": {
         "experience": "From building API clients that were \"chatty\" and got IP-banned by third-party services for ignoring rate limits",
         "expertise": "Cites the correct, two-part solution: honoring the Retry-After header (primary) or using exponential backoff (fallback)",
@@ -3999,8 +4390,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/capability-grounding-manifest",
-          "process/release-readiness-runbook"
+          "capability-grounding-manifest",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -4008,7 +4399,15 @@
         "pain-point-22-missing-validations",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "authentication headers",
+        "authorization header",
+        "bearer token",
+        "API authentication",
+        "auth token",
+        "authentication flow",
+        "missing credentials"
+      ],
       "eEatSignals": {
         "experience": "From debugging client applications that \"suddenly stopped working\" because they lacked token-refresh logic",
         "expertise": "Cites the \"client middleware/interceptor\" pattern as the correct, centralized way to manage auth headers",
@@ -4046,15 +4445,23 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/capability-grounding-manifest",
-          "process/release-readiness-runbook"
+          "capability-grounding-manifest",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "content-type header",
+        "http headers",
+        "json requests",
+        "api client configuration",
+        "mime type",
+        "request headers",
+        "content negotiation"
+      ],
       "eEatSignals": {
         "experience": "From debugging \"mystery\" 415 errors that were caused by a missing Content-Type header on a POST request",
         "expertise": "Cites the critical distinction between Content-Type (what I am sending) and Accept (what I want back)",
@@ -4065,7 +4472,7 @@
     },
     {
       "slug": "prevent-missing-pagination-in-api-client",
-      "title": "Prevent Missing Pagination In Api Client",
+      "title": "Prevent Missing Pagination In API Client",
       "category": "guardrails",
       "subcategory": "integration",
       "severity": "medium",
@@ -4092,8 +4499,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/capability-grounding-manifest",
-          "process/release-readiness-runbook"
+          "capability-grounding-manifest",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -4101,7 +4508,14 @@
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "pagination",
+        "data chunking",
+        "page handling",
+        "result limiting",
+        "cursor pagination",
+        "offset pagination"
+      ],
       "eEatSignals": {
         "experience": "From data synchronization jobs that silently failed for months because they only ever fetched the first page of results",
         "expertise": "Cites the \"check for metadata\" and \"loop on next_page\" algorithm, which is the correct way to consume a paginated API",
@@ -4139,14 +4553,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "timeout configuration",
+        "request timeout",
+        "client timeout",
+        "network timeout",
+        "timeout tuning",
+        "timeout errors"
+      ],
       "eEatSignals": {
         "experience": "From tuning microservice timeouts, where a 1s timeout was too short for a p99 of 1.2s, causing cascading failures",
         "expertise": "Cites the SLO-driven (p99) method for setting timeouts, which is an advanced SRE practice",
@@ -4157,7 +4578,7 @@
     },
     {
       "slug": "prevent-missing-retry-logic-for-api-calls",
-      "title": "Prevent Missing Retry Logic For Api Calls",
+      "title": "Prevent Missing Retry Logic For API Calls",
       "category": "guardrails",
       "subcategory": "integration",
       "severity": "high",
@@ -4177,9 +4598,14 @@
         "static": "Code review of network clients to check for retry logic",
         "runtime": "Monitor logs for a high rate of client-side 5xx/timeout errors that are not followed by a retry attempt"
       },
+      "mitigation": [
+        "Temporarily pause or throttle the API client application that is failing on transient network errors",
+        "Deploy a hotfix to add retry logic with exponential backoff and jitter for 5xx/timeout/429 errors",
+        "Re-enable the client and monitor logs to confirm successful retries and reduced permanent failure rates"
+      ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -4187,7 +4613,14 @@
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "API retry",
+        "retry strategy",
+        "circuit breaker",
+        "resilient API calls",
+        "transient failure handling",
+        "backoff strategy"
+      ],
       "eEatSignals": {
         "experience": "From building resilient microservices that must gracefully handle temporary network blips between services",
         "expertise": "Cites the specific, industry-standard \"Exponential Backoff with Jitter\" algorithm as the correct implementation",
@@ -4198,7 +4631,7 @@
     },
     {
       "slug": "prevent-breaking-api-changes",
-      "title": "Prevent Breaking Api Changes",
+      "title": "Prevent Breaking API Changes",
       "category": "guardrails",
       "subcategory": "integration",
       "severity": "critical",
@@ -4225,15 +4658,23 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/capability-grounding-manifest",
-          "process/release-readiness-runbook"
+          "capability-grounding-manifest",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-03-hallucinated-capabilities"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "breaking api changes",
+        "backward compatibility",
+        "api versioning",
+        "contract breaking",
+        "api refactoring",
+        "field removal",
+        "api migration"
+      ],
       "eEatSignals": {
         "experience": "From managing public-facing APIs where a \"minor\" deploy broke thousands of clients",
         "expertise": "Cites the correct industry terms: \"API Evolution\" (non-breaking) vs. \"Versioning\" (breaking) and \"Contract Testing\"",
@@ -4244,7 +4685,7 @@
     },
     {
       "slug": "prevent-missing-api-versioning",
-      "title": "Prevent Missing Api Versioning",
+      "title": "Prevent Missing API Versioning",
       "category": "guardrails",
       "subcategory": "integration",
       "severity": "high",
@@ -4271,13 +4712,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "API versioning",
+        "version control",
+        "API evolution",
+        "backward compatibility",
+        "API design",
+        "version strategy",
+        "API lifecycle"
+      ],
       "eEatSignals": {
         "experience": "From being \"stuck\" with a legacy, un-versioned API that could not be changed for fear of breaking critical clients",
         "expertise": "Cites the three main versioning strategies (URI, Header, Query) and recommends URI as the most explicit",
@@ -4288,7 +4737,7 @@
     },
     {
       "slug": "prevent-incorrect-api-error-handling",
-      "title": "Prevent Incorrect Api Error Handling",
+      "title": "Prevent Incorrect API Error Handling",
       "category": "guardrails",
       "subcategory": "integration",
       "severity": "high",
@@ -4315,14 +4764,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "error response format",
+        "http status codes",
+        "error consistency",
+        "api error handling",
+        "stack trace exposure",
+        "error serialization",
+        "error standards"
+      ],
       "eEatSignals": {
         "experience": "From building API client libraries, where inconsistent error handling is the #1 integration bottleneck",
         "expertise": "Cites the specific fields of the RFC 7807 standard (type, title, detail) as the correct, machine-readable format",
@@ -4360,8 +4817,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -4369,7 +4826,14 @@
         "pain-point-17-insecure-code",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "request validation",
+        "input validation",
+        "schema validation",
+        "data validation",
+        "payload validation",
+        "API contract enforcement"
+      ],
       "eEatSignals": {
         "experience": "From production incidents where a single null field in a request body caused a NullPointerException and brought down a service",
         "expertise": "Cites \"schema-first\" validation (JSON Schema, OpenAPI) as the modern, automated solution over manual if/then checks",
@@ -4408,15 +4872,23 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "edge case testing",
+        "boundary conditions",
+        "corner cases",
+        "negative testing",
+        "error conditions",
+        "input validation testing",
+        "edge scenarios"
+      ],
       "eEatSignals": {
         "experience": "From real-world QA, where most production bugs are found in edge cases that the \"happy path\" tests missed",
         "expertise": "Cites the specific, professional QA methodologies of Boundary Value Analysis (BVA) and Equivalence Partitioning (EP)",
@@ -4455,15 +4927,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "test coverage",
+        "code coverage",
+        "branch coverage",
+        "test completeness",
+        "coverage gaps",
+        "testing thoroughness"
+      ],
       "eEatSignals": {
         "experience": "From managing large codebases where \"line\" coverage was high but \"branch\" coverage was low, hiding significant risk",
         "expertise": "Cites the critical difference between \"line\" coverage (weak) and \"branch/decision\" coverage (strong)",
@@ -4502,14 +4981,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "flaky tests",
+        "race conditions",
+        "timing issues",
+        "hardcoded sleeps",
+        "async testing",
+        "test reliability",
+        "non-deterministic tests"
+      ],
       "eEatSignals": {
         "experience": "From managing large CI/CD pipelines where flaky tests destroyed developer trust and slowed down releases",
         "expertise": "Cites the correct \"explicit wait\" (e.g., waitForElementVisible) pattern vs. the sleep() anti-pattern",
@@ -4548,8 +5035,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -4557,7 +5044,14 @@
         "pain-point-22-missing-validations",
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "integration testing",
+        "end-to-end testing",
+        "API testing",
+        "service integration",
+        "component interaction",
+        "system testing"
+      ],
       "eEatSignals": {
         "experience": "From incidents where all unit tests passed, but the application failed in production because the \"plumbing\" between components was broken",
         "expertise": "Cites the \"Test Pyramid\" model and \"Testcontainers\" as modern, advanced integration testing practices",
@@ -4596,14 +5090,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "test isolation",
+        "test cleanup",
+        "database teardown",
+        "test data management",
+        "fixture cleanup",
+        "test pollution"
+      ],
       "eEatSignals": {
         "experience": "From debugging \"flaky\" CI pipelines, only to find the root cause was tests colliding over a shared test_user record",
         "expertise": "Cites the \"transactional rollback\" method as the superior, faster, and cleaner solution to manual teardown() deletion",
@@ -4642,15 +5143,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "negative testing",
+        "error scenarios",
+        "edge cases",
+        "failure testing",
+        "invalid input testing",
+        "exception handling tests"
+      ],
       "eEatSignals": {
         "experience": "From production incidents where \"unhappy paths\" were never tested, leading to unhandled exceptions that crashed services",
         "expertise": "Cites the distinction between testing invalid inputs (e.g., bad email) and invalid states (e.g., suspended user)",
@@ -4690,14 +5198,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "code-quality/keep-prs-under-control"
+          "tdd-with-ai-pair",
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "test assertions",
+        "tautological tests",
+        "test quality",
+        "assertion correctness",
+        "test effectiveness",
+        "false positive tests"
+      ],
       "eEatSignals": {
         "experience": "From code reviews where AI-generated tests were found to be testing themselves, not the actual business logic",
         "expertise": "Cites the specific \"Arrange-Act-Assert\" (AAA) pattern and the \"don't repeat logic\" rule",
@@ -4736,14 +5251,21 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "performance testing",
+        "benchmark testing",
+        "latency testing",
+        "throughput testing",
+        "response time testing",
+        "performance regression"
+      ],
       "eEatSignals": {
         "experience": "Based on countless \"successful\" launches that immediately crashed when real users arrived",
         "expertise": "Cites specific SLO-driven testing (p99 latency) and test types (load, soak) as the correct methodology",
@@ -4782,13 +5304,20 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "environment parity",
+        "production parity",
+        "test environment setup",
+        "dependency mismatch",
+        "integration testing",
+        "environment configuration"
+      ],
       "eEatSignals": {
         "experience": "From debugging the classic \"it works on my machine\" problem, which is almost always an environment mismatch",
         "expertise": "Cites the correct, modern DevSecOps solution: Infrastructure as Code (IaC), Docker, and simulation tools (LocalStack)",
@@ -4827,15 +5356,22 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "security testing",
+        "penetration testing",
+        "vulnerability testing",
+        "security scanning",
+        "threat testing",
+        "security validation"
+      ],
       "eEatSignals": {
         "experience": "From implementing \"shift-left\" DevSecOps pipelines that find and fix vulnerabilities before they reach production",
         "expertise": "Cites the specific AST (Application Security Testing) tool types: SAST, DAST, SCA, and IAST",

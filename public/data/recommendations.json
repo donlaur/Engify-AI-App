@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generatedAt": "2025-11-15T06:34:11.246Z",
+  "generatedAt": "2025-11-17T03:08:14.067415Z",
   "totalRecommendations": 23,
   "recommendations": [
     {
@@ -22,9 +22,14 @@
         "pain-point-05-missing-context",
         "pain-point-06-brownfield-penalty"
       ],
-      "relatedPrompts": [],
+      "relatedPrompts": [
+        "code-refactoring-assistant",
+        "unit-test-generator-comprehensive-mocking"
+      ],
       "relatedPatterns": [
-        "few-shot"
+        "few-shot",
+        "template",
+        "zero-shot"
       ],
       "researchCitations": [],
       "primaryKeywords": [
@@ -82,8 +87,14 @@
         "pain-point-19-insecure-code",
         "pain-point-20-schema-drift"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "security-vulnerability-analysis-verification",
+        "code-review-with-self-verification"
+      ],
+      "relatedPatterns": [
+        "cognitive-verifier",
+        "self-reflection"
+      ],
       "researchCitations": [],
       "primaryKeywords": [
         "AI guardrails",
@@ -187,13 +198,20 @@
         "code-quality/keep-prs-under-control",
         "process/daily-merge-discipline"
       ],
-      "relatedGuardrails": [],
+      "relatedGuardrails": [
+        "guardrails/testing/prevent-insufficient-test-coverage"
+      ],
       "relatedPainPoints": [
         "pain-point-10-oversized-prs",
         "pain-point-01-almost-correct-code"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "code-review-assistant"
+      ],
+      "relatedPatterns": [
+        "recipe",
+        "template"
+      ],
       "researchCitations": [
         {
           "source": "Creating a comprehensive code review checklist for your team - Graphite.com",
@@ -270,8 +288,16 @@
         "pain-point-08-toolchain-sprawl",
         "pain-point-21-duplicate-tooling"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "code-review-assistant",
+        "unit-test-generator-comprehensive-mocking",
+        "api-documentation-generator"
+      ],
+      "relatedPatterns": [
+        "few-shot",
+        "persona",
+        "template"
+      ],
       "researchCitations": [],
       "primaryKeywords": [
         "Prompt library",
@@ -323,15 +349,25 @@
         "process/release-readiness-runbook"
       ],
       "relatedGuardrails": [
-        "guardrails/security/prevent-sql-injection-vulnerability"
+        "guardrails/security/prevent-hardcoded-secrets-in-ai-generated-code",
+        "guardrails/security/prevent-sql-injection-vulnerability",
+        "guardrails/testing/prevent-missing-edge-case-testing"
       ],
       "relatedPainPoints": [
         "pain-point-01-almost-correct-code",
         "pain-point-02-trust-deficit",
         "pain-point-19-insecure-code"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "code-review-assistant",
+        "bug-investigation-helper",
+        "security-vulnerability-analysis-verification",
+        "code-review-with-self-verification"
+      ],
+      "relatedPatterns": [
+        "cognitive-verifier",
+        "self-reflection"
+      ],
       "researchCitations": [
         {
           "source": "Understanding Security Risks in AI-Generated Code | CSA",
@@ -389,13 +425,20 @@
         "ai-behavior/trust-but-verify-triage"
       ],
       "relatedGuardrails": [
-        "guardrails/testing/prevent-missing-edge-case-tests"
+        "guardrails/testing/prevent-missing-edge-case-testing",
+        "guardrails/testing/prevent-insufficient-test-coverage"
       ],
       "relatedPainPoints": [
         "pain-point-01-almost-correct-code"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "unit-test-generator-comprehensive-mocking",
+        "e2e-test-scenario-builder"
+      ],
+      "relatedPatterns": [
+        "chain-of-thought",
+        "few-shot"
+      ],
       "researchCitations": [],
       "primaryKeywords": [
         "Test-Driven Development (TDD)",
@@ -507,8 +550,16 @@
       "relatedPainPoints": [
         "pain-point-23-tactical-trap"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "system-design-review",
+        "architecture-decision-record-adr",
+        "strategic-technical-roadmap-builder",
+        "root-cause-analysis-with-hypothesis-testing"
+      ],
+      "relatedPatterns": [
+        "chain-of-thought",
+        "hypothesis-testing"
+      ],
       "researchCitations": [],
       "primaryKeywords": [
         "Strategic AI",
@@ -764,8 +815,13 @@
         "pain-point-04-skill-atrophy",
         "pain-point-19-insecure-code"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "concept-explainer"
+      ],
+      "relatedPatterns": [
+        "audience-persona",
+        "few-shot"
+      ],
       "researchCitations": [
         {
           "source": "AI Literacy White Paper | The Learning and Development Initiative",
@@ -843,8 +899,14 @@
         "pain-point-03-hallucinated-capabilities",
         "pain-point-01-almost-correct-code"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "security-vulnerability-analysis-verification"
+      ],
+      "relatedPatterns": [
+        "few-shot",
+        "persona",
+        "template"
+      ],
       "researchCitations": [
         {
           "source": "Understanding Security Risks in AI-Generated Code | CSA",
@@ -1054,17 +1116,23 @@
         "process/release-readiness-runbook"
       ],
       "relatedGuardrails": [
-        "guardrails/security/prevent-sql-injection-vulnerability",
+        "guardrails/data-integrity/prevent-data-corruption-in-ai-generated-migrations",
         "guardrails/security/prevent-hardcoded-secrets-in-ai-generated-code",
-        "guardrails/data-integrity/prevent-data-corruption-in-ai-generated-migrations"
+        "guardrails/security/prevent-sql-injection-vulnerability"
       ],
       "relatedPainPoints": [
         "pain-point-19-insecure-code",
         "pain-point-01-almost-correct-code",
         "pain-point-16-guardrail-evasion"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "security-vulnerability-analysis-verification",
+        "code-review-assistant"
+      ],
+      "relatedPatterns": [
+        "cognitive-verifier",
+        "self-reflection"
+      ],
       "researchCitations": [
         {
           "source": "Code Quality & Security Software | Static Analysis Tool | Sonar",
@@ -1128,14 +1196,22 @@
         "process/release-readiness-runbook"
       ],
       "relatedGuardrails": [
-        "guardrails/testing/prevent-missing-edge-case-tests"
+        "guardrails/testing/prevent-flaky-tests-from-timing-issues",
+        "guardrails/testing/prevent-insufficient-test-coverage",
+        "guardrails/testing/prevent-missing-edge-case-testing"
       ],
       "relatedPainPoints": [
         "pain-point-01-almost-correct-code",
         "pain-point-05-missing-context"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "unit-test-generator-comprehensive-mocking",
+        "e2e-test-scenario-builder"
+      ],
+      "relatedPatterns": [
+        "chain-of-thought",
+        "few-shot"
+      ],
       "researchCitations": [
         {
           "source": "Testing AI Code in CI/CD Made Simple for Developers - Speedscale",
@@ -1204,8 +1280,13 @@
         "pain-point-05-missing-context",
         "pain-point-23-tactical-trap"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "code-review-assistant"
+      ],
+      "relatedPatterns": [
+        "structured-output",
+        "template"
+      ],
       "researchCitations": [
         {
           "source": "Boost your Continuous Delivery pipeline with Generative AI | Google ...",
@@ -1265,15 +1346,23 @@
       ],
       "relatedGuardrails": [
         "guardrails/security/prevent-sql-injection-vulnerability",
-        "guardrails/testing/prevent-missing-edge-case-tests"
+        "guardrails/testing/prevent-missing-edge-case-testing"
       ],
       "relatedPainPoints": [
         "pain-point-01-almost-correct-code",
         "pain-point-19-insecure-code",
         "pain-point-03-hallucinated-capabilities"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "code-review-assistant",
+        "code-review-with-self-verification",
+        "security-vulnerability-analysis-verification"
+      ],
+      "relatedPatterns": [
+        "cognitive-verifier",
+        "self-reflection",
+        "template"
+      ],
       "researchCitations": [
         {
           "source": "The Most Common Security Vulnerabilities in AI-Generated Code ...",
@@ -1337,7 +1426,10 @@
         "process/platform-consolidation-playbook",
         "governance/ai-governance-scorecard"
       ],
-      "relatedGuardrails": [],
+      "relatedGuardrails": [
+        "guardrails/security/prevent-exposed-sensitive-data-in-logs",
+        "guardrails/security/prevent-hardcoded-secrets-in-ai-generated-code"
+      ],
       "relatedPainPoints": [
         "pain-point-08-toolchain-sprawl",
         "pain-point-12-vibe-coding",
@@ -1402,6 +1494,7 @@
         "security/security-guardrails"
       ],
       "relatedGuardrails": [
+        "guardrails/security/prevent-exposed-sensitive-data-in-logs",
         "guardrails/security/prevent-hardcoded-secrets-in-ai-generated-code"
       ],
       "relatedPainPoints": [

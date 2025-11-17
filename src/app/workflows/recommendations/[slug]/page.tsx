@@ -56,13 +56,24 @@ export async function generateMetadata({ params }: RecommendationPageProps): Pro
       description,
       url: `${APP_URL}/workflows/recommendations/${slug}`,
       type: 'article',
+      siteName: 'Engify.ai',
+      images: [
+        {
+          url: `${APP_URL}/og-images/recommendations/${slug}.png`,
+          width: 1200,
+          height: 630,
+          alt: recommendation.title,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [`${APP_URL}/og-images/recommendations/${slug}.png`],
     },
     keywords: allKeywords.length > 0 ? allKeywords : recommendation.keywords || [],
+    authors: [{ name: 'Donnie Laur' }],
   };
 }
 
@@ -93,6 +104,20 @@ export default async function RecommendationPage({ params }: RecommendationPageP
     headline: recommendation.title,
     description: recommendation.description,
     url: `${APP_URL}/workflows/recommendations/${slug}`,
+    author: {
+      '@type': 'Person',
+      name: 'Donnie Laur',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Engify.ai',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${APP_URL}/logo.png`,
+      },
+    },
+    datePublished: recommendation.datePublished || new Date().toISOString(),
+    dateModified: recommendation.dateModified || new Date().toISOString(),
     about: {
       '@type': 'Thing',
       name: 'AI Development Recommendations',
