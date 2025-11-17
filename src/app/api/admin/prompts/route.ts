@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
+import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { getDb } from '@/lib/mongodb';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
 import { auditLog } from '@/lib/logging/audit';
 import { sanitizeText } from '@/lib/security/sanitize';
-import { UpdatePromptSchema } from '@/lib/schemas/prompt';
+import {
+  CreatePromptSchema,
+  UpdatePromptSchema,
+  PromptCategorySchema,
+} from '@/lib/schemas/prompt';
 
 /**
  * Prompt Management API
@@ -29,6 +34,46 @@ export async function GET(request: NextRequest) {
     const active = searchParams.get('active');
     const source = searchParams.get('source');
 
+    // Validate category parameter
+    if (category && category !== 'all') {
+      const validCategories = PromptCategorySchema.options;
+      if (!validCategories.includes(category as any)) {
+        return NextResponse.json(
+          {
+            error: `Invalid category. Valid values: ${validCategories.join(', ')}, all`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate source parameter
+    const validSources = ['seed', 'ai-generated', 'user-submitted', 'all'];
+    if (source && !validSources.includes(source)) {
+      return NextResponse.json(
+        {
+          error: `Invalid source. Valid values: ${validSources.join(', ')}`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate active parameter
+    if (active && !['true', 'false', 'all'].includes(active)) {
+      return NextResponse.json(
+        {
+          error:
+            'Invalid active param. Must be: true, false, or all',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Pagination parameters
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
+    const skip = (page - 1) * limit;
+
     const db = await getDb();
     const collection = db.collection('prompts');
 
@@ -40,11 +85,16 @@ export async function GET(request: NextRequest) {
     }
     if (source && source !== 'all') query.source = source;
 
-    const prompts = await collection
-      .find(query)
-      .sort({ updatedAt: -1 })
-      .limit(500)
-      .toArray();
+    // Fetch prompts and total count in parallel
+    const [prompts, total] = await Promise.all([
+      collection
+        .find(query)
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      collection.countDocuments(query),
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -52,6 +102,14 @@ export async function GET(request: NextRequest) {
         ...item,
         _id: item._id.toString(),
       })),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1,
+      },
     });
   } catch (error) {
     logger.apiError('/api/admin/prompts', error, { method: 'GET' });
@@ -87,20 +145,26 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Validation
-    if (!body.title || !body.content || !body.category) {
-      return NextResponse.json(
-        { error: 'Missing required fields: title, content, category' },
-        { status: 400 }
-      );
+    // Zod validation
+    let validatedData;
+    try {
+      validatedData = CreatePromptSchema.parse(body);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          { error: 'Invalid input', details: error.errors },
+          { status: 400 }
+        );
+      }
+      throw error;
     }
 
-    // Sanitize user input
-    const sanitizedTitle = sanitizeText(body.title);
-    const sanitizedDescription = body.description
-      ? sanitizeText(body.description)
+    // Sanitize user input (after validation)
+    const sanitizedTitle = sanitizeText(validatedData.title);
+    const sanitizedDescription = validatedData.description
+      ? sanitizeText(validatedData.description)
       : '';
-    const sanitizedContent = sanitizeText(body.content);
+    const sanitizedContent = sanitizeText(validatedData.content);
 
     const db = await getDb();
     const collection = db.collection('prompts');
@@ -108,7 +172,7 @@ export async function POST(request: NextRequest) {
     // Generate ID and slug
     const promptId = `prompt-${Date.now()}`;
     const slug =
-      body.slug ||
+      validatedData.slug ||
       sanitizedTitle
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
@@ -130,42 +194,42 @@ export async function POST(request: NextRequest) {
       title: sanitizedTitle,
       description: sanitizedDescription,
       content: sanitizedContent,
-      category: body.category,
-      role: body.role,
-      experienceLevel: body.experienceLevel,
-      pattern: body.pattern,
-      designPattern: body.designPattern,
-      tags: body.tags || [],
+      category: validatedData.category,
+      role: validatedData.role,
+      experienceLevel: validatedData.experienceLevel,
+      pattern: validatedData.pattern,
+      designPattern: validatedData.designPattern,
+      tags: validatedData.tags || [],
       views: 0,
       ratingCount: 0,
-      isPublic: body.isPublic !== false,
-      isFeatured: body.isFeatured === true,
-      active: body.active !== false,
-      source: body.source || 'user-submitted',
-      isPremium: body.isPremium === true,
-      requiresAuth: body.requiresAuth === true,
+      isPublic: validatedData.isPublic !== false,
+      isFeatured: validatedData.isFeatured === true,
+      active: validatedData.active !== false,
+      source: validatedData.source || 'user-submitted',
+      isPremium: validatedData.isPremium === true,
+      requiresAuth: validatedData.requiresAuth === true,
       currentRevision: 1,
       createdAt: now,
       updatedAt: now,
       authorId: session?.user?.email || 'admin',
       lastRevisedBy: session?.user?.email,
       lastRevisedAt: now,
-      ...(body.qualityScore && { qualityScore: body.qualityScore }),
-      ...(body.whatIs && { whatIs: body.whatIs }),
-      ...(body.whyUse && { whyUse: body.whyUse }),
-      ...(body.metaDescription && { metaDescription: body.metaDescription }),
-      ...(body.seoKeywords && { seoKeywords: body.seoKeywords }),
-      ...(body.caseStudies && { caseStudies: body.caseStudies }),
-      ...(body.examples && { examples: body.examples }),
-      ...(body.useCases && { useCases: body.useCases }),
-      ...(body.bestPractices && { bestPractices: body.bestPractices }),
-      ...(body.bestTimeToUse && { bestTimeToUse: body.bestTimeToUse }),
-      ...(body.recommendedModel && { recommendedModel: body.recommendedModel }),
-      ...(body.whenNotToUse && { whenNotToUse: body.whenNotToUse }),
-      ...(body.difficulty && { difficulty: body.difficulty }),
-      ...(body.estimatedTime && { estimatedTime: body.estimatedTime }),
-      ...(body.verified !== undefined && { verified: body.verified }),
-      ...(body.parameters && { parameters: body.parameters }),
+      ...(validatedData.qualityScore && { qualityScore: validatedData.qualityScore }),
+      ...(validatedData.whatIs && { whatIs: validatedData.whatIs }),
+      ...(validatedData.whyUse && { whyUse: validatedData.whyUse }),
+      ...(validatedData.metaDescription && { metaDescription: validatedData.metaDescription }),
+      ...(validatedData.seoKeywords && { seoKeywords: validatedData.seoKeywords }),
+      ...(validatedData.caseStudies && { caseStudies: validatedData.caseStudies }),
+      ...(validatedData.examples && { examples: validatedData.examples }),
+      ...(validatedData.useCases && { useCases: validatedData.useCases }),
+      ...(validatedData.bestPractices && { bestPractices: validatedData.bestPractices }),
+      ...(validatedData.bestTimeToUse && { bestTimeToUse: validatedData.bestTimeToUse }),
+      ...(validatedData.recommendedModel && { recommendedModel: validatedData.recommendedModel }),
+      ...(validatedData.whenNotToUse && { whenNotToUse: validatedData.whenNotToUse }),
+      ...(validatedData.difficulty && { difficulty: validatedData.difficulty }),
+      ...(validatedData.estimatedTime && { estimatedTime: validatedData.estimatedTime }),
+      ...(validatedData.verified !== undefined && { verified: validatedData.verified }),
+      ...(validatedData.parameters && { parameters: validatedData.parameters }),
     };
 
     const result = await collection.insertOne(newPrompt);
@@ -175,7 +239,7 @@ export async function POST(request: NextRequest) {
       userId: session?.user?.email || 'unknown',
       action: 'prompts.create',
       resource: `prompt:${promptId}`,
-      details: { title: sanitizedTitle, category: body.category },
+      details: { title: sanitizedTitle, category: validatedData.category },
     });
 
     return NextResponse.json(
@@ -235,29 +299,43 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid prompt ID' }, { status: 400 });
     }
 
+    // Zod validation for update data
+    let validatedUpdates;
+    try {
+      validatedUpdates = UpdatePromptSchema.partial().parse(updates);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          { error: 'Invalid input', details: error.errors },
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
+
     const db = await getDb();
     const collection = db.collection('prompts');
 
-    // Sanitize text fields if present
+    // Sanitize text fields if present (after validation)
     const sanitizedUpdates: Record<string, unknown> = {
-      ...updates,
+      ...validatedUpdates,
       updatedAt: new Date(),
       lastRevisedBy: session?.user?.email,
       lastRevisedAt: new Date(),
     };
 
-    if (updates.title) {
-      sanitizedUpdates.title = sanitizeText(updates.title);
+    if (validatedUpdates.title) {
+      sanitizedUpdates.title = sanitizeText(validatedUpdates.title);
     }
-    if (updates.description) {
-      sanitizedUpdates.description = sanitizeText(updates.description);
+    if (validatedUpdates.description) {
+      sanitizedUpdates.description = sanitizeText(validatedUpdates.description);
     }
-    if (updates.content) {
-      sanitizedUpdates.content = sanitizeText(updates.content);
+    if (validatedUpdates.content) {
+      sanitizedUpdates.content = sanitizeText(validatedUpdates.content);
     }
 
     // Increment revision if content changed
-    if (updates.content) {
+    if (validatedUpdates.content) {
       const existing = await collection.findOne({ _id: new ObjectId(_id) });
       if (existing) {
         sanitizedUpdates.currentRevision = (existing.currentRevision || 1) + 1;

@@ -39,76 +39,89 @@ export function DashboardOverviewPanel() {
   });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    const controller = new AbortController();
 
-  async function fetchDashboardData() {
-    setLoading(true);
-    try {
-      // Fetch stats from multiple endpoints in parallel
-      const [
-        usersRes,
-        contentRes,
-        promptsRes,
-        patternsRes,
-        modelsRes,
-        toolsRes,
-      ] = await Promise.all([
-        fetch('/api/admin/users').catch(() => null),
-        fetch('/api/admin/content/manage').catch(() => null),
-        fetch('/api/admin/prompts').catch(() => null),
-        fetch('/api/admin/patterns').catch(() => null),
-        fetch('/api/admin/ai-models').catch(() => null),
-        fetch('/api/admin/ai-tools').catch(() => null),
-      ]);
+    async function fetchData() {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch stats from multiple endpoints in parallel
+        const [
+          usersRes,
+          contentRes,
+          promptsRes,
+          patternsRes,
+          modelsRes,
+          toolsRes,
+        ] = await Promise.all([
+          fetch('/api/admin/users', { signal: controller.signal }).catch(() => null),
+          fetch('/api/admin/content/manage', { signal: controller.signal }).catch(() => null),
+          fetch('/api/admin/prompts', { signal: controller.signal }).catch(() => null),
+          fetch('/api/admin/patterns', { signal: controller.signal }).catch(() => null),
+          fetch('/api/admin/ai-models', { signal: controller.signal }).catch(() => null),
+          fetch('/api/admin/ai-tools', { signal: controller.signal }).catch(() => null),
+        ]);
 
-      const users = usersRes?.ok ? (await usersRes.json()).users || [] : [];
-      const content = contentRes?.ok ? (await contentRes.json()).content || [] : [];
-      const prompts = promptsRes?.ok ? (await promptsRes.json()).prompts || [] : [];
-      const patterns = patternsRes?.ok ? (await patternsRes.json()).patterns || [] : [];
-      const models = modelsRes?.ok ? (await modelsRes.json()).models || [] : [];
-      const tools = toolsRes?.ok ? (await toolsRes.json()).tools || [] : [];
+        const users = usersRes?.ok ? (await usersRes.json()).users || [] : [];
+        const content = contentRes?.ok ? (await contentRes.json()).content || [] : [];
+        const prompts = promptsRes?.ok ? (await promptsRes.json()).prompts || [] : [];
+        const patterns = patternsRes?.ok ? (await patternsRes.json()).patterns || [] : [];
+        const models = modelsRes?.ok ? (await modelsRes.json()).models || [] : [];
+        const tools = toolsRes?.ok ? (await toolsRes.json()).tools || [] : [];
 
-      setStats({
-        users: users.length,
-        content: content.length,
-        prompts: prompts.length,
-        patterns: patterns.length,
-        aiModels: models.length,
-        aiTools: tools.length,
-        auditLogs: 0, // Can fetch if needed
-        dlqMessages: 0, // Can fetch if needed
-      });
+        setStats({
+          users: users.length,
+          content: content.length,
+          prompts: prompts.length,
+          patterns: patterns.length,
+          aiModels: models.length,
+          aiTools: tools.length,
+          auditLogs: 0, // Can fetch if needed
+          dlqMessages: 0, // Can fetch if needed
+        });
 
-      // Build recent activity from users and content
-      const activity: RecentActivity[] = [
-        ...users.slice(0, 3).map((u: { _id: string; name?: string; email?: string; createdAt?: string }) => ({
-          type: 'user' as const,
-          title: u.name || u.email || 'Unknown User',
-          subtitle: 'New user registered',
-          timestamp: u.createdAt ? new Date(u.createdAt) : new Date(),
-          id: u._id,
-        })),
-        ...content.slice(0, 3).map((c: { _id: string; title?: string; type?: string; createdAt?: string }) => ({
-          type: 'content' as const,
-          title: c.title || 'Untitled',
-          subtitle: `New ${c.type || 'content'} created`,
-          timestamp: c.createdAt ? new Date(c.createdAt) : new Date(),
-          id: c._id,
-        })),
-      ];
+        // Build recent activity from users and content
+        const activity: RecentActivity[] = [
+          ...users.slice(0, 3).map((u: { _id: string; name?: string; email?: string; createdAt?: string }) => ({
+            type: 'user' as const,
+            title: u.name || u.email || 'Unknown User',
+            subtitle: 'New user registered',
+            timestamp: u.createdAt ? new Date(u.createdAt) : new Date(),
+            id: u._id,
+          })),
+          ...content.slice(0, 3).map((c: { _id: string; title?: string; type?: string; createdAt?: string }) => ({
+            type: 'content' as const,
+            title: c.title || 'Untitled',
+            subtitle: `New ${c.type || 'content'} created`,
+            timestamp: c.createdAt ? new Date(c.createdAt) : new Date(),
+            id: c._id,
+          })),
+        ];
 
-      // Sort by timestamp desc
-      activity.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-      setRecentActivity(activity.slice(0, 5));
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-    } finally {
-      setLoading(false);
+        // Sort by timestamp desc
+        activity.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+        setRecentActivity(activity.slice(0, 5));
+      } catch (err) {
+        // Ignore abort errors (component unmounted)
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        console.error('Failed to fetch dashboard data:', err);
+        setError('Failed to load dashboard data. Please refresh the page.');
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+
+    fetchData();
+
+    return () => {
+      controller.abort(); // Cleanup on unmount
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -130,6 +143,21 @@ export function DashboardOverviewPanel() {
           Welcome to the OpsHub admin dashboard. Manage all aspects of your platform from here.
         </p>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <Icons.alertCircle className="h-5 w-5 text-destructive" />
+              <div className="flex-1">
+                <p className="font-medium text-destructive">Error Loading Dashboard</p>
+                <p className="text-sm text-muted-foreground mt-1">{error}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Stats Grid */}
       <div className="grid gap-4 md:grid-cols-4">
