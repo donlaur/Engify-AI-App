@@ -35,7 +35,6 @@ export interface AuthContext {
 export class AuthProvider {
   private static instance: AuthProvider;
   private sessionCache: Map<string, { session: Session | null; timestamp: number }>;
-  private cacheTTL: number = 5000; // 5 seconds
 
   private constructor() {
     this.sessionCache = new Map();

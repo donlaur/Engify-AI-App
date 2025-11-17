@@ -313,14 +313,16 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
     try {
       const collection = await this.getCollection();
 
-      const updateDoc = {
-        ...update,
-        updatedAt: new Date(),
+      const updateDoc: UpdateFilter<T> = {
+        $set: {
+          ...update,
+          updatedAt: new Date(),
+        } as unknown as Partial<T>,
       };
 
       const result = await collection.findOneAndUpdate(
         { _id: new ObjectId(id) } as Filter<T>,
-        { $set: updateDoc } as UpdateFilter<T>,
+        updateDoc,
         { returnDocument: 'after', session }
       );
 
@@ -349,9 +351,13 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
         updatedAt: new Date(),
       };
 
+      const updateFilter: UpdateFilter<T> = {
+        $set: updateDoc as unknown as Partial<T>,
+      };
+
       const result = await collection.findOneAndUpdate(
         filter,
-        { $set: updateDoc } as UpdateFilter<T>,
+        updateFilter,
         { returnDocument: 'after', session }
       );
 
@@ -380,9 +386,13 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
         updatedAt: new Date(),
       };
 
+      const updateFilter: UpdateFilter<T> = {
+        $set: updateDoc as unknown as Partial<T>,
+      };
+
       const result = await collection.updateMany(
         filter,
-        { $set: updateDoc } as UpdateFilter<T>,
+        updateFilter,
         { session }
       );
 
@@ -405,9 +415,12 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
 
       if (this.softDelete) {
         // Soft delete
+        const updateFilter: UpdateFilter<T> = {
+          $set: { deletedAt: new Date() } as unknown as Partial<T>,
+        };
         const result = await collection.updateOne(
           { _id: new ObjectId(id) } as Filter<T>,
-          { $set: { deletedAt: new Date() } } as UpdateFilter<T>,
+          updateFilter,
           { session }
         );
         return result.modifiedCount > 0;
@@ -456,9 +469,12 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
 
     try {
       const collection = await this.getCollection();
+      const updateFilter = {
+        $unset: { deletedAt: '' },
+      } as unknown as UpdateFilter<T>;
       const result = await collection.updateOne(
         { _id: new ObjectId(id) } as Filter<T>,
-        { $unset: { deletedAt: '' } } as UpdateFilter<T>,
+        updateFilter,
         { session }
       );
       return result.modifiedCount > 0;

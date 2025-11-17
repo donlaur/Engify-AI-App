@@ -18,7 +18,7 @@
  * @module DatabaseProvider
  */
 
-import { Db, Collection, MongoClient, ClientSession } from 'mongodb';
+import { Db, Collection, MongoClient, ClientSession, Document } from 'mongodb';
 import { getDb, getClient } from '@/lib/mongodb';
 
 export class DatabaseProvider {
@@ -77,7 +77,7 @@ export class DatabaseProvider {
    * Get collection by name
    * Type-safe collection access
    */
-  public async getCollection<T = any>(name: string): Promise<Collection<T>> {
+  public async getCollection<T extends Document = Document>(name: string): Promise<Collection<T>> {
     const db = await this.getDb();
     return db.collection<T>(name);
   }

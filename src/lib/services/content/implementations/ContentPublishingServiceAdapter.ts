@@ -13,7 +13,6 @@ import {
   IContentPublisher,
   PublishParams,
   PublishResult,
-  PublishingReview,
 } from '../interfaces/IContentPublisher';
 
 export class ContentPublishingServiceAdapter implements IContentPublisher {
@@ -48,7 +47,34 @@ export class ContentPublishingServiceAdapter implements IContentPublisher {
       readabilityScore: result.readabilityScore,
       approved: result.approved,
       publishReady: result.publishReady,
-      slopDetection: result.slopDetection,
+      slopDetection: result.slopDetection
+        ? {
+            aiProbability: 0,
+            qualityScore: result.slopDetection.qualityScore,
+            flags: [],
+            recommendations: [],
+            metrics: {
+              wordCount: 0,
+              slopCount: result.slopDetection.slopPhrases.length,
+              slopPhrases: result.slopDetection.slopPhrases.map((phrase) => ({
+                phrase,
+                count: 1,
+              })),
+              emDashCount: 0,
+              emDashRatio: 0,
+              sentenceCount: 0,
+              avgSentenceLength: 0,
+              sentenceStdDev: 0,
+              hedgeCount: 0,
+              hedgeRatio: 0,
+              vagueCount: 0,
+              personalCount: 0,
+              hasCode: false,
+              hasNumbers: false,
+              hasLinks: false,
+            },
+          }
+        : undefined,
     };
 
     return this.publishingService.generateReport(publishingResult);
@@ -66,7 +92,13 @@ export class ContentPublishingServiceAdapter implements IContentPublisher {
       readabilityScore: result.readabilityScore,
       approved: result.approved,
       publishReady: result.publishReady,
-      slopDetection: result.slopDetection,
+      slopDetection: result.slopDetection
+        ? {
+            hasSlopPhrases: result.slopDetection.metrics.slopCount > 0,
+            slopPhrases: result.slopDetection.metrics.slopPhrases.map((p) => p.phrase),
+            qualityScore: result.slopDetection.qualityScore,
+          }
+        : undefined,
     };
   }
 }

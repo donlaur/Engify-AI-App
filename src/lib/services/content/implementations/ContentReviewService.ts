@@ -13,7 +13,6 @@ import {
   IContentReviewer,
   ReviewParams,
   ReviewResult,
-  AgentReview,
 } from '../interfaces/IContentReviewer';
 
 export class ContentReviewService implements IContentReviewer {

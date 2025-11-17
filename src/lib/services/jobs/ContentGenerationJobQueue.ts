@@ -57,6 +57,7 @@ export interface ContentGenerationJobStatus {
  * Processes content generation jobs from the queue
  */
 class ContentGenerationJobHandler implements IMessageHandler {
+  readonly messageType = 'content.generation.batch' as const;
   handlerName = 'ContentGenerationJobHandler';
   private jobStatuses = new Map<string, ContentGenerationJobStatus>();
 

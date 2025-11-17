@@ -47,6 +47,18 @@ import { cacheProvider } from '@/lib/providers/CacheProvider';
 import type { AuditAction } from '@/lib/logging/audit';
 import { isAdminMFAEnforced } from '@/lib/env';
 
+/**
+ * Get client IP address from NextRequest
+ */
+function getClientIP(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const parts = forwarded.split(',');
+    return parts.length > 0 ? parts[0].trim() : 'unknown';
+  }
+  return request.headers.get('x-real-ip') || 'unknown';
+}
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -221,12 +233,14 @@ export function withAPI<TInput = any, TOutput = any>(
     // Resolve params if provided
     const params = context?.params ? await context.params : undefined;
 
+    // Declare variables outside try block for catch block access
+    let userId: string | undefined;
+    let userRole: UserRole = 'user';
+
     try {
       // ========================================================================
       // 1. AUTHENTICATION
       // ========================================================================
-      let userId: string | undefined;
-      let userRole: UserRole = 'user';
 
       if (options.auth) {
         const authContext = await authProvider.getAuthContext();
@@ -301,7 +315,7 @@ export function withAPI<TInput = any, TOutput = any>(
       // 3. RATE LIMITING
       // ========================================================================
       if (options.rateLimit) {
-        const rateLimitKey = userId || request.ip || 'anonymous';
+        const rateLimitKey = userId || getClientIP(request) || 'anonymous';
         const rateLimitResult = await checkRateLimit(
           options.rateLimit,
           rateLimitKey
