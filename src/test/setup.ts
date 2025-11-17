@@ -8,6 +8,7 @@ import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 import * as util from 'util';
+import { ObjectId } from 'mongodb';
 
 // Cleanup after each test
 afterEach(() => {
@@ -143,7 +144,7 @@ vi.mock('@/lib/db/mongodb', () => {
 // Also mock MongoDB low-level client module if imported directly
 vi.mock('@/lib/db/client', () => {
   // Import ObjectId for proper type handling
-  const { ObjectId } = require('mongodb');
+  // Note: ObjectId is imported at the top of the file
 
   type Doc = Record<string, unknown> & { _id?: string | typeof ObjectId };
   const store = new Map<string, Doc[]>();

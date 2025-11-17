@@ -18,13 +18,14 @@
 import { MongoClient, Db } from 'mongodb';
 import { config } from 'dotenv';
 import { resolve } from 'path';
+import fs from 'fs';
+import { execSync } from 'child_process';
 
 // Load environment variables (for scripts and serverless environments)
 // Check multiple locations: current dir, parent dir (for worktrees), common git worktree locations
 if (typeof process !== 'undefined') {
   const currentDir = process.cwd();
   const parentDir = resolve(currentDir, '..');
-  const fs = require('fs');
   
   // Try current directory first
   config({ path: resolve(currentDir, '.env.local') });
@@ -60,7 +61,6 @@ if (typeof process !== 'undefined') {
   // Final fallback: Try to find git repository root dynamically
   if (!process.env.MONGODB_URI) {
     try {
-      const { execSync } = require('child_process');
       const gitRoot = execSync('git rev-parse --show-toplevel', {
         cwd: currentDir,
         encoding: 'utf8',
