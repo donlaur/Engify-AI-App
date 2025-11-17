@@ -50,7 +50,7 @@ catalogs:
   # State Management & Data Fetching
   state:
     '@tanstack/react-query': ^5.28.0
-    zustand: ^4.5.0
+    zustand: ^5.0.8
     swr: ^2.3.6
     superjson: ^2.2.1
 
