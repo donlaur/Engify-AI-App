@@ -305,9 +305,8 @@ export class AuthService {
       }
 
       // Generate reset token
-      const _resetToken = this.generateResetToken(user._id.toString());
-
       // TODO: In a real implementation, send email with reset token
+      // const resetToken = this.generateResetToken(user._id.toString());
       // For now, we'll just return success
 
       return {
@@ -479,10 +478,11 @@ export class AuthService {
     return `session_${userId}_${Date.now()}`;
   }
 
-  private generateResetToken(userId: string): string {
-    // In a real implementation, you'd generate a secure token
-    return `reset_${userId}_${Date.now()}`;
-  }
+  // Reserved for future password reset functionality
+  // private _generateResetToken(userId: string): string {
+  //   // In a real implementation, you'd generate a secure token
+  //   return `reset_${userId}_${Date.now()}`;
+  // }
 
   private extractUserIdFromToken(token: string): string | null {
     // In a real implementation, you'd decode and validate the token

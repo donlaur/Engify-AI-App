@@ -16,7 +16,7 @@ describe('RBAC /api/v2/execution', () => {
 
   it('denies POST when role lacks workbench:ai_execution', async () => {
     const { auth } = await import('@/lib/auth');
-    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } });
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } } as any);
 
     const req = new NextRequest('http://localhost:3000/api/v2/execution', {
       method: 'POST',
@@ -29,7 +29,7 @@ describe('RBAC /api/v2/execution', () => {
 
   it('denies GET when role lacks workbench:ai_execution', async () => {
     const { auth } = await import('@/lib/auth');
-    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } });
+    vi.mocked(auth).mockResolvedValue({ user: { id: 'u1', role: 'user' } } as any);
 
     const req = new NextRequest('http://localhost:3000/api/v2/execution');
     const res = await GET(req);
@@ -40,7 +40,7 @@ describe('RBAC /api/v2/execution', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'admin', role: 'super_admin' },
-    });
+    } as any);
 
     const req = new NextRequest('http://localhost:3000/api/v2/execution', {
       method: 'POST',
@@ -55,7 +55,7 @@ describe('RBAC /api/v2/execution', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'admin', role: 'super_admin' },
-    });
+    } as any);
 
     const req = new NextRequest('http://localhost:3000/api/v2/execution');
     const res = await GET(req);

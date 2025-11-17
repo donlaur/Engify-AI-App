@@ -50,7 +50,7 @@ describe('POST /api/chat', () => {
     const { auth } = await import('@/lib/auth');
     const { checkRateLimit } = await import('@/lib/rate-limit');
 
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as any);
     vi.mocked(checkRateLimit).mockResolvedValue({
       allowed: false,
       remaining: 0,
@@ -77,7 +77,7 @@ describe('POST /api/chat', () => {
     const { checkRateLimit } = await import('@/lib/rate-limit');
     const { sanitizeText } = await import('@/lib/security/sanitize');
 
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as any);
     vi.mocked(checkRateLimit).mockResolvedValue({
       allowed: true,
       remaining: 100,

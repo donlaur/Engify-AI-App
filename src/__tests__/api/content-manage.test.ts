@@ -41,6 +41,7 @@ describe('/api/admin/content/manage', () => {
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: false,
         remaining: 0,
+        resetAt: new Date(),
       });
 
       const req = new Request('http://localhost/api/admin/content/manage');
@@ -59,6 +60,7 @@ describe('/api/admin/content/manage', () => {
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
         remaining: 10,
+        resetAt: new Date(),
       });
 
       const mockContent = [
@@ -126,6 +128,7 @@ describe('/api/admin/content/manage', () => {
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
         remaining: 5,
+        resetAt: new Date(),
       });
 
       const mockCollection = {
@@ -186,6 +189,7 @@ describe('/api/admin/content/manage', () => {
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
         remaining: 10,
+        resetAt: new Date(),
       });
 
       const mockCollection = {
@@ -243,6 +247,7 @@ describe('/api/admin/content/manage', () => {
       vi.mocked(checkRateLimit).mockResolvedValue({
         allowed: true,
         remaining: 5,
+        resetAt: new Date(),
       });
 
       const mockCollection = {

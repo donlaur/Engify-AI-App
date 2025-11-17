@@ -1,11 +1,9 @@
 /**
  * Prompt Pattern Auditor
- * 
+ *
  * Multi-agent audit system for prompts and patterns.
  * Extracted from scripts to be usable in API routes.
  */
-
-import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFactoryWithRegistry';
 
 // Re-export types and interfaces
 export interface AuditResult {
@@ -50,13 +48,11 @@ export interface AuditAgent {
 
 // This is a stub - the full implementation will be in the next file
 export class PromptPatternAuditor {
-  private organizationId: string;
-
-  constructor(organizationId: string = 'system') {
-    this.organizationId = organizationId;
+  constructor(_organizationId: string = 'system') {
+    // Parameter reserved for future implementation
   }
 
-  async auditPrompt(prompt: any): Promise<AuditResult> {
+  async auditPrompt(): Promise<AuditResult> {
     // This will be implemented in the full file
     throw new Error('Not implemented - use the full auditor from scripts/content/audit-prompts-patterns');
   }

@@ -85,7 +85,7 @@ async function getUseCasesFromPrompts(role: string): Promise<string[]> {
     const useCases = new Set<string>();
     prompts.forEach((p) => {
       if (p.useCases && Array.isArray(p.useCases) && p.useCases.length > 0) {
-        p.useCases.forEach((uc) => useCases.add(uc));
+        p.useCases.forEach((uc: string) => useCases.add(uc));
       }
     });
 
@@ -107,7 +107,7 @@ async function getRealLifeExamplesFromPrompts(role: string): Promise<string[]> {
     const examples: string[] = [];
     prompts.forEach((p) => {
       if (p.caseStudies && Array.isArray(p.caseStudies)) {
-        p.caseStudies.forEach((cs) => {
+        p.caseStudies.forEach((cs: any) => {
           if (typeof cs === 'object' && cs !== null) {
             if (
               'outcome' in cs &&
@@ -161,7 +161,7 @@ async function getDailyTasksFromTags(role: string): Promise<string[]> {
 
     prompts.forEach((p) => {
       if (p.tags && Array.isArray(p.tags)) {
-        p.tags.forEach((tag) => {
+        p.tags.forEach((tag: string) => {
           const tagLower = tag.toLowerCase();
           if (taskPatterns.some((pattern) => tagLower.includes(pattern))) {
             taskKeywords.add(tag);

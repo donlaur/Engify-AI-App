@@ -91,7 +91,7 @@ export class PatternRepository
    */
   async getById(idOrName: string): Promise<Pattern | null> {
     const document = await this.findOne({
-      $or: [{ id: idOrName }, { name: idOrName }, { _id: idOrName }],
+      $or: [{ id: idOrName }, { name: idOrName }, { _id: idOrName as any }],
     });
     return document ? this.processor.process(document) : null;
   }

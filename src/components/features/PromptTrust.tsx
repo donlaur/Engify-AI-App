@@ -203,7 +203,7 @@ interface PromptPremiumCTAProps {
   promptTitle: string;
 }
 
-export function PromptPremiumCTA({ isPremium, promptTitle }: PromptPremiumCTAProps) {
+export function PromptPremiumCTA({ isPremium }: PromptPremiumCTAProps) {
   if (isPremium) {
     return null; // Don't show CTA for premium prompts
   }

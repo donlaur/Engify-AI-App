@@ -28,7 +28,6 @@ interface PatternsJsonData {
 
 const JSON_FILE_PATH = path.join(process.cwd(), 'public', 'data', 'patterns.json');
 const BACKUP_JSON_PATH = path.join(process.cwd(), 'public', 'data', 'patterns-backup.json'); // Immutable backup
-const MAX_AGE_MS = 3600000; // 1 hour - consider JSON stale after this
 
 /**
  * Load patterns from static JSON file (production-fast)

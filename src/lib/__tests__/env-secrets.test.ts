@@ -17,7 +17,7 @@ describe('env secret enforcement', () => {
   });
 
   it('throws when no AI provider keys present in production', async () => {
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     process.env.IMAGE_GENERATION_ENABLED = 'false';
     delete process.env.OPENAI_API_KEY;
     delete process.env.ANTHROPIC_API_KEY;
@@ -31,7 +31,7 @@ describe('env secret enforcement', () => {
   });
 
   it('throws when image generation enabled without replicate token', async () => {
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     process.env.OPENAI_API_KEY = 'sk-live-1234567890';
     process.env.IMAGE_GENERATION_ENABLED = 'true';
     delete process.env.REPLICATE_API_TOKEN;
@@ -40,7 +40,7 @@ describe('env secret enforcement', () => {
   });
 
   it('passes when secrets configured', async () => {
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     process.env.OPENAI_API_KEY = 'sk-live-1234567890';
     process.env.REPLICATE_API_TOKEN = 'r8_live_abcdef';
     process.env.IMAGE_GENERATION_ENABLED = 'true';

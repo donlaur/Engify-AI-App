@@ -24,6 +24,8 @@ interface PromptDocument {
   isFeatured?: boolean;
   isPublic?: boolean;
   active?: boolean;
+  isPremium?: boolean;
+  requiresAuth?: boolean;
   views?: number;
   rating?: number;
   ratingCount?: number;
@@ -31,6 +33,22 @@ interface PromptDocument {
     averageRating?: number;
     totalRatings?: number;
   };
+  currentRevision?: number;
+  lastRevisedAt?: Date;
+  whatIs?: string;
+  whyUse?: string[];
+  parameters?: Array<{
+    type?: string;
+    id?: string;
+    label?: string;
+    required?: boolean;
+    options?: string[];
+    description?: string;
+    placeholder?: string;
+    example?: string;
+    defaultValue?: string;
+    [key: string]: unknown;
+  }>;
   createdAt?: Date;
   updatedAt?: Date;
   // Include ALL possible fields from MongoDB
@@ -61,18 +79,23 @@ class PromptProcessor implements ContentProcessor<PromptDocument, Prompt> {
       updatedAt: raw.updatedAt || new Date(),
       isPublic: raw.isPublic !== false,
       active: raw.active !== false,
-      currentRevision: raw.currentRevision as number | undefined,
+      currentRevision: (raw.currentRevision || 0) as number,
       lastRevisedAt: raw.lastRevisedAt as Date | undefined,
       whatIs: raw.whatIs as string | undefined,
       whyUse: raw.whyUse as string[] | undefined,
-      parameters: raw.parameters as Array<{
+      isPremium: raw.isPremium || false,
+      requiresAuth: raw.requiresAuth || false,
+      parameters: raw.parameters?.map(p => ({
+        ...p,
+        required: p.required ?? false,
+      })) as Array<{
+        type: 'text' | 'select' | 'textarea' | 'checkbox' | 'multiselect';
         id: string;
         label: string;
-        type: 'text' | 'select' | 'textarea' | 'checkbox' | 'multiselect';
-        placeholder?: string;
-        required?: boolean;
+        required: boolean;
         options?: string[];
         description?: string;
+        placeholder?: string;
         example?: string;
         defaultValue?: string;
       }> | undefined,
@@ -118,7 +141,7 @@ export class PromptRepository
    */
   async getById(idOrSlug: string): Promise<Prompt | null> {
     const document = await this.findOne({
-      $or: [{ id: idOrSlug }, { slug: idOrSlug }, { _id: idOrSlug }],
+      $or: [{ id: idOrSlug }, { slug: idOrSlug }, { _id: idOrSlug as any }],
       // Show if isPublic is not explicitly false (public by default)
       // This includes: true, undefined, null
       isPublic: { $ne: false },
@@ -195,7 +218,7 @@ export class PromptRepository
    * Get unique categories
    */
   async getUniqueCategories(): Promise<string[]> {
-    const categories = await this.aggregate<string>([
+    const categories = await this.aggregate<{ category: string }>([
       { $match: { active: { $ne: false } } },
       { $group: { _id: '$category' } },
       { $project: { _id: 0, category: '$_id' } },
@@ -207,7 +230,7 @@ export class PromptRepository
    * Get unique roles
    */
   async getUniqueRoles(): Promise<string[]> {
-    const roles = await this.aggregate<string>([
+    const roles = await this.aggregate<{ role: string }>([
       { $match: { active: { $ne: false } } },
       { $group: { _id: '$role' } },
       { $project: { _id: 0, role: '$_id' } },

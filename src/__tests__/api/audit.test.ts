@@ -37,7 +37,7 @@ describe('POST /api/prompts/audit', () => {
 
   it('should return 401 when not authenticated', async () => {
     const { auth } = await import('@/lib/auth');
-    vi.mocked(auth).mockResolvedValue(null);
+    vi.mocked(auth).mockResolvedValue(null as any);
 
     const request = new NextRequest('http://localhost/api/prompts/audit', {
       method: 'POST',

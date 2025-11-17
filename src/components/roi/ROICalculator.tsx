@@ -102,10 +102,6 @@ export function ROICalculator({ onComplete }: ROICalculatorProps) {
   const roleData = ROLE_DATA[role];
 
   // Calculate savings
-  const _totalHoursPerWeek = roleData.commonTasks.reduce(
-    (sum, task) => sum + task.hoursPerWeek,
-    0
-  );
   const hoursSaved = roleData.commonTasks.reduce(
     (sum, task) => sum + (task.hoursPerWeek * task.savingsPercent) / 100,
     0

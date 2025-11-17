@@ -16,10 +16,8 @@
  */
 
 import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFactoryWithRegistry';
-import { getModelsByProvider, getModel } from '@/lib/services/AIModelRegistry';
+import { getModelsByProvider } from '@/lib/services/AIModelRegistry';
 import { detectAISlop, printDetectionReport, type SlopDetectionResult } from './ai-slop-detector';
-import { getMongoDb } from '@/lib/db/mongodb';
-import { getModelById } from '@/lib/config/ai-models';
 
 // Recommended models for content publishing (centralized configuration)
 const RECOMMENDED_MODELS = {
@@ -704,7 +702,7 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
       });
 
       // If exact match not found, try to find best available model for this provider
-      if (!dbModel || dbModel.status !== 'active') {
+      if (!dbModel || ('status' in dbModel && dbModel.status !== 'active')) {
         // Find first available, ACTIVE, ALLOWED model for this provider
         // CRITICAL: Must explicitly check status === 'active' and isAllowed === true
         dbModel = availableModels.find(m => {
@@ -718,12 +716,7 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
           if ('isAllowed' in m && m.isAllowed === false) {
             return false; // Reject if explicitly not allowed
           }
-          
-          // Skip deprecated or sunset models (safety check)
-          if (status === 'deprecated' || status === 'sunset') {
-            return false;
-          }
-          
+
           const modelId = (m.id || '').toLowerCase();
           
           // Skip models with invalid suffixes
@@ -768,7 +761,7 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
         }
       }
 
-      if (dbModel && !dbModel.deprecated) {
+      if (dbModel && !('deprecated' in dbModel && dbModel.deprecated)) {
         // Use model from DB - create provider with specific model ID
         // Normalize model ID by stripping provider prefix and invalid suffixes
         // Example: "openai/gpt-4o" -> "gpt-4o"
@@ -973,7 +966,7 @@ Provide your review in JSON format as specified in your system prompt.
         );
 
         // If exact match not found, try to find best available model for this provider
-        if (!dbModel || dbModel.status !== 'active') {
+        if (!dbModel || ('status' in dbModel && dbModel.status !== 'active')) {
           // Find first available, ACTIVE, ALLOWED model for this provider
           // CRITICAL: Must explicitly check status === 'active' and isAllowed === true
           dbModel = availableModels.find(m => {
@@ -987,12 +980,7 @@ Provide your review in JSON format as specified in your system prompt.
             if ('isAllowed' in m && m.isAllowed === false) {
               return false; // Reject if explicitly not allowed
             }
-            
-            // Skip deprecated or sunset models (safety check)
-            if (status === 'deprecated' || status === 'sunset') {
-              return false;
-            }
-            
+
             const modelId = (m.id || '').toLowerCase();
             
             // Skip models with invalid suffixes
@@ -1036,7 +1024,7 @@ Provide your review in JSON format as specified in your system prompt.
           }
         }
 
-        if (dbModel && !dbModel.deprecated) {
+        if (dbModel && !('deprecated' in dbModel && dbModel.deprecated)) {
           // Normalize model ID by stripping provider prefix and invalid suffixes
           // Example: "openai/gpt-4o" -> "gpt-4o"
           // Example: "anthropic/claude-3.7-sonnet:thinking" -> "claude-3.7-sonnet"
@@ -1121,8 +1109,7 @@ Provide your review in JSON format as specified in your system prompt.
           for (const fallbackModel of fallbackModels) {
             try {
               const availableModels = await getModelsByProvider(providerType);
-              const modelId = agent.preferredModelId || agent.model;
-              
+
               // Find model, filtering out deprecated ones
               const dbModel = availableModels.find(m => {
                 const status = ('status' in m ? m.status : 'active');
@@ -1334,7 +1321,7 @@ Provide your review in JSON format as specified in your system prompt.
                 const key = incompleteStringMatch[1];
                 const value = incompleteStringMatch[2];
                 const safeValue = value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-                const beforeIncomplete = jsonContent.substring(0, lastOpenBrace + incompleteStringMatch.index);
+                const beforeIncomplete = jsonContent.substring(0, lastOpenBrace + (incompleteStringMatch.index ?? 0));
                 jsonContent = beforeIncomplete + `"${key}": "${safeValue}"`;
               }
             }

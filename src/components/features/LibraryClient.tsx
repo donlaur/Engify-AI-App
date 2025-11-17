@@ -15,7 +15,6 @@ import { PromptCard } from '@/components/features/PromptCard';
 import { EmptyState } from '@/components/features/EmptyState';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -321,7 +320,7 @@ export function LibraryClient({
             ))}
             {allCategories.length > INITIAL_VISIBLE_CATEGORIES && (
               <Badge
-                variant="ghost"
+                variant="outline"
                 className="cursor-pointer text-primary hover:bg-primary/10"
                 onClick={() => setShowAllCategories(!showAllCategories)}
               >
@@ -375,7 +374,7 @@ export function LibraryClient({
             ))}
             {allRoles.length > INITIAL_VISIBLE_ROLES && (
               <Badge
-                variant="ghost"
+                variant="outline"
                 className="cursor-pointer text-primary hover:bg-primary/10"
                 onClick={() => setShowAllRoles(!showAllRoles)}
               >
@@ -427,7 +426,7 @@ export function LibraryClient({
             ))}
             {allPatterns.length > INITIAL_VISIBLE_PATTERNS && (
               <Badge
-                variant="ghost"
+                variant="outline"
                 className="cursor-pointer text-primary hover:bg-primary/10"
                 onClick={() => setShowAllPatterns(!showAllPatterns)}
               >

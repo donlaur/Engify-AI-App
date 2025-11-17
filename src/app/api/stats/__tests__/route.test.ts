@@ -5,6 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 import { GET } from '../route';
 
 // Mock MongoDB
@@ -42,7 +43,7 @@ describe('GET /api/stats', () => {
 
     (getMongoDb as any).mockResolvedValue(mockDb);
 
-    const response = await GET();
+    const response = await GET(new NextRequest('http://localhost:3000/api/stats'));
     const data = await response.json();
 
     expect(data.stats.prompts).toBe(100);
@@ -57,7 +58,7 @@ describe('GET /api/stats', () => {
       () => new Promise(() => {}) // Never resolves
     );
 
-    const response = await GET();
+    const response = await GET(new NextRequest('http://localhost:3000/api/stats'));
     const data = await response.json();
 
     // Should return static fallback after route's 5s timeout
@@ -70,7 +71,7 @@ describe('GET /api/stats', () => {
 
     (getMongoDb as any).mockRejectedValue(new Error('Connection failed'));
 
-    const response = await GET();
+    const response = await GET(new NextRequest('http://localhost:3000/api/stats'));
     const data = await response.json();
 
     expect(data.stats.prompts).toBeGreaterThan(0);
@@ -101,7 +102,7 @@ describe('GET /api/stats', () => {
 
     (getMongoDb as any).mockResolvedValue(mockDb);
 
-    const response = await GET();
+    const response = await GET(new NextRequest('http://localhost:3000/api/stats'));
     const data = await response.json();
 
     // Categories are sorted by count descending, check structure instead of exact length

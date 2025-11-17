@@ -76,10 +76,21 @@ export class WorkflowRepository
   }
 
   /**
+   * Get workflow by slug
+   */
+  async getBySlug(slug: string): Promise<Workflow | null> {
+    const document = await this.findOne({ slug });
+    if (!document) {
+      return null;
+    }
+    return this.processor.process(document);
+  }
+
+  /**
    * Get workflow by category and slug
    */
   async getByCategoryAndSlug(category: string, slug: string): Promise<Workflow | null> {
-    const document = await this.findOne({ category, slug });
+    const document = await this.findOne({ category: category as Workflow['category'], slug });
     if (!document) {
       return null;
     }
@@ -90,7 +101,7 @@ export class WorkflowRepository
    * Get workflows by category
    */
   async getByCategory(category: string): Promise<Workflow[]> {
-    const documents = await this.find({ category });
+    const documents = await this.find({ category: category as Workflow['category'] });
     return this.processor.processMany(documents);
   }
 
@@ -98,7 +109,7 @@ export class WorkflowRepository
    * Get workflows by audience
    */
   async getByAudience(audience: string): Promise<Workflow[]> {
-    const documents = await this.find({ audience: { $in: [audience] } });
+    const documents = await this.find({ audience: { $in: [audience as Workflow['audience'][0]] } });
     return this.processor.processMany(documents);
   }
 
