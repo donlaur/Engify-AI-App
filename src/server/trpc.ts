@@ -88,11 +88,23 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
  * Admin procedure - requires admin role
  */
 export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  // TODO: Check if user has admin role
-  // const user = await getUserById(ctx.session.user.id);
-  // if (user.role !== 'admin' && user.role !== 'owner') {
-  //   throw new TRPCError({ code: 'FORBIDDEN' });
-  // }
+  // Check if user has admin role
+  const { getUserService } = await import('@/lib/di/Container');
+  const userService = getUserService();
+  const user = await userService.getUserById(ctx.session.user.id);
+
+  if (!user) {
+    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not found' });
+  }
+
+  // Allow super_admin, org_admin, admin, and owner roles
+  const adminRoles = ['super_admin', 'org_admin', 'admin', 'owner'];
+  if (!adminRoles.includes(user.role)) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Admin role required'
+    });
+  }
 
   return next({ ctx });
 });

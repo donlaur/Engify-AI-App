@@ -131,6 +131,7 @@
     "@trpc/react-query": "^10.45.0",
     "@trpc/server": "^10.45.0",
     "@types/uuid": "^11.0.0",
+    "@upstash/qstash": "^2.8.4",
     "@upstash/redis": "^1.35.6",
     "@vercel/analytics": "^1.4.1",
     "@vercel/kv": "^3.0.0",
