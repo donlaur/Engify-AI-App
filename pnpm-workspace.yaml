@@ -73,7 +73,7 @@ catalogs:
   database:
     mongodb: ^6.3.0
     '@prisma/client': ^6.18.0
-    prisma: ^6.18.0
+    prisma: ^6.19.0
 
   # AI/ML Provider SDKs
   ai:
