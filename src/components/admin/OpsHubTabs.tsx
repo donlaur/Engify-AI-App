@@ -10,6 +10,7 @@ import { PromptManagementPanel } from './PromptManagementPanel';
 import { PatternManagementPanel } from './PatternManagementPanel';
 import { UserManagementPanel } from './UserManagementPanel';
 import { SystemSettingsPanel } from './SystemSettingsPanel';
+import { DeadLetterQueuePanel } from './DeadLetterQueuePanel';
 
 export function OpsHubTabs() {
   const [activeTab, setActiveTab] = useState('content');
@@ -32,7 +33,7 @@ export function OpsHubTabs() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="content" className="flex items-center gap-2">
             <Icons.fileText className="h-4 w-4" />
             Content
@@ -48,6 +49,10 @@ export function OpsHubTabs() {
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Icons.users className="h-4 w-4" />
             Users
+          </TabsTrigger>
+          <TabsTrigger value="queue" className="flex items-center gap-2">
+            <Icons.alertCircle className="h-4 w-4" />
+            DLQ
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Icons.settings className="h-4 w-4" />
@@ -73,6 +78,11 @@ export function OpsHubTabs() {
         {/* Users Tab */}
         <TabsContent value="users" className="space-y-4">
           <UserManagementPanel />
+        </TabsContent>
+
+        {/* Dead Letter Queue Tab */}
+        <TabsContent value="queue" className="space-y-4">
+          <DeadLetterQueuePanel />
         </TabsContent>
 
         {/* Settings Tab */}

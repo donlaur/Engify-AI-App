@@ -22,10 +22,8 @@ export interface Favorite {
 export class FavoriteService extends BaseService<Favorite> {
   constructor() {
     // Provide minimal placeholder schema for tests
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const schema = {} as unknown as import('zod').ZodSchema<Favorite>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    super('favorites', schema as any);
+    super('favorites', schema);
   }
 
   /**

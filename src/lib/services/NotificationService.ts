@@ -27,10 +27,8 @@ export interface Notification {
 export class NotificationService extends BaseService<Notification> {
   constructor() {
     // Provide minimal placeholder schema for tests; real validation occurs elsewhere
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const schema = {} as unknown as import('zod').ZodSchema<Notification>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    super('notifications', schema as any);
+    super('notifications', schema);
   }
 
   /**

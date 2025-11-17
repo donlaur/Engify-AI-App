@@ -97,8 +97,10 @@ export class PromptService {
     });
 
     if (duplicateCheck.isDuplicate) {
-      const duplicateError = new Error('Duplicate prompt detected');
-      (duplicateError as any).duplicateMatches = duplicateCheck.matches;
+      const duplicateError = new Error('Duplicate prompt detected') as Error & {
+        duplicateMatches?: typeof duplicateCheck.matches;
+      };
+      duplicateError.duplicateMatches = duplicateCheck.matches;
       throw duplicateError;
     }
 

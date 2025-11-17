@@ -44,7 +44,9 @@ function GoogleAnalyticsTracking() {
         page_path: url,
       });
     }
-  }, [pathname, searchParams, GA_MEASUREMENT_ID]);
+    // GA_MEASUREMENT_ID is a constant and doesn't need to be in deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, searchParams]);
 
   return null;
 }

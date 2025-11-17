@@ -111,6 +111,10 @@ export interface ApiKeyAlertTemplateData extends TemplateData {
   threshold: number;
   period: 'daily' | 'weekly' | 'monthly';
   dashboardUrl: string;
+  percentage?: number; // Percentage of quota used
+  thresholdLevel?: 50 | 80 | 90 | 100; // Which threshold was reached
+  quota?: number; // Total quota/limit
+  recommendedAction?: string; // Suggested action for user
 }
 
 /**

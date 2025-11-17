@@ -110,13 +110,13 @@ export default function CodeGenerationGuidePage() {
             <p className="lead">
               Code generation is one of the most common use cases for AI
               assistants, but getting production-ready code requires more than
-              just asking "write me a function." Effective prompt engineering
+              just asking &quot;write me a function.&quot; Effective prompt engineering
               transforms basic code requests into reliable, maintainable,
               production-quality implementations.
             </p>
             <p>
               This guide covers the essential patterns and techniques for code
-              generation, from simple functions to complex systems. You'll learn
+              generation, from simple functions to complex systems. You&apos;ll learn
               how to specify requirements, handle edge cases, and ensure code
               quality through effective prompting.
             </p>
@@ -335,7 +335,7 @@ Optimize for:
           </h2>
           <div className="prose prose-lg dark:prose-invert max-w-none">
             <h3 className="text-2xl font-semibold mt-8 mb-4">
-              ✅ Do's
+              ✅ Do&apos;s
             </h3>
             <ul>
               <li>
@@ -361,23 +361,23 @@ Optimize for:
             </ul>
 
             <h3 className="text-2xl font-semibold mt-8 mb-4">
-              ❌ Don'ts
+              ❌ Don&apos;ts
             </h3>
             <ul>
               <li>
-                <strong>Don't Assume:</strong> Don't assume the AI knows your
+                <strong>Don&apos;t Assume:</strong> Don&apos;t assume the AI knows your
                 codebase structure or conventions
               </li>
               <li>
-                <strong>Don't Skip Validation:</strong> Always request input
+                <strong>Don&apos;t Skip Validation:</strong> Always request input
                 validation and error handling
               </li>
               <li>
-                <strong>Don't Ignore Security:</strong> Explicitly request
+                <strong>Don&apos;t Ignore Security:</strong> Explicitly request
                 security best practices
               </li>
               <li>
-                <strong>Don't Skip Documentation:</strong> Ask for comments and
+                <strong>Don&apos;t Skip Documentation:</strong> Ask for comments and
                 documentation
               </li>
             </ul>

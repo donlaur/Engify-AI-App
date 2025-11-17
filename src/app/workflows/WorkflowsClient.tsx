@@ -102,7 +102,7 @@ export function WorkflowsClient({
 
   // Filter workflows using useMemo to prevent recalculations
   const filteredWorkflows = useMemo(() => {
-    let filtered = initialWorkflows.filter((workflow) => {
+    const filtered = initialWorkflows.filter((workflow) => {
       const matchesSearch =
         workflow.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         workflow.problemStatement.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -112,7 +112,8 @@ export function WorkflowsClient({
       const matchesCategory =
         selectedCategory === 'all' || workflow.category === selectedCategory;
       const matchesAudience =
-        selectedAudience === 'all' || workflow.audience.includes(selectedAudience as any);
+        selectedAudience === 'all' ||
+        (selectedAudience !== 'all' && workflow.audience.includes(selectedAudience as any));
 
       return matchesSearch && matchesCategory && matchesAudience;
     });
@@ -281,7 +282,8 @@ export function WorkflowsClient({
                 onClick={() => {
                   setSelectedAudience(audience);
                   if (audience !== 'all') {
-                    trackFilterUsage('audience' as any, audience, {
+                    // Track as 'category' type since 'audience' is not in the filterType union
+                    trackFilterUsage('category', audience, {
                       result_count: filteredWorkflows.length,
                     });
                   }

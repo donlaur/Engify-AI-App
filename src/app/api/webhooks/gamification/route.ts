@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Audit log
     await logAuditEvent({
       userId,
-      eventType: 'user.gamification.xp_awarded' as any,
+      eventType: 'user.updated',
       action: 'gamification.xp_awarded',
       metadata: {
         action,

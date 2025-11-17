@@ -69,10 +69,10 @@ export default async function LibraryPage() {
 
   // Calculate stats from actual prompts (more reliable than cache during active filter rollout)
   const uniqueCategories = [...new Set(sortedPrompts.map((p) => p.category).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b)); // Alphabetical sort
-  
+    .sort((a, b) => (a as string).localeCompare(b as string)); // Alphabetical sort
+
   const uniqueRoles = [...new Set(sortedPrompts.map((p) => p.role).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b)); // Alphabetical sort
+    .sort((a, b) => (a as string).localeCompare(b as string)); // Alphabetical sort
 
   // Calculate category counts from actual prompts
   const categoryStats = sortedPrompts.reduce((acc, prompt) => {
@@ -247,13 +247,13 @@ export default async function LibraryPage() {
 
           {/* Client-side filtering component */}
           <LibraryClient
-            initialPrompts={sortedPrompts as never}
+            initialPrompts={sortedPrompts as never as any}
             categoryStats={categoryStats}
             roleStats={roleStats}
             patternStats={patternStats}
-            uniqueCategories={uniqueCategories}
-            uniqueRoles={uniqueRoles}
-            uniquePatterns={uniquePatterns}
+            uniqueCategories={uniqueCategories as string[]}
+            uniqueRoles={uniqueRoles as string[]}
+            uniquePatterns={uniquePatterns as string[]}
           />
         </div>
       </MainLayout>

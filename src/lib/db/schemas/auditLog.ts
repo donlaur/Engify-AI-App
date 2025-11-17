@@ -83,7 +83,7 @@ export const AuditLogSchema = z.object({
   
   // Event details
   action: z.string(), // Human-readable action description
-  metadata: z.record(z.unknown()).optional(), // Additional context
+  metadata: z.record(z.string(), z.unknown()).optional(), // Additional context
   
   // Result
   success: z.boolean(),

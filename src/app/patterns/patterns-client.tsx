@@ -199,8 +199,8 @@ export function PatternsClient({
           <div>
             <h3 className="mb-2 text-lg font-semibold">🧩 Cognitive</h3>
             <p className="text-sm text-muted-foreground">
-              Advanced reasoning patterns. Chain-of-Thought, Cognitive Verifier, and techniques 
-              that improve AI's problem-solving capabilities.
+              Advanced reasoning patterns. Chain-of-Thought, Cognitive Verifier, and techniques
+              that improve AI&apos;s problem-solving capabilities.
             </p>
           </div>
           <div>

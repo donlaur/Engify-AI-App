@@ -192,7 +192,7 @@ export default async function CategoryPage({
       <CategoryPageClient
         category={category}
         categoryInfo={categoryInfo}
-        categoryPrompts={categoryPrompts as any}
+        categoryPrompts={categoryPrompts as any as any}
       />
     </>
   );

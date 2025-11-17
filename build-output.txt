@@ -1,43 +1,5 @@
 
-> engify-ai-app@1.0.0 build /home/user/Engify-AI-App
+> engify-ai-app@1.0.0 build
 > next build
 
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-
-   ▲ Next.js 15.5.6
-   - Experiments (use with caution):
-     · clientTraceMetadata
-
-   Creating an optimized production build ...
-<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (185kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
-<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (139kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
- ⚠ Compiled with warnings in 2.7min
-
-./node_modules/.pnpm/vite@7.1.12_@types+node@24.9.2_jiti@1.21.7_terser@5.44.0_tsx@4.20.6_yaml@2.8.1/node_modules/vite/dist/node/module-runner.js
-Critical dependency: the request of a dependency is an expression
-
-Import trace for requested module:
-./node_modules/.pnpm/vite@7.1.12_@types+node@24.9.2_jiti@1.21.7_terser@5.44.0_tsx@4.20.6_yaml@2.8.1/node_modules/vite/dist/node/module-runner.js
-./node_modules/.pnpm/vitest@4.0.5_@types+debug@4.1.12_@types+node@24.9.2_@vitest+ui@4.0.5_jiti@1.21.7_jsdom@_5b1e1749a47dd4ccc9c7fae76beacf80/node_modules/vitest/dist/index.js
-./src/lib/di/Container.ts
-./src/app/api/v2/users/route.ts
-
-   Skipping linting
-   Checking validity of types ...
-Failed to compile.
-
-./src/components/features/LibraryClient.tsx:18:1
-Type error: All imports in import declaration are unused.
-
-[0m [90m 16 |[39m [36mimport[39m { [33mBadge[39m } [36mfrom[39m [32m'@/components/ui/badge'[39m[33m;[39m
- [90m 17 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[33m;[39m
-[31m[1m>[22m[39m[90m 18 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m } [36mfrom[39m [32m'@/components/ui/card'[39m[33m;[39m
- [90m    |[39m [31m[1m^[22m[39m
- [90m 19 |[39m [36mimport[39m {
- [90m 20 |[39m   [33mSelect[39m[33m,[39m
- [90m 21 |[39m   [33mSelectContent[39m[33m,[39m[0m
-Next.js build worker exited with code: 1 and signal: null
- ELIFECYCLE  Command failed with exit code 1.
+sh: 1: next: not found

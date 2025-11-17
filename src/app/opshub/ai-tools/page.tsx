@@ -56,6 +56,8 @@ export default function AIToolsAdminPage() {
   // Load tools from database
   useEffect(() => {
     loadTools();
+    // loadTools is only called once on mount - adding it to deps would cause unnecessary re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadTools() {
@@ -357,7 +359,7 @@ export default function AIToolsAdminPage() {
                 No AI tools found in the database. To get started:
               </p>
               <ol className="list-decimal list-inside space-y-2 text-sm text-blue-600 dark:text-blue-300">
-                <li>Click <strong>"Add Tool"</strong> to manually add a new tool</li>
+                <li>Click <strong>&quot;Add Tool&quot;</strong> to manually add a new tool</li>
                 <li>Or check if tools need to be migrated from static config</li>
               </ol>
               <div className="flex gap-2 mt-4">

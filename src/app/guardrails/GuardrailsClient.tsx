@@ -80,7 +80,7 @@ export function GuardrailsClient({
 
   // Filter guardrails using useMemo
   const filteredGuardrails = useMemo(() => {
-    let filtered = initialGuardrails.filter((guardrail) => {
+    const filtered = initialGuardrails.filter((guardrail) => {
       const matchesSearch =
         guardrail.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         guardrail.problemStatement.toLowerCase().includes(searchQuery.toLowerCase()) ||

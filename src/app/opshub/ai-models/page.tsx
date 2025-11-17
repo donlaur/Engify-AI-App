@@ -23,6 +23,8 @@ export default function AIModelsAdminPage() {
   // Load models from database
   useEffect(() => {
     loadModels();
+    // loadModels is only called once on mount - adding it to deps would cause unnecessary re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadModels() {
@@ -255,8 +257,8 @@ export default function AIModelsAdminPage() {
                 No AI models found in the database. To get started:
               </p>
               <ol className="list-decimal list-inside space-y-2 text-sm text-blue-600 dark:text-blue-300">
-                <li>Click <strong>"Migrate Static Config"</strong> to import models from <code>src/lib/config/ai-models.ts</code></li>
-                <li>Or click <strong>"Sync from Providers"</strong> to fetch the latest models from provider APIs</li>
+                <li>Click <strong>&quot;Migrate Static Config&quot;</strong> to import models from <code>src/lib/config/ai-models.ts</code></li>
+                <li>Or click <strong>&quot;Sync from Providers&quot;</strong> to fetch the latest models from provider APIs</li>
               </ol>
               <div className="flex gap-2 mt-4">
                 <Button onClick={migrateStaticModels} disabled={syncing}>
@@ -451,7 +453,7 @@ export default function AIModelsAdminPage() {
           </CardHeader>
           <CardContent>
             <ol className="space-y-2 text-sm list-decimal list-inside">
-              <li>Check each provider's docs for new/updated models (links above)</li>
+              <li>Check each provider&apos;s docs for new/updated models (links above)</li>
               <li>Update <code className="bg-muted px-1 py-0.5 rounded">src/lib/config/ai-models.ts</code> with correct model IDs</li>
               <li>Update pricing (check provider pricing pages)</li>
               <li>Mark old models as deprecated, add replacementModel</li>

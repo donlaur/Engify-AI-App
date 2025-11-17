@@ -15,7 +15,7 @@ const RAGQuerySchema = z.object({
   query: z.string().min(1, 'Query is required'),
   collection: z.string().default('knowledge_base'),
   top_k: z.number().min(1).max(20).default(5),
-  filter: z.record(z.any()).optional(),
+  filter: z.record(z.string(), z.any()).optional(),
 });
 
 const RAGResponseSchema = z.object({
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: ERROR_MESSAGES.INVALID_INPUT,
-          details: error.errors,
+          details: error.issues,
           results: [],
         },
         { status: 400 }

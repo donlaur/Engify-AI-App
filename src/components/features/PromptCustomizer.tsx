@@ -115,7 +115,7 @@ export function PromptCustomizer({ promptId, promptTitle, originalContent, onCop
     const lines = text.split('\n');
     let offset = 0;
 
-    lines.forEach((line) => {
+    lines.forEach((line, index) => {
       const lineStart = offset;
       const lineEnd = offset + line.length;
 
@@ -226,7 +226,7 @@ export function PromptCustomizer({ promptId, promptTitle, originalContent, onCop
       const lines = content.split('\n');
       return lines.map((line, index) => {
         const isPlaceholder = placeholders.some(
-          () => content.substring(0, content.indexOf(line)).split('\n').length - 1 === index
+          (_p) => content.substring(0, content.indexOf(line)).split('\n').length - 1 === index
         );
         
         if (isPlaceholder) {
@@ -258,7 +258,7 @@ export function PromptCustomizer({ promptId, promptTitle, originalContent, onCop
               <CardDescription>
                 {isEditing
                   ? 'Edit the prompt below. Placeholder sections are highlighted. You can customize any part and save it to your collection.'
-                  : 'Click "Customize" to edit this prompt and save your personalized version.'}
+                  : 'Click &quot;Customize&quot; to edit this prompt and save your personalized version.'}
               </CardDescription>
             </div>
             {!isEditing && (

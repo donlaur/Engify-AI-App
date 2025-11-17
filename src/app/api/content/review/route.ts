@@ -38,12 +38,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // For now, require admin role
-    // TODO: Add proper RBAC check
-    const isAdmin = session.user.email?.includes('admin') || 
-                    session.user.role === 'admin';
-    
-    if (!isAdmin) {
+    // RBAC check: Require admin or org_admin role
+    const { getUserService } = await import('@/lib/di/Container');
+    const userService = getUserService();
+    const user = await userService.getUserById(session.user.id);
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 401 });
+    }
+
+    // Allow super_admin, org_admin, admin, and owner roles
+    const adminRoles = ['super_admin', 'org_admin', 'admin', 'owner'];
+    if (!adminRoles.includes(user.role)) {
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
@@ -118,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: error.issues },
         { status: 400 }
       );
     }
