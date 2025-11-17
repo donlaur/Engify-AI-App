@@ -6,7 +6,7 @@
  */
 
 import { RedisMessageQueue } from '@/lib/messaging/queues/RedisMessageQueue';
-import { IMessage, IMessageHandler, MessageResult } from '@/lib/messaging/types';
+import { IMessage, IMessageHandler, MessageResult, MessageType } from '@/lib/messaging/types';
 import { logger } from '@/lib/logging/logger';
 import { ContentGeneratorFactory, GeneratorType } from '@/lib/factories/ContentGeneratorFactory';
 import { ContentGenerationParams } from '@/lib/services/content/interfaces/IContentGenerator';
@@ -57,15 +57,16 @@ export interface ContentGenerationJobStatus {
  * Processes content generation jobs from the queue
  */
 class ContentGenerationJobHandler implements IMessageHandler {
-  readonly messageType = 'content.generation.batch' as const;
+  readonly messageType: MessageType = 'job';
   handlerName = 'ContentGenerationJobHandler';
   private jobStatuses = new Map<string, ContentGenerationJobStatus>();
 
   canHandle(message: IMessage): boolean {
-    return message.type === 'content.generation.batch';
+    return message.type === 'job' && (message.payload as any)?.type === 'content.generation.batch';
   }
 
   async handle(message: IMessage): Promise<MessageResult> {
+    const startTime = Date.now();
     const payload = message.payload as ContentGenerationJobPayload;
 
     try {
@@ -168,9 +169,12 @@ class ContentGenerationJobHandler implements IMessageHandler {
         failed: jobStatus.failedTopics,
       });
 
+      const processingTime = Date.now() - startTime;
       return {
         success: jobStatus.status !== 'failed',
         data: jobStatus,
+        processingTime,
+        timestamp: new Date(),
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -189,9 +193,12 @@ class ContentGenerationJobHandler implements IMessageHandler {
         this.jobStatuses.set(payload.jobId, jobStatus);
       }
 
+      const processingTime = Date.now() - startTime;
       return {
         success: false,
         error: errorMessage,
+        processingTime,
+        timestamp: new Date(),
       };
     }
   }
@@ -220,10 +227,16 @@ export class ContentGenerationJobQueueService {
       'content-generation',
       'redis',
       {
+        name: 'content-generation',
+        type: 'redis',
         maxRetries: 3,
+        retryDelay: 1000,
         visibilityTimeout: 5000,
         batchSize: 5,
-        deadLetterQueue: true,
+        concurrency: 5,
+        enableDeadLetter: true,
+        enableMetrics: true,
+        deadLetterQueue: 'content-generation-dlq',
       }
     );
 
@@ -260,9 +273,9 @@ export class ContentGenerationJobQueueService {
   }): Promise<string> {
     const jobId = `cg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    const message: IMessage = {
-      id: jobId,
-      type: 'content.generation.batch',
+      const message: IMessage = {
+        id: jobId,
+        type: 'job',
       priority: 'normal',
       status: 'pending',
       payload: {
