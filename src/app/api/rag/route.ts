@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: ERROR_MESSAGES.INVALID_INPUT,
-          details: error.errors,
+          details: error.issues,
           results: [],
         },
         { status: 400 }

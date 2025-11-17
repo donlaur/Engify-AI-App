@@ -134,7 +134,7 @@ function validateEnv(): Env {
     console.error(JSON.stringify(parsed.error.format(), null, 2));
 
     // Provide helpful error messages
-    const errors = parsed.error.errors.map((err) => {
+    const errors = parsed.error.issues.map((err) => {
       const path = err.path.join('.');
       return `  - ${path}: ${err.message}`;
     });

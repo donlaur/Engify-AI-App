@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const validationResult = promptIdsSchema.safeParse(promptIdsParam);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid promptIds format', details: validationResult.error.errors },
+        { error: 'Invalid promptIds format', details: validationResult.error.issues },
         { status: 400 }
       );
     }
