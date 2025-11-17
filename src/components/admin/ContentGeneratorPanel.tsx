@@ -56,7 +56,6 @@ export function ContentGeneratorPanel() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
-  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
 
   // Poll for job status
   useEffect(() => {
@@ -72,7 +71,6 @@ export function ContentGeneratorPanel() {
             // Stop polling if job is complete
             if (data.job.status !== 'processing') {
               clearInterval(interval);
-              setPollingInterval(null);
 
               toast({
                 title: 'Job Complete',
@@ -85,8 +83,6 @@ export function ContentGeneratorPanel() {
           console.error('Error polling job status:', error);
         }
       }, 3000); // Poll every 3 seconds
-
-      setPollingInterval(interval);
 
       return () => clearInterval(interval);
     }
