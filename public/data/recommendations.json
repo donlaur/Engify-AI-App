@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "generatedAt": "2025-11-15T06:34:11.246Z",
   "totalRecommendations": 23,
   "recommendations": [
@@ -57,7 +57,14 @@
         "engineering-managers"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-02-implement-guardrails-for-critical-code-paths",
@@ -118,7 +125,14 @@
         "cto"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-03-choose-ai-model-based-on-task-requirements",
@@ -172,7 +186,14 @@
         "architects"
       ],
       "priority": "medium",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-04-enforce-small-prs-for-ai-code",
@@ -251,7 +272,14 @@
         "qa"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-05-structure-reusable-prompt-library",
@@ -306,7 +334,14 @@
         "vp-engineering"
       ],
       "priority": "medium",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-06-always-validate-ai-suggestions",
@@ -373,7 +408,14 @@
         "qa"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-07-use-tdd-with-ai-generated-code",
@@ -429,7 +471,14 @@
         "engineering-managers"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-08-establish-ai-governance-before-scaling",
@@ -488,7 +537,14 @@
         "engineering-managers"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-09-focus-ai-on-strategic-tasks",
@@ -543,7 +599,14 @@
         "engineering-managers"
       ],
       "priority": "medium",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-10-monitor-ai-costs-and-usage",
@@ -597,7 +660,14 @@
         "engineering-managers"
       ],
       "priority": "medium",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "designate-ai-champions-to-scale-adoption",
@@ -673,7 +743,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-11-designate-ai-champions-to-scale-adoption"
+      "id": "recommendation-11-designate-ai-champions-to-scale-adoption",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "establish-ai-community-of-practice",
@@ -742,7 +819,14 @@
       ],
       "priority": "medium",
       "status": "published",
-      "id": "recommendation-12-establish-ai-community-of-practice"
+      "id": "recommendation-12-establish-ai-community-of-practice",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "implement-ai-literacy-framework",
@@ -819,7 +903,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-13-implement-ai-literacy-framework"
+      "id": "recommendation-13-implement-ai-literacy-framework",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "mandate-secure-prompt-engineering",
@@ -898,7 +989,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-14-mandate-secure-prompt-engineering"
+      "id": "recommendation-14-mandate-secure-prompt-engineering",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "adopt-ai-tool-evaluation-matrix",
@@ -967,7 +1065,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-15-adopt-ai-tool-evaluation-matrix"
+      "id": "recommendation-15-adopt-ai-tool-evaluation-matrix",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "standardize-on-enterprise-ai-tools",
@@ -1038,7 +1143,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-16-standardize-on-enterprise-ai-tools"
+      "id": "recommendation-16-standardize-on-enterprise-ai-tools",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "integrate-ai-analysis-in-cicd",
@@ -1113,7 +1225,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-17-integrate-ai-analysis-in-cicd"
+      "id": "recommendation-17-integrate-ai-analysis-in-cicd",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "use-ai-for-test-generation-and-maintenance",
@@ -1184,7 +1303,14 @@
       ],
       "priority": "medium",
       "status": "published",
-      "id": "recommendation-18-use-ai-for-test-generation-and-maintenance"
+      "id": "recommendation-18-use-ai-for-test-generation-and-maintenance",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "leverage-ai-for-pr-summaries-release-notes",
@@ -1248,7 +1374,14 @@
       ],
       "priority": "medium",
       "status": "published",
-      "id": "recommendation-19-leverage-ai-for-pr-summaries-release-notes"
+      "id": "recommendation-19-leverage-ai-for-pr-summaries-release-notes",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "augment-code-review-with-ai-checklist",
@@ -1322,7 +1455,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-20-augment-code-review-with-ai-checklist"
+      "id": "recommendation-20-augment-code-review-with-ai-checklist",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "implement-dlp-and-genai-firewalls",
@@ -1387,7 +1527,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-21-implement-dlp-and-genai-firewalls"
+      "id": "recommendation-21-implement-dlp-and-genai-firewalls",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "enforce-governance-over-sensitive-data-in-prompts",
@@ -1460,7 +1607,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-22-enforce-governance-over-sensitive-data-in-prompts"
+      "id": "recommendation-22-enforce-governance-over-sensitive-data-in-prompts",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "mitigate-ip-and-copyright-risks-from-ai",
@@ -1539,7 +1693,14 @@
       ],
       "priority": "medium",
       "status": "published",
-      "id": "recommendation-23-mitigate-ip-and-copyright-risks-from-ai"
+      "id": "recommendation-23-mitigate-ip-and-copyright-risks-from-ai",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     }
   ]
 }
