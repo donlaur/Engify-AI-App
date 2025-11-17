@@ -138,7 +138,7 @@ export function enforceProductionSecrets(config: Record<string, unknown>): void 
   const criticalSecrets = [
     'NEXTAUTH_SECRET',
     'MONGODB_URI',
-    'API_KEY_ENCRYPTION_KEY',
+    // API_KEY_ENCRYPTION_KEY is optional - removed from critical secrets
   ];
 
   const missingSecrets = criticalSecrets.filter((key) => {
@@ -204,7 +204,7 @@ export function isRequiredKey(key: string, environment: Environment): boolean {
   const productionRequired = [
     ...alwaysRequired,
     'NEXT_PUBLIC_APP_URL',
-    'API_KEY_ENCRYPTION_KEY',
+    // API_KEY_ENCRYPTION_KEY is optional
   ];
 
   if (environment === 'production') {
