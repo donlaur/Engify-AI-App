@@ -215,7 +215,7 @@ export function SystemSettingsPanel() {
           <Input
             id="value"
             type="number"
-            value={editingSetting.value}
+            value={typeof editingSetting.value === 'number' ? editingSetting.value : ''}
             onChange={(e) =>
               setEditingSetting({
                 ...editingSetting,

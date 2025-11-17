@@ -19,7 +19,8 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "sentry.edge.config.ts",
-    "sentry.server.config.ts"
+    "sentry.server.config.ts",
+    "scripts/content/audit-prompts-patterns.ts"
   ],
   "exclude": [
     "node_modules",

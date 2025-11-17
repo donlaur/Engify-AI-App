@@ -64,9 +64,10 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
     tool: 'Codeium',
     baseUrl: 'https://codeium.com',
     referralUrl: 'https://codeium.com/referral',
+    affiliateCode: 'engify',
     status: 'active',
     commission: 'Bonus add-on prompt credits',
-    notes: 'Referral program available for paid account holders - earn bonus credits for successful referrals',
+    notes: 'Referral program available for paid account holders - earn bonus credits for successful referrals. Sign up at codeium.com to get referral link.',
   },
 
   tabnine: {
@@ -194,20 +195,35 @@ export function getToolLink(toolKey: string): string {
 
 /**
  * Track affiliate click for analytics
+ * Now with server-side tracking for persistent storage
  */
-export function trackAffiliateClick(toolKey: string) {
+export function trackAffiliateClick(toolKey: string, source?: string) {
   const link = affiliateLinks[toolKey];
   if (!link) return;
 
   if (typeof window !== 'undefined') {
     const eventData = {
-      tool: toolKey,
-      tool_name: link.tool,
+      toolKey,
+      toolName: link.tool,
       url: getToolLink(toolKey),
-      has_referral: !!link.referralUrl,
+      hasReferral: !!link.referralUrl,
       status: link.status,
       commission: link.commission,
+      source,
     };
+
+    // Track with server-side API for persistent storage
+    fetch('/api/affiliate/click', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData),
+      // Don't wait for response - fire and forget
+    }).catch((error) => {
+      // Silent fail - don't break user experience
+      console.error('Server-side affiliate tracking failed:', error);
+    });
 
     // Track with Google Analytics (gtag)
     if (typeof window.gtag === 'function') {
