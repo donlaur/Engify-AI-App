@@ -17,16 +17,14 @@ export type RagSearchRequest = z.infer<typeof RagSearchRequestSchema>;
 
 export const RagSearchResultSchema = z.object({
   success: z.boolean(),
-  results: z
-    .array(
-      z.object({
-        _id: z.string(),
-        title: z.string().optional(),
-        content: z.string(),
-        score: z.number().optional(),
-      })
-    )
-    .default([]),
+  results: z.array(
+    z.object({
+      _id: z.string(),
+      title: z.string().optional(),
+      content: z.string(),
+      score: z.number().optional(),
+    })
+  ),
 });
 export type RagSearchResult = z.infer<typeof RagSearchResultSchema>;
 

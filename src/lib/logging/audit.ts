@@ -36,6 +36,7 @@ export type AuditAction =
   | 'usage_alert_created'
   | 'usage_alert_triggered'
   | 'usage_alert_deleted'
+  | 'notification_sent'
   | 'prompt_executed'
   | 'rate_limit_exceeded'
   | 'validation_failed'

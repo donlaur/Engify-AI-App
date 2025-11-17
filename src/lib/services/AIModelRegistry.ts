@@ -110,6 +110,9 @@ export async function migrateStaticModelsToDb(): Promise<{ created: number; skip
       lastVerified: staticModel.lastVerified ? new Date(staticModel.lastVerified) : new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
+      isDefault: false,
+      tags: [],
+      parameterFailures: [],
     };
 
     await aiModelService.upsert(dbModel);

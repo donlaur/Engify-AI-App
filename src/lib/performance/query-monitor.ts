@@ -94,7 +94,7 @@ export class QueryMonitor {
     options?: FindOptions
   ): Promise<{ result: T[]; metrics: QueryMetrics }> {
     if (!this.enabled) {
-      const result = await collection.find(filter, options).toArray();
+      const result = await collection.find(filter, options).toArray() as T[];
       return { result, metrics: this.createEmptyMetrics('find', collection.collectionName) };
     }
 
@@ -106,7 +106,7 @@ export class QueryMonitor {
     const executionStats = this.parseExecutionStats(explain);
 
     timer.start();
-    const result = await collection.find(filter, options).toArray();
+    const result = await collection.find(filter, options).toArray() as T[];
     const duration = timer.stop();
 
     const metrics: QueryMetrics = {
@@ -275,9 +275,9 @@ export class QueryMonitor {
   /**
    * Parse aggregate execution stats
    */
-  private parseAggregateStats(explain: Document[]): ExecutionStats {
+  private parseAggregateStats(_explain: Document[]): ExecutionStats {
     // Aggregate explain is different, extract what we can
-    const firstStage = explain[0] || {};
+    // const firstStage = explain[0] || {};
     return {
       executionTimeMillis: 0,
       totalKeysExamined: 0,

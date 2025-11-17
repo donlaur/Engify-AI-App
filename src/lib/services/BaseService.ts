@@ -93,7 +93,7 @@ export abstract class BaseService<T extends { _id?: ObjectId }> {
       : (data as T);
 
     const collection = await this.getCollection();
-    const result = await collection.insertOne(validated as OptionalId<T>);
+    const result = await collection.insertOne(validated as any);
 
     return {
       ...validated,
@@ -121,7 +121,7 @@ export abstract class BaseService<T extends { _id?: ObjectId }> {
 
     const result = await collection.findOneAndUpdate(
       { _id: new ObjectId(id) } as Filter<T>,
-      { $set: updateDoc },
+      { $set: updateDoc } as any,
       { returnDocument: 'after' }
     );
 

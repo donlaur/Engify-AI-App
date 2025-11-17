@@ -110,7 +110,8 @@ export class PromptService {
 
     // Check for existing slugs to ensure uniqueness
     const existingPrompts = await this.promptRepository.findAll();
-    const existingSlugs = new Set(existingPrompts.map(p => p.slug).filter(Boolean) as string[]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const existingSlugs = new Set(existingPrompts.map((p: any) => p.slug).filter(Boolean) as string[]);
     
     const slug = promptData.slug || generateUniqueSlug(promptData.title, existingSlugs);
 
@@ -192,8 +193,10 @@ export class PromptService {
       const allPrompts = await this.promptRepository.findAll();
       const existingSlugs = new Set(
         allPrompts
-          .filter(p => p.id !== id) // Exclude current prompt
-          .map(p => p.slug)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((p: any) => p.id !== id) // Exclude current prompt
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((p: any) => p.slug)
           .filter(Boolean) as string[]
       );
       

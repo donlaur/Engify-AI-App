@@ -38,7 +38,7 @@ export class ArticleResearchRepository {
     const db = await getMongoDb();
     const collection = db.collection<ArticleResearch>(ARTICLE_RESEARCH_COLLECTION);
 
-    return collection.findOne({ _id: new ObjectId(id) });
+    return collection.findOne({ _id: new ObjectId(id) } as any);
   }
 
   /**
@@ -66,7 +66,7 @@ export class ArticleResearchRepository {
     const collection = db.collection<ArticleResearch>(ARTICLE_RESEARCH_COLLECTION);
 
     await collection.updateOne(
-      { _id: new ObjectId(id) },
+      { _id: new ObjectId(id) } as any,
       {
         $set: {
           status,
@@ -87,7 +87,7 @@ export class ArticleResearchRepository {
     const collection = db.collection<ArticleResearch>(ARTICLE_RESEARCH_COLLECTION);
 
     await collection.updateOne(
-      { _id: new ObjectId(id) },
+      { _id: new ObjectId(id) } as any,
       {
         $set: {
           generated,
@@ -104,7 +104,7 @@ export class ArticleResearchRepository {
     const db = await getMongoDb();
     const collection = db.collection<ArticleResearch>(ARTICLE_RESEARCH_COLLECTION);
 
-    await collection.deleteOne({ _id: new ObjectId(id) });
+    await collection.deleteOne({ _id: new ObjectId(id) } as any);
   }
 
   /**

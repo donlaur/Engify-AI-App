@@ -149,10 +149,12 @@ export const DEFAULT_PROMPT_MEDIA: PromptMedia = {
 export const PromptTemplateSchema = z.object({
   _id: ObjectIdSchema,
   title: z.string().min(1).max(200),
+  slug: z.string().min(1).max(200).optional(), // URL-friendly identifier
   description: z.string().max(1000),
   content: z.string().min(1),
   category: PromptCategory,
   role: PromptRole,
+  pattern: z.string().nullable().optional(), // Prompt pattern
   tags: z.array(z.string()).default([]),
   difficulty: z
     .enum(['beginner', 'intermediate', 'advanced'])

@@ -429,7 +429,7 @@ export class BenchmarkRunner {
 /**
  * Simple time measurement decorator
  */
-export function measure(target: unknown, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+export function measure(_target: unknown, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
   const originalMethod = descriptor.value;
 
   descriptor.value = async function (...args: unknown[]) {

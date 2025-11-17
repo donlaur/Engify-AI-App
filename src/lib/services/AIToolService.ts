@@ -7,7 +7,7 @@
 import { BaseService } from './BaseService';
 import { AIToolSchema, AITool } from '@/lib/db/schemas/ai-tool';
 
-export class AIToolService extends BaseService<AITool> {
+export class AIToolService extends BaseService<any> {
   constructor() {
     super('ai_tools', AIToolSchema);
   }
@@ -91,7 +91,7 @@ export class AIToolService extends BaseService<AITool> {
       } as AITool);
       return {
         ...tool,
-        _id: result.insertedId,
+        _id: result.insertedId.toString(),
         createdAt: new Date(),
         updatedAt: new Date(),
       } as AITool;
