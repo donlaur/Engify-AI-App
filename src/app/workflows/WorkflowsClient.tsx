@@ -113,7 +113,7 @@ export function WorkflowsClient({
         selectedCategory === 'all' || workflow.category === selectedCategory;
       const matchesAudience =
         selectedAudience === 'all' ||
-        (selectedAudience !== 'all' && workflow.audience.includes(selectedAudience));
+        (selectedAudience !== 'all' && workflow.audience.includes(selectedAudience as any));
 
       return matchesSearch && matchesCategory && matchesAudience;
     });
