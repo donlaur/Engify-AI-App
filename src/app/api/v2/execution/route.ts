@@ -23,7 +23,7 @@ const ExecuteRequestSchema = z.object({
     .enum(['auto', 'streaming', 'batch', 'cache', 'hybrid'])
     .optional(),
   priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 // type ExecuteRequest = z.infer<typeof ExecuteRequestSchema>;

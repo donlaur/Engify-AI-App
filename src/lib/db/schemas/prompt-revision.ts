@@ -35,7 +35,7 @@ export const PromptRevisionSchema = z.object({
     bestPractices: z.array(z.string()).optional(),
   }),
   createdAt: z.date(),
-  metadata: z.record(z.unknown()).optional(), // Additional metadata
+  metadata: z.record(z.string(), z.unknown()).optional(), // Additional metadata
 });
 
 export type PromptRevision = z.infer<typeof PromptRevisionSchema>;

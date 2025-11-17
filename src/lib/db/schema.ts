@@ -126,7 +126,7 @@ const PromptMediaBase = z.object({
   palette: z.array(z.string()).default([]),
   generatedAt: z.date().nullable().default(null),
   source: z.enum(['placeholder', 'replicate', 'manual']).default('placeholder'),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const PromptMediaSchema = PromptMediaBase;
@@ -255,7 +255,7 @@ export const AuditLogSchema = z.object({
   action: z.string().min(1).max(100), // 'user.login', 'prompt.create', etc.
   resource: z.string().max(100).nullable(), // Resource type
   resourceId: z.string().max(100).nullable(), // Resource ID
-  metadata: z.record(z.unknown()).nullable(), // Additional context
+  metadata: z.record(z.string(), z.unknown()).nullable(), // Additional context
   ipAddress: z.string().nullable(),
   userAgent: z.string().nullable(),
   createdAt: z.date(),
@@ -286,7 +286,7 @@ export const WebContentSchema = z.object({
   reviewStatus: z.enum(['pending', 'approved', 'rejected']).default('pending'),
   createdAt: z.date(),
   updatedAt: z.date(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type WebContent = z.infer<typeof WebContentSchema>;
@@ -304,7 +304,7 @@ export const ContentProvenanceSchema = z.object({
   stage: z.string(),
   source: z.string(),
   status: z.enum(['queued', 'success', 'error']),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
   createdAt: z.date(),
 });
 
@@ -335,7 +335,7 @@ export const WorkbenchRunSchema = z.object({
   totalTokens: z.number().int().nonnegative().nullable(),
   promptHash: z.string().nullable(),
   contractVersion: z.number().int().positive(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
   error: z.string().nullable().default(null),
   createdAt: z.date(),
   completedAt: z.date().nullable(),

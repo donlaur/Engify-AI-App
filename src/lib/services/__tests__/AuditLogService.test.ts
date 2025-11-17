@@ -28,7 +28,7 @@ vi.mock('@/lib/db/schemas/auditLog', async () => {
     userAgent: z.string().nullable(),
     requestId: z.string().nullable(),
     action: z.string(),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
     success: z.boolean(),
     errorMessage: z.string().nullable(),
     timestamp: z.date(),
