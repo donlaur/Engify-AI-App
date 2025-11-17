@@ -18,6 +18,48 @@ import {
  * CRUD operations for prompts in OpsHub
  */
 
+/**
+ * Generate a unique slug by appending incremental numbers if collision is detected
+ * @param baseSlug - The base slug to use
+ * @param collection - MongoDB collection to check for collisions
+ * @param excludeId - Optional ObjectId to exclude from collision check (for updates)
+ * @returns Object with slug, success flag, and optional error message
+ */
+async function generateUniqueSlug(
+  baseSlug: string,
+  collection: any,
+  excludeId?: string
+): Promise<{ slug: string; success: boolean; error?: string }> {
+  let finalSlug = baseSlug;
+  let counter = 2;
+  let attempts = 0;
+  const maxAttempts = 100;
+
+  while (attempts < maxAttempts) {
+    const query: Record<string, unknown> = { slug: finalSlug };
+
+    // If excludeId is provided, exclude that document from the search (for updates)
+    if (excludeId) {
+      query._id = { $ne: new ObjectId(excludeId) };
+    }
+
+    const existingSlug = await collection.findOne(query);
+    if (!existingSlug) {
+      return { slug: finalSlug, success: true };
+    }
+
+    finalSlug = `${baseSlug}-${counter}`;
+    counter++;
+    attempts++;
+  }
+
+  return {
+    slug: finalSlug,
+    success: false,
+    error: 'Unable to generate unique slug after 100 attempts',
+  };
+}
+
 // GET: Fetch all prompts (including inactive for admin)
 export async function GET(request: NextRequest) {
   try {
@@ -171,21 +213,22 @@ export async function POST(request: NextRequest) {
 
     // Generate ID and slug
     const promptId = `prompt-${Date.now()}`;
-    const slug =
+    const baseSlug =
       validatedData.slug ||
       sanitizedTitle
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
 
-    // Check for duplicate slug
-    const existingSlug = await collection.findOne({ slug });
-    if (existingSlug) {
+    // Generate unique slug with auto-increment if collision is detected
+    const slugResult = await generateUniqueSlug(baseSlug, collection);
+    if (!slugResult.success) {
       return NextResponse.json(
-        { error: 'Slug already exists. Please choose a different title.' },
-        { status: 400 }
+        { error: slugResult.error },
+        { status: 500 }
       );
     }
+    const slug = slugResult.slug;
 
     const now = new Date();
     const newPrompt = {
@@ -316,6 +359,12 @@ export async function PUT(request: NextRequest) {
     const db = await getDb();
     const collection = db.collection('prompts');
 
+    // Get existing document to check for slug changes
+    const existingDoc = await collection.findOne({ _id: new ObjectId(_id) });
+    if (!existingDoc) {
+      return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
+    }
+
     // Sanitize text fields if present (after validation)
     const sanitizedUpdates: Record<string, unknown> = {
       ...validatedUpdates,
@@ -334,12 +383,43 @@ export async function PUT(request: NextRequest) {
       sanitizedUpdates.content = sanitizeText(validatedUpdates.content);
     }
 
+    // Handle slug uniqueness: regenerate if title is updated (and no explicit slug provided)
+    // or if slug is being directly updated
+    if (validatedUpdates.title && !validatedUpdates.slug) {
+      // Title is being updated but no custom slug provided, so auto-generate from new title
+      const newTitle = sanitizedUpdates.title as string;
+      const autoSlug = newTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      const slugResult = await generateUniqueSlug(autoSlug, collection, _id);
+      if (!slugResult.success) {
+        return NextResponse.json(
+          { error: slugResult.error },
+          { status: 500 }
+        );
+      }
+      sanitizedUpdates.slug = slugResult.slug;
+    } else if (validatedUpdates.slug) {
+      // Slug is being explicitly updated, ensure it's unique (excluding current doc)
+      const slugResult = await generateUniqueSlug(
+        validatedUpdates.slug as string,
+        collection,
+        _id
+      );
+      if (!slugResult.success) {
+        return NextResponse.json(
+          { error: slugResult.error },
+          { status: 500 }
+        );
+      }
+      sanitizedUpdates.slug = slugResult.slug;
+    }
+
     // Increment revision if content changed
     if (validatedUpdates.content) {
-      const existing = await collection.findOne({ _id: new ObjectId(_id) });
-      if (existing) {
-        sanitizedUpdates.currentRevision = (existing.currentRevision || 1) + 1;
-      }
+      sanitizedUpdates.currentRevision = (existingDoc.currentRevision || 1) + 1;
     }
 
     const result = await collection.updateOne(
