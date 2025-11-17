@@ -251,9 +251,9 @@ export default async function LibraryPage() {
             categoryStats={categoryStats}
             roleStats={roleStats}
             patternStats={patternStats}
-            uniqueCategories={uniqueCategories}
-            uniqueRoles={uniqueRoles}
-            uniquePatterns={uniquePatterns}
+            uniqueCategories={uniqueCategories as string[]}
+            uniqueRoles={uniqueRoles as string[]}
+            uniquePatterns={uniquePatterns as string[]}
           />
         </div>
       </MainLayout>
