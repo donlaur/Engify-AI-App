@@ -29,18 +29,40 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: `${APP_URL}/workflows/pain-points`,
       type: 'website',
+      siteName: 'Engify.ai',
+      images: [
+        {
+          url: `${APP_URL}/og-images/default.png`,
+          width: 1200,
+          height: 630,
+          alt: 'AI Development Pain Points',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [`${APP_URL}/og-images/default.png`],
     },
     keywords: [
       'ai development pain points',
       'ai coding problems',
       'ai development challenges',
       'ai assistant failures',
+      'ai coding pitfalls',
+      'ai code issues',
+      'ai failure modes',
+      'production incidents',
+      'ai audit findings',
+      'ai code quality issues',
+      'ai development risks',
+      'common ai mistakes',
+      'ai coding errors',
+      'ai generated code problems',
+      'ai technical debt',
     ],
+    authors: [{ name: 'Donnie Laur' }],
   };
 }
 

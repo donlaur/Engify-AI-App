@@ -37,18 +37,40 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: `${APP_URL}/workflows/recommendations`,
       type: 'website',
+      siteName: 'Engify.ai',
+      images: [
+        {
+          url: `${APP_URL}/og-images/default.png`,
+          width: 1200,
+          height: 630,
+          alt: 'AI Development Recommendations',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [`${APP_URL}/og-images/default.png`],
     },
     keywords: [
       'ai development recommendations',
       'ai best practices',
       'ai strategic guidance',
       'ai workflow recommendations',
+      'ai assisted development',
+      'ai coding best practices',
+      'ai development strategy',
+      'ai tool selection',
+      'ai team structure',
+      'process optimization',
+      'risk mitigation',
+      'ai governance',
+      'ai development workflows',
+      'proactive recommendations',
+      'ai code quality',
     ],
+    authors: [{ name: 'Donnie Laur' }],
   };
 }
 

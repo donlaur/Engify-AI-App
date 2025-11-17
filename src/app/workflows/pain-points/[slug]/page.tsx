@@ -55,13 +55,24 @@ export async function generateMetadata({ params }: PainPointPageProps): Promise<
       description,
       url: `${APP_URL}/workflows/pain-points/${slug}`,
       type: 'article',
+      siteName: 'Engify.ai',
+      images: [
+        {
+          url: `${APP_URL}/og-images/pain-points/${slug}.png`,
+          width: 1200,
+          height: 630,
+          alt: painPoint.title,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [`${APP_URL}/og-images/pain-points/${slug}.png`],
     },
     keywords: allKeywords.length > 0 ? allKeywords : painPoint.keywords || [],
+    authors: [{ name: 'Donnie Laur' }],
   };
 }
 
@@ -83,6 +94,20 @@ export default async function PainPointPage({ params }: PainPointPageProps) {
     headline: painPoint.title,
     description: painPoint.description,
     url: `${APP_URL}/workflows/pain-points/${slug}`,
+    author: {
+      '@type': 'Person',
+      name: 'Donnie Laur',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Engify.ai',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${APP_URL}/logo.png`,
+      },
+    },
+    datePublished: painPoint.datePublished || new Date().toISOString(),
+    dateModified: painPoint.dateModified || new Date().toISOString(),
     about: {
       '@type': 'Thing',
       name: 'AI Development Pain Points',
