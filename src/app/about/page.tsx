@@ -52,7 +52,7 @@ export default async function AboutPage() {
                 effectively.
               </p>
               <p className="text-muted-foreground">
-                Through curated prompts, proven patterns, and gamified learning,
+                Through curated prompts, proven patterns, and structured learning,
                 we help developers at all levels—from junior engineers to
                 CTOs—master the art and science of communicating with AI.
               </p>
