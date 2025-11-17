@@ -10,24 +10,29 @@ import { Separator } from '@/components/ui/separator';
 
 interface CaseStudy {
   title: string;
-  scenario: string;
-  challenge: string;
-  process: string;
-  outcome: string;
-  keyLearning: string;
+  scenario?: string;
+  challenge?: string;
+  context?: string;
+  solution?: string;
+  process?: string;
+  outcome?: string;
+  keyLearning?: string;
+  metrics?: string;
 }
 
 interface RecommendedModel {
   model: string;
-  provider: string;
-  reason: string;
+  provider?: string;
+  reason?: string;
   useCase?: string;
 }
 
 interface Example {
-  title: string;
-  input: string;
-  expectedOutput: string;
+  title?: string;
+  input?: string;
+  output?: string;
+  expectedOutput?: string;
+  description?: string;
 }
 
 interface PromptEnrichmentProps {
@@ -38,8 +43,8 @@ interface PromptEnrichmentProps {
   examples?: Example[];
   bestPractices?: string[];
   whenNotToUse?: string[];
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
-  estimatedTime?: string;
+  difficulty?: 'beginner' | 'intermediate' | 'advanced' | number;
+  estimatedTime?: string | number;
 }
 
 export function PromptEnrichment({
@@ -84,13 +89,16 @@ export function PromptEnrichment({
           {difficulty && (
             <Badge variant="outline" className="text-sm">
               <Icons.star className="mr-1 h-3 w-3" />
-              {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Level
+              {typeof difficulty === 'string'
+                ? `${difficulty.charAt(0).toUpperCase()}${difficulty.slice(1)} Level`
+                : `Level ${difficulty}`
+              }
             </Badge>
           )}
           {estimatedTime && (
             <Badge variant="outline" className="text-sm">
               <Icons.clock className="mr-1 h-3 w-3" />
-              {estimatedTime}
+              {typeof estimatedTime === 'number' ? `${estimatedTime} min` : estimatedTime}
             </Badge>
           )}
         </div>
@@ -131,15 +139,19 @@ export function PromptEnrichment({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     {model.model}
-                    <Badge variant="outline" className="text-xs">
-                      {model.provider}
-                    </Badge>
+                    {model.provider && (
+                      <Badge variant="outline" className="text-xs">
+                        {model.provider}
+                      </Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {model.reason}
-                  </p>
+                  {model.reason && (
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {model.reason}
+                    </p>
+                  )}
                   {model.useCase && (
                     <p className="text-xs text-muted-foreground">
                       <span className="font-medium">Best for:</span> {model.useCase}
@@ -186,26 +198,36 @@ export function PromptEnrichment({
               <Card key={i}>
                 <CardHeader>
                   <CardTitle>{study.title}</CardTitle>
-                  <CardDescription>{study.scenario}</CardDescription>
+                  {study.scenario && <CardDescription>{study.scenario}</CardDescription>}
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <h4 className="mb-2 font-semibold">Challenge:</h4>
-                    <p className="text-sm text-muted-foreground">{study.challenge}</p>
-                  </div>
-                  <div>
-                    <h4 className="mb-2 font-semibold">Process:</h4>
-                    <p className="text-sm text-muted-foreground">{study.process}</p>
-                  </div>
-                  <div>
-                    <h4 className="mb-2 font-semibold">Outcome:</h4>
-                    <p className="text-sm text-muted-foreground">{study.outcome}</p>
-                  </div>
-                  <Separator />
-                  <div className="rounded-lg bg-muted p-3">
-                    <p className="text-xs font-medium mb-1">Key Learning:</p>
-                    <p className="text-sm">{study.keyLearning}</p>
-                  </div>
+                  {study.challenge && (
+                    <div>
+                      <h4 className="mb-2 font-semibold">Challenge:</h4>
+                      <p className="text-sm text-muted-foreground">{study.challenge}</p>
+                    </div>
+                  )}
+                  {study.process && (
+                    <div>
+                      <h4 className="mb-2 font-semibold">Process:</h4>
+                      <p className="text-sm text-muted-foreground">{study.process}</p>
+                    </div>
+                  )}
+                  {study.outcome && (
+                    <div>
+                      <h4 className="mb-2 font-semibold">Outcome:</h4>
+                      <p className="text-sm text-muted-foreground">{study.outcome}</p>
+                    </div>
+                  )}
+                  {study.keyLearning && (
+                    <>
+                      <Separator />
+                      <div className="rounded-lg bg-muted p-3">
+                        <p className="text-xs font-medium mb-1">Key Learning:</p>
+                        <p className="text-sm">{study.keyLearning}</p>
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -224,21 +246,25 @@ export function PromptEnrichment({
             {examples.map((example, i) => (
               <Card key={i}>
                 <CardHeader>
-                  <CardTitle>{example.title}</CardTitle>
+                  {example.title && <CardTitle>{example.title}</CardTitle>}
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <h4 className="mb-2 font-semibold">Input:</h4>
-                    <div className="rounded-lg bg-muted p-4 font-mono text-sm">
-                      {example.input}
+                  {example.input && (
+                    <div>
+                      <h4 className="mb-2 font-semibold">Input:</h4>
+                      <div className="rounded-lg bg-muted p-4 font-mono text-sm">
+                        {example.input}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <h4 className="mb-2 font-semibold">Expected Output:</h4>
-                    <div className="rounded-lg bg-muted p-4 font-mono text-sm">
-                      {example.expectedOutput}
+                  )}
+                  {example.expectedOutput && (
+                    <div>
+                      <h4 className="mb-2 font-semibold">Expected Output:</h4>
+                      <div className="rounded-lg bg-muted p-4 font-mono text-sm">
+                        {example.expectedOutput}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
