@@ -75,6 +75,10 @@ export function convertPlaybooksToPrompts(): Omit<
         ratingCount: 0,
         isPublic: true,
         isFeatured: index === 0, // First in each category is featured
+        active: true,
+        currentRevision: 1,
+        requiresAuth: false,
+        isPremium: false,
       };
 
       prompts.push(prompt);

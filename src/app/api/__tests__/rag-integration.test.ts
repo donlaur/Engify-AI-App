@@ -118,7 +118,7 @@ describe('RAG Integration', () => {
       });
 
       const { POST } = await import('@/app/api/chat/route');
-      const request = new Request('http://localhost:3000/api/chat', {
+      const request = new NextRequest('http://localhost:3000/api/chat', {
         method: 'POST',
         body: JSON.stringify({
           messages: [{ role: 'user', content: 'What is chain of thought?' }],
@@ -164,7 +164,7 @@ describe('RAG Integration', () => {
       });
 
       const { POST } = await import('@/app/api/chat/route');
-      const request = new Request('http://localhost:3000/api/chat', {
+      const request = new NextRequest('http://localhost:3000/api/chat', {
         method: 'POST',
         body: JSON.stringify({
           messages: [{ role: 'user', content: 'What is chain of thought?' }],
@@ -185,7 +185,7 @@ describe('RAG Integration', () => {
   describe('RAG Health Check', () => {
     it('should return healthy status when RAG service is available', async () => {
       const { GET } = await import('@/app/api/rag/route');
-      const request = new Request('http://localhost:3000/api/rag');
+      const request = new NextRequest('http://localhost:3000/api/rag');
 
       const response = await GET(request);
       const data = await response.json();
@@ -197,7 +197,7 @@ describe('RAG Integration', () => {
 
     it('should return unhealthy status when RAG service is unavailable', async () => {
       const { GET } = await import('@/app/api/rag/route');
-      const request = new Request(
+      const request = new NextRequest(
         'http://localhost:3000/api/rag?unhealthy=true'
       );
 

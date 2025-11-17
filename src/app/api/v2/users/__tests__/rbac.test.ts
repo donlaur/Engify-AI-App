@@ -27,7 +27,7 @@ describe('RBAC: /api/v2/users', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 't1', email: 't@example.com', role: 'user' },
-    });
+    } as any);
 
     const req = new NextRequest('http://localhost:3000/api/v2/users');
     const res = await GET(req);
@@ -38,7 +38,7 @@ describe('RBAC: /api/v2/users', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 't1', email: 't@example.com', role: 'user' },
-    });
+    } as any);
 
     const req = new NextRequest('http://localhost:3000/api/v2/users', {
       method: 'POST',
@@ -53,7 +53,7 @@ describe('RBAC: /api/v2/users', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'a1', email: 'admin@example.com', role: 'org_admin' },
-    });
+    } as any);
 
     const req = new NextRequest('http://localhost:3000/api/v2/users');
     const res = await GET(req);
@@ -64,7 +64,7 @@ describe('RBAC: /api/v2/users', () => {
     const { auth } = await import('@/lib/auth');
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'a1', email: 'admin@example.com', role: 'org_admin' },
-    });
+    } as any);
 
     const req = new NextRequest('http://localhost:3000/api/v2/users', {
       method: 'POST',

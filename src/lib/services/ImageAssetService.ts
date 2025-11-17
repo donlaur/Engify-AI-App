@@ -108,7 +108,7 @@ export class ImageAssetService {
 
       const { value, latencyMs } = await executeWithProviderHarness(
         () =>
-          replicate.run(modelId, {
+          replicate.run(modelId as `${string}/${string}`, {
             input: {
               prompt: promptText,
               size: '1024x1024',

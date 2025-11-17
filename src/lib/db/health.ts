@@ -19,7 +19,10 @@ export async function checkDbHealth(): Promise<{
   const startTime = Date.now();
 
   try {
-    const client = await clientPromise;
+    // clientPromise is a function that returns a Promise<MongoClient>
+    const client = typeof clientPromise === 'function'
+      ? await clientPromise()
+      : await clientPromise;
 
     // Ping the database
     await client.db().admin().ping();

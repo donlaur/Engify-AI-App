@@ -3,16 +3,18 @@
  * 90% complete guides for common facilitation scenarios
  */
 
-import { PromptTemplate } from '@/lib/schemas/prompt';
+import type { Prompt } from '@/lib/schemas/prompt';
 
-export const facilitatorGuides: Omit<PromptTemplate, 'id' | 'createdAt' | 'updatedAt'>[] = [
+export const facilitatorGuides: Omit<Prompt, 'createdAt' | 'updatedAt'>[] = [
   {
+    id: 'facilitator-001',
     title: '1-on-1 Meeting Facilitator Guide',
     description: 'Complete guide for running effective 1-on-1s with direct reports, including prep, agenda, and follow-up.',
-    category: 'management',
+    category: 'general',
     role: 'engineering-manager',
-    pattern: 'craft',
+    pattern: 'template',
     tags: ['1-on-1s', 'facilitation', 'management', 'feedback', 'coaching', 'career-development'],
+    isPublic: true,
     content: `You are preparing for a 1-on-1 meeting with a direct report. Generate a complete facilitation guide:
 
 **Context:**
@@ -347,15 +349,21 @@ export const facilitatorGuides: Omit<PromptTemplate, 'id' | 'createdAt' | 'updat
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
 
   {
+    id: 'facilitator-002',
     title: 'Sprint Retrospective Facilitator Guide',
     description: 'Complete retro facilitation guide with agenda, activities, and follow-through plan.',
-    category: 'management',
+    category: 'general',
     role: 'engineering-manager',
-    pattern: 'craft',
+    pattern: 'template',
     tags: ['retros', 'facilitation', 'agile', 'team-building', 'process-improvement'],
+    isPublic: true,
     content: `You are facilitating a sprint retrospective. Generate a complete facilitation guide:
 
 **Context:**
@@ -721,6 +729,10 @@ Let me know if you have questions!
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
 ];
 

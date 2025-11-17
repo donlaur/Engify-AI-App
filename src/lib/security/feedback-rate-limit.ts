@@ -9,7 +9,7 @@ import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { auth } from '@/lib/auth';
 import { FEEDBACK_RATE_LIMITS } from '@/lib/constants/rates';
-import { ERROR_MESSAGES, getRateLimitMessage } from '@/lib/constants/messages';
+import { getRateLimitMessage } from '@/lib/constants/messages';
 
 interface FeedbackRateLimitResult {
   allowed: boolean;

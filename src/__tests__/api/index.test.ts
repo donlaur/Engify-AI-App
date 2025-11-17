@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 import { GET, POST } from '@/app/api/admin/content/index/route';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { checkRateLimit } from '@/lib/rate-limit';
@@ -31,7 +32,7 @@ describe('/api/admin/content/index', () => {
         } as never;
       });
 
-      const req = new Request('http://localhost/api/admin/content/index', {
+      const req = new NextRequest('http://localhost/api/admin/content/index', {
         headers: { 'x-forwarded-for': '127.0.0.1' },
       });
       const res = await GET(req);
@@ -47,7 +48,7 @@ describe('/api/admin/content/index', () => {
       // Set indexer to disabled
       process.env.RAG_INDEX_ENABLED = 'false';
 
-      const req = new Request('http://localhost/api/admin/content/index', {
+      const req = new NextRequest('http://localhost/api/admin/content/index', {
         headers: { 'x-forwarded-for': '127.0.0.1' },
       });
       const res = await GET(req);
@@ -72,7 +73,7 @@ describe('/api/admin/content/index', () => {
 
       process.env.RAG_INDEX_ENABLED = 'true';
 
-      const req = new Request('http://localhost/api/admin/content/index', {
+      const req = new NextRequest('http://localhost/api/admin/content/index', {
         headers: { 'x-forwarded-for': '127.0.0.1' },
       });
       const res = await GET(req);
@@ -89,7 +90,7 @@ describe('/api/admin/content/index', () => {
 
       process.env.RAG_INDEX_ENABLED = 'true';
 
-      const req = new Request('http://localhost/api/admin/content/index', {
+      const req = new NextRequest('http://localhost/api/admin/content/index', {
         headers: { 'x-forwarded-for': '127.0.0.1' },
       });
       const res = await GET(req);
@@ -111,7 +112,7 @@ describe('/api/admin/content/index', () => {
         } as never;
       });
 
-      const req = new Request('http://localhost/api/admin/content/index', {
+      const req = new NextRequest('http://localhost/api/admin/content/index', {
         method: 'POST',
         headers: { 'x-forwarded-for': '127.0.0.1' },
         body: JSON.stringify({ hashes: [] }),
@@ -128,7 +129,7 @@ describe('/api/admin/content/index', () => {
 
       process.env.RAG_INDEX_ENABLED = 'false';
 
-      const req = new Request('http://localhost/api/admin/content/index', {
+      const req = new NextRequest('http://localhost/api/admin/content/index', {
         method: 'POST',
         headers: { 'x-forwarded-for': '127.0.0.1' },
         body: JSON.stringify({ hashes: [] }),
@@ -148,7 +149,7 @@ describe('/api/admin/content/index', () => {
 
       process.env.RAG_INDEX_ENABLED = 'true';
 
-      const req = new Request('http://localhost/api/admin/content/index', {
+      const req = new NextRequest('http://localhost/api/admin/content/index', {
         method: 'POST',
         headers: {
           'x-forwarded-for': '127.0.0.1',

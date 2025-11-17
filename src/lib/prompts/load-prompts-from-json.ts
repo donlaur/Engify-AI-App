@@ -8,7 +8,7 @@
  * during static generation/ISR. Filesystem access is only available at runtime.
  */
 
-import type { Prompt } from '@/lib/db/schemas/prompt';
+import type { Prompt } from '@/lib/schemas/prompt';
 import { promptRepository } from '@/lib/db/repositories/ContentService';
 import { logger } from '@/lib/logging/logger';
 
@@ -25,10 +25,6 @@ interface PromptsJsonData {
     public: number;
   };
 }
-
-const JSON_FILE_URL = '/data/prompts.json'; // Public URL path
-const BACKUP_JSON_PATH = '/data/prompts-backup.json'; // Immutable backup (committed to git)
-const MAX_AGE_MS = 3600000; // 1 hour - consider JSON stale after this
 
 /**
  * Load prompts from static JSON file (production-fast)

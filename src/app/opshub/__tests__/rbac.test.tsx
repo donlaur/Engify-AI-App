@@ -28,7 +28,7 @@ afterEach(() => {
   process.env = { ...ORIGINAL_ENV };
 });
 
-if (import.meta.vitest) {
+if ((import.meta as any).vitest) {
   describe('RBAC: /opshub page', () => {
     it('redirects non-admin users', async () => {
       const { auth } = await import('@/lib/auth');
@@ -36,7 +36,7 @@ if (import.meta.vitest) {
 
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'u1', role: 'user' },
-      });
+      } as any);
       vi.mocked(redirect).mockImplementation(() => {
         throw new Error('REDIRECT');
       });
@@ -57,7 +57,7 @@ if (import.meta.vitest) {
           name: 'Admin',
           mfaVerified: true,
         },
-      });
+      } as any);
       vi.mocked(getDb).mockResolvedValue({
         collection: vi.fn().mockReturnValue({
           countDocuments: vi.fn().mockResolvedValue(0),
@@ -69,7 +69,7 @@ if (import.meta.vitest) {
             }),
           }),
         }),
-      });
+      } as any);
 
       const OpsHubPage = (await import('../page')).default;
       const jsx = await OpsHubPage();
@@ -88,7 +88,7 @@ if (import.meta.vitest) {
           name: 'Admin',
           mfaVerified: false,
         },
-      });
+      } as any);
       vi.mocked(redirect).mockImplementation(() => {
         throw new Error('REDIRECT');
       });

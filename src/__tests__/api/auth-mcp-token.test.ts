@@ -40,7 +40,7 @@ describe('/api/auth/mcp-token', () => {
         name: 'Test User',
       },
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    });
+    } as any);
 
     const request = new NextRequest('http://localhost:3000/api/auth/mcp-token', {
       method: 'POST',
@@ -59,7 +59,7 @@ describe('/api/auth/mcp-token', () => {
   it('should reject unauthenticated requests', async () => {
     const { auth } = await import('@/lib/auth');
 
-    vi.mocked(auth).mockResolvedValueOnce(null);
+    vi.mocked(auth).mockResolvedValueOnce(null as any);
 
     const request = new NextRequest('http://localhost:3000/api/auth/mcp-token', {
       method: 'POST',
@@ -81,7 +81,7 @@ describe('/api/auth/mcp-token', () => {
         name: 'Test User',
       },
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    });
+    } as any);
 
     vi.mocked(checkRateLimit).mockResolvedValueOnce({
       allowed: false,
