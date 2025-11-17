@@ -204,7 +204,7 @@ export default async function RolePage({
       <RolePageClient
         role={role}
         roleInfo={roleInfo}
-        rolePrompts={rolePrompts as any}
+        rolePrompts={rolePrompts as any as any}
       />
     </>
   );

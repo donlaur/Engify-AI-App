@@ -247,7 +247,7 @@ export default async function LibraryPage() {
 
           {/* Client-side filtering component */}
           <LibraryClient
-            initialPrompts={sortedPrompts as never}
+            initialPrompts={sortedPrompts as never as any}
             categoryStats={categoryStats}
             roleStats={roleStats}
             patternStats={patternStats}
