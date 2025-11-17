@@ -59,7 +59,7 @@ export async function GET(_request: NextRequest) {
             daysLoggedIn: 1,
             totalSessions: 1
           }
-        }
+        } as any
       );
       
       statsData.daysLoggedIn += 1;
