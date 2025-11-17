@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         const { Receiver } = await import('@upstash/qstash');
         const receiver = new Receiver({
           currentSigningKey: qstashSigningKey,
-          nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY,
+          nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY || qstashSigningKey,
         });
 
         const body = await req.text();
