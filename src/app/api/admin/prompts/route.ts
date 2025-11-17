@@ -237,9 +237,9 @@ export async function POST(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session?.user?.email || 'unknown',
-      action: 'prompts.create',
+      action: 'admin_action',
       resource: `prompt:${promptId}`,
-      details: { title: sanitizedTitle, category: validatedData.category },
+      details: { action: 'create', title: sanitizedTitle, category: validatedData.category },
     });
 
     return NextResponse.json(
@@ -354,9 +354,9 @@ export async function PUT(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session?.user?.email || 'unknown',
-      action: 'prompts.update',
+      action: 'admin_action',
       resource: `prompt:${_id}`,
-      details: { updates: Object.keys(sanitizedUpdates) },
+      details: { action: 'update', updates: Object.keys(sanitizedUpdates) },
     });
 
     const updated = await collection.findOne({ _id: new ObjectId(_id) });
@@ -427,9 +427,9 @@ export async function DELETE(request: NextRequest) {
     // Audit log
     await auditLog({
       userId: session?.user?.email || 'unknown',
-      action: 'prompts.delete',
+      action: 'admin_action',
       resource: `prompt:${_id}`,
-      details: {},
+      details: { action: 'delete' },
     });
 
     return NextResponse.json({ success: true });

@@ -1026,8 +1026,11 @@ describe('/api/admin/prompts', () => {
 
       expect(auditLog).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'prompts.create',
+          action: 'admin_action',
           resource: expect.stringContaining('prompt:'),
+          details: expect.objectContaining({
+            action: 'create',
+          }),
         })
       );
     });
@@ -1062,8 +1065,11 @@ describe('/api/admin/prompts', () => {
 
       expect(auditLog).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'prompts.update',
+          action: 'admin_action',
           resource: expect.stringContaining('prompt:'),
+          details: expect.objectContaining({
+            action: 'update',
+          }),
         })
       );
     });
@@ -1090,8 +1096,11 @@ describe('/api/admin/prompts', () => {
 
       expect(auditLog).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'prompts.delete',
+          action: 'admin_action',
           resource: expect.stringContaining('prompt:'),
+          details: expect.objectContaining({
+            action: 'delete',
+          }),
         })
       );
     });

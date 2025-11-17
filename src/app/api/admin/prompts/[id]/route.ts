@@ -80,9 +80,9 @@ export async function PATCH(
     // Audit log
     await auditLog({
       userId: session?.user?.email || 'unknown',
-      action: 'prompts.patch',
+      action: 'admin_action',
       resource: `prompt:${id}`,
-      details: { fields: Object.keys(updateDoc) },
+      details: { action: 'patch', fields: Object.keys(updateDoc) },
     });
 
     const updated = await collection.findOne({ _id: new ObjectId(id) });
