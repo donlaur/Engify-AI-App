@@ -319,7 +319,7 @@ export function DashboardOverviewPanel() {
                       <Icons.fileText className="h-4 w-4 text-green-500" />
                     )}
                     {activity.type === 'audit' && (
-                      <Icons.activity className="h-4 w-4 text-orange-500" />
+                      <Icons.shield className="h-4 w-4 text-orange-500" />
                     )}
                   </div>
                   <div className="flex-1 space-y-1">
@@ -347,7 +347,7 @@ export function DashboardOverviewPanel() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Icons.activity className="h-5 w-5" />
+            <Icons.server className="h-5 w-5" />
             System Health
           </CardTitle>
           <CardDescription>Quick overview of system status</CardDescription>
