@@ -127,6 +127,7 @@ export default async function Home() {
 
   const roles = data.prompts?.byRole
     ? Object.entries(data.prompts.byRole)
+        .filter(([name]) => name && name !== 'null' && name !== 'undefined') // Filter out null/undefined roles
         .map(([name, count]) => ({
           name,
           icon: roleIcons[name as keyof typeof roleIcons] || Icons.code,

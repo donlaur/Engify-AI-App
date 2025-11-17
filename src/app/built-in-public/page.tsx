@@ -748,14 +748,12 @@ export default function BuiltInPublicPage() {
                     Day 6: Content Hardening (Real Data Migration)
                   </p>
                   <p className="mb-2 text-sm text-cyan-800">
-                    Patterns to MongoDB | TODO resolution | Real gamification
-                    data
+                    Patterns to MongoDB | TODO resolution | Real data migration
                   </p>
                   <p className="text-xs text-gray-600">
                     Migrated all content to MongoDB, resolved 39 critical TODOs
-                    (auth adapter, audit logging, tRPC), added real achievements
-                    system, career recommendations API, site stats from
-                    database.
+                    (auth adapter, audit logging, tRPC), added career recommendations
+                    API, site stats from database.
                     <br />
                     <strong>Key Docs:</strong> DAY_6_CONTENT_HARDENING.md,
                     TODO_RESOLUTION_DAY6.md
