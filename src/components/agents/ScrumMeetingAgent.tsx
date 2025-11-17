@@ -138,7 +138,7 @@ export function ScrumMeetingAgent() {
               disabled={isRunning}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Describe the situation, problem, or challenge you're facing. This will be analyzed 
+              Describe the situation, problem, or challenge you&apos;re facing. This will be analyzed 
               from multiple engineering leadership perspectives.
             </p>
           </div>

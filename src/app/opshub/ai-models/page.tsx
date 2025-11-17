@@ -453,7 +453,7 @@ export default function AIModelsAdminPage() {
           </CardHeader>
           <CardContent>
             <ol className="space-y-2 text-sm list-decimal list-inside">
-              <li>Check each provider's docs for new/updated models (links above)</li>
+              <li>Check each provider&apos;s docs for new/updated models (links above)</li>
               <li>Update <code className="bg-muted px-1 py-0.5 rounded">src/lib/config/ai-models.ts</code> with correct model IDs</li>
               <li>Update pricing (check provider pricing pages)</li>
               <li>Mark old models as deprecated, add replacementModel</li>

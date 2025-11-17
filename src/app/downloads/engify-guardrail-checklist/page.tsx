@@ -25,7 +25,7 @@ export default function GuardrailChecklistDownloadPage() {
           <h1 className="text-4xl font-bold md:text-5xl">Engify Guardrail Quality Checklist</h1>
           <p className="mt-4 text-lg text-muted-foreground">
             Use this checklist to validate AI guardrail coverage before every large release. For a
-            customized version mapped to your SDLC tools, reach out and we\'ll tailor the steps for your team.
+            customized version mapped to your SDLC tools, reach out and we&apos;ll tailor the steps for your team.
           </p>
         </header>
 
@@ -45,7 +45,7 @@ export default function GuardrailChecklistDownloadPage() {
           <div className="rounded-lg border bg-background p-6">
             <h3 className="text-xl font-semibold">Need the full PDF?</h3>
             <p className="mt-3 text-sm text-muted-foreground">
-              Email us with your stack details and we\'ll send the printable PDF plus companion rollout plan.
+              Email us with your stack details and we&apos;ll send the printable PDF plus companion rollout plan.
             </p>
             <div className="mt-4 flex flex-wrap gap-4">
               <Button asChild>
