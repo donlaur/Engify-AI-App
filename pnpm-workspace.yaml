@@ -85,7 +85,7 @@ catalogs:
 
   # AWS Services
   aws:
-    '@aws-sdk/client-cognito-identity-provider': ^3.922.0
+    '@aws-sdk/client-cognito-identity-provider': ^3.932.0
     '@aws-sdk/client-lambda': ^3.922.0
     '@aws-sdk/client-secrets-manager': ^3.919.0
     'aws-sdk': ^2.1400.0
