@@ -101,7 +101,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",
-    "@auth/mongodb-adapter": "^3.10.0",
+    "@auth/mongodb-adapter": "^3.11.1",
     "@auth/prisma-adapter": "^2.11.1",
     "@aws-sdk/client-cognito-identity-provider": "^3.922.0",
     "@aws-sdk/client-lambda": "^3.922.0",
@@ -145,7 +145,7 @@
     "jose": "^6.1.0",
     "lucide-react": "^0.344.0",
     "marked": "^16.4.1",
-    "mongodb": "^6.3.0",
+    "mongodb": "^7.0.0",
     "nanoid": "^5.1.6",
     "next": "^15.5.6",
     "next-auth": "5.0.0-beta.30",
