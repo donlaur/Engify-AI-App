@@ -38,7 +38,7 @@ export async function GET(_request: NextRequest) {
       await db.collection('user_stats').insertOne(initialStats);
       statsData = initialStats;
     } else {
-      statsData = userStats;
+      statsData = userStats as unknown as UserStats;
     }
     
     // Check if user has logged in today
