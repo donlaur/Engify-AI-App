@@ -13,7 +13,7 @@ import { getContentGenerationJobQueue } from '@/lib/services/jobs/ContentGenerat
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: { params: Promise<{ jobId: string }> }
 ) {
   try {
     // Auth check
@@ -28,7 +28,7 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { jobId } = params;
+    const { jobId } = await params;
 
     if (!jobId) {
       return NextResponse.json(
@@ -125,7 +125,7 @@ export async function GET(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: { params: Promise<{ jobId: string }> }
 ) {
   try {
     // Auth check
@@ -140,7 +140,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { jobId } = params;
+    const { jobId } = await params;
 
     // For now, just return not implemented
     // In future: implement job cancellation
