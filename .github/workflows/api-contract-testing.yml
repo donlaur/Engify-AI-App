@@ -46,7 +46,7 @@ jobs:
           npm test -- --coverage --testPathPattern="src/lib/api/__tests__"
           
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           file: ./coverage/lcov.info
           flags: api-contract-tests
