@@ -25,8 +25,8 @@ declare global {
   interface Window {
     gtag?: (
       command: string,
-      targetIdOrAction: string,
-      params?: Record<string, any>
+      eventName: string,
+      eventParams?: Record<string, unknown>
     ) => void;
     dataLayer?: unknown[];
   }
@@ -70,6 +70,7 @@ export function GoogleAnalytics() {
       <Script
         id="google-analytics-init"
         strategy="afterInteractive"
+        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];

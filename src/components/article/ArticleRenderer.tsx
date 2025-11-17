@@ -24,6 +24,7 @@ export function ArticleRenderer({ content }: ArticleRendererProps) {
         ]}
         components={{
           // Code blocks with copy button
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           code({ node, inline, className, children, ...props }: any) {
             if (inline) {
               return (
@@ -106,7 +107,7 @@ export function ArticleRenderer({ content }: ArticleRendererProps) {
             <figure className="my-8">
               <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900">
                 {/* Placeholder for images that don't exist yet */}
-                {src?.includes('images/') ? (
+                {typeof src === 'string' && src.includes('images/') ? (
                   <div className="aspect-video flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
                     <div className="text-center px-6">
                       <div className="text-slate-400 dark:text-slate-600 mb-2">
