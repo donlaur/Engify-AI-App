@@ -181,7 +181,7 @@ export default async function PainPointPage({ params }: PainPointPageProps) {
               <CardHeader>
                 <CardTitle>Solution Workflows</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  The problem isn't the AI; it's the lack of a human-in-the-loop verification and governance system. These workflows are the perfect antidote.
+                  The problem isn&apos;t the AI; it&apos;s the lack of a human-in-the-loop verification and governance system. These workflows are the perfect antidote.
                 </p>
               </CardHeader>
               <CardContent>

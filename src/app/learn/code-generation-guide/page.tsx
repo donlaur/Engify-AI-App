@@ -335,7 +335,7 @@ Optimize for:
           </h2>
           <div className="prose prose-lg dark:prose-invert max-w-none">
             <h3 className="text-2xl font-semibold mt-8 mb-4">
-              ✅ Do's
+              ✅ Do&apos;s
             </h3>
             <ul>
               <li>
