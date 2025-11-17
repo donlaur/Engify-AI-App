@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
  *
  * Get all batch jobs for the current user
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Auth check
     const session = await auth();
