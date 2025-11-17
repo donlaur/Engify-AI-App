@@ -46,29 +46,42 @@ if (typeof process !== 'undefined') {
       const envPaths = [
         resolve(possibleMainRepo, '.env.local'),
         resolve(worktreeRoot, '.env.local'),
-        // Also try absolute path to main repo (common worktree scenario)
-        resolve('/Users/donlaur/dev/Engify-AI-App', '.env.local'),
       ];
-      
+
       for (const envPath of envPaths) {
         if (fs.existsSync(envPath)) {
           config({ path: envPath });
           if (process.env.MONGODB_URI) break;
         }
       }
-    } else {
-      // Fallback: try common absolute paths
-      const commonPaths = [
-        resolve('/Users/donlaur/dev/Engify-AI-App', '.env.local'),
-        resolve('/Users/donlaur/dev/Engify-AI-App', '.env'),
-      ];
-      
-      for (const envPath of commonPaths) {
-        if (fs.existsSync(envPath)) {
-          config({ path: envPath });
-          if (process.env.MONGODB_URI) break;
+    }
+  }
+
+  // Final fallback: Try to find git repository root dynamically
+  if (!process.env.MONGODB_URI) {
+    try {
+      const { execSync } = require('child_process');
+      const gitRoot = execSync('git rev-parse --show-toplevel', {
+        cwd: currentDir,
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'ignore'] // Suppress stderr
+      }).trim();
+
+      if (gitRoot && fs.existsSync(gitRoot)) {
+        const gitEnvPaths = [
+          resolve(gitRoot, '.env.local'),
+          resolve(gitRoot, '.env'),
+        ];
+
+        for (const envPath of gitEnvPaths) {
+          if (fs.existsSync(envPath)) {
+            config({ path: envPath });
+            if (process.env.MONGODB_URI) break;
+          }
         }
       }
+    } catch (error) {
+      // Git command failed or not in a git repo - this is okay, just skip
     }
   }
 }
