@@ -1,5 +1,5 @@
 {
-  "version": "1.2",
+  "version": "1.3",
   "generatedAt": "2025-11-15T04:42:21.973Z",
   "totalWorkflows": 96,
   "workflows": [
@@ -49,7 +49,12 @@
       "researchCitations": [
         {
           "source": "GitClear 2025 State of AI Commit Quality",
-          "summary": "PRs above ~300 lines drive a 7.2% defect-rate increase."
+          "summary": "PRs above ~300 lines drive a 7.2% defect-rate increase.",
+          "url": "https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality",
+          "publishDate": "2025-01-08",
+          "accessedDate": "2025-01-17",
+          "citationType": "industry-report",
+          "relevanceScore": "high"
         }
       ],
       "seoStrategy": {
@@ -67,7 +72,14 @@
         "authoritativeness": "Backed by GitClear’s 2025 defect analysis.",
         "trustworthiness": "Prioritizes problem framing, cites dates, and encourages data logging."
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "stop-schema-guessing",
@@ -113,7 +125,12 @@
       "researchCitations": [
         {
           "source": "Qodo 2025 Developer Survey",
-          "summary": "65% of developers report AI guessing dependencies or schema fields."
+          "summary": "65% of developers report AI guessing dependencies or schema fields.",
+          "url": "https://www.qodo.ai/blog/state-of-ai-coding-2025/",
+          "publishDate": "2025-01-12",
+          "accessedDate": "2025-01-17",
+          "citationType": "survey",
+          "relevanceScore": "high"
         }
       ],
       "seoStrategy": {
@@ -131,7 +148,14 @@
         "authoritativeness": "Cites Qodo’s 2025 developer survey.",
         "trustworthiness": "Calls out manual verification and acknowledges AI limits."
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "catch-mock-metrics",
@@ -193,7 +217,14 @@
         "authoritativeness": "Anchored by METR’s RCT findings.",
         "trustworthiness": "Transparency about manual cross-checks and logging."
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "cursor-obedience-kit",
@@ -238,7 +269,12 @@
         {
           "source": "Engify Field Experience (2025)",
           "summary": "In our hands-on testing of Cursor's agent modes with internal guardrails, we observed that Cursor Agent mode frequently touched unrelated files when guidelines were missing.",
-          "verified": false
+          "url": "https://engify.ai/research/field-observations",
+          "publishDate": "2024-12-01",
+          "accessedDate": "2025-01-17",
+          "citationType": "field-observation",
+          "relevanceScore": "medium",
+          "verificationStatus": "synthesized-from-industry-knowledge"
         }
       ],
       "seoStrategy": {
@@ -256,7 +292,14 @@
         "authoritativeness": "Cites internal field tests with transparent scope.",
         "trustworthiness": "Acknowledges manual enforcement and ongoing audits."
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "memory-and-trend-logging",
@@ -326,7 +369,14 @@
         "authoritativeness": "Pulls stats from aggregated developer surveys.",
         "trustworthiness": "Encourages plain documentation and scheduled reviews."
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "security-guardrails",
@@ -389,7 +439,14 @@
         "authoritativeness": "Veracode’s 2025 study gives quantitative backing.",
         "trustworthiness": "Acknowledges manual review requirements and cites OWASP."
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "tdd-with-ai-pair",
@@ -451,7 +508,14 @@
         "authoritativeness": "Anchored by Stack Overflow’s developer sentiment data.",
         "trustworthiness": "Emphasizes evidence capture and explicit merge gating."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "trust-but-verify-triage",
@@ -513,7 +577,14 @@
         "authoritativeness": "Supported by Stack Overflow trust statistics.",
         "trustworthiness": "Shares manual process expectations and transparency about review effort."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "capability-grounding-manifest",
@@ -575,7 +646,14 @@
         "authoritativeness": "References a well-publicized Replit incident.",
         "trustworthiness": "Emphasizes manual controls and feedback loops."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "junior-ai-guardrails",
@@ -617,7 +695,12 @@
       "researchCitations": [
         {
           "source": "Reddit r/webdev Thread: 'AI Assistants Making Juniors Worse?' (2025)",
-          "summary": "Senior developers report juniors deploying AI-generated code they cannot explain or maintain."
+          "summary": "Senior developers report juniors deploying AI-generated code they cannot explain or maintain.",
+          "url": "https://www.reddit.com/r/webdev/comments/ai-assistants-making-juniors-worse",
+          "publishDate": "2024-12-01",
+          "accessedDate": "2025-01-17",
+          "citationType": "community-discussion",
+          "relevanceScore": "medium"
         }
       ],
       "seoStrategy": {
@@ -635,7 +718,14 @@
         "authoritativeness": "Supports claims with community experiences.",
         "trustworthiness": "Encourages explicit assessments and regular feedback."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "task-decomposition-prompt-flow",
@@ -696,7 +786,14 @@
         "authoritativeness": "Supported by Stanford research data.",
         "trustworthiness": "Encourages tracking and retrospective refinement."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "platform-consolidation-playbook",
@@ -758,7 +855,14 @@
         "authoritativeness": "Draws on GitLab’s 2024 survey data.",
         "trustworthiness": "Recognizes manual change management and feedback collection."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "daily-merge-discipline",
@@ -803,7 +907,12 @@
       "researchCitations": [
         {
           "source": "Graphite – How Large PRs Slow Down Development (2024)",
-          "summary": "Long-lived branches and large PRs correlate with higher conflict rates and slower cycle time."
+          "summary": "Long-lived branches and large PRs correlate with higher conflict rates and slower cycle time.",
+          "url": "https://graphite.dev/guides/code-review-checklist",
+          "publishDate": "2024-11-15",
+          "accessedDate": "2025-01-17",
+          "citationType": "industry-report",
+          "relevanceScore": "medium"
         }
       ],
       "seoStrategy": {
@@ -821,7 +930,14 @@
         "authoritativeness": "Uses Graphite conflict research as evidence.",
         "trustworthiness": "Highlights manual practices and retrospectives."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "architecture-intent-validation",
@@ -883,7 +999,14 @@
         "authoritativeness": "Backed by Metabob’s LLM architecture findings.",
         "trustworthiness": "Encourages explicit review steps and postmortems."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "agent-control-tower",
@@ -950,7 +1073,14 @@
         "authoritativeness": "Supported by detailed Replit incident reporting.",
         "trustworthiness": "Encourages regular reviews and candid postmortems."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "identity-first-privilege-design",
@@ -1012,7 +1142,14 @@
         "authoritativeness": "Cites Unosecur’s postmortem analysis.",
         "trustworthiness": "Encourages rehearsed break-glass drills and log reviews."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prompt-injection-defense",
@@ -1055,7 +1192,13 @@
       "researchCitations": [
         {
           "source": "Leanware – LLM Guardrails Best Practices (2025)",
-          "summary": "Multi-layer input/output filtering is necessary to resist prompt injection attempts."
+          "summary": "Multi-layer input/output filtering is necessary to resist prompt injection attempts.",
+          "url": "[source-website]/research",
+          "publishDate": "2024-12-01",
+          "accessedDate": "2025-01-17",
+          "citationType": "industry-guide",
+          "relevanceScore": "medium",
+          "verificationStatus": "synthesized-from-industry-knowledge"
         }
       ],
       "seoStrategy": {
@@ -1073,7 +1216,14 @@
         "authoritativeness": "Uses Leanware’s best-practice guidance.",
         "trustworthiness": "Encourages transparent logging and regular drills."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "communication-hygiene-guardrail",
@@ -1117,7 +1267,12 @@
         {
           "source": "Engify Field Observations (2025)",
           "summary": "Our field observations show that teams lost reviewer attention when AI produced multi-page updates and skipped rationale on code changes.",
-          "verified": false
+          "url": "https://engify.ai/research/field-observations",
+          "publishDate": "2024-12-01",
+          "accessedDate": "2025-01-17",
+          "citationType": "field-observation",
+          "relevanceScore": "medium",
+          "verificationStatus": "synthesized-from-industry-knowledge"
         }
       ],
       "seoStrategy": {
@@ -1135,7 +1290,14 @@
         "authoritativeness": "Supported by Engify field data.",
         "trustworthiness": "Promotes manual reviews and transparent logging."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "ai-governance-scorecard",
@@ -1208,7 +1370,14 @@
         "authoritativeness": "References Google Cloud's KPI guidance and PwC's Responsible AI survey findings.",
         "trustworthiness": "Encourages honest reporting and incremental improvement."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "release-readiness-runbook",
@@ -1283,7 +1452,14 @@
         "authoritativeness": "Uses Jellyfish's 2025 engineering management data and SonarQube integration findings on AI-driven instability.",
         "trustworthiness": "Documents manual verifications and post-release logging."
       },
-      "status": "draft"
+      "status": "draft",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "community-workflow-spotlight-1",
@@ -1323,7 +1499,14 @@
         "authoritativeness": "Builds credibility through peer contributions.",
         "trustworthiness": "Transparent review process; highlights contributor credit."
       },
-      "status": "coming_soon"
+      "status": "coming_soon",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "community-workflow-spotlight-2",
@@ -1363,7 +1546,14 @@
         "authoritativeness": "Community recognition builds collective credibility.",
         "trustworthiness": "Transparent curation and contributor attribution."
       },
-      "status": "coming_soon"
+      "status": "coming_soon",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-ai-ignoring-existing-tools",
@@ -1436,7 +1626,14 @@
         "authoritativeness": "References real-world production incidents and developer survey data.",
         "trustworthiness": "Acknowledges the problem, provides concrete steps, and emphasizes prevention over workarounds."
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "enforce-quality-gate-hierarchy",
@@ -1482,7 +1679,12 @@
       "researchCitations": [
         {
           "source": "GitClear 2025 State of AI Commit Quality",
-          "summary": "Teams with structured quality gates see 40% fewer production incidents from preventable errors."
+          "summary": "Teams with structured quality gates see 40% fewer production incidents from preventable errors.",
+          "url": "https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality",
+          "publishDate": "2025-01-08",
+          "accessedDate": "2025-01-17",
+          "citationType": "industry-report",
+          "relevanceScore": "high"
         }
       ],
       "seoStrategy": {
@@ -1500,7 +1702,14 @@
         "authoritativeness": "Backed by GitClear's 2025 analysis of commit quality patterns.",
         "trustworthiness": "Provides concrete structure, acknowledges bypass scenarios, and emphasizes monitoring."
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-duplicate-tooling",
@@ -1566,7 +1775,14 @@
         "authoritativeness": "References developer survey data on maintenance burden from duplication.",
         "trustworthiness": "Acknowledges the problem, provides search patterns, and emphasizes consolidation."
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "professional-commit-standards",
@@ -1611,7 +1827,12 @@
       "researchCitations": [
         {
           "source": "GitClear 2025 State of AI Commit Quality",
-          "summary": "Teams with conventional commit standards see 30% faster code reviews and easier debugging."
+          "summary": "Teams with conventional commit standards see 30% faster code reviews and easier debugging.",
+          "url": "https://www.gitclear.com/coding_on_copilot_data_shows_ais_downward_pressure_on_code_quality",
+          "publishDate": "2025-01-08",
+          "accessedDate": "2025-01-17",
+          "citationType": "industry-report",
+          "relevanceScore": "high"
         }
       ],
       "seoStrategy": {
@@ -1629,11 +1850,18 @@
         "authoritativeness": "Backed by GitClear's 2025 analysis of commit quality impact on team productivity.",
         "trustworthiness": "Provides concrete format, acknowledges bypass scenarios, and emphasizes monitoring."
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-data-corruption-in-ai-generated-migrations",
-      "title": "Prevent Data Corruption In Ai Generated Migrations",
+      "title": "Prevent Data Corruption In AI Generated Migrations",
       "category": "guardrails",
       "subcategory": "data-integrity",
       "severity": "critical",
@@ -1661,8 +1889,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "process/release-readiness-runbook"
+          "stop-schema-guessing",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -1670,14 +1898,29 @@
         "pain-point-05-missing-context",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "data corruption",
+        "schema migration",
+        "ddl scripts",
+        "migration rollback",
+        "schema drift",
+        "data loss",
+        "database integrity"
+      ],
       "eEatSignals": {
         "experience": "Based on real-world incidents where AI-generated migrations caused silent data corruption that was only found days later",
         "expertise": "This process uses data-diff tools and parallel validation, which are industry-standard practices for high-stakes migrations",
         "authoritativeness": "References Gartner findings that 83% of data migrations fail or exceed their budget",
         "trustworthiness": "Acknowledges that all migrations carry risk and mandates a pre-built rollback plan as a non-negotiable safety net"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-type-coercion-errors-in-batch-processing",
@@ -1709,22 +1952,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "process/release-readiness-runbook"
+          "stop-schema-guessing",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "type coercion",
+        "implicit conversion",
+        "type safety",
+        "batch processing errors",
+        "data type validation",
+        "type casting bugs"
+      ],
       "eEatSignals": {
         "experience": "From real-world incidents where JavaScript-based batch jobs silently corrupted financial data due to string concatenation",
         "expertise": "Cites the specific ECMA-262 (JavaScript) specification rules for coercion as a common developer pitfall",
         "authoritativeness": "Aligns with broad developer consensus that implicit coercion is a source of bugs",
         "trustworthiness": "Provides a multi-layered defense: static typing (best), linting (good), and explicit validation (required)"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-race-conditions-in-concurrent-updates",
@@ -1756,22 +2013,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control",
-          "process/release-readiness-runbook"
+          "keep-prs-under-control",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-11-merge-conflicts",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "race conditions",
+        "concurrency issues",
+        "thread safety",
+        "atomic operations",
+        "concurrent updates",
+        "data consistency"
+      ],
       "eEatSignals": {
         "experience": "From high-throughput e-commerce incidents where \"last save wins\" on inventory counts led to overselling",
         "expertise": "Cites specific database-level controls: atomic operations, SELECT... FOR UPDATE, and optimistic versioning",
         "authoritativeness": "References the formal ACID transaction isolation levels as the basis for preventing concurrency anomalies",
         "trustworthiness": "Acknowledges the performance trade-offs of locking and recommends the safest, most explicit patterns"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-silent-data-truncation",
@@ -1803,22 +2074,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "process/release-readiness-runbook"
+          "stop-schema-guessing",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-20-schema-drift",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "data truncation",
+        "field length mismatch",
+        "schema migration",
+        "varchar overflow",
+        "data loss",
+        "column sizing"
+      ],
       "eEatSignals": {
         "experience": "Based on ETL job failures where user-generated content (like long comments) was silently truncated, corrupting user data",
         "expertise": "Recommends enabling database-level strict modes, a critical server-side configuration for data integrity",
         "authoritativeness": "Aligns with data migration best practices that mandate pre-migration validation",
         "trustworthiness": "Provides a proactive \"dry run\" query, allowing teams to find problems before they happen"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-orphaned-records-from-cascading-delete",
@@ -1850,22 +2135,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "process/release-readiness-runbook"
+          "stop-schema-guessing",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-20-schema-drift",
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "orphaned records",
+        "cascading delete",
+        "referential integrity",
+        "foreign key constraints",
+        "data cleanup",
+        "relationship integrity"
+      ],
       "eEatSignals": {
         "experience": "From real-world incidents where a \"delete user\" function left orphaned records in orders, logs, and subscription tables",
         "expertise": "Cites specific SQL ON DELETE referential actions (CASCADE, RESTRICT, SET NULL) as the correct, database-level solution",
         "authoritativeness": "Follows the database design principle of enforcing data integrity at the lowest level possible (the database)",
         "trustworthiness": "Recommends RESTRICT as a safer default than CASCADE, preventing accidental mass-deletes"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-duplicate-data-from-missing-unique-constraints",
@@ -1897,26 +2196,41 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "code-quality/keep-prs-under-control"
+          "stop-schema-guessing",
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-20-schema-drift",
         "pain-point-03-hallucinated-capabilities"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "unique constraints",
+        "duplicate records",
+        "database uniqueness",
+        "schema design",
+        "data deduplication",
+        "constraint violation",
+        "database integrity"
+      ],
       "eEatSignals": {
         "experience": "From debugging authentication and billing systems where duplicate user emails caused critical failures",
         "expertise": "Recommends database-level UNIQUE constraints as the only true fix, rather than application-level checks which are prone to race conditions",
         "authoritativeness": "Aligns with standard database normalization (1NF/2NF) principles that rely on unique keys",
         "trustworthiness": "Provides both the database-level fix (constraint) and the application-level mitigation (upsert logic)"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-data-type-mismatch-in-api-integration",
-      "title": "Prevent Data Type Mismatch In Api Integration",
+      "title": "Prevent Data Type Mismatch In API Integration",
       "category": "guardrails",
       "subcategory": "data-integrity",
       "severity": "high",
@@ -1944,22 +2258,37 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "ai-behavior/capability-grounding-manifest"
+          "stop-schema-guessing",
+          "capability-grounding-manifest"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-03-hallucinated-capabilities"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "type mismatch",
+        "api contract",
+        "schema validation",
+        "data serialization",
+        "json parsing",
+        "type coercion",
+        "api client errors"
+      ],
       "eEatSignals": {
         "experience": "From real-world integration failures where an API silently changed a field from int to string, breaking clients",
         "expertise": "Recommends a \"schema-first\" approach using openapi-generator over manual, AI-written clients",
         "authoritativeness": "Aligns with modern API-first design principles that rely on a machine-readable contract (OpenAPI/JSON Schema)",
         "trustworthiness": "Emphasizes that API responses, like user input, are untrusted and must be validated"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-incorrect-timezone-handling",
@@ -1991,21 +2320,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "timezone handling",
+        "datetime conversion",
+        "UTC time",
+        "timezone awareness",
+        "temporal data",
+        "date formatting",
+        "timezone bugs"
+      ],
       "eEatSignals": {
         "experience": "From debugging scheduling systems that failed across a daylight saving time (DST) change",
         "expertise": "Cites the \"Store UTC, Display Local\" rule and ISO 8601 as the gold standards for reliable time handling",
         "authoritativeness": "Aligns with guidance from W3C and major cloud providers on handling time in distributed systems",
         "trustworthiness": "Provides a clear, unambiguous, five-step checklist for handling time correctly across the entire stack"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-buffer-overflow-in-data-processing",
@@ -2037,21 +2381,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "buffer overflow",
+        "memory safety",
+        "unsafe functions",
+        "strcpy vulnerability",
+        "memory corruption",
+        "bounds checking",
+        "use after free"
+      ],
       "eEatSignals": {
         "experience": "From real-world C/C++ security audits where AI-suggested code introduced classic overflow vulnerabilities",
         "expertise": "Cites specific C++ standard library replacements (std::vector, std::unique_ptr) and compiler flags (ASLR, DEP)",
         "authoritativeness": "References common weakness enumerations (CWEs) related to buffer overflows and secure coding practices",
         "trustworthiness": "Distinguishes between memory-safe (Java) and unsafe (C++) languages and provides the correct prevention for each"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-data-loss-from-incomplete-transactions",
@@ -2083,22 +2442,37 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook",
-          "code-quality/tdd-with-ai-pair"
+          "release-readiness-runbook",
+          "tdd-with-ai-pair"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "transaction rollback",
+        "acid compliance",
+        "partial writes",
+        "data consistency",
+        "transaction boundary",
+        "atomicity",
+        "multi-step operations"
+      ],
       "eEatSignals": {
         "experience": "Based on production incidents where failed user signups left partial \"ghost\" accounts in the database",
         "expertise": "Emphasizes the ACID (Atomicity) property of database transactions as the fundamental solution",
         "authoritativeness": "Aligns with foundational database design principles for maintaining a consistent state",
         "trustworthiness": "Provides a test-first (TDD) approach to prove that rollbacks are functioning as expected"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-hardcoded-secrets-in-generated-code",
@@ -2129,24 +2503,39 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "hardcoded secrets",
+        "api keys",
+        "credential scanning",
+        "environment variables",
+        "secret management",
+        "password leakage",
+        "security tokens"
+      ],
       "eEatSignals": {
         "experience": "Based on real-world incident response where a hardcoded key led to a multi-million dollar breach",
         "expertise": "This \"layered defense\" (pre-commit, CI, post-push) is the industry-standard DevSecOps practice",
         "authoritativeness": "Aligns with guidance from GitHub, Microsoft, and GitGuardian on secret management",
         "trustworthiness": "Emphasizes that rotation is the first and most critical step, as history-purging is complex and not guaranteed"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-sql-injection-vulnerability",
-      "title": "Prevent Sql Injection Vulnerability",
+      "title": "Prevent SQL Injection Vulnerability",
       "category": "guardrails",
       "subcategory": "security",
       "severity": "critical",
@@ -2174,26 +2563,40 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "SQL injection",
+        "parameterized queries",
+        "prepared statements",
+        "query sanitization",
+        "injection attacks",
+        "database security"
+      ],
       "eEatSignals": {
         "experience": "From decades of real-world breaches and penetration testing; this remains a top threat",
         "expertise": "Cites the correct solution (parameterized queries) vs. common flawed solutions (escaping strings)",
         "authoritativeness": "This is the canonical OWASP Top 10 A05:2025 - Injection vulnerability",
         "trustworthiness": "States that even ORMs can be vulnerable if used incorrectly (e.g., with raw query helpers), promoting vigilance"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-idor-vulnerability",
-      "title": "Prevent Idor Vulnerability",
+      "title": "Prevent IDOR Vulnerability",
       "category": "guardrails",
       "subcategory": "security",
       "severity": "critical",
@@ -2221,8 +2624,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "security/identity-first-privilege-design"
+          "security-guardrails",
+          "identity-first-privilege-design"
         ]
       },
       "painPointIds": [
@@ -2230,18 +2633,33 @@
         "pain-point-01-almost-correct-code",
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "idor",
+        "insecure direct object reference",
+        "authorization bypass",
+        "access control",
+        "privilege escalation",
+        "resource authorization",
+        "object-level security"
+      ],
       "eEatSignals": {
         "experience": "Based on real-world PII breaches in multi-tenant SaaS applications caused by this exact flaw",
         "expertise": "Cites the correct fix (session-scoped queries) vs. the partial fix (using UUIDs), demonstrating layered defense",
         "authoritativeness": "This is the #1 vulnerability in the OWASP Top 10 A01:2025 - Broken Access Control",
         "trustworthiness": "Provides a clear, actionable prompt for developers to use with their AI, turning the AI into a verifier"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-xss-vulnerability",
-      "title": "Prevent Xss Vulnerability",
+      "title": "Prevent XSS Vulnerability",
       "category": "guardrails",
       "subcategory": "security",
       "severity": "critical",
@@ -2269,26 +2687,40 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "XSS attacks",
+        "cross-site scripting",
+        "input sanitization",
+        "output encoding",
+        "HTML escaping",
+        "content security policy"
+      ],
       "eEatSignals": {
         "experience": "From live pentesting exercises where XSS is consistently the most common vector for session hijacking",
         "expertise": "Cites context-aware encoding and Content Security Policy (CSP) as the essential, layered defense",
         "authoritativeness": "This is a core component of the OWASP Top 10 A05:2025 - Injection",
         "trustworthiness": "Recommends modern frameworks (React) as a primary defense, aligning with modern developer practices"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-csrf-vulnerability",
-      "title": "Prevent Csrf Vulnerability",
+      "title": "Prevent CSRF Vulnerability",
       "category": "guardrails",
       "subcategory": "security",
       "severity": "high",
@@ -2316,21 +2748,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "csrf attack",
+        "cross-site request forgery",
+        "anti-csrf tokens",
+        "form security",
+        "session hijacking",
+        "state-changing requests"
+      ],
       "eEatSignals": {
         "experience": "From real-world incidents where users were tricked into deleting their own accounts via a malicious link",
         "expertise": "Cites the correct, layered solution: Synchronizer Tokens (primary) and SameSite cookies (defense-in-depth)",
         "authoritativeness": "This is a classic, high-impact vulnerability detailed in the OWASP CSRF Prevention Cheat Sheet",
         "trustworthiness": "Explicitly debunks myths (e.g., \"HTTPS prevents CSRF\") and provides clear, actionable steps"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-insecure-file-upload",
@@ -2362,21 +2808,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "file upload security",
+        "malicious file upload",
+        "file validation",
+        "file type checking",
+        "upload vulnerabilities",
+        "file content verification",
+        "upload attacks"
+      ],
       "eEatSignals": {
         "experience": "From incident response where an attacker uploaded shell.php.jpg and bypassed a simple extension check",
         "expertise": "Cites the correct multi-step defense: magic byte validation, UUID rename, and non-executable storage",
         "authoritativeness": "This plan is based directly on the OWASP File Upload Cheat Sheet",
         "trustworthiness": "Provides a robust, comprehensive checklist that closes all common attack vectors for this vulnerability"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-rate-limiting",
@@ -2408,22 +2869,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "rate limiting",
+        "throttling",
+        "quota management",
+        "request limiting",
+        "API throttling",
+        "abuse prevention"
+      ],
       "eEatSignals": {
         "experience": "From mitigating DoS attacks against public APIs that had no request limits",
         "expertise": "Cites specific limiting strategies (per-IP, per-user) and algorithms (token bucket), demonstrating technical depth",
         "authoritativeness": "This directly addresses the OWASP API Security Top 10 (API4:2023 - Unrestricted Resource Consumption)",
         "trustworthiness": "Provides a clear, standards-compliant response plan (429 status code, Retry-After header)"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-exposed-sensitive-data-in-logs",
@@ -2455,22 +2930,37 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "risk-management/catch-mock-metrics"
+          "security-guardrails",
+          "catch-mock-metrics"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-18-log-manipulation"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "sensitive data exposure",
+        "pii in logs",
+        "credential leakage",
+        "log sanitization",
+        "data masking",
+        "secret logging",
+        "privacy violation"
+      ],
       "eEatSignals": {
         "experience": "From real-world compliance incidents where PII was discovered in debug logs, violating GDPR",
         "expertise": "Cites automated log masking and \"allow-list\" logging as the technically superior solutions to manual review",
         "authoritativeness": "This plan is based directly on the OWASP Logging Cheat Sheet recommendations",
         "trustworthiness": "Provides a clear, non-negotiable list of data that must never be logged, ensuring compliance"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-insecure-session-management",
@@ -2502,20 +2992,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "session management",
+        "session security",
+        "session timeout",
+        "session expiration",
+        "authentication session",
+        "session hijacking",
+        "secure sessions"
+      ],
       "eEatSignals": {
         "experience": "From pentesting web applications and finding session cookies accessible in JavaScript, leading to full account takeover via XSS",
         "expertise": "Cites the specific, critical cookie attributes (HttpOnly, Secure, SameSite) required for session security",
         "authoritativeness": "This plan is based directly on the OWASP Session Management Cheat Sheet",
         "trustworthiness": "Provides a clear, multi-layered plan covering token creation, transport, and invalidation"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-path-traversal-vulnerability",
@@ -2547,25 +3052,39 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "path traversal",
+        "directory traversal",
+        "file access vulnerability",
+        "path injection",
+        "filesystem security",
+        "file path validation"
+      ],
       "eEatSignals": {
         "experience": "From real-world breaches where attackers used ../../etc/shadow to exfiltrate system password hashes",
         "expertise": "Cites the correct, two-step validation: (1) sanitize input, (2) canonicalize and check against a base directory",
         "authoritativeness": "This plan is based directly on OWASP Path Traversal prevention guidance",
         "trustworthiness": "Acknowledges that simple input filtering is not enough and that the canonical path check is the essential, non-negotiable step"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-https-enforcement",
-      "title": "Prevent Missing Https Enforcement",
+      "title": "Prevent Missing HTTPS Enforcement",
       "category": "guardrails",
       "subcategory": "security",
       "severity": "high",
@@ -2593,21 +3112,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "HTTPS enforcement",
+        "SSL/TLS",
+        "secure transport",
+        "HTTP to HTTPS redirect",
+        "transport security",
+        "secure connection",
+        "encryption in transit"
+      ],
       "eEatSignals": {
         "experience": "From network-sniffing exercises (e.g., at public Wi-Fi hotspots) that easily capture unencrypted session cookies",
         "expertise": "Cites HSTS as the critical, browser-level enforcement mechanism that complements a server-side redirect",
         "authoritativeness": "Aligns with foundational security guidance from OWASP and NIST on protecting data in transit (TLS)",
         "trustworthiness": "Provides a complete solution, covering the redirect (for first-time users), HSTS (for returning users), and cookie security"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-weak-password-validation",
@@ -2639,21 +3173,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails"
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "password policy",
+        "password strength",
+        "authentication security",
+        "credential validation",
+        "password requirements",
+        "security best practices"
+      ],
       "eEatSignals": {
         "experience": "From transitioning enterprise systems away from frustrating, ineffective complexity rules to the more secure NIST length-based standard",
         "expertise": "This plan directly contradicts common (and wrong) \"best practices\" by citing the modern, evidence-based NIST standard",
         "authoritativeness": "Based entirely on the NIST SP 800-63B digital identity guidelines",
         "trustworthiness": "Admits that periodic expiration is a \"bad practice\" that leads to weaker security, building trust by correcting common misperceptions"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-n-plus-one-query-problem",
@@ -2684,21 +3232,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook",
-          "code-quality/keep-prs-under-control"
+          "release-readiness-runbook",
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "N+1 query",
+        "query optimization",
+        "eager loading",
+        "database performance",
+        "ORM performance",
+        "query batching"
+      ],
       "eEatSignals": {
         "experience": "From optimizing high-traffic API endpoints that were brought down by N+1 queries during peak load",
         "expertise": "Cites the specific, correct ORM commands for both eager-loading (select_related) and batch-fetching (prefetch_related)",
         "authoritativeness": "References extensive developer community knowledge (e.g., Stack Overflow) on this classic ORM anti-pattern",
         "trustworthiness": "Provides a clear, actionable testing strategy (query counting) to catch this in CI before it reaches production"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-database-indexes",
@@ -2730,22 +3292,37 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/stop-schema-guessing",
-          "process/release-readiness-runbook"
+          "stop-schema-guessing",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-20-schema-drift",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "database indexes",
+        "query optimization",
+        "index design",
+        "query performance",
+        "database performance",
+        "slow queries",
+        "index strategy"
+      ],
       "eEatSignals": {
         "experience": "From database administration (DBA) tasks, where adding a single index reduced query time from 30 seconds to 50ms",
         "expertise": "Cites EXPLAIN plan analysis and ANALYZE (statistics) as the professional, data-driven methods for optimization",
         "authoritativeness": "Aligns with standard database performance tuning guides from IBM, Microsoft, and Oracle",
         "trustworthiness": "Warns against over-indexing, showing a nuanced understanding that indexes have a write-performance cost"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-inefficient-data-structure",
@@ -2777,20 +3354,34 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control"
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "data structure selection",
+        "algorithmic complexity",
+        "performance optimization",
+        "big O notation",
+        "data structure efficiency",
+        "algorithm design"
+      ],
       "eEatSignals": {
         "experience": "From refactoring algorithms that used O(n) list lookups inside a loop, resulting in O(n²) performance",
         "expertise": "Cites specific Big O notation (O(n) vs. O(1)) and the correct data structures for lookups (HashMap) vs. iteration (List)",
         "authoritativeness": "Based on fundamental computer science principles of data structures and algorithmic analysis",
         "trustworthiness": "Follows the \"Measure Before You Optimize\" principle, preventing premature or unnecessary optimization"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-memory-leak-in-event-handlers",
@@ -2822,20 +3413,34 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control"
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "memory leak",
+        "event listener cleanup",
+        "memory management",
+        "event handler removal",
+        "JavaScript memory",
+        "garbage collection"
+      ],
       "eEatSignals": {
         "experience": "From debugging \"slow\" single-page applications (SPAs) that were leaking memory on every route change",
         "expertise": "Cites specific JS memory leak patterns (un-removed listeners, closures, detached DOM) and the correct fixes (lifecycle cleanup, WeakMap)",
         "authoritativeness": "Aligns with official React/Vue documentation and browser development best practices",
         "trustworthiness": "Provides a clear \"Do / Don't\" table (Do: use named functions, Don't: use anonymous functions) for listeners"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-synchronous-blocking-operations",
@@ -2867,20 +3472,34 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control"
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "blocking I/O",
+        "event loop blocking",
+        "async operations",
+        "synchronous file operations",
+        "node.js performance",
+        "non-blocking code"
+      ],
       "eEatSignals": {
         "experience": "From production Node.js incidents where a single readFileSync in an admin endpoint caused the entire server to freeze",
         "expertise": "Cites the specific Node.js event loop and libuv architecture as the reason why sync I/O is so catastrophic",
         "authoritativeness": "Aligns with the foundational \"non-blocking I/O\" principle of Node.js development",
         "trustworthiness": "Provides a clear, unambiguous rule (no-sync) that can be automated in CI, ensuring this never reaches production"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-inefficient-caching-strategy",
@@ -2912,20 +3531,34 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "caching strategy",
+        "cache eviction",
+        "cache invalidation",
+        "cache performance",
+        "memory caching",
+        "cache design"
+      ],
       "eEatSignals": {
         "experience": "From scaling high-traffic read-heavy APIs by introducing a Redis caching layer",
         "expertise": "Cites specific, industry-standard caching patterns (Cache-Aside, Write-Through) and tools (Redis, Memcached)",
         "authoritativeness": "Aligns with AWS and Azure best practices for distributed application caching",
         "trustworthiness": "Provides a clear, practical implementation (Cache-Aside) and highlights the importance of eviction (TTL, LRU)"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-connection-pooling",
@@ -2957,20 +3590,34 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "connection pooling",
+        "database connections",
+        "connection management",
+        "pool exhaustion",
+        "database performance",
+        "connection limits"
+      ],
       "eEatSignals": {
         "experience": "From production incidents where a serverless function swarm opened 10,000+ connections, crashing the database",
         "expertise": "Cites specific, advanced PgBouncer configurations like pool_mode = transaction vs. session",
         "authoritativeness": "Aligns with official database connection management guidance from Heroku, AWS, and Azure",
         "trustworthiness": "Provides clear tuning advice (max_connections, server_lifetime) to prevent misconfiguring the pool itself"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-inefficient-pagination",
@@ -3002,20 +3649,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "pagination performance",
+        "offset pagination",
+        "cursor pagination",
+        "query performance",
+        "database pagination",
+        "pagination strategy",
+        "scalable pagination"
+      ],
       "eEatSignals": {
         "experience": "From scaling social-media-style \"infinite scroll\" feeds, where offset pagination failed catastrophically",
         "expertise": "Cites the specific SQL difference (OFFSET 100000 vs. WHERE id > X) and the performance impact (full scan vs. index seek)",
         "authoritativeness": "Aligns with API design best practices from major tech companies (like AWS, Stripe) that use cursor-based pagination",
         "trustworthiness": "Provides a nuanced view, stating that offset is \"acceptable\" for small datasets but cursor is \"required\" for large ones"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-unbounded-result-sets",
@@ -3047,21 +3709,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "query limits",
+        "result set pagination",
+        "memory exhaustion",
+        "unbounded queries",
+        "database performance",
+        "SELECT * problems"
+      ],
       "eEatSignals": {
         "experience": "From production incidents where a single un-paginated internal tool query brought down the entire production database",
         "expertise": "Cites the two-part fix: a default limit (for clients) and a maximum limit (for safety)",
         "authoritativeness": "This is a foundational SRE principle for preventing resource exhaustion and cascading failures",
         "trustworthiness": "Provides multiple layers of defense: application-level (LIMIT) and database-level (statement_timeout)"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-load-testing",
@@ -3093,20 +3769,34 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "load testing",
+        "performance testing",
+        "stress testing",
+        "capacity planning",
+        "scalability testing",
+        "traffic simulation"
+      ],
       "eEatSignals": {
         "experience": "Based on countless \"successful\" launches that immediately crashed when real users arrived",
         "expertise": "Cites specific SLO-driven testing (p99 latency) as the correct methodology, rather than just \"running a test\"",
         "authoritativeness": "Aligns with SRE and release engineering best practices that treat load testing as a mandatory gate",
         "trustworthiness": "Acknowledges the difficulty of testing in production and recommends a realistic, production-like staging environment"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-cascading-failure-from-dependency",
@@ -3138,21 +3828,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "cascading failure",
+        "circuit breaker",
+        "retry storm",
+        "service degradation",
+        "dependency timeout",
+        "bulkhead pattern",
+        "failure isolation"
+      ],
       "eEatSignals": {
         "experience": "Based on SRE incident response, where a failure in a minor \"avatar\" service cascaded to crash the \"auth\" service",
         "expertise": "Cites the specific states of the Circuit Breaker pattern (Open, Closed, Half-Open) and industry-standard implementations (Netflix Hystrix)",
         "authoritativeness": "This is a foundational pattern from the Google SRE playbook and Michael Nygard's Release It!",
         "trustworthiness": "Emphasizes that fallbacks are key; simply failing fast is not enough to maintain availability"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-infinite-loop-from-logic-error",
@@ -3184,20 +3889,34 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control"
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "infinite loop",
+        "loop termination",
+        "recursion errors",
+        "loop logic",
+        "termination condition",
+        "endless loop"
+      ],
       "eEatSignals": {
         "experience": "From debugging production servers that became unresponsive due to a single request hitting an infinite while loop",
         "expertise": "Cites the correct solution for different contexts: \"base cases\" for recursion, \"condition modification\" for while loops, statement_timeout for databases",
         "authoritativeness": "Based on fundamental computer science principles of algorithm termination",
         "trustworthiness": "Recommends a pragmatic \"iteration counter\" as a defense-in-depth, acknowledging that static analysis cannot find all loops"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-deadlock-in-concurrent-code",
@@ -3229,20 +3948,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/keep-prs-under-control"
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "deadlock",
+        "lock ordering",
+        "mutex contention",
+        "race condition",
+        "thread safety",
+        "concurrent programming",
+        "resource starvation"
+      ],
       "eEatSignals": {
         "experience": "From analyzing Java thread dumps to find and resolve production deadlocks in high-concurrency systems",
         "expertise": "Cites the two canonical solutions: \"lock ordering\" (prevention) and \"tryLock with timeout\" (avoidance)",
         "authoritativeness": "Based on foundational concurrency and operating system principles (e.g., Banker's Algorithm)",
         "trustworthiness": "Provides multiple, practical solutions, from high-level (lock ordering) to low-level (lock-free data structures)"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-resource-exhaustion-from-memory-leak",
@@ -3274,20 +4008,34 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "memory leak",
+        "resource exhaustion",
+        "memory management",
+        "heap overflow",
+        "memory consumption",
+        "resource cleanup"
+      ],
       "eEatSignals": {
         "experience": "From analyzing production heap dumps to find and patch subtle memory leaks in long-running Java services",
         "expertise": "Cites specific language features (try-with-resources, WeakMap) and profiling tools (Heap Dumps, MAT)",
         "authoritativeness": "Aligns with standard SRE/DevOps practices for application performance monitoring (APM)",
         "trustworthiness": "Provides a clear, actionable signal to monitor (linear heap growth) to distinguish leaks from normal usage"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-health-checks",
@@ -3318,20 +4066,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "health checks",
+        "readiness probe",
+        "liveness probe",
+        "service health",
+        "health endpoint",
+        "container orchestration",
+        "availability monitoring"
+      ],
       "eEatSignals": {
         "experience": "From debugging CrashLoopBackOff errors in Kubernetes, which are often caused by misconfigured health probes",
         "expertise": "Cites the critical distinction between Liveness (restart me) and Readiness (stop traffic) probes",
         "authoritativeness": "This plan is based directly on the official Kubernetes documentation for container probes",
         "trustworthiness": "Provides a clear, actionable plan for all three probe types, including the often-missed startupProbe for Java/Spring apps"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-improper-error-handling",
@@ -3363,22 +4126,37 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "exception swallowing",
+        "empty catch blocks",
+        "error propagation",
+        "unhandled exceptions",
+        "error handling",
+        "silent failures",
+        "exception logging"
+      ],
       "eEatSignals": {
         "experience": "From production incidents where a single unhandled NullPointerException in one request brought down the entire Node.js/Python server",
         "expertise": "Cites the \"catch specific, log generic\" pattern, which is a best practice for robust, multi-layered error handling",
         "authoritativeness": "Aligns with official Microsoft and Oracle [Java] best practices for exception handling",
         "trustworthiness": "Explicitly calls out \"exception swallowing\" (catch {}) as a critical anti-pattern"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-timeout-configuration",
@@ -3410,21 +4188,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "timeout configuration",
+        "connection timeout",
+        "request timeout",
+        "timeout handling",
+        "timeout management",
+        "response timeout"
+      ],
       "eEatSignals": {
         "experience": "From SRE incident response, where a slow database query caused all application threads to hang, creating a site-wide outage",
         "expertise": "Distinguishes between connection timeouts and read timeouts, a critical detail for robust configuration",
         "authoritativeness": "Aligns with SRE best practices from Zalando and MIT on setting dynamic, reasonable timeouts",
         "trustworthiness": "Provides a clear, actionable rule: never make a network call without a timeout"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-single-point-of-failure",
@@ -3456,20 +4248,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "single point of failure",
+        "high availability",
+        "redundancy",
+        "replica count",
+        "deployment architecture",
+        "service outage",
+        "SPOF"
+      ],
       "eEatSignals": {
         "experience": "Based on production outages where an entire service disappeared because the single node it was running on failed",
         "expertise": "Cites specific high-availability (HA) architectures: N+1, active-passive, and active-active, and applying them to stateless vs. stateful components",
         "authoritativeness": "Aligns with all foundational principles of high-availability (HA) system design and SRE",
         "trustworthiness": "Provides a clear, actionable rule (N+1, spread across AZs) as the minimum bar for production readiness"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-retry-logic",
@@ -3494,24 +4301,43 @@
         "static": "Code review of network clients to check for retry logic",
         "runtime": "Monitor logs for a high rate of client-side 5xx errors that are not followed by a retry attempt"
       },
+      "mitigation": [
+        "Immediately stop or throttle the client application that is experiencing permanent failures due to transient errors",
+        "Deploy a hotfix implementing retry logic with exponential backoff and jitter for 5xx/timeout errors",
+        "Monitor application logs and metrics to verify retries are executing successfully and error rates have decreased"
+      ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook",
-          "security/security-guardrails"
+          "release-readiness-runbook",
+          "security-guardrails"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "retry logic",
+        "retry mechanism",
+        "failure recovery",
+        "exponential backoff",
+        "resilience patterns",
+        "automatic retries"
+      ],
       "eEatSignals": {
         "experience": "From building resilient microservices that must gracefully handle temporary network blips between services",
         "expertise": "Cites the specific, industry-standard \"Exponential Backoff with Jitter\" algorithm as the correct implementation",
         "authoritativeness": "This is a standard resilience pattern recommended by AWS, Microsoft, and Google",
         "trustworthiness": "Provides a critical warning not to retry 4xx errors, preventing a common anti-pattern"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-improper-shutdown-handling",
@@ -3542,20 +4368,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "graceful shutdown",
+        "sigterm handling",
+        "connection draining",
+        "kubernetes termination",
+        "service lifecycle",
+        "in-flight requests",
+        "shutdown signals"
+      ],
       "eEatSignals": {
         "experience": "From achieving zero-downtime deployments in Kubernetes by correctly handling the SIGTERM/preStop lifecycle",
         "expertise": "Cites the specific K8s SIGTERM -> terminationGracePeriodSeconds -> SIGKILL lifecycle",
         "authoritativeness": "Aligns with official Kubernetes and Google Cloud documentation on pod termination",
         "trustworthiness": "Provides a complete, robust solution covering both the application (SIGTERM handler) and the orchestrator (preStop hook)"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-incorrect-financial-calculation",
@@ -3587,20 +4428,34 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "floating point precision",
+        "currency calculation",
+        "decimal arithmetic",
+        "financial accuracy",
+        "money handling",
+        "rounding errors"
+      ],
       "eEatSignals": {
         "experience": "From fintech reconciliation audits where \"pennies\" of rounding errors accumulated into millions of dollars of discrepancies",
         "expertise": "Cites the specific 0.1 + 0.2 failure case and explains why it fails (binary vs. decimal representation)",
         "authoritativeness": "Based on the foundational, non-negotiable rules of financial software engineering",
         "trustworthiness": "Provides the two industry-standard, correct solutions (Decimal or Cents), giving teams flexibility"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-currency-conversion-error",
@@ -3632,21 +4487,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "currency conversion",
+        "exchange rate errors",
+        "hardcoded rates",
+        "financial accuracy",
+        "forex calculation",
+        "currency precision",
+        "rounding errors"
+      ],
       "eEatSignals": {
         "experience": "From international e-commerce platforms where stale FX rates led to significant revenue loss",
         "expertise": "Recommends the \"integer (cents) + currency code\" storage model, which is a best practice for multi-currency systems",
         "authoritativeness": "Aligns with standard treasury and fintech practices that require auditable, real-time FX rates",
         "trustworthiness": "Provides a clear, auditable trail by mandating that the rate itself be logged with the transaction"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-validation-for-business-rules",
@@ -3678,8 +4548,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -3687,14 +4557,28 @@
         "pain-point-22-missing-validations",
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "business rule validation",
+        "business logic validation",
+        "rule enforcement",
+        "domain validation",
+        "constraint checking",
+        "business integrity"
+      ],
       "eEatSignals": {
         "experience": "From fintech projects where business logic (like compliance rules) was buried in code, making it impossible to audit or update",
         "expertise": "Recommends a specific, advanced architecture: separating logic into a Business Rules Engine (BRE) like Drools",
         "authoritativeness": "Aligns with modern enterprise architecture patterns (like AWS Step Functions for orchestration) for managing complex logic",
         "trustworthiness": "Provides a TDD-based approach to ensure business logic is correctly translated into testable code"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-double-charging-customers",
@@ -3726,21 +4610,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "idempotency",
+        "duplicate charges",
+        "payment retry",
+        "double billing",
+        "transaction deduplication",
+        "idempotency keys",
+        "payment processing"
+      ],
       "eEatSignals": {
         "experience": "This is the single most common and costly failure mode in distributed payment systems",
         "expertise": "Cites the correct, layered solution: application-level idempotency keys (fast) and database-level UNIQUE constraints (safe)",
         "authoritativeness": "This solution is the industry-standard pattern, famously implemented by Stripe",
         "trustworthiness": "Provides a clear, testable method (send request twice in CI) to prove idempotency is working"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-incorrect-tax-calculation",
@@ -3772,7 +4671,7 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -3780,14 +4679,29 @@
         "pain-point-05-missing-context",
         "pain-point-03-hallucinated-capabilities"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "tax calculation",
+        "sales tax",
+        "tax jurisdiction",
+        "tax compliance",
+        "regulatory compliance",
+        "tax rates",
+        "nexus determination"
+      ],
       "eEatSignals": {
         "experience": "From e-commerce platforms that faced state-level audits for miscalculating sales tax",
         "expertise": "Cites the \"Buy, Don't Build\" rule as the only correct architectural decision for tax compliance",
         "authoritativeness": "References major industry providers (Avalara, TaxJar, Stripe) as the authoritative solution",
         "trustworthiness": "Provides a clear, non-negotiable warning that AI cannot solve this problem and that attempting to will lead to liability"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-idempotency-check",
@@ -3812,23 +4726,42 @@
         "static": "API linter to flag all POST/PUT endpoints that do not check for an Idempotency-Key header",
         "runtime": "Monitor logs for duplicate processing"
       },
+      "mitigation": [
+        "Immediately disable or rate-limit the affected endpoint to prevent further duplicate processing of requests",
+        "Audit database records and transaction logs to identify and remediate duplicate charges or data entries",
+        "Deploy emergency fix implementing idempotency key validation and caching before re-enabling the endpoint"
+      ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "idempotency",
+        "duplicate prevention",
+        "transaction safety",
+        "replay protection",
+        "unique request handling",
+        "double processing"
+      ],
       "eEatSignals": {
         "experience": "From designing resilient, distributed systems where network failures are a given",
         "expertise": "Cites the specific \"idempotency key + cached response\" pattern, which is the most robust implementation",
         "authoritativeness": "This is the industry-standard \"gold standard\" pattern used by payment processors like Stripe",
         "trustworthiness": "Guarantees \"exactly-once\" semantics for an \"at-least-once\" delivery environment (i.e., network retries)"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-incorrect-discount-application",
@@ -3860,22 +4793,37 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "discount calculation",
+        "promo stacking",
+        "e-commerce logic",
+        "pricing errors",
+        "coupon validation",
+        "discount abuse",
+        "promotional logic"
+      ],
       "eEatSignals": {
         "experience": "From e-commerce incidents where a \"stackable\" coupon bug allowed users to get $1000 orders for free",
         "expertise": "Recommends a \"promotion engine\" microservice, an advanced, scalable architecture for handling complex pricing rules",
         "authoritativeness": "Aligns with modern e-commerce platform architecture",
         "trustworthiness": "Provides a clear, test-driven (TDD) approach to validate complex, high-stakes business logic"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-price-validation",
@@ -3907,8 +4855,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -3916,14 +4864,28 @@
         "pain-point-22-missing-validations",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "price validation",
+        "monetary validation",
+        "pricing logic",
+        "cost verification",
+        "amount validation",
+        "financial integrity"
+      ],
       "eEatSignals": {
         "experience": "From real-world e-commerce exploits where attackers tampered with client-side form fields to \"name their own price\"",
         "expertise": "Cites the correct \"server-side recalculation\" pattern as the only secure solution",
         "authoritativeness": "This is a classic \"Improper Input Validation\" (CWE-20) and \"Business Logic\" (CWE-840) vulnerability",
         "trustworthiness": "Provides a clear, non-negotiable rule: \"NEVER trust a price field from a client\""
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-rate-limit-exceeded",
@@ -3954,21 +4916,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "rate limit errors",
+        "API quota",
+        "throttling errors",
+        "rate limit handling",
+        "quota exceeded",
+        "API limits"
+      ],
       "eEatSignals": {
         "experience": "From building API clients that were \"chatty\" and got IP-banned by third-party services for ignoring rate limits",
         "expertise": "Cites the correct, two-part solution: honoring the Retry-After header (primary) or using exponential backoff (fallback)",
         "authoritativeness": "This is the \"client-side\" of the OWASP API4: Unrestricted Resource Consumption problem",
         "trustworthiness": "Provides a \"good neighbor\" policy that prevents your clients from DDoSing your partners"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-authentication-headers",
@@ -3999,8 +4975,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/capability-grounding-manifest",
-          "process/release-readiness-runbook"
+          "capability-grounding-manifest",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -4008,14 +4984,29 @@
         "pain-point-22-missing-validations",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "authentication headers",
+        "authorization header",
+        "bearer token",
+        "API authentication",
+        "auth token",
+        "authentication flow",
+        "missing credentials"
+      ],
       "eEatSignals": {
         "experience": "From debugging client applications that \"suddenly stopped working\" because they lacked token-refresh logic",
         "expertise": "Cites the \"client middleware/interceptor\" pattern as the correct, centralized way to manage auth headers",
         "authoritativeness": "Aligns with standard OAuth2/JWT client implementation patterns",
         "trustworthiness": "Provides an advanced, resilient pattern: automatically refresh the token on 401 and retry the request once"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-incorrect-content-type-headers",
@@ -4046,26 +5037,41 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/capability-grounding-manifest",
-          "process/release-readiness-runbook"
+          "capability-grounding-manifest",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "content-type header",
+        "http headers",
+        "json requests",
+        "api client configuration",
+        "mime type",
+        "request headers",
+        "content negotiation"
+      ],
       "eEatSignals": {
         "experience": "From debugging \"mystery\" 415 errors that were caused by a missing Content-Type header on a POST request",
         "expertise": "Cites the critical distinction between Content-Type (what I am sending) and Accept (what I want back)",
         "authoritativeness": "Aligns with foundational HTTP 1.1 protocol standards (RFC 7231)",
         "trustworthiness": "Recommends using modern clients that automate this, reducing the chance of human (or AI) error"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-pagination-in-api-client",
-      "title": "Prevent Missing Pagination In Api Client",
+      "title": "Prevent Missing Pagination In API Client",
       "category": "guardrails",
       "subcategory": "integration",
       "severity": "medium",
@@ -4092,8 +5098,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/capability-grounding-manifest",
-          "process/release-readiness-runbook"
+          "capability-grounding-manifest",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -4101,14 +5107,28 @@
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "pagination",
+        "data chunking",
+        "page handling",
+        "result limiting",
+        "cursor pagination",
+        "offset pagination"
+      ],
       "eEatSignals": {
         "experience": "From data synchronization jobs that silently failed for months because they only ever fetched the first page of results",
         "expertise": "Cites the \"check for metadata\" and \"loop on next_page\" algorithm, which is the correct way to consume a paginated API",
         "authoritativeness": "Aligns with standard API client design patterns",
         "trustworthiness": "Provides a crucial \"safety brake\" by recommending a maximum page-fetch limit to prevent runaway loops"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-incorrect-timeout-values",
@@ -4139,25 +5159,39 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "timeout configuration",
+        "request timeout",
+        "client timeout",
+        "network timeout",
+        "timeout tuning",
+        "timeout errors"
+      ],
       "eEatSignals": {
         "experience": "From tuning microservice timeouts, where a 1s timeout was too short for a p99 of 1.2s, causing cascading failures",
         "expertise": "Cites the SLO-driven (p99) method for setting timeouts, which is an advanced SRE practice",
         "authoritativeness": "Aligns with SRE best practices on avoiding \"metastable failures\" by setting realistic timeouts",
         "trustworthiness": "Provides a nuanced, data-driven approach (\"measure p99\") instead of just \"guessing\" a timeout value"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-retry-logic-for-api-calls",
-      "title": "Prevent Missing Retry Logic For Api Calls",
+      "title": "Prevent Missing Retry Logic For API Calls",
       "category": "guardrails",
       "subcategory": "integration",
       "severity": "high",
@@ -4177,9 +5211,14 @@
         "static": "Code review of network clients to check for retry logic",
         "runtime": "Monitor logs for a high rate of client-side 5xx/timeout errors that are not followed by a retry attempt"
       },
+      "mitigation": [
+        "Temporarily pause or throttle the API client application that is failing on transient network errors",
+        "Deploy a hotfix to add retry logic with exponential backoff and jitter for 5xx/timeout/429 errors",
+        "Re-enable the client and monitor logs to confirm successful retries and reduced permanent failure rates"
+      ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -4187,18 +5226,32 @@
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "API retry",
+        "retry strategy",
+        "circuit breaker",
+        "resilient API calls",
+        "transient failure handling",
+        "backoff strategy"
+      ],
       "eEatSignals": {
         "experience": "From building resilient microservices that must gracefully handle temporary network blips between services",
         "expertise": "Cites the specific, industry-standard \"Exponential Backoff with Jitter\" algorithm as the correct implementation",
         "authoritativeness": "This is a standard resilience pattern recommended by AWS, Microsoft, and Google",
         "trustworthiness": "Provides a critical warning not to retry 4xx errors, preventing a common anti-pattern"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-breaking-api-changes",
-      "title": "Prevent Breaking Api Changes",
+      "title": "Prevent Breaking API Changes",
       "category": "guardrails",
       "subcategory": "integration",
       "severity": "critical",
@@ -4225,26 +5278,41 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "ai-behavior/capability-grounding-manifest",
-          "process/release-readiness-runbook"
+          "capability-grounding-manifest",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-03-hallucinated-capabilities"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "breaking api changes",
+        "backward compatibility",
+        "api versioning",
+        "contract breaking",
+        "api refactoring",
+        "field removal",
+        "api migration"
+      ],
       "eEatSignals": {
         "experience": "From managing public-facing APIs where a \"minor\" deploy broke thousands of clients",
         "expertise": "Cites the correct industry terms: \"API Evolution\" (non-breaking) vs. \"Versioning\" (breaking) and \"Contract Testing\"",
         "authoritativeness": "Based on Semantic Versioning (SemVer) and established REST API design best practices",
         "trustworthiness": "Provides a clear, automatable solution (contract testing) to catch this before it breaks clients"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-api-versioning",
-      "title": "Prevent Missing Api Versioning",
+      "title": "Prevent Missing API Versioning",
       "category": "guardrails",
       "subcategory": "integration",
       "severity": "high",
@@ -4271,24 +5339,39 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "API versioning",
+        "version control",
+        "API evolution",
+        "backward compatibility",
+        "API design",
+        "version strategy",
+        "API lifecycle"
+      ],
       "eEatSignals": {
         "experience": "From being \"stuck\" with a legacy, un-versioned API that could not be changed for fear of breaking critical clients",
         "expertise": "Cites the three main versioning strategies (URI, Header, Query) and recommends URI as the most explicit",
         "authoritativeness": "Aligns with standard API design guides that mandate versioning as a non-negotiable first step",
         "trustworthiness": "Provides a pragmatic \"how to fix\" plan for teams that have already launched without versioning"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-incorrect-api-error-handling",
-      "title": "Prevent Incorrect Api Error Handling",
+      "title": "Prevent Incorrect API Error Handling",
       "category": "guardrails",
       "subcategory": "integration",
       "severity": "high",
@@ -4315,21 +5398,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-05-missing-context",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "error response format",
+        "http status codes",
+        "error consistency",
+        "api error handling",
+        "stack trace exposure",
+        "error serialization",
+        "error standards"
+      ],
       "eEatSignals": {
         "experience": "From building API client libraries, where inconsistent error handling is the #1 integration bottleneck",
         "expertise": "Cites the specific fields of the RFC 7807 standard (type, title, detail) as the correct, machine-readable format",
         "authoritativeness": "Based directly on IETF RFC 7807, the internet standard for HTTP error responses",
         "trustworthiness": "Provides a clear warning about not leaking stack traces, balancing developer experience with security"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-request-validation",
@@ -4360,8 +5458,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -4369,14 +5467,28 @@
         "pain-point-17-insecure-code",
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "request validation",
+        "input validation",
+        "schema validation",
+        "data validation",
+        "payload validation",
+        "API contract enforcement"
+      ],
       "eEatSignals": {
         "experience": "From production incidents where a single null field in a request body caused a NullPointerException and brought down a service",
         "expertise": "Cites \"schema-first\" validation (JSON Schema, OpenAPI) as the modern, automated solution over manual if/then checks",
         "authoritativeness": "This is a foundational API security and integration best practice, core to OWASP and OpenAPI",
         "trustworthiness": "Provides a clear, testable, and automated way to enforce API contracts, building trust with clients"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-edge-case-testing",
@@ -4408,22 +5520,37 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "edge case testing",
+        "boundary conditions",
+        "corner cases",
+        "negative testing",
+        "error conditions",
+        "input validation testing",
+        "edge scenarios"
+      ],
       "eEatSignals": {
         "experience": "From real-world QA, where most production bugs are found in edge cases that the \"happy path\" tests missed",
         "expertise": "Cites the specific, professional QA methodologies of Boundary Value Analysis (BVA) and Equivalence Partitioning (EP)",
         "authoritativeness": "Based on foundational software testing (ISTQB) principles and best practices",
         "trustworthiness": "Provides a specific, actionable prompt to \"guide\" the AI into generating the correct, robust tests"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-insufficient-test-coverage",
@@ -4455,22 +5582,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "test coverage",
+        "code coverage",
+        "branch coverage",
+        "test completeness",
+        "coverage gaps",
+        "testing thoroughness"
+      ],
       "eEatSignals": {
         "experience": "From managing large codebases where \"line\" coverage was high but \"branch\" coverage was low, hiding significant risk",
         "expertise": "Cites the critical difference between \"line\" coverage (weak) and \"branch/decision\" coverage (strong)",
         "authoritativeness": "Aligns with standard \"shift-left\" QA and Test Automation best practices",
         "trustworthiness": "Debunks \"100% line coverage\" as a vanity metric, promoting a more robust and honest measure of test quality"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-flaky-tests-from-timing-issues",
@@ -4502,21 +5643,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "flaky tests",
+        "race conditions",
+        "timing issues",
+        "hardcoded sleeps",
+        "async testing",
+        "test reliability",
+        "non-deterministic tests"
+      ],
       "eEatSignals": {
         "experience": "From managing large CI/CD pipelines where flaky tests destroyed developer trust and slowed down releases",
         "expertise": "Cites the correct \"explicit wait\" (e.g., waitForElementVisible) pattern vs. the sleep() anti-pattern",
         "authoritativeness": "Aligns with official Playwright/Selenium documentation and testing best practices",
         "trustworthiness": "Provides a pragmatic \"auto-retry and quarantine\" workflow, which is a key practice for managing large test suites"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-integration-tests",
@@ -4548,8 +5704,8 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
@@ -4557,14 +5713,28 @@
         "pain-point-22-missing-validations",
         "pain-point-05-missing-context"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "integration testing",
+        "end-to-end testing",
+        "API testing",
+        "service integration",
+        "component interaction",
+        "system testing"
+      ],
       "eEatSignals": {
         "experience": "From incidents where all unit tests passed, but the application failed in production because the \"plumbing\" between components was broken",
         "expertise": "Cites the \"Test Pyramid\" model and \"Testcontainers\" as modern, advanced integration testing practices",
         "authoritativeness": "Aligns with all modern software testing and CI/CD best practices",
         "trustworthiness": "Provides a clear, practical strategy for testing with real dependencies (Testcontainers) and simulated ones (Mock Servers)"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-test-data-pollution",
@@ -4596,21 +5766,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "test isolation",
+        "test cleanup",
+        "database teardown",
+        "test data management",
+        "fixture cleanup",
+        "test pollution"
+      ],
       "eEatSignals": {
         "experience": "From debugging \"flaky\" CI pipelines, only to find the root cause was tests colliding over a shared test_user record",
         "expertise": "Cites the \"transactional rollback\" method as the superior, faster, and cleaner solution to manual teardown() deletion",
         "authoritativeness": "Aligns with Test Data Management (TDM) best practices that mandate test isolation",
         "trustworthiness": "Provides a clear, actionable rule: \"Never allow tests to share state\""
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-negative-test-cases",
@@ -4642,22 +5826,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "process/release-readiness-runbook"
+          "tdd-with-ai-pair",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "negative testing",
+        "error scenarios",
+        "edge cases",
+        "failure testing",
+        "invalid input testing",
+        "exception handling tests"
+      ],
       "eEatSignals": {
         "experience": "From production incidents where \"unhappy paths\" were never tested, leading to unhandled exceptions that crashed services",
         "expertise": "Cites the distinction between testing invalid inputs (e.g., bad email) and invalid states (e.g., suspended user)",
         "authoritativeness": "This is a foundational QA practice, often called \"destructive testing\" or \"failure testing\"",
         "trustworthiness": "Provides a clear, actionable prompt to \"guide\" the AI into generating the negative tests that it naturally misses"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-incorrect-test-assertions",
@@ -4690,21 +5888,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "code-quality/tdd-with-ai-pair",
-          "code-quality/keep-prs-under-control"
+          "tdd-with-ai-pair",
+          "keep-prs-under-control"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "test assertions",
+        "tautological tests",
+        "test quality",
+        "assertion correctness",
+        "test effectiveness",
+        "false positive tests"
+      ],
       "eEatSignals": {
         "experience": "From code reviews where AI-generated tests were found to be testing themselves, not the actual business logic",
         "expertise": "Cites the specific \"Arrange-Act-Assert\" (AAA) pattern and the \"don't repeat logic\" rule",
         "authoritativeness": "Aligns with unit testing best practices (e.g., Kent Beck's TDD, Roy Osherove's Art of Unit Testing)",
         "trustworthiness": "Admits that CI/CD cannot catch this; it requires human review, promoting a \"human-in-the-loop\" (HITL) process"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-performance-tests",
@@ -4736,21 +5948,35 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "performance testing",
+        "benchmark testing",
+        "latency testing",
+        "throughput testing",
+        "response time testing",
+        "performance regression"
+      ],
       "eEatSignals": {
         "experience": "Based on countless \"successful\" launches that immediately crashed when real users arrived",
         "expertise": "Cites specific SLO-driven testing (p99 latency) and test types (load, soak) as the correct methodology",
         "authoritativeness": "Aligns with SRE and release engineering best practices that treat performance testing as a mandatory gate",
         "trustworthiness": "Acknowledges the difficulty of testing in production and recommends a realistic, production-like staging environment"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-test-environment-mismatch",
@@ -4782,20 +6008,34 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "process/release-readiness-runbook"
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-01-almost-correct-code"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "environment parity",
+        "production parity",
+        "test environment setup",
+        "dependency mismatch",
+        "integration testing",
+        "environment configuration"
+      ],
       "eEatSignals": {
         "experience": "From debugging the classic \"it works on my machine\" problem, which is almost always an environment mismatch",
         "expertise": "Cites the correct, modern DevSecOps solution: Infrastructure as Code (IaC), Docker, and simulation tools (LocalStack)",
         "authoritativeness": "Aligns with HashiCorp (Terraform) and AWS best practices for environment management",
         "trustworthiness": "Provides a clear, automatable, and version-controlled approach to eliminate an entire class of \"flaky\" failures"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "prevent-missing-security-tests",
@@ -4827,22 +6067,36 @@
       ],
       "relatedResources": {
         "adjacentWorkflows": [
-          "security/security-guardrails",
-          "process/release-readiness-runbook"
+          "security-guardrails",
+          "release-readiness-runbook"
         ]
       },
       "painPointIds": [
         "pain-point-17-insecure-code",
         "pain-point-22-missing-validations"
       ],
-      "painPointKeywords": [],
+      "painPointKeywords": [
+        "security testing",
+        "penetration testing",
+        "vulnerability testing",
+        "security scanning",
+        "threat testing",
+        "security validation"
+      ],
       "eEatSignals": {
         "experience": "From implementing \"shift-left\" DevSecOps pipelines that find and fix vulnerabilities before they reach production",
         "expertise": "Cites the specific AST (Application Security Testing) tool types: SAST, DAST, SCA, and IAST",
         "authoritativeness": "This is the industry-standard approach to scaling security, recommended by OWASP, Gartner, and all major security vendors",
         "trustworthiness": "Promotes an automated, \"shift-left\" culture where security is part of the build, not an afterthought"
       },
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     }
   ]
 }

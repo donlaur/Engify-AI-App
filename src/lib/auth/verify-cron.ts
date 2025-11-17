@@ -40,12 +40,32 @@ export async function verifyCronRequest(
   // Check 3: QStash signature (if configured)
   const qstashSignature = request.headers.get('upstash-signature');
   const qstashSigningKey = process.env.QSTASH_CURRENT_SIGNING_KEY;
-  
+
   if (qstashSignature && qstashSigningKey) {
-    // QStash signature verification
-    // For now, just check presence of signature
-    // TODO: Implement full HMAC signature verification
-    return null; // Authorized via QStash
+    // QStash signature verification using @upstash/qstash
+    try {
+      const { Receiver } = await import('@upstash/qstash');
+      const receiverConfig: { currentSigningKey: string; nextSigningKey?: string } = {
+        currentSigningKey: qstashSigningKey,
+      };
+      if (process.env.QSTASH_NEXT_SIGNING_KEY) {
+        receiverConfig.nextSigningKey = process.env.QSTASH_NEXT_SIGNING_KEY;
+      }
+      const receiver = new Receiver(receiverConfig as any);
+
+      const body = await request.text();
+      const isValid = await receiver.verify({
+        signature: qstashSignature,
+        body,
+      });
+
+      if (isValid) {
+        return null; // Authorized via QStash
+      }
+    } catch (error) {
+      // If verification fails, continue to other auth methods
+      console.error('QStash signature verification failed:', error);
+    }
   }
 
   // None of the auth methods passed

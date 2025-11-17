@@ -25,8 +25,8 @@ declare global {
   interface Window {
     gtag?: (
       command: string,
-      targetId: string,
-      config?: Record<string, unknown>
+      eventName: string,
+      eventParams?: Record<string, unknown>
     ) => void;
     dataLayer?: unknown[];
   }
@@ -44,7 +44,9 @@ function GoogleAnalyticsTracking() {
         page_path: url,
       });
     }
-  }, [pathname, searchParams, GA_MEASUREMENT_ID]);
+    // GA_MEASUREMENT_ID is a constant and doesn't need to be in deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, searchParams]);
 
   return null;
 }
@@ -68,6 +70,7 @@ export function GoogleAnalytics() {
       <Script
         id="google-analytics-init"
         strategy="afterInteractive"
+        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];

@@ -97,18 +97,21 @@ export class PromptService {
     });
 
     if (duplicateCheck.isDuplicate) {
-      const duplicateError = new Error('Duplicate prompt detected');
-      (duplicateError as any).duplicateMatches = duplicateCheck.matches;
+      const duplicateError = new Error('Duplicate prompt detected') as Error & {
+        duplicateMatches?: typeof duplicateCheck.matches;
+      };
+      duplicateError.duplicateMatches = duplicateCheck.matches;
       throw duplicateError;
     }
 
     // Generate slug from title if not provided
     // IMPORTANT: Do NOT append ID - slugs should be clean and SEO-friendly
-    const { generateSlug, generateUniqueSlug } = await import('@/lib/utils/slug');
-    
+    const { generateUniqueSlug } = await import('@/lib/utils/slug');
+
     // Check for existing slugs to ensure uniqueness
     const existingPrompts = await this.promptRepository.findAll();
-    const existingSlugs = new Set(existingPrompts.map(p => p.slug).filter(Boolean) as string[]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const existingSlugs = new Set(existingPrompts.map((p: any) => p.slug).filter(Boolean) as string[]);
     
     const slug = promptData.slug || generateUniqueSlug(promptData.title, existingSlugs);
 
@@ -184,14 +187,16 @@ export class PromptService {
     // Regenerate slug if title changed (clean slug, no ID)
     const updateData = { ...promptData };
     if (promptData.title && existingPrompt.title !== promptData.title) {
-      const { generateSlug, generateUniqueSlug } = await import('@/lib/utils/slug');
-      
+      const { generateUniqueSlug } = await import('@/lib/utils/slug');
+
       // Check for existing slugs to ensure uniqueness
       const allPrompts = await this.promptRepository.findAll();
       const existingSlugs = new Set(
         allPrompts
-          .filter(p => p.id !== id) // Exclude current prompt
-          .map(p => p.slug)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((p: any) => p.id !== id) // Exclude current prompt
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((p: any) => p.slug)
           .filter(Boolean) as string[]
       );
       

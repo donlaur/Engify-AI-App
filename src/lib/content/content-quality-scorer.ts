@@ -242,9 +242,8 @@ export function analyzeEEAT(content: string): EEATSignals {
  * Analyze SEO signals
  */
 export function analyzeSEO(content: string, targetKeywords: string[] = []): SEOSignals {
-  const lowerContent = content.toLowerCase();
   const wordCount = content.split(/\s+/).length;
-  
+
   // Keyword density
   let keywordMatches = 0;
   targetKeywords.forEach(keyword => {

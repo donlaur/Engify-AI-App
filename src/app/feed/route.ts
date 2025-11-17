@@ -39,17 +39,8 @@ export async function GET() {
       .toArray();
 
     const buildDate = new Date().toUTCString();
-    
-    const rssItems = articles.map((article: {
-      title: string;
-      description?: string;
-      seo?: { slug?: string; description?: string };
-      slug?: string;
-      publishedAt?: Date;
-      updatedAt?: Date;
-      createdAt?: Date;
-      author?: { name?: string } | string;
-    }) => {
+
+    const rssItems = articles.map((article: any) => {
       const slug = article.seo?.slug || article.slug;
       const url = `${APP_URL}/learn/${slug}`;
       const pubDate = (article.publishedAt || article.createdAt) 

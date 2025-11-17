@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/lib/icons';
 import { getPainPointBySlug, loadPainPointsFromJson } from '@/lib/workflows/load-pain-points-from-json';
 import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
 import { AuthorAttribution } from '@/components/workflows/AuthorAttribution';
@@ -56,13 +55,24 @@ export async function generateMetadata({ params }: PainPointPageProps): Promise<
       description,
       url: `${APP_URL}/workflows/pain-points/${slug}`,
       type: 'article',
+      siteName: 'Engify.ai',
+      images: [
+        {
+          url: `${APP_URL}/og-images/pain-points/${slug}.png`,
+          width: 1200,
+          height: 630,
+          alt: painPoint.title,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [`${APP_URL}/og-images/pain-points/${slug}.png`],
     },
     keywords: allKeywords.length > 0 ? allKeywords : painPoint.keywords || [],
+    authors: [{ name: 'Donnie Laur' }],
   };
 }
 
@@ -84,6 +94,20 @@ export default async function PainPointPage({ params }: PainPointPageProps) {
     headline: painPoint.title,
     description: painPoint.description,
     url: `${APP_URL}/workflows/pain-points/${slug}`,
+    author: {
+      '@type': 'Person',
+      name: 'Donnie Laur',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Engify.ai',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${APP_URL}/logo.png`,
+      },
+    },
+    datePublished: painPoint.datePublished || new Date().toISOString(),
+    dateModified: painPoint.dateModified || new Date().toISOString(),
     about: {
       '@type': 'Thing',
       name: 'AI Development Pain Points',
@@ -182,7 +206,7 @@ export default async function PainPointPage({ params }: PainPointPageProps) {
               <CardHeader>
                 <CardTitle>Solution Workflows</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  The problem isn't the AI; it's the lack of a human-in-the-loop verification and governance system. These workflows are the perfect antidote.
+                  The problem isn&apos;t the AI; it&apos;s the lack of a human-in-the-loop verification and governance system. These workflows are the perfect antidote.
                 </p>
               </CardHeader>
               <CardContent>

@@ -92,7 +92,7 @@ export const patternIdSchema = z.string()
 export const patternApplicationSchema = z.object({
   patternId: patternIdSchema,
   userPrompt: promptContentSchema,
-  context: z.record(z.any()).optional(),
+  context: z.record(z.string(), z.any()).optional(),
 });
 
 // ============================================================================
@@ -161,7 +161,7 @@ export function validateSchema<T>(
     return { success: true, data: result };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
+      const firstError = error.issues[0];
       return {
         success: false,
         error: `${firstError.path.join('.')}: ${firstError.message}`,

@@ -8,7 +8,7 @@
 import { BaseService } from './BaseService';
 import { AIModelSchema, AIModel } from '@/lib/db/schemas/ai-model';
 
-export class AIModelService extends BaseService<AIModel> {
+export class AIModelService extends BaseService<any> {
   constructor() {
     super('ai_models', AIModelSchema);
   }

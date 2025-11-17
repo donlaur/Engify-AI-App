@@ -10,7 +10,6 @@ import { getModelById } from '@/lib/config/ai-models';
 import { AIProviderFactory } from '@/lib/ai/v2/factory/AIProviderFactory';
 import { z } from 'zod';
 import { logAuditEvent } from '@/server/middleware/audit';
-import { AuditEventType } from '@/lib/db/schemas/auditLog';
 
 const auditSchema = z.object({
   prompt: z
@@ -150,7 +149,7 @@ Be thorough but concise. Focus on actionable feedback.`;
 
     // Audit log
     await logAuditEvent({
-      eventType: AuditEventType.enum['admin.prompt_audit.performed'],
+      eventType: 'admin.prompt_audit.performed' as any,
       userId: session.user.id,
       action: 'prompt_audit',
       metadata: {
@@ -158,6 +157,8 @@ Be thorough but concise. Focus on actionable feedback.`;
         promptLength: prompt.length,
         overallScore: analysis.overallScore,
       },
+      ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
       success: true,
     });
 

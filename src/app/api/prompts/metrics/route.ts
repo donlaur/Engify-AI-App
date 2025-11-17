@@ -19,7 +19,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
  */
 export async function GET(request: NextRequest) {
   // Rate limiting for public API
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+  const ip = request.headers.get('x-forwarded-for') || 'unknown';
   const rateLimit = await checkRateLimit(ip, 'anonymous');
 
   if (!rateLimit.allowed) {

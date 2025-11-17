@@ -14,9 +14,9 @@ export class OpenAIAdapter implements AIProvider {
 
   /**
    * Create a new OpenAI adapter
-   * @param model - The OpenAI model to use (default: gpt-3.5-turbo)
+   * @param model - The OpenAI model to use (default: gpt-4o-mini)
    */
-  constructor(model: string = 'gpt-3.5-turbo') {
+  constructor(model: string = 'gpt-4o-mini') {
     this.client = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY || 'test-key',
     });

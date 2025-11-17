@@ -41,6 +41,11 @@ const ApiKeyAlertSchema = z.object({
   threshold: z.number().positive(),
   period: z.enum(['daily', 'weekly', 'monthly']),
   dashboardUrl: z.string().url(),
+  // Optional fields used in email template fallback
+  percentage: z.number().optional(),
+  thresholdLevel: z.number().optional(),
+  quota: z.number().optional(),
+  recommendedAction: z.string().optional(),
 });
 
 export type WelcomeVars = z.infer<typeof WelcomeSchema>;

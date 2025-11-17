@@ -12,7 +12,7 @@ export interface WorkbenchToolContract {
 
 export type ContractToolId = WorkbenchToolId | 'multi-agent';
 
-const WORKBENCH_TOOL_CONTRACTS: Record<ContractToolId, WorkbenchToolContract> = {
+const WORKBENCH_TOOL_CONTRACTS: Partial<Record<ContractToolId, WorkbenchToolContract>> = {
   'prompt-optimizer': {
     contractId: 'contract/prompt-optimizer@1',
     toolId: 'prompt-optimizer',
@@ -64,7 +64,7 @@ export function getWorkbenchToolContract(
   toolId: ContractToolId
 ): WorkbenchToolContract | null {
   if (toolId in WORKBENCH_TOOL_CONTRACTS) {
-    return WORKBENCH_TOOL_CONTRACTS[toolId];
+    return WORKBENCH_TOOL_CONTRACTS[toolId] ?? null;
   }
   // If tool exists but no contract, return null (front-end tools may not need one)
   return null;

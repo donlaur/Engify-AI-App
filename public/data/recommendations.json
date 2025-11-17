@@ -1,6 +1,6 @@
 {
-  "version": "1.0",
-  "generatedAt": "2025-11-15T06:34:11.246Z",
+  "version": "1.1",
+  "generatedAt": "2025-11-17T03:08:14.067415Z",
   "totalRecommendations": 23,
   "recommendations": [
     {
@@ -22,9 +22,14 @@
         "pain-point-05-missing-context",
         "pain-point-06-brownfield-penalty"
       ],
-      "relatedPrompts": [],
+      "relatedPrompts": [
+        "code-refactoring-assistant",
+        "unit-test-generator-comprehensive-mocking"
+      ],
       "relatedPatterns": [
-        "few-shot"
+        "few-shot",
+        "template",
+        "zero-shot"
       ],
       "researchCitations": [],
       "primaryKeywords": [
@@ -57,7 +62,14 @@
         "engineering-managers"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-02-implement-guardrails-for-critical-code-paths",
@@ -82,8 +94,14 @@
         "pain-point-19-insecure-code",
         "pain-point-20-schema-drift"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "security-vulnerability-analysis-verification",
+        "code-review-with-self-verification"
+      ],
+      "relatedPatterns": [
+        "cognitive-verifier",
+        "self-reflection"
+      ],
       "researchCitations": [],
       "primaryKeywords": [
         "AI guardrails",
@@ -118,7 +136,14 @@
         "cto"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-03-choose-ai-model-based-on-task-requirements",
@@ -172,7 +197,14 @@
         "architects"
       ],
       "priority": "medium",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-04-enforce-small-prs-for-ai-code",
@@ -187,13 +219,20 @@
         "code-quality/keep-prs-under-control",
         "process/daily-merge-discipline"
       ],
-      "relatedGuardrails": [],
+      "relatedGuardrails": [
+        "guardrails/testing/prevent-insufficient-test-coverage"
+      ],
       "relatedPainPoints": [
         "pain-point-10-oversized-prs",
         "pain-point-01-almost-correct-code"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "code-review-assistant"
+      ],
+      "relatedPatterns": [
+        "recipe",
+        "template"
+      ],
       "researchCitations": [
         {
           "source": "Creating a comprehensive code review checklist for your team - Graphite.com",
@@ -251,7 +290,14 @@
         "qa"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-05-structure-reusable-prompt-library",
@@ -270,8 +316,16 @@
         "pain-point-08-toolchain-sprawl",
         "pain-point-21-duplicate-tooling"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "code-review-assistant",
+        "unit-test-generator-comprehensive-mocking",
+        "api-documentation-generator"
+      ],
+      "relatedPatterns": [
+        "few-shot",
+        "persona",
+        "template"
+      ],
       "researchCitations": [],
       "primaryKeywords": [
         "Prompt library",
@@ -306,7 +360,14 @@
         "vp-engineering"
       ],
       "priority": "medium",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-06-always-validate-ai-suggestions",
@@ -323,15 +384,25 @@
         "process/release-readiness-runbook"
       ],
       "relatedGuardrails": [
-        "guardrails/security/prevent-sql-injection-vulnerability"
+        "guardrails/security/prevent-hardcoded-secrets-in-ai-generated-code",
+        "guardrails/security/prevent-sql-injection-vulnerability",
+        "guardrails/testing/prevent-missing-edge-case-testing"
       ],
       "relatedPainPoints": [
         "pain-point-01-almost-correct-code",
         "pain-point-02-trust-deficit",
         "pain-point-19-insecure-code"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "code-review-assistant",
+        "bug-investigation-helper",
+        "security-vulnerability-analysis-verification",
+        "code-review-with-self-verification"
+      ],
+      "relatedPatterns": [
+        "cognitive-verifier",
+        "self-reflection"
+      ],
       "researchCitations": [
         {
           "source": "Understanding Security Risks in AI-Generated Code | CSA",
@@ -373,7 +444,14 @@
         "qa"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-07-use-tdd-with-ai-generated-code",
@@ -389,13 +467,20 @@
         "ai-behavior/trust-but-verify-triage"
       ],
       "relatedGuardrails": [
-        "guardrails/testing/prevent-missing-edge-case-tests"
+        "guardrails/testing/prevent-missing-edge-case-testing",
+        "guardrails/testing/prevent-insufficient-test-coverage"
       ],
       "relatedPainPoints": [
         "pain-point-01-almost-correct-code"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "unit-test-generator-comprehensive-mocking",
+        "e2e-test-scenario-builder"
+      ],
+      "relatedPatterns": [
+        "chain-of-thought",
+        "few-shot"
+      ],
       "researchCitations": [],
       "primaryKeywords": [
         "Test-Driven Development (TDD)",
@@ -429,7 +514,14 @@
         "engineering-managers"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-08-establish-ai-governance-before-scaling",
@@ -488,7 +580,14 @@
         "engineering-managers"
       ],
       "priority": "high",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-09-focus-ai-on-strategic-tasks",
@@ -507,8 +606,16 @@
       "relatedPainPoints": [
         "pain-point-23-tactical-trap"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "system-design-review",
+        "architecture-decision-record-adr",
+        "strategic-technical-roadmap-builder",
+        "root-cause-analysis-with-hypothesis-testing"
+      ],
+      "relatedPatterns": [
+        "chain-of-thought",
+        "hypothesis-testing"
+      ],
       "researchCitations": [],
       "primaryKeywords": [
         "Strategic AI",
@@ -543,7 +650,14 @@
         "engineering-managers"
       ],
       "priority": "medium",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "id": "recommendation-10-monitor-ai-costs-and-usage",
@@ -597,7 +711,14 @@
         "engineering-managers"
       ],
       "priority": "medium",
-      "status": "published"
+      "status": "published",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "designate-ai-champions-to-scale-adoption",
@@ -673,7 +794,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-11-designate-ai-champions-to-scale-adoption"
+      "id": "recommendation-11-designate-ai-champions-to-scale-adoption",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "establish-ai-community-of-practice",
@@ -742,7 +870,14 @@
       ],
       "priority": "medium",
       "status": "published",
-      "id": "recommendation-12-establish-ai-community-of-practice"
+      "id": "recommendation-12-establish-ai-community-of-practice",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "implement-ai-literacy-framework",
@@ -764,8 +899,13 @@
         "pain-point-04-skill-atrophy",
         "pain-point-19-insecure-code"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "concept-explainer"
+      ],
+      "relatedPatterns": [
+        "audience-persona",
+        "few-shot"
+      ],
       "researchCitations": [
         {
           "source": "AI Literacy White Paper | The Learning and Development Initiative",
@@ -819,7 +959,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-13-implement-ai-literacy-framework"
+      "id": "recommendation-13-implement-ai-literacy-framework",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "mandate-secure-prompt-engineering",
@@ -843,8 +990,14 @@
         "pain-point-03-hallucinated-capabilities",
         "pain-point-01-almost-correct-code"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "security-vulnerability-analysis-verification"
+      ],
+      "relatedPatterns": [
+        "few-shot",
+        "persona",
+        "template"
+      ],
       "researchCitations": [
         {
           "source": "Understanding Security Risks in AI-Generated Code | CSA",
@@ -898,7 +1051,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-14-mandate-secure-prompt-engineering"
+      "id": "recommendation-14-mandate-secure-prompt-engineering",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "adopt-ai-tool-evaluation-matrix",
@@ -967,7 +1127,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-15-adopt-ai-tool-evaluation-matrix"
+      "id": "recommendation-15-adopt-ai-tool-evaluation-matrix",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "standardize-on-enterprise-ai-tools",
@@ -1038,7 +1205,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-16-standardize-on-enterprise-ai-tools"
+      "id": "recommendation-16-standardize-on-enterprise-ai-tools",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "integrate-ai-analysis-in-cicd",
@@ -1054,17 +1228,23 @@
         "process/release-readiness-runbook"
       ],
       "relatedGuardrails": [
-        "guardrails/security/prevent-sql-injection-vulnerability",
+        "guardrails/data-integrity/prevent-data-corruption-in-ai-generated-migrations",
         "guardrails/security/prevent-hardcoded-secrets-in-ai-generated-code",
-        "guardrails/data-integrity/prevent-data-corruption-in-ai-generated-migrations"
+        "guardrails/security/prevent-sql-injection-vulnerability"
       ],
       "relatedPainPoints": [
         "pain-point-19-insecure-code",
         "pain-point-01-almost-correct-code",
         "pain-point-16-guardrail-evasion"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "security-vulnerability-analysis-verification",
+        "code-review-assistant"
+      ],
+      "relatedPatterns": [
+        "cognitive-verifier",
+        "self-reflection"
+      ],
       "researchCitations": [
         {
           "source": "Code Quality & Security Software | Static Analysis Tool | Sonar",
@@ -1113,7 +1293,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-17-integrate-ai-analysis-in-cicd"
+      "id": "recommendation-17-integrate-ai-analysis-in-cicd",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "use-ai-for-test-generation-and-maintenance",
@@ -1128,14 +1315,22 @@
         "process/release-readiness-runbook"
       ],
       "relatedGuardrails": [
-        "guardrails/testing/prevent-missing-edge-case-tests"
+        "guardrails/testing/prevent-flaky-tests-from-timing-issues",
+        "guardrails/testing/prevent-insufficient-test-coverage",
+        "guardrails/testing/prevent-missing-edge-case-testing"
       ],
       "relatedPainPoints": [
         "pain-point-01-almost-correct-code",
         "pain-point-05-missing-context"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "unit-test-generator-comprehensive-mocking",
+        "e2e-test-scenario-builder"
+      ],
+      "relatedPatterns": [
+        "chain-of-thought",
+        "few-shot"
+      ],
       "researchCitations": [
         {
           "source": "Testing AI Code in CI/CD Made Simple for Developers - Speedscale",
@@ -1184,7 +1379,14 @@
       ],
       "priority": "medium",
       "status": "published",
-      "id": "recommendation-18-use-ai-for-test-generation-and-maintenance"
+      "id": "recommendation-18-use-ai-for-test-generation-and-maintenance",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "leverage-ai-for-pr-summaries-release-notes",
@@ -1204,8 +1406,13 @@
         "pain-point-05-missing-context",
         "pain-point-23-tactical-trap"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "code-review-assistant"
+      ],
+      "relatedPatterns": [
+        "structured-output",
+        "template"
+      ],
       "researchCitations": [
         {
           "source": "Boost your Continuous Delivery pipeline with Generative AI | Google ...",
@@ -1248,7 +1455,14 @@
       ],
       "priority": "medium",
       "status": "published",
-      "id": "recommendation-19-leverage-ai-for-pr-summaries-release-notes"
+      "id": "recommendation-19-leverage-ai-for-pr-summaries-release-notes",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "augment-code-review-with-ai-checklist",
@@ -1265,15 +1479,23 @@
       ],
       "relatedGuardrails": [
         "guardrails/security/prevent-sql-injection-vulnerability",
-        "guardrails/testing/prevent-missing-edge-case-tests"
+        "guardrails/testing/prevent-missing-edge-case-testing"
       ],
       "relatedPainPoints": [
         "pain-point-01-almost-correct-code",
         "pain-point-19-insecure-code",
         "pain-point-03-hallucinated-capabilities"
       ],
-      "relatedPrompts": [],
-      "relatedPatterns": [],
+      "relatedPrompts": [
+        "code-review-assistant",
+        "code-review-with-self-verification",
+        "security-vulnerability-analysis-verification"
+      ],
+      "relatedPatterns": [
+        "cognitive-verifier",
+        "self-reflection",
+        "template"
+      ],
       "researchCitations": [
         {
           "source": "The Most Common Security Vulnerabilities in AI-Generated Code ...",
@@ -1322,7 +1544,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-20-augment-code-review-with-ai-checklist"
+      "id": "recommendation-20-augment-code-review-with-ai-checklist",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "implement-dlp-and-genai-firewalls",
@@ -1337,7 +1566,10 @@
         "process/platform-consolidation-playbook",
         "governance/ai-governance-scorecard"
       ],
-      "relatedGuardrails": [],
+      "relatedGuardrails": [
+        "guardrails/security/prevent-exposed-sensitive-data-in-logs",
+        "guardrails/security/prevent-hardcoded-secrets-in-ai-generated-code"
+      ],
       "relatedPainPoints": [
         "pain-point-08-toolchain-sprawl",
         "pain-point-12-vibe-coding",
@@ -1387,7 +1619,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-21-implement-dlp-and-genai-firewalls"
+      "id": "recommendation-21-implement-dlp-and-genai-firewalls",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "enforce-governance-over-sensitive-data-in-prompts",
@@ -1402,6 +1641,7 @@
         "security/security-guardrails"
       ],
       "relatedGuardrails": [
+        "guardrails/security/prevent-exposed-sensitive-data-in-logs",
         "guardrails/security/prevent-hardcoded-secrets-in-ai-generated-code"
       ],
       "relatedPainPoints": [
@@ -1460,7 +1700,14 @@
       ],
       "priority": "high",
       "status": "published",
-      "id": "recommendation-22-enforce-governance-over-sensitive-data-in-prompts"
+      "id": "recommendation-22-enforce-governance-over-sensitive-data-in-prompts",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     },
     {
       "slug": "mitigate-ip-and-copyright-risks-from-ai",
@@ -1539,7 +1786,14 @@
       ],
       "priority": "medium",
       "status": "published",
-      "id": "recommendation-23-mitigate-ip-and-copyright-risks-from-ai"
+      "id": "recommendation-23-mitigate-ip-and-copyright-risks-from-ai",
+      "publishedDate": "2025-01-17",
+      "lastUpdated": "2025-01-17",
+      "author": "Engify Engineering Leadership Team",
+      "reviewedBy": [
+        "Engineering Leaders",
+        "AI Practitioners"
+      ]
     }
   ]
 }

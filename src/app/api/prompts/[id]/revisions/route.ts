@@ -5,24 +5,30 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
-import { auth } from '@/lib/auth';
+import { ObjectId } from 'mongodb';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth();
     const db = await getMongoDb();
     const { id } = await params;
-    
+
+    // Build query conditions
+    const queryConditions: any[] = [
+      { id },
+      { slug: id },
+    ];
+
+    // Only add _id condition if id is a valid ObjectId
+    if (ObjectId.isValid(id)) {
+      queryConditions.push({ _id: new ObjectId(id) });
+    }
+
     // Find prompt by id or slug
     const prompt = await db.collection('prompts').findOne({
-      $or: [
-        { id },
-        { slug: id },
-        { _id: id },
-      ],
+      $or: queryConditions,
     });
 
     if (!prompt) {

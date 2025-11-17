@@ -39,8 +39,22 @@ interface AffiliateLink {
   status: 'active' | 'pending' | 'requested';
   notes?: string;
   clickCount?: number;
+  uniqueClicks?: number;
   conversionCount?: number;
   lastClickAt?: Date;
+  clicksToday?: number;
+  clicksThisWeek?: number;
+  clicksThisMonth?: number;
+}
+
+interface AffiliateStats {
+  totalClicks: number;
+  uniqueClicks: number;
+  clicksByTool: Record<string, number>;
+  clicksBySource: Record<string, number>;
+  recentClicks: any[];
+  conversionRate?: number;
+  estimatedRevenue?: number;
 }
 
 interface PartnershipOutreach {
@@ -57,6 +71,7 @@ interface PartnershipOutreach {
 export function AffiliateLinkManagement() {
   const [links, setLinks] = useState<AffiliateLink[]>([]);
   const [outreach, setOutreach] = useState<PartnershipOutreach[]>([]);
+  const [stats, setStats] = useState<AffiliateStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingLink, setEditingLink] = useState<AffiliateLink | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -72,6 +87,7 @@ export function AffiliateLinkManagement() {
         const data = await response.json();
         setLinks(data.links || []);
         setOutreach(data.outreach || []);
+        setStats(data.stats || null);
       }
     } catch (error) {
       console.error('Failed to fetch affiliate data:', error);
@@ -130,6 +146,65 @@ export function AffiliateLinkManagement() {
 
   return (
     <div className="space-y-6">
+      {/* Overall Stats Section */}
+      {stats && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
+              <Icons.target className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalClicks.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.uniqueClicks.toLocaleString()} unique
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+              <Icons.trendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {((stats.conversionRate || 0) * 100).toFixed(1)}%
+              </div>
+              <p className="text-xs text-muted-foreground">Estimated</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Est. Revenue</CardTitle>
+              <Icons.dollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                ${(stats.estimatedRevenue || 0).toFixed(0)}
+              </div>
+              <p className="text-xs text-muted-foreground">This month</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Links</CardTitle>
+              <Icons.link className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {links.filter((l) => l.status === 'active').length}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                of {links.length} total
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Affiliate Links Section */}
       <Card>
         <CardHeader>
@@ -181,9 +256,19 @@ export function AffiliateLinkManagement() {
                     </p>
                   )}
                   {link.clickCount !== undefined && (
-                    <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
-                      <span>Clicks: {link.clickCount}</span>
-                      <span>Conversions: {link.conversionCount || 0}</span>
+                    <div className="mt-2 space-y-1">
+                      <div className="flex gap-4 text-xs text-muted-foreground">
+                        <span>Total: {link.clickCount.toLocaleString()}</span>
+                        <span>Unique: {link.uniqueClicks?.toLocaleString() || 0}</span>
+                        <span>Conversions: {link.conversionCount || 0}</span>
+                      </div>
+                      {(link.clicksToday || link.clicksThisWeek || link.clicksThisMonth) && (
+                        <div className="flex gap-4 text-xs text-muted-foreground">
+                          <span>Today: {link.clicksToday || 0}</span>
+                          <span>Week: {link.clicksThisWeek || 0}</span>
+                          <span>Month: {link.clicksThisMonth || 0}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                   {link.notes && (

@@ -11,7 +11,9 @@ export function hasProcessedMessage(messageId: string | null): boolean {
   processedMessages.add(messageId);
   if (processedMessages.size > MAX_PROCESSED_CACHE) {
     const first = processedMessages.values().next().value;
-    processedMessages.delete(first);
+    if (first) {
+      processedMessages.delete(first);
+    }
   }
   return false;
 }

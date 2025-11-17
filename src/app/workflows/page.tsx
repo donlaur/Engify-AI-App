@@ -3,7 +3,6 @@ import Link from 'next/link';
 
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/lib/icons';
 import { WorkflowsClient } from './WorkflowsClient';
 import { WorkflowTracking } from './WorkflowTracking';
 import {
@@ -53,7 +52,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function WorkflowsPage() {
-  const [workflows, categories, audiences, metadata, painPointsMetadata] = await Promise.all([
+  const [workflows, categories, audiences, metadata, _painPointsMetadata] = await Promise.all([
     loadWorkflowsFromJson(),
     listWorkflowCategories(),
     listWorkflowAudiences(),
@@ -152,7 +151,7 @@ export default async function WorkflowsPage() {
                 <strong className="text-foreground">Workflows</strong> are step-by-step checklists that address specific <Link href="/workflows/pain-points" className="text-primary hover:underline">pain points</Link> in AI-assisted development. Each workflow transforms a pain point into a preventable pattern with actionable steps your team can implement today.
               </p>
               <p>
-                These are <strong className="text-foreground">manual processes</strong> you can start using immediately—no automation required. They're battle-tested patterns backed by industry research and real-world production incidents.
+                These are <strong className="text-foreground">manual processes</strong> you can start using immediately—no automation required. They&apos;re battle-tested patterns backed by industry research and real-world production incidents.
               </p>
             </div>
           </div>

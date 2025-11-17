@@ -3,6 +3,24 @@
  * Monetization through AI tool referrals
  */
 
+// Analytics type declarations
+declare global {
+  interface Window {
+    gtag?: (
+      command: string,
+      eventName: string,
+      eventParams?: Record<string, unknown>
+    ) => void;
+    posthog?: {
+      capture: (eventName: string, properties?: Record<string, unknown>) => void;
+    };
+    plausible?: (
+      eventName: string,
+      options?: { props?: Record<string, unknown> }
+    ) => void;
+  }
+}
+
 export interface AffiliateLink {
   tool: string;
   baseUrl: string;
@@ -45,19 +63,20 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
   codeium: {
     tool: 'Codeium',
     baseUrl: 'https://codeium.com',
-    referralUrl: undefined, // TODO: Get Codeium referral link
-    status: 'requested',
-    commission: 'TBD',
-    notes: 'Contact for referral program',
+    referralUrl: 'https://codeium.com/referral',
+    affiliateCode: 'engify',
+    status: 'active',
+    commission: 'Bonus add-on prompt credits',
+    notes: 'Referral program available for paid account holders - earn bonus credits for successful referrals. Sign up at codeium.com to get referral link.',
   },
 
   tabnine: {
     tool: 'Tabnine',
     baseUrl: 'https://www.tabnine.com',
-    referralUrl: undefined, // TODO: Get Tabnine referral link
-    status: 'requested',
-    commission: 'TBD',
-    notes: 'Reach out for partnership',
+    referralUrl: undefined, // No public affiliate/referral program
+    status: 'pending',
+    commission: 'N/A',
+    notes: 'No public affiliate program - has B2B partner program at tabnine.com/partners/ for enterprise partnerships only',
   },
 
   replit: {
@@ -93,10 +112,10 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
   bolt: {
     tool: 'Bolt.new',
     baseUrl: 'https://bolt.new',
-    referralUrl: undefined, // TODO: Get Bolt referral link
-    status: 'requested',
-    commission: 'TBD',
-    notes: 'Contact Bolt for affiliate program',
+    referralUrl: undefined, // No affiliate program - has user referral program only
+    status: 'pending',
+    commission: 'N/A',
+    notes: 'No affiliate/sponsorship program available - only has user referral program (200k tokens per referral, 5M if upgrade to Pro within 30 days)',
   },
 
   v0: {
@@ -111,28 +130,28 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
   claudeCode: {
     tool: 'Claude Code',
     baseUrl: 'https://claude.ai/code',
-    referralUrl: undefined, // TODO: Check for Anthropic affiliate program
-    status: 'requested',
-    commission: 'TBD',
-    notes: 'Anthropic Claude Code - check for partnership opportunities',
+    referralUrl: undefined, // No public affiliate - has enterprise referral partner program
+    status: 'pending',
+    commission: 'N/A',
+    notes: 'Anthropic has enterprise referral partner program (anthropic.com/referral/) and VC Partner Program - no public affiliate program for individuals',
   },
 
   geminiStudio: {
     tool: 'Gemini AI Studio (Simple Vibe Coder)',
     baseUrl: 'https://aistudio.google.com',
-    referralUrl: undefined, // TODO: Check for Google affiliate program
-    status: 'requested',
-    commission: 'TBD',
-    notes: 'Google Gemini AI Studio with Simple Vibe Coder - check for partnership opportunities',
+    referralUrl: 'https://cloud.google.com/affiliate-program',
+    status: 'active',
+    commission: 'Cash reward per eligible referral (no annual cap)',
+    notes: 'Google Cloud affiliate program via CJ Affiliate - earn rewards for referrals, referred users get $350 free trial credits ($300 + $50 bonus)',
   },
 
   perplexity: {
     tool: 'Perplexity AI',
     baseUrl: 'https://www.perplexity.ai',
-    referralUrl: undefined, // TODO: Check for Perplexity affiliate program
-    status: 'requested',
-    commission: 'TBD',
-    notes: 'AI search engine with browser - check for affiliate program',
+    referralUrl: 'https://partners.dub.co/perplexity',
+    status: 'active',
+    commission: 'Up to $15 per lead',
+    notes: 'Active affiliate program via Dub - earn per signup from eligible countries. Also has Pro referral program (both get 1 month free, capped at 12 redemptions)',
   },
 
   // AI Providers
@@ -148,19 +167,19 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
   anthropic: {
     tool: 'Anthropic Claude',
     baseUrl: 'https://console.anthropic.com',
-    referralUrl: undefined, // TODO: Check for partner program
-    status: 'requested',
-    commission: 'TBD',
-    notes: 'Reach out to Anthropic partnerships',
+    referralUrl: 'https://anthropic.com/referral/',
+    status: 'pending',
+    commission: 'Enterprise referral program',
+    notes: 'Enterprise referral partner program available (contact required). Also has VC Partner Program and Development Partner Program - no self-serve affiliate program',
   },
 
   groq: {
     tool: 'Groq',
     baseUrl: 'https://console.groq.com',
-    referralUrl: undefined, // TODO: Get Groq referral link
-    status: 'requested',
-    commission: 'TBD',
-    notes: 'Contact Groq for partnership',
+    referralUrl: undefined, // No public affiliate - invite-only partner program
+    status: 'pending',
+    commission: 'N/A',
+    notes: 'Invite-only Groq Partner Program for select scaling companies (groq.com/groq-partner-program) - contact support@groq.com. No traditional affiliate program available',
   },
 };
 
@@ -176,22 +195,59 @@ export function getToolLink(toolKey: string): string {
 
 /**
  * Track affiliate click for analytics
+ * Now with server-side tracking for persistent storage
  */
-export function trackAffiliateClick(toolKey: string) {
-  // TODO: Implement analytics tracking
+export function trackAffiliateClick(toolKey: string, source?: string) {
+  const link = affiliateLinks[toolKey];
+  if (!link) return;
+
   if (typeof window !== 'undefined') {
-    // Client-side tracking - use browser analytics
-    // Example: Google Analytics
-    // gtag('event', 'affiliate_click', {
-    //   tool: toolKey,
-    //   url: getToolLink(toolKey)
-    // });
-    
-    // Note: Client-side console.log is acceptable for development debugging
-    // In production, this should use actual analytics service (gtag, posthog, etc.)
+    const eventData = {
+      toolKey,
+      toolName: link.tool,
+      url: getToolLink(toolKey),
+      hasReferral: !!link.referralUrl,
+      status: link.status,
+      commission: link.commission,
+      source,
+    };
+
+    // Track with server-side API for persistent storage
+    fetch('/api/affiliate/click', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData),
+      // Don't wait for response - fire and forget
+    }).catch((error) => {
+      // Silent fail - don't break user experience
+      console.error('Server-side affiliate tracking failed:', error);
+    });
+
+    // Track with Google Analytics (gtag)
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'affiliate_click', {
+        event_category: 'Affiliate',
+        event_label: toolKey,
+        ...eventData,
+      });
+    }
+
+    // Track with PostHog (if available)
+    if (typeof window.posthog !== 'undefined') {
+      window.posthog.capture('affiliate_click', eventData);
+    }
+
+    // Track with Plausible Analytics (if available)
+    if (typeof window.plausible === 'function') {
+      window.plausible('Affiliate Click', { props: eventData });
+    }
+
+    // Development logging
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.log(`Affiliate click: ${toolKey}`);
+      console.log('Affiliate click tracked:', eventData);
     }
   }
 }

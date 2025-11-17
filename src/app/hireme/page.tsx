@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';

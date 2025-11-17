@@ -140,9 +140,9 @@ export function WorkbenchPageClient() {
             <div>
               <h3 className="mb-2 text-lg font-semibold">🔮 Future Vision</h3>
               <p className="text-sm text-muted-foreground">
-                The workbench will evolve into a full interactive prompt engineering platform: multi-step 
-                workflows, prompt chaining, output refinement, and eventually user-provided API keys 
-                for complete control. Think of it as "Jupyter Notebooks for prompt engineering."
+                The workbench will evolve into a full interactive prompt engineering platform: multi-step
+                workflows, prompt chaining, output refinement, and eventually user-provided API keys
+                for complete control. Think of it as &quot;Jupyter Notebooks for prompt engineering.&quot;
               </p>
             </div>
           </div>
@@ -167,8 +167,8 @@ export function WorkbenchPageClient() {
               </div>
               <h3 className="mb-2 font-semibold">Input Your Data</h3>
               <p className="text-sm text-muted-foreground">
-                Fill in the interactive form fields with your specific context, requirements, or data. 
-                Each tool guides you through what's needed.
+                Fill in the interactive form fields with your specific context, requirements, or data.
+                Each tool guides you through what&apos;s needed.
               </p>
             </div>
             <div className="text-center">

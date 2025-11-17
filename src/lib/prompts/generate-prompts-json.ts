@@ -83,16 +83,22 @@ export async function generatePromptsJson(): Promise<void> {
     pattern: prompt.pattern,
     slug: prompt.slug,
     tags: prompt.tags,
-    difficulty: prompt.difficulty,
-    estimatedTime: prompt.estimatedTime,
+    // Convert difficulty to string if it's a number
+    difficulty: typeof prompt.difficulty === 'number'
+      ? ['beginner', 'intermediate', 'advanced'][Math.min(Math.max(Math.floor(prompt.difficulty) - 1, 0), 2)]
+      : prompt.difficulty,
+    // Convert estimatedTime to number if it's a string, or keep as-is
+    estimatedTime: typeof prompt.estimatedTime === 'string'
+      ? parseInt(prompt.estimatedTime, 10) || undefined
+      : prompt.estimatedTime,
     experienceLevel: prompt.experienceLevel,
     isPublic: prompt.isPublic,
     isFeatured: prompt.isFeatured,
     active: prompt.active,
     // ADR-009: Zero mock data - always default to 0 if undefined/null
     views: prompt.views ?? 0,
-    favorites: prompt.favorites ?? 0,
-    shares: prompt.shares ?? 0,
+    favorites: 0, // Not in schema, default to 0
+    shares: 0, // Not in schema, default to 0
     rating: prompt.rating ?? 0,
     ratingCount: prompt.ratingCount ?? 0,
     createdAt: prompt.createdAt,

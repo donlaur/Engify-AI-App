@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
-import { APP_URL } from '@/lib/constants';
 
 export const metadata: Metadata = {
   title: 'Chain-of-Thought Prompting: Complete Guide with Examples | Engify.ai',
@@ -134,7 +133,7 @@ export default function ChainOfThoughtGuidePage() {
               Chain-of-Thought prompting asks the AI to reason through a problem
               step-by-step, showing its intermediate reasoning steps before
               arriving at a final answer. Instead of jumping directly to a
-              conclusion, the model "thinks out loud" through the problem-solving
+              conclusion, the model &quot;thinks out loud&quot; through the problem-solving
               process.
             </p>
             <p>
@@ -150,12 +149,12 @@ export default function ChainOfThoughtGuidePage() {
             <p>
               Modern language models are trained on vast amounts of text that
               includes examples of human reasoning. When you explicitly ask for
-              step-by-step reasoning, you're activating these learned patterns:
+              step-by-step reasoning, you&apos;re activating these learned patterns:
             </p>
             <ul>
               <li>
                 <strong>Pattern Matching:</strong> The model recognizes the
-                format of "step-by-step reasoning" from its training data
+                format of &quot;step-by-step reasoning&quot; from its training data
               </li>
               <li>
                 <strong>Error Reduction:</strong> Breaking problems into steps
@@ -179,7 +178,7 @@ export default function ChainOfThoughtGuidePage() {
             Before and After: Seeing the Difference
           </h2>
           <p className="mb-6 text-lg text-muted-foreground">
-            Let's see how Chain-of-Thought transforms prompt results:
+            Let&apos;s see how Chain-of-Thought transforms prompt results:
           </p>
 
           <div className="space-y-6 mb-8">
@@ -271,8 +270,8 @@ Now write the complete implementation.`}</code>
               </li>
             </ul>
             <p>
-              It's less effective for simple, single-step tasks where the
-              overhead isn't worth it. For those, use simpler patterns like
+              It&apos;s less effective for simple, single-step tasks where the
+              overhead isn&apos;t worth it. For those, use simpler patterns like
               Zero-Shot or Template.
             </p>
           </div>
@@ -325,10 +324,10 @@ SELECT * FROM users WHERE email = ? AND status = 'active'
 
 Think through:
 1. What indexes exist or should exist?
-2. What's the query execution plan?
+2. What&apos;s the query execution plan?
 3. Are there any bottlenecks?
 4. Can we reduce the result set?
-5. What's the optimal indexing strategy?
+5. What&apos;s the optimal indexing strategy?
 
 Provide your optimization step by step.`}</code>
                 </pre>
@@ -378,12 +377,12 @@ For each step, explain your reasoning and trade-offs.`}</code>
             <ul>
               <li>
                 <strong>Persona + Chain-of-Thought:</strong> Have an expert
-                reason through problems. "As a senior architect, think through
-                this step by step..."
+                reason through problems. &quot;As a senior architect, think through
+                this step by step...&quot;
               </li>
               <li>
                 <strong>Few-Shot + Chain-of-Thought:</strong> Provide examples
-                of step-by-step reasoning to guide the model's format
+                of step-by-step reasoning to guide the model&apos;s format
               </li>
               <li>
                 <strong>Chain-of-Thought + Self-Consistency:</strong> Generate
@@ -466,7 +465,7 @@ Think through each step before proceeding.`}</code>
             </h3>
             <ul>
               <li>
-                <strong>Too Vague:</strong> "Think about this" doesn't give
+                <strong>Too Vague:</strong> &quot;Think about this&quot; doesn&apos;t give
                 enough guidance
               </li>
               <li>

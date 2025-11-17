@@ -173,6 +173,7 @@ export class RedisAuthCache {
         : await (this.redis as Redis).get(key);
 
       if (cached === null) return undefined; // Not cached
+      if (!cached || typeof cached !== 'string') return undefined; // Invalid cache
 
       const parsed = JSON.parse(cached);
 
@@ -233,6 +234,7 @@ export class RedisAuthCache {
         : await (this.redis as Redis).get(key);
 
       if (cached === null) return null;
+      if (!cached || typeof cached !== 'string') return null; // Invalid cache
 
       return JSON.parse(cached) as User;
     } catch (error) {
@@ -340,7 +342,7 @@ export class RedisAuthCache {
       const attempts = isUpstash
         ? await (this.redis as UpstashRedis).get(key)
         : await (this.redis as Redis).get(key);
-      return attempts ? parseInt(attempts, 10) : 0;
+      return attempts && typeof attempts === 'string' ? parseInt(attempts, 10) : 0;
     } catch (error) {
       logger.warn('Redis rate limit read failed', {
         operation: 'getLoginAttempts',
@@ -386,6 +388,7 @@ export class RedisAuthCache {
         : await (this.redis as Redis).get(key);
 
       if (cached === null) return null;
+      if (!cached || typeof cached !== 'string') return null; // Invalid cache
 
       return JSON.parse(cached);
     } catch (error) {

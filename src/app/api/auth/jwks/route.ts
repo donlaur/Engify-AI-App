@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { checkOAuthRateLimit } from '@/lib/rate-limit/oauth';
 import { logger } from '@/lib/logging/logger';
 

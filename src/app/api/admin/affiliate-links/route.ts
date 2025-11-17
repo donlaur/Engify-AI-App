@@ -9,6 +9,7 @@ import {
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
 import { auditLog } from '@/lib/logging/audit';
+import { getAffiliateStats, getToolAffiliateStats } from '@/lib/analytics/affiliate-tracking';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -34,27 +35,44 @@ export async function GET(request: NextRequest) {
 
     const db = await getDb();
 
+    // Get overall affiliate stats from Redis
+    const overallStats = await getAffiliateStats();
+
     // SECURITY: This query is intentionally system-wide - affiliate_config is admin-only, not multi-tenant
     // Fetch affiliate links
     const linksCollection = await db
       .collection('affiliate_config')
       .find({})
       .toArray();
-    const links = linksCollection.map((link: any) => ({
-      _id: link._id?.toString(),
-      tool: link.tool,
-      baseUrl: link.baseUrl,
-      referralUrl: link.referralUrl,
-      affiliateCode: link.affiliateCode,
-      commission: link.commission,
-      status: link.status,
-      notes: link.notes,
-      clickCount: link.clickCount || 0,
-      conversionCount: link.conversionCount || 0,
-      lastClickAt: link.lastClickAt,
-      createdAt: link.createdAt,
-      updatedAt: link.updatedAt,
-    }));
+
+    // Enhance links with real-time stats from Redis
+    const links = await Promise.all(
+      linksCollection.map(async (link: any) => {
+        const toolKey = link.tool.toLowerCase().replace(/\s+/g, '');
+        const stats = await getToolAffiliateStats(toolKey);
+
+        return {
+          _id: link._id?.toString(),
+          tool: link.tool,
+          baseUrl: link.baseUrl,
+          referralUrl: link.referralUrl,
+          affiliateCode: link.affiliateCode,
+          commission: link.commission,
+          status: link.status,
+          notes: link.notes,
+          // Real-time stats from Redis
+          clickCount: stats.totalClicks,
+          uniqueClicks: stats.uniqueClicks,
+          conversionCount: link.conversionCount || 0,
+          lastClickAt: stats.lastClickAt ? new Date(stats.lastClickAt) : link.lastClickAt,
+          clicksToday: stats.clicksToday,
+          clicksThisWeek: stats.clicksThisWeek,
+          clicksThisMonth: stats.clicksThisMonth,
+          createdAt: link.createdAt,
+          updatedAt: link.updatedAt,
+        };
+      })
+    );
 
     // SECURITY: This query is intentionally system-wide - partnership_outreach is admin-only
     // Fetch partnership outreach
@@ -78,6 +96,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       links,
       outreach,
+      stats: overallStats, // Include overall stats
     });
   } catch (error) {
     logger.apiError('/api/admin/affiliate-links', error, { method: 'GET' });

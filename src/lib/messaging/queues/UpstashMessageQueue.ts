@@ -277,7 +277,7 @@ export class UpstashMessageQueue implements IMessageQueue {
       // Convert array to object
       const messageObj: Record<string, string> = {};
       for (let i = 0; i < messageData.length; i += 2) {
-        messageObj[messageData[i]] = messageData[i + 1];
+        messageObj[messageData[i] as string] = messageData[i + 1] as string;
       }
 
       return this.deserializeMessage(messageObj);

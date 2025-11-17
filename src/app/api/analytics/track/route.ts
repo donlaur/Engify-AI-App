@@ -18,7 +18,7 @@ import { z, ZodError } from 'zod';
 const trackSchema = z.object({
   promptId: z.string(),
   event: z.enum(['view', 'copy', 'execute', 'favorite']),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 function buildRateLimitHeaders(result: RateLimitResult) {

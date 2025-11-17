@@ -15,7 +15,7 @@ const RAGQuerySchema = z.object({
   query: z.string().min(1, 'Query is required'),
   collection: z.string().default('knowledge_base'),
   top_k: z.number().min(1).max(20).default(5),
-  filter: z.record(z.any()).optional(),
+  filter: z.record(z.string(), z.any()).optional(),
 });
 
 const RAGResponseSchema = z.object({
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Rate limiting
     const session = await auth();
     const tier = session?.user ? 'authenticated' : 'anonymous';
-    const identifier = session?.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || request.ip || 'unknown';
+    const identifier = session?.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
     
     const rateLimitResult = await checkRateLimit(identifier, tier);
     if (!rateLimitResult.allowed) {
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: ERROR_MESSAGES.INVALID_INPUT,
-          details: error.errors,
+          details: error.issues,
           results: [],
         },
         { status: 400 }
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
   // Rate limiting for health check (lighter limit)
   const session = await auth();
   const tier = session?.user ? 'authenticated' : 'anonymous';
-  const identifier = session?.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || request.ip || 'unknown';
+  const identifier = session?.user?.id || request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
   
   const rateLimitResult = await checkRateLimit(identifier, tier);
   if (!rateLimitResult.allowed) {

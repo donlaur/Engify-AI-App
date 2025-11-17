@@ -62,6 +62,25 @@ export interface User {
     notifications?: boolean;
     weeklyReports?: boolean;
   };
+
+  // API Usage Notification Preferences
+  apiNotificationPreferences?: {
+    emailEnabled: boolean;
+    smsEnabled: boolean;
+    thresholds: {
+      fifty: boolean;   // 50% usage
+      eighty: boolean;  // 80% usage
+      ninety: boolean;  // 90% usage
+      hundred: boolean; // 100% usage (exceeded)
+    };
+    alertTypes: {
+      usageLimit: boolean;
+      costThreshold: boolean;
+      rateLimit: boolean;
+      errorRate: boolean;
+    };
+    phoneNumber?: string; // For SMS notifications
+  };
 }
 
 export interface UserProfile extends Omit<User, 'password'> {

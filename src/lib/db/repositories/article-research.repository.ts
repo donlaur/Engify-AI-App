@@ -37,7 +37,7 @@ export class ArticleResearchRepository {
   static async findById(id: string): Promise<ArticleResearch | null> {
     const db = await getMongoDb();
     const collection = db.collection<ArticleResearch>(ARTICLE_RESEARCH_COLLECTION);
-    
+
     return collection.findOne({ _id: new ObjectId(id) } as any);
   }
 
@@ -47,14 +47,14 @@ export class ArticleResearchRepository {
   static async insert(research: Omit<ArticleResearch, '_id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     const db = await getMongoDb();
     const collection = db.collection<ArticleResearch>(ARTICLE_RESEARCH_COLLECTION);
-    
-    const doc: Omit<ArticleResearch, '_id'> = {
+
+    const doc = {
       ...research,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    
-    const result = await collection.insertOne(doc as any);
+
+    const result = await collection.insertOne(doc);
     return result.insertedId.toString();
   }
 
@@ -64,14 +64,14 @@ export class ArticleResearchRepository {
   static async updateStatus(id: string, status: ArticleResearch['status']): Promise<void> {
     const db = await getMongoDb();
     const collection = db.collection<ArticleResearch>(ARTICLE_RESEARCH_COLLECTION);
-    
+
     await collection.updateOne(
       { _id: new ObjectId(id) } as any,
-      { 
-        $set: { 
+      {
+        $set: {
           status,
           updatedAt: new Date()
-        } 
+        }
       }
     );
   }
@@ -80,19 +80,19 @@ export class ArticleResearchRepository {
    * Update generated content
    */
   static async updateGenerated(
-    id: string, 
+    id: string,
     generated: ArticleResearch['generated']
   ): Promise<void> {
     const db = await getMongoDb();
     const collection = db.collection<ArticleResearch>(ARTICLE_RESEARCH_COLLECTION);
-    
+
     await collection.updateOne(
       { _id: new ObjectId(id) } as any,
-      { 
-        $set: { 
+      {
+        $set: {
           generated,
           updatedAt: new Date()
-        } 
+        }
       }
     );
   }
@@ -103,7 +103,7 @@ export class ArticleResearchRepository {
   static async delete(id: string): Promise<void> {
     const db = await getMongoDb();
     const collection = db.collection<ArticleResearch>(ARTICLE_RESEARCH_COLLECTION);
-    
+
     await collection.deleteOne({ _id: new ObjectId(id) } as any);
   }
 

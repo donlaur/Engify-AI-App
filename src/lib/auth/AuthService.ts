@@ -298,17 +298,48 @@ export class AuthService {
 
       const user = await userService.findByEmail(validatedEmail);
       if (!user) {
-        // Don't reveal if user exists or not
+        // Don't reveal if user exists or not (security best practice)
+        // Still return success to prevent email enumeration attacks
+        logger.info('Password reset requested for non-existent email', {
+          email: validatedEmail,
+        });
         return {
           success: true,
         };
       }
 
-      // Generate reset token
-      const _resetToken = this.generateResetToken(user._id.toString());
+      // Generate secure reset token with 1-hour expiration
+      const resetToken = this.generateResetToken(user._id.toString());
 
-      // TODO: In a real implementation, send email with reset token
-      // For now, we'll just return success
+      // Store reset token in database with expiration
+      await userService.storePasswordResetToken(
+        user._id.toString(),
+        resetToken,
+        new Date(Date.now() + 60 * 60 * 1000) // 1 hour from now
+      );
+
+      // Send password reset email
+      const { sendPasswordResetEmail } = await import('@/lib/services/emailService');
+      const emailResult = await sendPasswordResetEmail(
+        validatedEmail,
+        resetToken,
+        user.name || 'User'
+      );
+
+      if (!emailResult.success) {
+        logger.error('Failed to send password reset email', {
+          userId: user._id.toString(),
+          email: validatedEmail,
+          error: emailResult.error,
+        });
+        // Still return success to user to prevent email enumeration
+      } else {
+        logger.info('Password reset email sent', {
+          userId: user._id.toString(),
+          email: validatedEmail,
+          messageId: emailResult.messageId,
+        });
+      }
 
       return {
         success: true,
@@ -330,20 +361,24 @@ export class AuthService {
    */
   async resetPassword(token: string, newPassword: string): Promise<AuthResult> {
     try {
-      const userId = this.extractUserIdFromToken(token);
+      // Verify the reset token is valid and not expired
+      const user = await userService.verifyPasswordResetToken(token);
 
-      if (!userId) {
+      if (!user) {
+        logger.warn('Invalid or expired password reset token', {
+          tokenPrefix: token.substring(0, 10),
+        });
         return {
           success: false,
-          error: 'Invalid reset token',
+          error: 'Invalid or expired reset token',
         };
       }
 
-      const user = await userService.getUserById(userId);
-      if (!user) {
+      // Validate new password strength
+      if (newPassword.length < 8) {
         return {
           success: false,
-          error: 'User not found',
+          error: 'Password must be at least 8 characters',
         };
       }
 
@@ -351,7 +386,15 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(newPassword, this.saltRounds);
 
       // Update password directly in DB
-      await userService.setPassword(userId, hashedPassword);
+      await userService.setPassword(user._id.toString(), hashedPassword);
+
+      // Clear the reset token so it can't be reused
+      await userService.clearPasswordResetToken(user._id.toString());
+
+      logger.info('Password reset successful', {
+        userId: user._id.toString(),
+        email: user.email,
+      });
 
       return {
         success: true,
@@ -480,8 +523,12 @@ export class AuthService {
   }
 
   private generateResetToken(userId: string): string {
-    // In a real implementation, you'd generate a secure token
-    return `reset_${userId}_${Date.now()}`;
+    // Generate a cryptographically secure random token
+    const crypto = require('crypto');
+    const randomBytes = crypto.randomBytes(32).toString('hex');
+    const timestamp = Date.now();
+    // Combine user ID, random bytes, and timestamp for uniqueness
+    return `${randomBytes}_${timestamp}_${userId}`;
   }
 
   private extractUserIdFromToken(token: string): string | null {

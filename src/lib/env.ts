@@ -1,12 +1,19 @@
 /**
- * Environment Variable Validation
+ * Environment Variable Validation (Legacy)
  *
- * Validates all required environment variables at startup using Zod.
- * Provides type-safe access to env vars throughout the application.
+ * This file is maintained for backward compatibility.
+ * New code should use the centralized config system from @/lib/config
  *
- * Security: Fails fast if critical env vars are missing.
+ * @deprecated Use @/lib/config instead
+ * @see {@link @/lib/config}
+ *
+ * Migration guide:
+ * - import { env } from '@/lib/env' -> import { config } from '@/lib/config'
+ * - env.MONGODB_URI -> config.database.MONGODB_URI
+ * - isProduction -> config.helpers.isProduction()
  */
 
+<<<<<<< HEAD
 import { z } from 'zod';
 
 const envSchema = z.object({
@@ -124,88 +131,66 @@ function enforceProductionSecrets(env: Env): void {
     );
   }
 }
+=======
+import { config } from '@/lib/config';
+import type { FlatConfig } from '@/lib/config';
+>>>>>>> 80ba9a347cbcc658c039a9f41c4342d730cb6ca1
 
 /**
- * Validates environment variables and returns typed env object
- * @throws {Error} If validation fails with detailed error message
+ * @deprecated Use config.flat from '@/lib/config' instead
  */
-function validateEnv(): Env {
-  const parsed = envSchema.safeParse(process.env);
-
-  if (!parsed.success) {
-    console.error('❌ Invalid environment variables:');
-    console.error(JSON.stringify(parsed.error.format(), null, 2));
-
-    // Provide helpful error messages
-    const errors = parsed.error.errors.map((err) => {
-      const path = err.path.join('.');
-      return `  - ${path}: ${err.message}`;
-    });
-
-    throw new Error(
-      `Environment validation failed:\n${errors.join('\n')}\n\n` +
-        'Please check your .env.local file and ensure all required variables are set.\n' +
-        'See .env.example for reference.'
-    );
-  }
-
-  enforceProductionSecrets(parsed.data);
-
-  return parsed.data;
-}
+export type Env = FlatConfig;
 
 /**
  * Validated and typed environment variables
- * Use this instead of process.env for type safety
+ * @deprecated Use config from '@/lib/config' instead
  */
-export const env = validateEnv();
+export const env = config.flat;
 
 /**
  * Check if we're in production
+ * @deprecated Use config.helpers.isProduction() instead
  */
-export const isProduction = env.NODE_ENV === 'production';
+export const isProduction = config.helpers.isProduction();
 
 /**
  * Check if we're in development
+ * @deprecated Use config.helpers.isDevelopment() instead
  */
-export const isDevelopment = env.NODE_ENV === 'development';
+export const isDevelopment = config.helpers.isDevelopment();
 
 /**
  * Check if we're in test environment
+ * @deprecated Use config.helpers.isTest() instead
  */
-export const isTest = env.NODE_ENV === 'test';
+export const isTest = config.helpers.isTest();
 
 /**
  * Check if AI providers are configured
+ * @deprecated Use config.helpers.getConfiguredAIProviders() instead
  */
-export const hasAIProviders = Boolean(
-  env.OPENAI_API_KEY ||
-    env.ANTHROPIC_API_KEY ||
-    env.GOOGLE_API_KEY ||
-    env.GOOGLE_AI_API_KEY ||
-    env.GROQ_API_KEY ||
-    env.REPLICATE_API_TOKEN
-);
+export const hasAIProviders = config.helpers.getConfiguredAIProviders().length > 0;
 
-export const adminSessionMaxAgeSeconds = (() => {
-  const minutes = Number(env.ADMIN_SESSION_MAX_AGE_MINUTES ?? '60');
-  if (Number.isNaN(minutes) || minutes <= 0) {
-    return 60 * 60;
-  }
-  return minutes * 60;
-})();
+/**
+ * Admin session max age in seconds
+ * @deprecated Use config.helpers.getAdminSessionMaxAge() instead
+ */
+export const adminSessionMaxAgeSeconds = config.helpers.getAdminSessionMaxAge();
 
-export const isAdminMFAEnforced =
-  (env.ADMIN_MFA_REQUIRED ?? 'true').toLowerCase() !== 'false';
+/**
+ * Check if admin MFA is enforced
+ * @deprecated Use config.helpers.isAdminMFARequired() instead
+ */
+export const isAdminMFAEnforced = config.helpers.isAdminMFARequired();
 
 /**
  * Check if OAuth is configured
+ * @deprecated Use config.helpers.hasOAuth() instead
  */
-export const hasGoogleOAuth = Boolean(
-  env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
-);
+export const hasGoogleOAuth = config.helpers.hasOAuth();
 
 /**
  * Check if Python services are configured
+ * @deprecated Use config.rag.RAG_API_URL instead
  */
-export const hasPythonServices = Boolean(env.PYTHON_API_URL);
+export const hasPythonServices = Boolean(config.rag.RAG_API_URL);

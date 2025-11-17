@@ -413,7 +413,7 @@ export default async function AIModelDetailPage({ params }: PageProps) {
                   <p className="text-sm text-muted-foreground">
                     Pricing is based on the number of tokens used, or other
                     metrics based on the model type. For tool-specific models,
-                    like search and computer use, there's a fee per tool call.
+                    like search and computer use, there&apos;s a fee per tool call.
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">

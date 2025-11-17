@@ -2,7 +2,6 @@
 RAG API - Retrieval Augmented Generation
 """
 
-import logging
 import time
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
@@ -14,13 +13,11 @@ import os
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 import asyncio
+from utils.logging_config import get_logger, configure_for_fastapi
 
-# Configure structured logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Configure centralized logging for FastAPI
+configure_for_fastapi(service_name="rag-api")
+logger = get_logger(__name__)
 
 # Global variables for model and database
 model = None

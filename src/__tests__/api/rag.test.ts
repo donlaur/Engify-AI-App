@@ -68,7 +68,7 @@ describe('GET /api/rag', () => {
   });
 
   it('should return healthy status in non-production', async () => {
-    process.env.NODE_ENV = 'development';
+    (process.env as any).NODE_ENV = 'development';
     const request = new NextRequest('http://localhost:3000/api/rag');
     const response = await GET(request);
     expect(response.status).toBe(200);

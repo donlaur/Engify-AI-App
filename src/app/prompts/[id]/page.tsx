@@ -483,7 +483,7 @@ export default async function PromptPage({
             </div>
 
             {/* Enrichment Details - Shows all enrichment fields if they exist in DB */}
-            {/* Includes: useCases, bestPractices, examples, caseStudies, bestTimeToUse, 
+            {/* Includes: useCases, bestPractices, examples, caseStudies, bestTimeToUse,
                 recommendedModel, whenNotToUse, difficulty, estimatedTime */}
             <PromptEnrichment
               caseStudies={prompt.caseStudies}
@@ -548,8 +548,9 @@ export default async function PromptPage({
     );
   } catch (error) {
     // Log error for debugging
+    const { id } = await params;
     logger.error('Failed to fetch prompt', {
-      idOrSlug: params.id,
+      idOrSlug: id,
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
     });

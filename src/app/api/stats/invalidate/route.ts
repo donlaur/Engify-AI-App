@@ -64,15 +64,44 @@ export async function POST(req: NextRequest) {
   try {
     // Verify QStash signature (if configured)
     const qstashSignature = req.headers.get('upstash-signature');
-    if (process.env.QSTASH_CURRENT_SIGNING_KEY && !qstashSignature) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Missing QStash signature' },
-        { status: 401 }
-      );
-    }
+    const qstashSigningKey = process.env.QSTASH_CURRENT_SIGNING_KEY;
 
-    // TODO: Verify QStash signature here using @upstash/qstash
-    // For now, we'll allow any POST (secure by keeping URL private)
+    if (qstashSigningKey) {
+      if (!qstashSignature) {
+        return NextResponse.json(
+          { error: 'Unauthorized - Missing QStash signature' },
+          { status: 401 }
+        );
+      }
+
+      try {
+        // Verify QStash signature using @upstash/qstash
+        const { Receiver } = await import('@upstash/qstash');
+        const receiver = new Receiver({
+          currentSigningKey: qstashSigningKey,
+          nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY || qstashSigningKey,
+        });
+
+        const body = await req.text();
+        const isValid = await receiver.verify({
+          signature: qstashSignature,
+          body,
+        });
+
+        if (!isValid) {
+          return NextResponse.json(
+            { error: 'Unauthorized - Invalid QStash signature' },
+            { status: 401 }
+          );
+        }
+      } catch (error) {
+        logger.error('QStash signature verification failed', { error });
+        return NextResponse.json(
+          { error: 'Unauthorized - Signature verification failed' },
+          { status: 401 }
+        );
+      }
+    }
 
     if (!redis) {
       return NextResponse.json(

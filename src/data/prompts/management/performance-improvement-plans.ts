@@ -3,16 +3,18 @@
  * 80-90% complete templates for managers to create PIPs
  */
 
-import { PromptTemplate } from '@/lib/schemas/prompt';
+import type { Prompt } from '@/lib/schemas/prompt';
 
-export const performanceImprovementPlans: Omit<PromptTemplate, 'id' | 'createdAt' | 'updatedAt'>[] = [
+export const performanceImprovementPlans: Omit<Prompt, 'createdAt' | 'updatedAt'>[] = [
   {
+    id: 'pip-001',
     title: 'Performance Improvement Plan for Individual Contributor',
     description: 'Structured PIP template for ICs with clear expectations, support plan, and success metrics. Starts at 85% complete.',
-    category: 'management',
+    category: 'general',
     role: 'engineering-manager',
-    pattern: 'craft',
+    pattern: 'template',
     tags: ['pips', 'performance', 'management', 'feedback', '1-on-1s', 'documentation'],
+    isPublic: true,
     content: `You are an experienced engineering manager creating a Performance Improvement Plan (PIP). Create a professional, supportive PIP document for:
 
 **Employee Context:**
@@ -103,15 +105,21 @@ How we'll measure improvement:
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
 
   {
+    id: 'pip-002',
     title: 'Performance Improvement Plan for Engineering Manager',
     description: 'PIP template for managers with focus on leadership, team health, and organizational impact.',
-    category: 'leadership',
-    role: 'director',
-    pattern: 'craft',
+    category: 'general',
+    role: 'engineering-director',
+    pattern: 'template',
     tags: ['pips', 'leadership', 'management', 'performance', 'team-building', 'documentation'],
+    isPublic: true,
     content: `You are a Director or VP creating a Performance Improvement Plan for an Engineering Manager. Create a thoughtful, comprehensive PIP that addresses leadership and management competencies:
 
 **Manager Context:**
@@ -292,15 +300,21 @@ How we'll measure improvement:
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
 
   {
+    id: 'pip-003',
     title: 'PIP Progress Review Template',
     description: '30/60/90 day PIP checkpoint meeting template with structured assessment and feedback.',
-    category: 'management',
+    category: 'general',
     role: 'engineering-manager',
-    pattern: 'craft',
+    pattern: 'template',
     tags: ['pips', 'feedback', '1-on-1s', 'performance', 'management', 'documentation'],
+    isPublic: true,
     content: `You are conducting a PIP progress review meeting. Generate a structured review document for a checkpoint meeting (30, 60, or 90 day review).
 
 **Context:**
@@ -430,6 +444,10 @@ How we'll measure improvement:
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
 ];
 

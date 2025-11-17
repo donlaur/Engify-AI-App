@@ -25,10 +25,8 @@ export interface Activity {
 export class ActivityService extends BaseService<Activity> {
   constructor() {
     // BaseService expects a Zod schema. Provide a minimal placeholder schema via lazy import.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const schema = {} as unknown as import('zod').ZodSchema<Activity>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    super('activities', schema as any);
+    super('activities', schema);
   }
 
   /**

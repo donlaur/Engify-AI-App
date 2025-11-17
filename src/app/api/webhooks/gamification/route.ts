@@ -18,7 +18,6 @@ import { GamificationService } from '@/lib/services/GamificationService';
 import { XP_REWARDS } from '@/lib/gamification/levels';
 import { logger } from '@/lib/logging/logger';
 import { logAuditEvent } from '@/server/middleware/audit';
-import { AuditEventType } from '@/lib/db/schemas/auditLog';
 
 const gamificationService = new GamificationService();
 
@@ -88,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Audit log
     await logAuditEvent({
       userId,
-      eventType: AuditEventType.enum['user.gamification.xp_awarded'],
+      eventType: 'user.updated',
       action: 'gamification.xp_awarded',
       metadata: {
         action,
@@ -99,6 +98,8 @@ export async function POST(request: NextRequest) {
         achievementsUnlocked: result.achievementsUnlocked.length,
         ...metadata,
       },
+      ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
       success: true,
     });
 

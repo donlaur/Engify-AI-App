@@ -92,27 +92,23 @@ export function sanitizeObject<T extends Record<string, unknown>>(
   obj: T,
   level: 'strict' | 'basic' | 'rich' = 'strict'
 ): T {
-  const sanitized = {} as T;
+  const sanitized: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sanitized[key as keyof T] = sanitizeHtml(value, level) as any;
+      sanitized[key] = sanitizeHtml(value, level);
     } else if (Array.isArray(value)) {
-      sanitized[key as keyof T] = value.map(item =>
+      sanitized[key] = value.map(item =>
         typeof item === 'string' ? sanitizeHtml(item, level) : item
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ) as any;
+      );
     } else if (value && typeof value === 'object') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sanitized[key as keyof T] = sanitizeObject(value as Record<string, unknown>, level) as any;
+      sanitized[key] = sanitizeObject(value as Record<string, unknown>, level);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sanitized[key as keyof T] = value as any;
+      sanitized[key] = value;
     }
   }
 
-  return sanitized;
+  return sanitized as T;
 }
 
 /**

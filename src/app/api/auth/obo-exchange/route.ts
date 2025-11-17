@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
     // Check if user's refresh token is still valid
     const refreshTokens = await kv.keys(`mcp_refresh_token:*`);
     let userHasValidRefresh = false;
-    
+
     for (const tokenKey of refreshTokens) {
-      const tokenData = await kv.get(tokenKey) as any;
+      const tokenData = await kv.get(tokenKey) as { userId?: string; resource?: string } | null;
       if (tokenData?.userId === payload.sub && tokenData?.resource === payload.resource) {
         userHasValidRefresh = true;
         break;

@@ -3,16 +3,18 @@
  * DARCI, RACI, Value/Effort, Build/Buy frameworks for strategic decision-making
  */
 
-import { PromptTemplate } from '@/lib/schemas/prompt';
+import type { Prompt } from '@/lib/schemas/prompt';
 
-export const decisionFrameworkPrompts: Omit<PromptTemplate, 'id' | 'createdAt' | 'updatedAt'>[] = [
+export const decisionFrameworkPrompts: Omit<Prompt, 'createdAt' | 'updatedAt'>[] = [
   {
+    id: 'decision-001',
     title: 'DARCI Decision Framework',
     description: 'Define decision roles: Driver, Approver, Recommender, Consulted, Informed. Clarify who makes decisions and who has input.',
-    category: 'management',
+    category: 'general',
     role: 'engineering-manager',
     pattern: 'template',
     tags: ['darci', 'decision-making', 'leadership', 'stakeholder-management', 'governance'],
+    isPublic: true,
     content: `You are an engineering manager using the DARCI framework to clarify decision-making roles for a project or initiative. Generate a DARCI matrix:
 
 **Decision Context:**
@@ -126,14 +128,20 @@ export const decisionFrameworkPrompts: Omit<PromptTemplate, 'id' | 'createdAt' |
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
   {
+    id: 'decision-002',
     title: 'RACI Responsibility Matrix',
     description: 'Clarify project roles: Responsible, Accountable, Consulted, Informed. Map who does what on complex projects.',
-    category: 'management',
+    category: 'general',
     role: 'engineering-manager',
     pattern: 'template',
     tags: ['raci', 'project-management', 'responsibility', 'team-coordination', 'accountability'],
+    isPublic: true,
     content: `You are an engineering manager creating a RACI matrix for a project or initiative. Generate a comprehensive responsibility matrix:
 
 **Project Context:**
@@ -269,14 +277,20 @@ Before starting work:
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
   {
+    id: 'decision-003',
     title: 'Value vs. Effort Matrix',
     description: 'Categorize initiatives into Quick Wins, Big Bets, Fill-ins, and Time Sinks. Prioritize strategically.',
-    category: 'strategy',
+    category: 'general',
     role: 'engineering-manager',
     pattern: 'template',
     tags: ['prioritization', 'strategy', 'planning', 'value-effort', 'roadmap'],
+    isPublic: true,
     content: `You are an engineering manager using the Value vs. Effort matrix to prioritize initiatives. Generate a strategic prioritization matrix:
 
 **Context:**
@@ -473,14 +487,20 @@ Before starting work:
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
   {
+    id: 'decision-004',
     title: 'Build vs. Buy Decision Framework',
     description: 'Decide whether to build custom solutions or buy/integrate existing platforms. Calculate TCO and risk.',
-    category: 'strategy',
+    category: 'general',
     role: 'engineering-manager',
     pattern: 'template',
     tags: ['build-buy', 'architecture', 'strategy', 'tco', 'vendor-evaluation', 'technical-decision'],
+    isPublic: true,
     content: `You are an engineering manager evaluating whether to build a custom solution or buy/integrate an existing platform. Generate a comprehensive build vs. buy analysis:
 
 **Decision Context:**
@@ -730,6 +750,10 @@ Before starting work:
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
 ];
 

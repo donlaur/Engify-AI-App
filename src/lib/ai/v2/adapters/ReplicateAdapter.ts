@@ -122,7 +122,7 @@ export class ReplicateAdapter implements AIProvider {
 
         const { value: rawOutput, latencyMs } =
           await executeWithProviderHarness(
-            () => replicate.run(modelId, { input }) as Promise<unknown>,
+            () => replicate.run(modelId as `${string}/${string}`, { input }) as Promise<unknown>,
             {
               provider: this.provider,
               model: modelId,

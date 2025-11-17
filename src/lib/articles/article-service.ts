@@ -59,7 +59,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
         console.error(`[ArticleService] Failed to increment view count for ${slug}:`, error);
       });
 
-    return article as Article;
+    return article as unknown as Article;
   } catch (error) {
     console.error(`[ArticleService] Error fetching article ${slug}:`, error);
     return null;
@@ -111,7 +111,7 @@ export async function getArticles(options: {
       .skip(options.skip || 0)
       .toArray();
 
-    return articles as Article[];
+    return articles as unknown as Article[];
   } catch (error) {
     console.error('[ArticleService] Error fetching articles:', error);
     return [];
@@ -189,7 +189,7 @@ export async function getRelatedArticles(
       .limit(limit)
       .toArray();
 
-    return articles as Article[];
+    return articles as unknown as Article[];
   } catch (error) {
     console.error(`[ArticleService] Error fetching related articles for ${currentSlug}:`, error);
     return [];
@@ -218,7 +218,7 @@ export async function searchArticles(query: string, limit = 10): Promise<Article
       .limit(limit)
       .toArray();
 
-    return articles as Article[];
+    return articles as unknown as Article[];
   } catch (error) {
     console.error(`[ArticleService] Error searching articles with query "${query}":`, error);
     return [];

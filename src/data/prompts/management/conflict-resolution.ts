@@ -3,16 +3,18 @@
  * Role-specific guides for resolving team conflicts
  */
 
-import { PromptTemplate } from '@/lib/schemas/prompt';
+import type { Prompt } from '@/lib/schemas/prompt';
 
-export const conflictResolutionPrompts: Omit<PromptTemplate, 'id' | 'createdAt' | 'updatedAt'>[] = [
+export const conflictResolutionPrompts: Omit<Prompt, 'createdAt' | 'updatedAt'>[] = [
   {
+    id: 'conflict-res-001',
     title: 'Resolve Engineer-to-Engineer Conflict',
     description: 'Mediation guide for resolving technical disagreements or interpersonal conflicts between engineers.',
-    category: 'management',
+    category: 'general',
     role: 'engineering-manager',
-    pattern: 'craft',
+    pattern: 'template',
     tags: ['conflict-resolution', 'management', 'facilitation', 'team-building', 'communication'],
+    isPublic: true,
     content: `You are an Engineering Manager mediating a conflict between two engineers. Generate a structured mediation plan and talking points:
 
 **Conflict Context:**
@@ -188,15 +190,21 @@ export const conflictResolutionPrompts: Omit<PromptTemplate, 'id' | 'createdAt' 
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
 
   {
+    id: 'conflict-res-002',
     title: 'Resolve Product-Engineering Tension',
     description: 'Framework for mediating conflicts between Product and Engineering teams over priorities, scope, or delivery.',
-    category: 'management',
+    category: 'general',
     role: 'engineering-manager',
-    pattern: 'craft',
+    pattern: 'template',
     tags: ['conflict-resolution', 'product', 'planning', 'facilitation', 'communication', 'leadership'],
+    isPublic: true,
     content: `You are mediating a conflict between Product and Engineering. Generate a structured resolution plan:
 
 **Conflict Context:**
@@ -411,15 +419,21 @@ export const conflictResolutionPrompts: Omit<PromptTemplate, 'id' | 'createdAt' 
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
 
   {
+    id: 'conflict-res-003',
     title: 'Resolve Manager-Direct Report Conflict',
     description: 'Guide for Directors mediating conflicts between managers and their direct reports.',
-    category: 'leadership',
-    role: 'director',
-    pattern: 'craft',
+    category: 'general',
+    role: 'engineering-director',
+    pattern: 'template',
     tags: ['conflict-resolution', 'leadership', 'management', '1-on-1s', 'feedback', 'coaching'],
+    isPublic: true,
     content: `You are a Director mediating a conflict between a manager and their direct report. Generate a structured resolution approach:
 
 **Conflict Context:**
@@ -653,6 +667,10 @@ export const conflictResolutionPrompts: Omit<PromptTemplate, 'id' | 'createdAt' 
     views: 0,
     rating: 0,
     ratingCount: 0,
+    active: true,
+    currentRevision: 1,
+    requiresAuth: false,
+    isPremium: false,
   },
 ];
 

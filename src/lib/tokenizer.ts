@@ -34,12 +34,12 @@ export const MODEL_PRICING: Record<string, ModelPricing> = {
     outputPrice: 0.06,
     contextWindow: 8192,
   },
-  'gpt-3.5-turbo': {
-    name: 'GPT-3.5 Turbo',
+  'gpt-4o-mini': {
+    name: 'GPT-4o Mini',
     provider: 'openai',
-    inputPrice: 0.0015,
-    outputPrice: 0.002,
-    contextWindow: 16385,
+    inputPrice: 0.00015,
+    outputPrice: 0.0006,
+    contextWindow: 128000,
   },
   'claude-3-opus': {
     name: 'Claude 3 Opus',

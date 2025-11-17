@@ -32,7 +32,7 @@ export async function GET(
 
   // Role check: manager, director, or higher
   const allowedRoles = ['manager', 'director', 'enterprise_admin', 'super_admin'];
-  if (!allowedRoles.includes(user.role)) {
+  if (!user.role || !allowedRoles.includes(user.role)) {
     return NextResponse.json(
       { error: 'Forbidden - Manager role required' },
       { status: 403 }
@@ -52,8 +52,20 @@ export async function GET(
   try {
     const { teamId } = await params;
 
-    // TODO: Verify user is actually manager of THIS specific team
-    // For now, any manager can view any team (will add team ownership check later)
+    // Verify user is actually manager of THIS specific team
+    const { teamService } = await import('@/lib/services/TeamService');
+    const isTeamManager = await teamService.isManager(teamId, user.id);
+
+    // Allow if user is the team manager, or has elevated privileges (director+)
+    const elevatedRoles = ['director', 'enterprise_admin', 'super_admin', 'org_admin'];
+    const hasElevatedRole = user.role && elevatedRoles.includes(user.role);
+
+    if (!isTeamManager && !hasElevatedRole) {
+      return NextResponse.json(
+        { error: 'Forbidden - You are not the manager of this team' },
+        { status: 403 }
+      );
+    }
 
     const [members, skillMatrix, pipeline, roi] = await Promise.all([
       managerDashboardService.getMemberProgress(teamId),

@@ -388,7 +388,7 @@ export function HubContentEditor({ tool, onChange }: HubContentEditorProps) {
         <CardHeader>
           <CardTitle>Related Articles</CardTitle>
           <p className="text-sm text-muted-foreground">
-            In-depth guides and articles (can be placeholders for "Coming Soon")
+            In-depth guides and articles (can be placeholders for &quot;Coming Soon&quot;)
           </p>
         </CardHeader>
         <CardContent>

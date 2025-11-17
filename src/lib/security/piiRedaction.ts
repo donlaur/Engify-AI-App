@@ -81,18 +81,18 @@ export function redactPIIFromObject<T extends Record<string, unknown>>(
   obj: T,
   options: RedactionOptions = {}
 ): T {
-  const result = { ...obj };
+  const result: any = { ...obj };
 
   Object.keys(result).forEach((key) => {
     const value = result[key];
 
     if (typeof value === 'string') {
-      result[key] = redactPII(value, options) as T[Extract<keyof T, string>];
+      result[key] = redactPII(value, options);
     } else if (value && typeof value === 'object' && !Array.isArray(value)) {
       result[key] = redactPIIFromObject(
         value as Record<string, unknown>,
         options
-      ) as T[Extract<keyof T, string>];
+      );
     } else if (Array.isArray(value)) {
       result[key] = value.map((item) =>
         typeof item === 'string'
@@ -100,11 +100,11 @@ export function redactPIIFromObject<T extends Record<string, unknown>>(
           : typeof item === 'object' && item !== null
             ? redactPIIFromObject(item as Record<string, unknown>, options)
             : item
-      ) as T[Extract<keyof T, string>];
+      );
     }
   });
 
-  return result;
+  return result as T;
 }
 
 /**

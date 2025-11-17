@@ -31,11 +31,21 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: `${APP_URL}/guardrails`,
       type: 'website',
+      siteName: 'Engify.ai',
+      images: [
+        {
+          url: `${APP_URL}/og-images/default.png`,
+          width: 1200,
+          height: 630,
+          alt: 'AI Guardrails Library',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [`${APP_URL}/og-images/default.png`],
     },
     keywords: [
       'ai guardrails',
@@ -46,6 +56,13 @@ export async function generateMetadata(): Promise<Metadata> {
       'data integrity guardrails',
       'security guardrails',
       'performance guardrails',
+      'production safety',
+      'code quality gates',
+      'ai code review',
+      'automated testing',
+      'ai workflow automation',
+      'financial guardrails',
+      'integration testing',
     ],
     authors: [{ name: 'Donnie Laur' }],
   };
@@ -72,8 +89,8 @@ export default async function GuardrailsPage() {
   }, {} as Record<string, number>);
 
   // Get unique subcategories and severities
-  const uniqueSubcategories = [...new Set(guardrails.map((g) => g.subcategory).filter(Boolean))].sort();
-  const uniqueSeverities = [...new Set(guardrails.map((g) => g.severity).filter(Boolean))].sort();
+  const uniqueSubcategories = [...new Set(guardrails.map((g) => g.subcategory).filter(Boolean))].sort() as string[];
+  const uniqueSeverities = [...new Set(guardrails.map((g) => g.severity).filter(Boolean))].sort() as string[];
 
   // Generate JSON-LD structured data for SEO
   const jsonLd = {

@@ -18,13 +18,14 @@
 import { MongoClient, Db } from 'mongodb';
 import { config } from 'dotenv';
 import { resolve } from 'path';
+import fs from 'fs';
+import { execSync } from 'child_process';
 
 // Load environment variables (for scripts and serverless environments)
 // Check multiple locations: current dir, parent dir (for worktrees), common git worktree locations
 if (typeof process !== 'undefined') {
   const currentDir = process.cwd();
   const parentDir = resolve(currentDir, '..');
-  const fs = require('fs');
   
   // Try current directory first
   config({ path: resolve(currentDir, '.env.local') });
@@ -46,29 +47,41 @@ if (typeof process !== 'undefined') {
       const envPaths = [
         resolve(possibleMainRepo, '.env.local'),
         resolve(worktreeRoot, '.env.local'),
-        // Also try absolute path to main repo (common worktree scenario)
-        resolve('/Users/donlaur/dev/Engify-AI-App', '.env.local'),
       ];
-      
+
       for (const envPath of envPaths) {
         if (fs.existsSync(envPath)) {
           config({ path: envPath });
           if (process.env.MONGODB_URI) break;
         }
       }
-    } else {
-      // Fallback: try common absolute paths
-      const commonPaths = [
-        resolve('/Users/donlaur/dev/Engify-AI-App', '.env.local'),
-        resolve('/Users/donlaur/dev/Engify-AI-App', '.env'),
-      ];
-      
-      for (const envPath of commonPaths) {
-        if (fs.existsSync(envPath)) {
-          config({ path: envPath });
-          if (process.env.MONGODB_URI) break;
+    }
+  }
+
+  // Final fallback: Try to find git repository root dynamically
+  if (!process.env.MONGODB_URI) {
+    try {
+      const gitRoot = execSync('git rev-parse --show-toplevel', {
+        cwd: currentDir,
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'ignore'] // Suppress stderr
+      }).trim();
+
+      if (gitRoot && fs.existsSync(gitRoot)) {
+        const gitEnvPaths = [
+          resolve(gitRoot, '.env.local'),
+          resolve(gitRoot, '.env'),
+        ];
+
+        for (const envPath of gitEnvPaths) {
+          if (fs.existsSync(envPath)) {
+            config({ path: envPath });
+            if (process.env.MONGODB_URI) break;
+          }
         }
       }
+    } catch (error) {
+      // Git command failed or not in a git repo - this is okay, just skip
     }
   }
 }

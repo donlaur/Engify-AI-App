@@ -46,22 +46,22 @@ const CATEGORY_LABELS: Record<string, string> = {
   security: 'Security',
 };
 
-const SUBCATEGORY_LABELS: Record<string, string> = {
-  'data-integrity': 'Data Integrity',
-  security: 'Security',
-  performance: 'Performance',
-  availability: 'Availability',
-  financial: 'Financial',
-  integration: 'Integration',
-  testing: 'Testing',
-};
+// const SUBCATEGORY_LABELS: Record<string, string> = {
+//   'data-integrity': 'Data Integrity',
+//   security: 'Security',
+//   performance: 'Performance',
+//   availability: 'Availability',
+//   financial: 'Financial',
+//   integration: 'Integration',
+//   testing: 'Testing',
+// };
 
-const SEVERITY_COLORS: Record<string, 'destructive' | 'default' | 'secondary'> = {
-  critical: 'destructive',
-  high: 'destructive',
-  medium: 'default',
-  low: 'secondary',
-};
+// const SEVERITY_COLORS: Record<string, 'destructive' | 'default' | 'secondary'> = {
+//   critical: 'destructive',
+//   high: 'destructive',
+//   medium: 'default',
+//   low: 'secondary',
+// };
 
 const AUDIENCE_LABELS: Record<string, string> = {
   analysts: 'Analysts',
@@ -93,7 +93,7 @@ export function WorkflowsClient({
   );
 
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  // const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // Reset visible count when filters change
   useEffect(() => {
@@ -102,7 +102,7 @@ export function WorkflowsClient({
 
   // Filter workflows using useMemo to prevent recalculations
   const filteredWorkflows = useMemo(() => {
-    let filtered = initialWorkflows.filter((workflow) => {
+    const filtered = initialWorkflows.filter((workflow) => {
       const matchesSearch =
         workflow.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         workflow.problemStatement.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -112,7 +112,8 @@ export function WorkflowsClient({
       const matchesCategory =
         selectedCategory === 'all' || workflow.category === selectedCategory;
       const matchesAudience =
-        selectedAudience === 'all' || workflow.audience.includes(selectedAudience);
+        selectedAudience === 'all' ||
+        (selectedAudience !== 'all' && workflow.audience.includes(selectedAudience as any));
 
       return matchesSearch && matchesCategory && matchesAudience;
     });
@@ -242,7 +243,7 @@ export function WorkflowsClient({
             ))}
             {allCategories.length > INITIAL_VISIBLE_CATEGORIES && (
               <Badge
-                variant="ghost"
+                variant="secondary"
                 className="cursor-pointer text-primary hover:bg-primary/10"
                 onClick={() => setShowAllCategories(!showAllCategories)}
               >
@@ -281,7 +282,8 @@ export function WorkflowsClient({
                 onClick={() => {
                   setSelectedAudience(audience);
                   if (audience !== 'all') {
-                    trackFilterUsage('audience', audience, {
+                    // Track as 'category' type since 'audience' is not in the filterType union
+                    trackFilterUsage('category', audience, {
                       result_count: filteredWorkflows.length,
                     });
                   }
@@ -294,7 +296,7 @@ export function WorkflowsClient({
             ))}
             {allAudiences.length > INITIAL_VISIBLE_AUDIENCES && (
               <Badge
-                variant="ghost"
+                variant="secondary"
                 className="cursor-pointer text-primary hover:bg-primary/10"
                 onClick={() => setShowAllAudiences(!showAllAudiences)}
               >

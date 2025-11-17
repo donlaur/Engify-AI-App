@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { kv } from '@vercel/kv';
 import { SignJWT } from 'jose';
 import { checkOAuthRateLimit } from '@/lib/rate-limit/oauth';
+import crypto from 'crypto';
 
 // OAuth 2.1 Token Endpoint with RFC 8707 Resource Indicators
 // Exchanges authorization code for JWT access and refresh tokens
@@ -84,7 +85,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify PKCE code verifier (RFC 7636)
-    const crypto = require('crypto');
     const expectedCodeChallenge = crypto
       .createHash('sha256')
       .update(codeVerifier)

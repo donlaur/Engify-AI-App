@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const validationResult = promptIdsSchema.safeParse(promptIdsParam);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid promptIds format', details: validationResult.error.errors },
+        { error: 'Invalid promptIds format', details: validationResult.error.issues },
         { status: 400 }
       );
     }
@@ -71,12 +71,14 @@ export async function GET(request: NextRequest) {
 
     // Audit logging
     await logAuditEvent({
+      eventType: 'prompt.quality_scores.viewed' as any,
       action: 'prompt.quality_scores.viewed',
       userId: session?.user?.id,
       organizationId: session?.user?.organizationId,
       resourceId: `batch:${promptIds.length}`,
       ipAddress: getClientIP(request),
       userAgent: request.headers.get('user-agent') || 'unknown',
+      success: true,
     });
     
     // Get prompts by id or slug to get their MongoDB _id

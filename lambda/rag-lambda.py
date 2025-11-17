@@ -3,6 +3,11 @@ import os
 from typing import List, Dict, Any
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
+from logging_utils import get_lambda_logger, configure_lambda_logging
+
+# Configure logging for Lambda
+configure_lambda_logging(service_name="rag-lambda")
+logger = get_lambda_logger(__name__)
 
 # Initialize MongoDB connection (reused across Lambda invocations)
 _db = None
@@ -30,7 +35,7 @@ def get_db():
         _client.admin.command('ping')
         return _db
     except Exception as e:
-        print(f"MongoDB connection error: {e}")
+        logger.error(f"MongoDB connection error: {e}")
         raise
 
 def simple_text_search(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
@@ -70,9 +75,9 @@ def simple_text_search(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
             })
         
         return formatted_results[:top_k]
-        
+
     except Exception as e:
-        print(f"Search error: {e}")
+        logger.error(f"Search error: {e}")
         return []
 
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
@@ -139,9 +144,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'query': query
             })
         }
-        
+
     except Exception as e:
-        print(f"Error in Lambda handler: {str(e)}")
+        logger.error(f"Error in Lambda handler: {str(e)}", exc_info=True)
         return {
             'statusCode': 500,
             'headers': {

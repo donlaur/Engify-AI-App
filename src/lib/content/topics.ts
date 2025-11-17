@@ -194,85 +194,8 @@ Create an original, comprehensive framework guide for engineering leaders on AI 
     enabled: false,
   },
   {
-    topic: 'crafted-prompt-framework',
-    title: 'The C.R.A.F.T.E.D. Prompt Framework for Software Engineers',
-    description:
-      'A structured, repeatable method for constructing high-quality prompts to get the best results from AI models for software engineering tasks. Learn Context, Role, Action, Format, Tone, Examples, and Definition of Done.',
-    prompt: `
-You are a prompt engineering expert who teaches software engineers how to get better results from AI coding assistants.
-
-Write a comprehensive guide titled "The C.R.A.F.T.E.D. Prompt Framework for Software Engineers"
-
-The C.R.A.F.T.E.D. framework stands for:
-- **C**ontext: Provide the background and the "what" - Prime the AI with all necessary information
-- **R**ole: Define the persona the AI should adopt - Focus on specific domain knowledge
-- **A**ction: State the primary, specific task - Use strong, direct action verbs
-- **F**ormat: Specify the structure of the desired output - Markdown, JSON, code blocks, etc.
-- **T**one: Define the communication style - Professional, casual, technical, etc.
-- **E**xamples: Show, don't just tell - Provide 1-3 concrete examples
-- **D**efinition of Done: Set the rules and boundaries - Constraints, requirements, must-haves
-
-Structure your article as follows:
-
-1. **Introduction** (150 words)
-   - Why prompt engineering matters for developers
-   - The difference between a mediocre and excellent prompt
-
-2. **The Problem** (200 words)
-   - Why most prompts produce generic results
-   - Common mistakes engineers make
-
-3. **The C.R.A.F.T.E.D. Framework Overview** (300 words)
-   - Brief explanation of each component
-   - Why order matters (Context first!)
-
-4. **Component Deep Dives** (1200 words, ~170 words each)
-   For each of C.R.A.F.T.E.D:
-   - What it means with concrete examples
-   - Why it's critical to quality output
-   - Common mistakes to avoid
-   - Working example with before/after
-   
-   Use real code examples in Python, JavaScript, or Ruby
-   Show actual prompt structure with XML-style tags: <context>, <role>, <action>, <format>, <tone>, <examples>, <definition_of_done>
-
-5. **Complete Example** (400 words)
-   - A full C.R.A.F.T.E.D. prompt for refactoring Ruby code (matching the style of the source article)
-   - Show the resulting AI output
-   - Explain why each section contributes to quality
-
-6. **When to Use What** (250 words)
-   - Not every prompt needs all 7 components
-   - Simple questions: C + R + A is enough
-   - Complex tasks: Use full C.R.A.F.T.E.D.
-   - When to add Examples vs. when to skip
-
-7. **Practice Exercises** (200 words)
-   - 3 scenarios for readers to try:
-     1. Debug a performance issue (use Chain-of-Thought)
-     2. Generate unit tests (use Few-Shot with Examples)
-     3. Refactor legacy code (use full C.R.A.F.T.E.D.)
-
-8. **Closing Thoughts** (150 words)
-   - It's all context (XML tags are just structure)
-   - Layer in sections when you get poor results
-   - Becomes critical as codebases grow in complexity
-   - How to level up: practice, iterate, share learnings
-
-Important guidelines:
-- Use real, runnable code examples (not pseudocode)
-- Show actual AI outputs to demonstrate quality difference
-- Be specific about what works and what doesn't
-- Credit the source: Engineering Leadership newsletter by Gregor Ojstersek & Steven Levey
-- Include a link: https://newsletter.eng-leadership.com/p/how-to-use-ai-to-help-with-software
-- Mention that C.R.A.F.T.E.D. builds on CRAFT (our existing framework)
-- Emphasize practicality over theory
-
-Make this immediately applicable. Engineers should be able to use C.R.A.F.T.E.D. today.
-
-Output as Markdown with clear headings (##, ###), code blocks (\`\`\`), and bullet points.
-Total target: ~2850 words.`,
-    category: 'prompt-engineering',
+    topic: 'The C.R.A.F.T.E.D. Prompt Framework for Software Engineers',
+    category: 'engineering',
     targetWordCount: 2850,
     tags: [
       'prompt-engineering',

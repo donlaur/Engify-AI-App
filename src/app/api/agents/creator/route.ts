@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import type { Session } from 'next-auth';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { CreatorAgent } from '@/lib/agents/CreatorAgent';
 import { auditLog } from '@/lib/logging/audit';
@@ -20,7 +21,7 @@ const createContentSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  let session: Awaited<ReturnType<typeof auth>> | null = null;
+  let session: Session | null = null;
 
   try {
     const guard = await RBACPresets.requireSuperAdmin()(request);

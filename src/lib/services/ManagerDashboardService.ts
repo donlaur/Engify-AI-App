@@ -99,7 +99,7 @@ export class ManagerDashboardService {
           .slice(0, 5);
 
         return {
-          teamId: team._id ? team._id.toString() : team.id || '',
+          teamId: team._id ? team._id.toString() : '',
           teamName: team.name,
           totalMembers: members.length,
           activeMembers,

@@ -118,7 +118,7 @@ export const PromptQualityScoreSchema = z.object({
   averageCostCents: z.number().nonnegative(),
   
   // Provider comparison
-  providerScores: z.record(z.object({
+  providerScores: z.record(z.string(), z.object({
     averageScore: z.number().min(0).max(100),
     testCount: z.number().int().nonnegative(),
     passRate: z.number().min(0).max(100),

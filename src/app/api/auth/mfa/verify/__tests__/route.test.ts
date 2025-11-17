@@ -27,7 +27,7 @@ describe('POST /api/auth/mfa/verify', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     const { rateLimit } = await import('@/lib/middleware/rateLimit');
-    vi.mocked(rateLimit).mockReturnValue(true);
+    vi.mocked(rateLimit).mockReturnValue(Promise.resolve(true));
   });
 
   it('should verify MFA code successfully', async () => {
@@ -184,7 +184,7 @@ describe('POST /api/auth/mfa/verify', () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: 'user123' },
     } as any);
-    vi.mocked(rateLimit).mockReturnValueOnce(false);
+    vi.mocked(rateLimit).mockReturnValueOnce(Promise.resolve(false));
 
     const request = new NextRequest(
       'http://localhost:3000/api/auth/mfa/verify',

@@ -56,6 +56,8 @@ export default function AIToolsAdminPage() {
   // Load tools from database
   useEffect(() => {
     loadTools();
+    // loadTools is only called once on mount - adding it to deps would cause unnecessary re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadTools() {
@@ -129,31 +131,28 @@ export default function AIToolsAdminPage() {
     }
   }
 
-  async function deleteTool(id: string) {
-    if (!confirm('Are you sure you want to deprecate this tool?')) return;
-
-    try {
-      const response = await fetch(`/api/admin/ai-tools?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete tool');
-
-      toast({
-        title: 'Success',
-        description: 'Tool marked as deprecated',
-      });
-
-      await loadTools();
-    } catch (error) {
-      console.error('Error deleting tool:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to delete tool',
-        variant: 'destructive',
-      });
-    }
-  }
+  // Unused function - kept for reference
+  // async function deleteTool(id: string) {
+  //   if (!confirm('Are you sure you want to deprecate this tool?')) return;
+  //   try {
+  //     const response = await fetch(`/api/admin/ai-tools?id=${id}`, {
+  //       method: 'DELETE',
+  //     });
+  //     if (!response.ok) throw new Error('Failed to delete tool');
+  //     toast({
+  //       title: 'Success',
+  //       description: 'Tool marked as deprecated',
+  //     });
+  //     await loadTools();
+  //   } catch (error) {
+  //     console.error('Error deleting tool:', error);
+  //     toast({
+  //       title: 'Error',
+  //       description: 'Failed to delete tool',
+  //       variant: 'destructive',
+  //     });
+  //   }
+  // }
 
   async function toggleStatus(tool: ToolDisplay) {
     try {
@@ -360,7 +359,7 @@ export default function AIToolsAdminPage() {
                 No AI tools found in the database. To get started:
               </p>
               <ol className="list-decimal list-inside space-y-2 text-sm text-blue-600 dark:text-blue-300">
-                <li>Click <strong>"Add Tool"</strong> to manually add a new tool</li>
+                <li>Click <strong>&quot;Add Tool&quot;</strong> to manually add a new tool</li>
                 <li>Or check if tools need to be migrated from static config</li>
               </ol>
               <div className="flex gap-2 mt-4">

@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
+import { ObjectId } from 'mongodb';
 import { auth } from '@/lib/auth';
 
 // Audit tool version - must match the version in audit-prompts-patterns.ts
@@ -15,9 +16,6 @@ const AUDIT_TOOL_VERSION = '1.1';
 async function getAuditor() {
   try {
     // Use the webpack alias configured in next.config.js
-    // @ts-expect-error - Dynamic import may not exist at build time
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const auditModule = await import(
       /* webpackIgnore: true */
       '@/scripts/content/audit-prompts-patterns'
@@ -30,11 +28,10 @@ async function getAuditor() {
 }
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth();
     const db = await getMongoDb();
     const { id } = await params;
     
@@ -43,7 +40,7 @@ export async function GET(
       $or: [
         { id },
         { slug: id },
-        { _id: id },
+        ...(ObjectId.isValid(id) ? [{ _id: new ObjectId(id) }] : []),
       ],
     });
 
@@ -109,7 +106,7 @@ export async function POST(
       $or: [
         { id },
         { slug: id },
-        { _id: id },
+        ...(ObjectId.isValid(id) ? [{ _id: new ObjectId(id) }] : []),
       ],
     });
 

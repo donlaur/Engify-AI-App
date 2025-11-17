@@ -53,7 +53,8 @@ describe('Stats Flow Integration', () => {
 
     // Step 2: API route processes MongoDB data
     const { GET } = await import('@/app/api/stats/route');
-    const apiResponse = await GET();
+    const { NextRequest } = await import('next/server');
+    const apiResponse = await GET(new NextRequest('http://localhost:3000/api/stats'));
     const apiData = await apiResponse.json();
 
     expect(apiData.stats.prompts).toBe(150);
@@ -108,7 +109,8 @@ describe('Stats Flow Integration', () => {
 
     // Step 2: API returns fallback after route's 5s timeout
     const { GET } = await import('@/app/api/stats/route');
-    const apiResponse = await GET();
+    const { NextRequest } = await import('next/server');
+    const apiResponse = await GET(new NextRequest('http://localhost:3000/api/stats'));
     const apiData = await apiResponse.json();
 
     expect(apiData.source).toBe('static');
@@ -200,7 +202,8 @@ describe('Stats Flow Integration', () => {
 
     // API returns fallback
     const { GET } = await import('@/app/api/stats/route');
-    const apiResponse = await GET();
+    const { NextRequest } = await import('next/server');
+    const apiResponse = await GET(new NextRequest('http://localhost:3000/api/stats'));
     const apiData = await apiResponse.json();
 
     expect(apiData.source).toBe('static');

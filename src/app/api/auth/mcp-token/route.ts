@@ -6,7 +6,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 
 const TOKEN_EXPIRY = 24 * 60 * 60; // 24 hours in seconds
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     // Check if user is authenticated
     const session = await auth();

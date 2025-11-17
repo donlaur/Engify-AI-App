@@ -36,7 +36,7 @@ import {
 } from '@/lib/schemas/prompt';
 import { trackPromptEvent } from '@/lib/utils/ga-events';
 
-interface PromptCardProps extends Omit<Prompt, 'createdAt' | 'updatedAt'> {
+interface PromptCardProps extends Omit<Prompt, 'createdAt' | 'updatedAt' | 'currentRevision'> {
   onView?: () => void;
   updatedAt?: Date;
   lastRevisedAt?: Date;

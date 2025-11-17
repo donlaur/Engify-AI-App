@@ -1,19 +1,11 @@
 /**
  * Google Analytics Event Tracking
- * 
+ *
  * Track prompt interactions via GA events
  * No database writes needed - all in GA
  */
 
-declare global {
-  interface Window {
-    gtag?: (
-      command: string,
-      action: string,
-      params?: Record<string, any>
-    ) => void;
-  }
-}
+// Note: gtag type is declared in src/components/analytics/GoogleAnalytics.tsx
 
 /**
  * Track prompt event in Google Analytics

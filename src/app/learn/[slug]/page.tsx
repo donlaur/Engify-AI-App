@@ -194,7 +194,7 @@ export default async function ArticlePage({ params }: PageProps) {
           {/* Feedback buttons */}
           <ArticleFeedback
             articleId={article._id?.toString() || article.id || ''}
-            articleSlug={article.seo?.slug || article.slug || params.slug}
+            articleSlug={article.seo?.slug || article.slug || slug}
           />
 
           {/* Author info */}
@@ -232,7 +232,7 @@ export default async function ArticlePage({ params }: PageProps) {
         {/* Related Articles */}
         <RelatedArticles
           currentArticle={{
-            slug: article.seo?.slug || article.slug || params.slug,
+            slug: article.seo?.slug || article.slug || slug,
             tags: Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : []),
             category: article.category,
             title: article.title,
@@ -241,13 +241,13 @@ export default async function ArticlePage({ params }: PageProps) {
         />
 
         {/* Hub-and-Spoke Links */}
-        <HubSpokeLinks articleSlug={article.seo?.slug || article.slug || params.slug} />
+        <HubSpokeLinks articleSlug={article.seo?.slug || article.slug || slug} />
 
         {/* Cross-Content Links (Prompts & Patterns) */}
         <CrossContentLinks
           tags={Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : [])}
           category={article.category}
-          excludeId={article._id || article.id}
+          excludeId={article._id?.toString() || article.id}
         />
       </article>
 
@@ -282,7 +282,8 @@ export default async function ArticlePage({ params }: PageProps) {
   );
   } catch (error) {
     // Log error for monitoring
-    console.error('Error loading article:', params.slug, error);
+    const { slug: errorSlug } = await params;
+    console.error('Error loading article:', errorSlug, error);
     notFound();
   }
 }

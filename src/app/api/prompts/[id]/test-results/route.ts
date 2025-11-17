@@ -5,11 +5,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
-import { PromptTestResultSchema } from '@/lib/db/schemas/prompt-test-results';
 import { checkFeedbackRateLimit } from '@/lib/security/feedback-rate-limit';
 import { auth } from '@/lib/auth';
 import { logAuditEvent } from '@/server/middleware/audit';
 import { z } from 'zod';
+import { ObjectId } from 'mongodb';
 
 // Validate prompt ID parameter
 const promptIdSchema = z.string().min(1).max(100);
@@ -49,14 +49,21 @@ export async function GET(
     }
     const session = await auth();
     const db = await getDb();
-    
+
+    // Build query conditions
+    const queryConditions: any[] = [
+      { id },
+      { slug: id },
+    ];
+
+    // Only add _id condition if id is a valid ObjectId
+    if (ObjectId.isValid(id)) {
+      queryConditions.push({ _id: new ObjectId(id) });
+    }
+
     // Find prompt by id, slug, or MongoDB _id
     const prompt = await db.collection('prompts').findOne({
-      $or: [
-        { id },
-        { slug: id },
-        { _id: id },
-      ],
+      $or: queryConditions,
     });
 
     if (!prompt) {
@@ -71,12 +78,14 @@ export async function GET(
 
     // Audit logging
     await logAuditEvent({
+      eventType: 'prompt.test_results.viewed' as any,
       action: 'prompt.test_results.viewed',
       userId: session?.user?.id,
       organizationId: session?.user?.organizationId,
       resourceId: prompt.id || prompt.slug || promptId,
       ipAddress: getClientIP(request),
       userAgent: request.headers.get('user-agent') || 'unknown',
+      success: true,
     });
     
     // Get test results for this prompt

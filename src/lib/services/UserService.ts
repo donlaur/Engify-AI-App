@@ -331,6 +331,81 @@ export class UserService {
   async getUserCount(): Promise<number> {
     return await this.userRepository.count();
   }
+
+  /**
+   * Store password reset token with expiration
+   */
+  async storePasswordResetToken(
+    userId: string,
+    token: string,
+    expiresAt: Date
+  ): Promise<void> {
+    if (!userId || !token) {
+      throw new Error('User ID and token are required');
+    }
+
+    await this.userRepository.update(userId, {
+      resetToken: token,
+      resetTokenExpiry: expiresAt,
+      updatedAt: new Date(),
+    } as Partial<User>);
+
+    // Invalidate cache since user data changed
+    const user = await this.userRepository.findById(userId);
+    if (user) {
+      const authCache = getAuthCache();
+      await authCache.invalidateUser(user.email, userId);
+    }
+  }
+
+  /**
+   * Verify and consume password reset token
+   */
+  async verifyPasswordResetToken(token: string): Promise<User | null> {
+    if (!token) {
+      return null;
+    }
+
+    // Find user with this reset token
+    const allUsers = await this.userRepository.findAll();
+    const user = allUsers.find(
+      (u) => (u as unknown as { resetToken?: string }).resetToken === token
+    );
+
+    if (!user) {
+      return null;
+    }
+
+    // Check if token has expired
+    const tokenExpiry = (user as unknown as { resetTokenExpiry?: Date }).resetTokenExpiry;
+    if (!tokenExpiry || new Date() > new Date(tokenExpiry)) {
+      return null;
+    }
+
+    return user;
+  }
+
+  /**
+   * Clear password reset token after use
+   */
+  async clearPasswordResetToken(userId: string): Promise<void> {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
+    await this.userRepository.update(userId, {
+      resetToken: null,
+      resetTokenExpiry: null,
+      updatedAt: new Date(),
+    } as Partial<User>);
+
+    // Invalidate cache
+    const user = await this.userRepository.findById(userId);
+    if (user) {
+      const authCache = getAuthCache();
+      await authCache.invalidateUser(user.email, userId);
+    }
+  }
 }
 
 // Export singleton instance for dependency injection
