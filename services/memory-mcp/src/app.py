@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import uuid
 from typing import Iterable, Optional
 
@@ -12,8 +11,11 @@ from auth import AuthContext, build_standard_tags, decode_jwt, merge_tags
 from config import Settings, settings
 from database import MemoryRepository
 from schemas import MemoryResponse, MemoryWriteRequest
+from logging_config import get_logger, configure_logging
 
-LOGGER = logging.getLogger("engify.memory")
+# Configure centralized logging for Memory MCP service
+configure_logging(service_name="engify-memory-mcp", json_format=settings.log_json)
+LOGGER = get_logger("engify.memory")
 
 
 def get_repository(request: Request) -> MemoryRepository:

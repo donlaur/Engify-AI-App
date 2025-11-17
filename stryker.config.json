@@ -1,0 +1,57 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "pnpm",
+  "reporters": ["html", "clear-text", "progress", "dashboard", "json"],
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "vitest.config.ts"
+  },
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "src/lib/services/**/*.ts",
+    "src/lib/repositories/**/*.ts",
+    "src/lib/utils/**/*.ts",
+    "src/lib/security/**/*.ts",
+    "src/lib/cache/**/*.ts",
+    "src/lib/ai/**/*.ts",
+    "src/app/api/**/*.ts",
+    "!src/**/*.test.ts",
+    "!src/**/*.spec.ts",
+    "!src/**/__tests__/**",
+    "!src/test/**"
+  ],
+  "mutator": {
+    "plugins": ["typescript"],
+    "excludedMutations": [
+      "StringLiteral",
+      "ObjectLiteral"
+    ]
+  },
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 50
+  },
+  "timeoutMS": 60000,
+  "timeoutFactor": 1.5,
+  "maxConcurrentTestRunners": 2,
+  "checkers": ["typescript"],
+  "tsconfigFile": "tsconfig.json",
+  "ignorePatterns": [
+    "dist",
+    "coverage",
+    ".next",
+    "node_modules",
+    "**/*.config.ts",
+    "**/*.config.js",
+    "**/types.ts",
+    "**/constants.ts"
+  ],
+  "tempDirName": ".stryker-tmp",
+  "cleanTempDir": true,
+  "concurrency": 2,
+  "dashboard": {
+    "project": "github.com/donlaur/Engify-AI-App",
+    "version": "main"
+  }
+}

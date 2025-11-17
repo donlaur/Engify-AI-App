@@ -42,6 +42,25 @@ export function MakeItMineButton({
   const freeCustomizationsLimit = 1; // 1 free per week
 
   const handleClick = () => {
+    // Track "Make It Mine" button click
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'make_it_mine_click', {
+        event_category: 'Conversion',
+        event_label: promptId,
+        prompt_id: promptId,
+        user_type: isPro ? 'pro' : 'free',
+      });
+    }
+
+    // Track with PostHog
+    if (typeof window !== 'undefined' && window.posthog) {
+      window.posthog.capture('make_it_mine_click', {
+        promptId,
+        userType: isPro ? 'pro' : 'free',
+        freeCustomizationsUsed,
+      });
+    }
+
     if (isPro) {
       // Pro user - open customization interface
       window.location.href = `/workbench?prompt=${promptId}`;
@@ -146,7 +165,23 @@ export function MakeItMineButton({
             <div className="flex flex-col gap-2 pt-2">
               <Button
                 onClick={() => {
-                  // TODO: Navigate to pricing/checkout
+                  // Track upgrade intent
+                  if (typeof window !== 'undefined' && window.gtag) {
+                    window.gtag('event', 'upgrade_intent', {
+                      event_category: 'Conversion',
+                      event_label: 'make_it_mine_modal',
+                      prompt_id: promptId,
+                    });
+                  }
+
+                  if (typeof window !== 'undefined' && window.posthog) {
+                    window.posthog.capture('upgrade_intent', {
+                      source: 'make_it_mine_modal',
+                      promptId,
+                    });
+                  }
+
+                  // Navigate to pricing page
                   window.location.href = '/pricing';
                 }}
                 size="lg"
