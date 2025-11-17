@@ -2,7 +2,7 @@
  * AI Model Configuration
  * 
  * ⚠️ IMPORTANT: Model names change frequently!
- * Last updated: October 31, 2025
+ * Last updated: November 17, 2025
  * 
  * Centralized list of valid AI models and providers.
  * Used for validation and API key management.
@@ -61,20 +61,7 @@ export const AI_MODELS: AIModel[] = [
     notes: 'Extremely cheap. Use for simple tasks, high-volume processing.',
     lastVerified: '2025-10-31',
   },
-  {
-    id: 'gpt-3.5-turbo',
-    name: 'GPT-3.5 Turbo',
-    provider: 'openai',
-    contextWindow: 16385,
-    maxOutputTokens: 4096,
-    costPer1kInputTokens: 0.0005,
-    costPer1kOutputTokens: 0.0015,
-    capabilities: ['text', 'code'],
-    deprecated: true,
-    replacementModel: 'gpt-4o-mini',
-    notes: 'DEPRECATED: Use gpt-4o-mini instead (better quality, similar cost)',
-    lastVerified: '2025-10-31',
-  },
+  // gpt-3.5-turbo REMOVED: Deprecated - use gpt-4o-mini instead (better quality, similar cost)
   {
     id: 'o1-preview',
     name: 'O1 Preview',
@@ -158,48 +145,9 @@ export const AI_MODELS: AIModel[] = [
     notes: '✅ VERIFIED WORKING: Experimental model, may change. Free during testing.',
     lastVerified: '2025-10-31',
   },
-  {
-    id: 'gemini-1.5-pro-002',
-    name: 'Gemini 1.5 Pro',
-    provider: 'google',
-    contextWindow: 2000000,
-    maxOutputTokens: 8192,
-    costPer1kInputTokens: 0.00125,
-    costPer1kOutputTokens: 0.005,
-    capabilities: ['text', 'code', 'analysis', 'vision', 'audio'],
-    deprecated: true,
-    replacementModel: 'gemini-2.0-flash-exp',
-    notes: '❌ SUNSET: Model no longer available. Use gemini-2.0-flash-exp instead.',
-    lastVerified: '2025-10-31',
-  },
-  {
-    id: 'gemini-1.5-flash-002',
-    name: 'Gemini 1.5 Flash',
-    provider: 'google',
-    contextWindow: 1000000,
-    maxOutputTokens: 8192,
-    costPer1kInputTokens: 0.000075,
-    costPer1kOutputTokens: 0.0003,
-    capabilities: ['text', 'code', 'vision'],
-    deprecated: true,
-    replacementModel: 'gemini-2.0-flash-exp',
-    notes: '❌ SUNSET: Model no longer available. Use gemini-2.0-flash-exp instead.',
-    lastVerified: '2025-10-31',
-  },
-  {
-    id: 'gemini-1.5-flash',
-    name: 'Gemini 1.5 Flash (OLD)',
-    provider: 'google',
-    contextWindow: 1000000,
-    maxOutputTokens: 8192,
-    costPer1kInputTokens: 0.000075,
-    costPer1kOutputTokens: 0.0003,
-    capabilities: ['text', 'code', 'vision'],
-    deprecated: true,
-    replacementModel: 'gemini-2.0-flash-exp',
-    notes: '❌ SUNSET: All 1.5 models removed. Use gemini-2.0-flash-exp.',
-    lastVerified: '2025-10-31',
-  },
+  // gemini-1.5-pro-002 REMOVED: SUNSET - Model no longer available. Use gemini-2.0-flash-exp instead.
+  // gemini-1.5-flash-002 REMOVED: SUNSET - Model no longer available. Use gemini-2.0-flash-exp instead.
+  // gemini-1.5-flash REMOVED: SUNSET - All 1.5 models removed. Use gemini-2.0-flash-exp.
   
   // Groq Models (Fast inference)
   {

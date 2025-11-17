@@ -121,11 +121,8 @@ async function syncAIModels() {
   console.log('📊 Syncing Google models...');
   const googleModels = [
     { name: 'gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash Experimental' },
-    { name: 'gemini-1.5-pro', displayName: 'Gemini 1.5 Pro' },
-    { name: 'gemini-1.5-flash', displayName: 'Gemini 1.5 Flash' },
-    { name: 'gemini-1.5-flash-8b', displayName: 'Gemini 1.5 Flash 8B' },
-    { name: 'gemini-pro', displayName: 'Gemini Pro' },
-    { name: 'gemini-pro-vision', displayName: 'Gemini Pro Vision' },
+    { name: 'gemini-exp-1206', displayName: 'Gemini Experimental (Dec 6 version)' },
+    // Note: gemini-1.5-* models are SUNSET and no longer available
   ];
 
   const googleDbModels = googleModels.map((m) => ({

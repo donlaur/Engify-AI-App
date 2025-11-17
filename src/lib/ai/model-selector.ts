@@ -43,15 +43,15 @@ export interface ModelRecommendation {
  * Task-specific model recommendations
  */
 const TASK_MODEL_PREFERENCES: Record<TaskType, string[]> = {
-  'chat': ['gpt-4o-mini', 'claude-3-haiku', 'groq-llama-3.1-8b', 'gemini-1.5-flash'],
+  'chat': ['gpt-4o-mini', 'claude-3-haiku', 'groq-llama-3.1-8b', 'gemini-2.0-flash-exp'],
   'code-review': ['claude-3-5-sonnet', 'gpt-4o-mini', 'groq-llama-3.1-70b'],
   'code-generation': ['claude-3-5-sonnet', 'gpt-4o-mini', 'groq-llama-3.1-70b'],
   'debugging': ['claude-3-5-sonnet', 'gpt-4o-mini', 'groq-llama-3.1-70b'],
-  'documentation': ['gpt-4o-mini', 'claude-3-haiku', 'gemini-1.5-flash'],
-  'analysis': ['claude-3-5-sonnet', 'gemini-1.5-pro', 'gpt-4o-mini'],
+  'documentation': ['gpt-4o-mini', 'claude-3-haiku', 'gemini-2.0-flash-exp'],
+  'analysis': ['claude-3-5-sonnet', 'gemini-2.0-flash-exp', 'gpt-4o-mini'],
   'creative': ['claude-3-5-sonnet', 'gpt-4o-mini', 'mistral-small'],
-  'summarization': ['gpt-4o-mini', 'claude-3-haiku', 'gemini-1.5-flash'],
-  'translation': ['gpt-4o-mini', 'gemini-1.5-flash', 'claude-3-haiku'],
+  'summarization': ['gpt-4o-mini', 'claude-3-haiku', 'gemini-2.0-flash-exp'],
+  'translation': ['gpt-4o-mini', 'gemini-2.0-flash-exp', 'claude-3-haiku'],
 };
 
 /**

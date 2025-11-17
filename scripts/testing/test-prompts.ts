@@ -35,7 +35,7 @@ async function testWithOpenAI(
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'user',
@@ -120,7 +120,7 @@ async function testWithGemini(
 
 async function testAllPrompts() {
   console.log('🧪 Starting Prompt Quality Test\n');
-  console.log('Testing with OpenAI GPT-3.5 and Google Gemini Pro\n');
+  console.log('Testing with OpenAI GPT-4o Mini and Google Gemini Pro\n');
 
   let totalPrompts = 0;
   let testedPrompts = 0;
