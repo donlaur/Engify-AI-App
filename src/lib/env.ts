@@ -65,6 +65,9 @@ const envSchema = z.object({
   SENDGRID_API_KEY_ALERT_TEMPLATE_ID: z.string().optional(),
   SENDGRID_WEEKLY_DIGEST_TEMPLATE_ID: z.string().optional(),
   SENDGRID_AI_CONTENT_READY_TEMPLATE_ID: z.string().optional(),
+
+  // Encryption Keys (Optional - only needed for API key encryption feature)
+  API_KEY_ENCRYPTION_KEY: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

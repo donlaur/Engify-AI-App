@@ -35,9 +35,9 @@ const ALGORITHM = 'aes-256-gcm';
 
 /**
  * Get encryption key from AWS Secrets Manager or environment variable
- * Fails fast if key is missing in production - no insecure defaults
+ * Returns null if key is missing (graceful degradation - feature disabled)
  */
-async function getEncryptionKey(): Promise<string> {
+async function getEncryptionKey(): Promise<string | null> {
   try {
     // Try AWS Secrets Manager first (production)
     return await secretsManager.getSecret(
@@ -45,25 +45,12 @@ async function getEncryptionKey(): Promise<string> {
       'API_KEY_ENCRYPTION_KEY'
     );
   } catch (error) {
-    // Fallback to environment variable (dev only)
+    // Fallback to environment variable
     const envKey = process.env.API_KEY_ENCRYPTION_KEY;
-
-    // Production: Fail fast - no insecure defaults
-    if (process.env.NODE_ENV === 'production') {
-      if (!envKey) {
-        throw new Error(
-          'CRITICAL: API_KEY_ENCRYPTION_KEY not found in AWS Secrets Manager or environment variables. ' +
-          'Cannot encrypt/decrypt API keys without proper encryption key.'
-        );
-      }
-    }
-
-    // Development: Require env var, but allow startup without it
+    
+    // Return null if missing - allows app to boot, feature just won't work
     if (!envKey) {
-      throw new Error(
-        'API_KEY_ENCRYPTION_KEY environment variable is required. ' +
-        'Generate a secure key with: openssl rand -base64 32'
-      );
+      return null;
     }
 
     return envKey;
@@ -80,6 +67,12 @@ export class ApiKeyService {
     apiKey: string
   ): Promise<{ encrypted: string; iv: string; authTag: string }> {
     const encryptionKey = await getEncryptionKey();
+    if (!encryptionKey) {
+      throw new Error(
+        'API_KEY_ENCRYPTION_KEY is required for API key encryption. ' +
+        'Please configure it in AWS Secrets Manager or environment variables.'
+      );
+    }
     const keyBuffer = encryptionKey.startsWith('hex:')
       ? Buffer.from(encryptionKey.slice(4), 'hex')
       : crypto.createHash('sha256').update(encryptionKey).digest();
@@ -104,6 +97,12 @@ export class ApiKeyService {
    */
   private async decryptKey(encryptedData: string): Promise<string> {
     const encryptionKey = await getEncryptionKey();
+    if (!encryptionKey) {
+      throw new Error(
+        'API_KEY_ENCRYPTION_KEY is required for API key decryption. ' +
+        'Please configure it in AWS Secrets Manager or environment variables.'
+      );
+    }
     const keyBuffer = encryptionKey.startsWith('hex:')
       ? Buffer.from(encryptionKey.slice(4), 'hex')
       : crypto.createHash('sha256').update(encryptionKey).digest();
