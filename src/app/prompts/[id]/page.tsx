@@ -486,15 +486,15 @@ export default async function PromptPage({
             {/* Includes: useCases, bestPractices, examples, caseStudies, bestTimeToUse,
                 recommendedModel, whenNotToUse, difficulty, estimatedTime */}
             <PromptEnrichment
-              caseStudies={prompt.caseStudies as any}
+              caseStudies={prompt.caseStudies}
               bestTimeToUse={prompt.bestTimeToUse}
-              recommendedModel={prompt.recommendedModel as any}
-              useCases={prompt.useCases as any}
-              examples={prompt.examples as any}
-              bestPractices={prompt.bestPractices as any}
+              recommendedModel={prompt.recommendedModel}
+              useCases={prompt.useCases}
+              examples={prompt.examples}
+              bestPractices={prompt.bestPractices}
               whenNotToUse={prompt.whenNotToUse}
-              difficulty={prompt.difficulty as any}
-              estimatedTime={prompt.estimatedTime as any}
+              difficulty={prompt.difficulty}
+              estimatedTime={prompt.estimatedTime}
             />
 
             {/* Meta Description Summary - SEO-optimized description */}

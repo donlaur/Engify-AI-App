@@ -196,7 +196,7 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <TagPageClient tag={decoded} displayTag={displayTag} taggedPrompts={uniquePrompts as any} />
+      <TagPageClient tag={decoded} displayTag={displayTag} taggedPrompts={uniquePrompts} />
     </>
   );
   } catch (error) {
