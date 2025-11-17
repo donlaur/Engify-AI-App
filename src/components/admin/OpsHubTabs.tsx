@@ -7,6 +7,7 @@ import { Icons } from '@/lib/icons';
 // Tab components
 import { DashboardOverviewPanel } from './DashboardOverviewPanel';
 import { ContentManagementCMS } from './ContentManagementCMS';
+import { ContentGeneratorPanel } from './ContentGeneratorPanel';
 import { PromptManagementPanel } from './PromptManagementPanel';
 import { PatternManagementPanel } from './PatternManagementPanel';
 import { UserManagementPanel } from './UserManagementPanel';
@@ -34,7 +35,7 @@ export function OpsHubTabs() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <Icons.barChart className="h-4 w-4" />
             <span className="hidden sm:inline">Dashboard</span>
@@ -43,8 +44,12 @@ export function OpsHubTabs() {
             <Icons.fileText className="h-4 w-4" />
             <span className="hidden sm:inline">Content</span>
           </TabsTrigger>
-          <TabsTrigger value="prompts" className="flex items-center gap-2">
+          <TabsTrigger value="generator" className="flex items-center gap-2">
             <Icons.zap className="h-4 w-4" />
+            <span className="hidden sm:inline">Generator</span>
+          </TabsTrigger>
+          <TabsTrigger value="prompts" className="flex items-center gap-2">
+            <Icons.code className="h-4 w-4" />
             <span className="hidden sm:inline">Prompts</span>
           </TabsTrigger>
           <TabsTrigger value="patterns" className="flex items-center gap-2">
@@ -73,6 +78,11 @@ export function OpsHubTabs() {
         {/* Content Tab */}
         <TabsContent value="content" className="space-y-4">
           <ContentManagementCMS />
+        </TabsContent>
+
+        {/* Generator Tab */}
+        <TabsContent value="generator" className="space-y-4">
+          <ContentGeneratorPanel />
         </TabsContent>
 
         {/* Prompts Tab */}
