@@ -2,12 +2,12 @@
 Lambda Handler for Engineering Leadership Discussion Prep Tool
 Multi-Perspective Analysis for Engineering Problems
 
-Use Case: Engineering leaders input a problem/situation, get comprehensive 
-analysis from multiple perspectives (Director, Manager, Tech Lead, Architect, VP, CTO) 
-before meetings or ARB reviews. Perfect for preparing for engineering+product leadership 
+Use Case: Engineering leaders input a problem/situation, get comprehensive
+analysis from multiple perspectives (Director, Manager, Tech Lead, Architect, VP, CTO)
+before meetings or ARB reviews. Perfect for preparing for engineering+product leadership
 discussions.
 
-Supports all leadership roles: Engineering Directors, Product Directors, VP Engineering, 
+Supports all leadership roles: Engineering Directors, Product Directors, VP Engineering,
 VP Product, CTOs, and more. Includes eNPS, career ladders, OKRs, and leadership prompts.
 
 Beta-optimized: 5-minute timeout, single invocation, no chunking, RAG-enhanced
@@ -19,6 +19,11 @@ import asyncio
 from datetime import datetime
 from pymongo import MongoClient
 from agents.scrum_meeting import app
+from logging_utils import get_lambda_logger, configure_lambda_logging
+
+# Configure logging for Lambda
+configure_lambda_logging(service_name="multi-agent-discussion-prep")
+logger = get_lambda_logger(__name__)
 
 # Initialize MongoDB connection (cached across invocations)
 _db = None
@@ -44,7 +49,7 @@ def get_db():
         _db = _client.get_database('engify')
         return _db
     except Exception as e:
-        print(f"MongoDB connection error: {e}")
+        logger.error(f"MongoDB connection error: {e}")
         return None  # Continue without MongoDB if connection fails
 
 def get_rag_context(situation: str, additional_context: str, db) -> str:
@@ -159,9 +164,9 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
         )
         
         if is_index_error:
-            print(f"Text index unavailable (may be rebuilding), using fallback search: {e}")
+            logger.warning(f"Text index unavailable (may be rebuilding), using fallback search: {e}")
         else:
-            print(f"Prompt search error: {e}")
+            logger.error(f"Prompt search error: {e}")
         
         # Fallback: Try regex search if text index fails (includes enriched fields)
         try:
@@ -205,7 +210,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                             f"- **{title}**{role_info}: {desc}{enriched_info}"
                         )
         except Exception as e2:
-            print(f"Fallback prompt search error: {e2}")
+            logger.error(f"Fallback prompt search error: {e2}")
     
     # Search patterns collection
     try:
@@ -228,7 +233,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                 desc = pat.get('description', '')[:150]
                 context_parts.append(f"- **{name}**: {desc}")
     except Exception as e:
-        print(f"Pattern search error: {e}")
+        logger.error(f"Pattern search error: {e}")
         # Fallback: Try regex search
         try:
             query_words = search_query.lower().split()[:2]
@@ -247,7 +252,7 @@ def get_rag_context(situation: str, additional_context: str, db) -> str:
                             f"- **{pat.get('name', 'Unknown')}**: {pat.get('description', '')[:100]}"
                         )
         except Exception as e2:
-            print(f"Fallback pattern search error: {e2}")
+            logger.error(f"Fallback pattern search error: {e2}")
     
     return "\n".join(context_parts) if context_parts else ""
 
@@ -355,7 +360,7 @@ async def async_handler(event, context):
                 insert_result = db['ai_integration_sessions'].insert_one(session_data)
                 session_id = str(insert_result.inserted_id)
             except Exception as e:
-                print(f"Failed to save session to MongoDB: {e}")
+                logger.error(f"Failed to save session to MongoDB: {e}")
         
         # Return result
         return {
@@ -381,11 +386,9 @@ async def async_handler(event, context):
                 'turn_count': result.get('turn_count', 0),
             })
         }
-    
+
     except Exception as e:
-        print(f"Lambda handler error: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Lambda handler error: {e}", exc_info=True)
         
         return {
             'statusCode': 500,
