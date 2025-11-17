@@ -46,7 +46,7 @@ export default function ForCLevelPage() {
       title: 'Talent Retention & Upskilling',
       description:
         'Engineers want AI skills, risk losing talent to AI-forward companies',
-      solution: 'Gamified learning system with certifications and achievements',
+      solution: 'Structured learning pathways with practical guardrail workflows',
       promptId: 'cg-008',
       impact: '60% engagement',
     },

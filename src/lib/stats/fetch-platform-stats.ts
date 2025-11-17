@@ -188,8 +188,11 @@ export async function fetchPlatformStats(skipMongoDB = false): Promise<StatsResp
         total: promptCount,
         byRole: promptsByRole.reduce(
           (acc, item) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            acc[item._id as string] = (item as any).count;
+            // Filter out null/undefined roles
+            if (item._id && typeof item._id === 'string') {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              acc[item._id as string] = (item as any).count;
+            }
             return acc;
           },
           {} as Record<string, number>
