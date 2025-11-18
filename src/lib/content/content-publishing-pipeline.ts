@@ -1248,7 +1248,7 @@ Provide your review in JSON format as specified in your system prompt.
         
         // Also handle cases where string is cut off mid-value (no quote at all)
         // Pattern: "key": "value that ends abruptly
-        jsonContent = jsonContent.replace(/"([^"]+)"\s*:\s*"([^"]+)$/gm, (match, key, value) => {
+        jsonContent = jsonContent.replace(/"([^"]+)"\s*:\s*"([^"]+)$/gm, (match: string, key: string, value: string) => {
           // If we're at the end of content and string isn't closed, close it
           if (jsonContent.indexOf(match) + match.length >= jsonContent.length - 10) {
             const safeValue = value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
