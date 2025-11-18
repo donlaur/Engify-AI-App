@@ -319,7 +319,7 @@ export class AuthService {
       );
 
       // Send password reset email
-      const { sendPasswordResetEmail } = await import('@/lib/services/emailService');
+      const { sendPasswordResetEmail } = await import('@/lib/services/emailService' as string);
       const emailResult = await sendPasswordResetEmail(
         validatedEmail,
         resetToken,
