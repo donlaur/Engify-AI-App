@@ -55,7 +55,6 @@ export const OPENAI_MODEL_DATA: Record<string, {
     computerUse: boolean;
     fileSearch: boolean;
     codeInterpreter: boolean;
-    mcp: boolean;
   };
   endpoints: Array<{
     name: string;
@@ -112,7 +111,6 @@ export const OPENAI_MODEL_DATA: Record<string, {
       computerUse: false,
       fileSearch: true,
       codeInterpreter: true,
-      mcp: true,
     },
     endpoints: [
       { name: 'Chat Completions', path: 'v1/chat/completions', supported: true },
@@ -182,7 +180,6 @@ export const OPENAI_MODEL_DATA: Record<string, {
       computerUse: false,
       fileSearch: true,
       codeInterpreter: true,
-      mcp: true,
     },
     endpoints: [
       { name: 'Chat Completions', path: 'v1/chat/completions', supported: true },
@@ -252,7 +249,6 @@ export const OPENAI_MODEL_DATA: Record<string, {
       computerUse: false,
       fileSearch: true,
       codeInterpreter: true,
-      mcp: true,
     },
     endpoints: [
       { name: 'Chat Completions', path: 'v1/chat/completions', supported: true },
@@ -321,7 +317,6 @@ export const OPENAI_MODEL_DATA: Record<string, {
       computerUse: false,
       fileSearch: false,
       codeInterpreter: false,
-      mcp: false,
     },
     endpoints: [
       { name: 'Videos', path: 'v1/videos', supported: true },
