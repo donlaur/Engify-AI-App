@@ -23,14 +23,15 @@ Scripts removed during cleanup. Can be recovered from git history if needed.
 
 ## Cleanup Round 2 (2025-11-18)
 
-### One-time Data/Content Scripts (7 scripts)
+### One-time Data/Content Scripts (6 scripts)
 - `data/enrich-workflow-citations.ts` - One-time citation enrichment
 - `data/seed-prompts-to-db.ts` - One-time seed (uses deprecated getMongoDb())
 - `data/seed-workflows-to-db.ts` - One-time seed
 - `content/link-prompts-to-patterns.ts` - One-time linking
 - `content/list-collections.ts` - Utility (use mongo shell instead)
 - `content/list-gemini-models.ts` - Utility (use API directly)
-- `content/audit-prompts-patterns.ts` - One-time audit
+
+**NOTE:** `content/audit-prompts-patterns.ts` was initially removed but restored - still used by API route
 
 ### One-time Setup Scripts (4 scripts)
 - `content/setup-test-environment.sh` - One-time test env setup
@@ -57,8 +58,8 @@ Scripts removed during cleanup. Can be recovered from git history if needed.
 
 ---
 
-**Total Removed:** 35 scripts
-**Reduction:** 175 → 131 scripts (25% reduction)
+**Total Removed:** 31 scripts (1 restored)
+**Reduction:** 175 → 146 scripts (17% reduction)
 **Lines Removed:** ~15,000+ lines
 
 All scripts can be recovered from git history using:

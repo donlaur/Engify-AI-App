@@ -132,6 +132,7 @@
     "security:audit": "node scripts/security/security-check.js",
     "security:test-keys": "./scripts/security/test-ai-keys.sh",
     "content:audit-db": "tsx scripts/content/audit-database-content.ts",
+    "content:audit-prompts": "tsx scripts/content/audit-prompts-patterns.ts",
     "data:import-bulk": "tsx scripts/data/import-content-bulk.ts",
     "dev:verify-links": "tsx scripts/development/verify-navigation-links.ts",
     "dev:verify-urls": "tsx scripts/development/verify-source-urls.ts",
