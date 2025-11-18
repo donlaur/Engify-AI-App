@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -44,6 +44,10 @@ import {
 } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import type { PainPoint } from '@/lib/workflows/pain-point-schema';
+import { useAdminData } from '@/hooks/admin/useAdminData';
+import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
+import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
+import { formatAdminDate, calculateStats, truncateText } from '@/lib/admin/utils';
 
 interface PainPointWithMetadata extends PainPoint {
   _id: string;
@@ -52,43 +56,26 @@ interface PainPointWithMetadata extends PainPoint {
 }
 
 export function PainPointManagementPanel() {
-  const [painPoints, setPainPoints] = useState<PainPointWithMetadata[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Use the new useAdminData hook for data fetching and pagination
+  const {
+    data: painPoints,
+    loading,
+    currentPage,
+    totalPages,
+    totalCount,
+    pageSize,
+    goToPage,
+    refresh,
+  } = useAdminData<PainPointWithMetadata>({
+    endpoint: '/api/admin/pain-points',
+    pageSize: 100,
+    dataKey: 'painPoints',
+  });
+
   const [filter, setFilter] = useState<string>('all'); // all, published, draft
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPainPoint, setSelectedPainPoint] = useState<PainPointWithMetadata | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [pageSize] = useState(100); // Max allowed by API
-
-  useEffect(() => {
-    fetchPainPoints();
-  }, [currentPage, pageSize]);
-
-  const fetchPainPoints = async () => {
-    setLoading(true);
-    try {
-      // Fetch from admin endpoint with pagination
-      const res = await fetch(`/api/admin/pain-points?page=${currentPage}&limit=${pageSize}`);
-      const data = await res.json();
-
-      if (data.success) {
-        setPainPoints(data.painPoints);
-        if (data.pagination) {
-          setTotalPages(data.pagination.totalPages);
-          setTotalCount(data.pagination.total);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch pain points:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleToggleStatus = async (
     painPointId: string,
@@ -103,7 +90,7 @@ export function PainPointManagementPanel() {
       });
 
       if (res.ok) {
-        fetchPainPoints();
+        refresh();
         if (selectedPainPoint?._id === painPointId) {
           setSelectedPainPoint({ ...selectedPainPoint, status: newStatus });
         }
@@ -136,61 +123,29 @@ export function PainPointManagementPanel() {
     return true;
   });
 
-  const stats = {
-    total: totalCount, // Use total from API pagination
-    published: painPoints.filter((p) => p.status === 'published').length,
-    draft: painPoints.filter((p) => p.status === 'draft').length,
-    withExamples: painPoints.filter((p) =>
+  // Use calculateStats utility for statistics
+  const stats = useMemo(() => calculateStats(painPoints, [
+    { key: 'total', calculate: () => totalCount },
+    { key: 'published', calculate: (items) => items.filter(p => p.status === 'published').length },
+    { key: 'draft', calculate: (items) => items.filter(p => p.status === 'draft').length },
+    { key: 'withExamples', calculate: (items) => items.filter(p =>
       (p.examples && p.examples.length > 0) ||
       (p.expandedExamples && p.expandedExamples.length > 0)
-    ).length,
-    withSolutions: painPoints.filter((p) =>
+    ).length },
+    { key: 'withSolutions', calculate: (items) => items.filter(p =>
       p.solutionWorkflows && p.solutionWorkflows.length > 0
-    ).length,
-  };
+    ).length },
+  ]), [painPoints, totalCount]);
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
+      {/* Stats Cards - Using AdminStatsCard */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Total</CardDescription>
-            <CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Published</CardDescription>
-            <CardTitle className="text-4xl font-bold text-green-600">
-              {stats.published}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Draft</CardDescription>
-            <CardTitle className="text-4xl font-bold text-gray-400">
-              {stats.draft}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">With Examples</CardDescription>
-            <CardTitle className="text-4xl font-bold text-blue-600">
-              {stats.withExamples}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">With Solutions</CardDescription>
-            <CardTitle className="text-4xl font-bold text-purple-600">
-              {stats.withSolutions}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <AdminStatsCard label="Total" value={stats.total} />
+        <AdminStatsCard label="Published" value={stats.published} variant="green" />
+        <AdminStatsCard label="Draft" value={stats.draft} variant="gray" />
+        <AdminStatsCard label="With Examples" value={stats.withExamples} variant="blue" />
+        <AdminStatsCard label="With Solutions" value={stats.withSolutions} variant="purple" />
       </div>
 
       {/* Search & Filters */}
@@ -277,7 +232,7 @@ export function PainPointManagementPanel() {
                       </TableCell>
                       <TableCell>
                         <span className="line-clamp-2 text-sm text-muted-foreground">
-                          {painPoint.description}
+                          {truncateText(painPoint.description, 80)}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -292,11 +247,7 @@ export function PainPointManagementPanel() {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm text-muted-foreground">
-                          {new Date(painPoint.updatedAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                          {formatAdminDate(painPoint.updatedAt)}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
@@ -315,72 +266,16 @@ export function PainPointManagementPanel() {
             </div>
           )}
 
-          {/* Pagination Controls */}
-          {!loading && filteredPainPoints.length > 0 && totalPages > 1 && (
-            <div className="flex items-center justify-between border-t pt-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} pain points
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                >
-                  First
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                <div className="flex items-center gap-1">
-                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setCurrentPage(pageNum)}
-                        className="w-10"
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages}
-                >
-                  Last
-                </Button>
-              </div>
-            </div>
+          {/* Pagination Controls - Using AdminPaginationControls */}
+          {!loading && filteredPainPoints.length > 0 && (
+            <AdminPaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={goToPage}
+              itemName="pain points"
+            />
           )}
         </CardContent>
       </Card>
@@ -483,11 +378,11 @@ export function PainPointManagementPanel() {
                     <div className="rounded-md border p-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Created:</span>
-                        <span>{new Date(selectedPainPoint.createdAt).toLocaleString()}</span>
+                        <span>{formatAdminDate(selectedPainPoint.createdAt)}</span>
                       </div>
                       <div className="mt-2 flex justify-between">
                         <span className="text-muted-foreground">Updated:</span>
-                        <span>{new Date(selectedPainPoint.updatedAt).toLocaleString()}</span>
+                        <span>{formatAdminDate(selectedPainPoint.updatedAt)}</span>
                       </div>
                       {selectedPainPoint.datePublished && (
                         <div className="mt-2 flex justify-between">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -42,6 +42,10 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
+import { useAdminData } from '@/hooks/admin/useAdminData';
+import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
+import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
+import { formatAdminDate, calculateStats } from '@/lib/admin/utils';
 
 interface Prompt {
   _id: string;
@@ -122,43 +126,26 @@ interface Prompt {
 }
 
 export function PromptManagementPanel() {
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all'); // all, active, inactive, ai-generated
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [pageSize, setPageSize] = useState(100); // Max allowed by API
-
-  useEffect(() => {
-    fetchPrompts();
-  }, [currentPage, pageSize]);
-
-  const fetchPrompts = async () => {
-    setLoading(true);
-    try {
-      // Fetch from admin endpoint with pagination
-      const res = await fetch(`/api/admin/prompts?page=${currentPage}&limit=${pageSize}`);
-      const data = await res.json();
-
-      if (data.success) {
-        setPrompts(data.prompts);
-        if (data.pagination) {
-          setTotalPages(data.pagination.totalPages);
-          setTotalCount(data.pagination.total);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch prompts:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: prompts,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    totalCount,
+    searchTerm,
+    setSearchTerm,
+    goToPage,
+    refresh,
+  } = useAdminData<Prompt>({
+    endpoint: '/api/admin/prompts',
+    pageSize: 100,
+    dataKey: 'prompts'
+  });
 
   const handleToggleActive = async (
     promptId: string,
@@ -172,7 +159,7 @@ export function PromptManagementPanel() {
       });
 
       if (res.ok) {
-        fetchPrompts();
+        refresh();
         if (selectedPrompt?._id === promptId) {
           setSelectedPrompt({ ...selectedPrompt, active: !currentActive });
         }
@@ -206,56 +193,23 @@ export function PromptManagementPanel() {
     return true;
   });
 
-  const stats = {
-    total: totalCount, // Use total from API pagination
-    active: prompts.filter((p) => p.active !== false).length,
-    inactive: prompts.filter((p) => p.active === false).length,
-    aiGenerated: prompts.filter((p) => p.id.startsWith('generated-')).length,
-    unscored: prompts.filter((p) => !p.qualityScore).length,
-  };
+  const stats = useMemo(() => calculateStats(prompts, [
+    { key: 'total', calculate: () => totalCount },
+    { key: 'active', calculate: (items) => items.filter(p => p.active !== false).length },
+    { key: 'inactive', calculate: (items) => items.filter(p => p.active === false).length },
+    { key: 'aiGenerated', calculate: (items) => items.filter(p => p.id.startsWith('generated-')).length },
+    { key: 'unscored', calculate: (items) => items.filter(p => !p.qualityScore).length },
+  ]), [prompts, totalCount]);
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Total</CardDescription>
-            <CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Active</CardDescription>
-            <CardTitle className="text-4xl font-bold text-green-600">
-              {stats.active}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Inactive</CardDescription>
-            <CardTitle className="text-4xl font-bold text-gray-400">
-              {stats.inactive}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">AI-Generated</CardDescription>
-            <CardTitle className="text-4xl font-bold text-purple-600">
-              {stats.aiGenerated}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Unscored</CardDescription>
-            <CardTitle className="text-4xl font-bold text-orange-600">
-              {stats.unscored}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <AdminStatsCard label="Total" value={stats.total} />
+        <AdminStatsCard label="Active" value={stats.active} variant="green" />
+        <AdminStatsCard label="Inactive" value={stats.inactive} variant="gray" />
+        <AdminStatsCard label="AI-Generated" value={stats.aiGenerated} variant="purple" />
+        <AdminStatsCard label="Unscored" value={stats.unscored} variant="orange" />
       </div>
 
       {/* Search & Filters */}
@@ -367,11 +321,7 @@ export function PromptManagementPanel() {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm text-muted-foreground">
-                          {new Date(prompt.updatedAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                          {formatAdminDate(prompt.updatedAt)}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
@@ -391,71 +341,15 @@ export function PromptManagementPanel() {
           )}
 
           {/* Pagination Controls */}
-          {!loading && filteredPrompts.length > 0 && totalPages > 1 && (
-            <div className="flex items-center justify-between border-t pt-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} prompts
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                >
-                  First
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                <div className="flex items-center gap-1">
-                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setCurrentPage(pageNum)}
-                        className="w-10"
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages}
-                >
-                  Last
-                </Button>
-              </div>
-            </div>
+          {!loading && filteredPrompts.length > 0 && (
+            <AdminPaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={100}
+              onPageChange={goToPage}
+              itemName="prompts"
+            />
           )}
         </CardContent>
       </Card>

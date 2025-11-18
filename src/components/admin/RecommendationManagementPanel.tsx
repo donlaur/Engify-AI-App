@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -44,6 +44,10 @@ import {
 } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import type { Recommendation } from '@/lib/workflows/recommendation-schema';
+import { useAdminData } from '@/hooks/admin/useAdminData';
+import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
+import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
+import { formatAdminDate, calculateStats } from '@/lib/admin/utils';
 
 interface RecommendationWithMeta extends Recommendation {
   _id: string;
@@ -52,8 +56,7 @@ interface RecommendationWithMeta extends Recommendation {
 }
 
 export function RecommendationManagementPanel() {
-  const [recommendations, setRecommendations] = useState<RecommendationWithMeta[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Local filters (client-side filtering)
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [audienceFilter, setAudienceFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
@@ -62,35 +65,21 @@ export function RecommendationManagementPanel() {
   const [selectedRecommendation, setSelectedRecommendation] = useState<RecommendationWithMeta | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [pageSize] = useState(100);
-
-  useEffect(() => {
-    fetchRecommendations();
-  }, [currentPage, pageSize]);
-
-  const fetchRecommendations = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/recommendations?page=${currentPage}&limit=${pageSize}`);
-      const data = await res.json();
-
-      if (data.success) {
-        setRecommendations(data.recommendations);
-        if (data.pagination) {
-          setTotalPages(data.pagination.totalPages);
-          setTotalCount(data.pagination.total);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch recommendations:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use the enterprise data hook for pagination and fetching
+  const {
+    data: recommendations,
+    loading,
+    currentPage,
+    totalPages,
+    totalCount,
+    pageSize,
+    goToPage,
+    refresh,
+  } = useAdminData<RecommendationWithMeta>({
+    endpoint: '/api/admin/recommendations',
+    pageSize: 100,
+    dataKey: 'recommendations',
+  });
 
   const handleToggleStatus = async (
     recommendationId: string,
@@ -105,7 +94,7 @@ export function RecommendationManagementPanel() {
       });
 
       if (res.ok) {
-        fetchRecommendations();
+        refresh();
         if (selectedRecommendation?._id === recommendationId) {
           setSelectedRecommendation({ ...selectedRecommendation, status: newStatus as 'draft' | 'published' });
         }
@@ -145,14 +134,15 @@ export function RecommendationManagementPanel() {
     return true;
   });
 
-  const stats = {
-    total: totalCount,
-    published: recommendations.filter((r) => r.status === 'published').length,
-    draft: recommendations.filter((r) => r.status === 'draft').length,
-    highPriority: recommendations.filter((r) => r.priority === 'high').length,
-    mediumPriority: recommendations.filter((r) => r.priority === 'medium').length,
-    lowPriority: recommendations.filter((r) => r.priority === 'low').length,
-  };
+  // Calculate stats using the enterprise utility function
+  const stats = useMemo(() => calculateStats(recommendations, [
+    { key: 'total', calculate: () => totalCount },
+    { key: 'published', calculate: (items) => items.filter((r) => r.status === 'published').length },
+    { key: 'draft', calculate: (items) => items.filter((r) => r.status === 'draft').length },
+    { key: 'highPriority', calculate: (items) => items.filter((r) => r.priority === 'high').length },
+    { key: 'mediumPriority', calculate: (items) => items.filter((r) => r.priority === 'medium').length },
+    { key: 'lowPriority', calculate: (items) => items.filter((r) => r.priority === 'low').length },
+  ]), [recommendations, totalCount]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -171,52 +161,12 @@ export function RecommendationManagementPanel() {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Total</CardDescription>
-            <CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Published</CardDescription>
-            <CardTitle className="text-4xl font-bold text-green-600">
-              {stats.published}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Draft</CardDescription>
-            <CardTitle className="text-4xl font-bold text-gray-400">
-              {stats.draft}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">High Priority</CardDescription>
-            <CardTitle className="text-4xl font-bold text-red-600">
-              {stats.highPriority}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Medium Priority</CardDescription>
-            <CardTitle className="text-4xl font-bold text-yellow-600">
-              {stats.mediumPriority}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Low Priority</CardDescription>
-            <CardTitle className="text-4xl font-bold text-green-600">
-              {stats.lowPriority}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <AdminStatsCard label="Total" value={stats.total} />
+        <AdminStatsCard label="Published" value={stats.published} variant="green" />
+        <AdminStatsCard label="Draft" value={stats.draft} variant="gray" />
+        <AdminStatsCard label="High Priority" value={stats.highPriority} variant="red" />
+        <AdminStatsCard label="Medium Priority" value={stats.mediumPriority} variant="orange" />
+        <AdminStatsCard label="Low Priority" value={stats.lowPriority} variant="green" />
       </div>
 
       {/* Search & Filters */}
@@ -367,11 +317,7 @@ export function RecommendationManagementPanel() {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm text-muted-foreground">
-                          {new Date(rec.updatedAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                          {formatAdminDate(rec.updatedAt)}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
@@ -391,71 +337,15 @@ export function RecommendationManagementPanel() {
           )}
 
           {/* Pagination Controls */}
-          {!loading && filteredRecommendations.length > 0 && totalPages > 1 && (
-            <div className="flex items-center justify-between border-t pt-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} recommendations
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                >
-                  First
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                <div className="flex items-center gap-1">
-                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setCurrentPage(pageNum)}
-                        className="w-10"
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages}
-                >
-                  Last
-                </Button>
-              </div>
-            </div>
+          {!loading && filteredRecommendations.length > 0 && (
+            <AdminPaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={goToPage}
+              itemName="recommendations"
+            />
           )}
         </CardContent>
       </Card>
@@ -612,22 +502,22 @@ export function RecommendationManagementPanel() {
                     <div className="rounded-md border p-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Created:</span>
-                        <span>{new Date(selectedRecommendation.createdAt).toLocaleString()}</span>
+                        <span>{formatAdminDate(selectedRecommendation.createdAt)}</span>
                       </div>
                       <div className="mt-2 flex justify-between">
                         <span className="text-muted-foreground">Updated:</span>
-                        <span>{new Date(selectedRecommendation.updatedAt).toLocaleString()}</span>
+                        <span>{formatAdminDate(selectedRecommendation.updatedAt)}</span>
                       </div>
                       {selectedRecommendation.datePublished && (
                         <div className="mt-2 flex justify-between">
                           <span className="text-muted-foreground">Published:</span>
-                          <span>{new Date(selectedRecommendation.datePublished).toLocaleString()}</span>
+                          <span>{formatAdminDate(selectedRecommendation.datePublished)}</span>
                         </div>
                       )}
                       {selectedRecommendation.dateModified && (
                         <div className="mt-2 flex justify-between">
                           <span className="text-muted-foreground">Modified:</span>
-                          <span>{new Date(selectedRecommendation.dateModified).toLocaleString()}</span>
+                          <span>{formatAdminDate(selectedRecommendation.dateModified)}</span>
                         </div>
                       )}
                     </div>

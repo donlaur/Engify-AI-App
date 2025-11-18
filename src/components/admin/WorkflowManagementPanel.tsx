@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -44,6 +44,10 @@ import {
 } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import type { Workflow } from '@/lib/workflows/workflow-schema';
+import { useAdminData } from '@/hooks/admin/useAdminData';
+import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
+import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
+import { formatAdminDate, calculateStats } from '@/lib/admin/utils';
 
 interface WorkflowWithMetadata extends Workflow {
   _id: string;
@@ -52,44 +56,30 @@ interface WorkflowWithMetadata extends Workflow {
 }
 
 export function WorkflowManagementPanel() {
-  const [workflows, setWorkflows] = useState<WorkflowWithMetadata[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [audienceFilter, setAudienceFilter] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowWithMetadata | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [pageSize] = useState(100);
-
-  useEffect(() => {
-    fetchWorkflows();
-  }, [currentPage, pageSize]);
-
-  const fetchWorkflows = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/workflows?page=${currentPage}&limit=${pageSize}`);
-      const data = await res.json();
-
-      if (data.success) {
-        setWorkflows(data.workflows);
-        if (data.pagination) {
-          setTotalPages(data.pagination.totalPages);
-          setTotalCount(data.pagination.total);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch workflows:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use the new useAdminData hook for data management
+  const {
+    data: workflows,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    totalCount,
+    pageSize,
+    filters,
+    setFilters,
+    searchTerm,
+    setSearchTerm,
+    goToPage,
+    refresh,
+  } = useAdminData<WorkflowWithMetadata>({
+    endpoint: '/api/admin/workflows',
+    pageSize: 100,
+    dataKey: 'workflows',
+    initialFilters: { category: 'all', status: 'all', audience: 'all' }
+  });
 
   const handleToggleStatus = async (
     workflowId: string,
@@ -106,7 +96,7 @@ export function WorkflowManagementPanel() {
       });
 
       if (res.ok) {
-        fetchWorkflows();
+        refresh();
         if (selectedWorkflow?._id === workflowId) {
           setSelectedWorkflow({ ...selectedWorkflow, status: newStatus as 'draft' | 'published' | 'coming_soon' });
         }
@@ -123,13 +113,13 @@ export function WorkflowManagementPanel() {
 
   const filteredWorkflows = workflows.filter((workflow) => {
     // Filter by category
-    if (categoryFilter !== 'all' && workflow.category !== categoryFilter) return false;
+    if (filters.category !== 'all' && workflow.category !== filters.category) return false;
 
     // Filter by status
-    if (statusFilter !== 'all' && workflow.status !== statusFilter) return false;
+    if (filters.status !== 'all' && workflow.status !== filters.status) return false;
 
     // Filter by audience
-    if (audienceFilter !== 'all' && !workflow.audience.includes(audienceFilter as any)) return false;
+    if (filters.audience !== 'all' && !workflow.audience.includes(filters.audience as any)) return false;
 
     // Filter by search (title or slug)
     if (searchTerm) {
@@ -143,13 +133,13 @@ export function WorkflowManagementPanel() {
     return true;
   });
 
-  // Calculate stats
-  const stats = {
-    total: totalCount,
-    published: workflows.filter((w) => w.status === 'published').length,
-    draft: workflows.filter((w) => w.status === 'draft').length,
-    comingSoon: workflows.filter((w) => w.status === 'coming_soon').length,
-  };
+  // Calculate stats using the utility function
+  const stats = useMemo(() => calculateStats(workflows, [
+    { key: 'total', calculate: () => totalCount },
+    { key: 'published', calculate: (items) => items.filter(w => w.status === 'published').length },
+    { key: 'draft', calculate: (items) => items.filter(w => w.status === 'draft').length },
+    { key: 'comingSoon', calculate: (items) => items.filter(w => w.status === 'coming_soon').length },
+  ]), [workflows, totalCount]);
 
   // Calculate category breakdown
   const categoryStats = workflows.reduce((acc, workflow) => {
@@ -161,36 +151,10 @@ export function WorkflowManagementPanel() {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Total</CardDescription>
-            <CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Published</CardDescription>
-            <CardTitle className="text-4xl font-bold text-green-600">
-              {stats.published}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Draft</CardDescription>
-            <CardTitle className="text-4xl font-bold text-gray-400">
-              {stats.draft}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Coming Soon</CardDescription>
-            <CardTitle className="text-4xl font-bold text-blue-600">
-              {stats.comingSoon}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <AdminStatsCard label="Total" value={stats.total} />
+        <AdminStatsCard label="Published" value={stats.published} variant="green" />
+        <AdminStatsCard label="Draft" value={stats.draft} variant="gray" />
+        <AdminStatsCard label="Coming Soon" value={stats.comingSoon} variant="blue" />
       </div>
 
       {/* Category Breakdown */}
@@ -225,7 +189,7 @@ export function WorkflowManagementPanel() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="flex-1 min-w-[200px] bg-white dark:bg-gray-800"
             />
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <Select value={filters.category as string} onValueChange={(value) => setFilters({ category: value })}>
               <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
@@ -244,7 +208,7 @@ export function WorkflowManagementPanel() {
                 <SelectItem value="security">Security</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={filters.status as string} onValueChange={(value) => setFilters({ status: value })}>
               <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -255,7 +219,7 @@ export function WorkflowManagementPanel() {
                 <SelectItem value="coming_soon">Coming Soon</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={audienceFilter} onValueChange={setAudienceFilter}>
+            <Select value={filters.audience as string} onValueChange={(value) => setFilters({ audience: value })}>
               <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
                 <SelectValue placeholder="Audience" />
               </SelectTrigger>
@@ -278,6 +242,10 @@ export function WorkflowManagementPanel() {
           {loading ? (
             <div className="py-8 text-center text-muted-foreground">
               Loading workflows...
+            </div>
+          ) : error ? (
+            <div className="py-8 text-center text-red-600">
+              Error: {error}
             </div>
           ) : filteredWorkflows.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
@@ -352,11 +320,7 @@ export function WorkflowManagementPanel() {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm text-muted-foreground">
-                          {new Date(workflow.updatedAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                          {formatAdminDate(workflow.updatedAt)}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
@@ -376,71 +340,15 @@ export function WorkflowManagementPanel() {
           )}
 
           {/* Pagination Controls */}
-          {!loading && filteredWorkflows.length > 0 && totalPages > 1 && (
-            <div className="flex items-center justify-between border-t pt-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} workflows
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                >
-                  First
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                <div className="flex items-center gap-1">
-                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setCurrentPage(pageNum)}
-                        className="w-10"
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages}
-                >
-                  Last
-                </Button>
-              </div>
-            </div>
+          {!loading && filteredWorkflows.length > 0 && (
+            <AdminPaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={goToPage}
+              itemName="workflows"
+            />
           )}
         </CardContent>
       </Card>
@@ -858,11 +766,11 @@ export function WorkflowManagementPanel() {
                     <div className="rounded-md border p-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Created:</span>
-                        <span>{new Date(selectedWorkflow.createdAt).toLocaleString()}</span>
+                        <span>{formatAdminDate(selectedWorkflow.createdAt)}</span>
                       </div>
                       <div className="mt-2 flex justify-between">
                         <span className="text-muted-foreground">Updated:</span>
-                        <span>{new Date(selectedWorkflow.updatedAt).toLocaleString()}</span>
+                        <span>{formatAdminDate(selectedWorkflow.updatedAt)}</span>
                       </div>
                     </div>
                   </div>
