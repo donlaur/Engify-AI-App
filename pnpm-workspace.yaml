@@ -63,8 +63,8 @@ catalogs:
 
   # Authentication & Authorization
   auth:
-    'next-auth': 5.0.0-beta.29
-    '@auth/mongodb-adapter': ^3.10.0
+    'next-auth': 5.0.0-beta.30
+    '@auth/mongodb-adapter': ^3.11.1
     '@auth/prisma-adapter': ^2.11.1
     bcryptjs: ^3.0.2
     jose: ^6.1.0

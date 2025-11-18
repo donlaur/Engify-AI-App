@@ -26,13 +26,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { SignJWT } from 'jose';
 import { kv } from '@vercel/kv';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import crypto from 'crypto';
-import { authOptions } from '@/lib/auth/config';
+import { auth } from '@/lib/auth';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { MCPTokenScopeSchema } from '@/lib/db/schema';
 import { logger } from '@/lib/logging/logger';
@@ -48,12 +47,11 @@ const tokenRequestSchema = z.object({
 
 const JWT_SECRET = new TextEncoder().encode(process.env.NEXTAUTH_SECRET!);
 const ACCESS_TOKEN_EXPIRY = 3600; // 1 hour
-const REFRESH_TOKEN_TTL = 30 * 24 * 60 * 60; // 30 days in seconds
 
 export async function POST(request: NextRequest) {
   try {
     // 1. Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return unauthorized('Authentication required');
     }
@@ -241,9 +239,9 @@ export async function POST(request: NextRequest) {
  * GET /api/auth/mcp/token
  * List user's MCP tokens
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return unauthorized('Authentication required');
     }

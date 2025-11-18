@@ -23,8 +23,8 @@ catalogs:
       version: 0.32.1
   auth:
     '@auth/mongodb-adapter':
-      specifier: ^3.10.0
-      version: 3.10.0
+      specifier: ^3.11.1
+      version: 3.11.1
     '@auth/prisma-adapter':
       specifier: ^2.11.1
       version: 2.11.1
@@ -35,8 +35,8 @@ catalogs:
       specifier: ^6.1.0
       version: 6.1.0
     next-auth:
-      specifier: 5.0.0-beta.29
-      version: 5.0.0-beta.29
+      specifier: 5.0.0-beta.30
+      version: 5.0.0-beta.30
   aws:
     '@aws-sdk/client-cognito-identity-provider':
       specifier: ^3.922.0
@@ -377,6 +377,9 @@ catalogs:
       specifier: ^5.0.0
       version: 5.0.0
 
+overrides:
+  '@auth/core': 0.41.1
+
 importers:
 
   .:
@@ -386,7 +389,7 @@ importers:
         version: 0.67.1(zod@3.25.76)
       '@auth/mongodb-adapter':
         specifier: catalog:auth
-        version: 3.10.0(mongodb@6.20.0(socks@2.8.7))
+        version: 3.11.1(mongodb@6.20.0(socks@2.8.7))
       '@auth/prisma-adapter':
         specifier: catalog:auth
         version: 2.11.1(@prisma/client@6.18.0(prisma@6.18.0(magicast@0.3.5)(typescript@5.9.3))(typescript@5.9.3))
@@ -533,7 +536,7 @@ importers:
         version: 15.5.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-auth:
         specifier: catalog:auth
-        version: 5.0.0-beta.29(next@15.5.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 5.0.0-beta.30(next@15.5.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       next-themes:
         specifier: catalog:ui-utils
         version: 0.2.1(next@15.5.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -774,20 +777,6 @@ packages:
   '@asamuzakjp/nwsapi@2.3.9':
     resolution: {integrity: sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==}
 
-  '@auth/core@0.40.0':
-    resolution: {integrity: sha512-n53uJE0RH5SqZ7N1xZoMKekbHfQgjd0sAEyUbE+IYJnmuQkbvuZnXItCU7d+i7Fj8VGOgqvNO7Mw4YfBTlZeQw==}
-    peerDependencies:
-      '@simplewebauthn/browser': ^9.0.1
-      '@simplewebauthn/server': ^9.0.2
-      nodemailer: ^6.8.0
-    peerDependenciesMeta:
-      '@simplewebauthn/browser':
-        optional: true
-      '@simplewebauthn/server':
-        optional: true
-      nodemailer:
-        optional: true
-
   '@auth/core@0.41.1':
     resolution: {integrity: sha512-t9cJ2zNYAdWMacGRMT6+r4xr1uybIdmYa49calBPeTqwgAFPV/88ac9TEvCR85pvATiSPt8VaNf+Gt24JIT/uw==}
     peerDependencies:
@@ -802,8 +791,8 @@ packages:
       nodemailer:
         optional: true
 
-  '@auth/mongodb-adapter@3.10.0':
-    resolution: {integrity: sha512-xDBeDDaCwY8yABrF0Nsb31I3MkuZJ57DCby2ikcOu9ydvCG7gKs2aNZf90J8rUj1sXXiIxIAY1WP0+KM8jJB7Q==}
+  '@auth/mongodb-adapter@3.11.1':
+    resolution: {integrity: sha512-xY+VUkC3CNXct8UwQgBAQqXASqolSlIARg6oAm1378CtRN2650tQUCOEnGLNLmroVefUeP73M6t+TpGXq72vwQ==}
     peerDependencies:
       mongodb: ^6
 
@@ -5806,14 +5795,14 @@ packages:
     resolution: {integrity: sha512-iGBUfFB7yPczHHtA8dksKTJ9E8TESNTAx1UQWW6TzMF280vo9jdPYpLUXrMN1BCkPdHFdNG3fxOt2CUad8KhAw==}
     engines: {node: '>=18'}
 
-  next-auth@5.0.0-beta.29:
-    resolution: {integrity: sha512-Ukpnuk3NMc/LiOl32njZPySk7pABEzbjhMUFd5/n10I0ZNC7NCuVv8IY2JgbDek2t/PUOifQEoUiOOTLy4os5A==}
+  next-auth@5.0.0-beta.30:
+    resolution: {integrity: sha512-+c51gquM3F6nMVmoAusRJ7RIoY0K4Ts9HCCwyy/BRoe4mp3msZpOzYMyb5LAYc1wSo74PMQkGDcaghIO7W6Xjg==}
     peerDependencies:
       '@simplewebauthn/browser': ^9.0.1
       '@simplewebauthn/server': ^9.0.2
-      next: ^14.0.0-0 || ^15.0.0-0
-      nodemailer: ^6.6.5
-      react: ^18.2.0 || ^19.0.0-0
+      next: ^14.0.0-0 || ^15.0.0 || ^16.0.0
+      nodemailer: ^7.0.7
+      react: ^18.2.0 || ^19.0.0
     peerDependenciesMeta:
       '@simplewebauthn/browser':
         optional: true
@@ -7528,14 +7517,6 @@ snapshots:
 
   '@asamuzakjp/nwsapi@2.3.9': {}
 
-  '@auth/core@0.40.0':
-    dependencies:
-      '@panva/hkdf': 1.2.1
-      jose: 6.1.0
-      oauth4webapi: 3.8.2
-      preact: 10.24.3
-      preact-render-to-string: 6.5.11(preact@10.24.3)
-
   '@auth/core@0.41.1':
     dependencies:
       '@panva/hkdf': 1.2.1
@@ -7544,9 +7525,9 @@ snapshots:
       preact: 10.24.3
       preact-render-to-string: 6.5.11(preact@10.24.3)
 
-  '@auth/mongodb-adapter@3.10.0(mongodb@6.20.0(socks@2.8.7))':
+  '@auth/mongodb-adapter@3.11.1(mongodb@6.20.0(socks@2.8.7))':
     dependencies:
-      '@auth/core': 0.40.0
+      '@auth/core': 0.41.1
       mongodb: 6.20.0(socks@2.8.7)
     transitivePeerDependencies:
       - '@simplewebauthn/browser'
@@ -13956,9 +13937,9 @@ snapshots:
 
   neverthrow@7.2.0: {}
 
-  next-auth@5.0.0-beta.29(next@15.5.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+  next-auth@5.0.0-beta.30(next@15.5.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@auth/core': 0.40.0
+      '@auth/core': 0.41.1
       next: 15.5.6(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
 

@@ -7,11 +7,10 @@
  */
 
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { kv } from '@vercel/kv';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
-import { authOptions } from '@/lib/auth/config';
+import { auth } from '@/lib/auth';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { logger } from '@/lib/logging/logger';
 import { success, fail, unauthorized } from '@/lib/api/response';
@@ -29,7 +28,7 @@ const revokeRequestSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // 1. Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return unauthorized('Authentication required');
     }
