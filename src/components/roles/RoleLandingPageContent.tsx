@@ -505,104 +505,73 @@ export async function RoleLandingPageContent({
 
               <h1 className="animate-fade-in text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
                 {(() => {
-                  const knownRoles = [
-                    'Engineers',
-                    'Engineering Managers',
-                    'Product Managers',
-                    'QA Engineers',
-                    'Software Architects',
-                    'DevOps & SRE',
-                    'Scrum Masters',
-                    'Product Owners',
-                    'Directors & C-Level',
-                    'Designers',
-                    'Engineering Directors',
-                    'Product Directors',
-                    'VP of Engineering',
-                    'VP of Product',
-                    'CTO',
-                  ];
-                  const title = roleInfo.title ?? '';
-                  const isKnownRole = knownRoles.includes(title);
-                  
-                  if (title === 'Engineers') return 'Code Faster.';
-                  if (title === 'Engineering Managers') return 'Lead Faster.';
-                  if (title === 'Product Managers') return 'Build Better Products.';
-                  if (title === 'QA Engineers') return 'Test Smarter.';
-                  if (title === 'Software Architects') return 'Design Better Systems.';
-                  if (title === 'DevOps & SRE') return 'Deploy with Confidence.';
-                  if (title === 'Scrum Masters') return 'Facilitate Better Sprints.';
-                  if (title === 'Product Owners') return 'Prioritize Smarter.';
-                  if (title === 'Directors & C-Level') return 'Make Strategic Decisions.';
-                  if (title === 'Designers') return 'Design Beautifully.';
-                  if (title === 'Engineering Directors') return 'Lead Engineering Organizations.';
-                  if (title === 'Product Directors') return 'Drive Product Strategy.';
-                  if (title === 'VP of Engineering') return 'Scale Engineering at Scale.';
-                  if (title === 'VP of Product') return 'Scale Product Vision.';
-                  if (title === 'CTO') return 'Set Technical Strategy.';
-                  if (!isKnownRole) return 'Level Up Your Skills.';
-                  return '';
+                  // Use concrete, specific examples instead of generic "AI slow" messaging
+                  if (roleContent?.coreRole.title === 'Engineering Manager') {
+                    return 'Turn 4-hour performance reviews into 30-minute drafts.';
+                  }
+                  if (roleContent?.coreRole.title === 'Product Manager') {
+                    return 'Synthesize 50 customer interviews in minutes.';
+                  }
+                  if (roleInfo.title === 'Engineers') {
+                    return 'Debug distributed systems faster. Write production-ready code.';
+                  }
+                  if (roleInfo.title === 'Engineering Directors') {
+                    return 'Identify workflow bottlenecks with data. Lead organizations that ship.';
+                  }
+                  if (roleInfo.title === 'Product Directors') {
+                    return 'Align competing stakeholder priorities. Drive product strategy that wins.';
+                  }
+                  // For roles with content, use the example if available
+                  if (roleContent?.howAIHelps.example) {
+                    const example = roleContent.howAIHelps.example;
+                    // Extract the concrete benefit from examples like "Instead of spending 4 hours..."
+                    if (example.includes('Instead of spending')) {
+                      const timeMatch = example.match(/Instead of spending ([\w\s]+),/);
+                      const resultMatch = example.match(/in ([\w\s]+)\./);
+                      if (timeMatch && resultMatch) {
+                        return `Turn ${timeMatch[1]} into ${resultMatch[1]}.`;
+                      }
+                    }
+                  }
+                  // Fallback
+                  return `${roleInfo.title}: Level up with AI-native workflows`;
                 })()}
-                <br />
-                <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                  {(() => {
-                    const knownRoles = [
-                      'Engineers',
-                      'Engineering Managers',
-                      'Product Managers',
-                      'QA Engineers',
-                      'Software Architects',
-                      'DevOps & SRE',
-                      'Scrum Masters',
-                      'Product Owners',
-                      'Directors & C-Level',
-                      'Designers',
-                      'Engineering Directors',
-                      'Product Directors',
-                      'VP of Engineering',
-                      'VP of Product',
-                      'CTO',
-                    ];
-                    const title = roleInfo.title ?? '';
-                    const isKnownRole = knownRoles.includes(title);
-                    
-                    if (title === 'Engineers') return 'Ship Better.';
-                    if (title === 'Engineering Managers') return 'Ship Smarter.';
-                    if (title === 'Product Managers') return 'Ship Faster.';
-                    if (title === 'QA Engineers') return 'Ship Quality.';
-                    if (title === 'Software Architects') return 'Ship Scalable.';
-                    if (title === 'DevOps & SRE') return 'Ship Reliable.';
-                    if (title === 'Scrum Masters') return 'Ship Agile.';
-                    if (title === 'Product Owners') return 'Ship Value.';
-                    if (title === 'Directors & C-Level') return 'Ship Innovation.';
-                    if (title === 'Designers') return 'Ship Delight.';
-                    if (title === 'Engineering Directors') return 'Ship Excellence.';
-                    if (title === 'Product Directors') return 'Ship Impact.';
-                    if (title === 'VP of Engineering') return 'Ship Scale.';
-                    if (title === 'VP of Product') return 'Ship Strategy.';
-                    if (title === 'CTO') return 'Ship Vision.';
-                    if (!isKnownRole) return 'Ship Success.';
-                    return '';
-                  })()}
-                </span>
               </h1>
 
               <p className="mx-auto max-w-2xl text-lg md:text-xl text-white/90 leading-relaxed">
-                {roleInfo.description}
+                {roleContent?.howAIHelps.explanation || roleInfo.description}
               </p>
 
-              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-                <ScrollButton
-                  targetId="featured-prompts"
-                  label={`${promptCount} Prompts`}
-                  className="cursor-pointer rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
-                />
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href={`/prompts/role/${dbRole}`}
+                  className="rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
+                >
+                  {promptCount} Prompts
+                </Link>
                 {patternCount > 0 && (
-                  <ScrollButton
-                    targetId="patterns-section"
-                    label={`${patternCount} Patterns`}
-                    className="cursor-pointer rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
-                  />
+                  <Link
+                    href="/patterns"
+                    className="rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
+                  >
+                    {patternCount} Patterns
+                  </Link>
+                )}
+                {workflows.length > 0 && (
+                  <Link
+                    href={`/workflows?audience=${getWorkflowAudienceFromDbRole(dbRole)[0] || 'engineers'}`}
+                    className="rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
+                  >
+                    {workflows.length}+ Workflows
+                  </Link>
+                )}
+                {painPoints.length > 0 && (
+                  <Link
+                    href="/workflows/pain-points"
+                    className="rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
+                  >
+                    Pain Points
+                  </Link>
                 )}
               </div>
             </div>
