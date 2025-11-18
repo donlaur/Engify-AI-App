@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { RoleSelector } from '@/components/roles/RoleSelector';
-import { ScrollButton } from '@/components/roles/ScrollButton';
 import Link from 'next/link';
 import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
 import { loadPatternsFromJson } from '@/lib/patterns/load-patterns-from-json';
@@ -305,6 +304,34 @@ async function getRecommendationsByRole(dbRole: string): Promise<Recommendation[
   }
 }
 
+async function getGuardrailsByRole(dbRole: string): Promise<Workflow[]> {
+  try {
+    const allWorkflows = await loadWorkflowsFromJson();
+    const audiences = getWorkflowAudienceFromDbRole(dbRole);
+    
+    // Guardrails are workflows with category 'guardrails'
+    const guardrails = allWorkflows.filter(
+      (w) => w.status === 'published' && 
+      w.category === 'guardrails' &&
+      w.audience.some((aud) => audiences.includes(aud))
+    );
+    
+    // Sort by severity: critical > high > medium > low
+    const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+    guardrails.sort((a, b) => {
+      const aSeverity = (a as any).severity || 'low';
+      const bSeverity = (b as any).severity || 'low';
+      return (severityOrder[aSeverity as keyof typeof severityOrder] || 3) - 
+             (severityOrder[bSeverity as keyof typeof severityOrder] || 3);
+    });
+    
+    return guardrails.slice(0, 6); // Limit to top 6
+  } catch (error) {
+    console.error('Error fetching guardrails by role:', error);
+    return [];
+  }
+}
+
 export async function generateRoleMetadata({
   slug,
   dbRole,
@@ -375,6 +402,7 @@ export async function RoleLandingPageContent({
   const prompts = await getPromptsByRole(dbRole);
   const patterns = await getPatternsByRole(dbRole);
   const workflows = await getWorkflowsByRole(dbRole);
+  const guardrails = await getGuardrailsByRole(dbRole);
   const painPoints = await getPainPointsByRole(workflows);
   const recommendations = await getRecommendationsByRole(dbRole);
 
@@ -651,6 +679,238 @@ export async function RoleLandingPageContent({
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </section>
+        )}
+
+        {/* Resources Section - Workflows, Guardrails, Pain Points, Recommendations */}
+        {(workflows.length > 0 || guardrails.length > 0 || painPoints.length > 0 || recommendations.length > 0) && (
+          <section className="container bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-12 md:py-16">
+            <div className="mx-auto max-w-7xl">
+              <div className="mb-8 md:mb-10 text-center">
+                <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
+                  Resources for {roleInfo.title}
+                </h2>
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  Workflows, guardrails, pain points, and recommendations tailored to your role
+                </p>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {/* Workflows */}
+                {workflows.slice(0, 2).map((workflow) => (
+                  <Card
+                    key={`${workflow.category}/${workflow.slug}`}
+                    className="group border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1"
+                  >
+                    <CardHeader>
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 p-1.5">
+                          <Icons.layers className="h-4 w-4 text-white" />
+                        </div>
+                        <Badge variant="secondary" className="text-xs">Workflow</Badge>
+                      </div>
+                      <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                        {workflow.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                        {workflow.problemStatement}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-blue-300 bg-white font-medium text-gray-900 hover:border-blue-400 hover:bg-blue-50 dark:bg-gray-800"
+                        asChild
+                      >
+                        <Link href={`/workflows/${workflow.category}/${workflow.slug}`}>
+                          View Workflow
+                          <Icons.arrowRight className="ml-2 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {/* Guardrails */}
+                {guardrails.slice(0, 2).map((guardrail) => {
+                  const severity = (guardrail as any).severity || 'low';
+                  const severityColors = {
+                    critical: 'border-red-500 dark:border-red-600 bg-red-50 dark:bg-red-950/50',
+                    high: 'border-orange-500 dark:border-orange-600 bg-orange-50 dark:bg-orange-950/50',
+                    medium: 'border-yellow-500 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-950/50',
+                    low: 'border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-800',
+                  };
+                  return (
+                    <Card
+                      key={`${guardrail.category}/${guardrail.slug}`}
+                      className={`group border-2 ${severityColors[severity as keyof typeof severityColors]} shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}
+                    >
+                      <CardHeader>
+                        <div className="mb-2 flex items-center gap-2">
+                          <div className="rounded-lg bg-gradient-to-br from-red-500 to-orange-500 p-1.5">
+                            <Icons.shield className="h-4 w-4 text-white" />
+                          </div>
+                          <Badge 
+                            variant={severity === 'critical' ? 'destructive' : 'secondary'} 
+                            className="text-xs capitalize"
+                          >
+                            {severity} Guardrail
+                          </Badge>
+                        </div>
+                        <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                          {guardrail.title}
+                        </CardTitle>
+                        <CardDescription className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                          {guardrail.problemStatement}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full border-gray-300 bg-white font-medium text-gray-900 hover:border-gray-400 hover:bg-gray-50 dark:bg-gray-800"
+                          asChild
+                        >
+                          <Link href={`/workflows/${guardrail.category}/${guardrail.slug}`}>
+                            View Guardrail
+                            <Icons.arrowRight className="ml-2 h-3 w-3" />
+                          </Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+
+                {/* Pain Points */}
+                {painPoints.slice(0, 2).map((painPoint) => (
+                  <Card
+                    key={painPoint.id}
+                    className="group border-2 border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-red-400 dark:hover:border-red-600 hover:shadow-xl hover:-translate-y-1"
+                  >
+                    <CardHeader>
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="rounded-lg bg-gradient-to-br from-red-500 to-pink-500 p-1.5">
+                          <Icons.alertCircle className="h-4 w-4 text-white" />
+                        </div>
+                        <Badge variant="destructive" className="text-xs">Pain Point</Badge>
+                      </div>
+                      <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                        {painPoint.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                        {painPoint.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50 dark:bg-gray-800"
+                        asChild
+                      >
+                        <Link href={`/workflows/pain-points/${painPoint.slug}`}>
+                          Learn More
+                          <Icons.arrowRight className="ml-2 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {/* Recommendations */}
+                {recommendations.slice(0, 2).map((recommendation) => (
+                  <Card
+                    key={recommendation.id}
+                    className="group border-2 border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-green-400 dark:hover:border-green-600 hover:shadow-xl hover:-translate-y-1"
+                  >
+                    <CardHeader>
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 p-1.5">
+                          <Icons.checkCircle className="h-4 w-4 text-white" />
+                        </div>
+                        <Badge variant="default" className="bg-green-600 text-xs">Recommendation</Badge>
+                      </div>
+                      <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                        {recommendation.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                        {recommendation.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-green-300 bg-white font-medium text-gray-900 hover:border-green-400 hover:bg-green-50 dark:bg-gray-800"
+                        asChild
+                      >
+                        <Link href={`/workflows/recommendations/${recommendation.slug}`}>
+                          Learn More
+                          <Icons.arrowRight className="ml-2 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* View All Links */}
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                {workflows.length > 2 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-300 bg-white font-medium text-gray-900 hover:border-blue-400 hover:bg-blue-50"
+                    asChild
+                  >
+                    <Link href={`/workflows?audience=${getWorkflowAudienceFromDbRole(dbRole)[0] || 'engineers'}`}>
+                      View All {workflows.length} Workflows
+                      <Icons.arrowRight className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
+                {guardrails.length > 2 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50"
+                    asChild
+                  >
+                    <Link href="/guardrails">
+                      View All {guardrails.length} Guardrails
+                      <Icons.arrowRight className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
+                {painPoints.length > 2 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50"
+                    asChild
+                  >
+                    <Link href="/workflows/pain-points">
+                      View All {painPoints.length} Pain Points
+                      <Icons.arrowRight className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
+                {recommendations.length > 2 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-green-300 bg-white font-medium text-gray-900 hover:border-green-400 hover:bg-green-50"
+                    asChild
+                  >
+                    <Link href="/workflows/recommendations">
+                      View All {recommendations.length} Recommendations
+                      <Icons.arrowRight className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
+              </div>
             </div>
           </section>
         )}
