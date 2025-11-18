@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import {
   calculateAllTiers,
   formatCost,
-  formatNumber,
   type CostCalculationResult,
   type ToolPricing,
   type TokenPricing,
@@ -82,7 +81,7 @@ export function AIToolCostComparison({
                   <th className="text-left p-3 font-semibold">Usage Level</th>
                   <th className="text-right p-3 font-semibold">Monthly Requests</th>
                   <th className="text-right p-3 font-semibold">Base Cost</th>
-                  {showTokenColumn && (
+                  {tokenPricing && (
                     <th className="text-right p-3 font-semibold">Token Cost</th>
                   )}
                   <th className="text-right p-3 font-semibold">Total Cost</th>
@@ -149,7 +148,7 @@ function CostRow({
   calculation: CostCalculationResult;
   showTokenColumn: boolean;
 }) {
-  const { tier, tierDefinition, baseCost, tokenCost, totalCost, costPerRequest } = calculation;
+  const { tierDefinition, baseCost, tokenCost, totalCost, costPerRequest } = calculation;
 
   return (
     <tr className="border-b hover:bg-muted/50">
@@ -181,7 +180,7 @@ function CostCard({
 }: {
   calculation: CostCalculationResult;
 }) {
-  const { tier, tierDefinition, baseCost, tokenCost, totalCost, costPerRequest, overageCost } =
+  const { tierDefinition, baseCost, tokenCost, totalCost, costPerRequest, overageCost } =
     calculation;
 
   return (
@@ -198,7 +197,7 @@ function CostCard({
           <span className="text-muted-foreground">Base Cost:</span>
           <span className="font-medium">{formatCost(baseCost)}</span>
         </div>
-        {tokenPricing && tokenCost > 0 && (
+        {tokenCost > 0 && (
           <div className="flex justify-between">
             <span className="text-muted-foreground">Token Cost:</span>
             <span className="font-medium">{formatCost(tokenCost)}</span>
