@@ -2,10 +2,10 @@
 
 **Professional development, testing, deployment, and maintenance scripts for Engify.ai**
 
-This directory contains **146 utility scripts** organized into 14 categories for comprehensive automation and tooling across the entire development lifecycle.
+This directory contains **126 utility scripts** organized into 14 categories for comprehensive automation and tooling across the entire development lifecycle.
 
 **Last Updated:** 2025-11-18
-**Recent Cleanup:** Removed 31 one-off/completed scripts in 2 rounds, 1 restored (see REMOVED_SCRIPTS.md)
+**Recent Cleanup:** Removed 50 one-off/completed scripts in 3 rounds, 1 restored (see REMOVED_SCRIPTS.md for full list)
 
 ## Table of Contents
 

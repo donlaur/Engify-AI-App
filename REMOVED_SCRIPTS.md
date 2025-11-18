@@ -58,9 +58,36 @@ Scripts removed during cleanup. Can be recovered from git history if needed.
 
 ---
 
-**Total Removed:** 31 scripts (1 restored)
-**Reduction:** 175 → 146 scripts (17% reduction)
-**Lines Removed:** ~15,000+ lines
+## Cleanup Round 3 (2025-11-18)
+
+### Development/Testing/Performance Scripts (10 scripts)
+- `development/audit-icons.ts` - One-time audit
+- `development/verify-navigation-links.ts` - One-time verification
+- `development/verify-source-urls.ts` - One-time verification
+- `performance/benchmark-api.ts` - One-time benchmark
+- `performance/benchmark-queries.ts` - One-time benchmark
+- `testing/analyze-test-results.ts` - One-time analysis
+- `testing/test-adapters.ts` - One-time test
+- `testing/test-multi-agent-production.sh` - One-time test
+- `testing/test-prompts-batch.ts` - One-time test
+- `testing/test-prompts.ts` - One-time test
+
+### Content/Data/Deployment Scripts (9 scripts)
+- `content/metadata-enrich.ts` - One-time enrichment
+- `content/save-to-mongo.ts` - One-time save
+- `content/schedule.ts` - One-time scheduling
+- `data/import-content-bulk.ts` - One-time import
+- `data/import-external-resources.ts` - One-time import
+- `deployment/pre-push-test.sh` - One-time test
+- `deployment/verify-deployment.sh` - One-time verification
+- `deployment/smoke-test.sh` - Duplicate (kept in maintenance/)
+- `maintenance/validate-schema.js` - One-time validation
+
+---
+
+**Total Removed:** 50 scripts (1 restored)
+**Reduction:** 175 → 126 scripts (28% reduction)
+**Lines Removed:** ~20,000+ lines
 
 All scripts can be recovered from git history using:
 ```bash
