@@ -118,11 +118,8 @@ export class RequestContext {
  * Extract request ID from headers (for distributed tracing)
  */
 export function getRequestIdFromHeaders(headers: Headers): string | undefined {
-  return (
-    headers.get('x-request-id') ||
-    headers.get('x-correlation-id') ||
-    headers.get('x-trace-id')
-  );
+  const requestId = headers.get('x-request-id') || headers.get('x-correlation-id') || headers.get('x-trace-id');
+  return requestId ?? undefined;
 }
 
 /**

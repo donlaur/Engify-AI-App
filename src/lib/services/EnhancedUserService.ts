@@ -21,7 +21,7 @@
  * @module EnhancedUserService
  */
 
-import { ObjectId, OptionalId, Filter } from 'mongodb';
+import { ObjectId, Filter } from 'mongodb';
 import { EnhancedUserRepository } from '@/lib/repositories/EnhancedUserRepository';
 import { loggingProvider } from '@/lib/providers/LoggingProvider';
 import { dbProvider } from '@/lib/providers/DatabaseProvider';

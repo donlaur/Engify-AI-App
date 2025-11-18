@@ -195,8 +195,8 @@ export function createSanitizationMiddleware(
       return sanitizeHtml(input, level);
     }
     
-    if (input && typeof input === 'object') {
-      return sanitizeObject(input, level);
+    if (input && typeof input === 'object' && !Array.isArray(input) && input.constructor === Object) {
+      return sanitizeObject(input as Record<string, unknown>, level);
     }
     
     return input;

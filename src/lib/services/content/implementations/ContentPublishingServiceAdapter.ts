@@ -55,11 +55,8 @@ export class ContentPublishingServiceAdapter implements IContentPublisher {
             recommendations: [],
             metrics: {
               wordCount: 0,
-              slopCount: result.slopDetection.slopPhrases.length,
-              slopPhrases: result.slopDetection.slopPhrases.map((phrase) => ({
-                phrase,
-                count: 1,
-              })),
+              slopCount: result.slopDetection.metrics?.slopPhrases?.length ?? 0,
+              slopPhrases: result.slopDetection.metrics?.slopPhrases ?? [],
               emDashCount: 0,
               emDashRatio: 0,
               sentenceCount: 0,
@@ -94,9 +91,11 @@ export class ContentPublishingServiceAdapter implements IContentPublisher {
       publishReady: result.publishReady,
       slopDetection: result.slopDetection
         ? {
-            hasSlopPhrases: result.slopDetection.metrics.slopCount > 0,
-            slopPhrases: result.slopDetection.metrics.slopPhrases.map((p) => p.phrase),
+            aiProbability: result.slopDetection.aiProbability,
             qualityScore: result.slopDetection.qualityScore,
+            flags: result.slopDetection.flags,
+            recommendations: result.slopDetection.recommendations,
+            metrics: result.slopDetection.metrics,
           }
         : undefined,
     };
