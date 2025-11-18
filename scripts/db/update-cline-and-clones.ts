@@ -226,7 +226,7 @@ const CLONE_TOOLS = [
     inspiredBy: 'cline',
     cloneType: 'alternative',
     marketplaceLinks: {
-      github: 'https://github.com/opendevin/opendevin',
+      github: 'https://github.com/AI-App/OpenDevin.OpenDevin',
     },
   },
 
