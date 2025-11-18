@@ -996,7 +996,7 @@ export async function RoleLandingPageContent({
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {workflows.map((workflow) => (
                   <Card
-                    key={workflow.id}
+                    key={`${workflow.category}/${workflow.slug}`}
                     className="group border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1"
                   >
                     <CardHeader>
