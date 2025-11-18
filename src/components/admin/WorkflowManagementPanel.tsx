@@ -67,7 +67,6 @@ export function WorkflowManagementPanel() {
   const {
     data: workflows,
     loading,
-    error,
     currentPage,
     totalPages,
     totalCount,
