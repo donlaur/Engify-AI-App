@@ -215,64 +215,6 @@ export interface AdminSortConfig {
 }
 
 // ============================================================================
-// Data Table Column Configuration
-// ============================================================================
-
-/**
- * Column alignment options for AdminDataTable
- *
- * Determines how content is aligned within table cells for visual consistency.
- */
-export type ColumnAlign = 'left' | 'center' | 'right';
-
-/**
- * Column definition for AdminDataTable
- *
- * Configures how a single column is rendered in admin data tables.
- * Used for creating flexible, reusable data table components.
- *
- * @template T - The type of the data row object
- *
- * @example
- * ```typescript
- * const columns: ColumnDef<Prompt>[] = [
- *   {
- *     id: 'title',
- *     header: 'Title',
- *     accessor: (row) => row.title,
- *     width: 300,
- *     align: 'left'
- *   },
- *   {
- *     id: 'score',
- *     header: 'Quality Score',
- *     accessor: (row) => row.qualityScore?.overall,
- *     align: 'center',
- *     cell: (value) => value ? `${value.toFixed(1)}/10` : 'N/A'
- *   }
- * ];
- * ```
- */
-export interface ColumnDef<T> {
-  /** Unique identifier for the column */
-  id: string;
-  /** Display header text for the column */
-  header: string;
-  /** Function to extract the value from a row object */
-  accessor: (row: T) => any;
-  /** Optional width in pixels */
-  width?: number;
-  /** Text alignment within the cell (default: 'left') */
-  align?: ColumnAlign;
-  /** Optional custom cell renderer function */
-  cell?: (value: any, row: T) => any;
-  /** Whether the column is sortable (default: false) */
-  sortable?: boolean;
-  /** Whether the column is filterable (default: false) */
-  filterable?: boolean;
-}
-
-// ============================================================================
 // Error Handling
 // ============================================================================
 
@@ -680,10 +622,6 @@ export interface AdminBulkOperationResult {
  * - AdminFilterConfig
  * - AdminSortConfig
  * - AdminDataHookConfig
- *
- * Data Table Types:
- * - ColumnAlign
- * - ColumnDef<T>
  *
  * Error Types:
  * - AdminErrorType (enum)
