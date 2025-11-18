@@ -11,14 +11,16 @@
 import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import type { Adapter, AdapterUser } from 'next-auth/adapters';
 import type { MongoClient } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 /**
  * Extended AdapterUser with our custom fields
+ * Use intersection type to override role as optional
  */
-export interface ExtendedAdapterUser extends AdapterUser {
+export type ExtendedAdapterUser = Omit<AdapterUser, 'role'> & {
   role?: string;
   organizationId?: string | null;
-}
+};
 
 /**
  * Create a custom MongoDB adapter that includes our custom user fields
@@ -44,7 +46,7 @@ export function CustomMongoDBAdapter(client: MongoClient | Promise<MongoClient>)
       const mongoClient = await Promise.resolve(client);
       const db = mongoClient.db();
       await db.collection('users').updateOne(
-        { _id: createdUser.id },
+        { _id: new ObjectId(createdUser.id) },
         {
           $set: {
             role: extendedUser.role,
