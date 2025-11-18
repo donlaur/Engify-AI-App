@@ -8,6 +8,7 @@ import {
   getTagVariations,
   isValidTagUrl,
 } from '@/lib/utils/tag-encoding';
+import { getSeedPromptsWithTimestamps } from '@/data/seed-prompts';
 
 async function getPromptsByTag(tag: string) {
   try {
@@ -43,9 +44,8 @@ async function getPromptsByTag(tag: string) {
   } catch (error) {
     console.error('Error fetching prompts by tag:', error);
     // Fallback to static data
-    const { getSeedPromptsWithTimestamps } = await import('@/data/seed-prompts');
     const allPrompts = getSeedPromptsWithTimestamps();
-    return allPrompts.filter((p) => 
+    return allPrompts.filter((p) =>
       p.tags && p.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
     );
   }

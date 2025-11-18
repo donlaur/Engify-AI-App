@@ -8,7 +8,7 @@ import { type NextAuthConfig } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
-import { MongoDBAdapter } from '@auth/mongodb-adapter';
+import { CustomMongoDBAdapter } from './CustomMongoDBAdapter';
 import { getClient } from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
@@ -29,7 +29,7 @@ const loginSchema = z.object({
 const USE_COGNITO = !!process.env.COGNITO_USER_POOL_ID;
 
 export const authOptions: NextAuthConfig = {
-  adapter: MongoDBAdapter(getClient()),
+  adapter: CustomMongoDBAdapter(getClient()),
 
   providers: [
     // Email/Password authentication

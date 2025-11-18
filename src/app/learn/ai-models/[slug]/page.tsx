@@ -6,7 +6,7 @@
  */
 
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
@@ -112,7 +112,6 @@ export default async function AIModelDetailPage({ params }: PageProps) {
       
       // Redirect to slug URL (if current URL doesn't match slug)
       if (slug !== generatedSlug) {
-        const { redirect } = await import('next/navigation');
         redirect(`/learn/ai-models/${generatedSlug}`);
       }
     }

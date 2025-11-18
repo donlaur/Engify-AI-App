@@ -7,7 +7,7 @@
  */
 
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -199,7 +199,6 @@ export default async function PromptPage({
         if (testUrl.pathname === `/prompts/${slug}`) {
           // Slug is valid - redirect to canonical slug (permanent redirect for SEO)
           // Next.js 15 supports permanentRedirect for 301 redirects
-          const { permanentRedirect } = await import('next/navigation');
           permanentRedirect(`/prompts/${encodeURIComponent(slug)}`);
         } else {
           // URL encoding changed the slug - log warning and skip redirect
