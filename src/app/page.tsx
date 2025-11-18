@@ -87,7 +87,6 @@ const features = [
 const allowSignup = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
 
 export default async function Home() {
-  // Load workflows data (server stats removed as no longer used after hero section redesign)
   const workflows = await loadWorkflowsFromJson();
 
   const guardrailCount = workflows.length || 20;
@@ -117,9 +116,6 @@ export default async function Home() {
     },
   ];
 
-  // Role stats code removed - was previously used for displaying role-based prompts
-  // This data structure is no longer needed after the hero section redesign
-
   return (
     <MainLayout>
       <PreloadContentJson />
@@ -128,14 +124,14 @@ export default async function Home() {
         {/* Animated background gradient overlay - BEHIND content, not blocking clicks */}
         <div className="absolute inset-0 -z-10 bg-black/20" />
 
-        <div className="container relative z-10 py-24 md:py-32">
-          <div className="mx-auto max-w-5xl space-y-12 text-center">
-            <div className="space-y-6">
+        <div className="container relative z-10 pt-12 pb-16 md:pt-20 md:pb-24">
+          <div className="mx-auto max-w-5xl space-y-6 md:space-y-8 text-center">
+            <div className="space-y-4 md:space-y-6">
               <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-7xl">
                 Amplify Your Engineering Org with AI-Native Workflows
               </h1>
 
-              <p className="mx-auto max-w-3xl text-xl font-semibold leading-relaxed text-white sm:text-2xl">
+              <p className="mx-auto max-w-3xl text-lg font-semibold leading-relaxed text-white sm:text-xl md:text-2xl">
                 Whether you&apos;re an engineer shipping code or a director scaling teams, learn the patterns and guardrails for AI-native software engineering. Study {guardrailCount}+ workflows tailored to your role.
               </p>
             </div>
@@ -145,15 +141,15 @@ export default async function Home() {
               {/* Engineers */}
               <Link
                 href="/for-engineers"
-                className="group rounded-xl border-2 border-white/20 bg-white/10 p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
+                className="group rounded-xl border-2 border-white/20 bg-white/10 p-4 sm:p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
               >
-                <div className="mb-4 flex justify-center">
-                  <div className="rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 p-3">
-                    <Icons.code className="h-8 w-8 text-white" />
+                <div className="mb-3 sm:mb-4 flex justify-center">
+                  <div className="rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 p-2 sm:p-3">
+                    <Icons.code className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                   </div>
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-white">Engineers</h3>
-                <p className="text-sm text-white/80">
+                <h3 className="mb-2 text-lg sm:text-xl font-bold text-white">Engineers</h3>
+                <p className="text-xs sm:text-sm text-white/80">
                   Ship AI code with confidence
                 </p>
                 <div className="mt-4 flex items-center justify-center text-white/60 transition-colors group-hover:text-white">
@@ -165,15 +161,15 @@ export default async function Home() {
               {/* Engineering Managers */}
               <Link
                 href="/for-managers"
-                className="group rounded-xl border-2 border-white/20 bg-white/10 p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
+                className="group rounded-xl border-2 border-white/20 bg-white/10 p-4 sm:p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
               >
-                <div className="mb-4 flex justify-center">
-                  <div className="rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 p-3">
-                    <Icons.users className="h-8 w-8 text-white" />
+                <div className="mb-3 sm:mb-4 flex justify-center">
+                  <div className="rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 p-2 sm:p-3">
+                    <Icons.users className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                   </div>
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-white">Eng Managers</h3>
-                <p className="text-sm text-white/80">
+                <h3 className="mb-2 text-lg sm:text-xl font-bold text-white">Eng Managers</h3>
+                <p className="text-xs sm:text-sm text-white/80">
                   Lead AI-native teams with confidence
                 </p>
                 <div className="mt-4 flex items-center justify-center text-white/60 transition-colors group-hover:text-white">
@@ -185,15 +181,15 @@ export default async function Home() {
               {/* Directors/VPs */}
               <Link
                 href="/for-engineering-directors"
-                className="group rounded-xl border-2 border-white/20 bg-white/10 p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
+                className="group rounded-xl border-2 border-white/20 bg-white/10 p-4 sm:p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
               >
-                <div className="mb-4 flex justify-center">
-                  <div className="rounded-lg bg-gradient-to-br from-orange-500 to-red-500 p-3">
-                    <Icons.trendingUp className="h-8 w-8 text-white" />
+                <div className="mb-3 sm:mb-4 flex justify-center">
+                  <div className="rounded-lg bg-gradient-to-br from-orange-500 to-red-500 p-2 sm:p-3">
+                    <Icons.trendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                   </div>
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-white">Directors & VPs</h3>
-                <p className="text-sm text-white/80">
+                <h3 className="mb-2 text-lg sm:text-xl font-bold text-white">Directors & VPs</h3>
+                <p className="text-xs sm:text-sm text-white/80">
                   Scale org-wide AI adoption safely
                 </p>
                 <div className="mt-4 flex items-center justify-center text-white/60 transition-colors group-hover:text-white">
@@ -205,15 +201,15 @@ export default async function Home() {
               {/* Product Teams */}
               <Link
                 href="/for-pms"
-                className="group rounded-xl border-2 border-white/20 bg-white/10 p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
+                className="group rounded-xl border-2 border-white/20 bg-white/10 p-4 sm:p-6 backdrop-blur-sm transition-all hover:border-white/40 hover:bg-white/20"
               >
-                <div className="mb-4 flex justify-center">
-                  <div className="rounded-lg bg-gradient-to-br from-green-500 to-teal-500 p-3">
-                    <Icons.target className="h-8 w-8 text-white" />
+                <div className="mb-3 sm:mb-4 flex justify-center">
+                  <div className="rounded-lg bg-gradient-to-br from-green-500 to-teal-500 p-2 sm:p-3">
+                    <Icons.target className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                   </div>
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-white">Product Teams</h3>
-                <p className="text-sm text-white/80">
+                <h3 className="mb-2 text-lg sm:text-xl font-bold text-white">Product Teams</h3>
+                <p className="text-xs sm:text-sm text-white/80">
                   Build faster with AI guardrails
                 </p>
                 <div className="mt-4 flex items-center justify-center text-white/60 transition-colors group-hover:text-white">

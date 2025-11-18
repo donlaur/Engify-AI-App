@@ -58,15 +58,15 @@ export interface ContentGenerationJobStatus {
  */
 class ContentGenerationJobHandler implements IMessageHandler {
   readonly messageType: MessageType = 'job';
-  readonly handlerName = 'ContentGenerationJobHandler';
+  handlerName = 'ContentGenerationJobHandler';
   private jobStatuses = new Map<string, ContentGenerationJobStatus>();
 
   canHandle(message: IMessage): boolean {
-    return message.type === 'job' &&
-           (message.payload as ContentGenerationJobPayload)?.jobId !== undefined;
+    return message.type === 'job' && (message.payload as any)?.type === 'content.generation.batch';
   }
 
   async handle(message: IMessage): Promise<MessageResult> {
+    const startTime = Date.now();
     const payload = message.payload as ContentGenerationJobPayload;
 
     try {
@@ -169,10 +169,7 @@ class ContentGenerationJobHandler implements IMessageHandler {
         failed: jobStatus.failedTopics,
       });
 
-      const endTime = Date.now();
-      const startTime = jobStatus.startedAt?.getTime() || endTime;
-      const processingTime = endTime - startTime;
-
+      const processingTime = Date.now() - startTime;
       return {
         success: jobStatus.status !== 'failed',
         data: jobStatus,
@@ -196,10 +193,7 @@ class ContentGenerationJobHandler implements IMessageHandler {
         this.jobStatuses.set(payload.jobId, jobStatus);
       }
 
-      const endTime = Date.now();
-      const startTime = jobStatus?.startedAt?.getTime() || endTime;
-      const processingTime = endTime - startTime;
-
+      const processingTime = Date.now() - startTime;
       return {
         success: false,
         error: errorMessage,
@@ -239,9 +233,10 @@ export class ContentGenerationJobQueueService {
         retryDelay: 1000,
         visibilityTimeout: 5000,
         batchSize: 5,
-        concurrency: 3,
+        concurrency: 5,
         enableDeadLetter: true,
         enableMetrics: true,
+        deadLetterQueue: 'content-generation-dlq',
       }
     );
 

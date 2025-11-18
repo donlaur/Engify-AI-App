@@ -66,13 +66,18 @@ export class EnhancedUserService {
       const now = new Date();
       const user = await this.userRepository.create({
         email: input.email,
-        name: input.name,
-        role: input.role || 'user',
-        organizationId: input.organizationId ? new ObjectId(input.organizationId) : undefined,
-        plan: input.plan || 'free',
+        name: input.name || '',
+        role: (input.role || 'user') as 'user' | 'admin' | 'owner',
+        organizationId: input.organizationId ? new ObjectId(input.organizationId) : null,
+        plan: (input.plan || 'free') as 'free' | 'pro' | 'team' | 'enterprise_starter' | 'enterprise_pro' | 'enterprise_premium',
+        emailVerified: null,
+        image: null,
+        password: null,
+        stripeCustomerId: null,
+        stripeSubscriptionId: null,
         createdAt: now,
         updatedAt: now,
-      } as OptionalId<User>);
+      });
 
       logger.info('User created', { userId: user._id?.toString(), email: user.email });
 

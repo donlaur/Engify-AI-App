@@ -68,7 +68,7 @@ export default [
     },
   },
   {
-    files: ['services/mcp-server/**/*.{js,ts,tsx}', 'services/memory-mcp/**/*.{ts,tsx}'],
+    files: ['services/mcp-server/**/*.{js,ts,tsx}'],
     languageOptions: {
       globals: {
         ...globals.node,

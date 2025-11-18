@@ -22,29 +22,12 @@
  */
 
 import { ObjectId, Filter, ClientSession } from 'mongodb';
-import { z } from 'zod';
 import { BaseRepository } from './BaseRepository';
-import type { User } from '@/lib/db/schema';
-
-/**
- * User schema for validation
- * Simplified version - adjust based on your actual User schema
- */
-const UserSchema = z.object({
-  _id: z.instanceof(ObjectId).optional(),
-  email: z.string().email(),
-  name: z.string().optional(),
-  role: z.string().optional(),
-  organizationId: z.instanceof(ObjectId).optional(),
-  plan: z.string().optional(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-  lastLoginAt: z.date().optional(),
-}) as unknown as z.ZodType<User>;
+import { UserSchema, type User } from '@/lib/db/schema';
 
 export class EnhancedUserRepository extends BaseRepository<User> {
   constructor() {
-    super('users', UserSchema);
+    super('users', UserSchema as any);
   }
 
   /**
