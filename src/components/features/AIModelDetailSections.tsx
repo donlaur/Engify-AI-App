@@ -345,7 +345,6 @@ export function ToolsSection({ model }: AIModelDetailSectionsProps) {
       name: 'Code interpreter',
       supported: model.tools.codeInterpreter,
     },
-    { name: 'MCP', supported: model.tools.mcp },
   ];
 
   return (

@@ -21,7 +21,7 @@
  * @module EnhancedUserService
  */
 
-import { ObjectId, OptionalId } from 'mongodb';
+import { ObjectId, OptionalId, Filter } from 'mongodb';
 import { EnhancedUserRepository } from '@/lib/repositories/EnhancedUserRepository';
 import { loggingProvider } from '@/lib/providers/LoggingProvider';
 import { dbProvider } from '@/lib/providers/DatabaseProvider';
@@ -66,13 +66,18 @@ export class EnhancedUserService {
       const now = new Date();
       const user = await this.userRepository.create({
         email: input.email,
-        name: input.name,
-        role: input.role || 'user',
-        organizationId: input.organizationId ? new ObjectId(input.organizationId) : undefined,
-        plan: input.plan || 'free',
+        name: input.name || '',
+        role: (input.role || 'user') as 'user' | 'admin' | 'owner',
+        organizationId: input.organizationId ? new ObjectId(input.organizationId) : null,
+        plan: (input.plan || 'free') as 'free' | 'pro' | 'team' | 'enterprise_starter' | 'enterprise_pro' | 'enterprise_premium',
+        emailVerified: null,
+        image: null,
+        password: null,
+        stripeCustomerId: null,
+        stripeSubscriptionId: null,
         createdAt: now,
         updatedAt: now,
-      } as OptionalId<User>);
+      });
 
       logger.info('User created', { userId: user._id?.toString(), email: user.email });
 
@@ -208,14 +213,14 @@ export class EnhancedUserService {
     organizationId?: string;
   }) {
     try {
-      let filter: any = {};
+      const filter: Filter<User> = {} as Filter<User>;
 
       if (options?.role) {
-        filter.role = options.role;
+        (filter as { role?: string }).role = options.role;
       }
 
       if (options?.organizationId) {
-        filter.organizationId = new ObjectId(options.organizationId);
+        (filter as { organizationId?: ObjectId }).organizationId = new ObjectId(options.organizationId);
       }
 
       return await this.userRepository.findPaginated(filter, {

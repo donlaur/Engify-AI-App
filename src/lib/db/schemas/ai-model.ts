@@ -86,7 +86,6 @@ export const AIModelSchema = z.object({
     computerUse: z.boolean().default(false),
     fileSearch: z.boolean().default(false),
     codeInterpreter: z.boolean().default(false),
-    mcp: z.boolean().default(false), // Model Context Protocol
   }).optional(),
   
   // API Endpoints supported

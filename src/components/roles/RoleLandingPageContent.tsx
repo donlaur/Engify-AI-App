@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { RoleSelector } from '@/components/roles/RoleSelector';
-import { ScrollButton } from '@/components/roles/ScrollButton';
 import Link from 'next/link';
 import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
 import { loadPatternsFromJson } from '@/lib/patterns/load-patterns-from-json';
@@ -22,6 +21,12 @@ import { fetchPlatformStats } from '@/lib/stats/fetch-platform-stats';
 import { FAQSection } from '@/components/features/FAQSection';
 import { getRoleFAQs } from '@/lib/data/role-faqs';
 import { generateCollectionPageSchema } from '@/lib/seo/metadata';
+import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
+import { loadPainPointsFromJson } from '@/lib/workflows/load-pain-points-from-json';
+import { loadRecommendationsFromJson } from '@/lib/workflows/load-recommendations-from-json';
+import type { Workflow } from '@/lib/workflows/workflow-schema';
+import type { PainPoint } from '@/lib/workflows/pain-point-schema';
+import type { Recommendation } from '@/lib/workflows/recommendation-schema';
 
 interface RoleLandingPageProps {
   slug: string;
@@ -107,7 +112,7 @@ async function getRealLifeExamplesFromPrompts(role: string): Promise<string[]> {
     const examples: string[] = [];
     prompts.forEach((p) => {
       if (p.caseStudies && Array.isArray(p.caseStudies)) {
-        p.caseStudies.forEach((cs: any) => {
+        p.caseStudies.forEach((cs: unknown) => {
           if (typeof cs === 'object' && cs !== null) {
             if (
               'outcome' in cs &&
@@ -218,6 +223,115 @@ async function getPatternsByRole(role: string) {
   }
 }
 
+/**
+ * Map DB role to workflow audience
+ */
+function getWorkflowAudienceFromDbRole(dbRole: string): string[] {
+  const mapping: Record<string, string[]> = {
+    'engineer': ['engineers'],
+    'engineering-manager': ['engineering-managers'],
+    'product-manager': ['product-managers'],
+    'engineering-director': ['engineering-managers', 'executives'],
+    'product-director': ['product-managers', 'executives'],
+    'vp-engineering': ['executives', 'engineering-managers'],
+    'vp-product': ['executives', 'product-managers'],
+    'cto': ['executives', 'engineering-managers'],
+    'director': ['executives'],
+    'c-level': ['executives'],
+    'qa': ['qa'],
+    'architect': ['architects'],
+    'devops-sre': ['platform'],
+    'security': ['security'],
+  };
+  
+  return mapping[dbRole] || ['engineers'];
+}
+
+async function getWorkflowsByRole(dbRole: string): Promise<Workflow[]> {
+  try {
+    const allWorkflows = await loadWorkflowsFromJson();
+    const audiences = getWorkflowAudienceFromDbRole(dbRole);
+    
+    const workflows = allWorkflows.filter(
+      (w) => w.status === 'published' && 
+      w.audience.some((aud) => audiences.includes(aud))
+    );
+    
+    return workflows.slice(0, 12); // Limit to top 12
+  } catch (error) {
+    console.error('Error fetching workflows by role:', error);
+    return [];
+  }
+}
+
+async function getPainPointsByRole(workflows: Workflow[]): Promise<PainPoint[]> {
+  try {
+    const allPainPoints = await loadPainPointsFromJson();
+    const workflowIds = new Set(workflows.map((w) => `${w.category}/${w.slug}`));
+    
+    // Find pain points that are addressed by workflows for this role
+    const relevantPainPoints = allPainPoints.filter((pp) => {
+      if (pp.status !== 'published') return false;
+      
+      // Check if any related workflows match
+      const hasRelatedWorkflow = pp.relatedWorkflows.some((wfId) => workflowIds.has(wfId));
+      const hasSolutionWorkflow = pp.solutionWorkflows.some((sw) => workflowIds.has(sw.workflowId));
+      
+      return hasRelatedWorkflow || hasSolutionWorkflow;
+    });
+    
+    return relevantPainPoints.slice(0, 8); // Limit to top 8
+  } catch (error) {
+    console.error('Error fetching pain points by role:', error);
+    return [];
+  }
+}
+
+async function getRecommendationsByRole(dbRole: string): Promise<Recommendation[]> {
+  try {
+    const allRecommendations = await loadRecommendationsFromJson();
+    const audiences = getWorkflowAudienceFromDbRole(dbRole);
+    
+    const recommendations = allRecommendations.filter(
+      (r) => r.status === 'published' && 
+      r.audience.some((aud) => audiences.includes(aud))
+    );
+    
+    return recommendations.slice(0, 8); // Limit to top 8
+  } catch (error) {
+    console.error('Error fetching recommendations by role:', error);
+    return [];
+  }
+}
+
+async function getGuardrailsByRole(dbRole: string): Promise<Workflow[]> {
+  try {
+    const allWorkflows = await loadWorkflowsFromJson();
+    const audiences = getWorkflowAudienceFromDbRole(dbRole);
+    
+    // Guardrails are workflows with category 'guardrails'
+    const guardrails = allWorkflows.filter(
+      (w) => w.status === 'published' && 
+      w.category === 'guardrails' &&
+      w.audience.some((aud) => audiences.includes(aud))
+    );
+    
+    // Sort by severity: critical > high > medium > low
+    const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+    guardrails.sort((a, b) => {
+      const aSeverity = (a as any).severity || 'low';
+      const bSeverity = (b as any).severity || 'low';
+      return (severityOrder[aSeverity as keyof typeof severityOrder] || 3) - 
+             (severityOrder[bSeverity as keyof typeof severityOrder] || 3);
+    });
+    
+    return guardrails.slice(0, 6); // Limit to top 6
+  } catch (error) {
+    console.error('Error fetching guardrails by role:', error);
+    return [];
+  }
+}
+
 export async function generateRoleMetadata({
   slug,
   dbRole,
@@ -287,6 +401,10 @@ export async function RoleLandingPageContent({
   const roleInfo = getRoleInfo(dbRole);
   const prompts = await getPromptsByRole(dbRole);
   const patterns = await getPatternsByRole(dbRole);
+  const workflows = await getWorkflowsByRole(dbRole);
+  const guardrails = await getGuardrailsByRole(dbRole);
+  const painPoints = await getPainPointsByRole(workflows);
+  const recommendations = await getRecommendationsByRole(dbRole);
 
   // Get dynamic content from DB
   const [dbUseCases, dbRealLifeExamples, dbDailyTasks] = await Promise.all([
@@ -399,122 +517,119 @@ export async function RoleLandingPageContent({
       <MainLayout>
         <RoleSelector />
 
-        {/* Hero */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-          <div className="absolute inset-0 animate-glow bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-purple-500/10" />
+        {/* Hero - Modern Gradient Design */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-red-500 via-blue-600 via-purple-600 to-teal-500 dark:from-red-600 dark:via-blue-700 dark:via-purple-700 dark:to-teal-600">
+          <div className="absolute inset-0 -z-10 bg-black/20" />
 
-          <div className="container relative py-24">
-            <div className="mx-auto max-w-4xl space-y-8 text-center">
+          <div className="container relative z-10 pt-12 pb-16 md:pt-16 md:pb-20">
+            <div className="mx-auto max-w-4xl space-y-4 md:space-y-6 text-center">
               <Badge
                 variant="secondary"
-                className="mb-4 border-white/20 bg-white/10 text-white"
+                className="mb-3 border-white/30 bg-white/15 backdrop-blur-sm text-white shadow-lg"
               >
-                <IconComponent className="mr-2 h-3 w-3" />
+                <IconComponent className="mr-2 h-3.5 w-3.5" />
                 For {roleInfo.title}
               </Badge>
 
-              <h1 className="animate-fade-in text-5xl font-bold tracking-tight text-white sm:text-6xl">
-                {roleInfo.title === 'Engineers' && 'Code Faster.'}
-                {roleInfo.title === 'Engineering Managers' && 'Lead Faster.'}
-                {roleInfo.title === 'Product Managers' &&
-                  'Build Better Products.'}
-                {roleInfo.title === 'QA Engineers' && 'Test Smarter.'}
-                {roleInfo.title === 'Software Architects' &&
-                  'Design Better Systems.'}
-                {roleInfo.title === 'DevOps & SRE' && 'Deploy with Confidence.'}
-                {roleInfo.title === 'Scrum Masters' &&
-                  'Facilitate Better Sprints.'}
-                {roleInfo.title === 'Product Owners' && 'Prioritize Smarter.'}
-                {roleInfo.title === 'Directors & C-Level' &&
-                  'Make Strategic Decisions.'}
-                {roleInfo.title === 'Designers' && 'Design Beautifully.'}
-                {roleInfo.title === 'Engineering Directors' &&
-                  'Lead Engineering Organizations.'}
-                {roleInfo.title === 'Product Directors' &&
-                  'Drive Product Strategy.'}
-                {roleInfo.title === 'VP of Engineering' &&
-                  'Scale Engineering at Scale.'}
-                {roleInfo.title === 'VP of Product' && 'Scale Product Vision.'}
-                {roleInfo.title === 'CTO' && 'Set Technical Strategy.'}
-                {![
-                  'Engineers',
-                  'Engineering Managers',
-                  'Product Managers',
-                  'QA Engineers',
-                  'Software Architects',
-                  'DevOps & SRE',
-                  'Scrum Masters',
-                  'Product Owners',
-                  'Directors & C-Level',
-                  'Designers',
-                  'Engineering Directors',
-                  'Product Directors',
-                  'VP of Engineering',
-                  'VP of Product',
-                  'CTO',
-                ].includes(roleInfo.title ?? '') && 'Level Up Your Skills.'}
-                <br />
-                <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                  {roleInfo.title === 'Engineers' && 'Ship Better.'}
-                  {roleInfo.title === 'Engineering Managers' && 'Ship Smarter.'}
-                  {roleInfo.title === 'Product Managers' && 'Ship Faster.'}
-                  {roleInfo.title === 'QA Engineers' && 'Ship Quality.'}
-                  {roleInfo.title === 'Software Architects' && 'Ship Scalable.'}
-                  {roleInfo.title === 'DevOps & SRE' && 'Ship Reliable.'}
-                  {roleInfo.title === 'Scrum Masters' && 'Ship Agile.'}
-                  {roleInfo.title === 'Product Owners' && 'Ship Value.'}
-                  {roleInfo.title === 'Directors & C-Level' &&
-                    'Ship Innovation.'}
-                  {roleInfo.title === 'Designers' && 'Ship Delight.'}
-                  {roleInfo.title === 'Engineering Directors' &&
-                    'Ship Excellence.'}
-                  {roleInfo.title === 'Product Directors' && 'Ship Impact.'}
-                  {roleInfo.title === 'VP of Engineering' && 'Ship Scale.'}
-                  {roleInfo.title === 'VP of Product' && 'Ship Strategy.'}
-                  {roleInfo.title === 'CTO' && 'Ship Vision.'}
-                  {![
-                    'Engineers',
-                    'Engineering Managers',
-                    'Product Managers',
-                    'QA Engineers',
-                    'Software Architects',
-                    'DevOps & SRE',
-                    'Scrum Masters',
-                    'Product Owners',
-                    'Directors & C-Level',
-                    'Designers',
-                    'Engineering Directors',
-                    'Product Directors',
-                    'VP of Engineering',
-                    'VP of Product',
-                    'CTO',
-                  ].includes(roleInfo.title ?? '') && 'Ship Success.'}
-                </span>
+              <h1 className="animate-fade-in text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
+                {(() => {
+                  // Use specific, concrete headlines based on real examples from role content
+                  if (roleContent?.coreRole.title === 'Engineering Manager') {
+                    return 'Synthesize a year\'s worth of project data into performance reviews in 30 minutes.';
+                  }
+                  if (roleContent?.coreRole.title === 'Product Manager') {
+                    return 'Ship faster without slowing down engineering. Align stakeholders and prioritize features that drive results.';
+                  }
+                  if (roleInfo.title === 'Engineers') {
+                    return 'Debug distributed systems with AI. Write production-ready code that passes review.';
+                  }
+                  if (roleInfo.title === 'Engineering Directors') {
+                    return 'Scale AI adoption without breaking the budget. Optimize token usage and reduce costs as teams grow.';
+                  }
+                  if (roleInfo.title === 'Product Directors') {
+                    return 'Reduce stakeholder alignment time from 2 weeks to 2 days.';
+                  }
+                  if (roleInfo.title === 'VP of Engineering') {
+                    return 'Control AI costs as adoption scales. Optimize token usage and prevent budget overruns across engineering teams.';
+                  }
+                  if (roleInfo.title === 'VP of Product') {
+                    return 'Scale product velocity while managing AI costs. Optimize token usage and prevent budget surprises.';
+                  }
+                  if (roleInfo.title === 'CTO') {
+                    return 'Balance AI innovation with cost control. Optimize token usage and prevent enterprise AI bills from spiraling.';
+                  }
+                  if (roleInfo.title === 'Directors & C-Level' || roleInfo.title === 'C-Level Executives') {
+                    return 'Scale AI adoption across teams while controlling costs. Optimize token usage and prevent budget overruns.';
+                  }
+                  // Use real-life examples from role content when available
+                  if (roleContent?.realLifeExamples && roleContent.realLifeExamples.length > 0) {
+                    const firstExample = roleContent.realLifeExamples[0];
+                    // Extract the concrete outcome from examples
+                    if (firstExample.includes('reduced') || firstExample.includes('from')) {
+                      const timeMatch = firstExample.match(/(?:reduced|from) ([\w\s]+) (?:to|by)/);
+                      const resultMatch = firstExample.match(/to ([\w\s]+) (?:by|using)/);
+                      if (timeMatch && resultMatch) {
+                        return `Reduce ${timeMatch[1]} to ${resultMatch[1]}.`;
+                      }
+                    }
+                  }
+                  // Use the example from howAIHelps
+                  if (roleContent?.howAIHelps.example) {
+                    const example = roleContent.howAIHelps.example;
+                    // Extract concrete benefits
+                    if (example.includes('50 pages')) {
+                      return 'Transform 50 pages of raw feedback into structured performance reviews.';
+                    }
+                    if (example.includes('50 customer interview')) {
+                      return 'Analyze 50 customer interviews to identify top pain points and feature ideas.';
+                    }
+                  }
+                  // Fallback to role-specific messaging
+                  return `${roleInfo.title}: Solve real problems with AI workflows`;
+                })()}
               </h1>
 
-              <p className="mx-auto max-w-2xl text-xl text-gray-300">
-                {roleInfo.description}
+              <p className="mx-auto max-w-2xl text-base md:text-lg text-white/90 leading-relaxed">
+                {roleContent?.howAIHelps.explanation || roleInfo.description}
               </p>
 
-              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <ScrollButton
-                  targetId="featured-prompts"
-                  label={`${promptCount} Prompts`}
-                  className="cursor-pointer rounded-md border border-white/20 bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20 hover:shadow-lg"
-                />
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href={`/prompts/role/${dbRole}`}
+                  className="rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
+                >
+                  {promptCount} Prompts
+                </Link>
                 {patternCount > 0 && (
-                  <ScrollButton
-                    targetId="patterns-section"
-                    label={`${patternCount} Patterns`}
-                    className="cursor-pointer rounded-md border border-white/20 bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20 hover:shadow-lg"
-                  />
+                  <Link
+                    href="/patterns"
+                    className="rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
+                  >
+                    {patternCount} Patterns
+                  </Link>
+                )}
+                {workflows.length > 0 && (
+                  <Link
+                    href={`/workflows?audience=${getWorkflowAudienceFromDbRole(dbRole)[0] || 'engineers'}`}
+                    className="rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
+                  >
+                    {workflows.length}+ Workflows
+                  </Link>
+                )}
+                {painPoints.length > 0 && (
+                  <Link
+                    href="/workflows/pain-points"
+                    className="rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
+                  >
+                    AI Pain Points
+                  </Link>
                 )}
               </div>
             </div>
           </div>
 
           <div className="absolute bottom-0 left-0 right-0">
-            <svg viewBox="0 0 1440 120" className="h-12 w-full fill-white">
+            <svg viewBox="0 0 1440 120" className="h-12 w-full fill-white dark:fill-gray-900">
               <path d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path>
             </svg>
           </div>
@@ -522,54 +637,56 @@ export async function RoleLandingPageContent({
 
         {/* Role Overview & AI Benefits - Combined Section */}
         {roleContent && (
-          <section className="container bg-white dark:bg-gray-900 py-10">
+          <section className="container bg-white dark:bg-gray-900 py-12 md:py-16">
             <div className="mx-auto max-w-5xl">
-              {/* What the Role Does - Compact */}
-              <div className="mb-8">
-                <h2 className="mb-3 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              {/* What the Role Does - Enhanced */}
+              <div className="mb-10 md:mb-12">
+                <h2 className="mb-4 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
                   What Does a {roleContent.coreRole.title} Do?
                 </h2>
-                <p className="mb-4 text-base text-gray-700 dark:text-gray-300">
+                <p className="mb-6 text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
                   {roleContent.coreRole.description}
                 </p>
 
-                <div className="grid gap-2 md:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2">
                   {roleContent.coreRole.keyResponsibilities.map((resp, idx) => (
-                    <div key={idx} className="flex items-start gap-2">
-                      <Icons.checkCircle className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
-                      <span className="text-sm text-gray-800 dark:text-gray-200">{resp}</span>
+                    <div key={idx} className="flex items-start gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3 transition-colors hover:border-blue-300 dark:hover:border-blue-600">
+                      <Icons.checkCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
+                      <span className="text-base text-gray-800 dark:text-gray-200">{resp}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* How AI Helps - Compact */}
-              <Card className="border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 shadow-sm">
-                <CardHeader className="pb-3">
+              {/* How AI Helps - Enhanced */}
+              <Card className="border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 shadow-lg">
+                <CardHeader className="pb-4">
                   <div className="flex items-center gap-3">
-                    <Icons.zap className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                    <CardTitle className="text-xl text-gray-900 dark:text-gray-100">
+                    <div className="rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 p-2">
+                      <Icons.zap className="h-6 w-6 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl md:text-3xl text-gray-900 dark:text-gray-100">
                       {roleContent.howAIHelps.headline}
                     </CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-base leading-relaxed text-gray-800 dark:text-gray-200">
+                <CardContent className="space-y-6">
+                  <p className="text-lg leading-relaxed text-gray-800 dark:text-gray-200">
                     {roleContent.howAIHelps.explanation}
                   </p>
 
-                  <div className="grid gap-2 md:grid-cols-2">
+                  <div className="grid gap-3 md:grid-cols-2">
                     {roleContent.howAIHelps.keyBenefits.map((benefit, idx) => (
-                      <div key={idx} className="flex items-start gap-2">
-                        <Icons.lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-yellow-500 dark:text-yellow-400" />
-                        <span className="text-sm text-gray-800 dark:text-gray-200">{benefit}</span>
+                      <div key={idx} className="flex items-start gap-3 rounded-lg border border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-800/50 p-3">
+                        <Icons.lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-yellow-500 dark:text-yellow-400" />
+                        <span className="text-base text-gray-800 dark:text-gray-200">{benefit}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-100 dark:bg-blue-950/50 p-3">
-                    <p className="text-sm text-blue-900 dark:text-blue-100">
-                      <strong>Example:</strong> {roleContent.howAIHelps.example}
+                  <div className="rounded-lg border-2 border-blue-300 dark:border-blue-700 bg-blue-100 dark:bg-blue-950/50 p-4 shadow-sm">
+                    <p className="text-base leading-relaxed text-blue-900 dark:text-blue-100">
+                      <strong className="font-semibold">Example:</strong> {roleContent.howAIHelps.example}
                     </p>
                   </div>
                 </CardContent>
@@ -578,47 +695,282 @@ export async function RoleLandingPageContent({
           </section>
         )}
 
-        {/* Common Problems & Solutions - Compact */}
+        {/* Resources Section - Workflows, Guardrails, Pain Points, Recommendations */}
+        {(workflows.length > 0 || guardrails.length > 0 || painPoints.length > 0 || recommendations.length > 0) && (
+          <section className="container bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 py-12 md:py-16">
+            <div className="mx-auto max-w-7xl">
+              <div className="mb-8 md:mb-10 text-center">
+                <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
+                  Resources for {roleInfo.title}
+                </h2>
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  Workflows, guardrails, AI pain points, and recommendations tailored to your role
+                </p>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {/* Workflows */}
+                {workflows.slice(0, 2).map((workflow) => (
+                  <Card
+                    key={`${workflow.category}/${workflow.slug}`}
+                    className="group border-2 border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1"
+                  >
+                    <CardHeader>
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 p-1.5">
+                          <Icons.layers className="h-4 w-4 text-white" />
+                        </div>
+                        <Badge variant="secondary" className="text-xs">Workflow</Badge>
+                      </div>
+                      <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                        {workflow.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                        {workflow.problemStatement}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-blue-300 bg-white font-medium text-gray-900 hover:border-blue-400 hover:bg-blue-50 dark:border-blue-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-blue-500 dark:hover:bg-gray-700"
+                        asChild
+                      >
+                        <Link href={`/workflows/${workflow.category}/${workflow.slug}`}>
+                          View Workflow
+                          <Icons.arrowRight className="ml-2 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {/* Guardrails */}
+                {guardrails.slice(0, 2).map((guardrail) => {
+                  const severity = (guardrail as any).severity || 'low';
+                  const severityColors = {
+                    critical: 'border-red-500 dark:border-red-600 bg-red-50 dark:bg-red-950/50',
+                    high: 'border-orange-500 dark:border-orange-600 bg-orange-50 dark:bg-orange-950/50',
+                    medium: 'border-yellow-500 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-950/50',
+                    low: 'border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-800',
+                  };
+                  return (
+                    <Card
+                      key={`${guardrail.category}/${guardrail.slug}`}
+                      className={`group border-2 ${severityColors[severity as keyof typeof severityColors]} shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}
+                    >
+                      <CardHeader>
+                        <div className="mb-2 flex items-center gap-2">
+                          <div className="rounded-lg bg-gradient-to-br from-red-500 to-orange-500 p-1.5">
+                            <Icons.shield className="h-4 w-4 text-white" />
+                          </div>
+                          <Badge 
+                            variant={severity === 'critical' ? 'destructive' : 'secondary'} 
+                            className="text-xs capitalize"
+                          >
+                            {severity} Guardrail
+                          </Badge>
+                        </div>
+                        <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                          {guardrail.title}
+                        </CardTitle>
+                        <CardDescription className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                          {guardrail.problemStatement}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full border-gray-300 bg-white font-medium text-gray-900 hover:border-gray-400 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-700"
+                          asChild
+                        >
+                          <Link href={`/workflows/${guardrail.category}/${guardrail.slug}`}>
+                            View Guardrail
+                            <Icons.arrowRight className="ml-2 h-3 w-3" />
+                          </Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+
+                {/* Pain Points */}
+                {painPoints.slice(0, 2).map((painPoint) => (
+                  <Card
+                    key={painPoint.id}
+                    className="group border-2 border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-red-400 dark:hover:border-red-600 hover:shadow-xl hover:-translate-y-1"
+                  >
+                    <CardHeader>
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="rounded-lg bg-gradient-to-br from-red-500 to-pink-500 p-1.5">
+                          <Icons.alertCircle className="h-4 w-4 text-white" />
+                        </div>
+                        <Badge variant="destructive" className="text-xs">AI Pain Point</Badge>
+                      </div>
+                      <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                        {painPoint.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                        {painPoint.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50 dark:border-red-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-red-500 dark:hover:bg-gray-700"
+                        asChild
+                      >
+                        <Link href={`/workflows/pain-points/${painPoint.slug}`}>
+                          Learn More
+                          <Icons.arrowRight className="ml-2 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {/* Recommendations */}
+                {recommendations.slice(0, 2).map((recommendation) => (
+                  <Card
+                    key={recommendation.id}
+                    className="group border-2 border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-green-400 dark:hover:border-green-600 hover:shadow-xl hover:-translate-y-1"
+                  >
+                    <CardHeader>
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 p-1.5">
+                          <Icons.checkCircle className="h-4 w-4 text-white" />
+                        </div>
+                        <Badge variant="default" className="bg-green-600 text-xs">Recommendation</Badge>
+                      </div>
+                      <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                        {recommendation.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+                        {recommendation.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-green-300 bg-white font-medium text-gray-900 hover:border-green-400 hover:bg-green-50 dark:border-green-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-green-500 dark:hover:bg-gray-700"
+                        asChild
+                      >
+                        <Link href={`/workflows/recommendations/${recommendation.slug}`}>
+                          Learn More
+                          <Icons.arrowRight className="ml-2 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* View All Links */}
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+                {workflows.length > 2 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-300 bg-white font-medium text-gray-900 hover:border-blue-400 hover:bg-blue-50 dark:border-blue-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-blue-500 dark:hover:bg-gray-700"
+                    asChild
+                  >
+                    <Link href={`/workflows?audience=${getWorkflowAudienceFromDbRole(dbRole)[0] || 'engineers'}`}>
+                      View All {workflows.length} Workflows
+                      <Icons.arrowRight className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
+                {guardrails.length > 2 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50 dark:border-red-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-red-500 dark:hover:bg-gray-700"
+                    asChild
+                  >
+                    <Link href="/guardrails">
+                      View All {guardrails.length} Guardrails
+                      <Icons.arrowRight className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
+                {painPoints.length > 2 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50 dark:border-red-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-red-500 dark:hover:bg-gray-700"
+                    asChild
+                  >
+                    <Link href="/workflows/pain-points">
+                      View All {painPoints.length} AI Pain Points
+                      <Icons.arrowRight className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
+                {recommendations.length > 2 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-green-300 bg-white font-medium text-gray-900 hover:border-green-400 hover:bg-green-50 dark:border-green-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-green-500 dark:hover:bg-gray-700"
+                    asChild
+                  >
+                    <Link href="/workflows/recommendations">
+                      View All {recommendations.length} Recommendations
+                      <Icons.arrowRight className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Common Problems & Solutions - Enhanced */}
         {roleContent && roleContent.commonProblems.length > 0 && (
-          <section className="container bg-white dark:bg-gray-900 py-10">
+          <section className="container bg-gray-50 dark:bg-gray-950 py-12 md:py-16">
             <div className="mx-auto max-w-5xl">
-              <div className="mb-6">
-                <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <div className="mb-8 md:mb-10 text-center">
+                <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
                   Common Problems & AI Solutions
                 </h2>
-                <p className="text-base text-gray-600 dark:text-gray-400">
+                <p className="text-lg text-gray-600 dark:text-gray-400">
                   How AI prompt engineering solves real challenges
                 </p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {roleContent.commonProblems.map((problem, idx) => (
                   <Card
                     key={idx}
-                    className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-colors hover:border-blue-300 dark:hover:border-blue-600"
+                    className="border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md transition-all hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-lg"
                   >
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between gap-4">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-sm font-bold text-white">
+                          {idx + 1}
+                        </div>
                         <div className="flex-1">
-                          <CardTitle className="mb-1 text-lg text-gray-900 dark:text-gray-100">
+                          <CardTitle className="mb-2 text-xl md:text-2xl text-gray-900 dark:text-gray-100">
                             {problem.title}
                           </CardTitle>
-                          <CardDescription className="text-sm text-gray-700 dark:text-gray-300">
+                          <CardDescription className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                             {problem.description}
                           </CardDescription>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-3 pt-0">
-                      <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 p-3">
-                        <p className="text-sm text-blue-900 dark:text-blue-100">
-                          <strong>Solution:</strong> {problem.aiSolution}
+                    <CardContent className="space-y-4 pt-0">
+                      <div className="rounded-lg border-2 border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/50 p-4 shadow-sm">
+                        <p className="text-base leading-relaxed text-blue-900 dark:text-blue-100">
+                          <strong className="font-semibold">Solution:</strong> {problem.aiSolution}
                         </p>
                       </div>
                       {problem.example && (
-                        <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/50 p-3">
-                          <p className="text-sm text-green-800 dark:text-green-100">
-                            <strong>Example:</strong> {problem.example}
+                        <div className="rounded-lg border-2 border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/50 p-4 shadow-sm">
+                          <p className="text-base leading-relaxed text-green-800 dark:text-green-100">
+                            <strong className="font-semibold">Example:</strong> {problem.example}
                           </p>
                         </div>
                       )}
@@ -632,13 +984,13 @@ export async function RoleLandingPageContent({
 
         {/* Daily Tasks & Use Cases - Combined */}
         {(dailyTasks.length > 0 || useCases.length > 0) && (
-          <section className="container bg-gray-50 dark:bg-gray-900 py-10">
+          <section className="container bg-white dark:bg-gray-900 py-12 md:py-16">
             <div className="mx-auto max-w-6xl">
-              <div className="mb-6">
-                <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <div className="mb-8 md:mb-10 text-center">
+                <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
                   Key Activities
                 </h2>
-                <p className="text-base text-gray-600 dark:text-gray-400">
+                <p className="text-lg text-gray-600 dark:text-gray-400">
                   What {roleInfo.title.toLowerCase()} do and how AI helps
                 </p>
               </div>
@@ -647,14 +999,14 @@ export async function RoleLandingPageContent({
                 {dailyTasks.map((task, idx) => (
                   <Card
                     key={`task-${idx}`}
-                    className="border-l-2 border-gray-200 dark:border-gray-700 border-l-blue-600 dark:border-l-blue-500 bg-white dark:bg-gray-800 shadow-sm"
+                    className="border-l-4 border-blue-600 dark:border-blue-500 bg-white dark:bg-gray-800 shadow-md transition-all hover:shadow-lg hover:border-blue-700 dark:hover:border-blue-400"
                   >
                     <CardContent className="pb-4 pt-4">
-                      <div className="flex items-start gap-2">
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-xs font-semibold text-blue-600 dark:text-blue-300">
+                      <div className="flex items-start gap-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-xs font-bold text-blue-600 dark:text-blue-300">
                           {idx + 1}
                         </span>
-                        <p className="text-sm text-gray-800 dark:text-gray-200">{task}</p>
+                        <p className="text-base text-gray-800 dark:text-gray-200 leading-relaxed">{task}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -662,12 +1014,12 @@ export async function RoleLandingPageContent({
                 {useCases.map((useCase, idx) => (
                   <Card
                     key={`usecase-${idx}`}
-                    className="border-l-2 border-gray-200 dark:border-gray-700 border-l-green-600 dark:border-l-green-500 bg-white dark:bg-gray-800 shadow-sm"
+                    className="border-l-4 border-green-600 dark:border-green-500 bg-white dark:bg-gray-800 shadow-md transition-all hover:shadow-lg hover:border-green-700 dark:hover:border-green-400"
                   >
                     <CardContent className="pb-4 pt-4">
-                      <div className="flex items-start gap-2">
-                        <Icons.checkCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
-                        <p className="text-sm text-gray-800 dark:text-gray-200">{useCase}</p>
+                      <div className="flex items-start gap-3">
+                        <Icons.checkCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
+                        <p className="text-base text-gray-800 dark:text-gray-200 leading-relaxed">{useCase}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -679,13 +1031,13 @@ export async function RoleLandingPageContent({
 
         {/* Real-Life Examples & Patterns - Combined */}
         {(realLifeExamples.length > 0 || aiPromptPatterns.length > 0) && (
-          <section className="container bg-gray-50 dark:bg-gray-900 py-10">
+          <section className="container bg-gray-50 dark:bg-gray-950 py-12 md:py-16">
             <div className="mx-auto max-w-6xl">
-              <div className="mb-6">
-                <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <div className="mb-8 md:mb-10 text-center">
+                <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
                   Success Stories & Patterns
                 </h2>
-                <p className="text-base text-gray-600 dark:text-gray-400">
+                <p className="text-lg text-gray-600 dark:text-gray-400">
                   How professionals use AI and patterns that work
                 </p>
               </div>
@@ -694,14 +1046,14 @@ export async function RoleLandingPageContent({
                 {realLifeExamples.map((example, idx) => (
                   <Card
                     key={`example-${idx}`}
-                    className="border-l-2 border-gray-200 dark:border-gray-700 border-l-purple-600 dark:border-l-purple-500 bg-white dark:bg-gray-800 shadow-sm"
+                    className="border-l-4 border-purple-600 dark:border-purple-500 bg-white dark:bg-gray-800 shadow-md transition-all hover:shadow-lg hover:border-purple-700 dark:hover:border-purple-400"
                   >
                     <CardContent className="pb-4 pt-4">
-                      <div className="flex items-start gap-2">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900 text-xs font-bold text-purple-600 dark:text-purple-300">
+                      <div className="flex items-start gap-3">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900 text-xs font-bold text-purple-600 dark:text-purple-300">
                           {idx + 1}
                         </span>
-                        <p className="text-sm leading-relaxed text-gray-800 dark:text-gray-200">
+                        <p className="text-base leading-relaxed text-gray-800 dark:text-gray-200">
                           {example}
                         </p>
                       </div>
@@ -711,12 +1063,14 @@ export async function RoleLandingPageContent({
                 {aiPromptPatterns.map((pattern, idx) => (
                   <Card
                     key={`pattern-${idx}`}
-                    className="border-l-2 border-gray-200 dark:border-gray-700 border-l-yellow-500 dark:border-l-yellow-500 bg-white dark:bg-gray-800 shadow-sm"
+                    className="border-l-4 border-yellow-500 dark:border-yellow-500 bg-white dark:bg-gray-800 shadow-md transition-all hover:shadow-lg hover:border-yellow-600 dark:hover:border-yellow-400"
                   >
                     <CardContent className="pb-4 pt-4">
-                      <div className="flex items-center gap-2">
-                        <Icons.zap className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-lg bg-gradient-to-br from-yellow-400 to-orange-400 p-1.5">
+                          <Icons.zap className="h-4 w-4 text-white" />
+                        </div>
+                        <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
                           {pattern}
                         </p>
                       </div>
@@ -732,14 +1086,14 @@ export async function RoleLandingPageContent({
         {displayPrompts.length > 0 && (
           <section
             id="featured-prompts"
-            className="container scroll-mt-20 bg-white dark:bg-gray-900 py-10"
+            className="container scroll-mt-20 bg-white dark:bg-gray-900 py-12 md:py-16"
           >
             <div className="mx-auto max-w-6xl">
-              <div className="mb-6">
-                <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <div className="mb-8 md:mb-10 text-center">
+                <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
                   Featured Prompts
                 </h2>
-                <p className="text-base text-gray-600 dark:text-gray-400">
+                <p className="text-lg text-gray-600 dark:text-gray-400">
                   Top prompts for {roleInfo.title.toLowerCase()}
                 </p>
               </div>
@@ -748,7 +1102,7 @@ export async function RoleLandingPageContent({
                 {displayPrompts.map((prompt) => (
                   <Card
                     key={prompt.id}
-                    className="group border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg"
+                    className="group border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1"
                   >
                     <CardHeader>
                       <div className="flex items-start justify-between gap-2">
@@ -832,14 +1186,14 @@ export async function RoleLandingPageContent({
         {patterns.length > 0 && (
           <section
             id="patterns-section"
-            className="container scroll-mt-20 bg-gray-50 dark:bg-gray-900 py-10"
+            className="container scroll-mt-20 bg-gray-50 dark:bg-gray-950 py-12 md:py-16"
           >
             <div className="mx-auto max-w-6xl">
-              <div className="mb-6">
-                <h2 className="mb-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <div className="mb-8 md:mb-10 text-center">
+                <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
                   Recommended Patterns
                 </h2>
-                <p className="text-base text-gray-600 dark:text-gray-400">
+                <p className="text-lg text-gray-600 dark:text-gray-400">
                   Patterns most useful for {roleInfo.title.toLowerCase()}
                 </p>
               </div>
@@ -848,7 +1202,7 @@ export async function RoleLandingPageContent({
                 {patterns.map((pattern) => (
                   <Card
                     key={pattern.id}
-                    className="group border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg"
+                    className="group border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1"
                   >
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
@@ -873,6 +1227,206 @@ export async function RoleLandingPageContent({
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Workflows Section */}
+        {workflows.length > 0 && (
+          <section className="container scroll-mt-20 bg-white dark:bg-gray-900 py-12 md:py-16">
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-8 md:mb-10 text-center">
+                <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
+                  Guardrail Workflows
+                </h2>
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  Industry-proven workflows for {roleInfo.title.toLowerCase()}
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {workflows.map((workflow) => (
+                  <Card
+                    key={`${workflow.category}/${workflow.slug}`}
+                    className="group border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1"
+                  >
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                          {workflow.title}
+                        </CardTitle>
+                        <Badge variant="secondary" className="shrink-0">
+                          {workflow.category}
+                        </Badge>
+                      </div>
+                      <CardDescription className="line-clamp-2 text-gray-600 dark:text-gray-400">
+                        {workflow.problemStatement}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex flex-wrap gap-2">
+                        {workflow.audience.slice(0, 3).map((aud) => (
+                          <Badge key={aud} variant="outline" className="text-xs">
+                            {aud}
+                          </Badge>
+                        ))}
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full border-gray-400 bg-white font-medium text-gray-900 hover:border-gray-500 hover:bg-gray-100"
+                        asChild
+                      >
+                        <Link href={`/workflows/${workflow.category}/${workflow.slug}`}>
+                          View Workflow
+                          <Icons.arrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {workflows.length >= 12 && (
+                <div className="mt-8 text-center">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-gray-400 bg-white font-medium text-gray-900 hover:border-gray-500 hover:bg-gray-100"
+                    asChild
+                  >
+                    <Link href={`/workflows?audience=${getWorkflowAudienceFromDbRole(dbRole)[0] || 'engineers'}`}>
+                      View All Workflows
+                      <Icons.arrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Pain Points Section */}
+        {painPoints.length > 0 && (
+          <section className="container scroll-mt-20 bg-gray-50 dark:bg-gray-950 py-12 md:py-16">
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-8 md:mb-10 text-center">
+                <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
+                  Common AI Pain Points
+                </h2>
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  AI-related issues {roleInfo.title.toLowerCase()} face and how to prevent them
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {painPoints.map((painPoint) => (
+                  <Card
+                    key={painPoint.id}
+                    className="group border-2 border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-red-400 dark:hover:border-red-600 hover:shadow-xl hover:-translate-y-1"
+                  >
+                    <CardHeader>
+                      <div className="mb-2 inline-block rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700 dark:bg-red-900 dark:text-red-300">
+                        AI Pain Point
+                      </div>
+                      <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                        {painPoint.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-3 text-sm text-gray-600 dark:text-gray-400">
+                        {painPoint.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        variant="outline"
+                        className="w-full border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50 dark:bg-gray-800"
+                        asChild
+                      >
+                        <Link href={`/workflows/pain-points/${painPoint.slug}`}>
+                          Learn More
+                          <Icons.arrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="mt-8 text-center">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-gray-400 bg-white font-medium text-gray-900 hover:border-gray-500 hover:bg-gray-100"
+                  asChild
+                >
+                  <Link href="/workflows/pain-points">
+                    View All AI Pain Points
+                    <Icons.arrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Recommendations Section */}
+        {recommendations.length > 0 && (
+          <section className="container scroll-mt-20 bg-white dark:bg-gray-900 py-12 md:py-16">
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-8 md:mb-10 text-center">
+                <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
+                  Best Practices & Recommendations
+                </h2>
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  Actionable guidance for {roleInfo.title.toLowerCase()}
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {recommendations.map((recommendation) => (
+                  <Card
+                    key={recommendation.id}
+                    className="group border-2 border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:border-green-400 dark:hover:border-green-600 hover:shadow-xl hover:-translate-y-1"
+                  >
+                    <CardHeader>
+                      <div className="mb-2 inline-block rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700 dark:bg-green-900 dark:text-green-300">
+                        Recommendation
+                      </div>
+                      <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
+                        {recommendation.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-3 text-sm text-gray-600 dark:text-gray-400">
+                        {recommendation.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        variant="outline"
+                        className="w-full border-green-300 bg-white font-medium text-gray-900 hover:border-green-400 hover:bg-green-50 dark:bg-gray-800"
+                        asChild
+                      >
+                        <Link href={`/workflows/recommendations/${recommendation.slug}`}>
+                          Learn More
+                          <Icons.arrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="mt-8 text-center">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-gray-400 bg-white font-medium text-gray-900 hover:border-gray-500 hover:bg-gray-100"
+                  asChild
+                >
+                  <Link href="/workflows/recommendations">
+                    View All Recommendations
+                    <Icons.arrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
             </div>
           </section>
@@ -912,37 +1466,40 @@ export async function RoleLandingPageContent({
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="container bg-white dark:bg-gray-900 py-10">
-          <Card className="mx-auto max-w-3xl border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 shadow-lg">
-            <CardContent className="space-y-4 py-8 text-center">
-              <IconComponent className="mx-auto h-12 w-12 text-blue-600 dark:text-blue-400" />
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+        {/* CTA - Enhanced */}
+        <section className="container bg-gradient-to-br from-blue-50 via-cyan-50 to-purple-50 dark:from-blue-950/50 dark:via-cyan-950/50 dark:to-purple-950/50 py-12 md:py-16">
+          <Card className="mx-auto max-w-3xl border-2 border-blue-300 dark:border-blue-700 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 shadow-xl">
+            <CardContent className="space-y-6 py-10 md:py-12 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg">
+                <IconComponent className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
                 Ready to Level Up?
               </h2>
-              <p className="mx-auto max-w-2xl text-base text-gray-700 dark:text-gray-300">
+              <p className="mx-auto max-w-2xl text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
                 Join {roleInfo.title.toLowerCase()} using AI to work smarter and
                 ship faster.
               </p>
               <div className="flex flex-col justify-center gap-4 sm:flex-row">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600"
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 text-lg font-semibold shadow-lg transition-all hover:shadow-xl hover:scale-105"
                   asChild
                 >
                   <Link href="/signup">
                     Start Free
-                    <Icons.arrowRight className="ml-2 h-4 w-4" />
+                    <Icons.arrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-gray-400 bg-white font-medium text-gray-900 hover:border-gray-500 hover:bg-gray-100"
+                  className="border-2 border-gray-400 bg-white text-lg font-semibold text-gray-900 hover:border-gray-500 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-100"
                   asChild
                 >
                   <Link href={`/prompts/role/${dbRole}`}>
                     Browse All Prompts
+                    <Icons.arrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
               </div>
