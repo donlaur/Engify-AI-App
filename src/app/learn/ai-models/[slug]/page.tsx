@@ -47,23 +47,6 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  // Try slug first, then fallback to ID lookup (for backwards compatibility)
-  let model = await aiModelService.findBySlug(slug);
-  if (!model) {
-    // Fallback: try finding by ID in case slug doesn't exist
-    model = await aiModelService.findById(slug);
-  }
-
-  if (!model) {
-    return {
-      title: 'AI Model Not Found | Engify.ai',
-    };
-  }
-
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
 export async function generateMetadata({

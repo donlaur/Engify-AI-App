@@ -22,6 +22,7 @@ export const AIToolSchema = z.object({
       'builder', // AI app builders: Lovable, Bolt, Replit
       'ui-generator', // UI component generators: v0.dev
       'ai-testing-qa', // AI Testing & QA: Virtuoso QA, LambdaTest KaneAI, BrowserStack
+      'code-review', // AI Code Review & Quality: Qodo, CodeRabbit, Snyk DeepCode
       'mlops', // MLOps & Tracking: W&B, DVC, Delta Lake
       'internal-tooling', // AI Internal Tooling: Superblocks, Replit (AI features)
       'protocol', // Protocols/frameworks: MCP (Model Context Protocol)

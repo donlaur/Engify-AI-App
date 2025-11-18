@@ -74,6 +74,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   builder: 'AI Builders',
   'ui-generator': 'UI Generators',
   'ai-testing-qa': 'AI Testing & QA',
+  'code-review': 'AI Code Review & Quality',
   'mlops': 'MLOps & Experiment Tracking',
   'internal-tooling': 'AI Internal Tooling',
   protocol: 'Protocols',
