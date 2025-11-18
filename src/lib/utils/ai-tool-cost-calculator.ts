@@ -73,6 +73,13 @@ export interface ToolPricing {
     creditsUnit?: string;
     unlimited?: boolean;
   };
+  alternativePricing?: {
+    model?: 'acu' | 'lines-of-code' | 'requests' | 'compute-units' | 'other';
+    unitName?: string;
+    costPerUnit?: number;
+    baseMinimum?: number;
+    includedUnits?: number;
+  };
 }
 
 export interface TokenPricing {
@@ -123,7 +130,47 @@ export function calculateToolCost(
 
   // Calculate token costs if token pricing is provided
   let tokenCost = 0;
-  if (tokenPricing) {
+  let alternativeCost = 0;
+  
+  // Handle alternative pricing models (ACU, lines-of-code, etc.)
+  if (toolPricing.alternativePricing) {
+    const altPricing = toolPricing.alternativePricing;
+    
+    if (altPricing.model === 'acu') {
+      // ACU pricing (e.g., Devin)
+      // Estimate ACU consumption based on usage tier
+      // This is approximate - actual ACU consumption varies by task complexity
+      const estimatedACUs = {
+        light: 10,   // ~10 ACUs for light usage
+        mid: 50,    // ~50 ACUs for mid usage
+        power: 150, // ~150 ACUs for power usage
+      };
+      
+      const acusUsed = estimatedACUs[tier] || 50;
+      const costPerACU = altPricing.costPerUnit || 2.25;
+      alternativeCost = acusUsed * costPerACU;
+      
+      // Apply base minimum if applicable
+      if (altPricing.baseMinimum && alternativeCost < altPricing.baseMinimum) {
+        alternativeCost = altPricing.baseMinimum;
+      }
+      
+      // Subtract included units if applicable
+      if (altPricing.includedUnits && acusUsed <= altPricing.includedUnits) {
+        alternativeCost = 0; // Covered by included units
+      } else if (altPricing.includedUnits) {
+        const overageACUs = acusUsed - altPricing.includedUnits;
+        alternativeCost = overageACUs * costPerACU;
+      }
+    } else if (altPricing.model === 'requests') {
+      // Request-based pricing
+      const requests = tierDef.monthlyRequests;
+      const costPerRequest = altPricing.costPerUnit || 0;
+      alternativeCost = requests * costPerRequest;
+    }
+    // Add other alternative pricing models as needed
+  } else if (tokenPricing) {
+    // Traditional token-based pricing
     const inputCost =
       (tierDef.monthlyTokens.input / 1_000_000) *
       (tokenPricing.inputCostPer1M || 0);
@@ -162,14 +209,14 @@ export function calculateToolCost(
     tokenCost = 0;
   }
 
-  const totalCost = baseCost + tokenCost + overageCost;
+  const totalCost = baseCost + tokenCost + alternativeCost + overageCost;
   const costPerRequest = totalCost / tierDef.monthlyRequests;
 
   return {
     tier,
     tierDefinition: tierDef,
     baseCost,
-    tokenCost,
+    tokenCost: tokenCost + alternativeCost, // Combine for display
     totalCost,
     costPerRequest,
     tokensUsed: tierDef.monthlyTokens,

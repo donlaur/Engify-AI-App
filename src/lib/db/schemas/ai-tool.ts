@@ -52,6 +52,16 @@ export const AIToolSchema = z.object({
           creditsPer1MTokens: z.number().optional(), // If tool uses credits, conversion rate
         })
         .optional(),
+      // Alternative pricing models (for tools that don't use tokens)
+      alternativePricing: z
+        .object({
+          model: z.enum(['acu', 'lines-of-code', 'requests', 'compute-units', 'other']).optional(), // Pricing model type
+          unitName: z.string().optional(), // e.g., 'ACU', 'LOC', 'Request'
+          costPerUnit: z.number().optional(), // Cost per unit (e.g., $2.25 per ACU)
+          baseMinimum: z.number().optional(), // Minimum charge (e.g., $20 minimum)
+          includedUnits: z.number().optional(), // Units included in base plan
+        })
+        .optional(),
     })
     .default({ free: false }),
   features: z.array(z.string()).default([]),
@@ -85,6 +95,11 @@ export const AIToolSchema = z.object({
     jetbrains: z.string().url().optional(), // JetBrains Marketplace URL
     github: z.string().url().optional(), // GitHub repository URL
   }).optional(),
+  
+  // Tool relationships and categorization
+  inspiredBy: z.string().optional(), // ID of tool this is inspired by/clone of (e.g., 'cline' for Cline clones)
+  alternatives: z.array(z.string()).default([]), // IDs of alternative tools
+  cloneType: z.enum(['original', 'clone', 'alternative', 'inspired']).optional(), // Relationship type
   
   // Hub Content (for SEO content hubs)
   hubContent: z.object({

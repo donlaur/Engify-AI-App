@@ -124,6 +124,17 @@ export function AIToolCostComparison({
                 {tokenPricing.model && ` (${tokenPricing.model})`}
               </p>
             )}
+            {toolPricing.alternativePricing && (
+              <p>
+                {toolPricing.alternativePricing.unitName || 'Unit'} pricing:{' '}
+                ${toolPricing.alternativePricing.costPerUnit?.toFixed(2)} per{' '}
+                {toolPricing.alternativePricing.unitName || 'unit'}
+                {toolPricing.alternativePricing.baseMinimum && 
+                  ` (minimum: $${toolPricing.alternativePricing.baseMinimum})`}
+                {toolPricing.alternativePricing.includedUnits && 
+                  ` (${toolPricing.alternativePricing.includedUnits} included in base plan)`}
+              </p>
+            )}
           </div>
         </div>
       </CardContent>
