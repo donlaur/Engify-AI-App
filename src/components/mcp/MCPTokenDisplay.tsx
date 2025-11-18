@@ -257,7 +257,7 @@ export function MCPTokenDisplay({ onClose }: MCPTokenDisplayProps) {
       "command": "npx",
       "args": ["@engify/mcp-server"],
       "env": {
-        "ENGIFY_TOKEN": "${token.access_token.substring(0, 20)}..."
+        "ENGIFY_TOKEN": "${token.access_token?.substring(0, 20) || ''}..."
       }
     }
   }

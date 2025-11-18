@@ -16,9 +16,8 @@
  */
 
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { z } from 'zod';
-import { authOptions } from '@/lib/auth/config';
+import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logging/logger';
 import { success, fail, unauthorized } from '@/lib/api/response';
 
@@ -60,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     // 3. For non-login actions, require dashboard session
     if (action !== 'login') {
-      const session = await getServerSession(authOptions);
+      const session = await auth();
       if (!session?.user?.id) {
         return unauthorized('Authentication required');
       }
