@@ -43,6 +43,15 @@ export const AIToolSchema = z.object({
           unlimited: z.boolean().default(false), // True if unlimited credits
         })
         .optional(),
+      // Token-based pricing (for tools that charge per token)
+      tokenPricing: z
+        .object({
+          inputCostPer1M: z.number().optional(), // Cost per 1M input tokens
+          outputCostPer1M: z.number().optional(), // Cost per 1M output tokens
+          model: z.string().optional(), // Which model this pricing applies to (e.g., 'GPT-4', 'Claude 3.5 Sonnet')
+          creditsPer1MTokens: z.number().optional(), // If tool uses credits, conversion rate
+        })
+        .optional(),
     })
     .default({ free: false }),
   features: z.array(z.string()).default([]),

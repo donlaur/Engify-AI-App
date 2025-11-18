@@ -16,6 +16,7 @@ import { Icons } from '@/lib/icons';
 import { aiToolService } from '@/lib/services/AIToolService';
 import { logger } from '@/lib/logging/logger';
 import { getToolLink } from '@/lib/utils/tool-links';
+import { AIToolCostComparison } from '@/components/features/AIToolCostComparison';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate hourly
@@ -535,6 +536,14 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                     )}
                   </CardContent>
                 </Card>
+              )}
+
+              {/* Cost Comparison */}
+              {tool.pricing && (
+                <AIToolCostComparison
+                  toolPricing={tool.pricing}
+                  toolName={tool.name}
+                />
               )}
 
               {/* Tags */}
