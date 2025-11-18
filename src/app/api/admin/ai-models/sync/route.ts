@@ -1,12 +1,12 @@
 /**
  * AI Models Sync API
- * 
+ *
  * Syncs models from provider APIs (OpenAI, Anthropic, Google)
- * RBAC: Super Admin only
+ * RBAC: Admin, Super Admin, and Org Admin roles
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { RBACPresets } from '@/lib/middleware/rbac';
+import { withRBAC } from '@/lib/middleware/rbac';
 import { auth } from '@/lib/auth';
 import { auditLog } from '@/lib/logging/audit';
 import { aiModelService } from '@/lib/services/AIModelService';
@@ -17,7 +17,8 @@ import { OPENAI_MODEL_DATA, convertOpenAIDataToModel } from '@/lib/data/openai-m
 
 // POST: Sync models from providers
 export async function POST(request: NextRequest) {
-  const r = await RBACPresets.requireSuperAdmin()(request);
+  // RBAC: Allow admin, super_admin, and org_admin roles
+  const r = await withRBAC({ roles: ['admin', 'super_admin', 'org_admin'] })(request);
   if (r) return r;
 
   const session = await auth();

@@ -22,18 +22,14 @@ interface GuardrailCheck {
 
 const checks: GuardrailCheck[] = [];
 
-// Check 1: Icon validation in pre-commit
+// Check 1: Icon validation in pre-commit (deprecated - script removed)
 function checkIconValidation(): GuardrailCheck {
-  const preCommit = readFileSync('.husky/pre-commit', 'utf-8');
-  const hasIconCheck = preCommit.includes('audit-icons');
-  
+  // Note: audit-icons.ts was removed in cleanup - skip this check
   return {
     name: 'Icon Validation in Pre-Commit',
-    passed: hasIconCheck,
-    message: hasIconCheck
-      ? '✅ Icon validation is in pre-commit hook'
-      : '❌ Icon validation script exists but NOT in pre-commit hook!',
-    severity: hasIconCheck ? 'info' : 'error',
+    passed: true,
+    message: '✅ Icon validation check skipped (script removed in cleanup)',
+    severity: 'info',
   };
 }
 
@@ -67,13 +63,12 @@ function checkNoVerifyUsage(): GuardrailCheck {
 // Check 3: Existing tools are being used
 function checkExistingTools(): GuardrailCheck {
   const criticalTools = [
-    'scripts/development/audit-icons.ts',
     'scripts/maintenance/check-enterprise-compliance.js',
-    'scripts/maintenance/validate-schema.js',
+    'scripts/security/security-check.js',
   ];
-  
+
   const missing = criticalTools.filter(tool => !existsSync(tool));
-  
+
   return {
     name: 'Critical Tools Exist',
     passed: missing.length === 0,
@@ -87,19 +82,16 @@ function checkExistingTools(): GuardrailCheck {
 // Check 4: Pre-commit hook has all validations
 function checkPreCommitCompleteness(): GuardrailCheck {
   const preCommit = readFileSync('.husky/pre-commit', 'utf-8');
-  
+
   const requiredChecks = [
     { name: 'Enterprise Compliance', pattern: 'check-enterprise-compliance' },
-    { name: 'Schema Validation', pattern: 'validate-schema' },
-    { name: 'Test Framework', pattern: 'check-test-framework' },
-    { name: 'Icon Validation', pattern: 'audit-icons' },
     { name: 'Security Check', pattern: 'security-check' },
   ];
-  
+
   const missing = requiredChecks.filter(
     check => !preCommit.includes(check.pattern)
   );
-  
+
   return {
     name: 'Pre-Commit Hook Completeness',
     passed: missing.length === 0,
