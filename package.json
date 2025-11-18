@@ -91,7 +91,6 @@
     "audit:eod": "tsx scripts/ci/end-of-day-audit.ts",
     "audit:eod:strict": "tsx scripts/ci/end-of-day-audit.ts --strict",
     "audit:eod:json": "tsx scripts/ci/end-of-day-audit.ts --json",
-    "content:rss": "tsx scripts/content/rss-fetch.ts",
     "admin:stats": "tsx scripts/admin/db-stats.ts",
     "admin:review-prompts": "tsx scripts/admin/review-prompts.ts",
     "admin:setup": "tsx scripts/admin/ensure-super-admin.ts",
