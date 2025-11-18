@@ -609,7 +609,7 @@ export async function RoleLandingPageContent({
                     href="/workflows/pain-points"
                     className="rounded-lg border-2 border-white/30 bg-white/15 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all hover:border-white/50 hover:bg-white/25 hover:shadow-xl"
                   >
-                    Pain Points
+                    AI Pain Points
                   </Link>
                 )}
               </div>
@@ -692,7 +692,7 @@ export async function RoleLandingPageContent({
                   Resources for {roleInfo.title}
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Workflows, guardrails, pain points, and recommendations tailored to your role
+                  Workflows, guardrails, AI pain points, and recommendations tailored to your role
                 </p>
               </div>
 
@@ -721,7 +721,7 @@ export async function RoleLandingPageContent({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full border-blue-300 bg-white font-medium text-gray-900 hover:border-blue-400 hover:bg-blue-50 dark:bg-gray-800"
+                        className="w-full border-blue-300 bg-white font-medium text-gray-900 hover:border-blue-400 hover:bg-blue-50 dark:border-blue-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-blue-500 dark:hover:bg-gray-700"
                         asChild
                       >
                         <Link href={`/workflows/${workflow.category}/${workflow.slug}`}>
@@ -770,7 +770,7 @@ export async function RoleLandingPageContent({
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full border-gray-300 bg-white font-medium text-gray-900 hover:border-gray-400 hover:bg-gray-50 dark:bg-gray-800"
+                          className="w-full border-gray-300 bg-white font-medium text-gray-900 hover:border-gray-400 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-gray-500 dark:hover:bg-gray-700"
                           asChild
                         >
                           <Link href={`/workflows/${guardrail.category}/${guardrail.slug}`}>
@@ -794,7 +794,7 @@ export async function RoleLandingPageContent({
                         <div className="rounded-lg bg-gradient-to-br from-red-500 to-pink-500 p-1.5">
                           <Icons.alertCircle className="h-4 w-4 text-white" />
                         </div>
-                        <Badge variant="destructive" className="text-xs">Pain Point</Badge>
+                        <Badge variant="destructive" className="text-xs">AI Pain Point</Badge>
                       </div>
                       <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
                         {painPoint.title}
@@ -807,7 +807,7 @@ export async function RoleLandingPageContent({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50 dark:bg-gray-800"
+                        className="w-full border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50 dark:border-red-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-red-500 dark:hover:bg-gray-700"
                         asChild
                       >
                         <Link href={`/workflows/pain-points/${painPoint.slug}`}>
@@ -843,7 +843,7 @@ export async function RoleLandingPageContent({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full border-green-300 bg-white font-medium text-gray-900 hover:border-green-400 hover:bg-green-50 dark:bg-gray-800"
+                        className="w-full border-green-300 bg-white font-medium text-gray-900 hover:border-green-400 hover:bg-green-50 dark:border-green-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-green-500 dark:hover:bg-gray-700"
                         asChild
                       >
                         <Link href={`/workflows/recommendations/${recommendation.slug}`}>
@@ -862,7 +862,7 @@ export async function RoleLandingPageContent({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-blue-300 bg-white font-medium text-gray-900 hover:border-blue-400 hover:bg-blue-50"
+                    className="border-blue-300 bg-white font-medium text-gray-900 hover:border-blue-400 hover:bg-blue-50 dark:border-blue-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-blue-500 dark:hover:bg-gray-700"
                     asChild
                   >
                     <Link href={`/workflows?audience=${getWorkflowAudienceFromDbRole(dbRole)[0] || 'engineers'}`}>
@@ -875,7 +875,7 @@ export async function RoleLandingPageContent({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50"
+                    className="border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50 dark:border-red-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-red-500 dark:hover:bg-gray-700"
                     asChild
                   >
                     <Link href="/guardrails">
@@ -888,11 +888,11 @@ export async function RoleLandingPageContent({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50"
+                    className="border-red-300 bg-white font-medium text-gray-900 hover:border-red-400 hover:bg-red-50 dark:border-red-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-red-500 dark:hover:bg-gray-700"
                     asChild
                   >
                     <Link href="/workflows/pain-points">
-                      View All {painPoints.length} Pain Points
+                      View All {painPoints.length} AI Pain Points
                       <Icons.arrowRight className="ml-2 h-3 w-3" />
                     </Link>
                   </Button>
@@ -901,7 +901,7 @@ export async function RoleLandingPageContent({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-green-300 bg-white font-medium text-gray-900 hover:border-green-400 hover:bg-green-50"
+                    className="border-green-300 bg-white font-medium text-gray-900 hover:border-green-400 hover:bg-green-50 dark:border-green-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-green-500 dark:hover:bg-gray-700"
                     asChild
                   >
                     <Link href="/workflows/recommendations">
@@ -1300,10 +1300,10 @@ export async function RoleLandingPageContent({
             <div className="mx-auto max-w-6xl">
               <div className="mb-8 md:mb-10 text-center">
                 <h2 className="mb-3 text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
-                  Common Pain Points
+                  Common AI Pain Points
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Issues {roleInfo.title.toLowerCase()} face and how to prevent them
+                  AI-related issues {roleInfo.title.toLowerCase()} face and how to prevent them
                 </p>
               </div>
 
@@ -1315,7 +1315,7 @@ export async function RoleLandingPageContent({
                   >
                     <CardHeader>
                       <div className="mb-2 inline-block rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700 dark:bg-red-900 dark:text-red-300">
-                        Pain Point
+                        AI Pain Point
                       </div>
                       <CardTitle className="line-clamp-2 text-lg text-gray-900 dark:text-gray-100">
                         {painPoint.title}
@@ -1348,7 +1348,7 @@ export async function RoleLandingPageContent({
                   asChild
                 >
                   <Link href="/workflows/pain-points">
-                    View All Pain Points
+                    View All AI Pain Points
                     <Icons.arrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
