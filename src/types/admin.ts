@@ -148,19 +148,17 @@ export interface AdminPaginationResponse<T> {
  * All admin API endpoints should conform to this structure for consistent
  * client-side handling and error management.
  *
- * @template T - The type of the main data payload
- *
  * @example
  * ```typescript
  * interface Workflow extends AdminEntity { ... }
- * const response: AdminApiResponse<Workflow> = {
+ * const response: AdminApiResponse = {
  *   success: true,
  *   pagination: { page: 1, limit: 50, total: 100, ... },
  *   workflows: [ ... ]  // dynamic key based on entity type
  * };
  * ```
  */
-export interface AdminApiResponse<T = any> {
+export interface AdminApiResponse {
   /** Whether the API call was successful */
   success: boolean;
   /** Optional error message if success is false */
@@ -676,7 +674,7 @@ export interface AdminBulkOperationResult {
  * API Response Types:
  * - AdminPaginationMeta
  * - AdminPaginationResponse<T>
- * - AdminApiResponse<T>
+ * - AdminApiResponse
  *
  * Configuration Types:
  * - AdminFilterConfig
