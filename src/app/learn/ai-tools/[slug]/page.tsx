@@ -246,6 +246,29 @@ export default async function AIToolDetailPage({ params }: PageProps) {
               <Badge variant={tool.pricing.free ? 'default' : 'outline'}>
                 {pricingText}
               </Badge>
+              {tool.badges && tool.badges.length > 0 && (
+                <>
+                  {tool.badges.includes('open-source') && (
+                    <Badge variant="outline" className="border-green-500 text-green-700 dark:text-green-400">
+                      Open Source
+                    </Badge>
+                  )}
+                  {tool.badges.includes('vscode-plugin') && (
+                    <Badge variant="outline">VS Code Plugin</Badge>
+                  )}
+                  {tool.badges.includes('jetbrains-plugin') && (
+                    <Badge variant="outline">JetBrains Plugin</Badge>
+                  )}
+                  {tool.badges.includes('enterprise') && (
+                    <Badge variant="outline" className="border-blue-500 text-blue-700 dark:text-blue-400">
+                      Enterprise
+                    </Badge>
+                  )}
+                  {tool.badges.includes('github-integration') && (
+                    <Badge variant="outline">GitHub Integration</Badge>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
@@ -423,6 +446,95 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                     </Card>
                   )}
                 </div>
+              )}
+
+              {/* Supported Models */}
+              {tool.supportedModels && tool.supportedModels.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Supported AI Models</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {tool.supportedModels.map((model) => (
+                        <Badge key={model} variant="secondary">
+                          {model}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Agent Capabilities */}
+              {tool.agentCapabilities && tool.agentCapabilities.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Agent Capabilities</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {tool.agentCapabilities.map((capability) => (
+                        <li key={capability} className="flex items-start gap-2">
+                          <Icons.check className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+                          <span className="text-sm capitalize">
+                            {capability.replace(/-/g, ' ')}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Marketplace Links */}
+              {tool.marketplaceLinks && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Installation & Links</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {tool.marketplaceLinks.vscode && (
+                      <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                        <a
+                          href={tool.marketplaceLinks.vscode}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Icons.code className="mr-2 h-4 w-4" />
+                          VS Code Marketplace
+                          <Icons.externalLink className="ml-auto h-3 w-3" />
+                        </a>
+                      </Button>
+                    )}
+                    {tool.marketplaceLinks.jetbrains && (
+                      <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                        <a
+                          href={tool.marketplaceLinks.jetbrains}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Icons.code className="mr-2 h-4 w-4" />
+                          JetBrains Marketplace
+                          <Icons.externalLink className="ml-auto h-3 w-3" />
+                        </a>
+                      </Button>
+                    )}
+                    {tool.marketplaceLinks.github && (
+                      <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                        <a
+                          href={tool.marketplaceLinks.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Icons.github className="mr-2 h-4 w-4" />
+                          GitHub Repository
+                          <Icons.externalLink className="ml-auto h-3 w-3" />
+                        </a>
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
               )}
 
               {/* Tags */}

@@ -58,6 +58,25 @@ export const AIToolSchema = z.object({
   icon: z.string().optional(), // Icon name/key
   organizationId: z.string().optional(), // Multi-tenant support (null = system-wide)
   
+  // Enhanced metadata for SEO and categorization
+  badges: z.array(z.enum([
+    'vscode-plugin',
+    'open-source',
+    'enterprise',
+    'free',
+    'jetbrains-plugin',
+    'github-integration',
+    'cli-tool',
+    'browser-based',
+  ])).default([]), // Badges: VS Code plugin, open-source, etc.
+  supportedModels: z.array(z.string()).default([]), // e.g., ['GPT-4', 'Claude', 'Gemini']
+  agentCapabilities: z.array(z.string()).default([]), // e.g., ['test-generation', 'refactoring', 'file-creation']
+  marketplaceLinks: z.object({
+    vscode: z.string().url().optional(), // VS Code Marketplace URL
+    jetbrains: z.string().url().optional(), // JetBrains Marketplace URL
+    github: z.string().url().optional(), // GitHub repository URL
+  }).optional(),
+  
   // Hub Content (for SEO content hubs)
   hubContent: z.object({
     // Section 5: Related Prompts
