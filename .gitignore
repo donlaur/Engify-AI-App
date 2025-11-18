@@ -6,6 +6,8 @@ node_modules
 # Testing
 coverage
 .nyc_output
+tests/screenshots/current/
+tests/screenshots/diff/
 
 # Next.js
 .next
@@ -121,11 +123,6 @@ lambda/*.dist-info/
 !lambda/package.json
 .env.local.backup
 .env*.local
-# MCP local assets
-mcp-data/
-.env.memory.local
-.env.guardrails.local
-.env.patterns.local
 
 # Private/confidential competitive analysis
 **/COMPETITIVE_ANALYSIS*.md
