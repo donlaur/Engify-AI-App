@@ -24,8 +24,13 @@ const CATEGORY_LABELS: Record<string, string> = {
   ide: 'AI IDEs',
   'code-assistant': 'Code Assistants',
   'ai-terminal': 'AI Terminals',
+  'agentic-assistant': 'Agentic Assistants',
+  'cloud-optimized': 'Cloud-Optimized Assistants',
   builder: 'AI Builders',
   'ui-generator': 'UI Generators',
+  'ai-testing-qa': 'AI Testing & QA',
+  'mlops': 'MLOps & Experiment Tracking',
+  'internal-tooling': 'AI Internal Tooling',
   protocol: 'Protocols',
   framework: 'Frameworks',
   other: 'Other',
@@ -34,6 +39,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
 export async function generateMetadata({
   params,
@@ -55,9 +62,28 @@ export async function generateMetadata({
     ? tool.pros.slice(0, 2).join('. ')
     : '';
 
+  // Enhanced description with more context
+  const enhancedDescription = `${tool.name}: ${tool.tagline || tool.description}. ${pricingText}.${prosPreview ? ` ${prosPreview}.` : ''} Learn how ${tool.name} can improve your development workflow with AI-powered features.`;
+
+  // Warp-specific enhancements
+  const isWarp = slug === 'warp';
+  const warpSpecificKeywords = isWarp ? [
+    'Warp terminal',
+    'Warp AI terminal',
+    'AI terminal emulator',
+    'modern terminal',
+    'Warp.dev',
+    'terminal AI',
+    'AI command line',
+    'developer terminal',
+    'Warp terminal review',
+    'Warp vs iTerm',
+    'Warp vs Terminal.app',
+  ] : [];
+
   return {
     title: `${tool.name} Review & Comparison - AI Development Tool | Engify.ai`,
-    description: `${tool.name}: ${tool.tagline || tool.description}. ${pricingText}.${prosPreview ? ` ${prosPreview}.` : ''}`,
+    description: enhancedDescription,
     keywords: [
       tool.name,
       `${tool.name} review`,
@@ -67,11 +93,44 @@ export async function generateMetadata({
       'AI IDE',
       'code assistant',
       ...(tool.tags || []),
+      ...warpSpecificKeywords,
     ],
+    authors: [{ name: 'Engify.ai Team' }],
     openGraph: {
-      title: `${tool.name} - AI Development Tool Review`,
-      description: tool.tagline || tool.description,
+      title: `${tool.name} - AI Development Tool Review & Guide | Engify.ai`,
+      description: enhancedDescription,
       type: 'article',
+      url: `${APP_URL}/learn/ai-tools/${slug}`,
+      siteName: 'Engify.ai',
+      images: [
+        {
+          url: `${APP_URL}/og-image.png`, // Add OG image if available
+          width: 1200,
+          height: 630,
+          alt: `${tool.name} - AI Development Tool`,
+        },
+      ],
+      locale: 'en_US',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${tool.name} - AI Development Tool Review`,
+      description: enhancedDescription,
+      creator: '@engifyai', // Update with actual Twitter handle if available
+    },
+    alternates: {
+      canonical: `${APP_URL}/learn/ai-tools/${slug}`,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
   };
 }
@@ -104,8 +163,11 @@ export default async function AIToolDetailPage({ params }: PageProps) {
             '@context': 'https://schema.org',
             '@type': 'SoftwareApplication',
             name: tool.name,
+            description: tool.description,
             applicationCategory: 'DeveloperApplication',
             operatingSystem: 'Windows, macOS, Linux',
+            url: tool.websiteUrl || getToolLink(tool),
+            ...(tool.websiteUrl && { sameAs: [tool.websiteUrl] }),
             offers: tool.pricing.free
               ? {
                   '@type': 'Offer',
@@ -130,6 +192,10 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                   ratingCount: tool.reviewCount,
                 }
               : undefined,
+            featureList: tool.features?.map(feature => ({
+              '@type': 'SoftwareFeature',
+              name: feature,
+            })),
           }),
         }}
       />
@@ -182,6 +248,46 @@ export default async function AIToolDetailPage({ params }: PageProps) {
             </div>
           </div>
 
+          {/* TL;DR Section - G2-style Authority Architecture */}
+          <Card className="mb-8 border-primary/20 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.zap className="h-5 w-5 text-primary" />
+                Quick Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Best For:</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {tool.pros && tool.pros.length > 0 
+                      ? tool.pros.slice(0, 2).join('. ') + '.'
+                      : tool.tagline || tool.description.split('.')[0] + '.'}
+                  </p>
+                </div>
+                {tool.pricing && (
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-2">Pricing:</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {tool.pricing.free 
+                        ? 'Free tier available' + (tool.pricing.paid?.monthly ? `, paid plans from $${tool.pricing.paid.monthly}/month` : '')
+                        : `Starting at $${tool.pricing.paid?.monthly || 0}/month`}
+                    </p>
+                  </div>
+                )}
+                {tool.features && tool.features.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-2">Key Differentiator:</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {tool.features[0]}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid gap-8 lg:grid-cols-3">
             {/* Main Content */}
             <div className="space-y-8 lg:col-span-2">
@@ -190,8 +296,21 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                 <CardHeader>
                   <CardTitle>Overview</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="prose prose-sm dark:prose-invert max-w-none">
                   <p className="text-muted-foreground">{tool.description}</p>
+                  {tool.websiteUrl && (
+                    <p className="mt-4 text-sm">
+                      <strong>Official Website:</strong>{' '}
+                      <a 
+                        href={tool.websiteUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {tool.websiteUrl.replace(/^https?:\/\//, '')}
+                      </a>
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
@@ -214,7 +333,53 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                 </Card>
               )}
 
-              {/* Pros & Cons */}
+              {/* Intent-Driven Comparison Section */}
+              {tool.category && (
+                <Card className="border-primary/20">
+                  <CardHeader>
+                    <CardTitle>How {tool.name} Compares</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Key differentiators and competitive advantages
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {tool.pros && tool.pros.length > 0 && (
+                        <div>
+                          <h4 className="mb-2 text-sm font-semibold text-foreground">
+                            Why {tool.name} beats competitors:
+                          </h4>
+                          <ul className="space-y-1.5 text-sm text-muted-foreground">
+                            {tool.pros.slice(0, 3).map((pro, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <Icons.check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-green-500" />
+                                <span>{pro}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {tool.cons && tool.cons.length > 0 && (
+                        <div className="pt-3 border-t">
+                          <h4 className="mb-2 text-sm font-semibold text-foreground">
+                            Trade-offs to consider:
+                          </h4>
+                          <ul className="space-y-1.5 text-sm text-muted-foreground">
+                            {tool.cons.slice(0, 2).map((con, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <Icons.alertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+                                <span>{con}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Pros & Cons - Detailed */}
               {((tool.pros && tool.pros.length > 0) || (tool.cons && tool.cons.length > 0)) && (
                 <div className="grid gap-4 md:grid-cols-2">
                   {tool.pros && tool.pros.length > 0 && (
@@ -360,16 +525,23 @@ export default async function AIToolDetailPage({ params }: PageProps) {
 
               {/* CTA - Use affiliate link if available, otherwise website URL */}
               {(tool.affiliateLink || tool.websiteUrl) && (
-                <Button asChild className="w-full" size="lg">
-                  <a
-                    href={getToolLink(tool)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {tool.affiliateLink ? `Try ${tool.name}` : `Visit ${tool.name}`}
-                    <Icons.externalLink className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
+                <div className="space-y-3">
+                  <Button asChild className="w-full" size="lg">
+                    <a
+                      href={getToolLink(tool)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {tool.affiliateLink ? `Try ${tool.name}` : `Visit ${tool.name}`}
+                      <Icons.externalLink className="ml-2 h-4 w-4" />
+                    </a>
+                  </Button>
+                  {tool.websiteUrl && (
+                    <p className="text-xs text-center text-muted-foreground">
+                      Official website: <a href={tool.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{tool.websiteUrl.replace(/^https?:\/\//, '')}</a>
+                    </p>
+                  )}
+                </div>
               )}
 
               {/* Related Links */}

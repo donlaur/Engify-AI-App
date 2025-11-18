@@ -14,11 +14,16 @@ export const AIToolSchema = z.object({
   description: z.string(), // Full description
   category: z
     .enum([
-      'ide', // Full IDEs: Cursor, Windsurf
+      'ide', // Full IDEs: Cursor, Windsurf, Zed
       'code-assistant', // IDE plugins: Copilot, Codeium, Tabnine
       'ai-terminal', // AI-powered terminals: Warp
+      'agentic-assistant', // Agentic/Terminal-Native: Claude Code, Amazon Q Developer
+      'cloud-optimized', // Cloud-Optimized: Amazon Q Developer (AWS), Google Cloud AI
       'builder', // AI app builders: Lovable, Bolt, Replit
       'ui-generator', // UI component generators: v0.dev
+      'ai-testing-qa', // AI Testing & QA: Virtuoso QA, LambdaTest KaneAI, BrowserStack
+      'mlops', // MLOps & Tracking: W&B, DVC, Delta Lake
+      'internal-tooling', // AI Internal Tooling: Superblocks, Replit (AI features)
       'protocol', // Protocols/frameworks: MCP (Model Context Protocol)
       'framework', // Development frameworks: LangChain, CrewAI
       'other',

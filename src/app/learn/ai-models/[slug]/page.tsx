@@ -64,27 +64,96 @@ export async function generateMetadata({
     };
   }
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  // Try slug first, then fallback to ID lookup (for backwards compatibility)
+  let model = await aiModelService.findBySlug(slug);
+  if (!model) {
+    // Fallback: try finding by ID in case slug doesn't exist
+    model = await aiModelService.findById(slug);
+  }
+
+  if (!model) {
+    return {
+      title: 'AI Model Not Found | Engify.ai',
+    };
+  }
+
   const providerLabel = PROVIDER_LABELS[model.provider] || model.provider;
   const statusBadge = model.status === 'deprecated' ? ' (Deprecated)' : '';
-  const costPer1M = model.costPer1kInputTokens ? model.costPer1kInputTokens * 1000 : 0;
+  const costPer1MInput = model.costPer1kInputTokens ? model.costPer1kInputTokens * 1000 : 0;
+  const costPer1MOutput = model.costPer1kOutputTokens ? model.costPer1kOutputTokens * 1000 : 0;
   const contextInfo = model.contextWindow ? `Context window: ${model.contextWindow.toLocaleString()} tokens. ` : '';
+  
+  // Enhanced description with economic data
+  const enhancedDescription = `${model.displayName} from ${providerLabel}. ${contextInfo}Pricing: $${costPer1MInput.toFixed(2)}/1M input tokens, $${costPer1MOutput.toFixed(2)}/1M output tokens. ${model.capabilities?.join(', ') || 'Various capabilities'}. Compare pricing, capabilities, and performance with other AI models.`;
+
+  // Functional specialization keywords
+  const specializationKeywords = model.capabilities.includes('reasoning')
+    ? ['agentic AI', 'reasoning model', 'complex reasoning', 'agentic tasks']
+    : model.tier === 'affordable' || model.tier === 'free'
+    ? ['cost-optimized', 'high-volume', 'affordable AI', 'budget model']
+    : model.supportsVision
+    ? ['multimodal AI', 'vision model', 'image processing', 'video generation']
+    : ['text generation', 'coding model', 'general purpose AI'];
 
   return {
-    title: `${model.displayName}${statusBadge} - AI Model Guide | Engify.ai`,
-    description: `${model.displayName} from ${providerLabel}. ${contextInfo}Pricing: $${costPer1M.toFixed(2)}/1M tokens. ${model.capabilities?.join(', ') || 'Various capabilities'}.`,
+    title: `${model.displayName}${statusBadge} - AI Model Guide, Pricing & Comparison | Engify.ai`,
+    description: enhancedDescription,
     keywords: [
       model.displayName,
       model.name,
       `${model.displayName} pricing`,
       `${model.displayName} review`,
+      `${model.displayName} vs`,
       `${providerLabel} ${model.displayName}`,
       'AI model comparison',
-      model.capabilities.join(', '),
+      'AI model pricing',
+      'token pricing',
+      'context window',
+      ...model.capabilities,
+      ...specializationKeywords,
     ],
+    authors: [{ name: 'Engify.ai Team' }],
     openGraph: {
-      title: `${model.displayName} - AI Model Guide`,
-      description: `${model.displayName} from ${providerLabel}. ${model.contextWindow ? `${model.contextWindow.toLocaleString()} token context window.` : 'Advanced AI model.'}`,
+      title: `${model.displayName} - AI Model Guide, Pricing & Comparison | Engify.ai`,
+      description: enhancedDescription,
       type: 'article',
+      url: `${APP_URL}/learn/ai-models/${slug}`,
+      siteName: 'Engify.ai',
+      images: [
+        {
+          url: `${APP_URL}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: `${model.displayName} - AI Model Guide`,
+        },
+      ],
+      locale: 'en_US',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${model.displayName} - AI Model Guide & Pricing`,
+      description: enhancedDescription,
+      creator: '@engifyai',
+    },
+    alternates: {
+      canonical: `${APP_URL}/learn/ai-models/${slug}`,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
   };
 }
@@ -126,7 +195,7 @@ export default async function AIModelDetailPage({ params }: PageProps) {
 
   return (
     <>
-      {/* Schema.org structured data */}
+      {/* Schema.org structured data - Enhanced for AEO */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -134,23 +203,51 @@ export default async function AIModelDetailPage({ params }: PageProps) {
             '@context': 'https://schema.org',
             '@type': 'SoftwareApplication',
             name: model.displayName,
+            description: model.description || model.tagline || `${model.displayName} from ${providerLabel}`,
             applicationCategory: 'AI Model',
             operatingSystem: 'API',
-            offers: {
-              '@type': 'Offer',
-              price: costPer1MInput,
-              priceCurrency: 'USD',
-              priceSpecification: {
-                '@type': 'UnitPriceSpecification',
+            url: `${APP_URL}/learn/ai-models/${model.slug || slug}`,
+            offers: [
+              {
+                '@type': 'Offer',
+                name: 'Input Tokens',
                 price: costPer1MInput,
                 priceCurrency: 'USD',
-                unitText: 'per 1M tokens',
+                priceSpecification: {
+                  '@type': 'UnitPriceSpecification',
+                  price: costPer1MInput,
+                  priceCurrency: 'USD',
+                  unitText: 'per 1M input tokens',
+                },
               },
-            },
+              {
+                '@type': 'Offer',
+                name: 'Output Tokens',
+                price: costPer1MOutput,
+                priceCurrency: 'USD',
+                priceSpecification: {
+                  '@type': 'UnitPriceSpecification',
+                  price: costPer1MOutput,
+                  priceCurrency: 'USD',
+                  unitText: 'per 1M output tokens',
+                },
+              },
+            ],
             provider: {
               '@type': 'Organization',
               name: providerLabel,
             },
+            featureList: model.capabilities?.map(cap => ({
+              '@type': 'SoftwareFeature',
+              name: cap,
+            })),
+            ...(model.contextWindow && {
+              additionalProperty: {
+                '@type': 'PropertyValue',
+                name: 'Context Window',
+                value: `${model.contextWindow.toLocaleString()} tokens`,
+              },
+            }),
           }),
         }}
       />
@@ -207,6 +304,59 @@ export default async function AIModelDetailPage({ params }: PageProps) {
               <p className="mt-3 text-muted-foreground">{model.notes}</p>
             )}
           </div>
+
+          {/* TL;DR Section - Economic & Functional Summary */}
+          <Card className="mb-8 border-primary/20 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.zap className="h-5 w-5 text-primary" />
+                Quick Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Best For:</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {model.capabilities.includes('reasoning') 
+                      ? 'Complex agentic tasks requiring configurable reasoning effort'
+                      : model.tier === 'affordable' || model.tier === 'free'
+                      ? 'High-volume, low-latency tasks where cost efficiency is paramount'
+                      : model.capabilities.includes('vision')
+                      ? 'Multimodal tasks requiring image or video processing'
+                      : 'General-purpose text generation and coding tasks'}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Pricing:</h3>
+                  <p className="text-sm text-muted-foreground">
+                    ${costPer1MInput.toFixed(2)}/1M input tokens, ${costPer1MOutput.toFixed(2)}/1M output tokens
+                  </p>
+                </div>
+                {model.contextWindow && (
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-2">Context Window:</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {model.contextWindow.toLocaleString()} tokens
+                      {model.contextWindow >= 200000 && ' (Large - suitable for extensive codebases)'}
+                    </p>
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Key Differentiator:</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {model.capabilities.includes('reasoning') 
+                      ? 'Advanced reasoning capabilities'
+                      : model.tier === 'affordable'
+                      ? 'Cost-optimized for high-volume usage'
+                      : model.supportsVision
+                      ? 'Multimodal capabilities'
+                      : 'Balanced performance and cost'}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Performance Metrics */}
           <PerformanceMetrics model={model} />
@@ -405,20 +555,18 @@ export default async function AIModelDetailPage({ params }: PageProps) {
               {/* Parameter Failures */}
               <ParameterFailureAlerts model={model} />
 
-              {/* Pricing */}
+              {/* Pricing - Enhanced Economic Data */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Pricing</CardTitle>
+                  <CardTitle>Token Economics</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Pricing is based on the number of tokens used, or other
-                    metrics based on the model type. For tool-specific models,
-                    like search and computer use, there&apos;s a fee per tool call.
+                    Pricing is based on the number of tokens used. Input and output tokens are priced separately, with output typically costing more.
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <div className="mb-1 text-sm font-medium text-muted-foreground">
-                      Input
+                      Input Tokens
                     </div>
                     <div className="text-2xl font-bold">
                       ${costPer1MInput.toFixed(2)}
@@ -426,13 +574,16 @@ export default async function AIModelDetailPage({ params }: PageProps) {
                     <div className="text-xs text-muted-foreground">
                       ${model.costPer1kInputTokens.toFixed(4)} per 1K tokens
                     </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {model.contextWindow && `Up to ${model.contextWindow.toLocaleString()} tokens per request`}
+                    </div>
                   </div>
                   {model.costPer1kCachedInputTokens && (
-                    <div>
+                    <div className="pt-3 border-t">
                       <div className="mb-1 text-sm font-medium text-muted-foreground">
-                        Cached Input
+                        Cached Input (Context Caching)
                       </div>
-                      <div className="text-2xl font-bold">
+                      <div className="text-xl font-bold">
                         $
                         {(
                           (model.costPer1kCachedInputTokens || 0) * 1000
@@ -444,17 +595,34 @@ export default async function AIModelDetailPage({ params }: PageProps) {
                         )}{' '}
                         per 1K tokens
                       </div>
+                      <div className="mt-1 text-xs text-primary">
+                        Save {Math.round((1 - (model.costPer1kCachedInputTokens || 0) / model.costPer1kInputTokens) * 100)}% vs. regular input
+                      </div>
                     </div>
                   )}
                   <div>
                     <div className="mb-1 text-sm font-medium text-muted-foreground">
-                      Output
+                      Output Tokens
                     </div>
                     <div className="text-2xl font-bold">
                       ${costPer1MOutput.toFixed(2)}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       ${model.costPer1kOutputTokens.toFixed(4)} per 1K tokens
+                    </div>
+                    {model.maxOutputTokens && (
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        Max {model.maxOutputTokens.toLocaleString()} tokens per response
+                      </div>
+                    )}
+                  </div>
+                  {/* Cost Comparison Helper */}
+                  <div className="pt-3 border-t">
+                    <div className="text-xs text-muted-foreground">
+                      <strong>Example:</strong> A 100K input + 10K output request costs approximately{' '}
+                      <strong className="text-foreground">
+                        ${((model.costPer1kInputTokens * 100) + (model.costPer1kOutputTokens * 10)).toFixed(2)}
+                      </strong>
                     </div>
                   </div>
                 </CardContent>

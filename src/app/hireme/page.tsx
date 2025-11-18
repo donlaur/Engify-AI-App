@@ -6,19 +6,65 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
+
 export const metadata: Metadata = {
   title: 'Hire Donnie Laur - Engineering Director for AI Platforms | Engify.ai',
   description:
-    'Recruit Donnie Laur as your next engineering manager, director, or VP to scale AI organizations, operationalize guardrails, and align product, platform, and compliance teams.',
+    'Recruit Donnie Laur as your next engineering manager, director, or VP to scale AI organizations, operationalize guardrails, and align product, platform, and compliance teams. Experienced in building production B2B SaaS platforms and leading engineering organizations.',
   keywords: [
     'Donnie Laur',
     'engineering director',
     'engineering manager',
     'head of engineering',
+    'VP of engineering',
     'AI platform leadership',
     'software engineering leadership',
-    'vp of engineering',
+    'engineering director hire',
+    'engineering leadership recruitment',
+    'AI guardrails expert',
+    'SaaS engineering leader',
+    'platform engineering director',
   ],
+  authors: [{ name: 'Donnie Laur', url: `${APP_URL}/authors/donnie-laur` }],
+  openGraph: {
+    title: 'Hire Donnie Laur - Engineering Director for AI Platforms | Engify.ai',
+    description:
+      'Recruit Donnie Laur as your next engineering manager, director, or VP to scale AI organizations, operationalize guardrails, and align product, platform, and compliance teams.',
+    type: 'website',
+    url: `${APP_URL}/hireme`,
+    siteName: 'Engify.ai',
+    images: [
+      {
+        url: `${APP_URL}/og-image.png`, // Add OG image if available
+        width: 1200,
+        height: 630,
+        alt: 'Hire Donnie Laur - Engineering Director for AI Platforms',
+      },
+    ],
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Hire Donnie Laur - Engineering Director for AI Platforms',
+    description:
+      'Recruit Donnie Laur as your next engineering manager, director, or VP to scale AI organizations and operationalize guardrails.',
+    creator: '@engifyai', // Update with actual Twitter handle if available
+  },
+  alternates: {
+    canonical: `${APP_URL}/hireme`,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 const RESUME_PATH =

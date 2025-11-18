@@ -13,27 +13,57 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 export const metadata: Metadata = {
   title: 'Donnie Laur - AI Guardrails & Engineering Leadership | Engify.ai',
   description:
-    'Donnie Laur leads AI guardrail strategy and engineering excellence. Human-created, AI-assisted workflows and content for operationalizing AI in engineering teams.',
+    'Donnie Laur leads AI guardrail strategy and engineering excellence. Human-created, AI-assisted workflows and content for operationalizing AI in engineering teams. Creator of Engify.ai, a production B2B SaaS platform.',
   keywords: [
     'Donnie Laur',
     'AI guardrails',
     'engineering leadership',
     'AI-assisted development',
     'engineering director',
+    'VP of engineering',
+    'head of engineering',
+    'AI platform leadership',
+    'software engineering leadership',
+    'engineering manager',
   ],
   authors: [{ name: 'Donnie Laur', url: `${APP_URL}/authors/donnie-laur` }],
   openGraph: {
-    title: 'Donnie Laur - AI Guardrails & Engineering Leadership',
+    title: 'Donnie Laur - AI Guardrails & Engineering Leadership | Engify.ai',
     description:
-      'Leading AI guardrail strategy and engineering excellence. Human-created, AI-assisted workflows and content.',
+      'Leading AI guardrail strategy and engineering excellence. Human-created, AI-assisted workflows and content. Creator of Engify.ai.',
     type: 'profile',
     url: `${APP_URL}/authors/donnie-laur`,
+    siteName: 'Engify.ai',
+    images: [
+      {
+        url: `${APP_URL}/og-image.png`, // Add OG image if available
+        width: 1200,
+        height: 630,
+        alt: 'Donnie Laur - AI Guardrails & Engineering Leadership',
+      },
+    ],
+    locale: 'en_US',
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Donnie Laur - AI Guardrails & Engineering Leadership',
     description:
-      'Leading AI guardrail strategy and engineering excellence. Human-created, AI-assisted workflows.',
+      'Leading AI guardrail strategy and engineering excellence. Human-created, AI-assisted workflows. Creator of Engify.ai.',
+    creator: '@engifyai', // Update with actual Twitter handle if available
+  },
+  alternates: {
+    canonical: `${APP_URL}/authors/donnie-laur`,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
@@ -44,7 +74,7 @@ export default async function AuthorPage() {
   const workflows = await loadWorkflowsFromJson();
   const publishedWorkflows = workflows.filter((w) => w.status === 'published').slice(0, 6);
 
-  // Generate Person structured data
+  // Generate Person structured data with enhanced SEO
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Person',
@@ -52,30 +82,51 @@ export default async function AuthorPage() {
     jobTitle: 'Engineering Leader & AI Guardrails Leader',
     url: `${APP_URL}/authors/donnie-laur`,
     email: 'donlaur@engify.ai',
+    image: `${APP_URL}/og-image.png`, // Add profile image if available
     sameAs: [
-      'https://github.com/donlaur', // Update with actual GitHub URL
-      'https://linkedin.com/in/donnie-laur', // Update with actual LinkedIn URL
+      'https://github.com/donlaur',
+      'https://linkedin.com/in/donnie-laur',
     ],
     description:
-      'Leading AI guardrail strategy and engineering excellence. Creating workflows and content to operationalize AI in engineering teams. Human-created, AI-assisted.',
+      'Leading AI guardrail strategy and engineering excellence. Creating workflows and content to operationalize AI in engineering teams. Creator of Engify.ai, a production B2B SaaS platform. Human-created, AI-assisted.',
     knowsAbout: [
       'AI Guardrails',
       'Engineering Leadership',
       'AI-Assisted Development',
       'Software Engineering',
       'Platform Engineering',
+      'SaaS Development',
+      'Enterprise Software',
+      'DevOps',
+      'Security Engineering',
     ],
+    alumniOf: {
+      '@type': 'Organization',
+      name: 'Engineering Organizations',
+    },
+    worksFor: {
+      '@type': 'Organization',
+      name: 'Engify.ai',
+      url: APP_URL,
+    },
     creator: {
       '@type': 'Organization',
       name: 'Engify.ai',
       url: APP_URL,
     },
     // Transparency: Human-created, AI-assisted
-    additionalProperty: {
-      '@type': 'PropertyValue',
-      name: 'Creation Process',
-      value: 'Human-created, AI-assisted',
-    },
+    additionalProperty: [
+      {
+        '@type': 'PropertyValue',
+        name: 'Creation Process',
+        value: 'Human-created, AI-assisted',
+      },
+      {
+        '@type': 'PropertyValue',
+        name: 'Platform',
+        value: 'Engify.ai',
+      },
+    ],
   };
 
   return (
