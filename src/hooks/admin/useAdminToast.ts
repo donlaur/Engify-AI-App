@@ -22,15 +22,6 @@ export interface ToastOptions {
 }
 
 /**
- * Internal toast function parameters extending the base toast interface
- */
-interface InternalToastParams {
-  title: string;
-  description?: string;
-  variant?: 'default' | 'destructive';
-}
-
-/**
  * Return type for the useAdminToast hook
  */
 export interface UseAdminToastReturn {
