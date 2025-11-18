@@ -1387,7 +1387,7 @@ Provide your review in JSON format as specified in your system prompt.
             // Extract complete string items
             const itemMatches = improvementsContent.match(/"([^"]+)"/g);
             if (itemMatches) {
-              improvements.push(...itemMatches.map(m => m.replace(/"/g, '')));
+              improvements.push(...itemMatches.map((m: string) => m.replace(/"/g, '')));
             }
           }
           
