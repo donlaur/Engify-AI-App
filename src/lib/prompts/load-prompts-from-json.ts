@@ -11,6 +11,8 @@
 import type { Prompt } from '@/lib/schemas/prompt';
 import { promptRepository } from '@/lib/db/repositories/ContentService';
 import { logger } from '@/lib/logging/logger';
+import fs from 'fs/promises';
+import path from 'path';
 
 interface PromptsJsonData {
   version: string;
@@ -37,8 +39,7 @@ export async function loadPromptsFromJson(): Promise<Prompt[]> {
     // For client-side, skip JSON loading and use MongoDB directly
     if (typeof window === 'undefined') {
       // Server-side: use filesystem
-      const fs = await import('fs/promises');
-      const path = await import('path');
+      // Using static import
       const jsonPath = path.join(process.cwd(), 'public', 'data', 'prompts.json');
       
       try {
@@ -72,8 +73,7 @@ export async function loadPromptsFromJson(): Promise<Prompt[]> {
     });
 
     try {
-      const fs = await import('fs/promises');
-      const path = await import('path');
+      // Using static import
       const backupPath = path.join(process.cwd(), 'public', 'data', 'prompts-backup.json');
       const backupContent = await fs.readFile(backupPath, 'utf-8');
       const backupData: PromptsJsonData = JSON.parse(backupContent);

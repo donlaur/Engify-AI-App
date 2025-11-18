@@ -5,6 +5,7 @@
  */
 
 import { getMongoDb } from '@/lib/db/mongodb';
+import { AI_MODELS } from '@/lib/ai/providers';
 
 export interface PlatformStats {
   prompts: {
@@ -131,7 +132,7 @@ async function getPatternStats() {
  */
 async function getProviderStats() {
   // Count from AI_MODELS in providers.ts
-  const { AI_MODELS } = await import('@/lib/ai/providers');
+  // Using static import
   const models = Object.values(AI_MODELS);
 
   return {

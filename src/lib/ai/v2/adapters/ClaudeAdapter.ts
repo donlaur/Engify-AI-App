@@ -6,6 +6,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { AIProvider, AIRequest, AIResponse } from '../interfaces/AIProvider';
 import { executeWithProviderHarness } from '../utils/provider-harness';
 import { loggingProvider } from '@/lib/providers/LoggingProvider';
+import { calculateCostFromDB } from '@/lib/ai/utils/model-cost';
 
 export class ClaudeAdapter implements AIProvider {
   readonly name = 'Claude';
@@ -150,7 +151,7 @@ export class ClaudeAdapter implements AIProvider {
     model: string
   ) {
     try {
-      const { calculateCostFromDB } = await import('@/lib/ai/utils/model-cost' as string);
+      // Using static import
       return await calculateCostFromDB(model, usage.promptTokens, usage.completionTokens);
     } catch (error) {
       loggingProvider.error('Failed to calculate cost for Claude request', error, {

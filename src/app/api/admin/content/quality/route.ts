@@ -9,6 +9,7 @@ import { auth } from '@/lib/auth';
 import { auditLog } from '@/lib/logging/audit';
 import { logger } from '@/lib/logging/logger';
 import { getDb } from '@/lib/db/client';
+import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   const guard = await RBACPresets.requireSuperAdmin()(request);
@@ -107,7 +108,7 @@ async function handleTestPrompts(userId: string, limit?: number) {
     );
   }
 
-  const OpenAI = (await import('openai')).default;
+  // Using static import
   const openai = new OpenAI({ apiKey });
 
   for (const prompt of prompts) {

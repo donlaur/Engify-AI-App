@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth';
 import { STATS_CACHE_KEY } from '@/lib/stats/fetch-platform-stats';
 import { AI_RATE_LIMITS } from '@/lib/constants/rates';
 import { ERROR_MESSAGES } from '@/lib/constants/messages';
+import { Receiver } from '@upstash/qstash';
 
 /**
  * POST /api/stats/invalidate
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
 
       try {
         // Verify QStash signature using @upstash/qstash
-        const { Receiver } = await import('@upstash/qstash');
+        // Using static import
         const receiver = new Receiver({
           currentSigningKey: qstashSigningKey,
           nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY || qstashSigningKey,

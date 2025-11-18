@@ -2,6 +2,8 @@
  * AI Summary: SendGrid webhook signature verification using Twilio Event Webhook ECDSA checks.
  */
 
+import { EventWebhook } from '@sendgrid/eventwebhook';
+
 export async function verifySendGridWebhook(
   timestamp: string | null,
   signature: string | null,
@@ -13,8 +15,7 @@ export async function verifySendGridWebhook(
   }
 
   try {
-    // Dynamic import to avoid requiring package in tests
-    const { EventWebhook } = await import('@sendgrid/eventwebhook');
+    // Using static import
     const eventWebhook = new EventWebhook();
     const ecKey = eventWebhook.convertPublicKeyToECDSA(publicKey);
     return eventWebhook.verifySignature(ecKey, payload, signature, timestamp);

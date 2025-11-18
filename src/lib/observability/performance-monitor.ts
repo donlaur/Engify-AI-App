@@ -16,7 +16,7 @@
  */
 
 import { observabilityLogger } from './enhanced-logger';
-import { recordRouteMetric, recordProviderMetric } from './metrics';
+import { recordProviderMetric } from './metrics';
 
 export interface PerformanceMetrics {
   operation: string;

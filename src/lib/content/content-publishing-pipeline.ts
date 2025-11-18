@@ -18,6 +18,10 @@
 import { AIProviderFactoryWithRegistry } from '@/lib/ai/v2/factory/AIProviderFactoryWithRegistry';
 import { getModelsByProvider } from '@/lib/services/AIModelRegistry';
 import { detectAISlop, printDetectionReport, type SlopDetectionResult } from './ai-slop-detector';
+import { OpenAIAdapter } from '@/lib/ai/v2/adapters/OpenAIAdapter';
+import { ClaudeAdapter } from '@/lib/ai/v2/adapters/ClaudeAdapter';
+import { GeminiAdapter } from '@/lib/ai/v2/adapters/GeminiAdapter';
+import { GroqAdapter } from '@/lib/ai/v2/adapters/GroqAdapter';
 
 // Recommended models for content publishing (centralized configuration)
 const RECOMMENDED_MODELS = {
@@ -787,16 +791,12 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
         
         // Create provider with specific model ID
         if (providerType === 'openai') {
-          const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
           providerInstance = new OpenAIAdapter(modelIdToUse);
         } else if (providerType === 'anthropic') {
-          const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
           providerInstance = new ClaudeAdapter(modelIdToUse);
         } else if (providerType === 'google') {
-          const { GeminiAdapter } = await import('@/lib/ai/v2/adapters/GeminiAdapter');
           providerInstance = new GeminiAdapter(modelIdToUse);
         } else if (providerType === 'groq') {
-          const { GroqAdapter } = await import('@/lib/ai/v2/adapters/GroqAdapter');
           providerInstance = new GroqAdapter(modelIdToUse);
         } else {
           // Fallback to factory
@@ -886,16 +886,16 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
               
               // Create new provider instance with fallback model
               if (providerType === 'openai') {
-                const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+                // Using static import
                 providerInstance = new OpenAIAdapter(modelIdToUse);
               } else if (providerType === 'anthropic') {
-                const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
+                // Using static import
                 providerInstance = new ClaudeAdapter(modelIdToUse);
               } else if (providerType === 'google') {
-                const { GeminiAdapter } = await import('@/lib/ai/v2/adapters/GeminiAdapter');
+                // Using static import
                 providerInstance = new GeminiAdapter(modelIdToUse);
               } else if (providerType === 'groq') {
-                const { GroqAdapter } = await import('@/lib/ai/v2/adapters/GroqAdapter');
+                // Using static import
                 providerInstance = new GroqAdapter(modelIdToUse);
               }
               
@@ -1046,16 +1046,16 @@ Provide your review in JSON format as specified in your system prompt.
           }
           
           if (providerType === 'openai') {
-            const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+            // Using static import
             providerInstance = new OpenAIAdapter(modelIdToUse);
           } else if (providerType === 'anthropic') {
-            const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
+            // Using static import
             providerInstance = new ClaudeAdapter(modelIdToUse);
           } else if (providerType === 'google') {
-            const { GeminiAdapter } = await import('@/lib/ai/v2/adapters/GeminiAdapter');
+            // Using static import
             providerInstance = new GeminiAdapter(modelIdToUse);
           } else if (providerType === 'groq') {
-            const { GroqAdapter } = await import('@/lib/ai/v2/adapters/GroqAdapter');
+            // Using static import
             providerInstance = new GroqAdapter(modelIdToUse);
           } else {
             providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
@@ -1145,16 +1145,16 @@ Provide your review in JSON format as specified in your system prompt.
                 // Create new provider instance with fallback model
                 let fallbackProvider;
                 if (providerType === 'openai') {
-                  const { OpenAIAdapter } = await import('@/lib/ai/v2/adapters/OpenAIAdapter');
+                  // Using static import
                   fallbackProvider = new OpenAIAdapter(modelIdToUse);
                 } else if (providerType === 'anthropic') {
-                  const { ClaudeAdapter } = await import('@/lib/ai/v2/adapters/ClaudeAdapter');
+                  // Using static import
                   fallbackProvider = new ClaudeAdapter(modelIdToUse);
                 } else if (providerType === 'google') {
-                  const { GeminiAdapter } = await import('@/lib/ai/v2/adapters/GeminiAdapter');
+                  // Using static import
                   fallbackProvider = new GeminiAdapter(modelIdToUse);
                 } else if (providerType === 'groq') {
-                  const { GroqAdapter } = await import('@/lib/ai/v2/adapters/GroqAdapter');
+                  // Using static import
                   fallbackProvider = new GroqAdapter(modelIdToUse);
                 }
                 

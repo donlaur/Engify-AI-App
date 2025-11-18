@@ -20,6 +20,7 @@ import { IPromptRepository } from '../repositories/interfaces/IRepository';
 import { PromptRepository } from '../repositories/mongodb/PromptRepository';
 import type { PromptTemplate } from '@/lib/db/schema';
 import { generateUniqueSlug } from '@/lib/utils/slug';
+import { checkPromptDuplicate } from '@/lib/utils/prompt-duplicate-check';
 
 // Use PromptTemplate as the Prompt type for the service
 type Prompt = PromptTemplate;
@@ -125,7 +126,7 @@ export class PromptService {
     }
 
     // Check for duplicates before creating
-    const { checkPromptDuplicate } = await import('@/lib/utils/prompt-duplicate-check');
+    // Using static import
     const duplicateCheck = await checkPromptDuplicate({
       title: promptData.title,
       content: promptData.content,

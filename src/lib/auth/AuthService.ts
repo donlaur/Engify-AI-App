@@ -23,6 +23,8 @@ import {
 } from './rbac';
 import type { User } from '@/lib/db/schema';
 import { logger } from '@/lib/logging/logger';
+import { sendPasswordResetEmail } from '@/lib/services/emailService';
+import { mfaService } from '@/lib/services/mfaService';
 
 // Validation schemas
 const registerSchema = z.object({
@@ -319,7 +321,7 @@ export class AuthService {
       );
 
       // Send password reset email
-      const { sendPasswordResetEmail } = await import('@/lib/services/emailService' as string);
+      // Using static import
       const emailResult = await sendPasswordResetEmail(
         validatedEmail,
         resetToken,
@@ -476,7 +478,7 @@ export class AuthService {
     phoneNumber: string
   ): Promise<{ success: boolean; error?: string }> {
     // Use MFA service which integrates with Twilio
-    const { mfaService } = await import('@/lib/services/mfaService' as string);
+    // Using static import
     return mfaService.enableMFA(userId, phoneNumber);
   }
 
@@ -488,7 +490,7 @@ export class AuthService {
     phoneNumber: string,
     token: string
   ): Promise<boolean> {
-    const { mfaService } = await import('@/lib/services/mfaService' as string);
+    // Using static import
     const result = await mfaService.verifyMFACode(userId, phoneNumber, token);
     return result.success;
   }

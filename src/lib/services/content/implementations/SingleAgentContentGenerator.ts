@@ -14,6 +14,9 @@ import {
 } from '../interfaces/IContentGenerator';
 import { countWords } from '@/lib/content/quality';
 import { calculateReadability, getReadabilityScore } from '@/lib/content/readability-calculator';
+import { getDb } from '@/lib/db/client';
+import { Collections } from '@/lib/db/schema';
+import { ObjectId } from 'mongodb';
 
 export class SingleAgentContentGenerator implements IContentGenerator {
   private agent: CreatorAgent;
@@ -39,10 +42,7 @@ export class SingleAgentContentGenerator implements IContentGenerator {
     }
 
     // Fetch generated content from database
-    const { getDb } = await import('@/lib/db/client');
-    const { Collections } = await import('@/lib/db/schema');
-    const { ObjectId } = await import('mongodb');
-
+    // Using static import
     const db = await getDb();
     const contentDoc = await db
       .collection(Collections.WEB_CONTENT)

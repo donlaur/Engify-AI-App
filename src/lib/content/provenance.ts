@@ -1,3 +1,6 @@
+import { getDb } from '@/lib/db/client';
+import { Collections } from '@/lib/db/schema';
+
 export type ProvenanceStatus = 'queued' | 'success' | 'error';
 
 export interface ProvenanceEvent {
@@ -8,8 +11,7 @@ export interface ProvenanceEvent {
 }
 
 export async function recordProvenance(event: ProvenanceEvent): Promise<void> {
-  const { getDb } = await import('@/lib/db/client');
-  const { Collections } = await import('@/lib/db/schema');
+  // Using static import
   const db = await getDb();
   await db.collection(Collections.CONTENT_PROVENANCE).insertOne({
     stage: event.stage,

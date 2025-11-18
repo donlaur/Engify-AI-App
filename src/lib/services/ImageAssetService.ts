@@ -11,6 +11,7 @@ import {
 } from '@/lib/db/schema';
 import { executeWithProviderHarness } from '@/lib/ai/v2/utils/provider-harness';
 import { logger } from '@/lib/logging/logger';
+import Replicate from 'replicate';
 
 const IMAGE_FEATURE_ENABLED =
   (process.env.IMAGE_GENERATION_ENABLED ?? 'true').toLowerCase() !== 'false';
@@ -101,7 +102,7 @@ export class ImageAssetService {
     }
 
     try {
-      const Replicate = (await import('replicate')).default;
+      // Using static import
       const replicate = new Replicate({ auth: token });
       const modelId = process.env.REPLICATE_IMAGE_MODEL || 'stability-ai/sdxl';
       const promptText = `${title} — ${description ?? 'professional SaaS illustration'} | flat design, vector, vibrant gradients, enterprise software`;

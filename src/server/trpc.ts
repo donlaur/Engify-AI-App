@@ -13,6 +13,7 @@ import { type FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch';
 import { auth } from '@/lib/auth';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
+import { getUserService } from '@/lib/di/Container';
 
 /**
  * Create context for tRPC requests
@@ -89,7 +90,7 @@ export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
  */
 export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   // Check if user has admin role
-  const { getUserService } = await import('@/lib/di/Container');
+  // Using static import
   const userService = getUserService();
   const user = await userService.getUserById(ctx.session.user.id);
 

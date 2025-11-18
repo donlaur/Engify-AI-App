@@ -5,6 +5,12 @@
  * Falls back to environment variables for local development
  */
 
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+  ListSecretsCommand,
+} from '@aws-sdk/client-secrets-manager';
+
 interface SecretsManagerConfig {
   region?: string;
   accessKeyId?: string;
@@ -78,12 +84,8 @@ export class SecretsManagerService {
    * Supports IAM roles (when running on EC2/Lambda) or explicit credentials
    */
   private async getSecretFromAWS(secretName: string): Promise<string> {
-    // Dynamic import to avoid requiring AWS SDK in development
+    // Using static import
     try {
-      const { SecretsManagerClient, GetSecretValueCommand } = await import(
-        '@aws-sdk/client-secrets-manager'
-      );
-
       // Build credentials - supports IAM roles, environment variables, or explicit config
       const credentials = process.env.AWS_ACCESS_KEY_ID
         ? {
@@ -155,10 +157,7 @@ export class SecretsManagerService {
     // Test with a dummy secret name to check connectivity
     // This won't fail if the secret doesn't exist, just if we can't reach AWS
     try {
-      const { SecretsManagerClient } = await import(
-        '@aws-sdk/client-secrets-manager'
-      );
-
+      // Using static import
       const client = new SecretsManagerClient({
         region: this.region,
         maxAttempts: 1, // Fast failure for health checks
@@ -168,9 +167,7 @@ export class SecretsManagerService {
       // But if we have permissions, we can check a known secret
       if (process.env.AWS_ACCESS_KEY_ID || process.env.AWS_EXECUTION_ENV) {
         // We're either configured or running on AWS - try to list secrets (will fail gracefully if no permissions)
-        const { ListSecretsCommand } = await import(
-          '@aws-sdk/client-secrets-manager'
-        );
+        // Using static import
         await client.send(new ListSecretsCommand({ MaxResults: 1 }));
       }
 

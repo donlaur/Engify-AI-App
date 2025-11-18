@@ -7,6 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { Receiver } from '@upstash/qstash';
 
 /**
  * Verify request is from authorized cron/scheduled job
@@ -44,7 +45,7 @@ export async function verifyCronRequest(
   if (qstashSignature && qstashSigningKey) {
     // QStash signature verification using @upstash/qstash
     try {
-      const { Receiver } = await import('@upstash/qstash');
+      // Using static import
       const receiverConfig: { currentSigningKey: string; nextSigningKey?: string } = {
         currentSigningKey: qstashSigningKey,
       };

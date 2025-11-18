@@ -6,6 +6,8 @@
 
 import { Redis as UpstashRedis } from '@upstash/redis';
 import Redis from 'ioredis';
+import { logger } from '@/lib/logging/logger';
+import twilio from 'twilio';
 
 // Twilio SDK types
 interface TwilioConfig {
@@ -165,7 +167,7 @@ async function generateAndStoreCode(
 
     return { success: true, code };
   } catch (error) {
-    const { logger } = await import('@/lib/logging/logger');
+    // Using static import
     logger.apiError('Failed to store MFA code', error);
     return {
       success: false,
@@ -256,7 +258,7 @@ async function verifyStoredCode(
       };
     }
   } catch (error) {
-    const { logger } = await import('@/lib/logging/logger');
+    // Using static import
     logger.apiError('Failed to verify MFA code', error);
     return {
       success: false,
@@ -303,20 +305,19 @@ class TwilioService {
       process.env.TWILIO_PHONE_NUMBER
     ) {
       try {
-        // Dynamic import to avoid requiring Twilio in development
-        const twilio = await import('twilio');
+        // Using static import
         this.config = {
           accountSid: process.env.TWILIO_ACCOUNT_SID,
           authToken: process.env.TWILIO_AUTH_TOKEN,
           phoneNumber: process.env.TWILIO_PHONE_NUMBER,
           verifyServiceSid: process.env.TWILIO_VERIFY_SERVICE_SID,
         };
-        this.client = twilio.default(
+        this.client = twilio(
           this.config.accountSid,
           this.config.authToken
         ) as unknown as TwilioClient;
       } catch (error) {
-        const { logger } = await import('@/lib/logging/logger');
+        // Using static import
         logger.warn('Twilio not available', {
           error: error instanceof Error ? error.message : 'Unknown error',
         });
@@ -350,7 +351,7 @@ class TwilioService {
         sid: result.sid,
       };
     } catch (error) {
-      const { logger } = await import('@/lib/logging/logger');
+      // Using static import
       logger.apiError('Twilio SMS error', error);
       return {
         success: false,
@@ -387,7 +388,7 @@ class TwilioService {
           sid: result.sid,
         };
       } catch (error) {
-        const { logger } = await import('@/lib/logging/logger');
+        // Using static import
         logger.apiError('Twilio Verify error', error);
         return {
           success: false,
@@ -448,7 +449,7 @@ class TwilioService {
               : undefined,
         };
       } catch (error) {
-        const { logger } = await import('@/lib/logging/logger');
+        // Using static import
         logger.apiError('Twilio Verify check error', error);
         return {
           success: false,

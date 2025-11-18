@@ -25,6 +25,8 @@ import {
 import { config } from '@/lib/config';
 import { auditLog } from '@/lib/logging/audit';
 import { logger } from '@/lib/logging/logger';
+import { getDb } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 
 export interface RBACOptions {
   permission?: Permission;
@@ -393,8 +395,7 @@ export function withResourceAuthorization(options: ResourceAuthzOptions) {
       }
 
       // Fetch resource from database
-      const { getDb } = await import('@/lib/mongodb');
-      const { ObjectId } = await import('mongodb');
+      // Using static import
       const db = await getDb();
       const resource = await db
         .collection(options.collection)
@@ -469,7 +470,7 @@ async function verifyBreakGlass(
   }
 
   try {
-    const { getDb } = await import('@/lib/mongodb');
+    // Using static import
     const db = await getDb();
 
     const session = await db.collection('break_glass_sessions').findOne({

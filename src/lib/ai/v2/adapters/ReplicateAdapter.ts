@@ -5,6 +5,7 @@
 import { AIProvider, AIRequest, AIResponse } from '../interfaces/AIProvider';
 import { logger } from '@/lib/logging/logger';
 import { executeWithProviderHarness } from '../utils/provider-harness';
+import Replicate from 'replicate';
 
 const DEFAULT_ALLOWED_MODELS = [
   'google/gemini-2.5-flash', // Updated with correct prefix
@@ -125,7 +126,7 @@ export class ReplicateAdapter implements AIProvider {
     const modelId = ensureModelAllowed(requestedModel);
 
     try {
-      const Replicate = (await import('replicate')).default;
+      // Using static import
       const replicate = new Replicate({ auth: token });
       const input: Record<string, unknown> = { prompt: request.prompt };
       if (typeof request.maxTokens === 'number') {

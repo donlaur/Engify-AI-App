@@ -5,20 +5,13 @@
  * - role
  * - organizationId
  *
- * This fixes the type error where AdapterUser doesn't include our custom fields.
+ * These fields are defined via module augmentation in src/types/next-auth.d.ts
  */
 
 import { MongoDBAdapter } from '@auth/mongodb-adapter';
 import type { Adapter, AdapterUser } from 'next-auth/adapters';
 import type { MongoClient } from 'mongodb';
-
-/**
- * Extended AdapterUser with our custom fields
- */
-export interface ExtendedAdapterUser extends AdapterUser {
-  role?: string;
-  organizationId?: string | null;
-}
+import { ObjectId } from 'mongodb';
 
 /**
  * Create a custom MongoDB adapter that includes our custom user fields
@@ -33,63 +26,57 @@ export function CustomMongoDBAdapter(client: MongoClient | Promise<MongoClient>)
       // Call the base adapter's createUser
       const createdUser = await baseAdapter.createUser!(user);
 
-      // Add our custom fields if they exist in the input
-      const extendedUser: ExtendedAdapterUser = {
-        ...createdUser,
-        role: (user as ExtendedAdapterUser).role || 'user',
-        organizationId: (user as ExtendedAdapterUser).organizationId || null,
-      };
+      // Extract custom fields from the input user
+      const userWithCustomFields = user as any;
+      const role = userWithCustomFields.role || 'user';
+      const organizationId = userWithCustomFields.organizationId || null;
 
       // Update the user in the database to include custom fields
       const mongoClient = await Promise.resolve(client);
       const db = mongoClient.db();
       await db.collection('users').updateOne(
-        { _id: createdUser.id },
+        { _id: new ObjectId(createdUser.id) },
         {
           $set: {
-            role: extendedUser.role,
-            organizationId: extendedUser.organizationId,
+            role,
+            organizationId,
           },
         }
       );
 
-      return extendedUser as AdapterUser;
+      // Return the user with custom fields
+      return {
+        ...createdUser,
+        role,
+        organizationId,
+      } as AdapterUser;
     },
 
     async getUser(id) {
       const user = await baseAdapter.getUser!(id);
       if (!user) return null;
 
-      // Include custom fields in the returned user
-      return {
-        ...user,
-        role: (user as ExtendedAdapterUser).role,
-        organizationId: (user as ExtendedAdapterUser).organizationId,
-      } as AdapterUser;
+      // The user from the database already has the custom fields
+      // Just return it with proper typing
+      return user as AdapterUser;
     },
 
     async getUserByEmail(email) {
       const user = await baseAdapter.getUserByEmail!(email);
       if (!user) return null;
 
-      // Include custom fields in the returned user
-      return {
-        ...user,
-        role: (user as ExtendedAdapterUser).role,
-        organizationId: (user as ExtendedAdapterUser).organizationId,
-      } as AdapterUser;
+      // The user from the database already has the custom fields
+      // Just return it with proper typing
+      return user as AdapterUser;
     },
 
     async getUserByAccount({ providerAccountId, provider }) {
       const user = await baseAdapter.getUserByAccount!({ providerAccountId, provider });
       if (!user) return null;
 
-      // Include custom fields in the returned user
-      return {
-        ...user,
-        role: (user as ExtendedAdapterUser).role,
-        organizationId: (user as ExtendedAdapterUser).organizationId,
-      } as AdapterUser;
+      // The user from the database already has the custom fields
+      // Just return it with proper typing
+      return user as AdapterUser;
     },
-  };
+  } as Adapter;
 }

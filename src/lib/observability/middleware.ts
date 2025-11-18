@@ -183,7 +183,7 @@ export function withObservability<T = unknown>(
 /**
  * Middleware for Next.js middleware.ts
  */
-export function observabilityMiddleware(request: NextRequest) {
+export function observabilityMiddleware(_request: NextRequest) {
   const requestId = RequestContext.generateRequestId();
   const response = NextResponse.next();
 

@@ -19,12 +19,14 @@ export {
   default,
 } from '@/lib/mongodb';
 
+import { getClient as getMongoClient } from '@/lib/mongodb';
+
 /**
  * Close MongoDB connection
  * Only use in tests or shutdown
  */
 export async function closeConnection(): Promise<void> {
-  const { getClient } = await import('@/lib/mongodb');
-  const client = await getClient();
+  // Using static import
+  const client = await getMongoClient();
   await client.close();
 }

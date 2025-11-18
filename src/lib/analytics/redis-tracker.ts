@@ -1,12 +1,13 @@
 /**
  * Redis Analytics Tracker
- * 
+ *
  * Lightweight tracking for prompt interactions using Upstash Redis
  * No MongoDB writes - just Redis counters
  * Sync to MongoDB once per hour via cron
  */
 
 import { Redis } from '@upstash/redis';
+import { getMongoDb } from '@/lib/db/mongodb';
 
 // Singleton Redis client
 let redis: Redis | null = null;
@@ -133,7 +134,7 @@ export async function getTopPrompts(
 export async function syncStatsToMongoDB(): Promise<void> {
   try {
     const redis = getRedis();
-    const { getMongoDb } = await import('@/lib/db/mongodb' as string);
+    // Using static import
     const db = await getMongoDb();
     
     // Get all prompt keys (excluding daily keys)

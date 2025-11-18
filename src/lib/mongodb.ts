@@ -132,7 +132,7 @@ function getMongoOptions() {
       waitQueueTimeoutMS: 10000, // PRODUCTION: Wait longer for available connection
       family: 4, // Force IPv4 to avoid DNS issues
       compressors: ['zlib' as const], // PERFORMANCE: Enable compression to reduce bandwidth
-      zlibCompressionLevel: 6, // Balanced compression
+      zlibCompressionLevel: 6 as const, // Balanced compression
       // SSL/TLS options for MongoDB Atlas
       ...(isSrvUri
         ? {
