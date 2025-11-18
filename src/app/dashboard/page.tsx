@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -55,6 +56,7 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const ref = searchParams.get('ref');
   const showMCPToken = ref === 'mcp-auth';
+  const { data: session } = useSession();
 
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [favoritePrompts, setFavoritePrompts] = useState<FavoritePrompt[]>([]);
@@ -65,6 +67,9 @@ function DashboardContent() {
   const [loadingActivity, setLoadingActivity] = useState(true);
   const [gamificationStats, setGamificationStats] = useState<GamificationStats | null>(null);
   const [loadingGamification, setLoadingGamification] = useState(true);
+
+  // Check if user is super admin
+  const isSuperAdmin = session?.user?.role === 'super_admin';
 
   useEffect(() => {
     async function fetchData() {
@@ -153,6 +158,23 @@ function DashboardContent() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-3">
+              {/* OpsHub - Super Admin Only */}
+              {isSuperAdmin && (
+                <Link href="/opshub">
+                  <Button variant="outline" className="w-full justify-start h-auto py-3 border-yellow-300 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-950 hover:bg-yellow-100 dark:hover:bg-yellow-900">
+                    <div className="flex flex-col items-start gap-1">
+                      <div className="flex items-center gap-2">
+                        <Icons.shield className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                        <span className="font-medium text-yellow-900 dark:text-yellow-100">OpsHub</span>
+                      </div>
+                      <span className="text-xs text-yellow-700 dark:text-yellow-300">
+                        Admin dashboard
+                      </span>
+                    </div>
+                  </Button>
+                </Link>
+              )}
+
               <Link href="/prompts">
                 <Button variant="outline" className="w-full justify-start h-auto py-3">
                   <div className="flex flex-col items-start gap-1">
