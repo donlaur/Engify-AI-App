@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   Card,
@@ -11,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
+import { MCPTokenDisplay } from '@/components/mcp/MCPTokenDisplay';
 
 interface FavoritePrompt {
   id: string;
@@ -27,11 +29,16 @@ interface UserStats {
   streak: number;
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const ref = searchParams.get('ref');
+  const showMCPToken = ref === 'mcp-auth';
+
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [favoritePrompts, setFavoritePrompts] = useState<FavoritePrompt[]>([]);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [showMCP, setShowMCP] = useState(showMCPToken);
 
   useEffect(() => {
     async function fetchData() {
@@ -64,12 +71,25 @@ export default function DashboardPage() {
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Your favorite prompts
-          </p>
-        </div>
+        {/* MCP Token Display (when ?ref=mcp-auth) */}
+        {showMCP ? (
+          <div className="space-y-6">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold">MCP Authentication</h1>
+              <p className="text-muted-foreground">
+                Set up MCP access for CLI and desktop applications
+              </p>
+            </div>
+            <MCPTokenDisplay onClose={() => setShowMCP(false)} />
+          </div>
+        ) : (
+          <>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold">Dashboard</h1>
+              <p className="text-muted-foreground">
+                Your favorite prompts
+              </p>
+            </div>
 
         <div className="grid gap-6 lg:grid-cols-1">
           {/* User Stats */}
@@ -192,7 +212,25 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+          </>
+        )}
       </div>
     </MainLayout>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <MainLayout>
+          <div className="flex min-h-screen items-center justify-center">
+            <Icons.spinner className="h-8 w-8 animate-spin" />
+          </div>
+        </MainLayout>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   );
 }

@@ -89,6 +89,107 @@ export const OrganizationSchema = z.object({
 export type Organization = z.infer<typeof OrganizationSchema>;
 
 /**
+ * Organization Member Schema
+ */
+export const OrgMemberRoleSchema = z.enum(['owner', 'admin', 'member']);
+export type OrgMemberRole = z.infer<typeof OrgMemberRoleSchema>;
+
+export const OrgMemberSchema = z.object({
+  _id: ObjectIdSchema,
+  organizationId: ObjectIdSchema,
+  userId: ObjectIdSchema,
+  role: OrgMemberRoleSchema.default('member'),
+  invitedBy: ObjectIdSchema.nullable(),
+  invitedAt: z.date().nullable(),
+  joinedAt: z.date(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type OrgMember = z.infer<typeof OrgMemberSchema>;
+
+/**
+ * Workspace Schema
+ */
+export const WorkspaceSchema = z.object({
+  _id: ObjectIdSchema,
+  organizationId: ObjectIdSchema,
+  slug: z.string().min(1).max(100), // URL-friendly identifier
+  name: z.string().min(1).max(200),
+  description: z.string().max(500).nullable(),
+  settings: z.object({
+    defaultPermissions: z.array(z.string()).default([]),
+    allowedScopes: z.array(z.string()).default([]),
+  }),
+  createdBy: ObjectIdSchema,
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type Workspace = z.infer<typeof WorkspaceSchema>;
+
+/**
+ * Workspace Member Schema
+ */
+export const WorkspaceMemberRoleSchema = z.enum(['owner', 'admin', 'contributor', 'viewer']);
+export type WorkspaceMemberRole = z.infer<typeof WorkspaceMemberRoleSchema>;
+
+export const WorkspaceMemberSchema = z.object({
+  _id: ObjectIdSchema,
+  workspaceId: ObjectIdSchema,
+  userId: ObjectIdSchema,
+  role: WorkspaceMemberRoleSchema.default('viewer'),
+  permissions: z.array(z.string()).default([]),
+  addedBy: ObjectIdSchema.nullable(),
+  joinedAt: z.date(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type WorkspaceMember = z.infer<typeof WorkspaceMemberSchema>;
+
+/**
+ * MCP Token Schema
+ */
+export const MCPTokenScopeSchema = z.enum([
+  'memory.read',
+  'memory.write',
+  'guardrails.scan',
+  'prompts.execute',
+  'prompts.read',
+  'analytics.read',
+  'admin.full',
+]);
+export type MCPTokenScope = z.infer<typeof MCPTokenScopeSchema>;
+
+export const MCPTokenSchema = z.object({
+  _id: ObjectIdSchema,
+  userId: ObjectIdSchema,
+  organizationId: ObjectIdSchema.nullable(),
+  workspaceId: ObjectIdSchema.nullable(),
+  tokenName: z.string().min(1).max(100), // User-friendly name
+  jti: z.string(), // JWT ID for revocation
+  resource: z.string().default('urn:mcp:bug-reporter'),
+  scopes: z.array(MCPTokenScopeSchema).default([]),
+  isActive: z.boolean().default(true),
+  expiresAt: z.date(),
+  lastUsedAt: z.date().nullable(),
+  usageCount: z.number().int().nonnegative().default(0),
+  revokedAt: z.date().nullable(),
+  revokedBy: ObjectIdSchema.nullable(),
+  revokeReason: z.string().nullable(),
+  metadata: z.object({
+    ipAddress: z.string().nullable(),
+    userAgent: z.string().nullable(),
+    createdVia: z.enum(['dashboard', 'api', 'cli']).default('dashboard'),
+  }),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type MCPToken = z.infer<typeof MCPTokenSchema>;
+
+/**
  * Prompt Template Category
  */
 export const PromptCategory = z.enum([
