@@ -140,8 +140,6 @@ export function PromptManagementPanel() {
     currentPage,
     totalPages,
     totalCount,
-    searchTerm,
-    setSearchTerm,
     goToPage,
     refresh,
   } = useAdminData<Prompt>({
