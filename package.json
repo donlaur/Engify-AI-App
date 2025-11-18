@@ -135,7 +135,6 @@
     "content:list-collections": "tsx scripts/content/list-collections.ts",
     "content:link-patterns": "tsx scripts/content/link-prompts-to-patterns.ts",
     "data:seed-workflows": "tsx scripts/data/seed-workflows-to-db.ts",
-    "data:seed-api-keys": "tsx scripts/data/seed-api-keys.ts",
     "data:import-bulk": "tsx scripts/data/import-content-bulk.ts",
     "dev:verify-links": "tsx scripts/development/verify-navigation-links.ts",
     "dev:verify-urls": "tsx scripts/development/verify-source-urls.ts",
