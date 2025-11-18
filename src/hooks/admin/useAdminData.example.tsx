@@ -22,7 +22,6 @@ export function WorkflowManagementExample() {
     totalCount,
     nextPage,
     prevPage,
-    goToPage,
     setFilters,
     clearFilters,
     refresh,

@@ -13,22 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -45,8 +37,14 @@ import {
 import { Separator } from '@/components/ui/separator';
 import type { Workflow } from '@/lib/workflows/workflow-schema';
 import { useAdminData } from '@/hooks/admin/useAdminData';
+import { useAdminToast } from '@/hooks/admin/useAdminToast';
+import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
 import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
 import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
+import { AdminDataTable, type ColumnDef } from '@/components/admin/shared/AdminDataTable';
+import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
+import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
+import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
 import { formatAdminDate, calculateStats } from '@/lib/admin/utils';
 
 interface WorkflowWithMetadata extends Workflow {
@@ -58,20 +56,24 @@ interface WorkflowWithMetadata extends Workflow {
 export function WorkflowManagementPanel() {
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowWithMetadata | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+
+  // Debounce search input to reduce API calls
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+
+  // Toast notifications for user feedback
+  const { success, error: showError } = useAdminToast();
 
   // Use the new useAdminData hook for data management
   const {
     data: workflows,
     loading,
-    error,
     currentPage,
     totalPages,
     totalCount,
     pageSize,
     filters,
     setFilters,
-    searchTerm,
-    setSearchTerm,
     goToPage,
     refresh,
   } = useAdminData<WorkflowWithMetadata>({
@@ -97,12 +99,19 @@ export function WorkflowManagementPanel() {
 
       if (res.ok) {
         refresh();
+        success(
+          'Status updated',
+          `Workflow ${newStatus === 'published' ? 'published' : 'saved as draft'} successfully`
+        );
         if (selectedWorkflow?._id === workflowId) {
           setSelectedWorkflow({ ...selectedWorkflow, status: newStatus as 'draft' | 'published' | 'coming_soon' });
         }
+      } else {
+        showError('Failed to update status', 'Please try again');
       }
-    } catch (error) {
-      console.error('Failed to toggle status:', error);
+    } catch (err) {
+      console.error('Failed to toggle status:', err);
+      showError('Network error', 'Unable to connect to server');
     }
   };
 
@@ -110,6 +119,65 @@ export function WorkflowManagementPanel() {
     setSelectedWorkflow(workflow);
     setIsDrawerOpen(true);
   };
+
+  // Column definitions for AdminDataTable
+  const columns: ColumnDef<WorkflowWithMetadata>[] = [
+    {
+      id: 'title',
+      label: 'Title',
+      width: 'w-[300px]',
+      render: (workflow) => (
+        <button
+          onClick={() => handleView(workflow)}
+          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+        >
+          {workflow.title}
+        </button>
+      ),
+      cellClassName: 'font-medium'
+    },
+    {
+      id: 'category',
+      label: 'Category',
+      render: (workflow) => <Badge variant="outline">{workflow.category}</Badge>
+    },
+    {
+      id: 'audience',
+      label: 'Audience',
+      render: (workflow) => (
+        <div className="flex flex-wrap gap-1">
+          {workflow.audience.slice(0, 2).map((aud) => (
+            <Badge key={aud} variant="secondary" className="text-xs">
+              {aud}
+            </Badge>
+          ))}
+          {workflow.audience.length > 2 && (
+            <Badge variant="secondary" className="text-xs">
+              +{workflow.audience.length - 2}
+            </Badge>
+          )}
+        </div>
+      )
+    },
+    {
+      id: 'checklist',
+      label: 'Checklist Items',
+      render: (workflow) => (
+        <Badge variant="outline" className="text-center">
+          {workflow.manualChecklist.length}
+        </Badge>
+      )
+    },
+    {
+      id: 'updated',
+      label: 'Updated',
+      render: (workflow) => (
+        <span className="text-sm text-muted-foreground">
+          {formatAdminDate(workflow.updatedAt)}
+        </span>
+      )
+    }
+  ];
 
   const filteredWorkflows = workflows.filter((workflow) => {
     // Filter by category
@@ -121,9 +189,9 @@ export function WorkflowManagementPanel() {
     // Filter by audience
     if (filters.audience !== 'all' && !workflow.audience.includes(filters.audience as any)) return false;
 
-    // Filter by search (title or slug)
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
+    // Filter by search using debounced value
+    if (debouncedSearch) {
+      const search = debouncedSearch.toLowerCase();
       return (
         workflow.title.toLowerCase().includes(search) ||
         workflow.slug.toLowerCase().includes(search)
@@ -148,47 +216,48 @@ export function WorkflowManagementPanel() {
   }, {} as Record<string, number>);
 
   return (
-    <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <AdminStatsCard label="Total" value={stats.total} />
-        <AdminStatsCard label="Published" value={stats.published} variant="green" />
-        <AdminStatsCard label="Draft" value={stats.draft} variant="gray" />
-        <AdminStatsCard label="Coming Soon" value={stats.comingSoon} variant="blue" />
-      </div>
+    <AdminErrorBoundary onError={(err) => console.error('Workflow panel error:', err)}>
+      <div className="space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <AdminStatsCard label="Total" value={stats.total} />
+          <AdminStatsCard label="Published" value={stats.published} variant="green" />
+          <AdminStatsCard label="Draft" value={stats.draft} variant="gray" />
+          <AdminStatsCard label="Coming Soon" value={stats.comingSoon} variant="blue" />
+        </div>
 
-      {/* Category Breakdown */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">By Category</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(categoryStats).map(([category, count]) => (
-              <Badge key={category} variant="secondary">
-                {category}: {count}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+        {/* Category Breakdown */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">By Category</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(categoryStats).map(([category, count]) => (
+                <Badge key={category} variant="secondary">
+                  {category}: {count}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Search & Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Workflow Library ({filteredWorkflows.length})</CardTitle>
-          <CardDescription>
-            Manage all workflows, toggle status, and review content
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-4">
-            <Input
-              placeholder="Search by title or slug..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 min-w-[200px] bg-white dark:bg-gray-800"
-            />
+        {/* Search & Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Workflow Library ({filteredWorkflows.length})</CardTitle>
+            <CardDescription>
+              Manage all workflows, toggle status, and review content
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap gap-4">
+              <Input
+                placeholder="Search by title or slug..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="flex-1 min-w-[200px] bg-white dark:bg-gray-800"
+              />
             <Select value={filters.category as string} onValueChange={(value) => setFilters({ category: value })}>
               <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
                 <SelectValue placeholder="Category" />
@@ -238,105 +307,39 @@ export function WorkflowManagementPanel() {
             </Select>
           </div>
 
-          {/* Table */}
+          {/* Table with new components */}
           {loading ? (
-            <div className="py-8 text-center text-muted-foreground">
-              Loading workflows...
-            </div>
-          ) : error ? (
-            <div className="py-8 text-center text-red-600">
-              Error: {error}
-            </div>
+            <AdminTableSkeleton rows={5} columns={6} />
           ) : filteredWorkflows.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              No workflows found
-            </div>
+            <AdminEmptyState
+              icon={<Icons.search className="h-12 w-12 text-muted-foreground" />}
+              title="No workflows found"
+              description="Try adjusting your search or filters"
+              action={{
+                label: "Clear filters",
+                onClick: () => {
+                  setFilters({ category: 'all', status: 'all', audience: 'all' });
+                  setSearchInput('');
+                }
+              }}
+            />
           ) : (
-            <div className="overflow-x-auto rounded-md border bg-white dark:bg-gray-900">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50 dark:bg-gray-800">
-                    <TableHead className="w-[80px] font-semibold">
-                      Status
-                    </TableHead>
-                    <TableHead className="w-[300px] font-semibold">
-                      Title
-                    </TableHead>
-                    <TableHead className="font-semibold">Category</TableHead>
-                    <TableHead className="font-semibold">Audience</TableHead>
-                    <TableHead className="font-semibold text-center">Checklist</TableHead>
-                    <TableHead className="font-semibold">Updated</TableHead>
-                    <TableHead className="text-right font-semibold">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredWorkflows.map((workflow) => (
-                    <TableRow
-                      key={workflow._id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                      <TableCell>
-                        <Switch
-                          checked={workflow.status === 'published'}
-                          onCheckedChange={() =>
-                            handleToggleStatus(
-                              workflow._id,
-                              workflow.status
-                            )
-                          }
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <button
-                          onClick={() => handleView(workflow)}
-                          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
-                        >
-                          {workflow.title}
-                        </button>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{workflow.category}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {workflow.audience.slice(0, 2).map((aud) => (
-                            <Badge key={aud} variant="secondary" className="text-xs">
-                              {aud}
-                            </Badge>
-                          ))}
-                          {workflow.audience.length > 2 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{workflow.audience.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline">
-                          {workflow.manualChecklist.length}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
-                          {formatAdminDate(workflow.updatedAt)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleView(workflow)}
-                        >
-                          <Icons.eye className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <AdminDataTable
+              data={filteredWorkflows}
+              columns={columns}
+              statusField="status"
+              onStatusToggle={(id, currentStatus) => handleToggleStatus(id, currentStatus as string)}
+              renderRowActions={(workflow) => (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleView(workflow)}
+                >
+                  <Icons.eye className="h-4 w-4" />
+                </Button>
+              )}
+              onRowClick={handleView}
+            />
           )}
 
           {/* Pagination Controls */}
@@ -780,6 +783,7 @@ export function WorkflowManagementPanel() {
           )}
         </SheetContent>
       </Sheet>
-    </div>
+      </div>
+    </AdminErrorBoundary>
   );
 }

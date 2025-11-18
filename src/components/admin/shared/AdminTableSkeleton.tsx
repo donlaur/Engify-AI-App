@@ -54,7 +54,7 @@ interface AdminTableSkeletonProps {
  *           <AdminTableSkeleton rows={5} columns={6} showHeader={true} />
  *         ) : (
  *           <Table>
- *             {/* Your actual table content */}
+ *             // Your actual table content
  *           </Table>
  *         )}
  *       </CardContent>

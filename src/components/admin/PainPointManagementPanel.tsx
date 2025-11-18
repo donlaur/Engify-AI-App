@@ -13,14 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -45,8 +37,14 @@ import {
 import { Separator } from '@/components/ui/separator';
 import type { PainPoint } from '@/lib/workflows/pain-point-schema';
 import { useAdminData } from '@/hooks/admin/useAdminData';
+import { useAdminToast } from '@/hooks/admin/useAdminToast';
+import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
 import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
 import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
+import { AdminDataTable, type ColumnDef } from '@/components/admin/shared/AdminDataTable';
+import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
+import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
+import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
 import { formatAdminDate, calculateStats, truncateText } from '@/lib/admin/utils';
 
 interface PainPointWithMetadata extends PainPoint {
@@ -56,6 +54,17 @@ interface PainPointWithMetadata extends PainPoint {
 }
 
 export function PainPointManagementPanel() {
+  const [filter, setFilter] = useState<string>('all'); // all, published, draft
+  const [selectedPainPoint, setSelectedPainPoint] = useState<PainPointWithMetadata | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+
+  // Debounce search input to reduce API calls
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+
+  // Toast notifications for user feedback
+  const { success, error: showError } = useAdminToast();
+
   // Use the new useAdminData hook for data fetching and pagination
   const {
     data: painPoints,
@@ -72,11 +81,6 @@ export function PainPointManagementPanel() {
     dataKey: 'painPoints',
   });
 
-  const [filter, setFilter] = useState<string>('all'); // all, published, draft
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPainPoint, setSelectedPainPoint] = useState<PainPointWithMetadata | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
   const handleToggleStatus = async (
     painPointId: string,
     currentStatus: 'draft' | 'published'
@@ -91,12 +95,19 @@ export function PainPointManagementPanel() {
 
       if (res.ok) {
         refresh();
+        success(
+          'Status updated',
+          `Pain point ${newStatus === 'published' ? 'published' : 'saved as draft'} successfully`
+        );
         if (selectedPainPoint?._id === painPointId) {
           setSelectedPainPoint({ ...selectedPainPoint, status: newStatus });
         }
+      } else {
+        showError('Failed to update status', 'Please try again');
       }
     } catch (error) {
       console.error('Failed to toggle status:', error);
+      showError('Network error', 'Unable to connect to server');
     }
   };
 
@@ -105,14 +116,68 @@ export function PainPointManagementPanel() {
     setIsDrawerOpen(true);
   };
 
+  // Column definitions for AdminDataTable
+  const columns: ColumnDef<PainPointWithMetadata>[] = [
+    {
+      id: 'title',
+      label: 'Title',
+      width: 'w-[300px]',
+      render: (painPoint) => (
+        <button
+          onClick={() => handleView(painPoint)}
+          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+        >
+          {painPoint.title}
+        </button>
+      ),
+      cellClassName: 'font-medium'
+    },
+    {
+      id: 'description',
+      label: 'Description',
+      render: (painPoint) => (
+        <span className="line-clamp-2 text-sm text-muted-foreground">
+          {truncateText(painPoint.description, 80)}
+        </span>
+      )
+    },
+    {
+      id: 'examples',
+      label: 'Examples',
+      render: (painPoint) => (
+        <Badge variant="secondary">
+          {(painPoint.examples?.length || 0) + (painPoint.expandedExamples?.length || 0)}
+        </Badge>
+      )
+    },
+    {
+      id: 'solutions',
+      label: 'Solutions',
+      render: (painPoint) => (
+        <Badge variant="secondary">
+          {painPoint.solutionWorkflows?.length || 0}
+        </Badge>
+      )
+    },
+    {
+      id: 'updated',
+      label: 'Updated',
+      render: (painPoint) => (
+        <span className="text-sm text-muted-foreground">
+          {formatAdminDate(painPoint.updatedAt)}
+        </span>
+      )
+    }
+  ];
+
   const filteredPainPoints = painPoints.filter((painPoint) => {
     // Filter by status
     if (filter === 'published' && painPoint.status !== 'published') return false;
     if (filter === 'draft' && painPoint.status !== 'draft') return false;
 
-    // Filter by search
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
+    // Filter by search using debounced value
+    if (debouncedSearch) {
+      const search = debouncedSearch.toLowerCase();
       return (
         painPoint.title.toLowerCase().includes(search) ||
         painPoint.slug.toLowerCase().includes(search) ||
@@ -138,9 +203,10 @@ export function PainPointManagementPanel() {
   ]), [painPoints, totalCount]);
 
   return (
-    <div className="space-y-6">
-      {/* Stats Cards - Using AdminStatsCard */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+    <AdminErrorBoundary onError={(err) => console.error('Pain point panel error:', err)}>
+      <div className="space-y-6">
+        {/* Stats Cards - Using AdminStatsCard */}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         <AdminStatsCard label="Total" value={stats.total} />
         <AdminStatsCard label="Published" value={stats.published} variant="green" />
         <AdminStatsCard label="Draft" value={stats.draft} variant="gray" />
@@ -160,8 +226,8 @@ export function PainPointManagementPanel() {
           <div className="flex gap-4">
             <Input
               placeholder="Search by title, slug, or description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="flex-1 bg-white dark:bg-gray-800"
             />
             <Select value={filter} onValueChange={setFilter}>
@@ -176,94 +242,39 @@ export function PainPointManagementPanel() {
             </Select>
           </div>
 
-          {/* Table */}
+          {/* Table with new components */}
           {loading ? (
-            <div className="py-8 text-center text-muted-foreground">
-              Loading pain points...
-            </div>
+            <AdminTableSkeleton rows={5} columns={6} />
           ) : filteredPainPoints.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              No pain points found
-            </div>
+            <AdminEmptyState
+              icon={<Icons.search className="h-12 w-12 text-muted-foreground" />}
+              title="No pain points found"
+              description="Try adjusting your search or filters"
+              action={{
+                label: "Clear filters",
+                onClick: () => {
+                  setFilter('all');
+                  setSearchInput('');
+                }
+              }}
+            />
           ) : (
-            <div className="overflow-x-auto rounded-md border bg-white dark:bg-gray-900">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50 dark:bg-gray-800">
-                    <TableHead className="w-[80px] font-semibold">
-                      Status
-                    </TableHead>
-                    <TableHead className="w-[300px] font-semibold">
-                      Title
-                    </TableHead>
-                    <TableHead className="font-semibold">Description</TableHead>
-                    <TableHead className="font-semibold">Examples</TableHead>
-                    <TableHead className="font-semibold">Solutions</TableHead>
-                    <TableHead className="font-semibold">Updated</TableHead>
-                    <TableHead className="text-right font-semibold">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPainPoints.map((painPoint) => (
-                    <TableRow
-                      key={painPoint._id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                      <TableCell>
-                        <Switch
-                          checked={painPoint.status === 'published'}
-                          onCheckedChange={() =>
-                            handleToggleStatus(
-                              painPoint._id,
-                              painPoint.status
-                            )
-                          }
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <button
-                          onClick={() => handleView(painPoint)}
-                          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
-                        >
-                          {painPoint.title}
-                        </button>
-                      </TableCell>
-                      <TableCell>
-                        <span className="line-clamp-2 text-sm text-muted-foreground">
-                          {truncateText(painPoint.description, 80)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {(painPoint.examples?.length || 0) + (painPoint.expandedExamples?.length || 0)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {painPoint.solutionWorkflows?.length || 0}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
-                          {formatAdminDate(painPoint.updatedAt)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleView(painPoint)}
-                        >
-                          <Icons.eye className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <AdminDataTable
+              data={filteredPainPoints}
+              columns={columns}
+              statusField="status"
+              onStatusToggle={handleToggleStatus}
+              renderRowActions={(painPoint) => (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleView(painPoint)}
+                >
+                  <Icons.eye className="h-4 w-4" />
+                </Button>
+              )}
+              onRowClick={handleView}
+            />
           )}
 
           {/* Pagination Controls - Using AdminPaginationControls */}
@@ -652,6 +663,7 @@ export function PainPointManagementPanel() {
           )}
         </SheetContent>
       </Sheet>
-    </div>
+      </div>
+    </AdminErrorBoundary>
   );
 }
