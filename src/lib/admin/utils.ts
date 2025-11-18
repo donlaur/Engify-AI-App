@@ -282,7 +282,7 @@ export function applyFilters<T extends Record<string, any>>(
 
           // Handle arrays (search in each element)
           if (Array.isArray(fieldValue)) {
-            return fieldValue.some(val =>
+            return fieldValue.some((val: unknown) =>
               String(val).toLowerCase().includes(normalizedSearch)
             );
           }
