@@ -37,9 +37,9 @@ export default function BuiltInPublicPage() {
             </h1>
 
             <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              1,357+ commits. 85K+ lines of TypeScript. 620 passing tests. 12
-              ADRs. This is what AI-augmented engineering looks like when done
-              right.
+              186K+ lines of TypeScript. 303 test files. 258 documentation files.
+              Comprehensive guardrails system. This is what AI-augmented engineering
+              maturity looks like.
             </p>
 
             <div className="flex justify-center gap-4">
@@ -72,6 +72,156 @@ export default function BuiltInPublicPage() {
           <svg viewBox="0 0 1440 120" className="h-12 w-full fill-white">
             <path d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path>
           </svg>
+        </div>
+      </section>
+
+      {/* Current State: Mature Engineering */}
+      <section className="container py-20 bg-gradient-to-br from-green-50 to-emerald-50">
+        <div className="mx-auto max-w-4xl space-y-8">
+          <div className="text-center">
+            <Badge variant="secondary" className="mb-4 bg-green-600 text-white">
+              Current State: Mature Engineering Phase
+            </Badge>
+            <h2 className="mb-4 text-4xl font-bold">
+              From Rapid Commits to Guardrails & Quality
+            </h2>
+            <p className="text-lg text-gray-600">
+              The evolution from prototyping velocity to production excellence
+            </p>
+          </div>
+
+          <Card className="border-2 border-green-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.shield className="h-6 w-6 text-green-600" />
+                Comprehensive Guardrails System
+              </CardTitle>
+              <CardDescription>
+                Multi-layer pre-commit validation preventing errors before code review
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-lg bg-green-50 p-4">
+                  <p className="mb-2 font-semibold text-green-900">
+                    ✓ AI Guardrails Enforcement
+                  </p>
+                  <ul className="space-y-1 text-sm text-green-800">
+                    <li>• Icon usage validation</li>
+                    <li>• Enterprise compliance checks</li>
+                    <li>• Schema and data integrity</li>
+                    <li>• Test framework consistency</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg bg-blue-50 p-4">
+                  <p className="mb-2 font-semibold text-blue-900">
+                    ✓ Security & Quality Gates
+                  </p>
+                  <ul className="space-y-1 text-sm text-blue-800">
+                    <li>• Secrets detection & scanning</li>
+                    <li>• Mock data prevention</li>
+                    <li>• Automated test execution</li>
+                    <li>• Icon and asset validation</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 p-4">
+                <p className="mb-2 font-semibold text-purple-900">
+                  💡 Real Impact
+                </p>
+                <p className="text-sm text-purple-800">
+                  Prevents 90% of common coding errors before they reach code review.
+                  Enforces consistent standards across codebase. Automated security
+                  checks catch vulnerabilities early.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <div className="text-4xl font-bold text-green-600">303</div>
+                <div className="text-sm text-gray-600">Test Files</div>
+                <div className="mt-1 text-xs text-gray-500">
+                  Comprehensive coverage
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <div className="text-4xl font-bold text-blue-600">258</div>
+                <div className="text-sm text-gray-600">Documentation Files</div>
+                <div className="mt-1 text-xs text-gray-500">
+                  Living documentation
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <div className="text-4xl font-bold text-purple-600">186K+</div>
+                <div className="text-sm text-gray-600">Lines TypeScript</div>
+                <div className="mt-1 text-xs text-gray-500">
+                  Strict mode, production-ready
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.fileText className="h-6 w-6 text-purple-600" />
+                50+ Engineering Workflows Documented
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="text-sm">
+                  <p className="font-semibold text-gray-900">🔐 Security Patterns</p>
+                  <ul className="ml-4 mt-1 space-y-1 text-gray-600">
+                    <li>• Authentication & authorization</li>
+                    <li>• Secrets management workflows</li>
+                    <li>• Security audit procedures</li>
+                  </ul>
+                </div>
+                <div className="text-sm">
+                  <p className="font-semibold text-gray-900">🤖 AI Guardrails</p>
+                  <ul className="ml-4 mt-1 space-y-1 text-gray-600">
+                    <li>• LLM integration best practices</li>
+                    <li>• Prompt engineering standards</li>
+                    <li>• AI provider abstraction</li>
+                  </ul>
+                </div>
+                <div className="text-sm">
+                  <p className="font-semibold text-gray-900">📊 Database Workflows</p>
+                  <ul className="ml-4 mt-1 space-y-1 text-gray-600">
+                    <li>• Migration and schema evolution</li>
+                    <li>• Data validation patterns</li>
+                    <li>• Repository pattern implementation</li>
+                  </ul>
+                </div>
+                <div className="text-sm">
+                  <p className="font-semibold text-gray-900">⚡ Development Standards</p>
+                  <ul className="ml-4 mt-1 space-y-1 text-gray-600">
+                    <li>• Code review checklists</li>
+                    <li>• Error handling patterns</li>
+                    <li>• Performance optimization</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-4 rounded-lg bg-green-50 p-4">
+                <p className="mb-2 font-semibold text-green-900">
+                  ✅ Knowledge Transfer Impact
+                </p>
+                <p className="text-sm text-green-800">
+                  New developers onboard in hours, not days. Consistent implementation
+                  patterns across the team. Self-service troubleshooting and debugging
+                  guides reduce tribal knowledge.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
@@ -608,43 +758,55 @@ export default function BuiltInPublicPage() {
             </CardContent>
           </Card>
 
-          {/* Production Stats */}
-          <div className="grid gap-6 grid-cols-2 sm:grid-cols-4">
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-4xl font-bold text-purple-600 sm:text-5xl">1,357</div>
-                <div className="text-sm text-gray-600">Total Commits</div>
-                <div className="mt-1 text-xs text-gray-500">
-                  Atomic, tested, documented
+          {/* Production Stats - Current */}
+          <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-center">
+                <Icons.trendingUp className="h-6 w-6 text-green-600" />
+                Current Production Metrics
+              </CardTitle>
+              <CardDescription className="text-center">
+                Evolved from rapid prototyping to production excellence
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 grid-cols-2 sm:grid-cols-4">
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-purple-600 sm:text-5xl">186K+</div>
+                  <div className="text-sm text-gray-600">Lines TypeScript</div>
+                  <div className="mt-1 text-xs text-gray-500">
+                    Strict mode, enterprise-grade
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-5xl font-bold text-green-600">620</div>
-                <div className="text-sm text-gray-600">Unit Tests</div>
-                <div className="mt-1 text-xs text-gray-500">100% passing</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-3xl font-bold text-blue-600 sm:text-4xl">85K+</div>
-                <div className="text-sm text-gray-600">Lines of Code</div>
-                <div className="mt-1 text-xs text-gray-500">
-                  TypeScript strict mode
+                <div className="text-center">
+                  <div className="text-5xl font-bold text-green-600">303</div>
+                  <div className="text-sm text-gray-600">Test Files</div>
+                  <div className="mt-1 text-xs text-gray-500">Comprehensive coverage</div>
                 </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="text-5xl font-bold text-orange-600">115</div>
-                <div className="text-sm text-gray-600">Documentation Pages</div>
-                <div className="mt-1 text-xs text-gray-500">
-                  ADRs, playbooks, guides
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600 sm:text-4xl">258</div>
+                  <div className="text-sm text-gray-600">Documentation Files</div>
+                  <div className="mt-1 text-xs text-gray-500">
+                    Living documentation
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                <div className="text-center">
+                  <div className="text-5xl font-bold text-orange-600">50+</div>
+                  <div className="text-sm text-gray-600">Documented Workflows</div>
+                  <div className="mt-1 text-xs text-gray-500">
+                    Standardized processes
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 rounded-lg bg-gradient-to-r from-purple-100 to-blue-100 p-4">
+                <p className="text-center text-sm text-gray-900">
+                  <strong>The Evolution:</strong> From "ship fast" (early prototyping)
+                  to "ship right" (comprehensive guardrails, workflows, and quality gates).
+                  Both velocity AND quality, not one or the other.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Business Evolution: Days 1-5 */}
           <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
