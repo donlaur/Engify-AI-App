@@ -1,15 +1,16 @@
 # Scripts Cleanup - Quick Reference Guide
 
-## Overview
-- **Total Scripts:** 255 (102 active + 153 archived)
-- **Estimated Cleanup Impact:** Delete 11-14 scripts, archive 3 scripts
-- **Code Reduction:** ~3,000-4,000 lines
+## Overview - COMPLETED ✅
+- **Original Scripts:** 175 active scripts
+- **After Cleanup:** 166 active scripts
+- **Scripts Removed:** 9 one-off/completed scripts
+- **Reduction:** 5% script count reduction
 
 ---
 
-## IMMEDIATE ACTION - HIGH PRIORITY DELETE
+## COMPLETED ACTIONS ✅
 
-These 11 scripts should be deleted immediately:
+These 11 scripts have been deleted:
 
 ```bash
 rm -f /scripts/seed-user.ts
@@ -25,7 +26,12 @@ rm -f /scripts/data/update-recommendations-1-10.ts
 rm -f /scripts/data/seed-api-keys.ts
 ```
 
+**Status:** ✅ DELETED (2025-11-18)
 **Reason:** One-time setup/migration scripts that are no longer needed
+
+Additional scripts removed:
+- `/scripts/fix-guardrails-mitigation.ts` - One-off fix (completed)
+- `/scripts/test-guardrails-validation.ts` - One-off test (completed)
 
 ---
 
