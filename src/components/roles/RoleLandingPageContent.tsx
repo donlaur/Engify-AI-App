@@ -521,33 +521,45 @@ export async function RoleLandingPageContent({
         <section className="relative overflow-hidden bg-gradient-to-br from-red-500 via-blue-600 via-purple-600 to-teal-500 dark:from-red-600 dark:via-blue-700 dark:via-purple-700 dark:to-teal-600">
           <div className="absolute inset-0 -z-10 bg-black/20" />
 
-          <div className="container relative z-10 pt-16 pb-20 md:pt-24 md:pb-28">
-            <div className="mx-auto max-w-4xl space-y-6 md:space-y-8 text-center">
+          <div className="container relative z-10 pt-12 pb-16 md:pt-16 md:pb-20">
+            <div className="mx-auto max-w-4xl space-y-4 md:space-y-6 text-center">
               <Badge
                 variant="secondary"
-                className="mb-4 border-white/30 bg-white/15 backdrop-blur-sm text-white shadow-lg"
+                className="mb-3 border-white/30 bg-white/15 backdrop-blur-sm text-white shadow-lg"
               >
                 <IconComponent className="mr-2 h-3.5 w-3.5" />
                 For {roleInfo.title}
               </Badge>
 
-              <h1 className="animate-fade-in text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+              <h1 className="animate-fade-in text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
                 {(() => {
                   // Use specific, concrete headlines based on real examples from role content
                   if (roleContent?.coreRole.title === 'Engineering Manager') {
                     return 'Synthesize a year\'s worth of project data into performance reviews in 30 minutes.';
                   }
                   if (roleContent?.coreRole.title === 'Product Manager') {
-                    return 'Identify the top 5 pain points from 50 customer interviews in minutes.';
+                    return 'Ship faster without slowing down engineering. Align stakeholders and prioritize features that drive results.';
                   }
                   if (roleInfo.title === 'Engineers') {
                     return 'Debug distributed systems with AI. Write production-ready code that passes review.';
                   }
                   if (roleInfo.title === 'Engineering Directors') {
-                    return 'Identify code review wait time as your primary bottleneck using 60 days of Jira data.';
+                    return 'Scale AI adoption without breaking the budget. Optimize token usage and reduce costs as teams grow.';
                   }
                   if (roleInfo.title === 'Product Directors') {
                     return 'Reduce stakeholder alignment time from 2 weeks to 2 days.';
+                  }
+                  if (roleInfo.title === 'VP of Engineering') {
+                    return 'Control AI costs as adoption scales. Optimize token usage and prevent budget overruns across engineering teams.';
+                  }
+                  if (roleInfo.title === 'VP of Product') {
+                    return 'Scale product velocity while managing AI costs. Optimize token usage and prevent budget surprises.';
+                  }
+                  if (roleInfo.title === 'CTO') {
+                    return 'Balance AI innovation with cost control. Optimize token usage and prevent enterprise AI bills from spiraling.';
+                  }
+                  if (roleInfo.title === 'Directors & C-Level' || roleInfo.title === 'C-Level Executives') {
+                    return 'Scale AI adoption across teams while controlling costs. Optimize token usage and prevent budget overruns.';
                   }
                   // Use real-life examples from role content when available
                   if (roleContent?.realLifeExamples && roleContent.realLifeExamples.length > 0) {
@@ -577,7 +589,7 @@ export async function RoleLandingPageContent({
                 })()}
               </h1>
 
-              <p className="mx-auto max-w-2xl text-lg md:text-xl text-white/90 leading-relaxed">
+              <p className="mx-auto max-w-2xl text-base md:text-lg text-white/90 leading-relaxed">
                 {roleContent?.howAIHelps.explanation || roleInfo.description}
               </p>
 
