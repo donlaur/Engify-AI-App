@@ -63,7 +63,7 @@ export function PainPointManagementPanel() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [pageSize, setPageSize] = useState(100); // Max allowed by API
+  const [pageSize] = useState(100); // Max allowed by API
 
   useEffect(() => {
     fetchPainPoints();
