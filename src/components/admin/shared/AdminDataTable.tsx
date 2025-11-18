@@ -10,7 +10,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
-import { Icons } from '@/lib/icons';
 
 /**
  * Column definition interface for AdminDataTable

@@ -137,7 +137,6 @@ export function PromptManagementPanel() {
   const {
     data: prompts,
     loading,
-    error,
     currentPage,
     totalPages,
     totalCount,
