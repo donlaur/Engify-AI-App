@@ -169,7 +169,7 @@ export function parsePerplexityResponse(response: PerplexityResponse): ParsedRes
         total: response.usage?.total_tokens || 0,
       },
       finishReason: choice?.finish_reason,
-      citations: response.citations, // Perplexity includes citations!
+      citations: (response as { citations?: unknown }).citations, // Perplexity includes citations!
     },
   };
 }

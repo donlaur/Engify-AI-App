@@ -171,7 +171,7 @@ export class GeminiAdapter implements AIProvider {
     model: string
   ) {
     try {
-      const { calculateCostFromDB } = await import('@/lib/ai/utils/model-cost');
+      const { calculateCostFromDB } = await import('@/lib/ai/utils/model-cost' as string);
       return await calculateCostFromDB(model, usage.promptTokens, usage.completionTokens);
     } catch (error) {
       loggingProvider.error('Failed to calculate cost for Gemini request', error, {

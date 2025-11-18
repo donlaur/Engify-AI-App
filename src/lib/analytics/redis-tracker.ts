@@ -133,7 +133,7 @@ export async function getTopPrompts(
 export async function syncStatsToMongoDB(): Promise<void> {
   try {
     const redis = getRedis();
-    const { getMongoDb } = await import('@/lib/db/mongodb');
+    const { getMongoDb } = await import('@/lib/db/mongodb' as string);
     const db = await getMongoDb();
     
     // Get all prompt keys (excluding daily keys)

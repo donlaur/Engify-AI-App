@@ -5,6 +5,7 @@ import { getCompletePillarPages } from '@/lib/data/pillar-pages';
 import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
 import { loadPainPointsFromJson } from '@/lib/workflows/load-pain-points-from-json';
 import { loadRecommendationsFromJson } from '@/lib/workflows/load-recommendations-from-json';
+import { getPromptSlug } from '@/lib/utils/slug';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
@@ -302,7 +303,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Individual prompt pages: /prompts/[slug] - use slug for better SEO
   // Filter out prompts with invalid slugs (empty, 'untitled', or missing)
-  const { getPromptSlug } = await import('@/lib/utils/slug');
   const promptPages = prompts
     .map((prompt) => {
       // Skip prompts without valid ID
