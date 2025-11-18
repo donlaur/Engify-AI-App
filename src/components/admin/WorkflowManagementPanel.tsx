@@ -73,8 +73,6 @@ export function WorkflowManagementPanel() {
     pageSize,
     filters,
     setFilters,
-    searchTerm,
-    setSearchTerm,
     goToPage,
     refresh,
   } = useAdminData<WorkflowWithMetadata>({
