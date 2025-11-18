@@ -505,36 +505,47 @@ export async function RoleLandingPageContent({
 
               <h1 className="animate-fade-in text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
                 {(() => {
-                  // Use concrete, specific examples instead of generic "AI slow" messaging
+                  // Use specific, concrete headlines based on real examples from role content
                   if (roleContent?.coreRole.title === 'Engineering Manager') {
-                    return 'Turn 4-hour performance reviews into 30-minute drafts.';
+                    return 'Synthesize a year\'s worth of project data into performance reviews in 30 minutes.';
                   }
                   if (roleContent?.coreRole.title === 'Product Manager') {
-                    return 'Synthesize 50 customer interviews in minutes.';
+                    return 'Identify the top 5 pain points from 50 customer interviews in minutes.';
                   }
                   if (roleInfo.title === 'Engineers') {
-                    return 'Debug distributed systems faster. Write production-ready code.';
+                    return 'Debug distributed systems with AI. Write production-ready code that passes review.';
                   }
                   if (roleInfo.title === 'Engineering Directors') {
-                    return 'Identify workflow bottlenecks with data. Lead organizations that ship.';
+                    return 'Identify code review wait time as your primary bottleneck using 60 days of Jira data.';
                   }
                   if (roleInfo.title === 'Product Directors') {
-                    return 'Align competing stakeholder priorities. Drive product strategy that wins.';
+                    return 'Reduce stakeholder alignment time from 2 weeks to 2 days.';
                   }
-                  // For roles with content, use the example if available
-                  if (roleContent?.howAIHelps.example) {
-                    const example = roleContent.howAIHelps.example;
-                    // Extract the concrete benefit from examples like "Instead of spending 4 hours..."
-                    if (example.includes('Instead of spending')) {
-                      const timeMatch = example.match(/Instead of spending ([\w\s]+),/);
-                      const resultMatch = example.match(/in ([\w\s]+)\./);
+                  // Use real-life examples from role content when available
+                  if (roleContent?.realLifeExamples && roleContent.realLifeExamples.length > 0) {
+                    const firstExample = roleContent.realLifeExamples[0];
+                    // Extract the concrete outcome from examples
+                    if (firstExample.includes('reduced') || firstExample.includes('from')) {
+                      const timeMatch = firstExample.match(/(?:reduced|from) ([\w\s]+) (?:to|by)/);
+                      const resultMatch = firstExample.match(/to ([\w\s]+) (?:by|using)/);
                       if (timeMatch && resultMatch) {
-                        return `Turn ${timeMatch[1]} into ${resultMatch[1]}.`;
+                        return `Reduce ${timeMatch[1]} to ${resultMatch[1]}.`;
                       }
                     }
                   }
-                  // Fallback
-                  return `${roleInfo.title}: Level up with AI-native workflows`;
+                  // Use the example from howAIHelps
+                  if (roleContent?.howAIHelps.example) {
+                    const example = roleContent.howAIHelps.example;
+                    // Extract concrete benefits
+                    if (example.includes('50 pages')) {
+                      return 'Transform 50 pages of raw feedback into structured performance reviews.';
+                    }
+                    if (example.includes('50 customer interview')) {
+                      return 'Analyze 50 customer interviews to identify top pain points and feature ideas.';
+                    }
+                  }
+                  // Fallback to role-specific messaging
+                  return `${roleInfo.title}: Solve real problems with AI workflows`;
                 })()}
               </h1>
 
