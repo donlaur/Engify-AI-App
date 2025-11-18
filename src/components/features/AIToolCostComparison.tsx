@@ -82,7 +82,7 @@ export function AIToolCostComparison({
                   <th className="text-left p-3 font-semibold">Usage Level</th>
                   <th className="text-right p-3 font-semibold">Monthly Requests</th>
                   <th className="text-right p-3 font-semibold">Base Cost</th>
-                  {tokenPricing && (
+                  {showTokenColumn && (
                     <th className="text-right p-3 font-semibold">Token Cost</th>
                   )}
                   <th className="text-right p-3 font-semibold">Total Cost</th>
@@ -91,7 +91,7 @@ export function AIToolCostComparison({
               </thead>
               <tbody>
                 {calculations.map((calc) => (
-                  <CostRow key={calc.tier} calculation={calc} tokenPricing={tokenPricing} />
+                  <CostRow key={calc.tier} calculation={calc} showTokenColumn={!!tokenPricing} />
                 ))}
               </tbody>
             </table>
@@ -100,7 +100,7 @@ export function AIToolCostComparison({
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">
             {calculations.map((calc) => (
-              <CostCard key={calc.tier} calculation={calc} tokenPricing={tokenPricing} />
+              <CostCard key={calc.tier} calculation={calc} />
             ))}
           </div>
 
@@ -133,10 +133,10 @@ export function AIToolCostComparison({
 
 function CostRow({
   calculation,
-  tokenPricing,
+  showTokenColumn,
 }: {
   calculation: CostCalculationResult;
-  tokenPricing?: TokenPricing;
+  showTokenColumn: boolean;
 }) {
   const { tier, tierDefinition, baseCost, tokenCost, totalCost, costPerRequest } = calculation;
 
@@ -150,7 +150,7 @@ function CostRow({
         {tierDefinition.monthlyRequests.toLocaleString()}
       </td>
       <td className="p-3 text-right">{formatCost(baseCost)}</td>
-      {tokenPricing && (
+      {showTokenColumn && (
         <td className="p-3 text-right">
           {tokenCost > 0 ? formatCost(tokenCost) : 'Included'}
         </td>
@@ -167,10 +167,8 @@ function CostRow({
 
 function CostCard({
   calculation,
-  tokenPricing,
 }: {
   calculation: CostCalculationResult;
-  tokenPricing?: TokenPricing;
 }) {
   const { tier, tierDefinition, baseCost, tokenCost, totalCost, costPerRequest, overageCost } =
     calculation;
