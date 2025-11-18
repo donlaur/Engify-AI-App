@@ -45,7 +45,7 @@ export interface UseAdminDataConfig {
 /**
  * API response structure from admin endpoints
  */
-interface AdminApiResponse<T> {
+interface AdminApiResponse {
   success: boolean;
   pagination?: PaginationMeta;
   [key: string]: any; // Dynamic data key (e.g., prompts, workflows, etc.)
@@ -209,7 +209,7 @@ export function useAdminData<T extends AdminDataItem>(
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const result: AdminApiResponse<T> = await response.json();
+        const result: AdminApiResponse = await response.json();
 
         if (!result.success) {
           throw new Error('API returned unsuccessful response');
