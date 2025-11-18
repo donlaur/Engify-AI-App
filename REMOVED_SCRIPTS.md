@@ -85,9 +85,30 @@ Scripts removed during cleanup. Can be recovered from git history if needed.
 
 ---
 
-**Total Removed:** 50 scripts (1 restored)
-**Reduction:** 175 → 126 scripts (28% reduction)
-**Lines Removed:** ~20,000+ lines
+## Cleanup Round 4 (2025-11-18) - Agent-Assisted
+
+### Admin Scripts (4 scripts)
+- `admin/check-beta-requests.js` - Duplicate of engify-admin.ts
+- `admin/check-db-direct.js` - Duplicate of db-stats.ts
+- `admin/extract-case-studies-examples-text.ts` - One-time extraction (completed)
+- `admin/create-user-gamification.ts` - Manual setup (not in workflow)
+
+### DB Scripts (4 scripts)
+- `db/seed-ai-tools.ts` - Replaced by sync-ai-models-latest.ts
+- `db/sync-ai-models-from-config.ts` - Replaced by sync-ai-models-latest.ts
+- `db/sync-ai-models-from-openrouter.ts` - Experimental (abandoned)
+- `db/update-ai-tools-2025-safe.ts` - One-time 2025 update (completed)
+
+### Security/Content Scripts (3 scripts)
+- `security/audit-secrets.js` - Overlaps with security-check.js
+- `content/audit-database-content.ts` - One-time audit
+- `content/rss-fetch.ts` - Manual utility (not in active workflow)
+
+---
+
+**Total Removed:** 61 scripts (1 restored)
+**Reduction:** 175 → 115 scripts (34% reduction)
+**Lines Removed:** ~25,000+ lines
 
 All scripts can be recovered from git history using:
 ```bash

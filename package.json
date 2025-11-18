@@ -122,7 +122,6 @@
     "aws:secrets:rotate": "tsx scripts/aws/rotate-secret.ts",
     "security:audit": "node scripts/security/security-check.js",
     "security:test-keys": "./scripts/security/test-ai-keys.sh",
-    "content:audit-db": "tsx scripts/content/audit-database-content.ts",
     "content:audit-prompts": "tsx scripts/content/audit-prompts-patterns.ts"
   },
   "dependencies": {
