@@ -8,6 +8,7 @@
  */
 
 import { Redis } from '@upstash/redis';
+import { getMongoDb } from '@/lib/db/mongodb';
 
 // Singleton Redis client
 let redis: Redis | null = null;
@@ -375,7 +376,6 @@ export async function trackAffiliateConversion(
 export async function syncAffiliateStatsToMongoDB(): Promise<void> {
   try {
     const redis = getRedis();
-    const { getMongoDb } = await import('@/lib/db/mongodb');
     const db = await getMongoDb();
 
     // Get all tool keys

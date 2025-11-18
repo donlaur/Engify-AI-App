@@ -19,6 +19,7 @@
 import { IPromptRepository } from '../repositories/interfaces/IRepository';
 import { PromptRepository } from '../repositories/mongodb/PromptRepository';
 import type { PromptTemplate } from '@/lib/db/schema';
+import { generateUniqueSlug } from '@/lib/utils/slug';
 
 // Use PromptTemplate as the Prompt type for the service
 type Prompt = PromptTemplate;
@@ -143,8 +144,6 @@ export class PromptService {
 
     // Generate slug from title if not provided
     // IMPORTANT: Do NOT append ID - slugs should be clean and SEO-friendly
-    const { generateUniqueSlug } = await import('@/lib/utils/slug');
-
     // Check for existing slugs to ensure uniqueness
     const existingPrompts = await this.promptRepository.findAll();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -238,8 +237,6 @@ export class PromptService {
     // Regenerate slug if title changed (clean slug, no ID)
     const updateData = { ...promptData };
     if (promptData.title && existingPrompt.title !== promptData.title) {
-      const { generateUniqueSlug } = await import('@/lib/utils/slug');
-
       // Check for existing slugs to ensure uniqueness
       const allPrompts = await this.promptRepository.findAll();
       const existingSlugs = new Set(

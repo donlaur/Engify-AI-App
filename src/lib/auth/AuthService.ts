@@ -319,7 +319,7 @@ export class AuthService {
       );
 
       // Send password reset email
-      const { sendPasswordResetEmail } = await import('@/lib/services/emailService');
+      const { sendPasswordResetEmail } = await import('@/lib/services/emailService' as string);
       const emailResult = await sendPasswordResetEmail(
         validatedEmail,
         resetToken,
@@ -476,7 +476,7 @@ export class AuthService {
     phoneNumber: string
   ): Promise<{ success: boolean; error?: string }> {
     // Use MFA service which integrates with Twilio
-    const { mfaService } = await import('@/lib/services/mfaService');
+    const { mfaService } = await import('@/lib/services/mfaService' as string);
     return mfaService.enableMFA(userId, phoneNumber);
   }
 
@@ -488,7 +488,7 @@ export class AuthService {
     phoneNumber: string,
     token: string
   ): Promise<boolean> {
-    const { mfaService } = await import('@/lib/services/mfaService');
+    const { mfaService } = await import('@/lib/services/mfaService' as string);
     const result = await mfaService.verifyMFACode(userId, phoneNumber, token);
     return result.success;
   }

@@ -10,6 +10,7 @@ import type { Db } from 'mongodb';
 import { Redis } from '@upstash/redis';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { logger } from '@/lib/logging/logger';
+import { seedPrompts } from '@/data/seed-prompts';
 
 // Redis cache key and TTL
 export const STATS_CACHE_KEY = 'site:stats:v1';
@@ -53,7 +54,6 @@ export interface StatsResponse {
  * Get static fallback stats (used when Redis and MongoDB are unavailable)
  */
 async function getStaticFallbackStats(): Promise<StatsResponse> {
-  const { seedPrompts } = await import('@/data/seed-prompts');
   const { promptPatterns } = await import('@/data/prompt-patterns');
   const { learningPathways } = await import('@/data/learning-pathways');
 
