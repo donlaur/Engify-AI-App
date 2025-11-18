@@ -42,7 +42,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 
 interface Prompt {
   _id: string;
