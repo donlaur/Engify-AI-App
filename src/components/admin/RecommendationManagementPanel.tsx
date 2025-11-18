@@ -13,14 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -45,8 +37,14 @@ import {
 import { Separator } from '@/components/ui/separator';
 import type { Recommendation } from '@/lib/workflows/recommendation-schema';
 import { useAdminData } from '@/hooks/admin/useAdminData';
+import { useAdminToast } from '@/hooks/admin/useAdminToast';
+import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
 import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
 import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
+import { AdminDataTable, type ColumnDef } from '@/components/admin/shared/AdminDataTable';
+import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
+import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
+import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
 import { formatAdminDate, calculateStats } from '@/lib/admin/utils';
 
 interface RecommendationWithMeta extends Recommendation {
@@ -61,9 +59,15 @@ export function RecommendationManagementPanel() {
   const [audienceFilter, setAudienceFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [selectedRecommendation, setSelectedRecommendation] = useState<RecommendationWithMeta | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Debounce search input to reduce API calls
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+
+  // Toast notifications for user feedback
+  const { success, error: showError } = useAdminToast();
 
   // Use the enterprise data hook for pagination and fetching
   const {
@@ -95,12 +99,19 @@ export function RecommendationManagementPanel() {
 
       if (res.ok) {
         refresh();
+        success(
+          'Status updated',
+          `Recommendation ${newStatus === 'published' ? 'published' : 'saved as draft'} successfully`
+        );
         if (selectedRecommendation?._id === recommendationId) {
           setSelectedRecommendation({ ...selectedRecommendation, status: newStatus as 'draft' | 'published' });
         }
+      } else {
+        showError('Failed to update status', 'Please try again');
       }
     } catch (error) {
       console.error('Failed to toggle status:', error);
+      showError('Network error', 'Unable to connect to server');
     }
   };
 
@@ -108,6 +119,69 @@ export function RecommendationManagementPanel() {
     setSelectedRecommendation(recommendation);
     setIsDrawerOpen(true);
   };
+
+  // Column definitions for AdminDataTable
+  const columns: ColumnDef<RecommendationWithMeta>[] = [
+    {
+      id: 'title',
+      label: 'Title',
+      width: 'w-[300px]',
+      render: (rec) => (
+        <button
+          onClick={() => handleView(rec)}
+          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+        >
+          {rec.title}
+        </button>
+      ),
+      cellClassName: 'font-medium'
+    },
+    {
+      id: 'category',
+      label: 'Category',
+      render: (rec) => (
+        <Badge variant="outline">
+          {rec.category.replace(/-/g, ' ')}
+        </Badge>
+      )
+    },
+    {
+      id: 'audience',
+      label: 'Audience',
+      render: (rec) => (
+        <div className="flex flex-wrap gap-1">
+          {rec.audience.slice(0, 2).map((aud) => (
+            <Badge key={aud} variant="secondary" className="text-xs">
+              {aud.replace(/-/g, ' ')}
+            </Badge>
+          ))}
+          {rec.audience.length > 2 && (
+            <Badge variant="secondary" className="text-xs">
+              +{rec.audience.length - 2}
+            </Badge>
+          )}
+        </div>
+      )
+    },
+    {
+      id: 'priority',
+      label: 'Priority',
+      render: (rec) => (
+        <Badge className={getPriorityColor(rec.priority)}>
+          {rec.priority}
+        </Badge>
+      )
+    },
+    {
+      id: 'updated',
+      label: 'Updated',
+      render: (rec) => (
+        <span className="text-sm text-muted-foreground">
+          {formatAdminDate(rec.updatedAt)}
+        </span>
+      )
+    }
+  ];
 
   const filteredRecommendations = recommendations.filter((rec) => {
     // Filter by category
@@ -122,9 +196,9 @@ export function RecommendationManagementPanel() {
     // Filter by status
     if (statusFilter !== 'all' && rec.status !== statusFilter) return false;
 
-    // Filter by search
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
+    // Filter by search using debounced value
+    if (debouncedSearch) {
+      const search = debouncedSearch.toLowerCase();
       return (
         rec.title.toLowerCase().includes(search) ||
         rec.slug.toLowerCase().includes(search)
@@ -158,9 +232,10 @@ export function RecommendationManagementPanel() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
+    <AdminErrorBoundary onError={(err) => console.error('Recommendation panel error:', err)}>
+      <div className="space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
         <AdminStatsCard label="Total" value={stats.total} />
         <AdminStatsCard label="Published" value={stats.published} variant="green" />
         <AdminStatsCard label="Draft" value={stats.draft} variant="gray" />
@@ -181,8 +256,8 @@ export function RecommendationManagementPanel() {
           <div className="grid gap-4 md:grid-cols-5">
             <Input
               placeholder="Search by title or slug..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="bg-white dark:bg-gray-800 md:col-span-1"
             />
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -240,100 +315,42 @@ export function RecommendationManagementPanel() {
             </Select>
           </div>
 
-          {/* Table */}
+          {/* Table with new components */}
           {loading ? (
-            <div className="py-8 text-center text-muted-foreground">
-              Loading recommendations...
-            </div>
+            <AdminTableSkeleton rows={5} columns={6} />
           ) : filteredRecommendations.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              No recommendations found
-            </div>
+            <AdminEmptyState
+              icon={<Icons.search className="h-12 w-12 text-muted-foreground" />}
+              title="No recommendations found"
+              description="Try adjusting your search or filters"
+              action={{
+                label: "Clear filters",
+                onClick: () => {
+                  setCategoryFilter('all');
+                  setAudienceFilter('all');
+                  setPriorityFilter('all');
+                  setStatusFilter('all');
+                  setSearchInput('');
+                }
+              }}
+            />
           ) : (
-            <div className="overflow-x-auto rounded-md border bg-white dark:bg-gray-900">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50 dark:bg-gray-800">
-                    <TableHead className="w-[80px] font-semibold">
-                      Status
-                    </TableHead>
-                    <TableHead className="w-[300px] font-semibold">
-                      Title
-                    </TableHead>
-                    <TableHead className="font-semibold">Category</TableHead>
-                    <TableHead className="font-semibold">Audience</TableHead>
-                    <TableHead className="font-semibold">Priority</TableHead>
-                    <TableHead className="font-semibold">Updated</TableHead>
-                    <TableHead className="text-right font-semibold">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredRecommendations.map((rec) => (
-                    <TableRow
-                      key={rec._id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                      <TableCell>
-                        <Switch
-                          checked={rec.status === 'published'}
-                          onCheckedChange={() =>
-                            handleToggleStatus(rec._id, rec.status)
-                          }
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <button
-                          onClick={() => handleView(rec)}
-                          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
-                        >
-                          {rec.title}
-                        </button>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {rec.category.replace(/-/g, ' ')}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {rec.audience.slice(0, 2).map((aud) => (
-                            <Badge key={aud} variant="secondary" className="text-xs">
-                              {aud.replace(/-/g, ' ')}
-                            </Badge>
-                          ))}
-                          {rec.audience.length > 2 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{rec.audience.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getPriorityColor(rec.priority)}>
-                          {rec.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
-                          {formatAdminDate(rec.updatedAt)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleView(rec)}
-                        >
-                          <Icons.eye className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <AdminDataTable
+              data={filteredRecommendations}
+              columns={columns}
+              statusField="status"
+              onStatusToggle={handleToggleStatus}
+              renderRowActions={(rec) => (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleView(rec)}
+                >
+                  <Icons.eye className="h-4 w-4" />
+                </Button>
+              )}
+              onRowClick={handleView}
+            />
           )}
 
           {/* Pagination Controls */}
@@ -682,6 +699,7 @@ export function RecommendationManagementPanel() {
           )}
         </SheetContent>
       </Sheet>
-    </div>
+      </div>
+    </AdminErrorBoundary>
   );
 }
