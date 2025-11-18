@@ -1,147 +1,88 @@
 /**
- * Health Check Endpoint
+ * Comprehensive Health Check Endpoint
  *
- * Provides comprehensive health status for all services:
+ * Enterprise-grade health monitoring for:
  * - Database (MongoDB)
- * - QStash message queue
- * - Redis (if configured)
- * - External API connectivity
+ * - Cache (Redis)
+ * - Message Queue (QStash)
+ * - AI Providers (OpenAI, Anthropic, Gemini, Groq)
+ * - Performance Metrics
+ * - Error Tracking
+ * - Memory Usage
  *
  * Used for monitoring, load balancer health checks, and uptime tracking
  */
 
 import { NextResponse } from 'next/server';
-import { checkDbHealth } from '@/lib/db/health';
+import { healthCheckManager } from '@/lib/observability/health-checks';
 import { getREDSummary } from '@/lib/observability/metrics';
+import { performanceMonitor } from '@/lib/observability/performance-monitor';
+import { errorTracker } from '@/lib/observability/error-tracker';
+import { withHealthCheck } from '@/lib/observability/middleware';
 
-async function checkQStashHealth(): Promise<{
-  status: 'healthy' | 'unhealthy';
-  latency: number;
-  error?: string;
-}> {
-  const startTime = Date.now();
+async function handler() {
   try {
-    const qstashToken = process.env.QSTASH_TOKEN;
-    if (!qstashToken) {
-      return {
-        status: 'unhealthy',
-        latency: Date.now() - startTime,
-        error: 'QStash token not configured',
-      };
-    }
+    // Get comprehensive health status
+    const health = await healthCheckManager.checkAll();
 
-    // Simple health check - verify QStash is accessible
-    // In production, you might ping QStash API health endpoint
-    const latency = Date.now() - startTime;
-    return {
-      status: 'healthy',
-      latency,
-    };
-  } catch (error) {
-    return {
-      status: 'unhealthy',
-      latency: Date.now() - startTime,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-}
-
-async function checkRedisHealth(): Promise<{
-  status: 'healthy' | 'unhealthy' | 'not_configured';
-  latency: number;
-  error?: string;
-}> {
-  const startTime = Date.now();
-  try {
-    // Check if Redis URL is configured (Upstash Redis)
-    const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-    if (!redisUrl) {
-      return {
-        status: 'not_configured',
-        latency: Date.now() - startTime,
-      };
-    }
-
-    // In production, ping Redis here
-    // For now, just check if URL is present
-    const latency = Date.now() - startTime;
-    return {
-      status: 'healthy',
-      latency,
-    };
-  } catch (error) {
-    return {
-      status: 'unhealthy',
-      latency: Date.now() - startTime,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-}
-
-export async function GET() {
-  try {
-    // Check all services in parallel
-    const [dbHealth, qstashHealth, redisHealth] = await Promise.all([
-      checkDbHealth(),
-      checkQStashHealth(),
-      checkRedisHealth(),
-    ]);
-
-    // Determine overall health status
-    const criticalServices = [dbHealth];
-    const degradedServices = [qstashHealth, redisHealth].filter(
-      (s) => s.status === 'unhealthy'
-    );
-
-    let overallStatus: 'ok' | 'degraded' | 'error' = 'ok';
-    if (criticalServices.some((s) => s.status !== 'healthy')) {
-      overallStatus = 'error';
-    } else if (degradedServices.length > 0) {
-      overallStatus = 'degraded';
-    }
-
+    // Get RED metrics summary
     const redSummary = getREDSummary();
 
-    const health = {
-      status: overallStatus,
-      timestamp: new Date().toISOString(),
-      services: {
-        database: {
-          status: dbHealth.status,
-          latency: `${dbHealth.latency}ms`,
-          ...(dbHealth.error && { error: dbHealth.error }),
-        },
-        qstash: {
-          status: qstashHealth.status,
-          latency: `${qstashHealth.latency}ms`,
-          ...(qstashHealth.error && { error: qstashHealth.error }),
-        },
-        redis: {
-          status: redisHealth.status,
-          latency: `${redisHealth.latency}ms`,
-          ...(redisHealth.error && { error: redisHealth.error }),
-        },
+    // Get error summary
+    const errorSummary = errorTracker.getErrorSummary();
+
+    // Get memory usage
+    const memoryUsage = performanceMonitor.getFormattedMemoryUsage();
+
+    // Get system uptime
+    const uptime = healthCheckManager.getUptime();
+
+    // Build comprehensive health response
+    const healthResponse = {
+      status: health.status,
+      timestamp: health.timestamp,
+      uptime: {
+        milliseconds: uptime,
+        seconds: Math.floor(uptime / 1000),
+        minutes: Math.floor(uptime / 1000 / 60),
       },
-      metrics: {
-        routes: redSummary.routes.slice(0, 5), // Top 5 routes
-        providers: redSummary.providers,
+      services: health.services,
+      performance: {
+        memory: memoryUsage,
+        topRoutes: redSummary.routes.slice(0, 10),
+        aiProviders: redSummary.providers,
       },
-      version: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
-      environment: process.env.NODE_ENV || 'development',
+      errors: {
+        total: errorSummary.totalErrors,
+        critical: errorSummary.criticalErrors,
+        alertWorthy: errorSummary.alertWorthyErrors,
+        byCategory: errorSummary.errorsByCategory,
+        topErrors: errorSummary.topErrors,
+      },
+      metadata: health.metadata,
     };
 
+    // Determine HTTP status code based on overall health
     const statusCode =
-      overallStatus === 'ok' ? 200 : overallStatus === 'degraded' ? 503 : 500;
+      health.status === 'healthy'
+        ? 200
+        : health.status === 'degraded'
+        ? 200 // Return 200 for degraded but functional
+        : 503; // Service unavailable for unhealthy
 
-    return NextResponse.json(health, { status: statusCode });
+    return NextResponse.json(healthResponse, { status: statusCode });
   } catch (error) {
     return NextResponse.json(
       {
         status: 'error',
         timestamp: new Date().toISOString(),
         error: error instanceof Error ? error.message : 'Unknown error',
+        message: 'Health check failed',
       },
       { status: 500 }
     );
   }
 }
+
+// Export wrapped handler (skips logging/metrics for health checks)
+export const GET = withHealthCheck(handler);

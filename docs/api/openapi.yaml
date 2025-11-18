@@ -1,0 +1,897 @@
+openapi: 3.0.3
+info:
+  title: Engify AI API
+  description: |
+    Enterprise-grade API for the Engify AI prompt engineering platform.
+
+    ## Features
+    - 🔐 Secure authentication with NextAuth.js
+    - 🎯 Rate limiting for fair usage
+    - 📊 AI-powered chat with RAG (Retrieval Augmented Generation)
+    - 🎨 100+ expert-crafted prompts
+    - 🧩 15+ proven prompt patterns
+    - 🔧 Multi-provider AI execution (OpenAI, Claude, Gemini, Groq, Replicate)
+
+    ## Authentication
+    Most endpoints require authentication via session cookies (NextAuth.js).
+    Admin endpoints require elevated privileges.
+
+    ## Rate Limits
+    - **Anonymous**: 20 requests/hour, 50 requests/day
+    - **Authenticated**: 100 requests/hour, 500 requests/day
+    - **Pro**: 1000 requests/hour, 5000 requests/day
+
+    Rate limit headers are included in responses:
+    - `X-RateLimit-Limit`: Maximum requests allowed
+    - `X-RateLimit-Remaining`: Requests remaining in current window
+    - `X-RateLimit-Reset`: Time when the rate limit resets (ISO 8601)
+
+  version: 2.0.0
+  contact:
+    name: Engify AI Support
+    email: donlaur@engify.ai
+    url: https://engify.ai
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://engify.ai/api
+    description: Production server
+  - url: http://localhost:3000/api
+    description: Development server
+
+tags:
+  - name: Chat
+    description: AI-powered chat with RAG support
+  - name: Patterns
+    description: Prompt pattern library
+  - name: Feedback
+    description: User feedback and ratings
+  - name: AI Execution
+    description: Multi-provider AI execution (v2)
+  - name: Authentication
+    description: User authentication endpoints
+  - name: Admin
+    description: Administrative operations (requires admin role)
+
+paths:
+  /chat:
+    post:
+      tags:
+        - Chat
+      summary: Send chat message
+      description: |
+        Send a message to the AI assistant. Supports RAG (Retrieval Augmented Generation)
+        to provide contextually relevant responses from the knowledge base.
+
+        **Rate Limits:**
+        - Anonymous: 20/hour
+        - Authenticated: 100/hour
+
+        **Features:**
+        - Automatic context retrieval from prompt library
+        - Fallback to knowledge-based responses
+        - Sanitized inputs and outputs
+      operationId: sendChatMessage
+      security:
+        - sessionAuth: []
+        - anonymous: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - messages
+              properties:
+                messages:
+                  type: array
+                  description: Chat message history
+                  items:
+                    type: object
+                    required:
+                      - role
+                      - content
+                    properties:
+                      role:
+                        type: string
+                        enum: [user, assistant, system]
+                        description: Message role
+                      content:
+                        type: string
+                        description: Message content
+                        maxLength: 10000
+                useRAG:
+                  type: boolean
+                  default: true
+                  description: Enable RAG for contextual responses
+            examples:
+              basicChat:
+                summary: Basic chat message
+                value:
+                  messages:
+                    - role: user
+                      content: What is chain of thought prompting?
+                  useRAG: true
+              conversationWithHistory:
+                summary: Chat with history
+                value:
+                  messages:
+                    - role: user
+                      content: Tell me about prompt patterns
+                    - role: assistant
+                      content: Prompt patterns are proven techniques...
+                    - role: user
+                      content: Which one is best for complex reasoning?
+                  useRAG: true
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+              description: Maximum requests allowed
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+              description: Requests remaining
+            X-RateLimit-Reset:
+              schema:
+                type: string
+                format: date-time
+              description: Rate limit reset time
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: AI response
+                  sources:
+                    type: array
+                    description: Knowledge base sources used
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        score:
+                          type: number
+                  usedRAG:
+                    type: boolean
+                    description: Whether RAG was used
+              examples:
+                successWithRAG:
+                  summary: Success with RAG
+                  value:
+                    message: "Chain of Thought (CoT) is one of our most powerful patterns..."
+                    sources:
+                      - title: "Chain of Thought Pattern"
+                        score: 0.95
+                      - title: "Advanced Reasoning Techniques"
+                        score: 0.87
+                    usedRAG: true
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds to wait before retrying
+            X-RateLimit-Reset:
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: free_trial_limit_reached
+                  message:
+                    type: string
+                    example: You've reached the limit of your free trial. Sign in to continue.
+                  resetAt:
+                    type: string
+                    format: date-time
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /patterns:
+    get:
+      tags:
+        - Patterns
+      summary: Get prompt patterns
+      description: |
+        Retrieve prompt patterns from the library. Supports filtering by category and level.
+
+        **Categories:**
+        - FOUNDATIONAL: Basic patterns for beginners
+        - STRUCTURAL: Patterns for organizing prompts
+        - COGNITIVE: Advanced reasoning patterns
+        - ITERATIVE: Patterns for refinement
+
+        **Levels:**
+        - beginner: Entry-level patterns
+        - intermediate: Moderate complexity
+        - advanced: Expert-level patterns
+      operationId: getPatterns
+      security:
+        - sessionAuth: []
+        - anonymous: []
+      parameters:
+        - name: category
+          in: query
+          description: Filter by category
+          schema:
+            type: string
+            enum: [FOUNDATIONAL, STRUCTURAL, COGNITIVE, ITERATIVE]
+        - name: level
+          in: query
+          description: Filter by difficulty level
+          schema:
+            type: string
+            enum: [beginner, intermediate, advanced]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Pattern'
+                  count:
+                    type: integer
+              examples:
+                allPatterns:
+                  summary: All patterns
+                  value:
+                    success: true
+                    data:
+                      - id: "1"
+                        name: "Chain of Thought"
+                        category: "COGNITIVE"
+                        level: "intermediate"
+                        description: "Break down complex reasoning into steps"
+                      - id: "2"
+                        name: "Few-Shot Learning"
+                        category: "FOUNDATIONAL"
+                        level: "beginner"
+                        description: "Teach by example"
+                    count: 2
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /feedback/rating:
+    post:
+      tags:
+        - Feedback
+      summary: Submit detailed rating
+      description: |
+        Submit a detailed 1-5 star rating for a prompt. Supports multi-dimensional ratings
+        and prevents duplicate submissions within 24 hours.
+
+        **Rate Limits:** Stricter limits apply to prevent spam
+
+        **Dimensions:**
+        - clarity: How clear is the prompt?
+        - usefulness: How useful is it?
+        - completeness: How complete is it?
+        - accuracy: How accurate are the results?
+      operationId: submitRating
+      security:
+        - sessionAuth: []
+        - anonymous: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - promptId
+                - rating
+              properties:
+                promptId:
+                  type: string
+                  description: Prompt ID
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  description: Overall rating (1-5 stars)
+                dimensions:
+                  type: object
+                  description: Multi-dimensional ratings
+                  properties:
+                    clarity:
+                      type: integer
+                      minimum: 1
+                      maximum: 5
+                    usefulness:
+                      type: integer
+                      minimum: 1
+                      maximum: 5
+                    completeness:
+                      type: integer
+                      minimum: 1
+                      maximum: 5
+                    accuracy:
+                      type: integer
+                      minimum: 1
+                      maximum: 5
+                usageContext:
+                  type: object
+                  description: Context of usage
+                  properties:
+                    aiModel:
+                      type: string
+                      description: AI model used
+                    useCase:
+                      type: string
+                      description: Use case
+                comment:
+                  type: string
+                  maxLength: 1000
+                  description: Optional comment
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Tags for categorization
+                suggestedImprovements:
+                  type: array
+                  items:
+                    type: string
+                  description: Suggested improvements
+            examples:
+              detailedRating:
+                summary: Detailed rating with dimensions
+                value:
+                  promptId: "prompt_123"
+                  rating: 5
+                  dimensions:
+                    clarity: 5
+                    usefulness: 5
+                    completeness: 4
+                    accuracy: 5
+                  usageContext:
+                    aiModel: "gpt-4"
+                    useCase: "code generation"
+                  comment: "Excellent prompt for generating React components"
+                  tags: ["react", "frontend"]
+      responses:
+        '200':
+          description: Rating submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Feedback
+      summary: Get ratings for a prompt
+      description: Retrieve aggregated ratings and statistics for a specific prompt
+      operationId: getRatings
+      security:
+        - sessionAuth: []
+        - anonymous: []
+      parameters:
+        - name: promptId
+          in: query
+          required: true
+          description: Prompt ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedbackAggregate'
+        '400':
+          description: Missing promptId parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v2/ai/execute:
+    post:
+      tags:
+        - AI Execution
+      summary: Execute AI request (v2)
+      description: |
+        Execute an AI request using any supported provider. Demonstrates SOLID principles
+        with factory pattern and provider abstraction.
+
+        **Supported Providers:**
+        - openai: OpenAI GPT models
+        - claude: Anthropic Claude models
+        - gemini: Google Gemini models
+        - groq: Groq (fast inference)
+        - replicate: Replicate models
+
+        **Features:**
+        - Provider abstraction (works with any provider)
+        - Cost tracking
+        - Token usage tracking
+        - Workbench integration
+        - RBAC (requires workbench:ai_execution permission)
+      operationId: executeAI
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+              properties:
+                prompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 10000
+                  description: User prompt
+                provider:
+                  type: string
+                  default: openai
+                  description: AI provider to use
+                systemPrompt:
+                  type: string
+                  description: System prompt (optional)
+                temperature:
+                  type: number
+                  minimum: 0
+                  maximum: 2
+                  default: 0.7
+                  description: Sampling temperature
+                maxTokens:
+                  type: number
+                  minimum: 1
+                  maximum: 4096
+                  default: 2000
+                  description: Maximum tokens to generate
+                toolId:
+                  type: string
+                  description: Workbench tool ID (for cost tracking)
+                runId:
+                  type: string
+                  description: Workbench run ID (for replay detection)
+            examples:
+              basicExecution:
+                summary: Basic execution with OpenAI
+                value:
+                  prompt: "Write a Python function to calculate fibonacci numbers"
+                  provider: "openai"
+                  temperature: 0.7
+                  maxTokens: 500
+              withSystemPrompt:
+                summary: Execution with system prompt
+                value:
+                  prompt: "Explain quantum computing"
+                  provider: "claude"
+                  systemPrompt: "You are a physics professor. Explain concepts clearly and concisely."
+                  temperature: 0.5
+                  maxTokens: 1000
+      responses:
+        '200':
+          description: Successful execution
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  response:
+                    type: string
+                    description: AI response
+                  usage:
+                    type: object
+                    properties:
+                      promptTokens:
+                        type: integer
+                      completionTokens:
+                        type: integer
+                      totalTokens:
+                        type: integer
+                  cost:
+                    type: object
+                    properties:
+                      prompt:
+                        type: number
+                      completion:
+                        type: number
+                      total:
+                        type: number
+                  latency:
+                    type: number
+                    description: Response time in milliseconds
+                  provider:
+                    type: string
+                  model:
+                    type: string
+                  runId:
+                    type: string
+                    nullable: true
+        '400':
+          description: Invalid request or provider not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  details:
+                    type: array
+                    items:
+                      type: object
+                  availableProviders:
+                    type: array
+                    items:
+                      type: string
+        '403':
+          description: Permission denied or budget exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  runId:
+                    type: string
+                  maxCostCents:
+                    type: integer
+                  actualCostCents:
+                    type: integer
+        '409':
+          description: Replay detected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  runId:
+                    type: string
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - AI Execution
+      summary: List available providers
+      description: Get list of available AI providers and their categories
+      operationId: listProviders
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  providers:
+                    type: array
+                    items:
+                      type: string
+                  categories:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: string
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Create new user account
+      description: |
+        Register a new user account. Passwords are hashed with bcrypt.
+        Supports email verification flow.
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User email address
+                password:
+                  type: string
+                  minLength: 8
+                  description: User password (min 8 characters)
+                name:
+                  type: string
+                  description: User display name
+            examples:
+              newUser:
+                summary: New user signup
+                value:
+                  email: "developer@example.com"
+                  password: "SecurePass123!"
+                  name: "John Developer"
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
+                      name:
+                        type: string
+        '400':
+          description: Invalid request or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
+      description: |
+        NextAuth.js session cookie. Automatically set after successful login.
+        No need to manually include in requests when using a browser.
+    anonymous:
+      type: http
+      scheme: bearer
+      description: Anonymous access (no authentication required, but rate limited)
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code or type
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: array
+          description: Additional error details
+          items:
+            type: object
+      required:
+        - error
+      example:
+        error: "validation_error"
+        message: "Invalid input provided"
+        details:
+          - field: "email"
+            issue: "Invalid email format"
+
+    Pattern:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Pattern ID
+        name:
+          type: string
+          description: Pattern name
+        category:
+          type: string
+          enum: [FOUNDATIONAL, STRUCTURAL, COGNITIVE, ITERATIVE]
+          description: Pattern category
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Difficulty level
+        description:
+          type: string
+          description: Pattern description
+        examples:
+          type: array
+          items:
+            type: string
+          description: Usage examples
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags for categorization
+      required:
+        - id
+        - name
+        - category
+        - level
+
+    FeedbackAggregate:
+      type: object
+      properties:
+        promptId:
+          type: string
+        quickFeedback:
+          type: object
+          properties:
+            likes:
+              type: integer
+            saves:
+              type: integer
+            helpful:
+              type: integer
+            notHelpful:
+              type: integer
+            shares:
+              type: integer
+            totalInteractions:
+              type: integer
+        detailedRatings:
+          type: object
+          properties:
+            averageRating:
+              type: number
+            ratingCount:
+              type: integer
+            ratingDistribution:
+              type: object
+              properties:
+                stars1:
+                  type: integer
+                stars2:
+                  type: integer
+                stars3:
+                  type: integer
+                stars4:
+                  type: integer
+                stars5:
+                  type: integer
+            averageClarity:
+              type: number
+              nullable: true
+            averageUsefulness:
+              type: number
+              nullable: true
+            averageCompleteness:
+              type: number
+              nullable: true
+            averageAccuracy:
+              type: number
+              nullable: true
+        overallScore:
+          type: number
+          description: Overall quality score (0-100)
+        confidenceScore:
+          type: number
+          description: Confidence in the score (0-1)
+        qualityFlags:
+          type: object
+          properties:
+            isHighQuality:
+              type: boolean
+            needsImprovement:
+              type: boolean
+            hasIssues:
+              type: boolean
+            isPopular:
+              type: boolean
+        ragReadiness:
+          type: object
+          properties:
+            isReady:
+              type: boolean
+            score:
+              type: number
+            reasons:
+              type: array
+              items:
+                type: string

@@ -21,7 +21,7 @@
  * @module EnhancedUserService
  */
 
-import { ObjectId } from 'mongodb';
+import { ObjectId, OptionalId } from 'mongodb';
 import { EnhancedUserRepository } from '@/lib/repositories/EnhancedUserRepository';
 import { loggingProvider } from '@/lib/providers/LoggingProvider';
 import { dbProvider } from '@/lib/providers/DatabaseProvider';
@@ -72,7 +72,7 @@ export class EnhancedUserService {
         plan: input.plan || 'free',
         createdAt: now,
         updatedAt: now,
-      } as Partial<User>);
+      } as OptionalId<User>);
 
       logger.info('User created', { userId: user._id?.toString(), email: user.email });
 

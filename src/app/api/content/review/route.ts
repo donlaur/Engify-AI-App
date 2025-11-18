@@ -10,8 +10,10 @@ import { auth } from '@/lib/auth';
 import {
   ContentReviewService,
   generateAndReviewArticle,
+  REVIEW_AGENTS,
 } from '@/lib/content/multi-agent-review';
 import { z } from 'zod';
+import { getUserService } from '@/lib/di/Container';
 
 const ReviewRequestSchema = z.object({
   content: z.string().min(100, 'Content must be at least 100 characters'),
@@ -39,7 +41,6 @@ export async function POST(request: NextRequest) {
     }
 
     // RBAC check: Require admin or org_admin role
-    const { getUserService } = await import('@/lib/di/Container');
     const userService = getUserService();
     const user = await userService.getUserById(session.user.id);
 
@@ -146,8 +147,6 @@ export async function GET(_request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const { REVIEW_AGENTS } = await import('@/lib/content/multi-agent-review');
 
     return NextResponse.json({
       agents: REVIEW_AGENTS.map((agent) => ({

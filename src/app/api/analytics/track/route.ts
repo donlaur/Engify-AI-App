@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { trackPromptEvent } from '@/lib/analytics/redis-tracker';
+import { trackPromptEvent, getPromptStats, getTopPrompts } from '@/lib/analytics/redis-tracker';
 import {
   checkRateLimit,
   getClientIp,
@@ -83,13 +83,11 @@ export async function GET(req: NextRequest) {
 
     if (promptId) {
       // Get stats from Redis (fast, real-time)
-      const { getPromptStats } = await import('@/lib/analytics/redis-tracker');
       const stats = await getPromptStats(promptId);
       return NextResponse.json({ stats });
     }
 
     // Get top prompts from Redis
-    const { getTopPrompts } = await import('@/lib/analytics/redis-tracker');
     const topPrompts = await getTopPrompts('execute', 10);
     return NextResponse.json({ topPrompts });
     

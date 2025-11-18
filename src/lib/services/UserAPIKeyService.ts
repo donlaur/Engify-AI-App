@@ -24,7 +24,6 @@
  * @module UserAPIKeyService
  */
 
-import { ObjectId } from 'mongodb';
 import crypto from 'crypto';
 import { APIKeyRepository, type APIKey } from '@/lib/repositories/APIKeyRepository';
 import { loggingProvider } from '@/lib/providers/LoggingProvider';

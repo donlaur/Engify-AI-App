@@ -31,8 +31,8 @@ export class QStashMessageQueue implements IMessageQueue {
   constructor(
     public readonly name: string,
     public readonly type: 'redis' = 'redis',
-    // @ts-expect-error - intentionally unused, kept for potential future use
-    private _config: QueueConfig
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    private _config: QueueConfig // Reserved for future use
   ) {
     this.baseUrl = process.env.QSTASH_URL || 'https://qstash.upstash.io/v2';
     this.authToken = process.env.QSTASH_TOKEN || '';

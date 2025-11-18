@@ -10,6 +10,9 @@ import { auth } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { z } from 'zod';
 import { CreatorAgent } from '@/lib/agents/CreatorAgent';
+import { getDb } from '@/lib/mongodb';
+import { Collections } from '@/lib/db/schema';
+import { ObjectId } from 'mongodb';
 
 const GenerateRequestSchema = z.object({
   prompt: z.string().min(10),
@@ -82,10 +85,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch the generated content from the database
-    const { getDb } = await import('@/lib/mongodb');
-    const { Collections } = await import('@/lib/db/schema');
-    const { ObjectId } = await import('mongodb');
-
     const db = await getDb();
     const contentDoc = await db
       .collection(Collections.WEB_CONTENT)

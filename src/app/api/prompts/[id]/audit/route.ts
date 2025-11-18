@@ -7,25 +7,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { ObjectId } from 'mongodb';
-import { auth } from '@/lib/auth';
+// import { auth } from '@/lib/auth'; // Disabled - audit functionality only via CLI
 
 // Audit tool version - must match the version in audit-prompts-patterns.ts
-const AUDIT_TOOL_VERSION = '1.1';
+// const AUDIT_TOOL_VERSION = '1.1'; // Disabled - only used in CLI audits
 
-// Dynamic import using webpack alias configured in next.config.js
-async function getAuditor() {
-  try {
-    // Use the webpack alias configured in next.config.js
-    const auditModule = await import(
-      /* webpackIgnore: true */
-      '@/scripts/content/audit-prompts-patterns'
-    );
-    return auditModule.PromptPatternAuditor;
-  } catch (error) {
-    console.error('Error importing auditor:', error);
-    throw new Error(`Failed to import audit module: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-}
+// Dynamic import disabled in production builds - audit functionality available via CLI only
+// To run audits, use: npm run content:audit-prompts
+// Original function removed - was: async function getAuditor() {...}
 
 export async function GET(
   _request: NextRequest,
@@ -33,46 +22,30 @@ export async function GET(
 ) {
   try {
     const db = await getMongoDb();
-    const { id } = await params;
-    
-    // Find prompt by id or slug
-    const prompt = await db.collection('prompts').findOne({
-      $or: [
-        { id },
-        { slug: id },
-        ...(ObjectId.isValid(id) ? [{ _id: new ObjectId(id) }] : []),
-      ],
-    });
+    const { id: promptId } = await params;
 
-    if (!prompt) {
+    if (!ObjectId.isValid(promptId)) {
+      return NextResponse.json({ error: 'Invalid prompt ID' }, { status: 400 });
+    }
+
+    // Fetch the latest audit result from database
+    const auditResult = await db.collection('prompt_audit_results').findOne(
+      { promptId },
+      { sort: { auditedAt: -1 } }
+    );
+
+    if (!auditResult) {
       return NextResponse.json(
-        { error: 'Prompt not found' },
+        { error: 'No audit results found for this prompt' },
         { status: 404 }
       );
     }
 
-    // Check for audit results in a dedicated collection
-    const auditResult = await db.collection('prompt_audit_results').findOne({
-      promptId: prompt.id || prompt.slug || prompt._id.toString(),
-    }, {
-      sort: { auditVersion: -1 } // Get latest version
-    });
-
-    if (!auditResult) {
-      return NextResponse.json({
-        hasAudit: false,
-        promptId: prompt.id || prompt.slug,
-      });
-    }
-
     return NextResponse.json({
-      hasAudit: true,
-      promptId: prompt.id || prompt.slug,
-      auditResult: {
+      success: true,
+      audit: {
         auditVersion: auditResult.auditVersion,
         auditDate: auditResult.auditDate,
-        auditToolVersion: auditResult.auditToolVersion,
-        auditType: auditResult.auditType,
         overallScore: auditResult.overallScore,
         categoryScores: auditResult.categoryScores,
         agentReviews: auditResult.agentReviews,
@@ -93,87 +66,29 @@ export async function GET(
 }
 
 export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  _params: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Audit functionality disabled in production builds
+    return NextResponse.json({
+      error: 'Audit functionality is only available via CLI',
+      message: 'To run prompt audits, use: npm run content:audit-prompts',
+      cli_command: 'npm run content:audit-prompts',
+    }, { status: 501 }); // 501 Not Implemented
+
+    /* Original code disabled for production builds:
     const session = await auth();
     const db = await getMongoDb();
     const { id } = await params;
-    
-    // Find prompt
-    const prompt = await db.collection('prompts').findOne({
-      $or: [
-        { id },
-        { slug: id },
-        ...(ObjectId.isValid(id) ? [{ _id: new ObjectId(id) }] : []),
-      ],
-    });
 
-    if (!prompt) {
-      return NextResponse.json(
-        { error: 'Prompt not found' },
-        { status: 404 }
-      );
-    }
+    const prompt = await db.collection('prompts').findOne({...});
+    if (!prompt) {...}
 
-    // Run audit
-    const AuditorClass = await getAuditor();
-    // API route defaults to full audit (can be extended to accept quick mode via query param)
-    const quickMode = new URL(request.url).searchParams.get('quick') === 'true';
-    const auditor = new AuditorClass('system', { quickMode });
-    const auditResult = await auditor.auditPrompt(prompt);
-
-    // Get existing audit to determine audit count (not prompt revision)
-    const existingAudit = await db.collection('prompt_audit_results').findOne(
-      { promptId: prompt.id || prompt.slug || prompt._id.toString() },
-      { sort: { auditVersion: -1 } }
-    );
-
-    // Calculate audit version (audit count - can be multiple audits per prompt revision)
-    // This tracks how many times we've audited this prompt (not prompt content changes)
-    const auditVersion = existingAudit ? (existingAudit.auditVersion || 0) + 1 : 1;
-    const auditDate = new Date();
-    const promptRevision = prompt.currentRevision || 1;
-    
-    // Determine audit type based on mode
-    const auditType = quickMode ? 'quick' : 'full';
-
-    // Save audit result to database
-    // Note: This is just an audit record, NOT a prompt content update
-    await db.collection('prompt_audit_results').insertOne({
-      promptId: prompt.id || prompt.slug || prompt._id.toString(),
-      promptTitle: prompt.title,
-      promptRevision: promptRevision, // Track which prompt revision this audit is for
-      auditVersion, // Audit count (how many times we've audited)
-      auditDate,
-      auditToolVersion: AUDIT_TOOL_VERSION, // Version of audit tool used (e.g., "1.1")
-      auditType, // 'quick' or 'full' - indicates which audit mode was used
-      overallScore: auditResult.overallScore,
-      categoryScores: auditResult.categoryScores,
-      agentReviews: auditResult.agentReviews,
-      issues: auditResult.issues,
-      recommendations: auditResult.recommendations,
-      missingElements: auditResult.missingElements,
-      needsFix: auditResult.needsFix,
-      auditedAt: auditDate,
-      auditedBy: session?.user?.id || 'system',
-      createdAt: auditDate,
-      updatedAt: auditDate,
-    });
-
-    return NextResponse.json({
-      success: true,
-      auditResult: {
-        auditVersion,
-        auditDate,
-        overallScore: auditResult.overallScore,
-        categoryScores: auditResult.categoryScores,
-        issues: auditResult.issues,
-        recommendations: auditResult.recommendations,
-        missingElements: auditResult.missingElements,
-      },
-    });
+    // Run audit with AuditorClass
+    // Save results to database
+    // Return audit results
+    */
   } catch (error) {
     console.error('Error running audit:', error);
     return NextResponse.json(
@@ -182,5 +97,3 @@ export async function POST(
     );
   }
 }
-
-

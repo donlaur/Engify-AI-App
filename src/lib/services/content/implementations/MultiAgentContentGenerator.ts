@@ -17,10 +17,8 @@ import { calculateReadability, getReadabilityScore } from '@/lib/content/readabi
 
 export class MultiAgentContentGenerator implements IContentGenerator {
   private service: ContentPublishingService;
-  private organizationId: string;
 
   constructor(organizationId: string) {
-    this.organizationId = organizationId;
     this.service = new ContentPublishingService(organizationId);
   }
 

@@ -239,4 +239,3 @@ export class ValidatorFactory {
  * Convenience exports
  */
 export const { createUserSchemas, createAPIKeySchemas, createContentSchemas, createPromptSchemas } = ValidatorFactory;
-export { CommonValidators };

@@ -104,13 +104,57 @@ function getMongoUri(): string {
 
 /**
  * Get MongoDB connection options
+ * PERFORMANCE OPTIMIZED: Different settings for production vs free tier
  */
 function getMongoOptions() {
   const uri = getMongoUri();
   const isSrvUri = uri.startsWith('mongodb+srv://');
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isVercel = process.env.VERCEL_ENV === 'production';
 
+  // ENTERPRISE OPTIMIZATION: Use higher connection pool for paid tier
+  // Detect tier by checking if URI contains specific patterns or env var
+  const isFreeTier = uri.includes('.mongodb.net') && !process.env.MONGODB_PAID_TIER;
+
+  if (isProduction && !isFreeTier) {
+    // PRODUCTION OPTIMIZED SETTINGS for paid MongoDB tier
+    return {
+      maxPoolSize: 10, // PRODUCTION: Allow 10 concurrent connections per instance
+      minPoolSize: 2, // PRODUCTION: Maintain 2 warm connections
+      serverSelectionTimeoutMS: 5000, // Faster server selection
+      socketTimeoutMS: 45000, // Longer socket timeout for complex queries
+      connectTimeoutMS: 10000, // Standard connection timeout
+      retryWrites: true,
+      retryReads: true,
+      w: 'majority' as const,
+      maxIdleTimeMS: 60000, // PRODUCTION: Keep connections alive for 1 minute
+      maxConnecting: 5, // PRODUCTION: Allow more concurrent connections
+      waitQueueTimeoutMS: 10000, // PRODUCTION: Wait longer for available connection
+      family: 4, // Force IPv4 to avoid DNS issues
+      compressors: ['zlib' as const], // PERFORMANCE: Enable compression to reduce bandwidth
+      zlibCompressionLevel: 6, // Balanced compression
+      // SSL/TLS options for MongoDB Atlas
+      ...(isSrvUri
+        ? {
+            tls: true,
+            tlsAllowInvalidCertificates: false,
+            tlsAllowInvalidHostnames: false,
+          }
+        : {
+            tls: true,
+            tlsAllowInvalidCertificates: false,
+            tlsAllowInvalidHostnames: false,
+          }),
+      // Connection pool options
+      heartbeatFrequencyMS: 10000,
+      // Additional options for serverless environments
+      directConnection: false, // Use replica set connection
+    };
+  }
+
+  // FREE TIER SETTINGS (M0 cluster)
   return {
-    maxPoolSize: 1, // FREE TIER: Limit to 1 connection per serverless function
+    maxPoolSize: isVercel ? 1 : 2, // FREE TIER: Conservative pooling
     minPoolSize: 0, // FREE TIER: Don't maintain minimum connections
     serverSelectionTimeoutMS: 10000, // M0: Reduced from 15s - fail faster
     socketTimeoutMS: 15000, // M0: Reduced from 20s - close faster
@@ -118,9 +162,9 @@ function getMongoOptions() {
     retryWrites: true,
     retryReads: true,
     w: 'majority' as const,
-    maxIdleTimeMS: 5000, // M0: AGGRESSIVE - Close idle connections after 5s (was 10s)
+    maxIdleTimeMS: 5000, // M0: AGGRESSIVE - Close idle connections after 5s
     maxConnecting: 1, // M0: Limit concurrent connection attempts
-    waitQueueTimeoutMS: 3000, // M0: AGGRESSIVE - Don't wait long (was 5s)
+    waitQueueTimeoutMS: 3000, // M0: AGGRESSIVE - Don't wait long
     family: 4, // Force IPv4 to avoid DNS issues
     // SSL/TLS options for MongoDB Atlas
     ...(isSrvUri
@@ -231,8 +275,7 @@ export async function getClient(): Promise<MongoClient> {
         await client.db('admin').command({ ping: 1 }, { timeoutMS: 2000 });
         globalWithMongo._connectionTime = Date.now(); // Update last check
       } catch (pingError) {
-        // Connection might be stale, try to reconnect
-        console.warn('MongoDB ping failed, attempting reconnect...');
+        // Connection might be stale, try to reconnect silently
         delete globalWithMongo._mongoClientPromise;
         delete globalWithMongo._mongoClient;
         delete globalWithMongo._connectionTime;
@@ -249,7 +292,7 @@ export async function getClient(): Promise<MongoClient> {
 
     return client;
   } catch (error) {
-    console.error('Failed to get MongoDB client:', error);
+    // Re-throw error for upstream handling
     throw error;
   }
 }

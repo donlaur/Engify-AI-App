@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMongoDb } from '@/lib/db/mongodb';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { logger } from '@/lib/logging/logger';
+import { z } from 'zod';
+import { sanitizeText } from '@/lib/security/sanitize';
+import { PromptCategorySchema, PromptPatternSchema, CreatePromptSchema } from '@/lib/schemas/prompt';
+import { checkPromptDuplicate } from '@/lib/utils/prompt-duplicate-check';
+import { seedPrompts } from '@/data/seed-prompts';
+
+// Query parameters validation schema
+const PromptsQuerySchema = z.object({
+  category: z.union([PromptCategorySchema, z.literal('all')]).optional(),
+  pattern: PromptPatternSchema.optional(),
+  search: z.string().min(1).max(200).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  skip: z.coerce.number().int().min(0).default(0),
+});
 
 /**
  * GET /api/prompts
@@ -11,11 +25,27 @@ import { logger } from '@/lib/logging/logger';
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const category = searchParams.get('category');
-    const pattern = searchParams.get('pattern');
-    const search = searchParams.get('search');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const skip = parseInt(searchParams.get('skip') || '0');
+
+    // Validate query parameters
+    const queryValidation = PromptsQuerySchema.safeParse({
+      category: searchParams.get('category'),
+      pattern: searchParams.get('pattern'),
+      search: searchParams.get('search'),
+      limit: searchParams.get('limit'),
+      skip: searchParams.get('skip'),
+    });
+
+    if (!queryValidation.success) {
+      return NextResponse.json(
+        {
+          error: 'Invalid query parameters',
+          details: queryValidation.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { category, pattern, search, limit, skip } = queryValidation.data;
 
     // Try MongoDB first
     try {
@@ -34,7 +64,9 @@ export async function GET(request: NextRequest) {
         query.pattern = pattern;
       }
       if (search) {
-        query.$text = { $search: search };
+        // Sanitize search query to prevent injection
+        const sanitizedSearch = sanitizeText(search);
+        query.$text = { $search: sanitizedSearch };
       }
 
       // Execute query
@@ -60,7 +92,6 @@ export async function GET(request: NextRequest) {
         error: dbError instanceof Error ? dbError.message : 'Unknown error',
       });
 
-      const { seedPrompts } = await import('@/data/seed-prompts');
       let filtered = seedPrompts;
 
       if (category && category !== 'all') {
@@ -111,22 +142,34 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.title || !body.content) {
+    // Validate request body with Zod
+    const validation = CreatePromptSchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Title and content are required' },
+        {
+          error: 'Invalid prompt data',
+          details: validation.error.flatten(),
+        },
         { status: 400 }
       );
     }
 
+    const validatedData = validation.data;
+
+    // Sanitize text fields to prevent XSS
+    const sanitizedTitle = sanitizeText(validatedData.title);
+    const sanitizedDescription = validatedData.description
+      ? sanitizeText(validatedData.description)
+      : '';
+    const sanitizedContent = sanitizeText(validatedData.content);
+
     // Check for duplicates
-    const { checkPromptDuplicate } = await import('@/lib/utils/prompt-duplicate-check');
     const duplicateCheck = await checkPromptDuplicate({
-      title: body.title,
-      content: body.content,
-      category: body.category,
-      role: body.role,
-      pattern: body.pattern,
+      title: sanitizedTitle,
+      content: sanitizedContent,
+      category: validatedData.category,
+      role: validatedData.role,
+      pattern: validatedData.pattern,
     });
 
     if (duplicateCheck.isDuplicate) {
@@ -143,7 +186,10 @@ export async function POST(request: NextRequest) {
     const collection = db.collection('prompts');
 
     const prompt = {
-      ...body,
+      ...validatedData,
+      title: sanitizedTitle,
+      description: sanitizedDescription,
+      content: sanitizedContent,
       views: 0,
       favorites: 0,
       rating: 0,

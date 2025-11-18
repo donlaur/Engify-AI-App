@@ -81,7 +81,7 @@ export function redactPIIFromObject<T extends Record<string, unknown>>(
   obj: T,
   options: RedactionOptions = {}
 ): T {
-  const result: any = { ...obj };
+  const result: Record<string, unknown> = { ...obj };
 
   Object.keys(result).forEach((key) => {
     const value = result[key];

@@ -6,7 +6,7 @@
  */
 
 import { RedisMessageQueue } from '@/lib/messaging/queues/RedisMessageQueue';
-import { IMessage, IMessageHandler, MessageResult } from '@/lib/messaging/types';
+import { IMessage, IMessageHandler, MessageResult, MessageType } from '@/lib/messaging/types';
 import { logger } from '@/lib/logging/logger';
 import { ContentGeneratorFactory, GeneratorType } from '@/lib/factories/ContentGeneratorFactory';
 import { ContentGenerationParams } from '@/lib/services/content/interfaces/IContentGenerator';
@@ -57,11 +57,13 @@ export interface ContentGenerationJobStatus {
  * Processes content generation jobs from the queue
  */
 class ContentGenerationJobHandler implements IMessageHandler {
-  handlerName = 'ContentGenerationJobHandler';
+  readonly messageType: MessageType = 'job';
+  readonly handlerName = 'ContentGenerationJobHandler';
   private jobStatuses = new Map<string, ContentGenerationJobStatus>();
 
   canHandle(message: IMessage): boolean {
-    return message.type === 'content.generation.batch';
+    return message.type === 'job' &&
+           (message.payload as ContentGenerationJobPayload)?.jobId !== undefined;
   }
 
   async handle(message: IMessage): Promise<MessageResult> {
@@ -167,9 +169,15 @@ class ContentGenerationJobHandler implements IMessageHandler {
         failed: jobStatus.failedTopics,
       });
 
+      const endTime = Date.now();
+      const startTime = jobStatus.startedAt?.getTime() || endTime;
+      const processingTime = endTime - startTime;
+
       return {
         success: jobStatus.status !== 'failed',
         data: jobStatus,
+        processingTime,
+        timestamp: new Date(),
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -188,9 +196,15 @@ class ContentGenerationJobHandler implements IMessageHandler {
         this.jobStatuses.set(payload.jobId, jobStatus);
       }
 
+      const endTime = Date.now();
+      const startTime = jobStatus?.startedAt?.getTime() || endTime;
+      const processingTime = endTime - startTime;
+
       return {
         success: false,
         error: errorMessage,
+        processingTime,
+        timestamp: new Date(),
       };
     }
   }
@@ -219,10 +233,15 @@ export class ContentGenerationJobQueueService {
       'content-generation',
       'redis',
       {
+        name: 'content-generation',
+        type: 'redis',
         maxRetries: 3,
+        retryDelay: 1000,
         visibilityTimeout: 5000,
         batchSize: 5,
-        deadLetterQueue: true,
+        concurrency: 3,
+        enableDeadLetter: true,
+        enableMetrics: true,
       }
     );
 
@@ -261,7 +280,7 @@ export class ContentGenerationJobQueueService {
 
     const message: IMessage = {
       id: jobId,
-      type: 'content.generation.batch',
+      type: 'job',
       priority: 'normal',
       status: 'pending',
       payload: {
@@ -275,6 +294,7 @@ export class ContentGenerationJobQueueService {
       metadata: {
         source: 'ContentGenerationJobQueue',
         version: '1.0',
+        tags: ['content-generation', 'batch'],
       },
       createdAt: new Date(),
       updatedAt: new Date(),

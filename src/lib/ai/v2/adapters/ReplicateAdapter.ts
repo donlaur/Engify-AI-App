@@ -102,93 +102,107 @@ export class ReplicateAdapter implements AIProvider {
     const start = Date.now();
 
     if (!this.validateRequest(request)) {
-      throw new Error('Invalid request: prompt is required');
+      const error = new Error('Invalid request: prompt is required');
+      logger.error('replicate.validation.failed', {
+        model: this.model,
+        reason: 'empty_prompt',
+      });
+      throw error;
     }
+
     const token = process.env.REPLICATE_API_TOKEN;
     const requestedModel = process.env.REPLICATE_MODEL || this.model;
-    const modelId = ensureModelAllowed(requestedModel);
 
-    if (token && modelId) {
-      try {
-        const Replicate = (await import('replicate')).default;
-        const replicate = new Replicate({ auth: token });
-        const input: Record<string, unknown> = { prompt: request.prompt };
-        if (typeof request.maxTokens === 'number') {
-          input.max_tokens = request.maxTokens;
-        }
-        if (typeof request.temperature === 'number') {
-          input.temperature = request.temperature;
-        }
-
-        const { value: rawOutput, latencyMs } =
-          await executeWithProviderHarness(
-            () => replicate.run(modelId as `${string}/${string}`, { input }) as Promise<unknown>,
-            {
-              provider: this.provider,
-              model: modelId,
-              operation: 'text-generation',
-              timeoutMs: TIMEOUT_MS,
-              maxRetries: MAX_RETRIES,
-              retryDelayMs: RETRY_BACKOFF_MS,
-            }
-          );
-
-        const content = Array.isArray(rawOutput)
-          ? String(rawOutput[0] ?? '')
-          : typeof rawOutput === 'string'
-            ? rawOutput
-            : JSON.stringify(rawOutput);
-
-        const promptTokens = estimateTokens(request.prompt);
-        const completionTokens = estimateTokens(content);
-        const usage = {
-          promptTokens,
-          completionTokens,
-          totalTokens: promptTokens + completionTokens,
-        };
-        const cost = estimateCost(modelId, promptTokens, completionTokens);
-
-        logger.info('replicate.request.success', {
-          model: modelId,
-          latency: latencyMs,
-          usage,
-          cost,
-        });
-
-        return {
-          content,
-          usage,
-          cost,
-          latency: latencyMs,
-          provider: this.provider,
-          model: modelId,
-        };
-      } catch (err) {
-        const latency = Date.now() - start;
-        logger.error('replicate.request.failed', {
-          model: modelId,
-          error: err instanceof Error ? err.message : String(err),
-        });
-        return {
-          content: `Replicate(${modelId}) error fallback: ${String(err)}`,
-          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-          cost: { input: 0, output: 0, total: 0 },
-          latency,
-          provider: this.provider,
-          model: modelId,
-        };
-      }
+    if (!token) {
+      const error = new Error('REPLICATE_API_TOKEN is not configured');
+      logger.error('replicate.config.missing', {
+        model: requestedModel,
+        reason: 'missing_api_token',
+      });
+      throw error;
     }
 
-    // Fallback scaffold if token/model not set
-    const latency = Date.now() - start;
-    return {
-      content: `Replicate(${this.model}) placeholder: ${request.prompt}`,
-      usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-      cost: { input: 0, output: 0, total: 0 },
-      latency,
-      provider: this.provider,
-      model: this.model,
-    };
+    const modelId = ensureModelAllowed(requestedModel);
+
+    try {
+      const Replicate = (await import('replicate')).default;
+      const replicate = new Replicate({ auth: token });
+      const input: Record<string, unknown> = { prompt: request.prompt };
+      if (typeof request.maxTokens === 'number') {
+        input.max_tokens = request.maxTokens;
+      }
+      if (typeof request.temperature === 'number') {
+        input.temperature = request.temperature;
+      }
+
+      const { value: rawOutput, latencyMs } =
+        await executeWithProviderHarness(
+          () => replicate.run(modelId as `${string}/${string}`, { input }) as Promise<unknown>,
+          {
+            provider: this.provider,
+            model: modelId,
+            operation: 'text-generation',
+            timeoutMs: TIMEOUT_MS,
+            maxRetries: MAX_RETRIES,
+            retryDelayMs: RETRY_BACKOFF_MS,
+          }
+        );
+
+      const content = Array.isArray(rawOutput)
+        ? String(rawOutput[0] ?? '')
+        : typeof rawOutput === 'string'
+          ? rawOutput
+          : JSON.stringify(rawOutput);
+
+      // Validate we got actual content
+      if (!content || content.trim().length === 0) {
+        const error = new Error('Replicate API returned empty content');
+        logger.error('replicate.response.empty', {
+          model: modelId,
+          latency: latencyMs,
+        });
+        throw error;
+      }
+
+      const promptTokens = estimateTokens(request.prompt);
+      const completionTokens = estimateTokens(content);
+      const usage = {
+        promptTokens,
+        completionTokens,
+        totalTokens: promptTokens + completionTokens,
+      };
+      const cost = estimateCost(modelId, promptTokens, completionTokens);
+
+      logger.info('replicate.request.success', {
+        model: modelId,
+        latency: latencyMs,
+        usage,
+        cost,
+      });
+
+      return {
+        content,
+        usage,
+        cost,
+        latency: latencyMs,
+        provider: this.provider,
+        model: modelId,
+      };
+    } catch (err) {
+      const latency = Date.now() - start;
+      logger.error('replicate.request.failed', {
+        model: modelId,
+        error: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+        latency,
+        promptLength: request.prompt?.length || 0,
+        temperature: request.temperature,
+        maxTokens: request.maxTokens,
+      });
+
+      // Re-throw the error instead of swallowing it with a fallback response
+      // This ensures errors are properly propagated and handled at higher levels
+      throw err instanceof Error ? err : new Error(String(err));
+    }
   }
 }

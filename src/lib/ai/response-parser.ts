@@ -20,9 +20,56 @@ export interface ParsedResponse {
 }
 
 /**
+ * OpenAI API response structure
+ */
+interface OpenAIResponse {
+  choices?: Array<{
+    message?: { content?: string };
+    finish_reason?: string;
+  }>;
+  model?: string;
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+}
+
+/**
+ * Anthropic API response structure
+ */
+interface AnthropicResponse {
+  content?: Array<{ text?: string }>;
+  model?: string;
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+  };
+  stop_reason?: string;
+}
+
+/**
+ * Google API response structure
+ */
+interface GoogleResponse {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{ text?: string }>;
+    };
+    finishReason?: string;
+  }>;
+  modelVersion?: string;
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    totalTokenCount?: number;
+  };
+}
+
+/**
  * Parse OpenAI response
  */
-export function parseOpenAIResponse(response: any): ParsedResponse {
+export function parseOpenAIResponse(response: OpenAIResponse): ParsedResponse {
   const choice = response.choices?.[0];
   const content = choice?.message?.content || '';
   
@@ -45,7 +92,7 @@ export function parseOpenAIResponse(response: any): ParsedResponse {
 /**
  * Parse Anthropic (Claude) response
  */
-export function parseAnthropicResponse(response: any): ParsedResponse {
+export function parseAnthropicResponse(response: AnthropicResponse): ParsedResponse {
   const content = response.content?.[0]?.text || '';
   
   return {
@@ -67,7 +114,7 @@ export function parseAnthropicResponse(response: any): ParsedResponse {
 /**
  * Parse Google (Gemini) response
  */
-export function parseGoogleResponse(response: any): ParsedResponse {
+export function parseGoogleResponse(response: GoogleResponse): ParsedResponse {
   const candidate = response.candidates?.[0];
   const content = candidate?.content?.parts?.[0]?.text || '';
   
@@ -88,9 +135,25 @@ export function parseGoogleResponse(response: any): ParsedResponse {
 }
 
 /**
+ * Perplexity API response structure (similar to OpenAI)
+ */
+interface PerplexityResponse {
+  choices?: Array<{
+    message?: { content?: string };
+    finish_reason?: string;
+  }>;
+  model?: string;
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+}
+
+/**
  * Parse Perplexity response
  */
-export function parsePerplexityResponse(response: any): ParsedResponse {
+export function parsePerplexityResponse(response: PerplexityResponse): ParsedResponse {
   const choice = response.choices?.[0];
   const content = choice?.message?.content || '';
   
@@ -112,12 +175,29 @@ export function parsePerplexityResponse(response: any): ParsedResponse {
 }
 
 /**
+ * Groq API response structure
+ */
+interface GroqResponse {
+  choices?: Array<{
+    message?: { content?: string };
+    finish_reason?: string;
+  }>;
+  model?: string;
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+  x_groq?: unknown; // Groq-specific metadata
+}
+
+/**
  * Parse Groq response
  */
-export function parseGroqResponse(response: any): ParsedResponse {
+export function parseGroqResponse(response: GroqResponse): ParsedResponse {
   const choice = response.choices?.[0];
   const content = choice?.message?.content || '';
-  
+
   return {
     content,
     raw: response,
@@ -136,12 +216,29 @@ export function parseGroqResponse(response: any): ParsedResponse {
 }
 
 /**
+ * Together AI response structure
+ */
+interface TogetherResponse {
+  choices?: Array<{
+    message?: { content?: string };
+    text?: string;
+    finish_reason?: string;
+  }>;
+  model?: string;
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+}
+
+/**
  * Parse Together AI response
  */
-export function parseTogetherResponse(response: any): ParsedResponse {
+export function parseTogetherResponse(response: TogetherResponse): ParsedResponse {
   const choice = response.choices?.[0];
   const content = choice?.message?.content || choice?.text || '';
-  
+
   return {
     content,
     raw: response,
@@ -159,9 +256,25 @@ export function parseTogetherResponse(response: any): ParsedResponse {
 }
 
 /**
+ * Mistral AI response structure
+ */
+interface MistralResponse {
+  choices?: Array<{
+    message?: { content?: string };
+    finish_reason?: string;
+  }>;
+  model?: string;
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+}
+
+/**
  * Parse Mistral response
  */
-export function parseMistralResponse(response: any): ParsedResponse {
+export function parseMistralResponse(response: MistralResponse): ParsedResponse {
   const choice = response.choices?.[0];
   const content = choice?.message?.content || '';
   

@@ -71,6 +71,43 @@ export class PromptService {
 
   /**
    * Create a new prompt
+   *
+   * @description Creates a new prompt with validation and duplicate checking.
+   * Automatically generates a unique SEO-friendly slug from the title.
+   *
+   * @param {CreatePromptData} promptData - The prompt data to create
+   * @param {string} promptData.title - Prompt title (max 200 chars)
+   * @param {string} promptData.description - Prompt description (max 1000 chars)
+   * @param {string} promptData.content - Prompt content/template
+   * @param {string} promptData.category - Prompt category
+   * @param {string} [promptData.role] - Associated role (optional)
+   * @param {string} [promptData.pattern] - Associated pattern (optional)
+   * @param {string} [promptData.slug] - Custom slug (optional, auto-generated if not provided)
+   * @param {string[]} [promptData.tags] - Tags for categorization (optional)
+   * @param {string} [promptData.difficulty] - Difficulty level: beginner, intermediate, advanced (default: beginner)
+   * @param {number} [promptData.estimatedTime] - Estimated time in minutes (optional)
+   * @param {boolean} [promptData.isPublic] - Whether prompt is public (default: true)
+   * @param {boolean} [promptData.isFeatured] - Whether prompt is featured (default: false)
+   * @param {string} [promptData.authorId] - Author user ID (optional)
+   * @param {string} [promptData.organizationId] - Organization ID (optional)
+   *
+   * @returns {Promise<Prompt>} The created prompt with generated ID and slug
+   *
+   * @throws {Error} If title or content is missing
+   * @throws {Error} If title exceeds 200 characters
+   * @throws {Error} If description exceeds 1000 characters
+   * @throws {Error} If duplicate prompt is detected (includes duplicateMatches property)
+   *
+   * @example
+   * const prompt = await promptService.createPrompt({
+   *   title: 'React Component Generator',
+   *   description: 'Generate React functional components with TypeScript',
+   *   content: 'Create a React component named {{componentName}}...',
+   *   category: 'code-generation',
+   *   tags: ['react', 'typescript'],
+   *   difficulty: 'intermediate',
+   *   isPublic: true
+   * });
    */
   async createPrompt(promptData: CreatePromptData): Promise<Prompt> {
     // Business logic validation
@@ -149,6 +186,20 @@ export class PromptService {
 
   /**
    * Get prompt by ID
+   *
+   * @description Retrieves a single prompt by its unique identifier.
+   *
+   * @param {string} id - The unique prompt ID
+   *
+   * @returns {Promise<Prompt | null>} The prompt if found, null otherwise
+   *
+   * @throws {Error} If ID is empty or invalid
+   *
+   * @example
+   * const prompt = await promptService.getPromptById('prompt_123');
+   * if (prompt) {
+   *   console.log(prompt.title);
+   * }
    */
   async getPromptById(id: string): Promise<Prompt | null> {
     if (!id) {
@@ -293,6 +344,22 @@ export class PromptService {
 
   /**
    * Search prompts
+   *
+   * @description Performs full-text search across prompts using MongoDB text indexes.
+   * Searches title, description, content, and tags fields.
+   *
+   * @param {string} query - Search query (minimum 2 characters)
+   *
+   * @returns {Promise<Prompt[]>} Array of matching prompts, sorted by relevance
+   *
+   * @throws {Error} If query is less than 2 characters
+   *
+   * @example
+   * // Search for React-related prompts
+   * const prompts = await promptService.searchPrompts('react component');
+   * prompts.forEach(prompt => {
+   *   console.log(`${prompt.title} - Score: ${prompt.score}`);
+   * });
    */
   async searchPrompts(query: string): Promise<Prompt[]> {
     if (!query || query.trim().length < 2) {
@@ -304,6 +371,36 @@ export class PromptService {
 
   /**
    * Get prompts with filters
+   *
+   * @description Retrieves prompts with advanced filtering options.
+   * Supports filtering by category, role, difficulty, tags, and more.
+   * Multiple filters can be applied simultaneously.
+   *
+   * @param {PromptSearchFilters} filters - Filter criteria
+   * @param {string} [filters.category] - Filter by category
+   * @param {string} [filters.role] - Filter by role
+   * @param {string} [filters.difficulty] - Filter by difficulty level
+   * @param {string[]} [filters.tags] - Filter by tags (OR logic - matches any tag)
+   * @param {boolean} [filters.isPublic] - Filter by public/private status
+   * @param {boolean} [filters.isFeatured] - Filter by featured status
+   * @param {string} [filters.authorId] - Filter by author ID
+   * @param {string} [filters.organizationId] - Filter by organization ID
+   *
+   * @returns {Promise<Prompt[]>} Array of prompts matching the filters
+   *
+   * @example
+   * // Get all public, featured prompts for beginners
+   * const prompts = await promptService.getPromptsWithFilters({
+   *   difficulty: 'beginner',
+   *   isPublic: true,
+   *   isFeatured: true
+   * });
+   *
+   * @example
+   * // Get prompts with specific tags
+   * const codePrompts = await promptService.getPromptsWithFilters({
+   *   tags: ['react', 'typescript', 'frontend']
+   * });
    */
   async getPromptsWithFilters(filters: PromptSearchFilters): Promise<Prompt[]> {
     let prompts: Prompt[] = [];
@@ -377,6 +474,27 @@ export class PromptService {
 
   /**
    * Get prompt statistics
+   *
+   * @description Retrieves comprehensive statistics about all prompts in the system.
+   * Useful for analytics dashboards and reporting.
+   *
+   * @returns {Promise<Object>} Statistics object containing:
+   *   - totalPrompts: Total number of prompts
+   *   - promptsByCategory: Breakdown by category
+   *   - promptsByRole: Breakdown by role
+   *   - promptsByDifficulty: Breakdown by difficulty level
+   *   - featuredPrompts: Count of featured prompts
+   *   - publicPrompts: Count of public prompts
+   *
+   * @example
+   * const stats = await promptService.getPromptStats();
+   * console.log(`Total Prompts: ${stats.totalPrompts}`);
+   * console.log(`Featured: ${stats.featuredPrompts}`);
+   * console.log('By Category:', stats.promptsByCategory);
+   * // Output:
+   * // Total Prompts: 150
+   * // Featured: 25
+   * // By Category: { 'code-generation': 45, 'writing': 30, 'analysis': 20, ... }
    */
   async getPromptStats(): Promise<{
     totalPrompts: number;

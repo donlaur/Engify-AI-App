@@ -8,10 +8,20 @@ import { auth } from '@/lib/auth';
 import { githubConnectionService } from '@/lib/services/GitHubConnectionService';
 import { GitHubClient, extractCodeContext } from '@/lib/integrations/github';
 import { RBACPresets } from '@/lib/middleware/rbac';
+import { z } from 'zod';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // 60 seconds for large repos
+
+// Validation schema for code context request
+const CodeContextSchema = z.object({
+  owner: z.string().min(1).max(100).regex(/^[a-zA-Z0-9-]+$/, 'Invalid owner format'),
+  repo: z.string().min(1).max(100).regex(/^[a-zA-Z0-9._-]+$/, 'Invalid repo format'),
+  maxFiles: z.number().int().min(1).max(100).optional(),
+  includePatterns: z.array(z.string().max(200)).max(50).optional(),
+  excludePatterns: z.array(z.string().max(200)).max(50).optional(),
+});
 
 /**
  * POST /api/github/code-context
@@ -40,16 +50,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse request body
+    // Parse and validate request body
     const body = await request.json();
-    const { owner, repo, maxFiles, includePatterns, excludePatterns } = body;
 
-    if (!owner || !repo) {
+    const validation = CodeContextSchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Owner and repo are required' },
+        {
+          error: 'Invalid request parameters',
+          details: validation.error.flatten(),
+        },
         { status: 400 }
       );
     }
+
+    const { owner, repo, maxFiles, includePatterns, excludePatterns } = validation.data;
 
     // Extract code context
     const client = new GitHubClient(accessToken);

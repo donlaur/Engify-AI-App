@@ -40,7 +40,7 @@ const UserSchema = z.object({
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
   lastLoginAt: z.date().optional(),
-}) as z.ZodSchema<User>;
+}) as unknown as z.ZodType<User>;
 
 export class EnhancedUserRepository extends BaseRepository<User> {
   constructor() {

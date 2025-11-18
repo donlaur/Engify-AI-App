@@ -325,36 +325,84 @@ export class PromptRepository implements IPromptRepository {
 
   /**
    * Update prompt rating
+   * OPTIMIZED: Single atomic operation instead of read-then-write (eliminates N+1)
+   * Uses MongoDB aggregation pipeline for atomic calculation
    */
   async updateRating(id: string, rating: number): Promise<void> {
     try {
       const collection = await this.getCollection();
 
-      // Get current prompt to calculate new average
-      const prompt = await this.findById(id);
-      if (!prompt) {
-        throw new Error('Prompt not found');
-      }
-
-      const currentTotal =
-        prompt.stats.averageRating * prompt.stats.totalRatings;
-      const newTotal = currentTotal + rating;
-      const newCount = prompt.stats.totalRatings + 1;
-      const newAverage = newTotal / newCount;
-
+      // PERFORMANCE: Use aggregation pipeline to calculate in a single atomic operation
+      // This prevents race conditions and eliminates the extra read operation
       await collection.updateOne(
         { _id: new ObjectId(id) },
-        {
-          $set: {
-            'stats.averageRating': newAverage,
-            'stats.totalRatings': newCount,
-            updatedAt: new Date(),
+        [
+          {
+            $set: {
+              'stats.totalRatings': { $add: ['$stats.totalRatings', 1] },
+              'stats.averageRating': {
+                $divide: [
+                  {
+                    $add: [
+                      { $multiply: ['$stats.averageRating', '$stats.totalRatings'] },
+                      rating,
+                    ],
+                  },
+                  { $add: ['$stats.totalRatings', 1] },
+                ],
+              },
+              updatedAt: new Date(),
+            },
           },
-        }
+        ]
       );
     } catch (error) {
       console.error('Error updating rating:', error);
       throw new Error('Failed to update rating');
+    }
+  }
+
+  /**
+   * Batch update ratings for multiple prompts
+   * PERFORMANCE: Single bulk operation instead of multiple individual updates
+   */
+  async batchUpdateRatings(
+    ratings: Array<{ id: string; rating: number }>
+  ): Promise<void> {
+    if (ratings.length === 0) return;
+
+    try {
+      const collection = await this.getCollection();
+
+      const bulkOps = ratings.map(({ id, rating }) => ({
+        updateOne: {
+          filter: { _id: new ObjectId(id) },
+          update: [
+            {
+              $set: {
+                'stats.totalRatings': { $add: ['$stats.totalRatings', 1] },
+                'stats.averageRating': {
+                  $divide: [
+                    {
+                      $add: [
+                        { $multiply: ['$stats.averageRating', '$stats.totalRatings'] },
+                        rating,
+                      ],
+                    },
+                    { $add: ['$stats.totalRatings', 1] },
+                  ],
+                },
+                updatedAt: new Date(),
+              },
+            },
+          ],
+        },
+      }));
+
+      await collection.bulkWrite(bulkOps);
+    } catch (error) {
+      console.error('Error batch updating ratings:', error);
+      throw new Error('Failed to batch update ratings');
     }
   }
 }

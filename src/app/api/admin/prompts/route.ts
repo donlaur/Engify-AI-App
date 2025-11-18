@@ -7,6 +7,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logging/logger';
 import { auditLog } from '@/lib/logging/audit';
 import { sanitizeText } from '@/lib/security/sanitize';
+import { isValidObjectId } from '@/lib/validation/mongodb';
 import {
   CreatePromptSchema,
   UpdatePromptSchema,
@@ -337,9 +338,12 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Validate ObjectId
-    if (!ObjectId.isValid(_id)) {
-      return NextResponse.json({ error: 'Invalid prompt ID' }, { status: 400 });
+    // Validate ObjectId format
+    if (!isValidObjectId(_id)) {
+      return NextResponse.json(
+        { error: 'Invalid prompt ID format' },
+        { status: 400 }
+      );
     }
 
     // Zod validation for update data
@@ -490,9 +494,12 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Validate ObjectId
-    if (!ObjectId.isValid(_id)) {
-      return NextResponse.json({ error: 'Invalid prompt ID' }, { status: 400 });
+    // Validate ObjectId format
+    if (!isValidObjectId(_id)) {
+      return NextResponse.json(
+        { error: 'Invalid prompt ID format' },
+        { status: 400 }
+      );
     }
 
     const db = await getDb();

@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { ContentPublishingService } from '@/lib/content/content-publishing-pipeline';
+import { ContentPublishingService, CONTENT_AGENTS } from '@/lib/content/content-publishing-pipeline';
 import { logger } from '@/lib/logging/logger';
 import { z } from 'zod';
 
@@ -106,8 +106,6 @@ export async function POST(request: NextRequest) {
  */
 export async function GET() {
   try {
-    const { CONTENT_AGENTS } = await import('@/lib/content/content-publishing-pipeline');
-
     return NextResponse.json({
       agents: CONTENT_AGENTS.map((agent) => ({
         role: agent.role,

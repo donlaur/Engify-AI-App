@@ -4,6 +4,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { auth } from '@/lib/auth';
 import { sanitizeText } from '@/lib/security/sanitize';
 import { getModelById } from '@/lib/config/ai-models';
+import { getDb } from '@/lib/mongodb';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -80,7 +81,6 @@ export async function POST(request: NextRequest) {
       try {
         // First, try MongoDB direct search (fallback if Python RAG service not deployed)
         try {
-          const { getDb } = await import('@/lib/mongodb');
           const db = await getDb();
           // Use find with text search (requires text index)
           const prompts = await db

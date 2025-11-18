@@ -13,7 +13,6 @@ import {
   IContentPublisher,
   PublishParams,
   PublishResult,
-  PublishingReview,
 } from '../interfaces/IContentPublisher';
 
 export class ContentPublishingServiceAdapter implements IContentPublisher {

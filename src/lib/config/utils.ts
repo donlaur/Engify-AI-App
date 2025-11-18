@@ -131,7 +131,7 @@ export function enforceProductionSecrets(config: Record<string, unknown>): void 
   // Skip validation during Next.js build phase
   // BUILD_MODE is set during Next.js builds
   if (process.env.BUILD_MODE === '1' || process.env.NEXT_PHASE === 'phase-production-build') {
-    console.log('⚠️  Skipping production secret validation during build phase');
+    // Silent during build - no need to log as this is expected behavior
     return;
   }
 

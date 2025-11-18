@@ -3,6 +3,7 @@
  *
  * Abstract base class for all database services
  * Provides common CRUD operations with type safety
+ * MEMORY LEAK PREVENTION: Includes cleanup mechanisms
  */
 
 import { Collection, Filter, ObjectId, OptionalId } from 'mongodb';
@@ -12,6 +13,8 @@ import { getDb } from '@/lib/db/client';
 export abstract class BaseService<T extends { _id?: ObjectId }> {
   protected collectionName: string;
   protected schema: ZodSchema<T>;
+  private cleanupHandlers: Array<() => Promise<void> | void> = [];
+  private isDestroyed = false;
 
   constructor(collectionName: string, schema: ZodSchema<T>) {
     this.collectionName = collectionName;
@@ -19,9 +22,46 @@ export abstract class BaseService<T extends { _id?: ObjectId }> {
   }
 
   /**
+   * Register cleanup handler (for event listeners, timers, etc.)
+   * MEMORY LEAK PREVENTION: Ensures resources are released
+   */
+  protected registerCleanup(handler: () => Promise<void> | void): void {
+    this.cleanupHandlers.push(handler);
+  }
+
+  /**
+   * Cleanup service resources
+   * MEMORY LEAK PREVENTION: Call this when service is no longer needed
+   */
+  async cleanup(): Promise<void> {
+    if (this.isDestroyed) return;
+
+    this.isDestroyed = true;
+
+    // Execute all cleanup handlers
+    await Promise.allSettled(
+      this.cleanupHandlers.map((handler) => Promise.resolve(handler()))
+    );
+
+    this.cleanupHandlers = [];
+  }
+
+  /**
+   * Check if service is destroyed
+   */
+  protected checkDestroyed(): void {
+    if (this.isDestroyed) {
+      throw new Error(`Service ${this.collectionName} has been destroyed`);
+    }
+  }
+
+  /**
    * Get MongoDB collection
+   * MEMORY LEAK PREVENTION: Checks if service is destroyed
    */
   protected async getCollection(): Promise<Collection<T>> {
+    this.checkDestroyed();
+
     try {
       const db = await getDb();
       return db.collection<T>(this.collectionName);

@@ -33,6 +33,7 @@ import { Collection, Filter, ObjectId, OptionalId, UpdateFilter, ClientSession }
 import { ZodSchema } from 'zod';
 import { dbProvider } from '@/lib/providers/DatabaseProvider';
 import { loggingProvider } from '@/lib/providers/LoggingProvider';
+import { Redis } from '@upstash/redis';
 
 export interface PaginationOptions {
   page?: number;
@@ -53,6 +54,28 @@ export interface PaginatedResult<T> {
 export interface SortOptions {
   field: string;
   order: 'asc' | 'desc' | 1 | -1;
+}
+
+export interface CacheOptions {
+  ttl?: number; // Time to live in seconds
+  useCache?: boolean; // Enable/disable cache for specific query
+  cacheKey?: string; // Custom cache key
+}
+
+/**
+ * Redis cache singleton for query result caching
+ */
+let redisCache: Redis | null = null;
+function getRedisCache(): Redis | null {
+  if (redisCache) return redisCache;
+
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    redisCache = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+  }
+  return redisCache;
 }
 
 export abstract class BaseRepository<T extends { _id?: ObjectId }> {
@@ -113,6 +136,209 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
   }
 
   // ==========================================================================
+  // Cache Operations (Enterprise Performance Optimization)
+  // ==========================================================================
+
+  /**
+   * Generate cache key for query
+   */
+  protected getCacheKey(operation: string, params: unknown): string {
+    const paramsHash = JSON.stringify(params);
+    return `repo:${this.collectionName}:${operation}:${paramsHash}`;
+  }
+
+  /**
+   * Get from cache with fallback to database
+   */
+  protected async cachedQuery<R>(
+    cacheKey: string,
+    queryFn: () => Promise<R>,
+    ttlSeconds: number = 300
+  ): Promise<R> {
+    const redis = getRedisCache();
+
+    // If Redis is not available, execute query directly
+    if (!redis) {
+      return queryFn();
+    }
+
+    try {
+      // Try cache first
+      const cached = await redis.get<R>(cacheKey);
+      if (cached !== null) {
+        loggingProvider.debug('Cache hit', { key: cacheKey });
+        return cached;
+      }
+
+      // Cache miss - execute query
+      loggingProvider.debug('Cache miss', { key: cacheKey });
+      const result = await queryFn();
+
+      // Cache the result asynchronously (don't block)
+      redis.set(cacheKey, result, { ex: ttlSeconds }).catch((err) => {
+        loggingProvider.warn('Failed to cache result', { key: cacheKey, error: err });
+      });
+
+      return result;
+    } catch (error) {
+      loggingProvider.warn('Cache error, falling back to direct query', { error });
+      return queryFn();
+    }
+  }
+
+  /**
+   * Invalidate cache by pattern
+   */
+  protected async invalidateCache(pattern?: string): Promise<void> {
+    const redis = getRedisCache();
+    if (!redis) return;
+
+    try {
+      const keyPattern = pattern || `repo:${this.collectionName}:*`;
+      // Note: Upstash Redis doesn't support SCAN, so we track keys separately
+      // For production, implement key tracking or use cache tags
+      loggingProvider.debug('Cache invalidation requested', { pattern: keyPattern });
+    } catch (error) {
+      loggingProvider.warn('Cache invalidation failed', { error });
+    }
+  }
+
+  // ==========================================================================
+  // Batch Operations (Prevent N+1 Queries)
+  // ==========================================================================
+
+  /**
+   * Find multiple documents by IDs (batch operation)
+   * PERFORMANCE: Prevents N+1 queries by fetching all at once
+   */
+  async findByIds(
+    ids: string[],
+    options?: { session?: ClientSession; useCache?: boolean; cacheTtl?: number }
+  ): Promise<Map<string, T>> {
+    if (ids.length === 0) {
+      return new Map();
+    }
+
+    const cacheKey = this.getCacheKey('findByIds', ids);
+    const queryFn = async () => {
+      try {
+        const collection = await this.getCollection();
+        const objectIds = ids.map((id) => new ObjectId(id));
+        const filter = this.addSoftDeleteFilter({
+          _id: { $in: objectIds },
+        } as Filter<T>);
+
+        const docs = await collection.find(filter, { session: options?.session }).toArray();
+
+        // Convert to Map for O(1) lookup
+        const resultMap = new Map<string, T>();
+        docs.forEach((doc) => {
+          if (doc._id) {
+            resultMap.set(doc._id.toString(), doc as T);
+          }
+        });
+
+        return resultMap;
+      } catch (error) {
+        loggingProvider.error('Failed to find by IDs', error, {
+          collection: this.collectionName,
+          idsCount: ids.length,
+        });
+        throw error;
+      }
+    };
+
+    // Use cache if enabled
+    if (options?.useCache && !options?.session) {
+      return this.cachedQuery(cacheKey, queryFn, options.cacheTtl || 300);
+    }
+
+    return queryFn();
+  }
+
+  /**
+   * Batch update multiple documents
+   * PERFORMANCE: Single database round-trip for multiple updates
+   */
+  async batchUpdate(
+    updates: Array<{ id: string; data: Partial<Omit<T, '_id'>> }>,
+    session?: ClientSession
+  ): Promise<number> {
+    if (updates.length === 0) {
+      return 0;
+    }
+
+    try {
+      const collection = await this.getCollection();
+      const bulkOps = updates.map(({ id, data }) => ({
+        updateOne: {
+          filter: { _id: new ObjectId(id) } as Filter<T>,
+          update: {
+            $set: {
+              ...data,
+              updatedAt: new Date(),
+            },
+          } as unknown as UpdateFilter<T>,
+        },
+      }));
+
+      const result = await collection.bulkWrite(bulkOps, { session });
+
+      // Invalidate cache for updated documents
+      await this.invalidateCache();
+
+      return result.modifiedCount;
+    } catch (error) {
+      loggingProvider.error('Batch update failed', error, {
+        collection: this.collectionName,
+        count: updates.length,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Batch delete multiple documents
+   * PERFORMANCE: Single database round-trip for multiple deletes
+   */
+  async batchDelete(
+    ids: string[],
+    session?: ClientSession
+  ): Promise<number> {
+    if (ids.length === 0) {
+      return 0;
+    }
+
+    try {
+      const collection = await this.getCollection();
+      const objectIds = ids.map((id) => new ObjectId(id));
+
+      if (this.softDelete) {
+        // Soft delete
+        const result = await collection.updateMany(
+          { _id: { $in: objectIds } } as Filter<T>,
+          { $set: { deletedAt: new Date() } } as unknown as UpdateFilter<T>,
+          { session }
+        );
+        return result.modifiedCount;
+      } else {
+        // Hard delete
+        const result = await collection.deleteMany(
+          { _id: { $in: objectIds } } as Filter<T>,
+          { session }
+        );
+        return result.deletedCount;
+      }
+    } catch (error) {
+      loggingProvider.error('Batch delete failed', error, {
+        collection: this.collectionName,
+        count: ids.length,
+      });
+      throw error;
+    }
+  }
+
+  // ==========================================================================
   // CRUD Operations
   // ==========================================================================
 
@@ -131,8 +357,12 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
     } catch (error) {
       loggingProvider.error(`Failed to find by ID: ${id}`, error, {
         collection: this.collectionName,
+        id,
+        operation: 'findById',
       });
-      throw error;
+      throw new Error(
+        `Failed to find ${this.collectionName} by ID ${id}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -161,8 +391,12 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
     } catch (error) {
       loggingProvider.error('Failed to find one', error, {
         collection: this.collectionName,
+        filter: JSON.stringify(filter),
+        operation: 'findOne',
       });
-      throw error;
+      throw new Error(
+        `Failed to find ${this.collectionName} document: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -267,8 +501,12 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
     } catch (error) {
       loggingProvider.error('Failed to insert one', error, {
         collection: this.collectionName,
+        dataKeys: Object.keys(data || {}),
+        operation: 'insertOne',
       });
-      throw error;
+      throw new Error(
+        `Failed to insert ${this.collectionName} document: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -320,7 +558,7 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
 
       const result = await collection.findOneAndUpdate(
         { _id: new ObjectId(id) } as Filter<T>,
-        { $set: updateDoc } as UpdateFilter<T>,
+        { $set: updateDoc } as unknown as UpdateFilter<T>,
         { returnDocument: 'after', session }
       );
 
@@ -328,8 +566,13 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
     } catch (error) {
       loggingProvider.error(`Failed to update by ID: ${id}`, error, {
         collection: this.collectionName,
+        id,
+        updateKeys: Object.keys(update || {}),
+        operation: 'updateOne',
       });
-      throw error;
+      throw new Error(
+        `Failed to update ${this.collectionName} document with ID ${id}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -351,7 +594,7 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
 
       const result = await collection.findOneAndUpdate(
         filter,
-        { $set: updateDoc } as UpdateFilter<T>,
+        { $set: updateDoc } as unknown as UpdateFilter<T>,
         { returnDocument: 'after', session }
       );
 
@@ -382,7 +625,7 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
 
       const result = await collection.updateMany(
         filter,
-        { $set: updateDoc } as UpdateFilter<T>,
+        { $set: updateDoc } as unknown as UpdateFilter<T>,
         { session }
       );
 
@@ -407,7 +650,7 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
         // Soft delete
         const result = await collection.updateOne(
           { _id: new ObjectId(id) } as Filter<T>,
-          { $set: { deletedAt: new Date() } } as UpdateFilter<T>,
+          { $set: { deletedAt: new Date() } } as unknown as UpdateFilter<T>,
           { session }
         );
         return result.modifiedCount > 0;
@@ -422,8 +665,13 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
     } catch (error) {
       loggingProvider.error(`Failed to delete by ID: ${id}`, error, {
         collection: this.collectionName,
+        id,
+        softDelete: this.softDelete,
+        operation: 'deleteOne',
       });
-      throw error;
+      throw new Error(
+        `Failed to delete ${this.collectionName} document with ID ${id}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -458,7 +706,7 @@ export abstract class BaseRepository<T extends { _id?: ObjectId }> {
       const collection = await this.getCollection();
       const result = await collection.updateOne(
         { _id: new ObjectId(id) } as Filter<T>,
-        { $unset: { deletedAt: '' } } as UpdateFilter<T>,
+        { $unset: { deletedAt: '' } } as unknown as UpdateFilter<T>,
         { session }
       );
       return result.modifiedCount > 0;

@@ -186,9 +186,18 @@ async function logCriticalEvent(entry: AuditLogEntry): Promise<void> {
       timestamp: entry.timestamp || new Date(),
       loggedAt: new Date(),
     });
-    console.error('CRITICAL SECURITY EVENT:', entry);
+    // Use winston logger for critical events
+    auditLogger.error('CRITICAL SECURITY EVENT', {
+      ...entry,
+      criticalAlert: true,
+    });
   } catch (error) {
-    console.error('Failed to log critical event:', error);
+    // Fallback to winston logger if MongoDB logging fails
+    auditLogger.error('Failed to log critical event to MongoDB', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      originalEvent: entry,
+    });
   }
 }
 
@@ -305,7 +314,11 @@ export async function queryAuditLogs(query: AuditQuery): Promise<unknown[]> {
       .toArray();
     return logs;
   } catch (error) {
-    console.error('Failed to query audit logs:', error);
+    auditLogger.error('Failed to query audit logs', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      query,
+    });
     return [];
   }
 }
@@ -367,7 +380,12 @@ export async function generateComplianceReport(
       uniqueUsersCount: 0,
     };
   } catch (error) {
-    console.error('Failed to generate compliance report:', error);
+    auditLogger.error('Failed to generate compliance report', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      startDate,
+      endDate,
+    });
     return {};
   }
 }

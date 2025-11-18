@@ -7,8 +7,8 @@
     "jsx": "preserve",
 
     /* Modules */
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
     "allowJs": true,
 

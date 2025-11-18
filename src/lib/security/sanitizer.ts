@@ -190,8 +190,7 @@ export function sanitizeUrl(url: string): string {
 export function createSanitizationMiddleware(
   level: 'strict' | 'basic' | 'rich' = 'strict'
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (input: any) => {
+  return (input: unknown): unknown => {
     if (typeof input === 'string') {
       return sanitizeHtml(input, level);
     }

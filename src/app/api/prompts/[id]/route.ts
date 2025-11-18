@@ -4,6 +4,11 @@ import { ObjectId } from 'mongodb';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { logger } from '@/lib/logging/logger';
 import { auth } from '@/lib/auth';
+import { isValidObjectId } from '@/lib/validation/mongodb';
+import { sanitizeText } from '@/lib/security/sanitize';
+import { cachedJsonResponse, CacheStrategies } from '@/lib/utils/cache-headers';
+import { seedPrompts } from '@/data/seed-prompts';
+import { createRevision } from '@/lib/db/schemas/prompt-revision';
 
 /**
  * GET /api/prompts/[id]
@@ -17,6 +22,17 @@ export async function GET(
   try {
     const { id } = await params;
 
+    // Sanitize the ID parameter to prevent injection
+    const sanitizedId = sanitizeText(id);
+
+    // Validate ID length to prevent DOS
+    if (sanitizedId.length > 200) {
+      return NextResponse.json(
+        { error: 'Invalid ID format' },
+        { status: 400 }
+      );
+    }
+
     // Try MongoDB first
     try {
       const db = await getMongoDb();
@@ -27,19 +43,19 @@ export async function GET(
         $and: [
           {
             $or: [
-              { id },
-              { slug: id },
+              { id: sanitizedId },
+              { slug: sanitizedId },
             ],
           },
           { active: { $ne: false } }, // Only show active prompts
         ],
       });
 
-      // If not found, try MongoDB ObjectId
-      if (!prompt) {
+      // If not found and ID is valid ObjectId format, try MongoDB ObjectId
+      if (!prompt && isValidObjectId(sanitizedId)) {
         try {
           prompt = await collection.findOne({
-            _id: new ObjectId(id),
+            _id: new ObjectId(sanitizedId),
             active: { $ne: false },
           });
         } catch {
@@ -69,15 +85,27 @@ export async function GET(
           );
         }
 
-        // Increment view count (only if not premium or user is authenticated)
+        // Increment view count asynchronously (don't block response)
         if (!prompt.isPremium || isAuthenticated) {
-          await collection.updateOne(
+          collection.updateOne(
             { _id: prompt._id },
             { $inc: { views: 1 } }
-          );
+          ).catch((err) => {
+            logger.warn('Failed to increment view count', { error: err, promptId: prompt._id });
+          });
         }
 
-        return NextResponse.json({ prompt, source: 'mongodb' });
+        // PERFORMANCE: Add cache headers for static content
+        // Public prompts can be cached for 1 hour with stale-while-revalidate
+        const cacheStrategy = prompt.isPremium
+          ? CacheStrategies.USER_SPECIFIC // Premium content - private cache
+          : CacheStrategies.STATIC_CONTENT; // Public content - public cache
+
+        return cachedJsonResponse(
+          { prompt, source: 'mongodb' },
+          cacheStrategy,
+          _request.headers
+        );
       }
     } catch (dbError) {
       // Continue to fallback
@@ -87,7 +115,6 @@ export async function GET(
     }
 
     // Fallback to static data
-    const { seedPrompts } = await import('@/data/seed-prompts');
     const prompt = seedPrompts.find((p) => p.id === id);
 
     if (!prompt) {
@@ -97,7 +124,12 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ prompt, source: 'static' });
+    // PERFORMANCE: Static data can be cached aggressively
+    return cachedJsonResponse(
+      { prompt, source: 'static' },
+      CacheStrategies.STATIC_CONTENT,
+      _request.headers
+    );
   } catch (error) {
     logger.apiError('/api/prompts/[id]', error, { method: 'GET' });
     return NextResponse.json(
@@ -121,6 +153,13 @@ export async function PATCH(
 
   try {
     const { id } = await params;
+
+    // Validate and sanitize ID
+    const sanitizedId = sanitizeText(id);
+    if (sanitizedId.length > 200) {
+      return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
+    }
+
     const body = await request.json();
     const session = await auth();
 
@@ -131,14 +170,24 @@ export async function PATCH(
     const db = await getMongoDb();
     const collection = db.collection('prompts');
 
-    // Find existing prompt
-    const existingPrompt = await collection.findOne({
-      $or: [
-        { id },
-        { slug: id },
-        { _id: new ObjectId(id) },
-      ],
-    });
+    // Find existing prompt (try different ID formats)
+    let existingPrompt;
+    if (isValidObjectId(sanitizedId)) {
+      existingPrompt = await collection.findOne({
+        $or: [
+          { id: sanitizedId },
+          { slug: sanitizedId },
+          { _id: new ObjectId(sanitizedId) },
+        ],
+      });
+    } else {
+      existingPrompt = await collection.findOne({
+        $or: [
+          { id: sanitizedId },
+          { slug: sanitizedId },
+        ],
+      });
+    }
 
     if (!existingPrompt) {
       return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
@@ -149,7 +198,6 @@ export async function PATCH(
     const newRevision = currentRevision + 1;
 
     // Create revision before updating
-    const { createRevision } = await import('@/lib/db/schemas/prompt-revision');
     const revision = createRevision(
       existingPrompt.id || existingPrompt._id.toString(),
       existingPrompt,
@@ -212,6 +260,13 @@ export async function DELETE(
 
   try {
     const { id } = await params;
+
+    // Validate and sanitize ID
+    const sanitizedId = sanitizeText(id);
+    if (!isValidObjectId(sanitizedId)) {
+      return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -222,7 +277,7 @@ export async function DELETE(
 
     // User- and org-scoped delete: restrict to documents owned by the user in their org
     const result = await collection.deleteOne({
-      _id: new ObjectId(id),
+      _id: new ObjectId(sanitizedId),
       userId: session.user.id,
       organizationId: session.user.organizationId,
     });

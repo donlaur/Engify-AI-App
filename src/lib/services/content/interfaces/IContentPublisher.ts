@@ -29,6 +29,30 @@ export interface PublishingReview {
   timestamp: Date;
 }
 
+export interface SlopDetectionResult {
+  aiProbability: number;
+  qualityScore: number;
+  flags: string[];
+  recommendations: string[];
+  metrics: {
+    wordCount: number;
+    slopCount: number;
+    slopPhrases: Array<{ phrase: string; count: number }>;
+    emDashCount: number;
+    emDashRatio: number;
+    sentenceCount: number;
+    avgSentenceLength: number;
+    sentenceStdDev: number;
+    hedgeCount: number;
+    hedgeRatio: number;
+    vagueCount: number;
+    personalCount: number;
+    hasCode: boolean;
+    hasNumbers: boolean;
+    hasLinks: boolean;
+  };
+}
+
 export interface PublishResult {
   topic: string;
   originalDraft: string;
@@ -43,11 +67,7 @@ export interface PublishResult {
   readabilityScore: number;
   approved: boolean;
   publishReady: boolean;
-  slopDetection?: {
-    hasSlopPhrases: boolean;
-    slopPhrases: string[];
-    qualityScore: number;
-  };
+  slopDetection?: SlopDetectionResult;
 }
 
 /**

@@ -18,7 +18,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { getServerStats } from '@/lib/server-stats';
 import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
 import type { Metadata } from 'next';
 import { PreloadContentJson } from '@/components/features/PreloadContentJson';
@@ -88,7 +87,8 @@ const features = [
 const allowSignup = process.env.NEXT_PUBLIC_ALLOW_SIGNUP === 'true';
 
 export default async function Home() {
-  const [data, workflows] = await Promise.all([getServerStats(), loadWorkflowsFromJson()]);
+  // Load workflows data (server stats removed as no longer used after hero section redesign)
+  const workflows = await loadWorkflowsFromJson();
 
   const guardrailCount = workflows.length || 20;
   const manualChecklistSteps = workflows.reduce((acc, workflow) => acc + workflow.manualChecklist.length, 0);
@@ -117,30 +117,8 @@ export default async function Home() {
     },
   ];
 
-  // Build role stats from data (kept for compatibility with downstream sections)
-  const roleIcons = {
-    Engineers: Icons.code,
-    Managers: Icons.users,
-    Designers: Icons.palette,
-    'Product Managers': Icons.target,
-    PMs: Icons.target,
-  };
-
-  const roles = data.prompts?.byRole
-    ? Object.entries(data.prompts.byRole)
-        .filter(([name]) => name && name !== 'null' && name !== 'undefined') // Filter out null/undefined roles
-        .map(([name, count]) => ({
-          name,
-          icon: roleIcons[name as keyof typeof roleIcons] || Icons.code,
-          count: `${count} prompts`,
-        }))
-        .slice(0, 4) // Show top 4 roles
-    : [
-        { name: 'Engineers', icon: Icons.code, count: '0 prompts' },
-        { name: 'Managers', icon: Icons.users, count: '0 prompts' },
-        { name: 'Designers', icon: Icons.palette, count: '0 prompts' },
-        { name: 'PMs', icon: Icons.target, count: '0 prompts' },
-      ];
+  // Role stats code removed - was previously used for displaying role-based prompts
+  // This data structure is no longer needed after the hero section redesign
 
   return (
     <MainLayout>

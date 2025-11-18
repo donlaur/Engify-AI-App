@@ -51,7 +51,7 @@ import { isAdminMFAEnforced } from '@/lib/env';
 // Types
 // ============================================================================
 
-export interface APIOptions<TInput = any> {
+export interface APIOptions<TInput = unknown> {
   /**
    * Require authentication
    */
@@ -132,7 +132,7 @@ export interface APIOptions<TInput = any> {
   };
 }
 
-export interface APIContext<TInput = any> {
+export interface APIContext<TInput = unknown> {
   /**
    * Validated request body (if validate schema provided)
    */
@@ -167,15 +167,21 @@ export interface APIContext<TInput = any> {
   };
 }
 
-export type APIHandler<TInput = any, TOutput = any> = (
+export type APIHandler<TInput = unknown, TOutput = unknown> = (
   ctx: APIContext<TInput>
 ) => Promise<TOutput>;
 
-export interface APIResponse<T = any> {
+export interface ValidationError {
+  code: string;
+  message: string;
+  path?: (string | number)[];
+}
+
+export interface APIResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
-  errors?: any[];
+  errors?: ValidationError[];
   meta?: {
     duration?: number;
     timestamp?: string;
@@ -207,7 +213,7 @@ const RATE_LIMIT_PRESETS: Record<
 /**
  * Wrap API route handler with comprehensive middleware
  */
-export function withAPI<TInput = any, TOutput = any>(
+export function withAPI<TInput = unknown, TOutput = unknown>(
   options: APIOptions<TInput>,
   handler: APIHandler<TInput, TOutput>
 ) {
@@ -221,12 +227,14 @@ export function withAPI<TInput = any, TOutput = any>(
     // Resolve params if provided
     const params = context?.params ? await context.params : undefined;
 
+    // Declare userId and userRole outside try block so they're accessible in catch
+    let userId: string | undefined;
+    let userRole: UserRole = 'user';
+
     try {
       // ========================================================================
       // 1. AUTHENTICATION
       // ========================================================================
-      let userId: string | undefined;
-      let userRole: UserRole = 'user';
 
       if (options.auth) {
         const authContext = await authProvider.getAuthContext();
@@ -301,7 +309,12 @@ export function withAPI<TInput = any, TOutput = any>(
       // 3. RATE LIMITING
       // ========================================================================
       if (options.rateLimit) {
-        const rateLimitKey = userId || request.ip || 'anonymous';
+        // Extract IP from headers (NextRequest doesn't have .ip property)
+        const clientIp =
+          request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          request.headers.get('x-real-ip') ||
+          'anonymous';
+        const rateLimitKey = userId || clientIp;
         const rateLimitResult = await checkRateLimit(
           options.rateLimit,
           rateLimitKey
@@ -443,7 +456,7 @@ export function withAPI<TInput = any, TOutput = any>(
     } catch (error) {
       const duration = Date.now() - startTime;
 
-      // Log error
+      // Log error with full context
       loggingProvider.apiError(route, error, {
         userId,
         method: request.method,
@@ -471,6 +484,7 @@ export function withAPI<TInput = any, TOutput = any>(
       // Determine status code and error message
       let statusCode = 500;
       let errorMessage = options.errors?.internal || 'Internal server error';
+      let errorDetails: Record<string, unknown> | undefined;
 
       if (error instanceof Error) {
         // Check for specific error types
@@ -486,12 +500,22 @@ export function withAPI<TInput = any, TOutput = any>(
         } else {
           errorMessage = error.message;
         }
+
+        // Include stack trace in development mode for debugging
+        if (process.env.NODE_ENV === 'development') {
+          errorDetails = {
+            stack: error.stack,
+            name: error.name,
+            cause: error.cause,
+          };
+        }
       }
 
       return NextResponse.json(
         {
           success: false,
           error: errorMessage,
+          ...(errorDetails && { details: errorDetails }),
           meta: {
             duration,
             timestamp: new Date().toISOString(),
@@ -624,8 +648,12 @@ async function logAudit(
       details,
     });
   } catch (error) {
-    // Don't fail the request if audit logging fails
-    console.error('Audit logging failed:', error);
+    // Don't fail the request if audit logging fails, but do log the error properly
+    loggingProvider.error('Audit logging failed', error, {
+      route,
+      userId,
+      action: typeof config === 'string' ? config : (typeof config === 'object' && 'action' in config ? config.action : 'unknown'),
+    });
   }
 }
 
