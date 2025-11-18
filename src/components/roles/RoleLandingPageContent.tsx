@@ -265,7 +265,7 @@ async function getWorkflowsByRole(dbRole: string): Promise<Workflow[]> {
   }
 }
 
-async function getPainPointsByRole(dbRole: string, workflows: Workflow[]): Promise<PainPoint[]> {
+async function getPainPointsByRole(workflows: Workflow[]): Promise<PainPoint[]> {
   try {
     const allPainPoints = await loadPainPointsFromJson();
     const workflowIds = new Set(workflows.map((w) => `${w.category}/${w.slug}`));
@@ -375,7 +375,7 @@ export async function RoleLandingPageContent({
   const prompts = await getPromptsByRole(dbRole);
   const patterns = await getPatternsByRole(dbRole);
   const workflows = await getWorkflowsByRole(dbRole);
-  const painPoints = await getPainPointsByRole(dbRole, workflows);
+  const painPoints = await getPainPointsByRole(workflows);
   const recommendations = await getRecommendationsByRole(dbRole);
 
   // Get dynamic content from DB
