@@ -222,6 +222,59 @@ export default function BuiltInPublicPage() {
               </div>
             </CardContent>
           </Card>
+
+          <Card className="border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icons.gitBranch className="h-6 w-6 text-indigo-600" />
+                Strategic Repository Organization
+              </CardTitle>
+              <CardDescription>
+                Evolution from monorepo to public/private separation
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-gray-700">
+                Midway through development, spun up a private repository for
+                enterprise-level product features while keeping core platform public.
+              </p>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-lg bg-green-50 p-4">
+                  <p className="mb-2 font-semibold text-green-900">
+                    ✓ Public Repo (This Repo)
+                  </p>
+                  <ul className="space-y-1 text-sm text-green-800">
+                    <li>• Core SaaS platform</li>
+                    <li>• Engineering best practices</li>
+                    <li>• Portfolio showcase code</li>
+                    <li>• Open source workflows</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg bg-purple-50 p-4">
+                  <p className="mb-2 font-semibold text-purple-900">
+                    ✓ Private Enterprise Repo
+                  </p>
+                  <ul className="space-y-1 text-sm text-purple-800">
+                    <li>• Proprietary business logic</li>
+                    <li>• Enterprise integrations</li>
+                    <li>• Revenue models & pricing</li>
+                    <li>• Advanced MCP servers</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="rounded-lg bg-blue-50 p-4">
+                <p className="mb-2 font-semibold text-blue-900">
+                  💡 Strategic Thinking
+                </p>
+                <p className="text-sm text-blue-800">
+                  Recognized partway through that some features should remain proprietary
+                  for competitive advantage. Refactored to separate public platform
+                  (portfolio showcase) from private enterprise product. Both repos
+                  maintain same engineering standards and guardrails.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
