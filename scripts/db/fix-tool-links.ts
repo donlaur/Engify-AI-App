@@ -72,16 +72,12 @@ const VERIFIED_LINKS: Record<string, {
     websiteUrl: 'https://continue.dev/',
     github: 'https://github.com/continuedev/continue',
   },
-  opendevin: {
-    websiteUrl: 'https://opendevin.github.io/',
-    github: 'https://github.com/AI-App/OpenDevin.OpenDevin',
-  },
   aider: {
     websiteUrl: 'https://aider.chat/',
     github: 'https://github.com/paul-gauthier/aider',
   },
   openhands: {
-    websiteUrl: 'https://www.openhands.ai/',
+    websiteUrl: 'https://openhands.dev/',
     github: 'https://github.com/allenai/open-hand',
   },
   tabby: {

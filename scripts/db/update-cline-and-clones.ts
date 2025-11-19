@@ -178,59 +178,6 @@ const CLONE_TOOLS = [
   },
 
   {
-    id: 'opendevin',
-    name: 'OpenDevin',
-    tagline: 'Autonomous, project-scale coding agent',
-    description: `OpenDevin is an autonomous, project-scale agent designed to tackle large, multi-step project tasks independently. It operates using an external "agent workspace" to handle complex tasks that require extensive planning and execution. OpenDevin aims for high autonomy similar to OpenHands but focuses on project-scale operations rather than providing a comprehensive all-in-one workspace. It's designed for developers who need an agent that can work on entire projects autonomously, making it suitable for large refactoring tasks, feature implementations, and system-level changes.`,
-    category: 'ide',
-    pricing: {
-      free: true,
-      paid: {
-        monthly: 0,
-        tier: 'Open Source',
-      },
-    },
-    features: [
-      'Autonomous project-scale agent',
-      'External agent workspace',
-      'Multi-step task planning',
-      'Large project handling',
-      'System-level changes',
-      'Complex refactoring support',
-    ],
-    pros: [
-      'Designed for project-scale tasks',
-      'Autonomous operation',
-      'Open-source',
-      'Handles complex multi-step workflows',
-      'External workspace isolation',
-    ],
-    cons: [
-      'Requires workspace setup',
-      'Less integrated than IDE extensions',
-      'May be slower for simple tasks',
-      'Learning curve for workspace management',
-    ],
-    tags: ['autonomous-agent', 'project-scale', 'workspace', 'open-source', 'cline-alternative'],
-    icon: 'code',
-    websiteUrl: 'https://opendevin.github.io/',
-    badges: ['open-source', 'free'],
-    supportedModels: ['GPT-4', 'Claude', 'Local models'],
-    agentCapabilities: [
-      'test-generation',
-      'refactoring',
-      'file-creation',
-      'project-scale-planning',
-      'system-level-changes',
-    ],
-    inspiredBy: 'cline',
-    cloneType: 'alternative',
-    marketplaceLinks: {
-      github: 'https://github.com/AI-App/OpenDevin.OpenDevin',
-    },
-  },
-
-  {
     id: 'tabby',
     name: 'Tabby',
     tagline: 'Self-hosted, open-source code completion agent',

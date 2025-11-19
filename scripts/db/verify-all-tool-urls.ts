@@ -133,13 +133,6 @@ const VERIFIED_URLS: Record<string, {
       free: true,
     },
   },
-  opendevin: {
-    websiteUrl: 'https://opendevin.github.io/',
-    github: 'https://github.com/AI-App/OpenDevin.OpenDevin',
-    pricing: {
-      free: true,
-    },
-  },
   aider: {
     websiteUrl: 'https://aider.chat/',
     github: 'https://github.com/paul-gauthier/aider',
@@ -148,7 +141,7 @@ const VERIFIED_URLS: Record<string, {
     },
   },
   openhands: {
-    websiteUrl: 'https://www.openhands.ai/',
+    websiteUrl: 'https://openhands.dev/',
     github: 'https://github.com/allenai/open-hand',
     pricing: {
       free: true,
