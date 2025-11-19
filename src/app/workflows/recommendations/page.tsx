@@ -2,11 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/lib/icons';
 import { loadRecommendationsFromJson } from '@/lib/workflows/load-recommendations-from-json';
+import { RecommendationsClient } from './RecommendationsClient';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -120,6 +118,41 @@ export default async function RecommendationsPage() {
     'risk-mitigation': 'Risk Mitigation',
   };
 
+  const AUDIENCE_LABELS: Record<string, string> = {
+    engineers: 'Engineers',
+    'engineering-managers': 'Engineering Managers',
+    'devops-sre': 'DevOps/SRE',
+    security: 'Security',
+    qa: 'QA',
+    'product-managers': 'Product Managers',
+    cto: 'CTO',
+    'vp-engineering': 'VP of Engineering',
+    legal: 'Legal',
+    architects: 'Architects',
+  };
+
+  // Calculate stats for filtering
+  const categoryStats = publishedRecommendations.reduce((acc, rec) => {
+    acc[rec.category] = (acc[rec.category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const audienceStats = publishedRecommendations.reduce((acc, rec) => {
+    rec.audience.forEach((aud) => {
+      acc[aud] = (acc[aud] || 0) + 1;
+    });
+    return acc;
+  }, {} as Record<string, number>);
+
+  const priorityStats = publishedRecommendations.reduce((acc, rec) => {
+    acc[rec.priority] = (acc[rec.priority] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const uniqueCategories = [...new Set(publishedRecommendations.map((r) => r.category))].sort();
+  const uniqueAudiences = [...new Set(publishedRecommendations.flatMap((r) => r.audience))].sort();
+  const uniquePriorities = [...new Set(publishedRecommendations.map((r) => r.priority))].sort();
+
   return (
     <>
       <script
@@ -153,59 +186,23 @@ export default async function RecommendationsPage() {
             </div>
           </header>
 
-          {/* Recommendations Grid */}
+          {/* Recommendations with Search and Filter */}
           {publishedRecommendations.length === 0 ? (
             <div className="rounded-lg border bg-card p-12 text-center">
               <p className="text-muted-foreground">No recommendations published yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {publishedRecommendations.map((recommendation) => (
-                <Card
-                  key={recommendation.id}
-                  className="group relative flex h-full flex-col transition-all duration-200 hover:border-primary hover:shadow-lg"
-                >
-                  <CardContent className="flex flex-1 flex-col p-6">
-                    <div className="mb-3 flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="mb-2 flex items-center gap-2">
-                          <Badge variant={recommendation.priority === 'high' ? 'default' : 'outline'} className="text-xs">
-                            {recommendation.priority.toUpperCase()}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {CATEGORY_LABELS[recommendation.category] || recommendation.category}
-                          </Badge>
-                        </div>
-                        <h2 className="text-lg font-semibold group-hover:text-primary">
-                          {recommendation.title}
-                        </h2>
-                      </div>
-                    </div>
-                    <p className="mb-4 flex-1 text-sm text-muted-foreground line-clamp-3">
-                      {recommendation.description}
-                    </p>
-                    <div className="mb-4 text-xs italic text-muted-foreground line-clamp-2">
-                      {recommendation.recommendationStatement}
-                    </div>
-                    {recommendation.keywords && recommendation.keywords.length > 0 && (
-                      <div className="mb-4 flex flex-wrap gap-1">
-                        {recommendation.keywords.slice(0, 3).map((keyword, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {keyword}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                    <Button asChild variant="outline" size="sm" className="w-full">
-                      <Link href={`/workflows/recommendations/${recommendation.slug}`}>
-                        Learn More
-                        <Icons.arrowRight className="ml-2 h-3 w-3" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <RecommendationsClient
+              initialRecommendations={publishedRecommendations}
+              categoryStats={categoryStats}
+              audienceStats={audienceStats}
+              priorityStats={priorityStats}
+              uniqueCategories={uniqueCategories}
+              uniqueAudiences={uniqueAudiences}
+              uniquePriorities={uniquePriorities}
+              categoryLabels={CATEGORY_LABELS}
+              audienceLabels={AUDIENCE_LABELS}
+            />
           )}
 
           {/* CTA */}

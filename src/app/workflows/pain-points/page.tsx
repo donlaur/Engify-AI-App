@@ -2,11 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/lib/icons';
 import { loadPainPointsFromJson, getPainPointsMetadata } from '@/lib/workflows/load-pain-points-from-json';
+import { PainPointsClient } from './PainPointsClient';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
@@ -76,6 +74,23 @@ export default async function PainPointsPage() {
     .filter(pp => pp.status === 'published')
     .sort((a, b) => a.title.localeCompare(b.title));
 
+  // Calculate keyword stats for filtering
+  const allKeywords: string[] = [];
+  publishedPainPoints.forEach((pp) => {
+    allKeywords.push(...(pp.keywords || []));
+    allKeywords.push(...(pp.primaryKeywords || []));
+    allKeywords.push(...(pp.painPointKeywords || []));
+  });
+  const uniqueKeywords = [...new Set(allKeywords)].sort();
+  const keywordStats = uniqueKeywords.reduce((acc, keyword) => {
+    acc[keyword] = publishedPainPoints.filter((pp) =>
+      pp.keywords.includes(keyword) ||
+      pp.primaryKeywords.includes(keyword) ||
+      pp.painPointKeywords.includes(keyword)
+    ).length;
+    return acc;
+  }, {} as Record<string, number>);
+
   // Generate JSON-LD structured data
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -132,46 +147,12 @@ export default async function PainPointsPage() {
             </div>
           </header>
 
-          {/* Pain Points Grid */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {publishedPainPoints.map(painPoint => (
-              <Card
-                key={painPoint.id}
-                className="group relative flex h-full flex-col transition-all duration-200 hover:border-primary hover:shadow-lg"
-              >
-                <CardContent className="flex flex-1 flex-col p-6">
-                  <div className="mb-3 flex items-start justify-between gap-2">
-                    <h2 className="text-lg font-semibold group-hover:text-primary">
-                      {painPoint.title}
-                    </h2>
-                  </div>
-                  <p className="mb-4 flex-1 text-sm text-muted-foreground line-clamp-3">
-                    {painPoint.description}
-                  </p>
-                  {painPoint.impact && (
-                    <p className="mb-4 text-xs italic text-muted-foreground line-clamp-2">
-                      {painPoint.impact}
-                    </p>
-                  )}
-                  {painPoint.keywords && painPoint.keywords.length > 0 && (
-                    <div className="mb-4 flex flex-wrap gap-1">
-                      {painPoint.keywords.slice(0, 3).map((keyword, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {keyword}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                  <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link href={`/workflows/pain-points/${painPoint.slug}`}>
-                      Learn More
-                      <Icons.arrowRight className="ml-2 h-3 w-3" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {/* Pain Points with Search and Filter */}
+          <PainPointsClient
+            initialPainPoints={publishedPainPoints}
+            keywordStats={keywordStats}
+            uniqueKeywords={uniqueKeywords}
+          />
 
           {/* CTA */}
           <div className="mt-12 rounded-lg border border-primary/20 bg-primary/5 p-8 text-center">

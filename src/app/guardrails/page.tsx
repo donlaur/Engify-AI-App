@@ -70,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function GuardrailsPage() {
   const workflows = await loadWorkflowsFromJson();
-  const guardrails = workflows.filter((w) => w.category === 'guardrails');
+  const guardrails = workflows.filter((w) => w.category === 'guardrails' && w.status === 'published');
 
   // Calculate subcategory stats
   const subcategoryStats = guardrails.reduce((acc, guardrail) => {

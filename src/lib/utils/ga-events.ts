@@ -215,7 +215,7 @@ export function trackNavigation(
  * Track filter usage for prompt library
  */
 export function trackFilterUsage(
-  filterType: 'category' | 'role' | 'pattern' | 'tags' | 'favorites',
+  filterType: 'category' | 'role' | 'pattern' | 'tags' | 'favorites' | 'keyword' | 'audience' | 'priority' | 'status' | 'subcategory' | 'severity',
   filterValue: string,
   metadata?: {
     result_count?: number;

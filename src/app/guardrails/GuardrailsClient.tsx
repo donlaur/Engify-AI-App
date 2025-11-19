@@ -193,7 +193,7 @@ export function GuardrailsClient({
               onClick={() => {
                 setSelectedSubcategory(subcategory);
                 if (subcategory !== 'all') {
-                  trackFilterUsage('subcategory' as any, subcategory, {
+                  trackFilterUsage('subcategory', subcategory, {
                     result_count: filteredGuardrails.length,
                   });
                 }
@@ -258,7 +258,7 @@ export function GuardrailsClient({
               onClick={() => {
                 setSelectedSeverity(severity);
                 if (severity !== 'all') {
-                  trackFilterUsage('severity' as any, severity, {
+                  trackFilterUsage('severity', severity, {
                     result_count: filteredGuardrails.length,
                   });
                 }
