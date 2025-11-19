@@ -185,8 +185,8 @@ export default async function AIModelDetailPage({ params }: PageProps) {
       .replace(/^alfredproscodellama/i, 'llama')
       .replace(/^inceptionmercury/i, 'mercury')
       .replace(/^undi95remm/i, 'remm')
-      .replace(/perplexitysonar/i, 'sonar')
-      .replace(/togethercomputer/i, 'together');
+      .replace(/^perplexitysonar/i, 'sonar')
+      .replace(/^togethercomputer/i, 'together');
     
     const generatedSlug = generateSlug(modelNameForSlug);
     if (generatedSlug && generatedSlug !== 'untitled' && generatedSlug !== slug) {
