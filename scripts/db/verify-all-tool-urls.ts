@@ -237,6 +237,16 @@ const VERIFIED_URLS: Record<string, {
       free: true,
     },
   },
+
+  // Agentic Assistants
+  zencoder: {
+    websiteUrl: 'https://zencoder.ai/',
+    pricing: {
+      free: false,
+      monthly: 0, // Pricing not publicly disclosed
+      tier: 'Pro',
+    },
+  },
 };
 
 async function main() {
