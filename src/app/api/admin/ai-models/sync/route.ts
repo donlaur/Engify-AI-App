@@ -17,8 +17,8 @@ import { OPENAI_MODEL_DATA, convertOpenAIDataToModel } from '@/lib/data/openai-m
 
 // POST: Sync models from providers
 export async function POST(request: NextRequest) {
-  // RBAC: Allow admin, super_admin, and org_admin roles
-  const r = await withRBAC({ roles: ['admin', 'super_admin', 'org_admin'] })(request);
+  // RBAC: Allow super_admin and org_admin roles
+  const r = await withRBAC({ roles: ['super_admin', 'org_admin'] })(request);
   if (r) return r;
 
   const session = await auth();
