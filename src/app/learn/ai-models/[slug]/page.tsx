@@ -143,6 +143,58 @@ export async function generateMetadata({
 
 export default async function AIModelDetailPage({ params }: PageProps) {
   const { slug } = await params;
+  
+  // CRITICAL: Check for problematic slugs FIRST, before database lookup
+  // This ensures we redirect even if the model doesn't exist in the database
+  const isProblematicSlug = 
+    slug.includes('anthropicclaude') ||
+    slug.includes('mistralaimistral') ||
+    slug.includes('mistralaimagistral') ||
+    slug.includes('meta-llamallama') ||
+    slug.includes('ai21jamba') ||
+    slug.includes('googlegemini') ||
+    slug.startsWith('openaigpt') ||
+    slug.startsWith('openaio') ||
+    slug.startsWith('openaicodex') ||
+    slug.startsWith('qwenqwen') ||
+    slug.startsWith('inflectioninflection') ||
+    slug.startsWith('alfredproscodellama') ||
+    slug.startsWith('inceptionmercury') ||
+    slug.startsWith('undi95remm') ||
+    slug.includes('perplexitysonar') ||
+    slug.includes('togethercomputer');
+
+  if (isProblematicSlug) {
+    // Extract model name from problematic slug and generate clean slug
+    // Example: "anthropicclaude-3-opus" -> "claude-3-opus"
+    let modelNameForSlug = slug;
+    
+    // Remove concatenated provider names
+    modelNameForSlug = modelNameForSlug
+      .replace(/^anthropicclaude/i, 'claude')
+      .replace(/^mistralaimistral/i, 'mistral')
+      .replace(/^mistralaimagistral/i, 'mistral')
+      .replace(/^meta-llamallama/i, 'llama')
+      .replace(/^ai21jamba/i, 'jamba')
+      .replace(/^googlegemini/i, 'gemini')
+      .replace(/^openaigpt/i, 'gpt')
+      .replace(/^openaio/i, 'o')
+      .replace(/^openaicodex/i, 'codex')
+      .replace(/^qwenqwen/i, 'qwen')
+      .replace(/^inflectioninflection/i, 'inflection')
+      .replace(/^alfredproscodellama/i, 'llama')
+      .replace(/^inceptionmercury/i, 'mercury')
+      .replace(/^undi95remm/i, 'remm')
+      .replace(/perplexitysonar/i, 'sonar')
+      .replace(/togethercomputer/i, 'together');
+    
+    const generatedSlug = generateSlug(modelNameForSlug);
+    if (generatedSlug && generatedSlug !== 'untitled' && generatedSlug !== slug) {
+      // Redirect to clean slug (even if model doesn't exist)
+      permanentRedirect(`/learn/ai-models/${generatedSlug}`);
+    }
+  }
+  
   // Try slug first, then fallback to ID lookup (for backwards compatibility)
   let model = await aiModelService.findBySlug(slug);
   if (!model) {
@@ -156,45 +208,21 @@ export default async function AIModelDetailPage({ params }: PageProps) {
   }
   
   // If model found by ID but doesn't have slug, generate and save slug, then redirect
-  // Also check if current slug is problematic and needs fixing
-  if (model) {
-    const currentSlug = model.slug || slug;
-    const isProblematicSlug = 
-      currentSlug.includes('anthropicclaude') ||
-      currentSlug.includes('mistralaimistral') ||
-      currentSlug.includes('mistralaimagistral') ||
-      currentSlug.includes('meta-llamallama') ||
-      currentSlug.includes('ai21jamba') ||
-      currentSlug.includes('googlegemini') ||
-      currentSlug.startsWith('openaigpt') ||
-      currentSlug.startsWith('openaio') ||
-      currentSlug.startsWith('openaicodex') ||
-      currentSlug.startsWith('qwenqwen') ||
-      currentSlug.startsWith('inflectioninflection') ||
-      currentSlug.startsWith('alfredproscodellama') ||
-      currentSlug.startsWith('inceptionmercury') ||
-      currentSlug.startsWith('undi95remm') ||
-      currentSlug.includes('perplexitysonar') ||
-      currentSlug.includes('togethercomputer');
-
-    if (!model.slug || isProblematicSlug) {
-      // Extract model name from ID if it contains a slash
-      let modelNameForSlug = model.name || model.displayName || model.id;
-      if (model.id && model.id.includes('/')) {
-        const parts = model.id.split('/');
-        modelNameForSlug = parts[parts.length - 1];
-      }
+  if (model && !model.slug) {
+    // Extract model name from ID if it contains a slash
+    let modelNameForSlug = model.name || model.displayName || model.id;
+    if (model.id && model.id.includes('/')) {
+      const parts = model.id.split('/');
+      modelNameForSlug = parts[parts.length - 1];
+    }
+    
+    const generatedSlug = generateSlug(modelNameForSlug);
+    if (generatedSlug && generatedSlug !== 'untitled' && slug !== generatedSlug) {
+      // Update the model with slug for future requests
+      await aiModelService.update(model.id, { slug: generatedSlug });
       
-      const generatedSlug = generateSlug(modelNameForSlug);
-      if (generatedSlug && generatedSlug !== 'untitled') {
-        // Update the model with slug for future requests
-        await aiModelService.update(model.id, { slug: generatedSlug });
-        
-        // Redirect to slug URL (if current URL doesn't match slug) - use permanentRedirect for SEO
-        if (slug !== generatedSlug) {
-          permanentRedirect(`/learn/ai-models/${generatedSlug}`);
-        }
-      }
+      // Redirect to slug URL - use permanentRedirect for SEO
+      permanentRedirect(`/learn/ai-models/${generatedSlug}`);
     }
   }
 
