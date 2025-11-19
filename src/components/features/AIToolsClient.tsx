@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { Icons } from '@/lib/icons';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { EmptyState } from '@/components/features/EmptyState';
 import type { AITool } from '@/lib/db/schemas/ai-tool';
 
 interface AIToolsClientProps {
@@ -39,6 +40,8 @@ interface AIToolsClientProps {
 type SortOption = 'alphabetical' | 'category' | 'price-low' | 'price-high';
 
 const INITIAL_VISIBLE_CATEGORIES = 8;
+const INITIAL_VISIBLE_TOOLS = 18; // Show 18 initially (6 rows x 3 columns) - but ALL are in HTML for SEO
+const LOAD_MORE_INCREMENT = 18; // Load 18 more at a time
 
 
 export function AIToolsClient({
@@ -51,6 +54,41 @@ export function AIToolsClient({
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('alphabetical');
+  const [visibleToolCount, setVisibleToolCount] = useState(INITIAL_VISIBLE_TOOLS);
+  
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleToolCount(INITIAL_VISIBLE_TOOLS);
+  }, [searchQuery, selectedCategory, sortBy]);
+
+  // Infinite scroll with Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
+
+  const loadMore = useCallback(() => {
+    setVisibleToolCount((prev) => prev + LOAD_MORE_INCREMENT);
+  }, []);
 
   // Filter tools using useMemo to prevent recalculations
   const filteredTools = useMemo(() => {
@@ -107,14 +145,8 @@ export function AIToolsClient({
     return sorted;
   }, [initialTools, searchQuery, selectedCategory, sortBy]);
 
-  // Group filtered tools by category
-  const byCategory: Record<string, typeof filteredTools> = {};
-  filteredTools.forEach((tool) => {
-    if (!byCategory[tool.category]) {
-      byCategory[tool.category] = [];
-    }
-    byCategory[tool.category].push(tool);
-  });
+  // Check if there are more tools to load
+  const hasMore = visibleToolCount < filteredTools.length;
 
   // Dynamic filters from DB
   const allCategories: Array<string | 'all'> = ['all', ...uniqueCategories];
@@ -225,28 +257,24 @@ export function AIToolsClient({
         </div>
       </div>
 
-      {/* Tools by Category */}
-      <div className="space-y-12">
-        {Object.entries(byCategory).map(([category, categoryTools]) => (
-          <div key={category}>
-            <div className="mb-6 flex items-center gap-3">
-              <h2 className="text-2xl font-bold">
-                {categoryLabels[category] || category}
-              </h2>
-              <Badge variant="secondary">
-                {categoryTools.length}{' '}
-                {categoryTools.length === 1 ? 'tool' : 'tools'}
-              </Badge>
-            </div>
+      {/* Results */}
+      {filteredTools.length > 0 ? (
+        <>
+          <div className="grid items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredTools.map((tool, index) => {
+              const isVisible = index < visibleToolCount;
+              const pricingText = tool.pricing.free
+                ? 'Free'
+                : `$${tool.pricing.paid?.monthly || 0}/mo`;
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {categoryTools.map((tool) => {
-                const pricingText = tool.pricing.free
-                  ? 'Free'
-                  : `$${tool.pricing.paid?.monthly || 0}/mo`;
-
-                return (
-                  <Card key={tool.id} className="group hover:border-primary">
+              return (
+                <div
+                  key={tool.id}
+                  className={isVisible ? '' : 'hidden'}
+                  // Use CSS to hide, but keep in DOM for SEO
+                  style={isVisible ? undefined : { display: 'none' }}
+                >
+                  <Card className="group h-full hover:border-primary">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -271,9 +299,15 @@ export function AIToolsClient({
                           </div>
                         )}
                       </div>
+                      {/* Category Badge */}
+                      <div className="mt-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {categoryLabels[tool.category] || tool.category}
+                        </Badge>
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
+                    <CardContent className="flex flex-col flex-1">
+                      <div className="space-y-3 flex-1">
                         {/* Pricing */}
                         <div>
                           <Badge
@@ -322,7 +356,7 @@ export function AIToolsClient({
                         )}
 
                         {/* CTA */}
-                        <Button asChild className="w-full" variant="outline">
+                        <Button asChild className="w-full mt-auto" variant="outline">
                           <Link href={`/learn/ai-tools/${tool.slug}`}>
                             View Details
                             <Icons.arrowRight className="ml-2 h-4 w-4" />
@@ -331,12 +365,52 @@ export function AIToolsClient({
                       </div>
                     </CardContent>
                   </Card>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
+
+          {/* Load More Trigger (invisible element for intersection observer) */}
+          {hasMore && (
+            <div ref={loadMoreRef} className="mt-8 flex justify-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-pulse text-sm text-muted-foreground">
+                  Loading more tools...
+                </div>
+                {/* Fallback button in case intersection observer doesn't work */}
+                <Button
+                  variant="outline"
+                  onClick={loadMore}
+                  className="min-w-[200px]"
+                >
+                  Load More ({filteredTools.length - visibleToolCount}{' '}
+                  remaining)
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Show total count when all loaded */}
+          {!hasMore && filteredTools.length > INITIAL_VISIBLE_TOOLS && (
+            <div className="mt-8 text-center text-sm text-muted-foreground">
+              Showing all {filteredTools.length} tools
+            </div>
+          )}
+        </>
+      ) : (
+        <EmptyState
+          icon={Icons.search}
+          title="No tools found"
+          description="Try adjusting your search or filters"
+          action={{
+            label: 'Clear Filters',
+            onClick: () => {
+              setSearchQuery('');
+              setSelectedCategory('all');
+            },
+          }}
+        />
+      )}
     </>
   );
 }
