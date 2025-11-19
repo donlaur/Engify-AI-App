@@ -235,8 +235,8 @@ const ADDITIONAL_TOOLS = [
     pricing: {
       free: true,
       paid: {
-        monthly: 10,
-        tier: 'Pro',
+        monthly: 8,
+        tier: 'BYOK Pro',
       },
     },
     features: [
@@ -262,7 +262,7 @@ const ADDITIONAL_TOOLS = [
     ],
     tags: ['code-assistant', 'chatbot', 'code-generation', 'debugging', 'natural-language'],
     icon: 'message-square',
-    websiteUrl: 'https://codegpt.ai/',
+    websiteUrl: 'https://www.codegpt.co/',
   },
 
   // AI Terminals

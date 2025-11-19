@@ -91,6 +91,9 @@ const VERIFIED_LINKS: Record<string, {
   'jetbrains-ai-assistant': {
     websiteUrl: 'https://www.jetbrains.com/ai/',
   },
+  codegpt: {
+    websiteUrl: 'https://www.codegpt.co/',
+  },
 };
 
 /**
@@ -134,6 +137,11 @@ const VERIFIED_PRICING: Record<string, {
     free: false,
     monthly: 20,
     tier: 'Pro',
+  },
+  codegpt: {
+    free: true,
+    monthly: 8,
+    tier: 'BYOK Pro',
   },
 };
 
