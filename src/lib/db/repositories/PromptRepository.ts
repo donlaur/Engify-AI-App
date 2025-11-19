@@ -215,6 +215,18 @@ export class PromptRepository
   }
 
   /**
+   * Get prompts by tag
+   */
+  async findByTag(tag: string): Promise<Prompt[]> {
+    const documents = await this.find({
+      tags: { $in: [tag.toLowerCase()] },
+      isPublic: true,
+      active: { $ne: false },
+    });
+    return this.processor.processMany(documents);
+  }
+
+  /**
    * Get unique categories
    */
   async getUniqueCategories(): Promise<string[]> {

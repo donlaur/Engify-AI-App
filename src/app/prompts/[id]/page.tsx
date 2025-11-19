@@ -155,7 +155,7 @@ export async function generateMetadata({
     });
 
     // For generated prompts or other errors, return noindex metadata
-    const isGenerated = errorId?.startsWith('generated-');
+    const isGenerated = errorId?.startsWith('generated-') ?? false;
     const isInternalId = errorId ? /^(em-|ref-|cg-|doc-|db-|dir-|gen-|arch-|test-|decision-|conflict-|facilitator-)\d{3}$/i.test(errorId) : false;
     
     // Fallback metadata if fetch fails - use noindex for generated/internal IDs
@@ -163,7 +163,7 @@ export async function generateMetadata({
       title: 'Prompt Not Found | Engify.ai',
       description: 'The requested prompt could not be found.',
       robots: {
-        index: false,
+        index: !(isGenerated || isInternalId), // Only index if not generated/internal ID
         follow: false,
       },
     };

@@ -234,7 +234,7 @@ export default async function ArticlePage({ params }: PageProps) {
         {/* Related Articles */}
         <RelatedArticles
           currentArticle={{
-            slug: article.seo?.slug || article.slug || slug,
+            slug: article.seo?.slug || slug,
             tags: Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : []),
             category: article.category,
             title: article.title,
@@ -243,7 +243,7 @@ export default async function ArticlePage({ params }: PageProps) {
         />
 
         {/* Hub-and-Spoke Links */}
-        <HubSpokeLinks articleSlug={article.seo?.slug || article.slug || slug} />
+        <HubSpokeLinks articleSlug={article.seo?.slug || slug} />
 
         {/* Cross-Content Links (Prompts & Patterns) */}
         <CrossContentLinks

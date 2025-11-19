@@ -44,8 +44,8 @@ async function getPromptsByTag(tag: string) {
       tags: p.tags || [],
       isFeatured: p.isFeatured || false,
       views: p.views || 0,
-      rating: p.rating || p.stats?.averageRating || 0,
-      ratingCount: p.ratingCount || p.stats?.totalRatings || 0,
+      rating: p.rating || 0,
+      ratingCount: p.ratingCount || 0,
       createdAt: p.createdAt || new Date(),
     }));
   } catch (error) {
@@ -171,7 +171,7 @@ export default async function TagPageCatchAll({ params }: { params: Promise<{ ta
     }
 
     // Decode and normalize tag from URL
-    const { decoded, normalized } = decodeTagFromUrl(tag);
+    const { normalized } = decodeTagFromUrl(tag);
     
     // Get all tag variations for database lookup
     const tagVariations = getTagVariations(tag);

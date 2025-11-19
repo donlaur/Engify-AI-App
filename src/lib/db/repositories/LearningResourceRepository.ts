@@ -208,7 +208,7 @@ export class LearningResourceRepository
           'seo.slug': slug,
           organizationId: null, // Public content - intentionally null for all users
         },
-        { $inc: { views: 1 } }
+        { $inc: { views: 1 } } as any
       );
     } catch (error) {
       console.error('Failed to increment view count:', error);
