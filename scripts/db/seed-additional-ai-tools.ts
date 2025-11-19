@@ -303,7 +303,10 @@ const ADDITIONAL_TOOLS = [
     ],
     tags: ['terminal', 'cli', 'gemini', 'open-source', 'google', 'natural-language'],
     icon: 'terminal',
-    websiteUrl: 'https://github.com/google/generative-ai-cli',
+    websiteUrl: 'https://github.com/google-gemini/gemini-cli',
+    marketplaceLinks: {
+      github: 'https://github.com/google-gemini/gemini-cli',
+    },
   },
 
   // App Builders

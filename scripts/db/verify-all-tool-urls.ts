@@ -160,8 +160,8 @@ const VERIFIED_URLS: Record<string, {
     github: 'https://github.com/warpdotdev',
   },
   'gemini-cli': {
-    websiteUrl: 'https://github.com/google/generative-ai-cli',
-    github: 'https://github.com/google/generative-ai-cli',
+    websiteUrl: 'https://github.com/google-gemini/gemini-cli',
+    github: 'https://github.com/google-gemini/gemini-cli',
     pricing: {
       free: true,
     },
