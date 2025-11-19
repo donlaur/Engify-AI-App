@@ -38,7 +38,7 @@ const ADDITIONAL_TOOLS = [
     pricing: {
       free: false,
       paid: {
-        monthly: 20, // Estimated
+        monthly: 30,
         tier: 'Pro',
       },
     },
@@ -65,7 +65,7 @@ const ADDITIONAL_TOOLS = [
     ],
     tags: ['ide', 'codebase-indexing', 'multi-file', 'enterprise', 'agents'],
     icon: 'code',
-    websiteUrl: 'https://www.augment.dev',
+    websiteUrl: 'https://www.augmentcode.com/',
   },
 
   {

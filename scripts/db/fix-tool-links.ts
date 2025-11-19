@@ -94,6 +94,9 @@ const VERIFIED_LINKS: Record<string, {
   codegpt: {
     websiteUrl: 'https://www.codegpt.co/',
   },
+  'augment-code': {
+    websiteUrl: 'https://www.augmentcode.com/',
+  },
 };
 
 /**
@@ -142,6 +145,11 @@ const VERIFIED_PRICING: Record<string, {
     free: true,
     monthly: 8,
     tier: 'BYOK Pro',
+  },
+  'augment-code': {
+    free: false,
+    monthly: 30,
+    tier: 'Pro',
   },
 };
 
