@@ -7,7 +7,7 @@
  * - Cline: Enhanced description noting it's the leading autonomous agent
  * - Aider: Note it's a CLI-native alternative to Cline
  * - Continue: Note it's an extensible alternative (already added, but update)
- * - Add OpenHands, OpenDevin, Tabby, Aider if missing
+ * - Add OpenHands, Tabby, Aider if missing
  * 
  * Run with: tsx scripts/db/update-cline-and-clones.ts
  */
@@ -159,7 +159,7 @@ const CLONE_TOOLS = [
     ],
     tags: ['autonomous-agent', 'full-capability', 'workspace', 'open-source', 'cline-alternative'],
     icon: 'code',
-    websiteUrl: 'https://www.openhands.ai/',
+    websiteUrl: 'https://openhands.dev/',
     badges: ['open-source', 'free'],
     supportedModels: ['GPT-4', 'Claude', 'Local models'],
     agentCapabilities: [
