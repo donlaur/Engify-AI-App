@@ -96,6 +96,23 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { id } = await params;
+    
+    // Early detection: Generated prompts and internal IDs are temporary/should return 404
+    // This prevents 500 errors in generateMetadata
+    const isGenerated = id.startsWith('generated-');
+    const isInternalId = /^(em-|ref-|cg-|doc-|db-|dir-|gen-|arch-|test-|decision-|conflict-|facilitator-)\d{3}$/i.test(id);
+    
+    if (isGenerated || isInternalId) {
+      return {
+        title: 'Prompt Not Found | Engify.ai',
+        description: 'The requested prompt could not be found.',
+        robots: {
+          index: false,
+          follow: false,
+        },
+      };
+    }
+    
     // Try JSON first (fast), then MongoDB fallback (reliable)
     const prompt = await getPromptById(id);
 
@@ -137,10 +154,18 @@ export async function generateMetadata({
       error: error instanceof Error ? error.message : 'Unknown error',
     });
 
-    // Fallback metadata if fetch fails
+    // For generated prompts or other errors, return noindex metadata
+    const isGenerated = errorId?.startsWith('generated-');
+    const isInternalId = errorId ? /^(em-|ref-|cg-|doc-|db-|dir-|gen-|arch-|test-|decision-|conflict-|facilitator-)\d{3}$/i.test(errorId) : false;
+    
+    // Fallback metadata if fetch fails - use noindex for generated/internal IDs
     return {
-      title: 'Prompt | Engify.ai',
-      description: 'Expert prompt for AI engineering teams',
+      title: 'Prompt Not Found | Engify.ai',
+      description: 'The requested prompt could not be found.',
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 }
@@ -152,10 +177,13 @@ export default async function PromptPage({
 }) {
   try {
     const { id } = await params;
-    // Early detection: Generated prompts are temporary and may not exist
+    // Early detection: Generated prompts and internal IDs are temporary/should return 404
     // Return 404 gracefully to prevent 5xx errors
-    if (id.startsWith('generated-')) {
-      logger.warn('Generated prompt ID not found (temporary prompt)', { id });
+    const isGenerated = id.startsWith('generated-');
+    const isInternalId = /^(em-|ref-|cg-|doc-|db-|dir-|gen-|arch-|test-|decision-|conflict-|facilitator-)\d{3}$/i.test(id);
+    
+    if (isGenerated || isInternalId) {
+      logger.warn('Generated or internal prompt ID not found (temporary prompt)', { id, isGenerated, isInternalId });
       notFound();
     }
 

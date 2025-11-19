@@ -6,7 +6,7 @@
  */
 
 import { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
@@ -156,15 +156,44 @@ export default async function AIModelDetailPage({ params }: PageProps) {
   }
   
   // If model found by ID but doesn't have slug, generate and save slug, then redirect
-  if (model && !model.slug) {
-    const generatedSlug = generateSlug(model.name || model.displayName || model.id);
-    if (generatedSlug && generatedSlug !== 'untitled') {
-      // Update the model with slug for future requests
-      await aiModelService.update(model.id, { slug: generatedSlug });
+  // Also check if current slug is problematic and needs fixing
+  if (model) {
+    const currentSlug = model.slug || slug;
+    const isProblematicSlug = 
+      currentSlug.includes('anthropicclaude') ||
+      currentSlug.includes('mistralaimistral') ||
+      currentSlug.includes('mistralaimagistral') ||
+      currentSlug.includes('meta-llamallama') ||
+      currentSlug.includes('ai21jamba') ||
+      currentSlug.includes('googlegemini') ||
+      currentSlug.startsWith('openaigpt') ||
+      currentSlug.startsWith('openaio') ||
+      currentSlug.startsWith('openaicodex') ||
+      currentSlug.startsWith('qwenqwen') ||
+      currentSlug.startsWith('inflectioninflection') ||
+      currentSlug.startsWith('alfredproscodellama') ||
+      currentSlug.startsWith('inceptionmercury') ||
+      currentSlug.startsWith('undi95remm') ||
+      currentSlug.includes('perplexitysonar') ||
+      currentSlug.includes('togethercomputer');
+
+    if (!model.slug || isProblematicSlug) {
+      // Extract model name from ID if it contains a slash
+      let modelNameForSlug = model.name || model.displayName || model.id;
+      if (model.id && model.id.includes('/')) {
+        const parts = model.id.split('/');
+        modelNameForSlug = parts[parts.length - 1];
+      }
       
-      // Redirect to slug URL (if current URL doesn't match slug)
-      if (slug !== generatedSlug) {
-        redirect(`/learn/ai-models/${generatedSlug}`);
+      const generatedSlug = generateSlug(modelNameForSlug);
+      if (generatedSlug && generatedSlug !== 'untitled') {
+        // Update the model with slug for future requests
+        await aiModelService.update(model.id, { slug: generatedSlug });
+        
+        // Redirect to slug URL (if current URL doesn't match slug) - use permanentRedirect for SEO
+        if (slug !== generatedSlug) {
+          permanentRedirect(`/learn/ai-models/${generatedSlug}`);
+        }
       }
     }
   }

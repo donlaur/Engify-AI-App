@@ -133,7 +133,11 @@ function mapModalities(architecture: OpenRouterModel['architecture']): AIModel['
 function mapOpenRouterToModel(openRouterModel: OpenRouterModel): Partial<AIModel> {
   const provider = extractProvider(openRouterModel.id);
   const modelName = extractModelName(openRouterModel.id);
-  const slug = generateSlug(openRouterModel.canonical_slug || openRouterModel.id);
+  // Generate slug from model name only (not full ID) to avoid concatenated provider names
+  // Use canonical_slug if available, otherwise extract model name from ID
+  const slugSource = openRouterModel.canonical_slug || 
+    (openRouterModel.id.includes('/') ? openRouterModel.id.split('/').pop() : openRouterModel.id);
+  const slug = generateSlug(slugSource || modelName);
 
   // Parse pricing (OpenRouter prices are per 1M tokens, we store per 1k)
   const costPer1kInputTokens = parseFloat(openRouterModel.pricing.prompt || '0') / 1000;

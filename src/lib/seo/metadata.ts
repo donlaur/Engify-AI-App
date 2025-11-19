@@ -151,6 +151,17 @@ export function generatePromptMetadata(
       canonical: url,
     },
     keywords,
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large' as const,
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title,
       description,
@@ -241,6 +252,17 @@ export function generatePatternMetadata(pattern: {
       canonical: url,
     },
     keywords,
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large' as const,
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title,
       description,
@@ -294,6 +316,17 @@ export function generateCollectionMetadata(
       canonical: url,
     },
     keywords,
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large' as const,
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title,
       description,

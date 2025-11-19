@@ -325,23 +325,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const slug = getPromptSlug(prompt);
       
       // Validate slug: must exist, not be empty, not be 'untitled', and not match ID
-      // If slug is invalid, we can either skip it or use ID as fallback
+      // Also filter out internal reference IDs (ref-001, cg-002, gen-001, arch-001, etc.) and generated IDs
+      const isInternalId = /^(ref-|cg-|doc-|db-|dir-|gen-|arch-|test-|decision-|conflict-|facilitator-|generated-)/i.test(slug || '') ||
+        /^[a-z]{2,4}-\d{3}$/i.test(slug || '') || // Pattern like "ref-001", "gen-001"
+        /-\d{3}$/.test(slug || ''); // Ends with -001, -002, etc. (likely internal IDs)
+      
+      // Check for duplicate/redundant patterns in slug (very long slugs with repeated sequences)
+      const hasDuplicatePattern = slug && slug.length > 50 && (() => {
+        const words = slug.split('-');
+        if (words.length < 10) return false;
+        // Check for repeated sequences of 3+ words
+        for (let seqLen = 3; seqLen <= Math.min(5, Math.floor(words.length / 2)); seqLen++) {
+          for (let i = 0; i <= words.length - seqLen * 2; i++) {
+            const sequence1 = words.slice(i, i + seqLen).join('-');
+            for (let j = i + seqLen; j <= words.length - seqLen; j++) {
+              const sequence2 = words.slice(j, j + seqLen).join('-');
+              if (sequence1 === sequence2) {
+                return true; // Found duplicate sequence
+              }
+            }
+          }
+        }
+        return false;
+      })();
+      
       const isValidSlug = slug && 
         slug !== '' && 
         slug !== 'untitled' && 
-        slug !== prompt.id;
+        slug !== prompt.id &&
+        !isInternalId &&
+        !hasDuplicatePattern;
 
       if (!isValidSlug) {
-        // Use ID as fallback only if ID is valid and different from 'untitled'
-        if (prompt.id && prompt.id !== 'untitled' && !prompt.id.includes('generated-')) {
-          return {
-            url: `${baseUrl}/prompts/${encodeURIComponent(prompt.id)}`,
-            lastModified: prompt.updatedAt || prompt.createdAt || now,
-            changeFrequency: 'monthly' as const,
-            priority: 0.7,
-          };
-        }
-        // Skip prompts with invalid slugs and invalid IDs
+        // Skip prompts with invalid slugs - don't use ID as fallback for SEO
         return null;
       }
 
@@ -356,7 +372,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       page !== null &&
       Boolean(page.url) &&
       !page.url.includes('/untitled') &&
-      !page.url.includes('generated-')
+      !page.url.includes('generated-') &&
+      !page.url.match(/\/prompts\/(ref-|cg-|doc-|db-|dir-|gen-|arch-|test-|decision-|conflict-|facilitator-)/i) // Filter out internal IDs
     ) as MetadataRoute.Sitemap; // Remove null entries and invalid URLs
 
   // Extract unique categories, roles, and tags from prompts
@@ -409,13 +426,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Fallback to empty array if MongoDB fails
   }
 
-  // Tag pages: /tags/[tag]
-  const tagPages: MetadataRoute.Sitemap = allTags.map((tag) => ({
-    url: `${baseUrl}/tags/${tag}`,
-    lastModified: now,
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }));
+  // Tag pages: /tags/[tag] - URL encode tags with special characters
+  const tagPages: MetadataRoute.Sitemap = allTags
+    .filter((tag) => tag && typeof tag === 'string' && tag.trim().length > 0)
+    .map((tag) => ({
+      url: `${baseUrl}/tags/${encodeURIComponent(tag)}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }));
 
   // Learning content pages - Fetch dynamically from MongoDB
   let learnPages: MetadataRoute.Sitemap = [];
@@ -485,19 +504,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     });
 
-    // Add individual model pages
+    // Add individual model pages - filter out models with problematic slugs
     aiModelPages = [
       ...aiModelPages,
-      ...aiModels.map((model: any) => ({
-        url: `${baseUrl}/learn/ai-models/${model.slug}`,
-        lastModified: model.updatedAt
-          ? new Date(model.updatedAt)
-          : model.lastVerified
-            ? new Date(model.lastVerified)
-            : now,
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-      })),
+      ...aiModels
+        .filter((model: any) => {
+          const slug = model.slug;
+          // Filter out slugs with concatenated provider names
+          if (!slug) return false;
+          const isProblematic =
+            slug.includes('anthropicclaude') ||
+            slug.includes('mistralaimistral') ||
+            slug.includes('mistralaimagistral') ||
+            slug.includes('meta-llamallama') ||
+            slug.includes('ai21jamba') ||
+            slug.includes('googlegemini') ||
+            slug.startsWith('openaigpt') ||
+            slug.startsWith('openaio') ||
+            slug.startsWith('openaicodex') ||
+            slug.startsWith('qwenqwen') ||
+            slug.startsWith('inflectioninflection') ||
+            slug.startsWith('alfredproscodellama') ||
+            slug.startsWith('inceptionmercury') ||
+            slug.startsWith('undi95remm') ||
+            slug.includes('perplexitysonar') ||
+            slug.includes('togethercomputer');
+          return !isProblematic;
+        })
+        .map((model: any) => ({
+          url: `${baseUrl}/learn/ai-models/${model.slug}`,
+          lastModified: model.updatedAt
+            ? new Date(model.updatedAt)
+            : model.lastVerified
+              ? new Date(model.lastVerified)
+              : now,
+          changeFrequency: 'weekly' as const,
+          priority: 0.8,
+        })),
     ];
 
     // AI Tools hub and individual pages

@@ -123,11 +123,13 @@ export class LearningResourceRepository
 
   /**
    * Get learning resource by slug
+   * Public query - learning content is intentionally accessible to all users (not organization-scoped)
    */
   async getBySlug(slug: string): Promise<LearningResource | null> {
     const document = await this.findOne({
       'seo.slug': slug,
       status: 'active',
+      organizationId: null, // Public content - intentionally null for all users
     });
     return document ? this.processor.process(document) : null;
   }
@@ -156,22 +158,26 @@ export class LearningResourceRepository
 
   /**
    * Get learning resources by category
+   * Public query - learning content is intentionally accessible to all users (not organization-scoped)
    */
   async getByCategory(category: string): Promise<LearningResource[]> {
     const documents = await this.find({
       category,
       status: 'active',
+      organizationId: null, // Public content - intentionally null for all users
     });
     return this.processor.processMany(documents);
   }
 
   /**
    * Get learning resources by level
+   * Public query - learning content is intentionally accessible to all users (not organization-scoped)
    */
   async getByLevel(level: string): Promise<LearningResource[]> {
     const documents = await this.find({
       level: level as LearningResource['level'],
       status: 'active',
+      organizationId: null, // Public content - intentionally null for all users
     });
     return this.processor.processMany(documents);
   }
@@ -188,6 +194,26 @@ export class LearningResourceRepository
       { sort: { publishedAt: -1 }, limit: 10 }
     );
     return this.processor.processMany(documents);
+  }
+
+  /**
+   * Increment view count for a learning resource
+   * Public query - learning content is intentionally accessible to all users (not organization-scoped)
+   */
+  async incrementViews(slug: string): Promise<void> {
+    try {
+      const collection = await this.getCollection();
+      await collection.updateOne(
+        {
+          'seo.slug': slug,
+          organizationId: null, // Public content - intentionally null for all users
+        },
+        { $inc: { views: 1 } }
+      );
+    } catch (error) {
+      console.error('Failed to increment view count:', error);
+      // Non-critical: view increment failure shouldn't break the page
+    }
   }
 }
 

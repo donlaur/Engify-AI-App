@@ -6,6 +6,7 @@ Disallow: /dashboard/
 Disallow: /opshub/
 Disallow: /admin/
 Disallow: /manager/
+Disallow: /_next/
 
 # Sitemaps
 Sitemap: https://engify.ai/sitemap.xml

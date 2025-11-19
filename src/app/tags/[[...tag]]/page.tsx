@@ -1,7 +1,13 @@
+/**
+ * Tag Page with Catch-All Route
+ * Handles tags with slashes (e.g., /tags/ci/cd -> /tags/ci%2Fcd)
+ * Also handles single-segment tags for backwards compatibility
+ */
+
 import { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { APP_URL } from '@/lib/constants';
-import TagPageClient from './tag-page-client';
+import TagPageClient from '../[tag]/tag-page-client';
 import {
   decodeTagFromUrl,
   getTagVariations,
@@ -52,9 +58,21 @@ async function getPromptsByTag(tag: string) {
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ tag: string }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ tag?: string[] }> }): Promise<Metadata> {
   try {
-    const { tag } = await params;
+    const { tag: tagArray } = await params;
+    
+    // If tag has multiple segments (e.g., ["ci", "cd"]), this is a multi-segment tag
+    // We'll handle the redirect in the page component, but return basic metadata here
+    if (tagArray && tagArray.length > 1) {
+      return {
+        title: 'Redirecting... | Engify.ai',
+      };
+    }
+    
+    // Single segment tag (normal case)
+    const tag = tagArray?.[0] || '';
+    
     // Validate tag URL format
     if (!isValidTagUrl(tag)) {
       return {
@@ -94,35 +112,38 @@ export async function generateMetadata({ params }: { params: Promise<{ tag: stri
     const normalizedUrlTag = encodeURIComponent(normalized);
     const url = `${APP_URL}/tags/${normalizedUrlTag}`;
 
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
+    return {
       title,
       description,
-      url,
-      type: 'website',
-      siteName: 'Engify.ai',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-    },
-    keywords: [
-      'prompt engineering',
-      'AI prompts',
-      displayTag.toLowerCase(),
-      'prompt library',
-      'AI tools',
-      'prompt templates',
-    ],
-  };
+      alternates: {
+        canonical: url,
+      },
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large' as const,
+          'max-snippet': -1,
+        },
+      },
+      openGraph: {
+        title,
+        description,
+        url,
+        type: 'website',
+        siteName: 'Engify.ai',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+      },
+    };
   } catch (error) {
-    // Return fallback metadata on error
+    console.error('Error generating tag metadata', error);
     return {
       title: 'Tag Not Found | Engify.ai',
       description: 'The requested tag could not be found.',
@@ -130,16 +151,18 @@ export async function generateMetadata({ params }: { params: Promise<{ tag: stri
   }
 }
 
-export default async function TagPage({ params }: { params: Promise<{ tag: string }> }) {
+export default async function TagPageCatchAll({ params }: { params: Promise<{ tag?: string[] }> }) {
   try {
-    const { tag } = await params;
+    const { tag: tagArray } = await params;
     
-    // Handle tags with slashes - if tag contains unencoded slash, redirect to encoded version
-    // Example: /tags/ci/cd -> /tags/ci%2Fcd
-    if (tag.includes('/') && !tag.includes('%2F')) {
-      const encodedTag = encodeURIComponent(tag);
+    // If tag has multiple segments (e.g., ["ci", "cd"]), redirect to encoded single-segment URL
+    if (tagArray && tagArray.length > 1) {
+      const joinedTag = tagArray.join('/');
+      const encodedTag = encodeURIComponent(joinedTag);
       permanentRedirect(`/tags/${encodedTag}`);
     }
+    
+    const tag = tagArray?.[0] || '';
     
     // Validate tag URL format
     if (!isValidTagUrl(tag)) {
@@ -183,35 +206,38 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
         '@type': 'ItemList',
         numberOfItems: uniquePrompts.length,
         itemListElement: uniquePrompts.slice(0, 10).map((prompt, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        item: {
-          '@type': 'Article',
-          name: prompt.title,
-          description: prompt.description,
-          url: `${APP_URL}/prompts/${prompt.id || prompt.slug}`,
-        },
-      })),
-    },
-    about: {
-      '@type': 'Thing',
-      name: displayTag,
-    },
-  };
+          '@type': 'ListItem',
+          position: index + 1,
+          item: {
+            '@type': 'Article',
+            name: prompt.title,
+            description: prompt.description,
+            url: `${APP_URL}/prompts/${prompt.id || prompt.slug}`,
+          },
+        })),
+      },
+      about: {
+        '@type': 'Thing',
+        name: displayTag,
+      },
+    };
 
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <TagPageClient tag={decoded} displayTag={displayTag} taggedPrompts={uniquePrompts as any} />
-    </>
-  );
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <TagPageClient
+          tag={normalized}
+          displayTag={displayTag}
+          taggedPrompts={uniquePrompts as any}
+        />
+      </>
+    );
   } catch (error) {
-    const { tag: errorTag } = await params;
-    console.error('Error loading tag page:', errorTag, error);
-    // Return 404 for invalid tags
+    console.error('Error rendering tag page', error);
     notFound();
   }
 }
+

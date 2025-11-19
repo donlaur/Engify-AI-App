@@ -10,7 +10,7 @@ import { RelatedArticles } from '@/components/features/RelatedArticles';
 import { HubSpokeLinks } from '@/components/features/HubSpokeLinks';
 import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 import { ArticleFeedback } from '@/components/article/ArticleFeedback';
-import { getClient } from '@/lib/mongodb';
+import { learningResourceRepository } from '@/lib/db/repositories/ContentService';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -19,24 +19,15 @@ interface PageProps {
 export const dynamic = 'force-dynamic';
 
 async function getArticle(slug: string) {
-  const client = await getClient();
-  const db = client.db('engify');
-  const collection = db.collection('learning_resources');
-
-  const article = await collection.findOne({
-    'seo.slug': slug,
-    status: 'active',
-  });
+  // Use repository instead of direct collection access
+  const article = await learningResourceRepository.getBySlug(slug);
 
   if (!article) {
     return null;
   }
 
-  // Increment view count
-  await collection.updateOne(
-    { 'seo.slug': slug },
-    { $inc: { views: 1 } }
-  );
+  // Increment view count using repository method
+  await learningResourceRepository.incrementViews(slug);
 
   return article;
 }
@@ -59,6 +50,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${metaTitle} | Engify.ai`,
     description: metaDescription,
     keywords: article.seo?.keywords || article.tags || [],
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large' as const,
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title: article.title,
       description: metaDescription,
