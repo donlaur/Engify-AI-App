@@ -195,8 +195,8 @@ export default async function ArticlePage({ params }: PageProps) {
 
           {/* Feedback buttons */}
           <ArticleFeedback
-            articleId={article._id?.toString() || article.id || ''}
-            articleSlug={article.seo?.slug || article.slug || slug}
+            articleId={article.id || ''}
+            articleSlug={article.seo?.slug || slug}
           />
 
           {/* Author info */}
@@ -249,7 +249,7 @@ export default async function ArticlePage({ params }: PageProps) {
         <CrossContentLinks
           tags={Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : [])}
           category={article.category}
-          excludeId={article._id?.toString() || article.id}
+          excludeId={article.id}
         />
       </article>
 
