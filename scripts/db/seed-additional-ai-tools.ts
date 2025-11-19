@@ -549,6 +549,76 @@ const ADDITIONAL_TOOLS = [
     icon: 'git-pull-request',
     websiteUrl: 'https://www.coderabbit.ai/',
   },
+
+  // Agentic Assistants
+  {
+    id: 'zencoder',
+    name: 'Zencoder',
+    tagline: 'The most integrated, customizable, and intuitive coding agent',
+    description: 'Zencoder is an AI coding agent designed to handle routine development tasks like bug fixing, refactoring, and new feature development using advanced AI workflows. It features Agentic Chat for unprecedented collaboration between human and AI with self-reasoning agents, Coffee Mode for autonomous agent execution, and Repo Grokking™ technology that deeply understands your codebase context. Zencoder integrates with 20+ tools including Jira, Sentry, GitHub, and GitLab, and offers enterprise-grade security with ISO 27001, GDPR, CCPA, and SOC 2 compliance.',
+    category: 'agentic-assistant',
+    pricing: {
+      free: false,
+      paid: {
+        monthly: 0, // Pricing not publicly disclosed, free 14-day trial available
+        tier: 'Pro',
+      },
+    },
+    features: [
+      'Agentic Chat with self-reasoning agents',
+      'Coffee Mode for autonomous code execution',
+      'Repo Grokking™ - deep codebase understanding',
+      'Agentic Pipeline - self-improving AI with feedback loops',
+      'Code generation and autocomplete',
+      'Unit test generation',
+      'Code review and quality checks',
+      'Custom agents for specific workflows',
+      'VS Code and JetBrains IDE integration',
+      '20+ platform integrations (Jira, Sentry, GitHub, GitLab)',
+      'Multi-language support (Python, Java, JavaScript, TypeScript, C#, Kotlin)',
+      'Real-time error detection and fixes',
+      'Enterprise security (ISO 27001, GDPR, CCPA, SOC 2)',
+      'SSO, SAML, and audit trails',
+      'Admin portal and team management',
+    ],
+    pros: [
+      'Deep repository understanding with Repo Grokking™',
+      'Autonomous agent execution (Coffee Mode)',
+      'Self-improving AI pipeline with feedback loops',
+      'Extensive integrations (20+ tools)',
+      'Enterprise-grade security and compliance',
+      'Seamless IDE integration',
+      'Multi-language support',
+      'Real-time error detection and fixes',
+      'Custom agent creation',
+    ],
+    cons: [
+      'Pricing not publicly disclosed',
+      'Requires setup and configuration',
+      'Learning curve for advanced features',
+      'May be resource-intensive for large projects',
+    ],
+    tags: ['agentic-assistant', 'ide-integration', 'enterprise', 'code-generation', 'testing', 'code-review', 'integrations'],
+    icon: 'sparkles',
+    websiteUrl: 'https://zencoder.ai/',
+    badges: ['vscode-plugin', 'jetbrains-plugin', 'enterprise'],
+    supportedModels: ['Gemini', 'GPT-4', 'Claude'], // Inferring from context
+    agentCapabilities: [
+      'code-generation',
+      'test-generation',
+      'refactoring',
+      'code-review',
+      'bug-fixing',
+      'file-creation',
+      'autonomous-execution',
+      'error-detection',
+      'custom-agents',
+    ],
+    marketplaceLinks: {
+      vscode: undefined, // VS Code extension available, URL not specified
+      jetbrains: undefined, // JetBrains plugin available, URL not specified
+    },
+  },
 ];
 
 async function main() {
