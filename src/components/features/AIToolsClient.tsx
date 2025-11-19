@@ -68,7 +68,7 @@ export function AIToolsClient({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          loadMore();
+          setVisibleToolCount((prev) => prev + LOAD_MORE_INCREMENT);
         }
       },
       { threshold: 0.1 }
