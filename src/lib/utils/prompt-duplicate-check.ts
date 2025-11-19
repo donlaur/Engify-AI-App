@@ -29,35 +29,7 @@ export interface NewPromptData {
   pattern?: string;
 }
 
-/**
- * Normalize string for comparison
- */
-function normalizeString(str: string): string {
-  return str
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s]/g, '') // Remove punctuation
-    .replace(/\s+/g, ' '); // Normalize whitespace
-}
-
-/**
- * Calculate similarity between two strings (simple Levenshtein-like)
- */
-function calculateSimilarity(str1: string, str2: string): number {
-  const s1 = normalizeString(str1);
-  const s2 = normalizeString(str2);
-  
-  if (s1 === s2) return 1.0;
-  
-  // Simple word overlap similarity
-  const words1 = new Set(s1.split(' '));
-  const words2 = new Set(s2.split(' '));
-  
-  const intersection = new Set([...words1].filter(x => words2.has(x)));
-  const union = new Set([...words1, ...words2]);
-  
-  return intersection.size / union.size;
-}
+import { normalizeString, calculateSimilarity } from '@/lib/utils/text-matching';
 
 /**
  * Check for duplicate prompts

@@ -17,6 +17,8 @@ import { aiToolService } from '@/lib/services/AIToolService';
 import { logger } from '@/lib/logging/logger';
 import { getToolLink } from '@/lib/utils/tool-links';
 import { AIToolCostComparison } from '@/components/features/AIToolCostComparison';
+import { AIToolUpdates } from '@/components/features/AIToolUpdates';
+import { newsAggregatorService } from '@/lib/services/NewsAggregatorService';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate hourly
@@ -155,6 +157,9 @@ export default async function AIToolDetailPage({ params }: PageProps) {
     tool.pricing.paid?.annual && tool.pricing.paid?.monthly
       ? `$${tool.pricing.paid.annual}/year (save ${Math.round((1 - tool.pricing.paid.annual / (tool.pricing.paid.monthly * 12)) * 100)}%)`
       : null;
+
+  // Fetch recent updates for this tool
+  const updates = await newsAggregatorService.getToolUpdates(tool.id, 5);
 
   return (
     <>
@@ -358,6 +363,13 @@ export default async function AIToolDetailPage({ params }: PageProps) {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Latest Updates */}
+              <AIToolUpdates 
+                updates={updates} 
+                toolName={tool.name}
+                emptyMessage={`No recent updates for ${tool.name} yet. Check back soon!`}
+              />
 
               {/* Intent-Driven Comparison Section */}
               {tool.category && (

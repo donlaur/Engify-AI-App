@@ -99,7 +99,7 @@
     "content:generate-prompts": "tsx scripts/content/generate-prompts-patterns.ts --type=prompts",
     "content:generate-patterns": "tsx scripts/content/generate-prompts-patterns.ts --type=patterns",
     "content:generate-both": "tsx scripts/content/generate-prompts-patterns.ts --type=both",
-    "content:audit-prompts": "tsx scripts/content/audit-prompts-patterns.ts --type=prompts",
+    "content:audit-prompts": "tsx scripts/content/audit-prompts-patterns.ts",
     "content:audit-patterns": "tsx scripts/content/audit-prompts-patterns.ts --type=patterns",
     "content:audit-both": "tsx scripts/content/audit-prompts-patterns.ts --type=both",
     "db:init-revisions": "tsx scripts/db/initialize-prompt-revisions.ts",
@@ -120,8 +120,7 @@
     "aws:secrets:create": "tsx scripts/aws/create-secret.ts",
     "aws:secrets:rotate": "tsx scripts/aws/rotate-secret.ts",
     "security:audit": "node scripts/security/security-check.js",
-    "security:test-keys": "./scripts/security/test-ai-keys.sh",
-    "content:audit-prompts": "tsx scripts/content/audit-prompts-patterns.ts"
+    "security:test-keys": "./scripts/security/test-ai-keys.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "catalog:ai",
@@ -188,6 +187,7 @@
     "rehype-slug": "catalog:markdown",
     "remark-gfm": "catalog:markdown",
     "replicate": "catalog:ai",
+    "rss-parser": "^3.13.0",
     "sonner": "catalog:ui-utils",
     "superjson": "catalog:state",
     "swr": "catalog:state",

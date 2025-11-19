@@ -148,6 +148,7 @@ import {
   Video,
   Type,
   Image as ImageIcon,
+  Newspaper,
 } from 'lucide-react';
 
 // Export all icons with descriptive names
@@ -210,6 +211,7 @@ export const Icons = {
   file: File,
   document: FileText,
   fileText: FileText,
+  newspaper: Newspaper,
   folder: Folder,
   folderOpen: FolderOpen,
   inbox: Inbox,

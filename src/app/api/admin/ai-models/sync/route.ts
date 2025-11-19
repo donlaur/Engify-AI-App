@@ -103,7 +103,7 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
 
   // Start with models from OpenAI API
   const apiModels: AIModel[] = models.data
-    .filter((m) => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4'))
+    .filter((m) => m.id.includes('gpt') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4') || m.id.includes('gpt-5.1'))
     .map((m) => {
       const displayName = m.id
         .replace(/^gpt-/, 'GPT-')
@@ -122,7 +122,7 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
         const baseModel = convertOpenAIDataToModel(
           structuredData,
           getOpenAIContextWindow(m.id),
-          m.id.includes('gpt-4o') ? 16384 : m.id.includes('gpt-4') ? 8192 : 4096
+          m.id.includes('gpt-5.1') ? 200000 : m.id.includes('gpt-5') ? 400000 : m.id.includes('gpt-4o') ? 16384 : m.id.includes('gpt-4') ? 8192 : 4096
         );
 
         return {
@@ -191,8 +191,8 @@ async function syncOpenAIModels(): Promise<{ created: number; updated: number }>
     .map((data) => {
       const baseModel = convertOpenAIDataToModel(
         data,
-        data.id.includes('gpt-5') ? 400000 : 128000,
-        data.id.includes('gpt-5') ? 128000 : 8192
+        data.id.includes('gpt-5.1') ? 200000 : data.id.includes('gpt-5') ? 400000 : 128000,
+        data.id.includes('gpt-5.1') ? 128000 : data.id.includes('gpt-5') ? 128000 : 8192
       );
       
       return {
@@ -282,8 +282,11 @@ async function syncGoogleModels(): Promise<{ created: number; updated: number }>
   // Google Gemini models (updated as of Nov 2024)
   // Many Gemini 1.0 and 1.5 models are deprecated/removed as of 2025
   const knownModels: Array<{ name: string; displayName: string; codename?: string; deprecated?: boolean }> = [
-    // Gemini 2.0 Series (latest experimental)
-    { name: 'gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash Experimental', codename: 'flash' },
+    // Gemini 3.0 Series (latest)
+    { name: 'gemini-3.0-pro', displayName: 'Gemini 3.0 Pro', codename: 'pro' },
+    { name: 'gemini-3.0-flash', displayName: 'Gemini 3.0 Flash', codename: 'flash' },
+    // Gemini 2.0 Series (experimental)
+    { name: 'gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash Experimental', codename: 'flash', deprecated: true },
     // Gemini 1.5 Series - many deprecated
     { name: 'gemini-1.5-pro', displayName: 'Gemini 1.5 Pro', codename: 'pro', deprecated: true }, // Deprecated/removed
     { name: 'gemini-1.5-flash', displayName: 'Gemini 1.5 Flash', codename: 'flash', deprecated: true }, // Deprecated/removed
@@ -312,12 +315,12 @@ async function syncGoogleModels(): Promise<{ created: number; updated: number }>
     supportsStreaming: true,
     supportsJSON: true,
     supportsVision: true,
-    recommended: m.name.includes('2.0') && !m.deprecated,
+    recommended: (m.name.includes('3.0') || m.name.includes('2.0')) && !m.deprecated,
     tier: getGoogleCost(m.name, 'input') === 0 ? 'free' as const : 'affordable' as const,
     isDefault: false,
     isAllowed: !m.deprecated, // Deprecated models not allowed
     tags: ['fast', 'multimodal'],
-    replacementModel: m.deprecated ? 'gemini-2.0-flash-exp' : undefined, // Suggest 2.0 Flash as replacement
+    replacementModel: m.deprecated ? 'gemini-3.0-flash' : undefined, // Suggest 3.0 Flash as replacement
     parameterFailures: [],
     lastVerified: m.deprecated ? undefined : new Date(),
     createdAt: new Date(),
@@ -329,6 +332,10 @@ async function syncGoogleModels(): Promise<{ created: number; updated: number }>
 
 // Helper functions for pricing (as of Nov 2025)
 function getOpenAIContextWindow(modelId: string): number {
+  // GPT-5.1 series
+  if (modelId.includes('gpt-5.1')) return 200000;
+  // GPT-5 series
+  if (modelId.includes('gpt-5')) return 400000;
   // O-series models (reasoning)
   if (modelId.includes('o1') || modelId.includes('o3') || modelId.includes('o4')) return 200000;
   // GPT-4o series
@@ -343,7 +350,15 @@ function getOpenAIContextWindow(modelId: string): number {
 }
 
 function getOpenAICost(modelId: string, type: 'input' | 'output'): number {
-  // Prices per 1K tokens as of Nov 2024 (updated with latest pricing)
+  // Prices per 1K tokens as of Dec 2024 (updated with latest pricing)
+  // GPT-5.1 series (latest)
+  if (modelId.includes('gpt-5.1')) {
+    return type === 'input' ? 1.50 / 1000 : 12.00 / 1000; // $1.50/$12 per 1M
+  }
+  // GPT-5 series
+  if (modelId.includes('gpt-5')) {
+    return type === 'input' ? 1.25 / 1000 : 10.00 / 1000; // $1.25/$10 per 1M
+  }
   // O-series models (reasoning - premium pricing)
   if (modelId.includes('o1') || modelId.includes('o3') || modelId.includes('o4')) {
     return type === 'input' ? 15.00 / 1000 : 60.00 / 1000; // Higher for reasoning models
@@ -372,6 +387,8 @@ function getOpenAICost(modelId: string, type: 'input' | 'output'): number {
 
 function getOpenAITags(modelId: string): string[] {
   const tags: string[] = [];
+  if (modelId.includes('gpt-5.1')) tags.push('smart', 'latest', 'recommended', 'enhanced');
+  if (modelId.includes('gpt-5')) tags.push('smart', 'latest', 'recommended');
   if (modelId.includes('gpt-4o')) tags.push('smart', 'fast', 'latest', 'recommended');
   if (modelId.includes('gpt-4o-mini')) tags.push('smart', 'fast', 'affordable', 'latest');
   if (modelId.includes('gpt-4')) tags.push('smart', 'expensive');
@@ -417,6 +434,10 @@ function getAnthropicTags(modelName: string): string[] {
 
 function getGoogleCost(modelName: string, type: 'input' | 'output'): number {
   // Gemini pricing as of Nov 2025
+  if (modelName.includes('3.0')) {
+    // Gemini 3.0 pricing (update with actual pricing when available)
+    return type === 'input' ? 0.10 / 1000 : 0.40 / 1000;
+  }
   if (modelName.includes('2.0')) {
     return type === 'input' ? 0.075 / 1000 : 0.30 / 1000; // Free tier
   }

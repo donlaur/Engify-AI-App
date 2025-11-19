@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Icons } from '@/lib/icons';
+import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
 
 // Tab components
 import { DashboardOverviewPanel } from './DashboardOverviewPanel';
@@ -16,12 +17,14 @@ import { PainPointManagementPanel } from './PainPointManagementPanel';
 import { UserManagementPanel } from './UserManagementPanel';
 import { SystemSettingsPanel } from './SystemSettingsPanel';
 import { DeadLetterQueuePanel } from './DeadLetterQueuePanel';
+import { FeedManagementPanel } from './FeedManagementPanel';
 
 export function OpsHubTabs() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   return (
-    <div className="space-y-6">
+    <AdminErrorBoundary onError={(err) => console.error('OpsHub tabs error:', err)}>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -38,7 +41,7 @@ export function OpsHubTabs() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="grid w-full grid-cols-11 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-12 lg:w-auto lg:inline-grid">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <Icons.barChart className="h-4 w-4" />
             <span className="hidden sm:inline">Dashboard</span>
@@ -82,6 +85,10 @@ export function OpsHubTabs() {
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Icons.settings className="h-4 w-4" />
             <span className="hidden sm:inline">Settings</span>
+          </TabsTrigger>
+          <TabsTrigger value="feeds" className="flex items-center gap-2">
+            <Icons.newspaper className="h-4 w-4" />
+            <span className="hidden sm:inline">Feeds</span>
           </TabsTrigger>
         </TabsList>
 
@@ -139,7 +146,13 @@ export function OpsHubTabs() {
         <TabsContent value="settings" className="space-y-4">
           <SystemSettingsPanel />
         </TabsContent>
+
+        {/* Feeds Tab */}
+        <TabsContent value="feeds" className="space-y-4">
+          <FeedManagementPanel />
+        </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </AdminErrorBoundary>
   );
 }

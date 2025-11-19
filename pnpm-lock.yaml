@@ -579,6 +579,9 @@ importers:
       replicate:
         specifier: catalog:ai
         version: 0.32.1
+      rss-parser:
+        specifier: ^3.13.0
+        version: 3.13.0
       sonner:
         specifier: catalog:ui-utils
         version: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4276,6 +4279,9 @@ packages:
     resolution: {integrity: sha512-d4lC8xfavMeBjzGr2vECC3fsGXziXZQyJxD868h2M/mBI3PwAuODxAkLkq5HYuvrPYcUtiLzsTo8U3PgX3Ocww==}
     engines: {node: '>=10.13.0'}
 
+  entities@2.2.0:
+    resolution: {integrity: sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==}
+
   entities@6.0.1:
     resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
     engines: {node: '>=0.12'}
@@ -6513,6 +6519,9 @@ packages:
   rrweb-cssom@0.8.0:
     resolution: {integrity: sha512-guoltQEx+9aMf2gDZ0s62EcV8lsXR+0w8915TC3ITdn2YueuNjdAYh/levpU9nFaoChh9RUS5ZdQMrKfVEN9tw==}
 
+  rss-parser@3.13.0:
+    resolution: {integrity: sha512-7jWUBV5yGN3rqMMj7CZufl/291QAhvrrGpDNE4k/02ZchL0npisiYYqULF71jCEKoIiHvK/Q2e6IkDwPziT7+w==}
+
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
 
@@ -7415,6 +7424,10 @@ packages:
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
     engines: {node: '>=18'}
+
+  xml2js@0.5.0:
+    resolution: {integrity: sha512-drPFnkQJik/O+uPKpqSgr22mpuFHqKdbS835iAQrUC73L2F5WkboIRd63ai/2Yg6I1jzifPFKH2NTK+cfglkIA==}
+    engines: {node: '>=4.0.0'}
 
   xml2js@0.6.2:
     resolution: {integrity: sha512-T4rieHaC1EXcES0Kxxj4JWgaUQHDk+qwHcYOCFHfiwKz7tOVPLq7Hjq9dM1WCMhylqMEfP7hMcOIChvotiZegA==}
@@ -11821,6 +11834,8 @@ snapshots:
       graceful-fs: 4.2.11
       tapable: 2.3.0
 
+  entities@2.2.0: {}
+
   entities@6.0.1: {}
 
   env-paths@2.2.1: {}
@@ -14686,6 +14701,11 @@ snapshots:
 
   rrweb-cssom@0.8.0: {}
 
+  rss-parser@3.13.0:
+    dependencies:
+      entities: 2.2.0
+      xml2js: 0.5.0
+
   run-parallel@1.2.0:
     dependencies:
       queue-microtask: 1.2.3
@@ -15760,6 +15780,11 @@ snapshots:
   ws@8.18.3: {}
 
   xml-name-validator@5.0.0: {}
+
+  xml2js@0.5.0:
+    dependencies:
+      sax: 1.2.1
+      xmlbuilder: 11.0.1
 
   xml2js@0.6.2:
     dependencies:
