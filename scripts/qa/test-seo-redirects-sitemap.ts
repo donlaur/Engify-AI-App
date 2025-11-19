@@ -247,13 +247,31 @@ async function testProblematicRedirects() {
     // AI Model slug redirects
     { url: `${BASE_URL}/learn/ai-models/anthropicclaude-3-opus`, expectedRedirect: `${BASE_URL}/learn/ai-models/claude-3-opus`, description: 'Problematic AI model slug redirects' },
     
-    // Blog redirects
-    { url: `${BASE_URL}/blog/11`, expectedRedirect: `${BASE_URL}/learn`, description: 'Numeric blog slug redirects to /learn' },
+    // Blog route removed - should return 404
+    { url: `${BASE_URL}/blog/11`, expectedRedirect: null, description: 'Blog route removed, should return 404' },
   ];
 
   for (const test of testUrls) {
     try {
       const { statusCode, finalUrl } = await fetchUrl(test.url, true);
+
+      // If expectedRedirect is null, we expect a 404
+      if (test.expectedRedirect === null) {
+        if (statusCode === 404) {
+          results.push({
+            name: `Redirect: ${test.description}`,
+            passed: true,
+            message: `Correctly returns 404 as expected`,
+          });
+        } else {
+          results.push({
+            name: `Redirect: ${test.description}`,
+            passed: false,
+            message: `Expected 404, got status ${statusCode}`,
+          });
+        }
+        continue;
+      }
 
       if (statusCode === 200 && finalUrl === test.expectedRedirect) {
         results.push({
