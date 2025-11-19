@@ -40,11 +40,24 @@ type SortOption = 'alphabetical' | 'category' | 'price-low' | 'price-high';
 
 const INITIAL_VISIBLE_CATEGORIES = 8;
 
-// Format category key to proper title case
+// Format category key to proper title case (handles hyphens correctly)
 function formatCategoryTitle(category: string): string {
+  // If already in categoryLabels, use that
+  if (categoryLabels[category]) {
+    return categoryLabels[category];
+  }
+  
+  // Otherwise, convert hyphenated keys to title case with spaces
+  // Replace hyphens with spaces and capitalize each word
   return category
     .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => {
+      // Handle acronyms and special cases
+      if (word.toUpperCase() === word && word.length > 1) {
+        return word; // Keep acronyms as-is (e.g., "AI", "QA", "MLOps")
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
     .join(' ');
 }
 
