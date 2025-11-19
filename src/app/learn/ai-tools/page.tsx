@@ -69,7 +69,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'code-assistant': 'Code Assistants',
   'ai-terminal': 'AI Terminals',
   'agentic-assistant': 'Agentic Assistants',
-  'cloud-optimized': 'Cloud-Optimized Assistants',
+  'cloud-optimized': 'Cloud Optimized Assistants',
   builder: 'AI Builders',
   'ui-generator': 'UI Generators',
   'ai-testing-qa': 'AI Testing & QA',
