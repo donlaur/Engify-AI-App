@@ -38,26 +38,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   other: 'Other',
 };
 
-// Format category key to proper title case (handles hyphens correctly)
-function formatCategoryTitle(category: string): string {
-  // If already in CATEGORY_LABELS, use that
-  if (CATEGORY_LABELS[category]) {
-    return CATEGORY_LABELS[category];
-  }
-  
-  // Otherwise, convert hyphenated keys to title case with spaces
-  // Replace hyphens with spaces and capitalize each word
-  return category
-    .split('-')
-    .map((word) => {
-      // Handle acronyms and special cases
-      if (word.toUpperCase() === word && word.length > 1) {
-        return word; // Keep acronyms as-is (e.g., "AI", "QA", "MLOps")
-      }
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    })
-    .join(' ');
-}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -271,7 +251,7 @@ export default async function AIToolDetailPage({ params }: PageProps) {
             )}
             <div className="mt-2 flex flex-wrap gap-2">
               <Badge variant="secondary">
-                {CATEGORY_LABELS[tool.category] || formatCategoryTitle(tool.category)}
+                {CATEGORY_LABELS[tool.category] || tool.category}
               </Badge>
               <Badge variant={tool.pricing.free ? 'default' : 'outline'}>
                 {pricingText}

@@ -40,26 +40,6 @@ type SortOption = 'alphabetical' | 'category' | 'price-low' | 'price-high';
 
 const INITIAL_VISIBLE_CATEGORIES = 8;
 
-// Format category key to proper title case (handles hyphens correctly)
-function formatCategoryTitle(category: string): string {
-  // If already in categoryLabels, use that
-  if (categoryLabels[category]) {
-    return categoryLabels[category];
-  }
-  
-  // Otherwise, convert hyphenated keys to title case with spaces
-  // Replace hyphens with spaces and capitalize each word
-  return category
-    .split('-')
-    .map((word) => {
-      // Handle acronyms and special cases
-      if (word.toUpperCase() === word && word.length > 1) {
-        return word; // Keep acronyms as-is (e.g., "AI", "QA", "MLOps")
-      }
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    })
-    .join(' ');
-}
 
 export function AIToolsClient({
   initialTools,
@@ -179,7 +159,7 @@ export function AIToolsClient({
               >
                 {category === 'all'
                   ? `All (${initialTools.length})`
-                  : `${categoryLabels[category] || formatCategoryTitle(category)} (${categoryStats[category] || 0})`}
+                  : `${categoryLabels[category] || category} (${categoryStats[category] || 0})`}
               </Badge>
             ))}
             {allCategories.length > INITIAL_VISIBLE_CATEGORIES && (
@@ -251,7 +231,7 @@ export function AIToolsClient({
           <div key={category}>
             <div className="mb-6 flex items-center gap-3">
               <h2 className="text-2xl font-bold">
-                {categoryLabels[category] || formatCategoryTitle(category)}
+                {categoryLabels[category] || category}
               </h2>
               <Badge variant="secondary">
                 {categoryTools.length}{' '}
