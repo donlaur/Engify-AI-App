@@ -45,14 +45,6 @@ interface PageProps {
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
-// Format category key to proper title case
-function formatCategoryTitle(category: string): string {
-  return category
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
-
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
