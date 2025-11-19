@@ -107,7 +107,7 @@ function fetchUrl(url: string, followRedirects = true, maxRedirects = 5): Promis
       req.end();
     };
 
-    makeRequest(urlToFetch);
+    makeRequest(url);
   });
 }
 
@@ -340,11 +340,13 @@ async function testCanonicalUrls() {
     try {
       const { body } = await fetchUrl(test.url);
 
-      // Check for canonical link tag
-      const canonicalMatch = body.match(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["']/i);
+      // Check for canonical link tag (handle whitespace/newlines in attributes)
+      // Use multiline flag and handle whitespace in URL
+      const canonicalMatch = body.match(/<link[^>]*rel\s*=\s*["']canonical["'][^>]*href\s*=\s*["']([^"']+)["']/ims);
       
       if (canonicalMatch) {
-        const canonicalUrl = canonicalMatch[1];
+        // Normalize URL: trim and remove any internal whitespace/newlines
+        const canonicalUrl = canonicalMatch[1].replace(/\s+/g, '').trim();
         if (canonicalUrl === test.expectedCanonical) {
           results.push({
             name: `Canonical URL: ${test.url.split('/').pop()}`,
