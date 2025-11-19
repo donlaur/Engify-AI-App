@@ -14,8 +14,12 @@
  * Usage:
  *   tsx scripts/qa/test-seo-redirects-sitemap.ts [baseUrl]
  *
- * Example:
- *   tsx scripts/qa/test-seo-redirects-sitemap.ts https://engify.ai
+ * Examples:
+ *   # Test against production (default)
+ *   tsx scripts/qa/test-seo-redirects-sitemap.ts
+ *   
+ *   # Test against branch/preview URL
+ *   tsx scripts/qa/test-seo-redirects-sitemap.ts https://engify-ai-app-git-claude-improve-code-dd03fa-donlaurs-projects.vercel.app
  */
 
 import { config } from 'dotenv';
@@ -25,7 +29,12 @@ import https from 'https';
 import http from 'http';
 import { URL } from 'url';
 
-const BASE_URL = process.argv[2] || process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
+// Priority: 1) Command line arg, 2) Production URL env var, 3) Default to production
+// Note: For branch/preview testing, pass URL as command line arg
+const BASE_URL = 
+  process.argv[2] || 
+  process.env.NEXT_PUBLIC_APP_URL || 
+  'https://engify.ai';
 
 interface TestResult {
   name: string;
@@ -510,7 +519,17 @@ async function testNextPagesBlocked() {
 // Main test runner
 async function runAllTests() {
   console.log('🧪 Running QA Tests for SEO, Redirects, and Sitemap\n');
-  console.log(`Base URL: ${BASE_URL}\n`);
+  console.log(`Base URL: ${BASE_URL}`);
+  
+  // Warn if testing production
+  if (BASE_URL.includes('engify.ai') && !BASE_URL.includes('vercel.app')) {
+    console.log('⚠️  WARNING: Testing against PRODUCTION. Use branch URL for QA!\n');
+  } else if (BASE_URL.includes('vercel.app')) {
+    console.log('✅ Testing against branch/preview URL (correct for QA)\n');
+  } else {
+    console.log('');
+  }
+  
   console.log('='.repeat(60));
 
   await testSitemapExists();
