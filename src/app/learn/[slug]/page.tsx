@@ -173,7 +173,7 @@ export default async function ArticlePage({ params }: PageProps) {
         </header>
 
         {/* Content - Rendered Markdown with syntax highlighting, copy buttons, proper formatting */}
-        <ArticleRenderer content={article.content || article.contentHtml || ''} />
+        <ArticleRenderer content={article.contentHtml || ''} />
 
         {/* Footer - Engagement and metadata */}
         <footer className="mt-16 space-y-8 border-t pt-8">
