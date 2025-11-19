@@ -75,15 +75,6 @@ const VERIFIED_URLS: Record<string, {
       tier: 'Individual',
     },
   },
-  codeium: {
-    websiteUrl: 'https://codeium.com',
-    github: 'https://github.com/Exafunction/codeium',
-    pricing: {
-      free: true,
-      monthly: 0,
-      tier: 'Free',
-    },
-  },
   tabnine: {
     websiteUrl: 'https://www.tabnine.com',
     pricing: {

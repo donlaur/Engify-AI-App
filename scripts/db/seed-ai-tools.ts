@@ -124,31 +124,6 @@ const TOOL_DEFINITIONS: Record<string, Partial<AITool>> = {
     tags: ['code-assistant', 'github', 'paid', 'enterprise'],
     icon: 'github',
   },
-  codeium: {
-    name: 'Codeium',
-    tagline: 'Free AI coding assistant',
-    description:
-      'Codeium provides free AI coding assistance with IDE integrations.',
-    category: 'code-assistant',
-    pricing: {
-      free: true,
-      paid: {
-        monthly: 0,
-        tier: 'Free',
-      },
-    },
-    features: [
-      'Free tier available',
-      'IDE integrations',
-      'Multi-language support',
-    ],
-    pros: ['Free option', 'Good performance', 'Multiple IDE support'],
-    cons: ['Paid features limited', 'Smaller model options'],
-    // rating: undefined, // Start at 0 - no reviews yet
-    // reviewCount: 0, // Default schema value
-    tags: ['code-assistant', 'free', 'ide-integration'],
-    icon: 'sparkles',
-  },
   tabnine: {
     name: 'Tabnine',
     tagline: 'AI code completion',

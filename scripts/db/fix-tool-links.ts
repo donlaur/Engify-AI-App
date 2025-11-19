@@ -60,10 +60,6 @@ const VERIFIED_LINKS: Record<string, {
     websiteUrl: 'https://cursor.sh',
     github: 'https://github.com/getcursor/cursor',
   },
-  codeium: {
-    websiteUrl: 'https://codeium.com',
-    github: 'https://github.com/Exafunction/codeium',
-  },
   cline: {
     websiteUrl: 'https://cline.bot/',
     github: 'https://github.com/clinebot/cline',
@@ -126,11 +122,6 @@ const VERIFIED_PRICING: Record<string, {
     monthly: 10,
     annual: 100,
     tier: 'Individual',
-  },
-  codeium: {
-    free: true,
-    monthly: 0,
-    tier: 'Free',
   },
   devin: {
     free: false,
@@ -446,7 +437,7 @@ async function main() {
       }
 
       // Check websiteUrl for codeium.com/windsurf references
-      if (tool.websiteUrl === 'https://codeium.com/windsurf' && tool.id !== 'codeium') {
+      if (tool.websiteUrl === 'https://codeium.com/windsurf') {
         needsUpdate.websiteUrl = 'https://windsurf.com';
         shouldUpdate = true;
         console.log(`   Found codeium.com/windsurf URL in ${tool.id}`);

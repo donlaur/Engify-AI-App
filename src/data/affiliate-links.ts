@@ -60,16 +60,6 @@ export const affiliateLinks: Record<string, AffiliateLink> = {
     notes: 'GitHub/Microsoft - likely no affiliate program',
   },
 
-  codeium: {
-    tool: 'Codeium',
-    baseUrl: 'https://codeium.com',
-    referralUrl: 'https://codeium.com/referral',
-    affiliateCode: 'engify',
-    status: 'active',
-    commission: 'Bonus add-on prompt credits',
-    notes: 'Referral program available for paid account holders - earn bonus credits for successful referrals. Sign up at codeium.com to get referral link.',
-  },
-
   tabnine: {
     tool: 'Tabnine',
     baseUrl: 'https://www.tabnine.com',
@@ -292,9 +282,9 @@ export const partnershipOutreach = [
     traffic: 'High intent - developers actively comparing',
   },
   {
-    company: 'Codeium (Windsurf)',
+    company: 'Windsurf (formerly Codeium)',
     priority: 'high',
-    contact: 'partnerships@codeium.com',
+    contact: 'partnerships@windsurf.com',
     rating: 4.8,
     traffic: 'Highest rated - strong conversion potential',
   },
