@@ -16,8 +16,8 @@
  */
 
 import { NextRequest } from 'next/server';
-import { auth } from '@/lib/auth';
 import { z } from 'zod';
+import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logging/logger';
 import { success, fail, unauthorized } from '@/lib/api/response';
 

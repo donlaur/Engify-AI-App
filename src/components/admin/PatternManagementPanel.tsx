@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -13,14 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -44,6 +36,15 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
+import { useAdminData } from '@/hooks/admin/useAdminData';
+import { useAdminToast } from '@/hooks/admin/useAdminToast';
+import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
+import { AdminDataTable, type ColumnDef } from '@/components/admin/shared/AdminDataTable';
+import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
+import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
+import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
+import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
+import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
 
 interface Pattern {
   _id: string;
@@ -61,42 +62,37 @@ interface Pattern {
 }
 
 export function PatternManagementPanel() {
-  const [patterns, setPatterns] = useState<Pattern[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Phase 1: Use useAdminData hook for data fetching and pagination
+  const {
+    data: patterns,
+    loading,
+    currentPage,
+    totalPages,
+    totalCount,
+    pageSize,
+    goToPage,
+    refresh,
+  } = useAdminData<Pattern>({
+    endpoint: '/api/admin/patterns',
+    pageSize: 10,
+    dataKey: 'patterns',
+  });
+
+  // Toast notifications
+  const { success, error: showError } = useAdminToast();
+
+  // State management
   const [filter, setFilter] = useState<string>('all');
   const [levelFilter, setLevelFilter] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [editingPattern, setEditingPattern] = useState<Pattern | null>(null);
   const [previewPattern, setPreviewPattern] = useState<Pattern | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
-  useEffect(() => {
-    fetchPatterns();
-  }, [filter, levelFilter]);
-
-  const fetchPatterns = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (filter !== 'all') params.append('category', filter);
-      if (levelFilter !== 'all') params.append('level', levelFilter);
-
-      const res = await fetch(`/api/admin/patterns?${params}`);
-      const data = await res.json();
-
-      if (data.success) {
-        setPatterns(data.patterns);
-      }
-    } catch (error) {
-      console.error('Failed to fetch patterns:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Debounced search value
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
 
   const handleEdit = (pattern: Pattern) => {
     setEditingPattern(pattern);
@@ -143,13 +139,19 @@ export function PatternManagementPanel() {
 
       if (data.success) {
         setIsEditDialogOpen(false);
-        fetchPatterns();
+        refresh();
+        success(
+          isCreating ? 'Pattern created' : 'Pattern updated',
+          isCreating
+            ? 'The pattern has been created successfully'
+            : 'The pattern has been updated successfully'
+        );
       } else {
-        alert(`Error: ${data.error}`);
+        showError('Save failed', data.error || 'Failed to save pattern');
       }
-    } catch (error) {
-      console.error('Failed to save pattern:', error);
-      alert('Failed to save pattern');
+    } catch (err) {
+      console.error('Failed to save pattern:', err);
+      showError('Save failed', 'An unexpected error occurred');
     }
   };
 
@@ -164,264 +166,235 @@ export function PatternManagementPanel() {
       const data = await res.json();
 
       if (data.success) {
-        fetchPatterns();
+        refresh();
+        success('Pattern deleted', 'The pattern has been deleted successfully');
       } else {
-        alert(`Error: ${data.error}`);
+        showError('Delete failed', data.error || 'Failed to delete pattern');
       }
-    } catch (error) {
-      console.error('Failed to delete pattern:', error);
-      alert('Failed to delete pattern');
+    } catch (err) {
+      console.error('Failed to delete pattern:', err);
+      showError('Delete failed', 'An unexpected error occurred');
     }
   };
 
-  const filteredPatterns = patterns.filter((pattern) =>
-    searchTerm
-      ? pattern.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pattern.description.toLowerCase().includes(searchTerm.toLowerCase())
-      : true
-  );
+  // Filter patterns based on category, level, and search
+  const filteredPatterns = useMemo(() => {
+    return patterns.filter((pattern) => {
+      // Filter by category
+      if (filter !== 'all' && pattern.category !== filter) return false;
 
-  // Pagination
-  const totalPages = Math.ceil(filteredPatterns.length / itemsPerPage);
-  const paginatedPatterns = filteredPatterns.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+      // Filter by level
+      if (levelFilter !== 'all' && pattern.level !== levelFilter) return false;
 
-  const stats = {
-    total: patterns.length,
+      // Filter by search
+      if (debouncedSearch) {
+        const search = debouncedSearch.toLowerCase();
+        return (
+          pattern.name.toLowerCase().includes(search) ||
+          pattern.description.toLowerCase().includes(search)
+        );
+      }
+
+      return true;
+    });
+  }, [patterns, filter, levelFilter, debouncedSearch]);
+
+  // Calculate stats
+  const stats = useMemo(() => ({
+    total: totalCount,
     foundational: patterns.filter((p) => p.category === 'FOUNDATIONAL').length,
     structural: patterns.filter((p) => p.category === 'STRUCTURAL').length,
     cognitive: patterns.filter((p) => p.category === 'COGNITIVE').length,
     iterative: patterns.filter((p) => p.category === 'ITERATIVE').length,
-  };
+  }), [patterns, totalCount]);
+
+  // Column definitions for AdminDataTable
+  const columns: ColumnDef<Pattern>[] = useMemo(() => [
+    {
+      id: 'name',
+      label: 'Name',
+      width: 'w-[250px]',
+      cellClassName: 'font-medium',
+      render: (pattern) => (
+        <button
+          onClick={() => handlePreview(pattern)}
+          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+        >
+          {pattern.name}
+        </button>
+      ),
+    },
+    {
+      id: 'category',
+      label: 'Category',
+      render: (pattern) => (
+        <Badge variant="outline">{pattern.category}</Badge>
+      ),
+    },
+    {
+      id: 'level',
+      label: 'Level',
+      render: (pattern) => (
+        <Badge
+          variant={
+            pattern.level === 'beginner'
+              ? 'default'
+              : pattern.level === 'intermediate'
+                ? 'secondary'
+                : 'default'
+          }
+        >
+          {pattern.level}
+        </Badge>
+      ),
+    },
+    {
+      id: 'id',
+      label: 'ID',
+      render: (pattern) => (
+        <span className="text-sm text-muted-foreground">{pattern.id}</span>
+      ),
+    },
+    {
+      id: 'updated',
+      label: 'Updated',
+      render: (pattern) => (
+        <span className="text-sm">
+          {new Date(pattern.updatedAt).toLocaleDateString()}
+        </span>
+      ),
+    },
+  ], []);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Pattern Management
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Manage prompt engineering patterns
-          </p>
+    <AdminErrorBoundary>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              Pattern Management
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Manage prompt engineering patterns
+            </p>
+          </div>
+          <Button onClick={handleCreate} size="lg">
+            <Icons.plus className="mr-2 h-4 w-4" />
+            Create Pattern
+          </Button>
         </div>
-        <Button onClick={handleCreate} size="lg">
-          <Icons.plus className="mr-2 h-4 w-4" />
-          Create Pattern
-        </Button>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Total</CardDescription>
-            <CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Foundational</CardDescription>
-            <CardTitle className="text-4xl font-bold text-blue-600">
-              {stats.foundational}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Structural</CardDescription>
-            <CardTitle className="text-4xl font-bold text-green-600">
-              {stats.structural}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Cognitive</CardDescription>
-            <CardTitle className="text-4xl font-bold text-purple-600">
-              {stats.cognitive}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Iterative</CardDescription>
-            <CardTitle className="text-4xl font-bold text-orange-600">
-              {stats.iterative}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
-
-      {/* Search & Filters */}
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="flex-1">
-          <Input
-            placeholder="Search patterns..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="bg-white dark:bg-gray-800"
-          />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+          <AdminStatsCard label="Total" value={stats.total} />
+          <AdminStatsCard label="Foundational" value={stats.foundational} variant="blue" />
+          <AdminStatsCard label="Structural" value={stats.structural} variant="green" />
+          <AdminStatsCard label="Cognitive" value={stats.cognitive} variant="purple" />
+          <AdminStatsCard label="Iterative" value={stats.iterative} variant="orange" />
         </div>
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800">
-            <SelectValue placeholder="Filter by category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="FOUNDATIONAL">Foundational</SelectItem>
-            <SelectItem value="STRUCTURAL">Structural</SelectItem>
-            <SelectItem value="COGNITIVE">Cognitive</SelectItem>
-            <SelectItem value="ITERATIVE">Iterative</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={levelFilter} onValueChange={setLevelFilter}>
-          <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
-            <SelectValue placeholder="Filter by level" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Levels</SelectItem>
-            <SelectItem value="beginner">Beginner</SelectItem>
-            <SelectItem value="intermediate">Intermediate</SelectItem>
-            <SelectItem value="advanced">Advanced</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
-      {/* Patterns Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Patterns</CardTitle>
-          <CardDescription>
-            {filteredPatterns.length} patterns
-            {searchTerm && ` matching "${searchTerm}"`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Icons.spinner className="h-6 w-6 animate-spin" />
-            </div>
-          ) : paginatedPatterns.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              No patterns found
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto rounded-md border bg-white dark:bg-gray-900">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-gray-50 dark:bg-gray-800">
-                      <TableHead className="w-[250px] font-semibold">
-                        Name
-                      </TableHead>
-                      <TableHead className="font-semibold">Category</TableHead>
-                      <TableHead className="font-semibold">Level</TableHead>
-                      <TableHead className="font-semibold">ID</TableHead>
-                      <TableHead className="font-semibold">Updated</TableHead>
-                      <TableHead className="text-right font-semibold">
-                        Actions
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedPatterns.map((pattern) => (
-                      <TableRow
-                        key={pattern._id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
-                        <TableCell className="font-medium">
-                          <button
-                            onClick={() => handlePreview(pattern)}
-                            className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
-                          >
-                            {pattern.name}
-                          </button>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{pattern.category}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              pattern.level === 'beginner'
-                                ? 'default'
-                                : pattern.level === 'intermediate'
-                                  ? 'secondary'
-                                  : 'default'
-                            }
-                          >
-                            {pattern.level}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {pattern.id}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {new Date(pattern.updatedAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleEdit(pattern)}
-                            >
-                              <Icons.edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleDelete(pattern._id)}
-                            >
-                              <Icons.delete className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+        {/* Search & Filters */}
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="flex-1">
+            <Input
+              placeholder="Search patterns..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="bg-white dark:bg-gray-800"
+            />
+          </div>
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800">
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="FOUNDATIONAL">Foundational</SelectItem>
+              <SelectItem value="STRUCTURAL">Structural</SelectItem>
+              <SelectItem value="COGNITIVE">Cognitive</SelectItem>
+              <SelectItem value="ITERATIVE">Iterative</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={levelFilter} onValueChange={setLevelFilter}>
+            <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
+              <SelectValue placeholder="Filter by level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Levels</SelectItem>
+              <SelectItem value="beginner">Beginner</SelectItem>
+              <SelectItem value="intermediate">Intermediate</SelectItem>
+              <SelectItem value="advanced">Advanced</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-4 flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    Page {currentPage} of {totalPages}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      <Icons.left className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+        {/* Patterns Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Patterns</CardTitle>
+            <CardDescription>
+              {filteredPatterns.length} patterns
+              {searchInput && ` matching "${searchInput}"`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <AdminTableSkeleton rows={5} columns={5} />
+            ) : filteredPatterns.length === 0 ? (
+              <AdminEmptyState
+                title="No patterns found"
+                description={
+                  searchInput || filter !== 'all' || levelFilter !== 'all'
+                    ? 'Try adjusting your search or filters.'
+                    : 'Create your first pattern to get started.'
+                }
+                action={
+                  searchInput || filter !== 'all' || levelFilter !== 'all'
+                    ? undefined
+                    : {
+                        label: 'Create Pattern',
+                        onClick: handleCreate,
+                        icon: <Icons.plus className="h-4 w-4" />,
                       }
-                      disabled={currentPage === totalPages}
-                    >
-                      <Icons.arrowRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+                }
+              />
+            ) : (
+              <>
+                <AdminDataTable
+                  data={filteredPatterns}
+                  columns={columns}
+                  renderRowActions={(pattern) => (
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEdit(pattern)}
+                      >
+                        <Icons.edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDelete(pattern._id)}
+                      >
+                        <Icons.delete className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </div>
+                  )}
+                />
+                <AdminPaginationControls
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalCount={totalCount}
+                  pageSize={pageSize}
+                  onPageChange={goToPage}
+                  itemName="patterns"
+                />
+              </>
+            )}
+          </CardContent>
+        </Card>
 
       {/* Edit/Create Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -665,6 +638,7 @@ export function PatternManagementPanel() {
           )}
         </SheetContent>
       </Sheet>
-    </div>
+      </div>
+    </AdminErrorBoundary>
   );
 }

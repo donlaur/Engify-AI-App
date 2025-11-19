@@ -10,6 +10,9 @@ import { ContentManagementCMS } from './ContentManagementCMS';
 import { ContentGeneratorPanel } from './ContentGeneratorPanel';
 import { PromptManagementPanel } from './PromptManagementPanel';
 import { PatternManagementPanel } from './PatternManagementPanel';
+import { WorkflowManagementPanel } from './WorkflowManagementPanel';
+import { RecommendationManagementPanel } from './RecommendationManagementPanel';
+import { PainPointManagementPanel } from './PainPointManagementPanel';
 import { UserManagementPanel } from './UserManagementPanel';
 import { SystemSettingsPanel } from './SystemSettingsPanel';
 import { DeadLetterQueuePanel } from './DeadLetterQueuePanel';
@@ -35,7 +38,7 @@ export function OpsHubTabs() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="grid w-full grid-cols-8 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-11 lg:w-auto lg:inline-grid">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <Icons.barChart className="h-4 w-4" />
             <span className="hidden sm:inline">Dashboard</span>
@@ -55,6 +58,18 @@ export function OpsHubTabs() {
           <TabsTrigger value="patterns" className="flex items-center gap-2">
             <Icons.brain className="h-4 w-4" />
             <span className="hidden sm:inline">Patterns</span>
+          </TabsTrigger>
+          <TabsTrigger value="workflows" className="flex items-center gap-2">
+            <Icons.gitBranch className="h-4 w-4" />
+            <span className="hidden sm:inline">Workflows</span>
+          </TabsTrigger>
+          <TabsTrigger value="recommendations" className="flex items-center gap-2">
+            <Icons.lightbulb className="h-4 w-4" />
+            <span className="hidden sm:inline">Recommendations</span>
+          </TabsTrigger>
+          <TabsTrigger value="painpoints" className="flex items-center gap-2">
+            <Icons.alertTriangle className="h-4 w-4" />
+            <span className="hidden sm:inline">Pain Points</span>
           </TabsTrigger>
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Icons.users className="h-4 w-4" />
@@ -93,6 +108,21 @@ export function OpsHubTabs() {
         {/* Patterns Tab */}
         <TabsContent value="patterns" className="space-y-4">
           <PatternManagementPanel />
+        </TabsContent>
+
+        {/* Workflows Tab */}
+        <TabsContent value="workflows" className="space-y-4">
+          <WorkflowManagementPanel />
+        </TabsContent>
+
+        {/* Recommendations Tab */}
+        <TabsContent value="recommendations" className="space-y-4">
+          <RecommendationManagementPanel />
+        </TabsContent>
+
+        {/* Pain Points Tab */}
+        <TabsContent value="painpoints" className="space-y-4">
+          <PainPointManagementPanel />
         </TabsContent>
 
         {/* Users Tab */}
