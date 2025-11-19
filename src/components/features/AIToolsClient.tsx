@@ -40,6 +40,14 @@ type SortOption = 'alphabetical' | 'category' | 'price-low' | 'price-high';
 
 const INITIAL_VISIBLE_CATEGORIES = 8;
 
+// Format category key to proper title case
+function formatCategoryTitle(category: string): string {
+  return category
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
 export function AIToolsClient({
   initialTools,
   categoryStats,
@@ -158,7 +166,7 @@ export function AIToolsClient({
               >
                 {category === 'all'
                   ? `All (${initialTools.length})`
-                  : `${categoryLabels[category] || category} (${categoryStats[category] || 0})`}
+                  : `${categoryLabels[category] || formatCategoryTitle(category)} (${categoryStats[category] || 0})`}
               </Badge>
             ))}
             {allCategories.length > INITIAL_VISIBLE_CATEGORIES && (
@@ -230,7 +238,7 @@ export function AIToolsClient({
           <div key={category}>
             <div className="mb-6 flex items-center gap-3">
               <h2 className="text-2xl font-bold">
-                {categoryLabels[category] || category}
+                {categoryLabels[category] || formatCategoryTitle(category)}
               </h2>
               <Badge variant="secondary">
                 {categoryTools.length}{' '}

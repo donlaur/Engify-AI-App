@@ -44,6 +44,14 @@ interface PageProps {
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
+// Format category key to proper title case
+function formatCategoryTitle(category: string): string {
+  return category
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
@@ -242,7 +250,7 @@ export default async function AIToolDetailPage({ params }: PageProps) {
             )}
             <div className="mt-2 flex flex-wrap gap-2">
               <Badge variant="secondary">
-                {CATEGORY_LABELS[tool.category] || tool.category}
+                {CATEGORY_LABELS[tool.category] || formatCategoryTitle(tool.category)}
               </Badge>
               <Badge variant={tool.pricing.free ? 'default' : 'outline'}>
                 {pricingText}
