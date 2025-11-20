@@ -365,6 +365,10 @@ export function ContentGeneratorPanel() {
           title: 'Job Submitted',
           description: `Batch job started with ${topics.length} topics`,
         });
+        
+        // Open progress modal
+        setProgressJobId(data.jobId);
+        setShowProgressModal(true);
 
         // Clear form
         setTopicsInput('');
