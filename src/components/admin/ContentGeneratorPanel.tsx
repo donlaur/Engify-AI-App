@@ -606,6 +606,64 @@ export function ContentGeneratorPanel() {
                             Generating...
                           </Button>
                         )}
+                        {item.status === 'failed' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              try {
+                                // Reset status to queued
+                                await fetch('/api/admin/content/queue', {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    id: item.id,
+                                    status: 'queued',
+                                  }),
+                                });
+
+                                // Start generation
+                                const response = await fetch('/api/admin/content/generate/single', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    queueItemId: item.id,
+                                    title: item.title,
+                                    contentType: item.contentType,
+                                    targetWordCount: item.targetWordCount,
+                                    keywords: item.keywords,
+                                  }),
+                                });
+                                
+                                const data = await response.json();
+                                if (data.success) {
+                                  toast({
+                                    title: 'Retry started',
+                                    description: item.title,
+                                  });
+                                  setProgressJobId(data.jobId);
+                                  setShowProgressModal(true);
+                                  loadQueue();
+                                } else {
+                                  toast({
+                                    title: 'Error',
+                                    description: data.error,
+                                    variant: 'destructive',
+                                  });
+                                }
+                              } catch (error) {
+                                toast({
+                                  title: 'Error',
+                                  description: 'Failed to retry generation',
+                                  variant: 'destructive',
+                                });
+                              }
+                            }}
+                          >
+                            <Icons.refresh className="mr-2 h-4 w-4" />
+                            Retry
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))

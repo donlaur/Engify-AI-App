@@ -133,6 +133,43 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// PATCH: Update queue item
+export async function PATCH(request: NextRequest) {
+  const r = await RBACPresets.requireOrgAdmin()(request);
+  if (r) return r;
+
+  try {
+    const body = await request.json();
+    const { id, status } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Missing id parameter' },
+        { status: 400 }
+      );
+    }
+
+    if (status) {
+      await contentQueueService.updateStatus(id, status);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Queue item updated',
+    });
+  } catch (error) {
+    console.error('Error updating queue item:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to update queue item',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
+}
+
 // DELETE: Remove from queue
 export async function DELETE(request: NextRequest) {
   const r = await RBACPresets.requireOrgAdmin()(request);
