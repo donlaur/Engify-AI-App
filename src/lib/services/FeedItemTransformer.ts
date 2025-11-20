@@ -40,11 +40,20 @@ export class FeedItemTransformer {
     // Generate ID from GUID or link
     const id = item.guid || item.link || `update-${Date.now()}-${Math.random()}`;
 
-    // Parse published date
-    const publishedAt = this.parseDate(item.pubDate);
+    // Parse published date - handle both string and object
+    const publishedAt = this.parseDate(
+      typeof item.pubDate === 'string' 
+        ? item.pubDate 
+        : (item.pubDate as any)?.toString?.() || undefined
+    );
 
-    // Extract categories
+    // Extract categories - handle objects with $ term property
     const categories = this.extractCategories(item.categories);
+
+    // Extract author - handle objects with name property
+    const author = this.extractAuthor(
+      item.creator || (item as any).author
+    );
 
     // Extract features
     const features = this.extractFeatures(
@@ -61,7 +70,7 @@ export class FeedItemTransformer {
       description: item.contentSnippet || (item as any).description || undefined,
       content: (item as any).content || item.contentSnippet || (item as any).description || undefined,
       link: item.link,
-      author: item.creator || (item as any).author || undefined,
+      author,
       publishedAt,
       feedUrl: config.url,
       guid: item.guid,
@@ -100,19 +109,79 @@ export class FeedItemTransformer {
 
   /**
    * Extract categories from feed item
+   * Handles both string arrays and objects with $ term property (Atom feeds)
    */
-  private extractCategories(categories: string | string[] | undefined): string[] {
+  private extractCategories(categories: string | string[] | any[] | undefined): string[] {
     if (!categories) return [];
     
     if (Array.isArray(categories)) {
-      return categories;
+      return categories
+        .map(cat => {
+          // Handle object format: { $: { term: "Category Name" } }
+          if (typeof cat === 'object' && cat !== null) {
+            if (cat.$?.term) {
+              return String(cat.$.term);
+            }
+            // Handle array format: { name: ["Category"] }
+            if (Array.isArray(cat.name) && cat.name.length > 0) {
+              return String(cat.name[0]);
+            }
+            // Fallback: try to stringify
+            return String(cat);
+          }
+          return String(cat);
+        })
+        .filter(Boolean);
     }
     
     if (typeof categories === 'string') {
       return [categories];
     }
     
+    // Handle single object
+    if (typeof categories === 'object' && categories !== null) {
+      if ((categories as any).$?.term) {
+        return [String((categories as any).$.term)];
+      }
+      if (Array.isArray((categories as any).name) && (categories as any).name.length > 0) {
+        return [String((categories as any).name[0])];
+      }
+    }
+    
     return [];
+  }
+
+  /**
+   * Extract author from feed item
+   * Handles both strings and objects with name property (Atom feeds)
+   */
+  private extractAuthor(author: string | any | undefined): string | undefined {
+    if (!author) return undefined;
+    
+    if (typeof author === 'string') {
+      return author;
+    }
+    
+    // Handle object format: { name: ["Author Name"], title: ["Title"], ... }
+    if (typeof author === 'object' && author !== null) {
+      // Try name array first (most common in Atom feeds)
+      if (Array.isArray(author.name) && author.name.length > 0) {
+        return String(author.name[0]);
+      }
+      // Try name as string
+      if (typeof author.name === 'string') {
+        return author.name;
+      }
+      // Try to stringify the object
+      if (author.toString && typeof author.toString === 'function') {
+        const str = author.toString();
+        if (str !== '[object Object]') {
+          return str;
+        }
+      }
+    }
+    
+    return undefined;
   }
 
   /**

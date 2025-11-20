@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
+import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
 import {
   Dialog,
   DialogContent,
@@ -67,6 +68,8 @@ export function ContentManagementCMS() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingRecap, setIsGeneratingRecap] = useState(false);
+  const [recapProvider, setRecapProvider] = useState<'openai' | 'anthropic' | 'google'>('openai');
 
   useEffect(() => {
     fetchContent();
@@ -255,6 +258,58 @@ Return enhanced markdown content.`;
     }
   };
 
+  const handleGenerateRecap = async () => {
+    if (!editingItem || !editingItem.content) return;
+
+    setIsGeneratingRecap(true);
+    try {
+      const res = await fetch('/api/admin/content/recap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editingItem.title,
+          content: editingItem.content,
+          provider: recapProvider,
+          sourceUrl: (editingItem as any).metadata?.sourceUrl,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success && data.recap) {
+        // Append recap to content with a separator
+        // Include agent analyses in a collapsible section
+        const separator = '\n\n---\n\n## Editorial Recap\n\n';
+        let recapSection = data.recap;
+        
+        if (data.agentAnalyses) {
+          recapSection += '\n\n<details>\n<summary>Agent Analyses (Editor & SEO)</summary>\n\n';
+          if (data.agentAnalyses.editor) {
+            recapSection += `### Editor Analysis\n\n${data.agentAnalyses.editor}\n\n`;
+          }
+          if (data.agentAnalyses.seoEeat) {
+            recapSection += `### SEO/EEAT Analysis\n\n${data.agentAnalyses.seoEeat}\n\n`;
+          }
+          recapSection += '</details>\n';
+        }
+        
+        const newContent = editingItem.content + separator + recapSection;
+        setEditingItem({
+          ...editingItem,
+          content: newContent,
+        });
+        alert(`Recap generated using ${data.metadata?.workflow || 'multi-agent'} workflow!`);
+      } else {
+        alert(`Error: ${data.error || data.message || 'Failed to generate recap'}`);
+      }
+    } catch (error) {
+      console.error('Failed to generate recap:', error);
+      alert('Failed to generate recap');
+    } finally {
+      setIsGeneratingRecap(false);
+    }
+  };
+
   const filteredContent = contentItems.filter((item) =>
     searchTerm
       ? item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -275,7 +330,8 @@ Return enhanced markdown content.`;
   };
 
   return (
-    <div className="space-y-6">
+    <AdminErrorBoundary onError={(err) => console.error('Content Management CMS error:', err)}>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -539,20 +595,37 @@ Return enhanced markdown content.`;
                   <Label htmlFor="content">Content (Markdown)</Label>
                   <div className="flex gap-2">
                     {editingItem.content && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleEnhanceWithAI}
-                        disabled={isGenerating}
-                      >
-                        {isGenerating ? (
-                          <Icons.spinner className="mr-2 h-3 w-3 animate-spin" />
-                        ) : (
-                          <Icons.zap className="mr-2 h-3 w-3" />
-                        )}
-                        Enhance with AI
-                      </Button>
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleGenerateRecap}
+                          disabled={isGeneratingRecap}
+                          title="Generate editorial recap using your API keys"
+                        >
+                          {isGeneratingRecap ? (
+                            <Icons.spinner className="mr-2 h-3 w-3 animate-spin" />
+                          ) : (
+                            <Icons.newspaper className="mr-2 h-3 w-3" />
+                          )}
+                          Generate Recap
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleEnhanceWithAI}
+                          disabled={isGenerating}
+                        >
+                          {isGenerating ? (
+                            <Icons.spinner className="mr-2 h-3 w-3 animate-spin" />
+                          ) : (
+                            <Icons.zap className="mr-2 h-3 w-3" />
+                          )}
+                          Enhance with AI
+                        </Button>
+                      </>
                     )}
                     <Button
                       type="button"
@@ -570,6 +643,26 @@ Return enhanced markdown content.`;
                     </Button>
                   </div>
                 </div>
+                {editingItem.content && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>Recap provider:</span>
+                    <Select
+                      value={recapProvider}
+                      onValueChange={(value: 'openai' | 'anthropic' | 'google') =>
+                        setRecapProvider(value)
+                      }
+                    >
+                      <SelectTrigger className="h-7 w-[120px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="openai">OpenAI</SelectItem>
+                        <SelectItem value="anthropic">Anthropic</SelectItem>
+                        <SelectItem value="google">Google</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <Textarea
                   id="content"
                   value={editingItem.content}
@@ -581,9 +674,7 @@ Return enhanced markdown content.`;
                   className="font-mono text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                  💡 Tip: Enter a title and click &quot;Generate with AI&quot;
-                  to create content automatically, or write your own and use
-                  &quot;Enhance with AI&quot; to improve it.
+                  💡 Tip: For news articles, use &quot;Generate Recap&quot; to create an editorial recap using a 3-agent workflow (Editor → SEO/EEAT → Tech Writer). Or use &quot;Generate with AI&quot; to create content from scratch, and &quot;Enhance with AI&quot; to improve existing content.
                 </p>
               </div>
 
@@ -638,11 +729,23 @@ Return enhanced markdown content.`;
               <div className="mt-6 space-y-4">
                 <div>
                   <h4 className="mb-2 text-sm font-semibold">Content</h4>
-                  <div className="prose prose-sm max-w-none">
-                    <pre className="whitespace-pre-wrap text-sm">
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <div className="whitespace-pre-wrap text-sm rounded-md border p-4 bg-muted/50">
                       {previewItem.content}
-                    </pre>
+                    </div>
                   </div>
+                  {(previewItem as any).metadata?.sourceUrl && (
+                    <div className="mt-2">
+                      <a
+                        href={(previewItem as any).metadata.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                        View Original Source →
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 {previewItem.tags.length > 0 && (
@@ -702,6 +805,7 @@ Return enhanced markdown content.`;
           )}
         </SheetContent>
       </Sheet>
-    </div>
+      </div>
+    </AdminErrorBoundary>
   );
 }
