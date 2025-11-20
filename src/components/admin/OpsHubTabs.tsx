@@ -26,8 +26,8 @@ export function OpsHubTabs() {
   return (
     <AdminErrorBoundary onError={(err) => console.error('OpsHub tabs error:', err)}>
       <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header - Fixed position to prevent disappearing */}
+      <div className="relative z-10 flex items-center justify-between bg-background pb-4">
         <div>
           <h1 className="text-3xl font-bold">OpsHub Admin Center</h1>
           <p className="text-sm text-muted-foreground">
@@ -42,7 +42,7 @@ export function OpsHubTabs() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="grid w-full grid-cols-13 lg:w-auto lg:inline-grid">
+        <TabsList className="flex w-full flex-wrap gap-1 lg:w-auto lg:flex-nowrap">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <Icons.barChart className="h-4 w-4" />
             <span className="hidden sm:inline">Dashboard</span>
