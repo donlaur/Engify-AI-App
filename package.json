@@ -142,6 +142,7 @@
     "@radix-ui/react-label": "catalog:ui",
     "@radix-ui/react-progress": "catalog:ui",
     "@radix-ui/react-radio-group": "catalog:ui",
+    "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-select": "catalog:ui",
     "@radix-ui/react-separator": "catalog:ui",
     "@radix-ui/react-slider": "catalog:ui",
