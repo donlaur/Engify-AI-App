@@ -1343,6 +1343,11 @@ export function ContentGeneratorPanel() {
         isOpen={showProgressModal}
         onClose={() => setShowProgressModal(false)}
         jobId={progressJobId}
+        onComplete={() => {
+          // Refresh both queue and review lists when generation completes
+          loadQueue();
+          loadReviewContent();
+        }}
       />
     </div>
   );

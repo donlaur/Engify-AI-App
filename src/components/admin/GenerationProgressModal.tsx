@@ -35,7 +35,7 @@ interface GenerationProgressModalProps {
   jobId: string | null;
 }
 
-export function GenerationProgressModal({ isOpen, onClose, jobId }: GenerationProgressModalProps) {
+export function GenerationProgressModal({ isOpen, onClose, jobId, onComplete }: GenerationProgressModalProps & { onComplete?: () => void }) {
   const [progress, setProgress] = useState<GenerationProgress | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
 
@@ -62,6 +62,10 @@ export function GenerationProgressModal({ isOpen, onClose, jobId }: GenerationPr
           // Stop polling if completed or failed
           if (data.progress.status === 'completed' || data.progress.status === 'failed') {
             clearInterval(interval);
+            // Notify parent to refresh review list
+            if (onComplete) {
+              onComplete();
+            }
           }
         }
       } catch (error) {
@@ -70,7 +74,7 @@ export function GenerationProgressModal({ isOpen, onClose, jobId }: GenerationPr
     }, 2000); // Poll every 2 seconds (reduced frequency)
 
     return () => clearInterval(interval);
-  }, [jobId, isOpen]);
+  }, [jobId, isOpen, onComplete]);
 
   if (!progress) {
     return (

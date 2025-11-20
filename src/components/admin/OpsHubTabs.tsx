@@ -100,81 +100,81 @@ export function OpsHubTabs() {
         className="space-y-4"
       >
         <div className="overflow-x-auto -mx-4 px-4">
-          <TabsList className="inline-flex min-w-full gap-1">
+          <TabsList className="inline-flex min-w-full gap-1 bg-slate-700/50">
           {visibleTabs.includes('dashboard') && (
-            <TabsTrigger value="dashboard" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.barChart className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('content') && (
-            <TabsTrigger value="content" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="content" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.fileText className="h-4 w-4" />
               <span className="hidden sm:inline">Content</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('generator') && (
-            <TabsTrigger value="generator" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="generator" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.zap className="h-4 w-4" />
               <span className="hidden sm:inline">Generator</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('prompts') && (
-            <TabsTrigger value="prompts" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="prompts" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.code className="h-4 w-4" />
               <span className="hidden sm:inline">Prompts</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('patterns') && (
-            <TabsTrigger value="patterns" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="patterns" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.brain className="h-4 w-4" />
               <span className="hidden sm:inline">Patterns</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('workflows') && (
-            <TabsTrigger value="workflows" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="workflows" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.gitBranch className="h-4 w-4" />
               <span className="hidden sm:inline">Workflows</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('recommendations') && (
-            <TabsTrigger value="recommendations" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="recommendations" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.lightbulb className="h-4 w-4" />
               <span className="hidden sm:inline">Recommendations</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('painpoints') && (
-            <TabsTrigger value="painpoints" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="painpoints" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.alertTriangle className="h-4 w-4" />
               <span className="hidden sm:inline">Pain Points</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('users') && (
-            <TabsTrigger value="users" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="users" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.users className="h-4 w-4" />
               <span className="hidden sm:inline">Users</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('queue') && (
-            <TabsTrigger value="queue" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="queue" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.alertCircle className="h-4 w-4" />
               <span className="hidden sm:inline">DLQ</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('settings') && (
-            <TabsTrigger value="settings" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="settings" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.settings className="h-4 w-4" />
               <span className="hidden sm:inline">Settings</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('feeds') && (
-            <TabsTrigger value="feeds" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="feeds" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.newspaper className="h-4 w-4" />
               <span className="hidden sm:inline">Feeds</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('news') && (
-            <TabsTrigger value="news" className="flex items-center gap-2 whitespace-nowrap">
+            <TabsTrigger value="news" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
               <Icons.newspaper className="h-4 w-4" />
               <span className="hidden sm:inline">News</span>
             </TabsTrigger>
