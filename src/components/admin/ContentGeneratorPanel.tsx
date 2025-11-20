@@ -899,13 +899,15 @@ export function ContentGeneratorPanel() {
                     generatedContent.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-start gap-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors cursor-pointer"
-                        onClick={() => {
-                          setSelectedContent(item);
-                          setEditingContent(item.content);
-                        }}
+                        className="flex items-start gap-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors"
                       >
-                        <div className="flex-1 min-w-0">
+                        <div 
+                          className="flex-1 min-w-0 cursor-pointer"
+                          onClick={() => {
+                            setSelectedContent(item);
+                            setEditingContent(item.content);
+                          }}
+                        >
                           <div className="flex items-center gap-2 mb-1">
                             <h4 className="font-medium text-sm truncate">{item.title}</h4>
                             <Badge variant="outline">{item.contentType}</Badge>
@@ -924,20 +926,80 @@ export function ContentGeneratorPanel() {
                               </>
                             )}
                           </div>
+                          {/* Show URL for approved/published content */}
+                          {(item.status === 'approved' || item.status === 'published') && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">
+                                URL: /blog/{item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}
+                              </span>
+                              {item.status === 'published' && item.publishedUrl && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 px-2 text-xs"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(item.publishedUrl, '_blank');
+                                  }}
+                                >
+                                  <Icons.externalLink className="h-3 w-3 mr-1" />
+                                  View Live
+                                </Button>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <Badge
-                          variant={
-                            item.status === 'published'
-                              ? 'default'
-                              : item.status === 'approved'
-                                ? 'secondary'
-                                : item.status === 'rejected'
-                                  ? 'destructive'
-                                  : 'outline'
-                          }
-                        >
-                          {item.status}
-                        </Badge>
+                        <div className="flex flex-col gap-2 items-end">
+                          <Badge
+                            variant={
+                              item.status === 'published'
+                                ? 'default'
+                                : item.status === 'approved'
+                                  ? 'secondary'
+                                  : item.status === 'rejected'
+                                    ? 'destructive'
+                                    : 'outline'
+                            }
+                          >
+                            {item.status}
+                          </Badge>
+                          {/* Quick action buttons */}
+                          {item.status === 'approved' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                  const response = await fetch(`/api/admin/content/generated?id=${item.id}&action=review`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action: 'publish' }),
+                                  });
+
+                                  const data = await response.json();
+                                  if (data.success) {
+                                    toast({
+                                      title: 'Published',
+                                      description: `Live at ${data.url}`,
+                                    });
+                                    loadReviewContent();
+                                  }
+                                } catch (error) {
+                                  toast({
+                                    title: 'Error',
+                                    description: 'Failed to publish',
+                                    variant: 'destructive',
+                                  });
+                                }
+                              }}
+                            >
+                              <Icons.globe className="h-3 w-3 mr-1" />
+                              Publish
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     ))
                   )}
