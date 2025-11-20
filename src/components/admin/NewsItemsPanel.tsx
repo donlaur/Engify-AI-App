@@ -162,12 +162,29 @@ export function NewsItemsPanel() {
         }
 
         await response.json(); // Consume response
+        
+        // Archive the news item so it's removed from the list
+        try {
+          await fetch(`/api/admin/news/items`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: item._id || item.id,
+              status: 'archived',
+            }),
+          });
+        } catch (archiveError) {
+          // Log but don't fail the whole operation
+          console.warn('Failed to archive news item:', archiveError);
+        }
+        
         showSuccess(
           'Article created',
           `Article "${item.title}" has been created and is ready for review.`
         );
         setIsSheetOpen(false);
-        // Optionally navigate to content management
+        // Refetch to remove archived item from list
+        refetch();
       } catch (err) {
         showError(
           'Failed to create article',

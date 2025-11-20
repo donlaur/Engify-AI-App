@@ -71,19 +71,30 @@ export async function POST(request: NextRequest) {
     const { title, content, sourceUrl, provider, model } = validationResult.data;
     const userId = session.user.id;
 
-    // Get user's API key for the provider
+    // Try to get user's API key first (BYOK - Bring Your Own Key)
     const apiKeyService = new ApiKeyService();
-    const apiKey = await apiKeyService.getActiveKey(
+    let apiKey: string | null = await apiKeyService.getActiveKey(
       userId,
       provider === 'google' ? 'google' : provider,
       model
     );
 
+    // Fall back to Vercel environment variables if no user key (like multi-agent workbench)
+    if (!apiKey) {
+      if (provider === 'openai') {
+        apiKey = process.env.OPENAI_API_KEY || null;
+      } else if (provider === 'anthropic') {
+        apiKey = process.env.ANTHROPIC_API_KEY || null;
+      } else if (provider === 'google') {
+        apiKey = process.env.GOOGLE_API_KEY || process.env.GOOGLE_AI_API_KEY || null;
+      }
+    }
+
     if (!apiKey) {
       return NextResponse.json(
         {
           error: 'No API key found',
-          message: `Please add a ${provider} API key in your settings to generate recaps.`,
+          message: `No API key found for ${provider}. Please add a ${provider} API key in your settings, or ensure ${provider.toUpperCase()}_API_KEY is set in Vercel environment variables.`,
         },
         { status: 400 }
       );

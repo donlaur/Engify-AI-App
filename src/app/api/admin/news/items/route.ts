@@ -9,7 +9,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withRBAC } from '@/lib/middleware/rbac';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logging/logger';
+import { auditLog } from '@/lib/logging/audit';
 import { getMongoDb } from '@/lib/db/mongodb';
+import { ObjectId } from 'mongodb';
 
 // GET: List all news items
 export async function GET(request: NextRequest) {
@@ -46,10 +48,15 @@ export async function GET(request: NextRequest) {
     if (source) query.source = source;
 
     // Fetch with pagination
+    // Sort by confidence (descending, highest first), then by publishedAt (newest first)
+    // Items without confidence go to the end
     const [items, total] = await Promise.all([
       collection
         .find(query)
-        .sort({ publishedAt: -1 })
+        .sort({ 
+          matchConfidence: -1,  // Highest confidence first
+          publishedAt: -1       // Then newest first
+        })
         .skip(skip)
         .limit(limit)
         .toArray(),
@@ -82,6 +89,85 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Failed to list news items',
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH: Update news item (e.g., archive after pushing to content)
+export async function PATCH(request: NextRequest) {
+  const r = await withRBAC({ roles: ['super_admin', 'org_admin'] })(request);
+  if (r) return r;
+
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const { id, status, ...updates } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Item ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const db = await getMongoDb();
+    const collection = db.collection('ai_tool_updates');
+
+    // Update the item - try _id first (ObjectId), then fall back to id field (string)
+    const query = ObjectId.isValid(id) 
+      ? { _id: new ObjectId(id) } 
+      : { id: id };
+    const result = await collection.updateOne(
+      query,
+      {
+        $set: {
+          ...(status && { status }),
+          ...updates,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return NextResponse.json(
+        { error: 'News item not found' },
+        { status: 404 }
+      );
+    }
+
+    // Audit log
+    await auditLog({
+      userId: session.user.id,
+      action: 'admin_action',
+      resource: 'news_item',
+      details: {
+        action: 'news_item_updated',
+        itemId: id,
+        status: status || 'updated',
+        updates: Object.keys(updates),
+      },
+      ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'News item updated successfully',
+    });
+  } catch (error) {
+    logger.error('Error updating news item', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return NextResponse.json(
+      {
+        error: 'Failed to update news item',
         details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
