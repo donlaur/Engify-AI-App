@@ -279,6 +279,16 @@ export default async function AIModelsHubPage() {
                   The &quot;best&quot; model is no longer a single winner. Use <strong>GPT-5 or Claude 4.5 for real-world bug fixing</strong> (both ~74% on SWE-Bench), <strong>Gemini 2.5 for writing new functions</strong> (99% HumanEval), and <strong>Gemini for whole-codebase analysis</strong> (1-2M context). Tools like Cursor let you switch models per task.
                 </p>
               </div>
+
+              <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+                <h4 className="mb-2 flex items-center gap-2 font-semibold text-blue-900 dark:text-blue-100">
+                  <Icons.info className="h-5 w-5" />
+                  Latest Model Updates
+                </h4>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <strong>Newer versions available:</strong> OpenAI has released <strong>GPT-5.1</strong> and Google has released <strong>Gemini 3.0</strong> with improved performance. The comparison above shows stable, well-tested versions recommended for production use. Check our full model listings below for the latest models and their capabilities.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
