@@ -9,8 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
+import { getAllContentTypes, type ContentTypeConfig } from '@/lib/content/content-types';
 
 interface Topic {
   topic: string;
@@ -49,6 +51,7 @@ interface JobStatus {
 export function ContentGeneratorPanel() {
   const { toast } = useToast();
   const [generatorType, setGeneratorType] = useState<'single-agent' | 'multi-agent'>('single-agent');
+  const [contentType, setContentType] = useState('tutorial');
   const [topicsInput, setTopicsInput] = useState('');
   const [category, setCategory] = useState('Tutorial');
   const [targetWordCount, setTargetWordCount] = useState('800');
@@ -56,6 +59,33 @@ export function ContentGeneratorPanel() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
+  
+  // AI Q&A state
+  const [aiQuestion, setAiQuestion] = useState('');
+  const [aiAnswer, setAiAnswer] = useState<any>(null);
+  const [askingAI, setAskingAI] = useState(false);
+  const [availableModels, setAvailableModels] = useState<any[]>([]);
+  const [selectedModel, setSelectedModel] = useState('');
+  
+  const contentTypes = getAllContentTypes();
+  const selectedContentType = contentTypes.find(t => t.id === contentType);
+
+  // Load available AI models
+  useEffect(() => {
+    async function loadModels() {
+      try {
+        const response = await fetch('/api/admin/content/strategy-qa');
+        const data = await response.json();
+        if (data.success) {
+          setAvailableModels(data.models);
+          setSelectedModel(data.models[0]?.id || '');
+        }
+      } catch (error) {
+        console.error('Error loading models:', error);
+      }
+    }
+    loadModels();
+  }, []);
 
   // Poll for job status
   useEffect(() => {
@@ -87,6 +117,45 @@ export function ContentGeneratorPanel() {
       return () => clearInterval(interval);
     }
   }, [currentJobId, jobStatus?.status, toast]);
+
+  const handleAskAI = async () => {
+    try {
+      setAskingAI(true);
+      const response = await fetch('/api/admin/content/strategy-qa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: aiQuestion,
+          modelId: selectedModel,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setAiAnswer(data);
+        
+        // Auto-fill form with recommendations
+        if (data.recommendedContentType) {
+          setContentType(data.recommendedContentType);
+        }
+        if (data.suggestedKeywords) {
+          setKeywords(data.suggestedKeywords.join(', '));
+        }
+        if (data.estimatedCost) {
+          // Update UI to show estimated cost
+        }
+      }
+    } catch (error) {
+      console.error('Error asking AI:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to get AI answer',
+        variant: 'destructive',
+      });
+    } finally {
+      setAskingAI(false);
+    }
+  };
 
   const handleSubmitBatch = async () => {
     try {
@@ -224,6 +293,93 @@ export function ContentGeneratorPanel() {
         </p>
       </div>
 
+      <Tabs defaultValue="generate" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="strategy">Content Strategy</TabsTrigger>
+          <TabsTrigger value="generate">Generate Content</TabsTrigger>
+          <TabsTrigger value="status">Job Status</TabsTrigger>
+        </TabsList>
+
+        {/* AI Strategy Tab */}
+        <TabsContent value="strategy">
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Content Strategy Assistant</CardTitle>
+              <CardDescription>
+                Ask AI about content strategy before generating
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Model Selector */}
+              <div className="space-y-2">
+                <Label>AI Model</Label>
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableModels.map(model => (
+                      <SelectItem key={model.id} value={model.id}>
+                        {model.name} ({model.provider})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Question Input */}
+              <div className="space-y-2">
+                <Label>Ask AI</Label>
+                <Textarea
+                  placeholder="What content type should I use for 'AI in Agile'?"
+                  value={aiQuestion}
+                  onChange={(e) => setAiQuestion(e.target.value)}
+                  rows={4}
+                />
+              </div>
+
+              <Button onClick={handleAskAI} disabled={askingAI || !aiQuestion}>
+                {askingAI ? (
+                  <>
+                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                    Asking AI...
+                  </>
+                ) : (
+                  <>
+                    <Icons.sparkles className="mr-2 h-4 w-4" />
+                    Ask AI
+                  </>
+                )}
+              </Button>
+
+              {/* AI Answer */}
+              {aiAnswer && (
+                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-semibold mb-2">AI Recommendation:</h4>
+                  <p className="text-sm mb-4">{aiAnswer.answer}</p>
+                  
+                  {aiAnswer.recommendedContentType && (
+                    <div className="space-y-2 text-sm">
+                      <div><strong>Content Type:</strong> {aiAnswer.recommendedContentType}</div>
+                      {aiAnswer.suggestedKeywords && (
+                        <div><strong>Keywords:</strong> {aiAnswer.suggestedKeywords.join(', ')}</div>
+                      )}
+                      {aiAnswer.estimatedCost && (
+                        <div><strong>Estimated Cost:</strong> ${aiAnswer.estimatedCost}</div>
+                      )}
+                      {aiAnswer.estimatedTime && (
+                        <div><strong>Estimated Time:</strong> {aiAnswer.estimatedTime} min</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Generate Tab */}
+        <TabsContent value="generate">
       <div className="grid gap-6 md:grid-cols-2">
         {/* Batch Generation Form */}
         <Card>
@@ -234,6 +390,28 @@ export function ContentGeneratorPanel() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Content Type */}
+            <div className="space-y-2">
+              <Label>Content Type</Label>
+              <Select value={contentType} onValueChange={setContentType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {contentTypes.map(type => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name} - {type.description}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedContentType && (
+                <p className="text-xs text-muted-foreground">
+                  ~{selectedContentType.targetWordCount} words, ${selectedContentType.estimatedCost}, {selectedContentType.estimatedTime} min
+                </p>
+              )}
+            </div>
+
             {/* Generator Type */}
             <div className="space-y-2">
               <Label>Generator Type</Label>
@@ -443,6 +621,121 @@ export function ContentGeneratorPanel() {
           </CardContent>
         </Card>
       </div>
+        </TabsContent>
+
+        {/* Status Tab */}
+        <TabsContent value="status">
+          <Card>
+            <CardHeader>
+              <CardTitle>Current Job Status</CardTitle>
+              <CardDescription>
+                {jobStatus ? `Job ID: ${jobStatus.jobId}` : 'No active job'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {jobStatus ? (
+                <div className="space-y-4">
+                  {/* Status Badge */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Status</span>
+                    <Badge className={getStatusColor(jobStatus.status)}>
+                      {jobStatus.status.toUpperCase()}
+                    </Badge>
+                  </div>
+
+                  {/* Progress */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Progress</span>
+                      <span className="font-medium">
+                        {jobStatus.progress.completed + jobStatus.progress.failed}/
+                        {jobStatus.progress.total}
+                      </span>
+                    </div>
+                    <Progress value={jobStatus.progress.percentComplete} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{jobStatus.progress.percentComplete}% complete</span>
+                      {jobStatus.timing.estimatedTimeRemainingMs > 0 && (
+                        <span>
+                          ~{formatDuration(jobStatus.timing.estimatedTimeRemainingMs)}{' '}
+                          remaining
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {jobStatus.progress.completed}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Completed</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {jobStatus.progress.pending}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Pending</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-red-600">
+                        {jobStatus.progress.failed}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Failed</div>
+                    </div>
+                  </div>
+
+                  {/* Duration */}
+                  {jobStatus.timing.durationMs > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Duration</span>
+                      <span className="font-medium">
+                        {formatDuration(jobStatus.timing.durationMs)}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Results */}
+                  {jobStatus.results.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Results</h4>
+                      <div className="max-h-[300px] space-y-2 overflow-y-auto">
+                        {jobStatus.results.map((result, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between rounded border p-2 text-sm"
+                          >
+                            <span className="truncate flex-1">{result.topic}</span>
+                            <Badge
+                              variant={
+                                result.status === 'completed'
+                                  ? 'default'
+                                  : result.status === 'failed'
+                                    ? 'destructive'
+                                    : 'secondary'
+                              }
+                            >
+                              {result.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex h-[300px] items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <Icons.fileText className="mx-auto h-12 w-12 opacity-20" />
+                    <p className="mt-2 text-sm">No active generation job</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
