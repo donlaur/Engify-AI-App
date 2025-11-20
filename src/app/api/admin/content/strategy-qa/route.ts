@@ -16,7 +16,7 @@ const StrategyQuestionSchema = z.object({
 
 export async function POST(request: NextRequest) {
   // RBAC: Admin only
-  const r = await RBACPresets.requireAdmin()(request);
+  const r = await RBACPresets.requireOrgAdmin()(request);
   if (r) return r;
 
   try {
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
 // GET: Get available models
 export async function GET(request: NextRequest) {
-  const r = await RBACPresets.requireAdmin()(request);
+  const r = await RBACPresets.requireOrgAdmin()(request);
   if (r) return r;
 
   try {
