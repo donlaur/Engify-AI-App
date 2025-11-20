@@ -11,13 +11,13 @@ const mockProgress: Record<string, any> = {};
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: { params: Promise<{ jobId: string }> }
 ) {
   const r = await RBACPresets.requireOrgAdmin()(request);
   if (r) return r;
 
   try {
-    const { jobId } = params;
+    const { jobId } = await params;
 
     // In production, fetch from Redis/job queue
     // For now, return mock progress

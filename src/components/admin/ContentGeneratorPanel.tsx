@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
 import { getAllContentTypes } from '@/lib/content/content-types';
+import { GenerationProgressModal } from './GenerationProgressModal';
 
 interface Topic {
   topic: string;
@@ -81,6 +82,10 @@ export function ContentGeneratorPanel() {
   const [selectedContent, setSelectedContent] = useState<any>(null);
   const [editingContent, setEditingContent] = useState<string>('');
   const [reviewFilter, setReviewFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'published'>('pending');
+  
+  // Progress modal state
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [progressJobId, setProgressJobId] = useState<string | null>(null);
   
   const contentTypes = getAllContentTypes();
   const selectedContentType = contentTypes.find(t => t.id === contentType);
@@ -1244,6 +1249,13 @@ export function ContentGeneratorPanel() {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* Generation Progress Modal */}
+      <GenerationProgressModal
+        isOpen={showProgressModal}
+        onClose={() => setShowProgressModal(false)}
+        jobId={progressJobId}
+      />
     </div>
   );
 }
