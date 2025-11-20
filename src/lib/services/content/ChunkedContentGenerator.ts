@@ -78,9 +78,9 @@ export class ChunkedContentGenerator {
   private costPerToken = 0.000002; // Approximate cost
 
   constructor(modelConfig?: { provider?: string; model?: string }) {
-    // Use OpenAI by default
+    // Use OpenAI by default with latest model (gpt-4o-mini deprecated Dec 2024)
     const provider = modelConfig?.provider || 'openai';
-    const model = modelConfig?.model || 'gpt-4o-mini';
+    const model = modelConfig?.model || 'gpt-4o-2024-11-20';
 
     switch (provider) {
       case 'anthropic':
@@ -99,6 +99,8 @@ export class ChunkedContentGenerator {
         this.model = new ChatOpenAI({
           modelName: model,
           temperature: 0.7,
+          timeout: 120000, // 2 minutes per section (was timing out at 45s)
+          maxRetries: 2,
         });
     }
   }

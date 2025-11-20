@@ -81,7 +81,7 @@ async function generateContent(params: {
     // Create chunked generator (no Redis needed)
     const generator = new ChunkedContentGenerator({
       provider: 'openai',
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o-2024-11-20', // Latest model (gpt-4o-mini deprecated Dec 2024)
     });
 
     // Generate content in sections
@@ -104,7 +104,7 @@ async function generateContent(params: {
       keywords: params.keywords,
       wordCount: result.metadata.totalWordCount,
       readingTime: Math.ceil(result.metadata.totalWordCount / 200),
-      model: 'gpt-4o-mini-chunked',
+      model: 'gpt-4o-2024-11-20-chunked',
       costUSD: result.metadata.costUSD,
       generationTimeMs: result.metadata.generationTimeMs,
       status: 'pending',

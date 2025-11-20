@@ -36,15 +36,25 @@ export class RedisMessageQueue implements IMessageQueue {
     private config: QueueConfig,
     redisClient?: Redis
   ) {
-    this.redis =
-      redisClient ||
-      new Redis({
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
+    // Use environment-based Redis configuration (production only)
+    if (redisClient) {
+      this.redis = redisClient;
+    } else if (process.env.UPSTASH_REDIS_REST_URL) {
+      // Upstash Redis (production)
+      this.redis = new Redis(process.env.UPSTASH_REDIS_REST_URL);
+    } else if (process.env.REDIS_HOST && process.env.REDIS_PORT) {
+      // Environment-configured Redis
+      this.redis = new Redis({
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
         db: parseInt(process.env.REDIS_DB || '0'),
         maxRetriesPerRequest: 3,
+        lazyConnect: true,
       });
+    } else {
+      throw new Error('Redis configuration missing. Set UPSTASH_REDIS_REST_URL or REDIS_HOST/REDIS_PORT environment variables.');
+    }
 
     this.setupErrorHandling();
   }
