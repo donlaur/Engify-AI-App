@@ -42,6 +42,9 @@ export function GenerationProgressModal({ isOpen, onClose, jobId }: GenerationPr
   useEffect(() => {
     if (!jobId || !isOpen) return;
 
+    // Reset logs when job changes
+    setLogs([]);
+
     // Poll for progress updates
     const interval = setInterval(async () => {
       try {
@@ -51,9 +54,9 @@ export function GenerationProgressModal({ isOpen, onClose, jobId }: GenerationPr
         if (data.success) {
           setProgress(data.progress);
           
-          // Add new logs
+          // Replace logs (don't append to prevent duplicates)
           if (data.logs) {
-            setLogs(prev => [...prev, ...data.logs]);
+            setLogs(data.logs);
           }
           
           // Stop polling if completed or failed
@@ -64,7 +67,7 @@ export function GenerationProgressModal({ isOpen, onClose, jobId }: GenerationPr
       } catch (error) {
         console.error('Error fetching progress:', error);
       }
-    }, 1000); // Poll every second
+    }, 2000); // Poll every 2 seconds (reduced frequency)
 
     return () => clearInterval(interval);
   }, [jobId, isOpen]);

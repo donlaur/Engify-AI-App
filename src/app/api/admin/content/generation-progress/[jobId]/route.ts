@@ -5,9 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { RBACPresets } from '@/lib/middleware/rbac';
+import { ContentQueueService } from '@/lib/services/ContentQueueService';
+import { generatedContentService } from '@/lib/services/GeneratedContentService';
 
-// Mock progress data - in production, this would come from Redis or a job queue
-const mockProgress: Record<string, any> = {};
+const queueService = new ContentQueueService();
 
 export async function GET(
   request: NextRequest,
@@ -19,35 +20,64 @@ export async function GET(
   try {
     const { jobId } = await params;
 
-    // In production, fetch from Redis/job queue
-    // For now, return mock progress
-    const progress = mockProgress[jobId] || {
-      jobId,
-      topic: 'Sample Article',
-      contentType: 'tutorial',
-      status: 'processing',
-      currentAgent: 'researcher',
-      steps: [
-        { agent: 'researcher', status: 'completed', output: 'Research complete' },
-        { agent: 'outliner', status: 'completed', output: 'Outline created' },
-        { agent: 'writer', status: 'active', output: 'Writing in progress...' },
-        { agent: 'editor', status: 'pending' },
-        { agent: 'seo', status: 'pending' },
-      ],
-      progress: 45,
-      wordCount: 1200,
-      costUSD: 0.023,
-    };
+    // Find queue item by generation job ID
+    const allItems = await queueService.getQueue({});
+    const queueItem = allItems.find(item => item.generationJobId === jobId);
 
-    const logs = [
-      '🔍 Researcher: Analyzing topic and gathering information...',
-      '✅ Researcher: Found 15 relevant sources',
-      '📋 Outliner: Creating content structure...',
-      '✅ Outliner: Generated 5-section outline',
-      '✍️ Writer: Beginning content generation...',
-      '📝 Writer: Section 1 complete (250 words)',
-      '📝 Writer: Section 2 in progress...',
-    ];
+    if (!queueItem) {
+      return NextResponse.json(
+        { success: false, error: 'Job not found' },
+        { status: 404 }
+      );
+    }
+
+    // Map queue status to progress
+    let status: 'queued' | 'processing' | 'completed' | 'failed' = 'processing';
+    let progressPercent = 50;
+    let logs: string[] = [];
+
+    if (queueItem.status === 'queued') {
+      status = 'queued';
+      progressPercent = 0;
+      logs = ['⏳ Waiting to start generation...'];
+    } else if (queueItem.status === 'generating') {
+      status = 'processing';
+      progressPercent = 50;
+      logs = [
+        '🚀 Generation started',
+        '✍️ Generating content sections...',
+        '📝 This may take 1-2 minutes',
+      ];
+    } else if (queueItem.status === 'completed') {
+      status = 'completed';
+      progressPercent = 100;
+      logs = [
+        '✅ Generation complete!',
+        '📄 Content saved to database',
+        '👉 Check the Review tab to view and edit',
+      ];
+    } else if (queueItem.status === 'failed') {
+      status = 'failed';
+      progressPercent = 0;
+      logs = [
+        '❌ Generation failed',
+        queueItem.generationError || 'Unknown error',
+      ];
+    }
+
+    const progress = {
+      jobId,
+      topic: queueItem.title,
+      contentType: queueItem.contentType,
+      status,
+      currentAgent: status === 'processing' ? 'writer' : undefined,
+      steps: [
+        { agent: 'writer', status: status === 'completed' ? 'completed' : status === 'processing' ? 'active' : 'pending' },
+      ],
+      progress: progressPercent,
+      wordCount: queueItem.targetWordCount,
+      costUSD: 0,
+    };
 
     return NextResponse.json({
       success: true,
