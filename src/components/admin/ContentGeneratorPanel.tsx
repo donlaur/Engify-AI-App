@@ -14,6 +14,7 @@ import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
 import { getAllContentTypes } from '@/lib/content/content-types';
 import { GenerationProgressModal } from './GenerationProgressModal';
+import { ContentPreview } from './ContentPreview';
 
 interface Topic {
   topic: string;
@@ -770,8 +771,8 @@ export function ContentGeneratorPanel() {
                 {/* Preview */}
                 <div className="space-y-2 pt-4 border-t">
                   <Label>Preview</Label>
-                  <div className="prose prose-sm max-w-none border rounded-lg p-4 bg-muted/30">
-                    <div dangerouslySetInnerHTML={{ __html: editingContent || selectedContent.content }} />
+                  <div className="border rounded-lg p-6 bg-white dark:bg-gray-900 max-h-[600px] overflow-y-auto">
+                    <ContentPreview content={editingContent || selectedContent.content} />
                   </div>
                 </div>
               </CardContent>
