@@ -5,9 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { RBACPresets } from '@/lib/middleware/rbac';
-import { ContentGeneratorFactory } from '@/lib/factories/ContentGeneratorFactory';
 import { generatedContentService } from '@/lib/services/GeneratedContentService';
 import { ContentQueueService } from '@/lib/services/ContentQueueService';
+import { ChunkedContentGenerator } from '@/lib/services/content/ChunkedContentGenerator';
 import { ObjectId } from 'mongodb';
 
 const queueService = new ContentQueueService();
@@ -75,41 +75,38 @@ async function generateContent(params: {
   targetWordCount: number;
   keywords: string[];
 }) {
-  const startTime = Date.now();
-  
   try {
     console.log(`[${params.jobId}] Starting generation for: ${params.title}`);
 
-    // Create generator
-    const generator = ContentGeneratorFactory.createGenerator('multi-agent', {
-      organizationId: 'system',
+    // Create chunked generator (no Redis needed)
+    const generator = new ChunkedContentGenerator({
+      provider: 'openai',
+      model: 'gpt-4o-mini',
     });
 
-    // Generate content
+    // Generate content in sections
     const result = await generator.generate({
       topic: params.title,
-      category: params.contentType,
+      contentType: params.contentType,
       targetWordCount: params.targetWordCount,
       keywords: params.keywords,
     });
 
-    const generationTime = Date.now() - startTime;
-
-    console.log(`[${params.jobId}] Generation complete: ${result.metadata.wordCount} words in ${generationTime}ms`);
+    console.log(`[${params.jobId}] Generation complete: ${result.metadata.totalWordCount} words in ${result.metadata.generationTimeMs}ms`);
 
     // Save to generated_content collection
     const savedContent = await generatedContentService.save({
       queueItemId: params.queueItemId,
       title: params.title,
-      content: result.content,
+      content: result.fullContent,
       contentType: params.contentType as any,
       description: `Generated content for: ${params.title}`,
       keywords: params.keywords,
-      wordCount: result.metadata.wordCount,
-      readingTime: Math.ceil(result.metadata.wordCount / 200),
-      model: 'multi-agent',
+      wordCount: result.metadata.totalWordCount,
+      readingTime: Math.ceil(result.metadata.totalWordCount / 200),
+      model: 'gpt-4o-mini-chunked',
       costUSD: result.metadata.costUSD,
-      generationTimeMs: generationTime,
+      generationTimeMs: result.metadata.generationTimeMs,
       status: 'pending',
       createdBy: 'system',
     });
