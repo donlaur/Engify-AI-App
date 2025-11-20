@@ -191,7 +191,13 @@ export class NewsAggregatorService {
           modelId: dbConfig.modelId,
           type: dbConfig.type,
           feedType: dbConfig.feedType || 'rss',
-          apiConfig: dbConfig.apiConfig,
+          apiConfig: dbConfig.apiConfig ? {
+            endpoint: dbConfig.apiConfig.endpoint,
+            headers: dbConfig.apiConfig.headers,
+            // Note: transform is stored as string in DB but used as function
+            // This would need to be evaluated/parsed if needed
+            transform: undefined, // TODO: Parse string to function if needed
+          } : undefined,
         };
 
         const result = await this.syncFeed(config);

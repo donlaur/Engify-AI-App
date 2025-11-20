@@ -10,7 +10,7 @@ import { withRBAC } from '@/lib/middleware/rbac';
 import { auth } from '@/lib/auth';
 import { auditLog } from '@/lib/logging/audit';
 import { FeedConfigRepository } from '@/lib/repositories/FeedConfigRepository';
-import { FeedConfigSchema, type FeedConfig } from '@/lib/db/schemas/feed-config';
+import { FeedConfigSchema } from '@/lib/db/schemas/feed-config';
 import { logger } from '@/lib/logging/logger';
 import { randomUUID } from 'crypto';
 import { z } from 'zod';

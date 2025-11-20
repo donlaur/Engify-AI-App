@@ -37,7 +37,6 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAdminData } from '@/hooks/admin/useAdminData';
 import { useAdminToast } from '@/hooks/admin/useAdminToast';
 import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
 import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
@@ -49,10 +48,11 @@ import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary
 import { formatAdminDate, truncateText } from '@/lib/admin/utils';
 import type { FeedConfig } from '@/lib/db/schemas/feed-config';
 
-interface FeedWithMetadata extends FeedConfig {
-  _id?: string;
+interface FeedWithMetadata extends Omit<FeedConfig, 'createdAt' | 'updatedAt' | 'lastSyncedAt'> {
+  _id: string;
   createdAt?: string;
   updatedAt?: string;
+  lastSyncedAt?: string;
 }
 
 export function FeedManagementPanel() {
@@ -168,7 +168,7 @@ export function FeedManagementPanel() {
         showError('Failed to update feed');
       }
     },
-    [refetch, showToast]
+    [refetch, showSuccess, showError]
   );
 
   const handleSyncAll = useCallback(async () => {
@@ -190,7 +190,7 @@ export function FeedManagementPanel() {
     } finally {
       setIsSyncing(false);
     }
-  }, [refetch, showToast]);
+  }, [refetch, showSuccess, showError]);
 
   const handleSyncFeed = useCallback(
     async (feed: FeedWithMetadata) => {
@@ -212,7 +212,7 @@ export function FeedManagementPanel() {
         setIsSyncing(false);
       }
     },
-    [refetch, showToast]
+    [refetch, showSuccess, showError]
   );
 
   const handleEdit = useCallback((feed: FeedWithMetadata) => {
@@ -242,7 +242,7 @@ export function FeedManagementPanel() {
         showError('Failed to delete feed');
       }
     },
-    [refetch, showToast]
+    [refetch, showSuccess, showError]
   );
 
   // Table columns (using AdminDataTable pattern)
@@ -430,7 +430,7 @@ export function FeedManagementPanel() {
                 data={paginatedFeeds}
                 columns={columns}
                 statusField="enabled"
-                onStatusToggle={(id, currentValue) => {
+                onStatusToggle={(id) => {
                   const feed = feeds.find((f) => f.id === id);
                   if (feed) handleToggleEnabled(feed);
                 }}
@@ -476,9 +476,11 @@ export function FeedManagementPanel() {
               />
                 <AdminPaginationControls
                   currentPage={page}
-                  totalItems={filteredFeeds.length}
+                  totalPages={Math.ceil(filteredFeeds.length / pageSize)}
+                  totalCount={filteredFeeds.length}
                   pageSize={pageSize}
                   onPageChange={setPage}
+                  itemName="feeds"
                 />
               </>
             )}
