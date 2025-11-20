@@ -929,9 +929,44 @@ export function ContentGeneratorPanel() {
                           {/* Show URL for approved/published content */}
                           {(item.status === 'approved' || item.status === 'published') && (
                             <div className="mt-2 flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">
-                                URL: /blog/{item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}
+                              <span className="text-xs text-muted-foreground font-mono">
+                                /blog/{item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}
                               </span>
+                              {item.status === 'approved' && (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  className="h-6 px-2 text-xs"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const response = await fetch(`/api/admin/content/generated?id=${item.id}&action=review`, {
+                                        method: 'PATCH',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ action: 'publish' }),
+                                      });
+
+                                      const data = await response.json();
+                                      if (data.success) {
+                                        toast({
+                                          title: 'Published',
+                                          description: `Live at ${data.url}`,
+                                        });
+                                        loadReviewContent();
+                                      }
+                                    } catch (error) {
+                                      toast({
+                                        title: 'Error',
+                                        description: 'Failed to publish',
+                                        variant: 'destructive',
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <Icons.globe className="h-3 w-3 mr-1" />
+                                  Publish Now
+                                </Button>
+                              )}
                               {item.status === 'published' && item.publishedUrl && (
                                 <Button
                                   size="sm"
@@ -949,7 +984,7 @@ export function ContentGeneratorPanel() {
                             </div>
                           )}
                         </div>
-                        <div className="flex flex-col gap-2 items-end">
+                        <div className="flex flex-col gap-2 items-end min-w-[100px]">
                           <Badge
                             variant={
                               item.status === 'published'
@@ -960,43 +995,44 @@ export function ContentGeneratorPanel() {
                                     ? 'destructive'
                                     : 'outline'
                             }
+                            className="w-full justify-center"
                           >
                             {item.status}
                           </Badge>
-                          {/* Quick action buttons */}
-                          {item.status === 'approved' && (
+                          {/* Quick action for pending items */}
+                          {item.status === 'pending' && (
                             <Button
                               size="sm"
-                              variant="outline"
-                              className="h-7 text-xs"
+                              variant="default"
+                              className="h-7 text-xs w-full"
                               onClick={async (e) => {
                                 e.stopPropagation();
                                 try {
                                   const response = await fetch(`/api/admin/content/generated?id=${item.id}&action=review`, {
                                     method: 'PATCH',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ action: 'publish' }),
+                                    body: JSON.stringify({ action: 'approve' }),
                                   });
 
                                   const data = await response.json();
                                   if (data.success) {
                                     toast({
-                                      title: 'Published',
-                                      description: `Live at ${data.url}`,
+                                      title: 'Approved',
+                                      description: 'Content ready to publish',
                                     });
                                     loadReviewContent();
                                   }
                                 } catch (error) {
                                   toast({
                                     title: 'Error',
-                                    description: 'Failed to publish',
+                                    description: 'Failed to approve',
                                     variant: 'destructive',
                                   });
                                 }
                               }}
                             >
-                              <Icons.globe className="h-3 w-3 mr-1" />
-                              Publish
+                              <Icons.checkCircle className="h-3 w-3 mr-1" />
+                              Approve
                             </Button>
                           )}
                         </div>
