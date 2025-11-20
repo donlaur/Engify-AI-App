@@ -17,7 +17,7 @@ const UpdateContentSchema = z.object({
 });
 
 const ReviewSchema = z.object({
-  action: z.enum(['approve', 'reject']),
+  action: z.enum(['approve', 'reject', 'publish']),
   notes: z.string().optional(),
 });
 
@@ -79,14 +79,40 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json();
 
-    // Review action (approve/reject)
+    // Review action (approve/reject/publish)
     if (action === 'review') {
       const validated = ReviewSchema.parse(body);
       
       if (validated.action === 'approve') {
         await generatedContentService.approve(id, 'admin', validated.notes);
-      } else {
+      } else if (validated.action === 'reject') {
         await generatedContentService.reject(id, 'admin', validated.notes || 'Rejected');
+      } else if (validated.action === 'publish') {
+        // Get content to generate URL
+        const content = await generatedContentService.getById(id);
+        if (!content) {
+          return NextResponse.json(
+            { success: false, error: 'Content not found' },
+            { status: 404 }
+          );
+        }
+        
+        // Generate slug if not exists
+        const slug = content.slug || content.title.toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+        
+        // Generate URL based on content type
+        const url = `/blog/${slug}`;
+        
+        // Mark as published
+        await generatedContentService.markPublished(id, url);
+        
+        return NextResponse.json({
+          success: true,
+          message: 'Content published',
+          url,
+        });
       }
 
       return NextResponse.json({

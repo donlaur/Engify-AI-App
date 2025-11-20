@@ -747,25 +747,71 @@ export function ContentGeneratorPanel() {
                     <Icons.save className="mr-2 h-4 w-4" />
                     Save Changes
                   </Button>
-                  <Button
-                    variant="default"
-                    onClick={() => handleReview(selectedContent.id, 'approve')}
-                  >
-                    <Icons.checkCircle className="mr-2 h-4 w-4" />
-                    Approve & Publish
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => {
-                      const notes = prompt('Rejection reason:');
-                      if (notes) {
-                        handleReview(selectedContent.id, 'reject', notes);
-                      }
-                    }}
-                  >
-                    <Icons.cancel className="mr-2 h-4 w-4" />
-                    Reject
-                  </Button>
+                  {selectedContent.status === 'pending' && (
+                    <>
+                      <Button
+                        variant="default"
+                        onClick={() => handleReview(selectedContent.id, 'approve')}
+                      >
+                        <Icons.checkCircle className="mr-2 h-4 w-4" />
+                        Approve
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          const notes = prompt('Rejection reason:');
+                          if (notes) {
+                            handleReview(selectedContent.id, 'reject', notes);
+                          }
+                        }}
+                      >
+                        <Icons.cancel className="mr-2 h-4 w-4" />
+                        Reject
+                      </Button>
+                    </>
+                  )}
+                  {selectedContent.status === 'approved' && (
+                    <Button
+                      variant="default"
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(`/api/admin/content/generated?id=${selectedContent.id}&action=review`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'publish' }),
+                          });
+
+                          const data = await response.json();
+                          if (data.success) {
+                            toast({
+                              title: 'Content Published',
+                              description: `Available at ${data.url}`,
+                            });
+                            loadReviewContent();
+                            setSelectedContent(null);
+                          }
+                        } catch (error) {
+                          toast({
+                            title: 'Error',
+                            description: 'Failed to publish content',
+                            variant: 'destructive',
+                          });
+                        }
+                      }}
+                    >
+                      <Icons.globe className="mr-2 h-4 w-4" />
+                      Publish to Site
+                    </Button>
+                  )}
+                  {selectedContent.status === 'published' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open(selectedContent.publishedUrl, '_blank')}
+                    >
+                      <Icons.externalLink className="mr-2 h-4 w-4" />
+                      View Published
+                    </Button>
+                  )}
                 </div>
 
                 {/* Preview */}
