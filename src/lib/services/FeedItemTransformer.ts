@@ -7,22 +7,12 @@
 
 import Parser from 'rss-parser';
 import { AIToolUpdate, AIToolUpdateSchema } from '@/lib/db/schemas/ai-tool-update';
+import { FeedConfig as SchemaFeedConfig } from '@/lib/db/schemas/feed-config';
 import { logger } from '@/lib/logging/logger';
 // Note: extractKeywords not used in transformer - feature extraction uses pattern matching
 
-export interface FeedConfig {
-  url: string;
-  source: AIToolUpdate['source'];
-  toolId?: string;
-  modelId?: string;
-  type: AIToolUpdate['type'];
-  feedType?: 'rss' | 'atom' | 'api';
-  apiConfig?: {
-    endpoint: string;
-    headers?: Record<string, string>;
-    transform?: (data: any) => Parser.Item[];
-  };
-}
+// Use schema FeedConfig type for consistency
+export type FeedConfig = Pick<SchemaFeedConfig, 'url' | 'source' | 'toolId' | 'modelId' | 'type' | 'feedType'>;
 
 /**
  * Feature extraction patterns

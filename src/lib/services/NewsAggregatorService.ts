@@ -13,8 +13,9 @@ import { logger } from '@/lib/logging/logger';
 import { FeedParserFactory } from '@/lib/factories/FeedParserFactory';
 import { AIToolUpdateRepository } from '@/lib/repositories/AIToolUpdateRepository';
 import { EntityMatcherService } from '@/lib/services/EntityMatcherService';
-import { FeedItemTransformer, type FeedConfig } from '@/lib/services/FeedItemTransformer';
+import { FeedItemTransformer } from '@/lib/services/FeedItemTransformer';
 import { FeedConfigRepository } from '@/lib/repositories/FeedConfigRepository';
+import { FeedConfig, FeedConfigSchema } from '@/lib/db/schemas/feed-config';
 import Parser from 'rss-parser';
 
 /**
@@ -48,7 +49,10 @@ export class NewsAggregatorService {
   /**
    * Fetch and parse a feed using the appropriate parser
    */
-  async fetchFeed(feedUrl: string, config?: FeedConfig): Promise<Parser.Output<Parser.Item> | null> {
+  async fetchFeed(
+    feedUrl: string,
+    config?: Pick<FeedConfig, 'url' | 'source' | 'type' | 'feedType' | 'toolId' | 'modelId' | 'apiConfig'>
+  ): Promise<Parser.Output<Parser.Item> | null> {
     try {
       logger.info('Fetching feed', { feedUrl, feedType: config?.feedType || 'rss' });
 
@@ -57,7 +61,9 @@ export class NewsAggregatorService {
       const parser = FeedParserFactory.create(feedType, {
         endpoint: config?.apiConfig?.endpoint,
         headers: config?.apiConfig?.headers,
-        transform: config?.apiConfig?.transform,
+        // Note: transform is stored as string in DB schema but FeedParserFactory expects function
+        // For now, we don't support transform functions from DB (would need eval/parsing)
+        transform: undefined,
       });
 
       return await parser.parse(feedUrl);
@@ -74,7 +80,7 @@ export class NewsAggregatorService {
    * Sync a single feed and store updates in database
    */
   async syncFeed(
-    config: FeedConfig
+    config: Pick<FeedConfig, 'url' | 'source' | 'type' | 'feedType' | 'toolId' | 'modelId' | 'apiConfig'>
   ): Promise<{ created: number; updated: number; errors: number; modelsTriggered: string[] }> {
     const feed = await this.fetchFeed(config.url, config);
     if (!feed || !feed.items) {
@@ -183,8 +189,8 @@ export class NewsAggregatorService {
 
     for (const dbConfig of feedConfigs) {
       try {
-        // Convert database config to FeedConfig format
-        const config: FeedConfig = {
+        // Convert database config to FeedConfig format for syncFeed
+        const config = {
           url: dbConfig.url,
           source: dbConfig.source,
           toolId: dbConfig.toolId,
@@ -194,9 +200,6 @@ export class NewsAggregatorService {
           apiConfig: dbConfig.apiConfig ? {
             endpoint: dbConfig.apiConfig.endpoint,
             headers: dbConfig.apiConfig.headers,
-            // Note: transform is stored as string in DB but used as function
-            // This would need to be evaluated/parsed if needed
-            transform: undefined, // TODO: Parse string to function if needed
           } : undefined,
         };
 
@@ -269,13 +272,14 @@ export class NewsAggregatorService {
    * Add a custom feed configuration (deprecated - use FeedConfigRepository directly)
    * @deprecated Use FeedConfigRepository.create() or POST /api/admin/news/feeds instead
    */
-  async addFeedConfig(config: FeedConfig & { id?: string }): Promise<void> {
+  async addFeedConfig(config: Omit<FeedConfig, 'id' | 'errorCount' | 'enabled' | 'createdAt' | 'updatedAt' | 'lastSyncedAt' | 'lastError'> & { id?: string }): Promise<void> {
     const { randomUUID } = await import('crypto');
-    const feedConfig = {
+    const feedConfig = FeedConfigSchema.parse({
       ...config,
       id: config.id || randomUUID(),
       enabled: true,
-    };
+      errorCount: 0,
+    });
     await this.feedConfigRepository.upsert(feedConfig);
   }
 }

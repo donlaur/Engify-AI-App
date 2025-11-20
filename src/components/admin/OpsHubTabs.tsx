@@ -18,6 +18,7 @@ import { UserManagementPanel } from './UserManagementPanel';
 import { SystemSettingsPanel } from './SystemSettingsPanel';
 import { DeadLetterQueuePanel } from './DeadLetterQueuePanel';
 import { FeedManagementPanel } from './FeedManagementPanel';
+import { NewsItemsPanel } from './NewsItemsPanel';
 
 export function OpsHubTabs() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -41,7 +42,7 @@ export function OpsHubTabs() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="grid w-full grid-cols-12 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-13 lg:w-auto lg:inline-grid">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <Icons.barChart className="h-4 w-4" />
             <span className="hidden sm:inline">Dashboard</span>
@@ -89,6 +90,10 @@ export function OpsHubTabs() {
           <TabsTrigger value="feeds" className="flex items-center gap-2">
             <Icons.newspaper className="h-4 w-4" />
             <span className="hidden sm:inline">Feeds</span>
+          </TabsTrigger>
+          <TabsTrigger value="news" className="flex items-center gap-2">
+            <Icons.newspaper className="h-4 w-4" />
+            <span className="hidden sm:inline">News</span>
           </TabsTrigger>
         </TabsList>
 
@@ -150,6 +155,11 @@ export function OpsHubTabs() {
         {/* Feeds Tab */}
         <TabsContent value="feeds" className="space-y-4">
           <FeedManagementPanel />
+        </TabsContent>
+
+        {/* News Items Tab */}
+        <TabsContent value="news" className="space-y-4">
+          <NewsItemsPanel />
         </TabsContent>
       </Tabs>
       </div>
