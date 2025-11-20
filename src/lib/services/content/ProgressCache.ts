@@ -3,7 +3,7 @@
  * Stores real-time progress updates in Redis/Upstash
  */
 
-import Redis from 'ioredis';
+import { Redis } from '@upstash/redis';
 
 export interface GenerationProgress {
   jobId: string;
@@ -25,19 +25,15 @@ export class ProgressCache {
   private redis: Redis;
 
   constructor() {
-    // Use Upstash Redis in production
-    if (process.env.UPSTASH_REDIS_REST_URL) {
-      this.redis = new Redis(process.env.UPSTASH_REDIS_REST_URL);
-    } else if (process.env.REDIS_HOST && process.env.REDIS_PORT) {
-      this.redis = new Redis({
-        host: process.env.REDIS_HOST,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: parseInt(process.env.REDIS_DB || '0'),
-      });
-    } else {
-      throw new Error('Redis configuration missing. Set UPSTASH_REDIS_REST_URL or REDIS_HOST/REDIS_PORT');
+    // Use Upstash Redis REST API (required for Vercel serverless)
+    if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+      throw new Error('Upstash Redis configuration missing. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN');
     }
+
+    this.redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
   }
 
   /**
@@ -134,7 +130,7 @@ export class ProgressCache {
    */
   async get(jobId: string): Promise<GenerationProgress | null> {
     const key = this.getKey(jobId);
-    const data = await this.redis.get(key);
+    const data = await this.redis.get<string>(key);
     
     if (!data) return null;
     
@@ -146,7 +142,7 @@ export class ProgressCache {
    */
   private async set(jobId: string, progress: GenerationProgress, ttlSeconds = 3600): Promise<void> {
     const key = this.getKey(jobId);
-    await this.redis.setex(key, ttlSeconds, JSON.stringify(progress));
+    await this.redis.set(key, JSON.stringify(progress), { ex: ttlSeconds });
   }
 
   /**
@@ -157,9 +153,9 @@ export class ProgressCache {
   }
 
   /**
-   * Close Redis connection
+   * Close Redis connection (no-op for Upstash REST client)
    */
   async close(): Promise<void> {
-    await this.redis.quit();
+    // Upstash REST client doesn't need explicit closing
   }
 }
