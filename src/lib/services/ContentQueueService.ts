@@ -97,6 +97,28 @@ export class ContentQueueService {
   }
 
   /**
+   * Update queue item status
+   */
+  async updateStatus(id: string, status: ContentQueueItem['status']): Promise<void> {
+    const collection = await this.getCollection();
+    await collection.updateOne(
+      { id },
+      { $set: { status, updatedAt: new Date() } }
+    );
+  }
+
+  /**
+   * Update queue item
+   */
+  async update(id: string, updates: Partial<ContentQueueItem>): Promise<void> {
+    const collection = await this.getCollection();
+    await collection.updateOne(
+      { id },
+      { $set: { ...updates, updatedAt: new Date() } }
+    );
+  }
+
+  /**
    * Get queue stats
    */
   async getQueueStats() {

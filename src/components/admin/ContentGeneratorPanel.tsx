@@ -72,7 +72,6 @@ export function ContentGeneratorPanel() {
   const [queueItems, setQueueItems] = useState<any[]>([]);
   const [queueStats, setQueueStats] = useState<any>(null);
   const [loadingQueue, setLoadingQueue] = useState(false);
-  const [selectedQueueItems, setSelectedQueueItems] = useState<Set<string>>(new Set());
   const [queueFilter, setQueueFilter] = useState<'all' | 'queued' | 'generating' | 'completed' | 'failed'>('queued');
   
   // Review state
@@ -498,21 +497,6 @@ export function ContentGeneratorPanel() {
                     <SelectItem value="failed">Failed</SelectItem>
                   </SelectContent>
                 </Select>
-                {selectedQueueItems.size > 0 && (
-                  <Button
-                    onClick={async () => {
-                      const items = queueItems.filter(item => selectedQueueItems.has(item.id));
-                      const topics = items.map(item => item.title).join('\n');
-                      setTopicsInput(topics);
-                      toast({
-                        title: 'Items added to generator',
-                        description: `${items.length} items ready to generate`,
-                      });
-                    }}
-                  >
-                    Generate Selected ({selectedQueueItems.size})
-                  </Button>
-                )}
               </div>
 
               {/* Queue Items */}
@@ -532,20 +516,6 @@ export function ContentGeneratorPanel() {
                       key={item.id}
                       className="flex items-start gap-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors"
                     >
-                      <input
-                        type="checkbox"
-                        checked={selectedQueueItems.has(item.id)}
-                        onChange={(e) => {
-                          const newSelected = new Set(selectedQueueItems);
-                          if (e.target.checked) {
-                            newSelected.add(item.id);
-                          } else {
-                            newSelected.delete(item.id);
-                          }
-                          setSelectedQueueItems(newSelected);
-                        }}
-                        className="mt-1"
-                      />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium text-sm truncate">{item.title}</h4>
@@ -569,19 +539,74 @@ export function ContentGeneratorPanel() {
                           )}
                         </div>
                       </div>
-                      <Badge
-                        variant={
-                          item.status === 'completed'
-                            ? 'default'
-                            : item.status === 'failed'
-                              ? 'destructive'
-                              : item.status === 'generating'
-                                ? 'secondary'
-                                : 'outline'
-                        }
-                      >
-                        {item.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant={
+                            item.status === 'completed'
+                              ? 'default'
+                              : item.status === 'failed'
+                                ? 'destructive'
+                                : item.status === 'generating'
+                                  ? 'secondary'
+                                  : 'outline'
+                          }
+                        >
+                          {item.status}
+                        </Badge>
+                        {item.status === 'queued' && (
+                          <Button
+                            size="sm"
+                            onClick={async () => {
+                              try {
+                                const response = await fetch('/api/admin/content/generate/single', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    queueItemId: item.id,
+                                    title: item.title,
+                                    contentType: item.contentType,
+                                    targetWordCount: item.targetWordCount,
+                                    keywords: item.keywords,
+                                  }),
+                                });
+                                
+                                const data = await response.json();
+                                if (data.success) {
+                                  toast({
+                                    title: 'Generation started',
+                                    description: item.title,
+                                  });
+                                  setProgressJobId(data.jobId);
+                                  setShowProgressModal(true);
+                                  loadQueue();
+                                } else {
+                                  toast({
+                                    title: 'Error',
+                                    description: data.error,
+                                    variant: 'destructive',
+                                  });
+                                }
+                              } catch (error) {
+                                toast({
+                                  title: 'Error',
+                                  description: 'Failed to start generation',
+                                  variant: 'destructive',
+                                });
+                              }
+                            }}
+                            disabled={item.status === 'generating'}
+                          >
+                            <Icons.sparkles className="mr-2 h-4 w-4" />
+                            Generate
+                          </Button>
+                        )}
+                        {item.status === 'generating' && (
+                          <Button size="sm" disabled>
+                            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                            Generating...
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}
