@@ -6,7 +6,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { ContentQueueService } from '@/lib/services/ContentQueueService';
-import { generatedContentService } from '@/lib/services/GeneratedContentService';
 
 const queueService = new ContentQueueService();
 
