@@ -12,7 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Icons } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
-import { getAllContentTypes, type ContentTypeConfig } from '@/lib/content/content-types';
+import { getAllContentTypes } from '@/lib/content/content-types';
 
 interface Topic {
   topic: string;
