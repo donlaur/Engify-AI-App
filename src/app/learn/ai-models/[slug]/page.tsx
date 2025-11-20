@@ -692,6 +692,14 @@ export default async function AIModelDetailPage({ params }: PageProps) {
                       </div>
                     </div>
                   )}
+                  {model.updatedAt && (
+                    <div>
+                      <div className="font-medium">Last Modified</div>
+                      <div className="text-muted-foreground">
+                        {new Date(model.updatedAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 

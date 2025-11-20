@@ -55,10 +55,13 @@ export default async function AIModelsHubPage() {
   const activeCount = models.filter((m) => m.status === 'active').length;
   const textModels = models.filter((m) => m.capabilities.includes('text')).length;
   const imageModels = models.filter((m) =>
-    m.capabilities.some((cap) => cap.includes('image'))
+    m.supportsVision ||
+    m.capabilities.some((cap) => cap.includes('image') || cap === 'vision' || cap.includes('vision')) ||
+    (m.modalities?.image && m.modalities.image !== 'not-supported')
   ).length;
   const videoModels = models.filter((m) =>
-    m.capabilities.some((cap) => cap.includes('video'))
+    m.capabilities.some((cap) => cap.includes('video') || cap === 'video-generation') ||
+    (m.modalities?.video && m.modalities.video !== 'not-supported')
   ).length;
 
   return (

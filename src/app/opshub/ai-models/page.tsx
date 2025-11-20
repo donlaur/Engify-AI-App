@@ -408,7 +408,15 @@ export default function AIModelsAdminPage() {
                     {model.lastVerified && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Icons.check className="h-3 w-3 text-green-500" />
-                        Verified: {new Date(model.lastVerified).toLocaleDateString()}
+                        Last Verified: {new Date(model.lastVerified).toLocaleDateString()}
+                      </div>
+                    )}
+                    
+                    {/* Last Modified */}
+                    {model.updatedAt && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Icons.clock className="h-3 w-3 text-blue-500" />
+                        Last Modified: {new Date(model.updatedAt).toLocaleDateString()}
                       </div>
                     )}
 
