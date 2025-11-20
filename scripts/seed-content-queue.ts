@@ -4,8 +4,11 @@
  * Populates the queue with 25 planned content items
  */
 
-import { getDb } from '../src/lib/db/mongodb';
-import { ObjectId } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
+import dotenv from 'dotenv';
+
+// Load env vars
+dotenv.config({ path: '.env.local' });
 
 const QUEUE_ITEMS = [
   // Batch 1: Pillar Pages
@@ -272,7 +275,16 @@ const QUEUE_ITEMS = [
 async function seedQueue() {
   console.log('🌱 Seeding content queue...\n');
 
-  const db = await getDb();
+  const mongoUri = process.env.MONGODB_URI;
+  if (!mongoUri) {
+    throw new Error('MONGODB_URI not found in environment');
+  }
+
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+  console.log('✅ Connected to MongoDB\n');
+
+  const db = client.db();
   const collection = db.collection('content_queue');
 
   // Clear existing queue
@@ -307,6 +319,8 @@ async function seedQueue() {
   });
 
   console.log('\n✨ Queue seeded successfully!');
+  
+  await client.close();
   process.exit(0);
 }
 
