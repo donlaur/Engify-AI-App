@@ -106,7 +106,7 @@ export function GenerationProgressModal({ isOpen, onClose, jobId }: GenerationPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Icons.sparkles className="h-5 w-5" />
@@ -163,9 +163,9 @@ export function GenerationProgressModal({ isOpen, onClose, jobId }: GenerationPr
           </div>
 
           {/* Live Logs */}
-          <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 flex flex-col min-h-[200px]">
             <h3 className="text-sm font-medium mb-2">Live Generation Log</h3>
-            <ScrollArea className="flex-1 border rounded-lg p-3 bg-muted/30">
+            <ScrollArea className="flex-1 border rounded-lg p-3 bg-muted/30 min-h-[200px]">
               <div className="space-y-1 font-mono text-xs">
                 {logs.length === 0 ? (
                   <div className="text-muted-foreground">Waiting for logs...</div>
@@ -182,9 +182,9 @@ export function GenerationProgressModal({ isOpen, onClose, jobId }: GenerationPr
 
           {/* Generated Content Preview */}
           {progress.generatedContent && (
-            <div className="space-y-2">
+            <div className="space-y-2 flex-shrink-0">
               <h3 className="text-sm font-medium">Content Preview</h3>
-              <ScrollArea className="h-40 border rounded-lg p-3 bg-muted/30">
+              <ScrollArea className="h-32 border rounded-lg p-3 bg-muted/30">
                 <div className="prose prose-sm max-w-none">
                   {progress.generatedContent.substring(0, 500)}...
                 </div>
