@@ -5,9 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { RBACPresets } from '@/lib/middleware/rbac';
-import { ContentQueueService } from '@/lib/services/ContentQueueService';
-
-const queueService = new ContentQueueService();
+import { ProgressCache } from '@/lib/services/content/ProgressCache';
 
 export async function GET(
   request: NextRequest,
@@ -19,69 +17,41 @@ export async function GET(
   try {
     const { jobId } = await params;
 
-    // Find queue item by generation job ID
-    const allItems = await queueService.getQueue({});
-    const queueItem = allItems.find(item => item.generationJobId === jobId);
+    // Get real-time progress from Redis
+    const progressCache = new ProgressCache();
+    const progress = await progressCache.get(jobId);
+    await progressCache.close();
 
-    if (!queueItem) {
+    if (!progress) {
       return NextResponse.json(
-        { success: false, error: 'Job not found' },
+        { success: false, error: 'Job not found or expired' },
         { status: 404 }
       );
     }
 
-    // Map queue status to progress
-    let status: 'queued' | 'processing' | 'completed' | 'failed' = 'processing';
-    let progressPercent = 50;
-    let logs: string[] = [];
-
-    if (queueItem.status === 'queued') {
-      status = 'queued';
-      progressPercent = 0;
-      logs = ['⏳ Waiting to start generation...'];
-    } else if (queueItem.status === 'generating') {
-      status = 'processing';
-      progressPercent = 50;
-      logs = [
-        '🚀 Generation started',
-        '✍️ Generating content sections...',
-        '📝 This may take 1-2 minutes',
-      ];
-    } else if (queueItem.status === 'completed') {
-      status = 'completed';
-      progressPercent = 100;
-      logs = [
-        '✅ Generation complete!',
-        '📄 Content saved to database',
-        '👉 Check the Review tab to view and edit',
-      ];
-    } else if (queueItem.status === 'failed') {
-      status = 'failed';
-      progressPercent = 0;
-      logs = [
-        '❌ Generation failed',
-        queueItem.generationError || 'Unknown error',
-      ];
-    }
-
-    const progress = {
-      jobId,
-      topic: queueItem.title,
-      contentType: queueItem.contentType,
-      status,
-      currentAgent: status === 'processing' ? 'writer' : undefined,
+    // Format for frontend
+    const formattedProgress = {
+      jobId: progress.jobId,
+      topic: progress.topic,
+      contentType: progress.contentType,
+      status: progress.status,
+      currentAgent: progress.currentSection ? 'writer' : undefined,
       steps: [
-        { agent: 'writer', status: status === 'completed' ? 'completed' : status === 'processing' ? 'active' : 'pending' },
+        {
+          agent: 'writer',
+          status: progress.status === 'completed' ? 'completed' : progress.status === 'processing' ? 'active' : 'pending',
+          output: progress.currentSection,
+        },
       ],
-      progress: progressPercent,
-      wordCount: queueItem.targetWordCount,
-      costUSD: 0,
+      progress: progress.progress,
+      wordCount: progress.wordCount,
+      costUSD: progress.costUSD,
     };
 
     return NextResponse.json({
       success: true,
-      progress,
-      logs,
+      progress: formattedProgress,
+      logs: progress.logs,
     });
   } catch (error) {
     console.error('Error fetching generation progress:', error);

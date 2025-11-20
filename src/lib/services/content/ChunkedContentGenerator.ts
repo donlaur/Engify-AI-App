@@ -76,8 +76,12 @@ const DEFAULT_SECTIONS: Record<string, ContentSection[]> = {
 export class ChunkedContentGenerator {
   private model: ChatOpenAI | ChatAnthropic | ChatGoogleGenerativeAI;
   private costPerToken = 0.000002; // Approximate cost
+  private jobId?: string;
+  private progressCache?: any; // ProgressCache instance
 
-  constructor(modelConfig?: { provider?: string; model?: string }) {
+  constructor(modelConfig?: { provider?: string; model?: string; jobId?: string; progressCache?: any }) {
+    this.jobId = modelConfig?.jobId;
+    this.progressCache = modelConfig?.progressCache;
     // Use OpenAI by default with latest model (gpt-4o-mini deprecated Dec 2024)
     const provider = modelConfig?.provider || 'openai';
     const model = modelConfig?.model || 'gpt-4o-2024-11-20';
@@ -116,6 +120,16 @@ export class ChunkedContentGenerator {
       DEFAULT_SECTIONS[params.contentType] || 
       DEFAULT_SECTIONS.article;
 
+    // Initialize progress tracking
+    if (this.jobId && this.progressCache) {
+      await this.progressCache.init(
+        this.jobId,
+        params.topic,
+        params.contentType,
+        sections.length
+      );
+    }
+
     const generatedSections: Array<{
       title: string;
       content: string;
@@ -128,6 +142,11 @@ export class ChunkedContentGenerator {
     for (const section of sections) {
       console.log(`Generating section: ${section.title}`);
       
+      // Update progress: section started
+      if (this.jobId && this.progressCache) {
+        await this.progressCache.startSection(this.jobId, section.title);
+      }
+      
       const sectionPrompt = this.buildSectionPrompt(
         params.topic,
         section,
@@ -139,7 +158,9 @@ export class ChunkedContentGenerator {
       const wordCount = content.split(/\s+/).length;
 
       // Estimate tokens (rough: 1 token ≈ 0.75 words)
-      totalTokens += Math.ceil(wordCount / 0.75);
+      const sectionTokens = Math.ceil(wordCount / 0.75);
+      totalTokens += sectionTokens;
+      const sectionCost = sectionTokens * this.costPerToken;
 
       generatedSections.push({
         title: section.title,
@@ -148,6 +169,16 @@ export class ChunkedContentGenerator {
       });
 
       console.log(`✓ ${section.title}: ${wordCount} words`);
+      
+      // Update progress: section completed
+      if (this.jobId && this.progressCache) {
+        await this.progressCache.completeSection(
+          this.jobId,
+          section.title,
+          wordCount,
+          sectionCost
+        );
+      }
     }
 
     // Combine sections into full content

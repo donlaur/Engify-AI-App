@@ -8,6 +8,7 @@ import { RBACPresets } from '@/lib/middleware/rbac';
 import { generatedContentService } from '@/lib/services/GeneratedContentService';
 import { ContentQueueService } from '@/lib/services/ContentQueueService';
 import { ChunkedContentGenerator } from '@/lib/services/content/ChunkedContentGenerator';
+import { ProgressCache } from '@/lib/services/content/ProgressCache';
 import { ObjectId } from 'mongodb';
 
 const queueService = new ContentQueueService();
@@ -75,13 +76,17 @@ async function generateContent(params: {
   targetWordCount: number;
   keywords: string[];
 }) {
+  const progressCache = new ProgressCache();
+  
   try {
     console.log(`[${params.jobId}] Starting generation for: ${params.title}`);
 
-    // Create chunked generator (no Redis needed)
+    // Create chunked generator with progress tracking
     const generator = new ChunkedContentGenerator({
       provider: 'openai',
       model: 'gpt-4o-2024-11-20', // Latest model (gpt-4o-mini deprecated Dec 2024)
+      jobId: params.jobId,
+      progressCache,
     });
 
     // Generate content in sections
@@ -123,11 +128,21 @@ async function generateContent(params: {
 
     console.log(`[${params.jobId}] Queue item updated`);
 
+    // Mark progress as complete
+    await progressCache.complete(params.jobId);
+    await progressCache.close();
+
     return savedContent;
   } catch (error) {
     console.error(`[${params.jobId}] Generation failed:`, error);
     
-    // Update queue item to failed
+    // Mark progress as failed
+    await progressCache.fail(
+      params.jobId,
+      error instanceof Error ? error.message : 'Unknown error'
+    );
+    await progressCache.close();
+    
     await queueService.updateStatus(params.queueItemId, 'failed');
     await queueService.update(params.queueItemId, {
       generationError: error instanceof Error ? error.message : 'Unknown error',
