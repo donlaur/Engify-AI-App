@@ -106,13 +106,6 @@ export function DashboardOverviewPanel() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Header */}
-      <div>
-        <h2 className="text-2xl font-bold">Dashboard Overview</h2>
-        <p className="text-sm text-muted-foreground">
-          Welcome to the OpsHub admin dashboard. Manage all aspects of your platform from here.
-        </p>
-      </div>
 
       {/* Error Display */}
       {error && (
