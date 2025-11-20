@@ -58,7 +58,7 @@ export class ContentStrategyQA {
       
       case 'google':
         return new ChatGoogleGenerativeAI({
-          modelName: model.id,
+          model: model.id,
           temperature: 0.7,
         });
       
