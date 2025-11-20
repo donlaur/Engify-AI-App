@@ -130,11 +130,11 @@ export class ProgressCache {
    */
   async get(jobId: string): Promise<GenerationProgress | null> {
     const key = this.getKey(jobId);
-    const data = await this.redis.get<string>(key);
+    const data = await this.redis.get<GenerationProgress>(key);
     
     if (!data) return null;
     
-    return JSON.parse(data);
+    return data; // Upstash auto-deserializes JSON
   }
 
   /**
