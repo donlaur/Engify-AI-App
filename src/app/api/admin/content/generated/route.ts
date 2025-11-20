@@ -105,8 +105,8 @@ export async function PATCH(request: NextRequest) {
         // Generate URL based on content type
         const url = `/blog/${slug}`;
         
-        // Mark as published
-        await generatedContentService.markPublished(id, url);
+        // Mark as published with slug
+        await generatedContentService.markPublished(id, url, slug);
         
         return NextResponse.json({
           success: true,

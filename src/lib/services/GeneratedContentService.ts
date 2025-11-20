@@ -111,7 +111,7 @@ export class GeneratedContentService {
   /**
    * Mark as published
    */
-  async markPublished(id: string, url: string): Promise<void> {
+  async markPublished(id: string, url: string, slug: string): Promise<void> {
     const collection = await this.getCollection();
     await collection.updateOne(
       { id },
@@ -119,6 +119,7 @@ export class GeneratedContentService {
         $set: { 
           status: 'published',
           publishedUrl: url,
+          slug,
           publishedAt: new Date(),
           updatedAt: new Date(),
         } 
