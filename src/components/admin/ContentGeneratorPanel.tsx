@@ -74,6 +74,14 @@ export function ContentGeneratorPanel() {
   const [selectedQueueItems, setSelectedQueueItems] = useState<Set<string>>(new Set());
   const [queueFilter, setQueueFilter] = useState<'all' | 'queued' | 'generating' | 'completed' | 'failed'>('queued');
   
+  // Review state
+  const [generatedContent, setGeneratedContent] = useState<any[]>([]);
+  const [reviewStats, setReviewStats] = useState<any>(null);
+  const [loadingReview, setLoadingReview] = useState(false);
+  const [selectedContent, setSelectedContent] = useState<any>(null);
+  const [editingContent, setEditingContent] = useState<string>('');
+  const [reviewFilter, setReviewFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'published'>('pending');
+  
   const contentTypes = getAllContentTypes();
   const selectedContentType = contentTypes.find(t => t.id === contentType);
 
@@ -123,6 +131,89 @@ export function ContentGeneratorPanel() {
   useEffect(() => {
     loadQueue();
   }, [queueFilter]);
+
+  // Load generated content for review
+  const loadReviewContent = async () => {
+    setLoadingReview(true);
+    try {
+      const statusParam = reviewFilter === 'all' ? '' : `?status=${reviewFilter}`;
+      const [itemsRes, statsRes] = await Promise.all([
+        fetch(`/api/admin/content/generated${statusParam}`),
+        fetch('/api/admin/content/generated?stats=true'),
+      ]);
+      
+      const itemsData = await itemsRes.json();
+      const statsData = await statsRes.json();
+      
+      if (itemsData.success) {
+        setGeneratedContent(itemsData.items);
+      }
+      if (statsData.success) {
+        setReviewStats(statsData.stats);
+      }
+    } catch (error) {
+      console.error('Error loading review content:', error);
+    } finally {
+      setLoadingReview(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReviewContent();
+  }, [reviewFilter]);
+
+  // Handle content review actions
+  const handleReview = async (id: string, action: 'approve' | 'reject', notes?: string) => {
+    try {
+      const response = await fetch(`/api/admin/content/generated?id=${id}&action=review`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, notes }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast({
+          title: `Content ${action}d`,
+          description: `Content has been ${action}d successfully`,
+        });
+        loadReviewContent();
+        setSelectedContent(null);
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: `Failed to ${action} content`,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Handle content update
+  const handleUpdateContent = async (id: string, updates: any) => {
+    try {
+      const response = await fetch(`/api/admin/content/generated?id=${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast({
+          title: 'Content updated',
+          description: 'Changes saved successfully',
+        });
+        loadReviewContent();
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update content',
+        variant: 'destructive',
+      });
+    }
+  };
 
   // Poll for job status
   useEffect(() => {
@@ -333,6 +424,7 @@ export function ContentGeneratorPanel() {
       <Tabs defaultValue="queue" className="space-y-6">
         <TabsList>
           <TabsTrigger value="queue">Queue ({queueStats?.total || 0})</TabsTrigger>
+          <TabsTrigger value="review">Review ({reviewStats?.byStatus?.pending || 0})</TabsTrigger>
           <TabsTrigger value="strategy">Content Strategy</TabsTrigger>
           <TabsTrigger value="generate">Generate Content</TabsTrigger>
           <TabsTrigger value="status">Job Status</TabsTrigger>
@@ -487,6 +579,233 @@ export function ContentGeneratorPanel() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Review Tab */}
+        <TabsContent value="review">
+          {selectedContent ? (
+            // Content Editor View
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>{selectedContent.title}</CardTitle>
+                    <CardDescription>
+                      {selectedContent.wordCount} words • {selectedContent.contentType}
+                    </CardDescription>
+                  </div>
+                  <Button variant="outline" onClick={() => setSelectedContent(null)}>
+                    <Icons.arrowLeft className="mr-2 h-4 w-4" />
+                    Back to List
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Content Editor */}
+                <div className="space-y-2">
+                  <Label>Content (Markdown)</Label>
+                  <Textarea
+                    value={editingContent || selectedContent.content}
+                    onChange={(e) => setEditingContent(e.target.value)}
+                    rows={20}
+                    className="font-mono text-sm"
+                  />
+                </div>
+
+                {/* Metadata */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Title</Label>
+                    <Input
+                      value={selectedContent.title}
+                      onChange={(e) => setSelectedContent({...selectedContent, title: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Slug</Label>
+                    <Input
+                      value={selectedContent.slug || ''}
+                      onChange={(e) => setSelectedContent({...selectedContent, slug: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Textarea
+                    value={selectedContent.description || ''}
+                    onChange={(e) => setSelectedContent({...selectedContent, description: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 pt-4 border-t">
+                  <Button
+                    onClick={() => {
+                      handleUpdateContent(selectedContent.id, {
+                        title: selectedContent.title,
+                        content: editingContent || selectedContent.content,
+                        description: selectedContent.description,
+                        slug: selectedContent.slug,
+                      });
+                    }}
+                  >
+                    <Icons.save className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </Button>
+                  <Button
+                    variant="default"
+                    onClick={() => handleReview(selectedContent.id, 'approve')}
+                  >
+                    <Icons.checkCircle className="mr-2 h-4 w-4" />
+                    Approve & Publish
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      const notes = prompt('Rejection reason:');
+                      if (notes) {
+                        handleReview(selectedContent.id, 'reject', notes);
+                      }
+                    }}
+                  >
+                    <Icons.cancel className="mr-2 h-4 w-4" />
+                    Reject
+                  </Button>
+                </div>
+
+                {/* Preview */}
+                <div className="space-y-2 pt-4 border-t">
+                  <Label>Preview</Label>
+                  <div className="prose prose-sm max-w-none border rounded-lg p-4 bg-muted/30">
+                    <div dangerouslySetInnerHTML={{ __html: editingContent || selectedContent.content }} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            // Content List View
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Review Generated Content</CardTitle>
+                    <CardDescription>
+                      {reviewStats?.total || 0} items awaiting review
+                    </CardDescription>
+                  </div>
+                  <Button onClick={loadReviewContent} disabled={loadingReview}>
+                    {loadingReview ? (
+                      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Icons.refresh className="mr-2 h-4 w-4" />
+                    )}
+                    Refresh
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Stats */}
+                {reviewStats && (
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="rounded-lg border p-3">
+                      <div className="text-2xl font-bold">{reviewStats.byStatus?.pending || 0}</div>
+                      <div className="text-xs text-muted-foreground">Pending Review</div>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <div className="text-2xl font-bold text-green-600">{reviewStats.byStatus?.approved || 0}</div>
+                      <div className="text-xs text-muted-foreground">Approved</div>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <div className="text-2xl font-bold text-blue-600">{reviewStats.byStatus?.published || 0}</div>
+                      <div className="text-xs text-muted-foreground">Published</div>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <div className="text-2xl font-bold text-red-600">{reviewStats.byStatus?.rejected || 0}</div>
+                      <div className="text-xs text-muted-foreground">Rejected</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Filter */}
+                <div className="flex items-center gap-2">
+                  <Label>Filter:</Label>
+                  <Select value={reviewFilter} onValueChange={(v: any) => setReviewFilter(v)}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Items</SelectItem>
+                      <SelectItem value="pending">Pending Review</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Content List */}
+                <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                  {loadingReview ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Icons.spinner className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : generatedContent.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <Icons.inbox className="h-12 w-12 mb-2 opacity-20" />
+                      <p>No content to review</p>
+                    </div>
+                  ) : (
+                    generatedContent.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-start gap-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors cursor-pointer"
+                        onClick={() => {
+                          setSelectedContent(item);
+                          setEditingContent(item.content);
+                        }}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-sm truncate">{item.title}</h4>
+                            <Badge variant="outline">{item.contentType}</Badge>
+                          </div>
+                          {item.description && (
+                            <p className="text-xs text-muted-foreground mb-2">{item.description}</p>
+                          )}
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span>{item.wordCount} words</span>
+                            <span>•</span>
+                            <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                            {item.costUSD && (
+                              <>
+                                <span>•</span>
+                                <span>${item.costUSD.toFixed(3)}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <Badge
+                          variant={
+                            item.status === 'published'
+                              ? 'default'
+                              : item.status === 'approved'
+                                ? 'secondary'
+                                : item.status === 'rejected'
+                                  ? 'destructive'
+                                  : 'outline'
+                          }
+                        >
+                          {item.status}
+                        </Badge>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* AI Strategy Tab */}
