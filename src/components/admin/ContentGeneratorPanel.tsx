@@ -67,6 +67,13 @@ export function ContentGeneratorPanel() {
   const [availableModels, setAvailableModels] = useState<any[]>([]);
   const [selectedModel, setSelectedModel] = useState('');
   
+  // Queue state
+  const [queueItems, setQueueItems] = useState<any[]>([]);
+  const [queueStats, setQueueStats] = useState<any>(null);
+  const [loadingQueue, setLoadingQueue] = useState(false);
+  const [selectedQueueItems, setSelectedQueueItems] = useState<Set<string>>(new Set());
+  const [queueFilter, setQueueFilter] = useState<'all' | 'queued' | 'generating' | 'completed' | 'failed'>('queued');
+  
   const contentTypes = getAllContentTypes();
   const selectedContentType = contentTypes.find(t => t.id === contentType);
 
@@ -86,6 +93,36 @@ export function ContentGeneratorPanel() {
     }
     loadModels();
   }, []);
+
+  // Load queue
+  const loadQueue = async () => {
+    setLoadingQueue(true);
+    try {
+      const statusParam = queueFilter === 'all' ? '' : `?status=${queueFilter}`;
+      const [itemsRes, statsRes] = await Promise.all([
+        fetch(`/api/admin/content/queue${statusParam}`),
+        fetch('/api/admin/content/queue?stats=true'),
+      ]);
+      
+      const itemsData = await itemsRes.json();
+      const statsData = await statsRes.json();
+      
+      if (itemsData.success) {
+        setQueueItems(itemsData.items);
+      }
+      if (statsData.success) {
+        setQueueStats(statsData.stats);
+      }
+    } catch (error) {
+      console.error('Error loading queue:', error);
+    } finally {
+      setLoadingQueue(false);
+    }
+  };
+
+  useEffect(() => {
+    loadQueue();
+  }, [queueFilter]);
 
   // Poll for job status
   useEffect(() => {
@@ -293,12 +330,164 @@ export function ContentGeneratorPanel() {
         </p>
       </div>
 
-      <Tabs defaultValue="generate" className="space-y-6">
+      <Tabs defaultValue="queue" className="space-y-6">
         <TabsList>
+          <TabsTrigger value="queue">Queue ({queueStats?.total || 0})</TabsTrigger>
           <TabsTrigger value="strategy">Content Strategy</TabsTrigger>
           <TabsTrigger value="generate">Generate Content</TabsTrigger>
           <TabsTrigger value="status">Job Status</TabsTrigger>
         </TabsList>
+
+        {/* Queue Tab */}
+        <TabsContent value="queue">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Content Queue</CardTitle>
+                  <CardDescription>
+                    {queueStats?.total || 0} items ready to generate
+                  </CardDescription>
+                </div>
+                <Button onClick={loadQueue} disabled={loadingQueue}>
+                  {loadingQueue ? (
+                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Icons.refresh className="mr-2 h-4 w-4" />
+                  )}
+                  Refresh
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Stats */}
+              {queueStats && (
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="rounded-lg border p-3">
+                    <div className="text-2xl font-bold">{queueStats.byStatus?.queued || 0}</div>
+                    <div className="text-xs text-muted-foreground">Queued</div>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <div className="text-2xl font-bold">{queueStats.byStatus?.generating || 0}</div>
+                    <div className="text-xs text-muted-foreground">Generating</div>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <div className="text-2xl font-bold text-green-600">{queueStats.byStatus?.completed || 0}</div>
+                    <div className="text-xs text-muted-foreground">Completed</div>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <div className="text-2xl font-bold text-red-600">{queueStats.byStatus?.failed || 0}</div>
+                    <div className="text-xs text-muted-foreground">Failed</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Filter */}
+              <div className="flex items-center gap-2">
+                <Label>Filter:</Label>
+                <Select value={queueFilter} onValueChange={(v: any) => setQueueFilter(v)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Items</SelectItem>
+                    <SelectItem value="queued">Queued Only</SelectItem>
+                    <SelectItem value="generating">Generating</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+                {selectedQueueItems.size > 0 && (
+                  <Button
+                    onClick={async () => {
+                      const items = queueItems.filter(item => selectedQueueItems.has(item.id));
+                      const topics = items.map(item => item.title).join('\n');
+                      setTopicsInput(topics);
+                      toast({
+                        title: 'Items added to generator',
+                        description: `${items.length} items ready to generate`,
+                      });
+                    }}
+                  >
+                    Generate Selected ({selectedQueueItems.size})
+                  </Button>
+                )}
+              </div>
+
+              {/* Queue Items */}
+              <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                {loadingQueue ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Icons.spinner className="h-8 w-8 animate-spin" />
+                  </div>
+                ) : queueItems.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                    <Icons.inbox className="h-12 w-12 mb-2 opacity-20" />
+                    <p>No items in queue</p>
+                  </div>
+                ) : (
+                  queueItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-start gap-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedQueueItems.has(item.id)}
+                        onChange={(e) => {
+                          const newSelected = new Set(selectedQueueItems);
+                          if (e.target.checked) {
+                            newSelected.add(item.id);
+                          } else {
+                            newSelected.delete(item.id);
+                          }
+                          setSelectedQueueItems(newSelected);
+                        }}
+                        className="mt-1"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium text-sm truncate">{item.title}</h4>
+                          <Badge variant={item.priority === 'high' ? 'destructive' : 'secondary'}>
+                            {item.priority}
+                          </Badge>
+                          <Badge variant="outline">{item.contentType}</Badge>
+                        </div>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mb-2">{item.description}</p>
+                        )}
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <span>{item.targetWordCount} words</span>
+                          <span>•</span>
+                          <span>{item.keywords?.length || 0} keywords</span>
+                          {item.batch && (
+                            <>
+                              <span>•</span>
+                              <span className="font-mono">{item.batch}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <Badge
+                        variant={
+                          item.status === 'completed'
+                            ? 'default'
+                            : item.status === 'failed'
+                              ? 'destructive'
+                              : item.status === 'generating'
+                                ? 'secondary'
+                                : 'outline'
+                        }
+                      >
+                        {item.status}
+                      </Badge>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* AI Strategy Tab */}
         <TabsContent value="strategy">
