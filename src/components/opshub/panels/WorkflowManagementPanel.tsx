@@ -96,6 +96,8 @@ import { calculateWorkflowStats, calculateCategoryStats } from './workflows/work
  * Provides a complete CRUD interface for workflow management.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function WorkflowManagementPanel
  */
 export function WorkflowManagementPanel() {
   const [searchInput, setSearchInput] = useState('');

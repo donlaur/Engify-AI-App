@@ -79,6 +79,8 @@ interface DLQStats {
  * Provides interface for DLQ troubleshooting and recovery.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function DeadLetterQueuePanel
  */
 export function DeadLetterQueuePanel() {
   const [messages, setMessages] = useState<DLQMessage[]>([]);

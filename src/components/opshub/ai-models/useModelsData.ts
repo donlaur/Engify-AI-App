@@ -40,6 +40,8 @@ interface ModelDisplay extends AIModel {
  * Used in AI model management panels to fetch and display model data.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function useModelsData
  */
 export function useModelsData() {
   const [models, setModels] = useState<ModelDisplay[]>([]);

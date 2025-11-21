@@ -90,6 +90,8 @@ interface Pattern {
  * Provides a complete interface for pattern management.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function PatternManagementPanel
  */
 export function PatternManagementPanel() {
   // Phase 1: Use useAdminData hook for data fetching and pagination

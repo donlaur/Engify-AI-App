@@ -50,6 +50,8 @@ interface AuditLogViewerProps {
  * Provides interface for security and compliance auditing.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function AuditLogViewer
  */
 export function AuditLogViewer({ initialLogs = [] }: AuditLogViewerProps) {
   const [logs, setLogs] = useState<AuditLog[]>(initialLogs);

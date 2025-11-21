@@ -107,6 +107,8 @@ function getTabComponent(tabId: string): React.ComponentType {
  * Implements category filtering and automatic tab switching when filters change.
  * 
  * @returns JSX.Element - The complete OpsHub admin center UI
+ * 
+ * @function OpsHubTabs
  */
 export function OpsHubTabs() {
   // Current active tab ID (e.g., 'dashboard', 'content', 'workflows')

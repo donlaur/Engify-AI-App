@@ -93,6 +93,8 @@ interface RecommendationWithMeta extends Recommendation {
  * Provides a complete interface for recommendation management.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function RecommendationManagementPanel
  */
 export function RecommendationManagementPanel() {
   // Local filters (client-side filtering)

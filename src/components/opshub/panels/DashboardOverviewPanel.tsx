@@ -54,6 +54,8 @@ interface RecentActivity {
  * Provides an overview of platform health and activity.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function DashboardOverviewPanel
  */
 export function DashboardOverviewPanel() {
   const [stats, setStats] = useState<DashboardStats>({

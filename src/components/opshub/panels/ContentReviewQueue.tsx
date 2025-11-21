@@ -50,6 +50,8 @@ interface ContentReviewQueueProps {
  * Provides interface for content moderation and approval.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function ContentReviewQueue
  */
 export function ContentReviewQueue({
   initialItems = [],

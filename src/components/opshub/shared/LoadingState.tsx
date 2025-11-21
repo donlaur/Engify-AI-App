@@ -27,6 +27,8 @@ interface LoadingStateProps {
  * @usage
  * Used when data is being fetched in admin panels.
  * Provides consistent loading experience across the OpsHub area.
+ * 
+ * @function LoadingState
  */
 export function LoadingState({ message = 'Loading...' }: LoadingStateProps) {
   return (

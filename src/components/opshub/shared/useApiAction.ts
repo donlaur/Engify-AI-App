@@ -64,6 +64,8 @@ interface ApiActionOptions<T> {
  * Reduces boilerplate and ensures consistent error handling and user feedback.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function useApiAction
  */
 export function useApiAction() {
   const [loading, setLoading] = useState(false);

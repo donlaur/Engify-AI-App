@@ -76,6 +76,8 @@ interface GenerationProgressModalProps {
  * Provides real-time feedback during content generation.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function GenerationProgressModal
  */
 export function GenerationProgressModal({ isOpen, onClose, jobId, onComplete }: GenerationProgressModalProps & { onComplete?: () => void }) {
   const [progress, setProgress] = useState<GenerationProgress | null>(null);

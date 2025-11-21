@@ -21,6 +21,8 @@ export type FilterType = 'all' | 'active' | 'deprecated';
  * const activeTools = filterTools(allTools, 'active');
  * const deprecatedTools = filterTools(allTools, 'deprecated');
  * ```
+ * 
+ * @function filterTools
  */
 export function filterTools(tools: ToolDisplay[], filter: FilterType): ToolDisplay[] {
   switch (filter) {
@@ -49,6 +51,8 @@ export function filterTools(tools: ToolDisplay[], filter: FilterType): ToolDispl
  * const grouped = groupToolsByCategory(tools);
  * // Result: { 'code': [...], 'text': [...], 'image': [...] }
  * ```
+ * 
+ * @function groupToolsByCategory
  */
 export function groupToolsByCategory(tools: ToolDisplay[]): Record<string, ToolDisplay[]> {
   return tools.reduce(

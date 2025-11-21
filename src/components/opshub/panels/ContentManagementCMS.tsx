@@ -87,6 +87,8 @@ interface ContentItem {
  * Provides a complete interface for content management.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function ContentManagementCMS
  */
 export function ContentManagementCMS() {
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);

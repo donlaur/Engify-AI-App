@@ -83,6 +83,8 @@ interface FeedWithMetadata extends Omit<FeedConfig, 'createdAt' | 'updatedAt' | 
  * Provides interface for feed configuration and monitoring.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function FeedManagementPanel
  */
 export function FeedManagementPanel() {
   const [filter, setFilter] = useState<string>('all');

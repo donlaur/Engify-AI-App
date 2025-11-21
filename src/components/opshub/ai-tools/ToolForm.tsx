@@ -65,6 +65,8 @@ interface ToolFormProps {
  * Used in AI tool management panels for creating and editing tool entries.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function ToolForm
  */
 export function ToolForm({ tool, onSave, onCancel, categoryLabels }: ToolFormProps) {
   const [formData, setFormData] = useState<Partial<ToolDisplay>>({

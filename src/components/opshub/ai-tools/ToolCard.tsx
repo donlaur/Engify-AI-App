@@ -50,6 +50,8 @@ interface ToolCardProps {
  * Used in AI tool management panels to display tool information in a card format.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function ToolCard
  */
 export function ToolCard({ tool, onEdit, onToggleStatus, categoryLabels }: ToolCardProps) {
   return (

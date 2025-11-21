@@ -83,6 +83,8 @@ interface NewsItemWithMetadata extends Omit<AIToolUpdate, 'publishedAt' | 'synce
  * Provides interface for news content management.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function NewsItemsPanel
  */
 export function NewsItemsPanel() {
   const [filter, setFilter] = useState<string>('all'); // all, tool-update, model-release, blog-post, etc.

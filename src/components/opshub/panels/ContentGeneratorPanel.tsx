@@ -78,6 +78,8 @@ interface JobStatus {
  * Provides interface for generating various types of content.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function ContentGeneratorPanel
  */
 export function ContentGeneratorPanel() {
   const { toast } = useToast();

@@ -37,6 +37,8 @@ interface EmptyStateProps {
  * Provides user-friendly messaging and call-to-action options.
  * 
  * @see AdminEmptyState for a more feature-rich alternative
+ * 
+ * @function EmptyState
  */
 export function EmptyState({ title, description, actions }: EmptyStateProps) {
   return (

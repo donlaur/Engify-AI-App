@@ -38,6 +38,8 @@ export interface WorkflowWithMetadata extends Workflow {
  * Used in WorkflowManagementPanel to configure the workflow data table.
  * 
  * @see AdminDataTable for column definition format
+ * 
+ * @function createWorkflowColumns
  */
 export function createWorkflowColumns(
   onView: (workflow: WorkflowWithMetadata) => void

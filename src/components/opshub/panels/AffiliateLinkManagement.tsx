@@ -96,6 +96,8 @@ interface PartnershipOutreach {
  * Provides interface for tracking and managing affiliate relationships.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function AffiliateLinkManagement
  */
 export function AffiliateLinkManagement() {
   const [links, setLinks] = useState<AffiliateLink[]>([]);

@@ -228,6 +228,8 @@ function HubContentSection<T extends { id: string; order: number }>({
  * Provides a comprehensive interface for organizing tool-related content.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function HubContentEditor
  */
 export function HubContentEditor({ tool, onChange }: HubContentEditorProps) {
   const [hubContent, setHubContent] = useState<NonNullable<AITool['hubContent']>>(

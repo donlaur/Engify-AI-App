@@ -93,6 +93,8 @@ interface PainPointWithMetadata extends PainPoint {
  * Provides a complete interface for pain point management.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function PainPointManagementPanel
  */
 export function PainPointManagementPanel() {
   const [filter, setFilter] = useState<string>('all'); // all, published, draft

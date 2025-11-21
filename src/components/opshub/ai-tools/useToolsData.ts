@@ -39,6 +39,8 @@ interface ToolDisplay extends AITool {
  * Used in AI tool management panels to fetch and display tool data.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function useToolsData
  */
 export function useToolsData() {
   const [tools, setTools] = useState<ToolDisplay[]>([]);

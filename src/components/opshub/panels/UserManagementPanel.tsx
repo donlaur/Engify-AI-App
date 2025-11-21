@@ -93,6 +93,8 @@ interface User {
  * Provides a complete CRUD interface for user management.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function UserManagementPanel
  */
 export function UserManagementPanel() {
   const [users, setUsers] = useState<User[]>([]);

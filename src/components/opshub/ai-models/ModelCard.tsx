@@ -38,6 +38,8 @@ interface ModelCardProps {
  * Used in AI model management panels to display model information in a card format.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function ModelCard
  */
 export function ModelCard({ model }: ModelCardProps) {
   const inputCost = model.inputCostPer1M || (model.costPer1kInputTokens || 0) * 1000;

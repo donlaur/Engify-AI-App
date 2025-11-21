@@ -44,6 +44,8 @@ interface FilterButtonsProps {
  * 
  * @usage
  * Used in admin panels to provide quick filter options with visual feedback.
+ * 
+ * @function FilterButtons
  */
 export function FilterButtons({ filter, onFilterChange, options }: FilterButtonsProps) {
   return (

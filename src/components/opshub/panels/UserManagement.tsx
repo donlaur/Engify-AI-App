@@ -45,6 +45,8 @@ interface UserManagementProps {
  * For full admin functionality, use UserManagementPanel instead.
  * 
  * @see UserManagementPanel for full-featured admin panel
+ * 
+ * @function UserManagement
  */
 export function UserManagement({ initialUsers = [] }: UserManagementProps) {
   const [users, setUsers] = useState<User[]>(initialUsers);

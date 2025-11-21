@@ -40,6 +40,8 @@ interface ContentStats {
  * Provides interface for content analysis and improvement.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function ContentQualityPanel
  */
 export function ContentQualityPanel() {
   const [stats, setStats] = useState<ContentStats | null>(null);

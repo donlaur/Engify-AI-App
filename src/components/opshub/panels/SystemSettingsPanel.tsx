@@ -90,6 +90,8 @@ interface SystemSetting {
  * Provides a complete CRUD interface for settings management.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function SystemSettingsPanel
  */
 export function SystemSettingsPanel() {
   const [settings, setSettings] = useState<SystemSetting[]>([]);

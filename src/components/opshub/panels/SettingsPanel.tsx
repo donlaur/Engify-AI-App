@@ -62,6 +62,8 @@ interface SystemInfo {
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
  * @see SystemSettingsPanel for more comprehensive settings management
+ * 
+ * @function SettingsPanel
  */
 export function SettingsPanel() {
   const [featureFlags, setFeatureFlags] = useState<FeatureFlag[]>([]);

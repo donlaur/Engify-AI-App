@@ -24,6 +24,8 @@ export interface WorkflowWithMetadata extends Workflow {
  * const stats = calculateWorkflowStats(workflows, 100);
  * // Result: { total: 100, published: 45, draft: 30, comingSoon: 25 }
  * ```
+ * 
+ * @function calculateWorkflowStats
  */
 export function calculateWorkflowStats(
   workflows: WorkflowWithMetadata[],
@@ -51,6 +53,8 @@ export function calculateWorkflowStats(
  * const categoryStats = calculateCategoryStats(workflows);
  * // Result: { 'marketing': 15, 'sales': 10, 'support': 8 }
  * ```
+ * 
+ * @function calculateCategoryStats
  */
 export function calculateCategoryStats(workflows: WorkflowWithMetadata[]) {
   return workflows.reduce((acc, workflow) => {

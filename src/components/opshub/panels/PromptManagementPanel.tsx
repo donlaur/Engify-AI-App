@@ -153,6 +153,8 @@ interface Prompt {
  * Provides a complete interface for prompt management.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function PromptManagementPanel
  */
 export function PromptManagementPanel() {
   const [filter, setFilter] = useState<string>('all'); // all, active, inactive, ai-generated

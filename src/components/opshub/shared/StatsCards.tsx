@@ -39,6 +39,8 @@ interface StatsCardsProps {
  * Used in admin panels to display key metrics and statistics.
  * 
  * @see AdminStatsCard for a more feature-rich alternative
+ * 
+ * @function StatsCards
  */
 export function StatsCards({ stats }: StatsCardsProps) {
   const getValueColor = (variant?: StatCard['variant']) => {

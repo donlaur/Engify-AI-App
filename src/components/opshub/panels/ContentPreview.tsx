@@ -49,6 +49,8 @@ interface ContentPreviewProps {
  * Provides consistent content preview rendering.
  * 
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * 
+ * @function ContentPreview
  */
 export function ContentPreview({ content, className = '' }: ContentPreviewProps) {
   return (

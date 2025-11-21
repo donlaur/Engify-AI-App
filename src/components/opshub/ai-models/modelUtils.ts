@@ -21,6 +21,8 @@ export type FilterType = 'all' | 'active' | 'deprecated';
  * const activeModels = filterModels(allModels, 'active');
  * const deprecatedModels = filterModels(allModels, 'deprecated');
  * ```
+ * 
+ * @function filterModels
  */
 export function filterModels(models: ModelDisplay[], filter: FilterType): ModelDisplay[] {
   switch (filter) {
@@ -49,6 +51,8 @@ export function filterModels(models: ModelDisplay[], filter: FilterType): ModelD
  * const grouped = groupModelsByProvider(models);
  * // Result: { 'openai': [...], 'anthropic': [...], 'google': [...] }
  * ```
+ * 
+ * @function groupModelsByProvider
  */
 export function groupModelsByProvider(
   models: ModelDisplay[]
@@ -75,6 +79,8 @@ export function groupModelsByProvider(
  * const iconName = getProviderIcon('openai'); // Returns 'zap'
  * const Icon = Icons[iconName || 'globe'];
  * ```
+ * 
+ * @function getProviderIcon
  */
 export function getProviderIcon(provider: string): 'zap' | 'brain' | 'globe' | undefined {
   switch (provider) {
