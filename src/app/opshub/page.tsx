@@ -1,30 +1,23 @@
-import { auth } from '@/lib/auth';
-import { redirect } from 'next/navigation';
-import { isAdminMFAEnforced } from '@/lib/env';
-import { OpsHubTabs } from '@/components/admin/OpsHubTabs';
+/**
+ * @pattern OPSHUB_PAGE
+ * @auth requireOpsHubAuth() - All opshub pages require admin authentication
+ * @description Main OpsHub admin center entry point. Provides tabbed interface for all admin panels.
+ * 
+ * This page follows the OpsHub authentication pattern:
+ * - Uses requireOpsHubAuth() for centralized auth logic
+ * - All opshub pages must be password-protected
+ * - Requires admin role (admin, super_admin, or org_admin)
+ * - Enforces MFA if enabled (no super_admin bypass per security audit)
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for pattern guide
+ */
+
+import { requireOpsHubAuth } from '@/lib/opshub/auth';
+import { OpsHubTabs } from '@/components/opshub/panels/OpsHubTabs';
 
 export default async function OpsHubPage() {
-  const session = await auth();
-
-  const role = (session?.user as { role?: string } | null)?.role || 'user';
-
-  const isAdmin =
-    role === 'admin' || role === 'super_admin' || role === 'org_admin';
-
-  if (!isAdmin) {
-    redirect('/');
-  }
-
-  const mfaVerified = Boolean(
-    (session?.user as { mfaVerified?: boolean } | null)?.mfaVerified
-  );
-
-  // Super admin bypass for emergency access
-  // In production, consider enforcing MFA for super_admin via env var
-  // Only enforce MFA for non-super_admin roles
-  if (isAdminMFAEnforced && role !== 'super_admin' && !mfaVerified) {
-    redirect('/login?error=MFA_REQUIRED');
-  }
+  // ✅ REQUIRED: All opshub pages must use requireOpsHubAuth()
+  const { user, role } = await requireOpsHubAuth();
 
   return (
     <div className="mx-auto max-w-7xl p-6">

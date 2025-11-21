@@ -27,4 +27,4 @@ export type {
   ToastVariant,
   ToastOptions,
   UseAdminToastReturn,
-} from '@/hooks/admin';
+} from '@/hooks/opshub';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAdminToast } from '@/hooks/admin';
+import { useAdminToast } from '@/hooks/opshub';
 
 /**
  * Hook for handling API actions with loading and error states

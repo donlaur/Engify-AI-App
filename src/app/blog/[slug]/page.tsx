@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { getDb } from '@/lib/db/mongodb';
 import { GeneratedContent } from '@/lib/db/schemas/generated-content';
-import { ContentPreview } from '@/components/admin/ContentPreview';
+import { ContentPreview } from '@/components/opshub/panels/ContentPreview';
 
 interface BlogPostPageProps {
   params: Promise<{

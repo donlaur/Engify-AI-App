@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAdminToast } from '@/hooks/admin';
+import { useAdminToast } from '@/hooks/opshub';
 import type { AIModel } from '@/lib/db/schemas/ai-model';
 
 interface ModelDisplay extends AIModel {

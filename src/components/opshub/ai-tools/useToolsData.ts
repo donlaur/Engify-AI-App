@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAdminToast } from '@/hooks/admin';
+import { useAdminToast } from '@/hooks/opshub';
 import type { AITool } from '@/lib/db/schemas/ai-tool';
 
 interface ToolDisplay extends AITool {

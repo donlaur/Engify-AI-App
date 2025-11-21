@@ -1,5 +1,12 @@
 'use client';
 
+/**
+ * Hub Content Editor
+ * 
+ * Editor for managing hub content sections (problems, resources, getting started, articles).
+ * Uses generic hooks and components to eliminate duplication.
+ */
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +19,165 @@ import type { AITool } from '@/lib/db/schemas/ai-tool';
 interface HubContentEditorProps {
   tool: Partial<AITool>;
   onChange: (hubContent: NonNullable<AITool['hubContent']>) => void;
+}
+
+type HubContentKey = keyof NonNullable<AITool['hubContent']>;
+
+/**
+ * Generic hook for managing array items in hub content
+ */
+function useHubContentArray<T extends { id: string; order: number }>(
+  items: T[] | undefined,
+  key: HubContentKey,
+  updateHubContent: (updates: Partial<NonNullable<AITool['hubContent']>>) => void
+) {
+  const add = (newItem: Omit<T, 'id' | 'order'>) => {
+    const item = {
+      ...newItem,
+      id: crypto.randomUUID(),
+      order: (items?.length || 0) + 1,
+    } as T;
+    updateHubContent({
+      [key]: [...(items || []), item],
+    });
+  };
+
+  const update = (index: number, field: keyof T, value: string) => {
+    const updated = [...(items || [])];
+    updated[index] = { ...updated[index], [field]: value };
+    updateHubContent({ [key]: updated });
+  };
+
+  const remove = (index: number) => {
+    const updated = [...(items || [])];
+    updated.splice(index, 1);
+    updateHubContent({ [key]: updated });
+  };
+
+  return { add, update, remove };
+}
+
+/**
+ * Reusable item card component for editing array items
+ */
+interface ItemCardProps {
+  fields: Array<{
+    name: string;
+    label: string;
+    placeholder: string;
+    type?: 'input' | 'textarea';
+    rows?: number;
+  }>;
+  value: Record<string, string>;
+  onChange: (field: string, value: string) => void;
+  onRemove: () => void;
+  removeLabel?: string;
+}
+
+function ItemCard({
+  fields,
+  value,
+  onChange,
+  onRemove,
+  removeLabel = 'Remove',
+}: ItemCardProps) {
+  return (
+    <Card className="border-dashed">
+      <CardContent className="pt-4">
+        <div className="space-y-2">
+          {fields.map((field) => {
+            const FieldComponent = field.type === 'textarea' ? Textarea : Input;
+            return (
+              <div key={field.name}>
+                <Label>{field.label}</Label>
+                <FieldComponent
+                  placeholder={field.placeholder}
+                  value={value[field.name] || ''}
+                  onChange={(e) => onChange(field.name, e.target.value)}
+                  rows={field.rows}
+                />
+              </div>
+            );
+          })}
+          <Button variant="destructive" size="sm" onClick={onRemove}>
+            <Icons.trash className="mr-2 h-4 w-4" />
+            {removeLabel}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Reusable section component for hub content arrays
+ */
+interface HubContentSectionProps<T extends { id: string; order: number }> {
+  title: string;
+  description: string;
+  items: T[] | undefined;
+  key: HubContentKey;
+  fields: Array<{
+    name: keyof T;
+    label: string;
+    placeholder: string;
+    type?: 'input' | 'textarea';
+    rows?: number;
+  }>;
+  defaultItem: Omit<T, 'id' | 'order'>;
+  updateHubContent: (updates: Partial<NonNullable<AITool['hubContent']>>) => void;
+  addButtonLabel: string;
+  removeLabel?: string;
+  extraContent?: React.ReactNode;
+}
+
+function HubContentSection<T extends { id: string; order: number }>({
+  title,
+  description,
+  items,
+  key: contentKey,
+  fields,
+  defaultItem,
+  updateHubContent,
+  addButtonLabel,
+  removeLabel,
+  extraContent,
+}: HubContentSectionProps<T>) {
+  const { add, update, remove } = useHubContentArray(items, contentKey, updateHubContent);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {items?.map((item, idx) => (
+            <ItemCard
+              key={item.id}
+              fields={fields.map((f) => ({
+                name: String(f.name),
+                label: f.label,
+                placeholder: f.placeholder,
+                type: f.type,
+                rows: f.rows,
+              }))}
+              value={item as Record<string, string>}
+              onChange={(field, value) => update(idx, field as keyof T, value)}
+              onRemove={() => remove(idx)}
+              removeLabel={removeLabel}
+            />
+          ))}
+          <Button onClick={() => add(defaultItem)} variant="outline">
+            <Icons.plus className="mr-2 h-4 w-4" />
+            {addButtonLabel}
+          </Button>
+          {extraContent}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export function HubContentEditor({ tool, onChange }: HubContentEditorProps) {
@@ -33,189 +199,31 @@ export function HubContentEditor({ tool, onChange }: HubContentEditorProps) {
     onChange(updated);
   };
 
-  // Problems Section
-  const addProblem = () => {
-    const newProblem = {
-      id: crypto.randomUUID(),
-      title: '',
-      issue: '',
-      impact: '',
-      engifySolution: '',
-      order: (hubContent.problems?.length || 0) + 1,
-    };
-    updateHubContent({
-      problems: [...(hubContent.problems || []), newProblem],
-    });
-  };
-
-  const updateProblem = (index: number, field: string, value: string) => {
-    const problems = [...(hubContent.problems || [])];
-    problems[index] = { ...problems[index], [field]: value };
-    updateHubContent({ problems });
-  };
-
-  const removeProblem = (index: number) => {
-    const problems = [...(hubContent.problems || [])];
-    problems.splice(index, 1);
-    updateHubContent({ problems });
-  };
-
-  // Resources Section
-  const addResource = (type: 'official' | 'community') => {
-    const key = type === 'official' ? 'officialResources' : 'communityResources';
-    const newResource = {
-      id: crypto.randomUUID(),
-      title: '',
-      url: '',
-      description: '',
-      order: (hubContent[key]?.length || 0) + 1,
-    };
-    updateHubContent({
-      [key]: [...(hubContent[key] || []), newResource],
-    });
-  };
-
-  const updateResource = (
-    type: 'official' | 'community',
-    index: number,
-    field: string,
-    value: string
-  ) => {
-    const key = type === 'official' ? 'officialResources' : 'communityResources';
-    const resources = [...(hubContent[key] || [])];
-    resources[index] = { ...resources[index], [field]: value };
-    updateHubContent({ [key]: resources });
-  };
-
-  const removeResource = (type: 'official' | 'community', index: number) => {
-    const key = type === 'official' ? 'officialResources' : 'communityResources';
-    const resources = [...(hubContent[key] || [])];
-    resources.splice(index, 1);
-    updateHubContent({ [key]: resources });
-  };
-
-  // Getting Started Section
-  const addGettingStartedStep = () => {
-    const newStep = {
-      id: crypto.randomUUID(),
-      title: '',
-      description: '',
-      order: (hubContent.gettingStarted?.length || 0) + 1,
-    };
-    updateHubContent({
-      gettingStarted: [...(hubContent.gettingStarted || []), newStep],
-    });
-  };
-
-  const updateGettingStartedStep = (index: number, field: string, value: string) => {
-    const steps = [...(hubContent.gettingStarted || [])];
-    steps[index] = { ...steps[index], [field]: value };
-    updateHubContent({ gettingStarted: steps });
-  };
-
-  const removeGettingStartedStep = (index: number) => {
-    const steps = [...(hubContent.gettingStarted || [])];
-    steps.splice(index, 1);
-    updateHubContent({ gettingStarted: steps });
-  };
-
-  // Articles Section
-  const addArticle = () => {
-    const newArticle = {
-      id: crypto.randomUUID(),
-      title: '',
-      description: '',
-      slug: '',
-      status: 'coming_soon' as const,
-      order: (hubContent.articles?.length || 0) + 1,
-    };
-    updateHubContent({
-      articles: [...(hubContent.articles || []), newArticle],
-    });
-  };
-
-  const updateArticle = (index: number, field: string, value: string) => {
-    const articles = [...(hubContent.articles || [])];
-    articles[index] = { ...articles[index], [field]: value };
-    updateHubContent({ articles });
-  };
-
-  const removeArticle = (index: number) => {
-    const articles = [...(hubContent.articles || [])];
-    articles.splice(index, 1);
-    updateHubContent({ articles });
-  };
+  // Resources need special handling for two types
+  const { add: addOfficialResource, update: updateOfficialResource, remove: removeOfficialResource } =
+    useHubContentArray(hubContent.officialResources, 'officialResources', updateHubContent);
+  const { add: addCommunityResource, update: updateCommunityResource, remove: removeCommunityResource } =
+    useHubContentArray(hubContent.communityResources, 'communityResources', updateHubContent);
 
   return (
     <div className="space-y-6">
       {/* Problems & Solutions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Problems & Solutions</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Common problems users face with this tool and how Engify solves them
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {hubContent.problems?.map((problem, idx) => (
-              <Card key={problem.id} className="border-dashed">
-                <CardContent className="pt-6">
-                  <div className="space-y-3">
-                    <div>
-                      <Label>Problem Title</Label>
-                      <Input
-                        placeholder="e.g., No Guardrails"
-                        value={problem.title}
-                        onChange={(e) => updateProblem(idx, 'title', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label>Issue Description</Label>
-                      <Textarea
-                        placeholder="What's the problem?"
-                        value={problem.issue}
-                        onChange={(e) => updateProblem(idx, 'issue', e.target.value)}
-                        rows={2}
-                      />
-                    </div>
-                    <div>
-                      <Label>Impact</Label>
-                      <Textarea
-                        placeholder="What's the impact on users?"
-                        value={problem.impact}
-                        onChange={(e) => updateProblem(idx, 'impact', e.target.value)}
-                        rows={2}
-                      />
-                    </div>
-                    <div>
-                      <Label>Engify Solution</Label>
-                      <Textarea
-                        placeholder="How does Engify solve this?"
-                        value={problem.engifySolution}
-                        onChange={(e) => updateProblem(idx, 'engifySolution', e.target.value)}
-                        rows={2}
-                      />
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => removeProblem(idx)}
-                    >
-                      <Icons.trash className="mr-2 h-4 w-4" />
-                      Remove Problem
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            <Button onClick={addProblem} variant="outline">
-              <Icons.plus className="mr-2 h-4 w-4" />
-              Add Problem
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <HubContentSection
+        title="Problems & Solutions"
+        description="Common problems users face with this tool and how Engify solves them"
+        items={hubContent.problems}
+        key="problems"
+        fields={[
+          { name: 'title', label: 'Problem Title', placeholder: "e.g., No Guardrails", type: 'input' },
+          { name: 'issue', label: 'Issue Description', placeholder: "What's the problem?", type: 'textarea', rows: 2 },
+          { name: 'impact', label: 'Impact', placeholder: "What's the impact on users?", type: 'textarea', rows: 2 },
+          { name: 'engifySolution', label: 'Engify Solution', placeholder: 'How does Engify solve this?', type: 'textarea', rows: 2 },
+        ]}
+        defaultItem={{ title: '', issue: '', impact: '', engifySolution: '' }}
+        updateHubContent={updateHubContent}
+        addButtonLabel="Add Problem"
+        removeLabel="Remove Problem"
+      />
 
       {/* Community Resources */}
       <Card>
@@ -232,43 +240,20 @@ export function HubContentEditor({ tool, onChange }: HubContentEditorProps) {
               <h4 className="mb-3 font-semibold">Official Resources</h4>
               <div className="space-y-3">
                 {hubContent.officialResources?.map((resource, idx) => (
-                  <Card key={resource.id} className="border-dashed">
-                    <CardContent className="pt-4">
-                      <div className="space-y-2">
-                        <Input
-                          placeholder="Title (e.g., Official Documentation)"
-                          value={resource.title}
-                          onChange={(e) =>
-                            updateResource('official', idx, 'title', e.target.value)
-                          }
-                        />
-                        <Input
-                          placeholder="URL"
-                          value={resource.url}
-                          onChange={(e) =>
-                            updateResource('official', idx, 'url', e.target.value)
-                          }
-                        />
-                        <Input
-                          placeholder="Description (optional)"
-                          value={resource.description || ''}
-                          onChange={(e) =>
-                            updateResource('official', idx, 'description', e.target.value)
-                          }
-                        />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => removeResource('official', idx)}
-                        >
-                          <Icons.trash className="mr-2 h-4 w-4" />
-                          Remove
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <ItemCard
+                    key={resource.id}
+                    fields={[
+                      { name: 'title', label: 'Title', placeholder: 'Title (e.g., Official Documentation)', type: 'input' },
+                      { name: 'url', label: 'URL', placeholder: 'URL', type: 'input' },
+                      { name: 'description', label: 'Description', placeholder: 'Description (optional)', type: 'input' },
+                    ]}
+                    value={resource as Record<string, string>}
+                    onChange={(field, value) => updateOfficialResource(idx, field as any, value)}
+                    onRemove={() => removeOfficialResource(idx)}
+                    removeLabel="Remove"
+                  />
                 ))}
-                <Button onClick={() => addResource('official')} variant="outline" size="sm">
+                <Button onClick={() => addOfficialResource({ title: '', url: '', description: '' })} variant="outline" size="sm">
                   <Icons.plus className="mr-2 h-4 w-4" />
                   Add Official Resource
                 </Button>
@@ -280,43 +265,20 @@ export function HubContentEditor({ tool, onChange }: HubContentEditorProps) {
               <h4 className="mb-3 font-semibold">Community Resources</h4>
               <div className="space-y-3">
                 {hubContent.communityResources?.map((resource, idx) => (
-                  <Card key={resource.id} className="border-dashed">
-                    <CardContent className="pt-4">
-                      <div className="space-y-2">
-                        <Input
-                          placeholder="Title (e.g., Reddit Community)"
-                          value={resource.title}
-                          onChange={(e) =>
-                            updateResource('community', idx, 'title', e.target.value)
-                          }
-                        />
-                        <Input
-                          placeholder="URL"
-                          value={resource.url}
-                          onChange={(e) =>
-                            updateResource('community', idx, 'url', e.target.value)
-                          }
-                        />
-                        <Input
-                          placeholder="Description (optional)"
-                          value={resource.description || ''}
-                          onChange={(e) =>
-                            updateResource('community', idx, 'description', e.target.value)
-                          }
-                        />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => removeResource('community', idx)}
-                        >
-                          <Icons.trash className="mr-2 h-4 w-4" />
-                          Remove
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <ItemCard
+                    key={resource.id}
+                    fields={[
+                      { name: 'title', label: 'Title', placeholder: 'Title (e.g., Reddit Community)', type: 'input' },
+                      { name: 'url', label: 'URL', placeholder: 'URL', type: 'input' },
+                      { name: 'description', label: 'Description', placeholder: 'Description (optional)', type: 'input' },
+                    ]}
+                    value={resource as Record<string, string>}
+                    onChange={(field, value) => updateCommunityResource(idx, field as any, value)}
+                    onRemove={() => removeCommunityResource(idx)}
+                    removeLabel="Remove"
+                  />
                 ))}
-                <Button onClick={() => addResource('community')} variant="outline" size="sm">
+                <Button onClick={() => addCommunityResource({ title: '', url: '', description: '' })} variant="outline" size="sm">
                   <Icons.plus className="mr-2 h-4 w-4" />
                   Add Community Resource
                 </Button>
@@ -327,111 +289,48 @@ export function HubContentEditor({ tool, onChange }: HubContentEditorProps) {
       </Card>
 
       {/* Getting Started */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Getting Started Guide</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Step-by-step guide for new users
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {hubContent.gettingStarted?.map((step, idx) => (
-              <Card key={step.id} className="border-dashed">
-                <CardContent className="pt-4">
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="Step Title (e.g., Download & Install)"
-                      value={step.title}
-                      onChange={(e) => updateGettingStartedStep(idx, 'title', e.target.value)}
-                    />
-                    <Textarea
-                      placeholder="Step Description"
-                      value={step.description}
-                      onChange={(e) =>
-                        updateGettingStartedStep(idx, 'description', e.target.value)
-                      }
-                      rows={2}
-                    />
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => removeGettingStartedStep(idx)}
-                    >
-                      <Icons.trash className="mr-2 h-4 w-4" />
-                      Remove Step
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            <Button onClick={addGettingStartedStep} variant="outline">
-              <Icons.plus className="mr-2 h-4 w-4" />
-              Add Step
-            </Button>
-
-            <div className="mt-4">
-              <Label>Pro Tip (optional)</Label>
-              <Textarea
-                placeholder="Add a helpful pro tip for users..."
-                value={hubContent.gettingStartedProTip || ''}
-                onChange={(e) => updateHubContent({ gettingStartedProTip: e.target.value })}
-                rows={2}
-              />
-            </div>
+      <HubContentSection
+        title="Getting Started Guide"
+        description="Step-by-step guide for new users"
+        items={hubContent.gettingStarted}
+        key="gettingStarted"
+        fields={[
+          { name: 'title', label: 'Step Title', placeholder: 'Step Title (e.g., Download & Install)', type: 'input' },
+          { name: 'description', label: 'Step Description', placeholder: 'Step Description', type: 'textarea', rows: 2 },
+        ]}
+        defaultItem={{ title: '', description: '' }}
+        updateHubContent={updateHubContent}
+        addButtonLabel="Add Step"
+        removeLabel="Remove Step"
+        extraContent={
+          <div className="mt-4">
+            <Label>Pro Tip (optional)</Label>
+            <Textarea
+              placeholder="Add a helpful pro tip for users..."
+              value={hubContent.gettingStartedProTip || ''}
+              onChange={(e) => updateHubContent({ gettingStartedProTip: e.target.value })}
+              rows={2}
+            />
           </div>
-        </CardContent>
-      </Card>
+        }
+      />
 
       {/* Articles */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Related Articles</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            In-depth guides and articles (can be placeholders for &quot;Coming Soon&quot;)
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {hubContent.articles?.map((article, idx) => (
-              <Card key={article.id} className="border-dashed">
-                <CardContent className="pt-4">
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="Article Title"
-                      value={article.title}
-                      onChange={(e) => updateArticle(idx, 'title', e.target.value)}
-                    />
-                    <Textarea
-                      placeholder="Article Description"
-                      value={article.description}
-                      onChange={(e) => updateArticle(idx, 'description', e.target.value)}
-                      rows={2}
-                    />
-                    <Input
-                      placeholder="Slug (when published, e.g., cursor-vs-windsurf)"
-                      value={article.slug || ''}
-                      onChange={(e) => updateArticle(idx, 'slug', e.target.value)}
-                    />
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => removeArticle(idx)}
-                    >
-                      <Icons.trash className="mr-2 h-4 w-4" />
-                      Remove Article
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            <Button onClick={addArticle} variant="outline">
-              <Icons.plus className="mr-2 h-4 w-4" />
-              Add Article
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <HubContentSection
+        title="Related Articles"
+        description='In-depth guides and articles (can be placeholders for "Coming Soon")'
+        items={hubContent.articles}
+        key="articles"
+        fields={[
+          { name: 'title', label: 'Article Title', placeholder: 'Article Title', type: 'input' },
+          { name: 'description', label: 'Article Description', placeholder: 'Article Description', type: 'textarea', rows: 2 },
+          { name: 'slug', label: 'Slug', placeholder: 'Slug (when published, e.g., cursor-vs-windsurf)', type: 'input' },
+        ]}
+        defaultItem={{ title: '', description: '', slug: '', status: 'coming_soon' as const }}
+        updateHubContent={updateHubContent}
+        addButtonLabel="Add Article"
+        removeLabel="Remove Article"
+      />
     </div>
   );
 }
