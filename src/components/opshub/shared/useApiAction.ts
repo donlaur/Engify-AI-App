@@ -69,14 +69,28 @@ export function useApiAction() {
   const [loading, setLoading] = useState(false);
   const { success, error: showError } = useAdminToast();
 
+  /**
+   * Execute an API action with loading and error handling
+   * 
+   * @template T - The return type of the action
+   * @param action - Async function that performs the API call
+   * @param options - Optional configuration for success/error handling
+   * @returns Promise resolving to the action result, or null on error
+   * 
+   * @example
+   * ```tsx
+   * const result = await execute(
+   *   () => api.updateUser(userId, data),
+   *   {
+   *     successMessage: (result) => `User ${result.name} updated`,
+   *     onSuccess: () => router.refresh(),
+   *   }
+   * );
+   * ```
+   */
   const execute = async <T = void>(
     action: () => Promise<T>,
-    options?: {
-      successMessage?: string | ((result: T) => string);
-      errorMessage?: string;
-      onSuccess?: (result: T) => void | Promise<void>;
-      onError?: (error: Error) => void;
-    }
+    options?: ApiActionOptions<T>
   ): Promise<T | null> => {
     try {
       setLoading(true);
