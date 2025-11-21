@@ -131,7 +131,7 @@ catalogs:
     lucide-react: ^0.344.0
     next-themes: ^0.2.1
     sonner: ^1.7.0
-    tailwind-merge: ^3.3.1
+    tailwind-merge: ^3.4.0
     vaul: ^0.9.9
   utils:
     '@types/uuid': ^11.0.0
