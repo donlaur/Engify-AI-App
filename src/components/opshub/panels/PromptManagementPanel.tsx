@@ -45,6 +45,7 @@ import { AdminEmptyState } from '@/components/opshub/panels/shared/AdminEmptySta
 import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
 import { formatAdminDate, calculateStats } from '@/lib/opshub/utils';
 import { clientLogger } from '@/lib/logging/client-logger';
+import { applyFilters } from '@/lib/opshub/utils';
 
 interface Prompt {
   _id: string;
@@ -277,24 +278,26 @@ export function PromptManagementPanel() {
     }
   ];
 
-  const filteredPrompts = prompts.filter((prompt) => {
-    // Filter by status
-    if (filter === 'active' && prompt.active === false) return false;
-    if (filter === 'inactive' && prompt.active !== false) return false;
-    if (filter === 'ai-generated' && !prompt.id.startsWith('generated-'))
-      return false;
+  // Use shared filtering utilities to reduce duplication
+  const filteredPrompts = useMemo(() => {
+    const predicates: Array<{ type: 'exact' | 'contains' | 'startsWith' | 'custom'; field?: keyof Prompt; value?: any; predicate?: (item: Prompt) => boolean }> = [];
 
-    // Filter by search using debounced value
-    if (debouncedSearch) {
-      const search = debouncedSearch.toLowerCase();
-      return (
-        prompt.title.toLowerCase().includes(search) ||
-        prompt.id.toLowerCase().includes(search)
-      );
+    // Filter by status
+    if (filter === 'active') {
+      predicates.push({ type: 'custom', predicate: (p) => p.active !== false });
+    } else if (filter === 'inactive') {
+      predicates.push({ type: 'custom', predicate: (p) => p.active === false });
+    } else if (filter === 'ai-generated') {
+      predicates.push({ type: 'custom', predicate: (p) => p.id.startsWith('generated-') });
     }
 
-    return true;
-  });
+    return applyFilters(
+      prompts,
+      { predicates: predicates as any },
+      debouncedSearch || undefined,
+      ['title', 'id']
+    );
+  }, [prompts, filter, debouncedSearch]);
 
   const stats = useMemo(() => calculateStats(prompts, [
     { key: 'total', calculate: () => totalCount },
