@@ -88,12 +88,19 @@ export function PainPointManagementPanel() {
   });
 
   // Use shared hooks for status toggle and view drawer
-  const { selectedItem: selectedPainPoint, isDrawerOpen, openDrawer, closeDrawer } = useAdminViewDrawer<PainPointWithMetadata>();
+  const { selectedItem: selectedPainPoint, isDrawerOpen, openDrawer, closeDrawer, updateSelectedItem } = useAdminViewDrawer<PainPointWithMetadata>();
   
   const { toggleStatus } = useAdminStatusToggle({
     endpoint: '/api/admin/pain-points',
     entityName: 'Pain point',
     onRefresh: refresh,
+    onUpdateSelected: (id, newStatus) => {
+      updateSelectedItem((item) => 
+        item && item._id === id 
+          ? { ...item, status: newStatus as 'draft' | 'published' }
+          : item
+      );
+    },
   });
 
   // Column definitions for AdminDataTable

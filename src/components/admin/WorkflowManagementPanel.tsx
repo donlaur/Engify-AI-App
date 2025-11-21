@@ -85,12 +85,19 @@ export function WorkflowManagementPanel() {
   });
 
   // Use shared hooks for status toggle and view drawer
-  const { selectedItem: selectedWorkflow, isDrawerOpen, openDrawer, closeDrawer } = useAdminViewDrawer<WorkflowWithMetadata>();
+  const { selectedItem: selectedWorkflow, isDrawerOpen, openDrawer, closeDrawer, updateSelectedItem } = useAdminViewDrawer<WorkflowWithMetadata>();
   
   const { toggleStatus } = useAdminStatusToggle({
     endpoint: '/api/admin/workflows',
     entityName: 'Workflow',
     onRefresh: refresh,
+    onUpdateSelected: (id, newStatus) => {
+      updateSelectedItem((item) => 
+        item && item._id === id 
+          ? { ...item, status: newStatus as 'draft' | 'published' | 'coming_soon' }
+          : item
+      );
+    },
   });
 
   // Column definitions for AdminDataTable

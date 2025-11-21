@@ -92,12 +92,19 @@ export function RecommendationManagementPanel() {
   });
 
   // Use shared hooks for status toggle and view drawer
-  const { selectedItem: selectedRecommendation, isDrawerOpen, openDrawer, closeDrawer } = useAdminViewDrawer<RecommendationWithMeta>();
+  const { selectedItem: selectedRecommendation, isDrawerOpen, openDrawer, closeDrawer, updateSelectedItem } = useAdminViewDrawer<RecommendationWithMeta>();
   
   const { toggleStatus } = useAdminStatusToggle({
     endpoint: '/api/admin/recommendations',
     entityName: 'Recommendation',
     onRefresh: refresh,
+    onUpdateSelected: (id, newStatus) => {
+      updateSelectedItem((item) => 
+        item && item._id === id 
+          ? { ...item, status: newStatus as 'draft' | 'published' }
+          : item
+      );
+    },
   });
 
   // Column definitions for AdminDataTable

@@ -14,6 +14,8 @@ export interface UseAdminViewDrawerReturn<T> {
   closeDrawer: () => void;
   /** Toggle drawer open/closed state */
   toggleDrawer: () => void;
+  /** Update the selected item (useful for updating status after toggle) */
+  updateSelectedItem: (updater: (item: T | null) => T | null) => void;
 }
 
 /**
@@ -65,12 +67,17 @@ export function useAdminViewDrawer<T>(): UseAdminViewDrawerReturn<T> {
     }
   }, [isDrawerOpen]);
 
+  const updateSelectedItem = useCallback((updater: (item: T | null) => T | null) => {
+    setSelectedItem(prev => updater(prev));
+  }, []);
+
   return {
     selectedItem,
     isDrawerOpen,
     openDrawer,
     closeDrawer,
     toggleDrawer,
+    updateSelectedItem,
   };
 }
 
