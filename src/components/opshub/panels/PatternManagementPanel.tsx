@@ -61,6 +61,35 @@ interface Pattern {
   updatedAt: string;
 }
 
+/**
+ * PatternManagementPanel Component
+ * 
+ * Admin panel for managing patterns, including viewing, filtering, searching,
+ * and editing pattern entries. Provides comprehensive pattern management with
+ * pagination and search functionality.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, CRUD_INTERFACE
+ * @principle DRY - Uses shared hooks and utilities
+ * 
+ * @features
+ * - Pattern listing with pagination
+ * - Search functionality
+ * - View and edit patterns in drawer
+ * - Pattern statistics display
+ * - Uses useAdminData for data management
+ * 
+ * @example
+ * ```tsx
+ * <PatternManagementPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing pattern entries.
+ * Provides a complete interface for pattern management.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function PatternManagementPanel() {
   // Phase 1: Use useAdminData hook for data fetching and pagination
   const {

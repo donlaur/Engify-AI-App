@@ -64,6 +64,36 @@ interface RecommendationWithMeta extends Recommendation {
   updatedAt: string;
 }
 
+/**
+ * RecommendationManagementPanel Component
+ * 
+ * Admin panel for managing recommendations, including viewing, filtering, searching,
+ * and toggling recommendation status. Provides comprehensive recommendation
+ * management with category, audience, priority, and status filtering.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, CRUD_INTERFACE
+ * @principle DRY - Uses shared hooks and utilities to reduce duplication
+ * 
+ * @features
+ * - Recommendation listing with pagination
+ * - Search functionality with debouncing
+ * - Multi-filter support (category, audience, priority, status)
+ * - Status toggle functionality
+ * - View drawer for recommendation details
+ * - Statistics display
+ * 
+ * @example
+ * ```tsx
+ * <RecommendationManagementPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing recommendation entries.
+ * Provides a complete interface for recommendation management.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function RecommendationManagementPanel() {
   // Local filters (client-side filtering)
   const [categoryFilter, setCategoryFilter] = useState<string>('all');

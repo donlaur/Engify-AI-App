@@ -64,6 +64,36 @@ interface PainPointWithMetadata extends PainPoint {
   updatedAt: string;
 }
 
+/**
+ * PainPointManagementPanel Component
+ * 
+ * Admin panel for managing pain points, including viewing, filtering, searching,
+ * and toggling pain point status. Provides comprehensive pain point management
+ * with status filtering and search functionality.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, CRUD_INTERFACE
+ * @principle DRY - Uses shared hooks and utilities
+ * 
+ * @features
+ * - Pain point listing with pagination
+ * - Search functionality with debouncing
+ * - Filter by status (all, published, draft)
+ * - Status toggle functionality
+ * - View drawer for pain point details
+ * - Statistics display
+ * 
+ * @example
+ * ```tsx
+ * <PainPointManagementPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing pain point entries.
+ * Provides a complete interface for pain point management.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function PainPointManagementPanel() {
   const [filter, setFilter] = useState<string>('all'); // all, published, draft
   const [searchInput, setSearchInput] = useState('');

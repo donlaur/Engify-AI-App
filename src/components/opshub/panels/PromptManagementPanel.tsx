@@ -123,6 +123,35 @@ interface Prompt {
   updatedAt: string;
 }
 
+/**
+ * PromptManagementPanel Component
+ * 
+ * Admin panel for managing prompts, including viewing, filtering, searching,
+ * and editing prompt entries. Provides comprehensive prompt management with
+ * filtering by status and search functionality.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, CRUD_INTERFACE
+ * @principle DRY - Uses shared hooks and utilities
+ * 
+ * @features
+ * - Prompt listing with filtering
+ * - Search functionality
+ * - Filter by status (all, active, inactive, ai-generated)
+ * - Edit and view prompts in drawer
+ * - Prompt statistics display
+ * 
+ * @example
+ * ```tsx
+ * <PromptManagementPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing prompt entries.
+ * Provides a complete interface for prompt management.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function PromptManagementPanel() {
   const [filter, setFilter] = useState<string>('all'); // all, active, inactive, ai-generated
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);

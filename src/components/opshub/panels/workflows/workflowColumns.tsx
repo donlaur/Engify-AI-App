@@ -14,9 +14,30 @@ export interface WorkflowWithMetadata extends Workflow {
 
 /**
  * Creates column definitions for the workflow data table
- *
- * @param onView - Callback function when a workflow is clicked
- * @returns Array of column definitions
+ * 
+ * Generates column configuration for AdminDataTable to display workflow data.
+ * Includes columns for title, category, status, audience, and actions.
+ * 
+ * @pattern COLUMN_DEFINITION_FACTORY
+ * @principle DRY - Centralizes workflow table column configuration
+ * 
+ * @param onView - Callback function when a workflow row is clicked
+ * @returns Array of column definitions compatible with AdminDataTable
+ * 
+ * @example
+ * ```tsx
+ * const columns = createWorkflowColumns((workflow) => {
+ *   setSelectedWorkflow(workflow);
+ *   openDrawer();
+ * });
+ * 
+ * <AdminDataTable data={workflows} columns={columns} />
+ * ```
+ * 
+ * @usage
+ * Used in WorkflowManagementPanel to configure the workflow data table.
+ * 
+ * @see AdminDataTable for column definition format
  */
 export function createWorkflowColumns(
   onView: (workflow: WorkflowWithMetadata) => void
