@@ -28,10 +28,11 @@ import { Icons } from '@/lib/icons';
 /**
  * Configuration for a single admin panel tab
  * 
- * @property id - Unique identifier for the tab (used in routing and state)
- * @property label - Human-readable label displayed in the tab trigger
- * @property icon - Icon name from Icons registry (must be a valid key)
- * @property category - Logical grouping for category filtering
+ * @interface TabConfig
+ * @property {string} id - Unique identifier for the tab (used in routing and state)
+ * @property {string} label - Human-readable label displayed in the tab trigger
+ * @property {keyof typeof Icons} icon - Icon name from Icons registry (must be a valid key)
+ * @property {'overview' | 'content' | 'management' | 'system'} category - Logical grouping for category filtering
  */
 export interface TabConfig {
   id: string;
@@ -46,6 +47,8 @@ export interface TabConfig {
  * This array defines every tab available in the OpsHub admin center.
  * Tabs are organized by category for logical grouping and filtering.
  * 
+ * @constant TAB_CONFIGS
+ * @type {TabConfig[]}
  * @note Order matters - tabs appear in this order within their category
  */
 export const TAB_CONFIGS: TabConfig[] = [
@@ -70,6 +73,7 @@ export const TAB_CONFIGS: TabConfig[] = [
  * Automatically generated from TAB_CONFIGS by grouping tabs by category.
  * Used by the category filter dropdown to show/hide tabs by category.
  * 
+ * @constant TAB_CATEGORIES
  * @structure Each category has:
  *   - label: Display name for the category filter
  *   - tabs: Array of tab IDs belonging to this category
@@ -101,6 +105,9 @@ export const TAB_CATEGORIES = {
  * 
  * Used when 'all' category is selected to show all tabs regardless of category.
  * Computed from TAB_CONFIGS for consistency.
+ * 
+ * @constant ALL_TABS
+ * @type {string[]}
  */
 export const ALL_TABS = TAB_CONFIGS.map(t => t.id);
 

@@ -21,6 +21,14 @@ interface HubContentEditorProps {
   onChange: (hubContent: NonNullable<AITool['hubContent']>) => void;
 }
 
+/**
+ * Type alias for hub content keys
+ * 
+ * Represents the keys of the hubContent object (e.g., 'relatedPrompts', 'problems', 'articles').
+ * Used for type-safe access to hub content sections.
+ * 
+ * @typedef {keyof NonNullable<AITool['hubContent']>} HubContentKey
+ */
 type HubContentKey = keyof NonNullable<AITool['hubContent']>;
 
 /**
@@ -59,6 +67,8 @@ function useHubContentArray<T extends { id: string; order: number }>(
 
 /**
  * Reusable item card component for editing array items
+ * 
+ * @interface ItemCardProps
  */
 interface ItemCardProps {
   fields: Array<{
@@ -74,6 +84,16 @@ interface ItemCardProps {
   removeLabel?: string;
 }
 
+/**
+ * ItemCard Component
+ * 
+ * Reusable card component for editing individual items in hub content arrays.
+ * Provides form fields and a remove button for each item.
+ * 
+ * @function ItemCard
+ * @param props - ItemCardProps containing fields, value, onChange, onRemove, and removeLabel
+ * @returns JSX.Element - Card component with form fields and remove button
+ */
 function ItemCard({
   fields,
   value,
@@ -111,6 +131,9 @@ function ItemCard({
 
 /**
  * Reusable section component for hub content arrays
+ * 
+ * @interface HubContentSectionProps
+ * @template T - Type extending { id: string; order: number }
  */
 interface HubContentSectionProps<T extends { id: string; order: number }> {
   title: string;
@@ -131,6 +154,17 @@ interface HubContentSectionProps<T extends { id: string; order: number }> {
   extraContent?: React.ReactNode;
 }
 
+/**
+ * HubContentSection Component
+ * 
+ * Reusable section component for managing hub content arrays (prompts, patterns, problems, etc.).
+ * Provides a complete interface for viewing, adding, editing, and removing items in each section.
+ * 
+ * @function HubContentSection
+ * @template T - Type extending { id: string; order: number }
+ * @param props - HubContentSectionProps containing section configuration and data
+ * @returns JSX.Element - Card component with item list and add button
+ */
 function HubContentSection<T extends { id: string; order: number }>({
   title,
   description,
