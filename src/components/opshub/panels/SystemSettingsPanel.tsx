@@ -57,6 +57,37 @@ interface SystemSetting {
   updatedAt: string;
 }
 
+/**
+ * SystemSettingsPanel Component
+ * 
+ * Admin panel for managing system settings, including viewing, editing, and
+ * creating configuration entries. Provides comprehensive settings management
+ * with category filtering, search functionality, and value type handling.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, CRUD_INTERFACE
+ * @principle DRY - Uses shared components and utilities
+ * 
+ * @features
+ * - Settings listing with pagination
+ * - Search by key or description
+ * - Filter by category
+ * - Create, edit, and preview settings
+ * - Support for multiple value types (string, number, boolean, json)
+ * - Settings statistics display
+ * - Preview settings in drawer
+ * 
+ * @example
+ * ```tsx
+ * <SystemSettingsPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing system configuration.
+ * Provides a complete CRUD interface for settings management.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function SystemSettingsPanel() {
   const [settings, setSettings] = useState<SystemSetting[]>([]);
   const [loading, setLoading] = useState(true);

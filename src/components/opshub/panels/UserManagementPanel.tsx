@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { clientLogger } from '@/lib/logging/client-logger';
+import { useAdminToast } from '@/hooks/opshub/useAdminToast';
+import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard';
 import {
   Card,
   CardContent,
@@ -58,6 +61,38 @@ interface User {
   lastLoginAt?: string;
 }
 
+/**
+ * UserManagementPanel Component
+ * 
+ * Admin panel for managing user accounts, including viewing, editing, creating,
+ * and deleting users. Provides comprehensive user management with filtering by
+ * plan and role, search functionality, and user statistics.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, CRUD_INTERFACE
+ * @principle DRY - Uses shared components and utilities
+ * 
+ * @features
+ * - User listing with pagination
+ * - Search by name or email
+ * - Filter by plan (free, basic, pro, enterprise)
+ * - Filter by role (user, admin, super_admin)
+ * - Create, edit, and delete users
+ * - User statistics display
+ * - Preview user details in drawer
+ * - Email verification status display
+ * 
+ * @example
+ * ```tsx
+ * <UserManagementPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing user accounts.
+ * Provides a complete CRUD interface for user management.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function UserManagementPanel() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +111,8 @@ export function UserManagementPanel() {
     fetchUsers();
   }, [planFilter, roleFilter]);
 
+  const { error: showError } = useAdminToast();
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -88,9 +125,12 @@ export function UserManagementPanel() {
 
       if (data.success) {
         setUsers(data.users);
+      } else {
+        showError('Failed to fetch users', data.error || 'Unknown error');
       }
     } catch (error) {
-      console.error('Failed to fetch users:', error);
+      clientLogger.apiError('/api/admin/users', error, { component: 'UserManagementPanel' });
+      showError('Network error', 'Unable to connect to server');
     } finally {
       setLoading(false);
     }
@@ -140,11 +180,11 @@ export function UserManagementPanel() {
         setIsEditDialogOpen(false);
         fetchUsers();
       } else {
-        alert(`Error: ${data.error}`);
+        showError('Save failed', data.error || 'Failed to save user');
       }
     } catch (error) {
-      console.error('Failed to save user:', error);
-      alert('Failed to save user');
+      clientLogger.apiError('/api/admin/users', error, { component: 'UserManagementPanel', action: 'save' });
+      showError('Network error', 'Unable to connect to server');
     }
   };
 
@@ -161,11 +201,11 @@ export function UserManagementPanel() {
       if (data.success) {
         fetchUsers();
       } else {
-        alert(`Error: ${data.error}`);
+        showError('Delete failed', data.error || 'Failed to delete user');
       }
     } catch (error) {
-      console.error('Failed to delete user:', error);
-      alert('Failed to delete user');
+      clientLogger.apiError('/api/admin/users', error, { component: 'UserManagementPanel', action: 'delete' });
+      showError('Network error', 'Unable to connect to server');
     }
   };
 
@@ -183,14 +223,14 @@ export function UserManagementPanel() {
     currentPage * itemsPerPage
   );
 
-  const stats = {
+  const stats = useMemo(() => ({
     total: users.length,
     free: users.filter((u) => u.plan === 'free').length,
     basic: users.filter((u) => u.plan === 'basic').length,
     pro: users.filter((u) => u.plan === 'pro').length,
     enterprise: users.filter((u) => u.plan === 'enterprise').length,
     verified: users.filter((u) => u.emailVerified).length,
-  };
+  }), [users]);
 
   return (
     <div className="space-y-6">
@@ -212,52 +252,12 @@ export function UserManagementPanel() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Total Users</CardDescription>
-            <CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Free</CardDescription>
-            <CardTitle className="text-4xl font-bold text-gray-600">
-              {stats.free}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Basic</CardDescription>
-            <CardTitle className="text-4xl font-bold text-blue-600">
-              {stats.basic}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Pro</CardDescription>
-            <CardTitle className="text-4xl font-bold text-purple-600">
-              {stats.pro}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Enterprise</CardDescription>
-            <CardTitle className="text-4xl font-bold text-green-600">
-              {stats.enterprise}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs">Verified</CardDescription>
-            <CardTitle className="text-4xl font-bold text-emerald-600">
-              {stats.verified}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <AdminStatsCard label="Total Users" value={stats.total} />
+        <AdminStatsCard label="Free" value={stats.free} variant="gray" />
+        <AdminStatsCard label="Basic" value={stats.basic} variant="blue" />
+        <AdminStatsCard label="Pro" value={stats.pro} variant="purple" />
+        <AdminStatsCard label="Enterprise" value={stats.enterprise} variant="green" />
+        <AdminStatsCard label="Verified" value={stats.verified} variant="green" />
       </div>
 
       {/* Search & Filters */}

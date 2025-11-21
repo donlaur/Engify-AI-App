@@ -59,6 +59,44 @@ import { filterWorkflows } from '@/lib/opshub/filterUtils';
 import { createWorkflowColumns, type WorkflowWithMetadata } from './workflows/workflowColumns';
 import { calculateWorkflowStats, calculateCategoryStats } from './workflows/workflowStats';
 
+/**
+ * WorkflowManagementPanel Component
+ * 
+ * Admin panel for managing workflows, including viewing, filtering, searching,
+ * and toggling workflow status. Provides comprehensive workflow management with
+ * statistics, category filtering, and status management.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, CRUD_INTERFACE
+ * @principle DRY - Uses shared hooks and utilities to reduce duplication
+ * 
+ * @features
+ * - Workflow listing with pagination
+ * - Search functionality with debouncing
+ * - Category and status filtering
+ * - Status toggle (active/deprecated)
+ * - Statistics display (total, by category, by status)
+ * - View drawer for workflow details
+ * - Error boundary protection
+ * 
+ * @uses
+ * - useAdminData - Data fetching and pagination
+ * - useAdminStatusToggle - Status toggle functionality
+ * - useAdminViewDrawer - View drawer management
+ * - useDebouncedValue - Search input debouncing
+ * - filterWorkflows - Workflow filtering utilities
+ * 
+ * @example
+ * ```tsx
+ * <WorkflowManagementPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing workflow entries.
+ * Provides a complete CRUD interface for workflow management.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function WorkflowManagementPanel() {
   const [searchInput, setSearchInput] = useState('');
 

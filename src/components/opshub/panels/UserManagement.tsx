@@ -17,6 +17,35 @@ interface UserManagementProps {
   initialUsers?: User[];
 }
 
+/**
+ * UserManagement Component
+ * 
+ * A reusable component for managing users with filtering and basic CRUD operations.
+ * Provides a simpler interface than UserManagementPanel for use in other contexts.
+ * 
+ * @component
+ * @pattern REUSABLE_COMPONENT
+ * @principle DRY - Provides reusable user management functionality
+ * 
+ * @features
+ * - User listing with filtering
+ * - Filter by role and plan
+ * - Basic user management operations
+ * - Initial data support for SSR
+ * 
+ * @param initialUsers - Optional array of initial user data (for SSR)
+ * 
+ * @example
+ * ```tsx
+ * <UserManagement initialUsers={users} />
+ * ```
+ * 
+ * @usage
+ * Used in contexts where a simpler user management interface is needed.
+ * For full admin functionality, use UserManagementPanel instead.
+ * 
+ * @see UserManagementPanel for full-featured admin panel
+ */
 export function UserManagement({ initialUsers = [] }: UserManagementProps) {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [loading, setLoading] = useState(false);
