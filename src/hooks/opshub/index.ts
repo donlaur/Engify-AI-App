@@ -3,8 +3,8 @@
  * Barrel export file for cleaner imports of admin-related hooks and types
  *
  * Usage:
- * import { useAdminData, useAdminToast, useDebouncedValue } from '@/hooks/admin';
- * import type { AdminDataItem, PaginationMeta, ToastVariant } from '@/hooks/admin';
+ * import { useAdminData, useAdminToast, useDebouncedValue } from '@/hooks/opshub';
+ * import type { AdminDataItem, PaginationMeta, ToastVariant } from '@/hooks/opshub';
  */
 
 // useAdminData hook and types

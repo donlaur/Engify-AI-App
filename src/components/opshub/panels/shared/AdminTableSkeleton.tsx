@@ -39,7 +39,7 @@ interface AdminTableSkeletonProps {
  * @component
  * @example
  * ```tsx
- * import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
+ * import { AdminTableSkeleton } from '@/components/opshub/panels/shared/AdminTableSkeleton';
  *
  * export function UserManagementPanel() {
  *   const [loading, setLoading] = useState(true);

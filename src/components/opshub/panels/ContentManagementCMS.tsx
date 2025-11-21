@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
+import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
 import {
   Dialog,
   DialogContent,

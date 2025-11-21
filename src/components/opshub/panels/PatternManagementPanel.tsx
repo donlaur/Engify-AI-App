@@ -36,15 +36,15 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
-import { useAdminData } from '@/hooks/admin/useAdminData';
-import { useAdminToast } from '@/hooks/admin/useAdminToast';
-import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
-import { AdminDataTable, type ColumnDef } from '@/components/admin/shared/AdminDataTable';
-import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
-import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
-import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
-import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
-import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
+import { useAdminData } from '@/hooks/opshub/useAdminData';
+import { useAdminToast } from '@/hooks/opshub/useAdminToast';
+import { useDebouncedValue } from '@/hooks/opshub/useDebouncedValue';
+import { AdminDataTable, type ColumnDef } from '@/components/opshub/panels/shared/AdminDataTable';
+import { AdminTableSkeleton } from '@/components/opshub/panels/shared/AdminTableSkeleton';
+import { AdminEmptyState } from '@/components/opshub/panels/shared/AdminEmptyState';
+import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
+import { AdminPaginationControls } from '@/components/opshub/panels/shared/AdminPaginationControls';
+import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard';
 
 interface Pattern {
   _id: string;

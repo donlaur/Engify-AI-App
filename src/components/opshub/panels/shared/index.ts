@@ -11,7 +11,7 @@
  *   AdminTableSkeleton,
  *   AdminPaginationControls,
  *   AdminStatsCard,
- * } from '@/components/admin/shared';
+ * } from '@/components/opshub/panels/shared';
  */
 
 // Data display components

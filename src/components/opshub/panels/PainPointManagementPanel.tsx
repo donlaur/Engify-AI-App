@@ -45,18 +45,18 @@ import {
 } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import type { PainPoint } from '@/lib/workflows/pain-point-schema';
-import { useAdminData } from '@/hooks/admin/useAdminData';
-import { useAdminStatusToggle } from '@/hooks/admin/useAdminStatusToggle';
-import { useAdminViewDrawer } from '@/hooks/admin/useAdminViewDrawer';
-import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
-import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
-import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
-import { AdminDataTable, type ColumnDef } from '@/components/admin/shared/AdminDataTable';
-import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
-import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
-import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
-import { formatAdminDate, calculateStats, truncateText } from '@/lib/admin/utils';
-import { filterPainPoints } from '@/lib/admin/filterUtils';
+import { useAdminData } from '@/hooks/opshub/useAdminData';
+import { useAdminStatusToggle } from '@/hooks/opshub/useAdminStatusToggle';
+import { useAdminViewDrawer } from '@/hooks/opshub/useAdminViewDrawer';
+import { useDebouncedValue } from '@/hooks/opshub/useDebouncedValue';
+import { AdminPaginationControls } from '@/components/opshub/panels/shared/AdminPaginationControls';
+import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard';
+import { AdminDataTable, type ColumnDef } from '@/components/opshub/panels/shared/AdminDataTable';
+import { AdminTableSkeleton } from '@/components/opshub/panels/shared/AdminTableSkeleton';
+import { AdminEmptyState } from '@/components/opshub/panels/shared/AdminEmptyState';
+import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
+import { formatAdminDate, calculateStats, truncateText } from '@/lib/opshub/utils';
+import { filterPainPoints } from '@/lib/opshub/filterUtils';
 
 interface PainPointWithMetadata extends PainPoint {
   _id: string;

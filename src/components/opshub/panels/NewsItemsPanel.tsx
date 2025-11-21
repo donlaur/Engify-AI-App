@@ -33,15 +33,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAdminToast } from '@/hooks/admin/useAdminToast';
-import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
-import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
-import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
-import { AdminDataTable, type ColumnDef } from '@/components/admin/shared/AdminDataTable';
-import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
-import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
-import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
-import { formatAdminDate, truncateText } from '@/lib/admin/utils';
+import { useAdminToast } from '@/hooks/opshub/useAdminToast';
+import { useDebouncedValue } from '@/hooks/opshub/useDebouncedValue';
+import { AdminPaginationControls } from '@/components/opshub/panels/shared/AdminPaginationControls';
+import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard';
+import { AdminDataTable, type ColumnDef } from '@/components/opshub/panels/shared/AdminDataTable';
+import { AdminTableSkeleton } from '@/components/opshub/panels/shared/AdminTableSkeleton';
+import { AdminEmptyState } from '@/components/opshub/panels/shared/AdminEmptyState';
+import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
+import { formatAdminDate, truncateText } from '@/lib/opshub/utils';
 import type { AIToolUpdate } from '@/lib/db/schemas/ai-tool-update';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';

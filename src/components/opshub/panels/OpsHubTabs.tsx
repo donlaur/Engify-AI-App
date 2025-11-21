@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Icons } from '@/lib/icons';
-import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
+import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
 
 // Tab components
 import { DashboardOverviewPanel } from './DashboardOverviewPanel';

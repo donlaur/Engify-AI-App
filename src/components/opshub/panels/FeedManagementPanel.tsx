@@ -37,15 +37,15 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAdminToast } from '@/hooks/admin/useAdminToast';
-import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
-import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
-import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
-import { AdminDataTable } from '@/components/admin/shared/AdminDataTable';
-import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
-import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
-import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
-import { formatAdminDate, truncateText } from '@/lib/admin/utils';
+import { useAdminToast } from '@/hooks/opshub/useAdminToast';
+import { useDebouncedValue } from '@/hooks/opshub/useDebouncedValue';
+import { AdminPaginationControls } from '@/components/opshub/panels/shared/AdminPaginationControls';
+import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard';
+import { AdminDataTable } from '@/components/opshub/panels/shared/AdminDataTable';
+import { AdminTableSkeleton } from '@/components/opshub/panels/shared/AdminTableSkeleton';
+import { AdminEmptyState } from '@/components/opshub/panels/shared/AdminEmptyState';
+import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
+import { formatAdminDate, truncateText } from '@/lib/opshub/utils';
 import type { FeedConfig } from '@/lib/db/schemas/feed-config';
 
 interface FeedWithMetadata extends Omit<FeedConfig, 'createdAt' | 'updatedAt' | 'lastSyncedAt'> {

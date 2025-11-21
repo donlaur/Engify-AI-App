@@ -44,18 +44,18 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { useAdminData } from '@/hooks/admin/useAdminData';
-import { useAdminStatusToggle } from '@/hooks/admin/useAdminStatusToggle';
-import { useAdminViewDrawer } from '@/hooks/admin/useAdminViewDrawer';
-import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
-import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
-import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
-import { AdminDataTable } from '@/components/admin/shared/AdminDataTable';
-import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
-import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
-import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
-import { formatAdminDate } from '@/lib/admin/utils';
-import { filterWorkflows } from '@/lib/admin/filterUtils';
+import { useAdminData } from '@/hooks/opshub/useAdminData';
+import { useAdminStatusToggle } from '@/hooks/opshub/useAdminStatusToggle';
+import { useAdminViewDrawer } from '@/hooks/opshub/useAdminViewDrawer';
+import { useDebouncedValue } from '@/hooks/opshub/useDebouncedValue';
+import { AdminPaginationControls } from '@/components/opshub/panels/shared/AdminPaginationControls';
+import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard';
+import { AdminDataTable } from '@/components/opshub/panels/shared/AdminDataTable';
+import { AdminTableSkeleton } from '@/components/opshub/panels/shared/AdminTableSkeleton';
+import { AdminEmptyState } from '@/components/opshub/panels/shared/AdminEmptyState';
+import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
+import { formatAdminDate } from '@/lib/opshub/utils';
+import { filterWorkflows } from '@/lib/opshub/filterUtils';
 import { createWorkflowColumns, type WorkflowWithMetadata } from './workflows/workflowColumns';
 import { calculateWorkflowStats, calculateCategoryStats } from './workflows/workflowStats';
 

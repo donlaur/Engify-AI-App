@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
-import { formatAdminDate } from '@/lib/admin/utils';
-import type { ColumnDef } from '@/components/admin/shared/AdminDataTable';
+import { formatAdminDate } from '@/lib/opshub/utils';
+import type { ColumnDef } from '@/components/opshub/panels/shared/AdminDataTable';
 import type { Workflow } from '@/lib/workflows/workflow-schema';
 
 /**
