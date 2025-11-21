@@ -13,6 +13,9 @@ interface User {
   updatedAt?: string;
 }
 
+/**
+ * @interface UserManagementProps
+ */
 interface UserManagementProps {
   initialUsers?: User[];
 }

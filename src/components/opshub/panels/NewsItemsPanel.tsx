@@ -48,6 +48,9 @@ import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { Label } from '@/components/ui/label';
 
+/**
+ * @interface NewsItemWithMetadata
+ */
 interface NewsItemWithMetadata extends Omit<AIToolUpdate, 'publishedAt' | 'syncedAt' | 'createdAt' | 'updatedAt'> {
   _id: string;
   publishedAt?: string;

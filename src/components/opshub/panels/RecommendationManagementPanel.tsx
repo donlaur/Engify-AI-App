@@ -58,6 +58,9 @@ import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminError
 import { formatAdminDate, calculateStats } from '@/lib/opshub/utils';
 import { filterRecommendations } from '@/lib/opshub/filterUtils';
 
+/**
+ * @interface RecommendationWithMeta
+ */
 interface RecommendationWithMeta extends Recommendation {
   _id: string;
   createdAt: string;

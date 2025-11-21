@@ -47,6 +47,9 @@ import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard
 import { useCrudOperations } from '@/hooks/opshub/useCrudOperations';
 import { applyFilters } from '@/lib/opshub/utils';
 
+/**
+ * @interface Pattern
+ */
 interface Pattern {
   _id: string;
   id: string;

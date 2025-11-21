@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Icons } from '@/lib/icons';
 import { clientLogger } from '@/lib/logging/client-logger';
 
+/**
+ * @interface ContentStats
+ */
 interface ContentStats {
   totalPrompts: number;
   categories: Array<{ _id: string; count: number }>;

@@ -30,6 +30,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+/**
+ * @interface AffiliateLink
+ */
 interface AffiliateLink {
   _id?: string;
   tool: string;
@@ -48,6 +51,9 @@ interface AffiliateLink {
   clicksThisMonth?: number;
 }
 
+/**
+ * @interface AffiliateStats
+ */
 interface AffiliateStats {
   totalClicks: number;
   uniqueClicks: number;
@@ -58,6 +64,9 @@ interface AffiliateStats {
   estimatedRevenue?: number;
 }
 
+/**
+ * @interface PartnershipOutreach
+ */
 interface PartnershipOutreach {
   _id?: string;
   company: string;

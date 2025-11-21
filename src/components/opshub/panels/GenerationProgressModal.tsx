@@ -8,6 +8,9 @@ import { Icons } from '@/lib/icons';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logging/client-logger';
 
+/**
+ * @interface GenerationStep
+ */
 interface GenerationStep {
   agent: string;
   status: 'pending' | 'active' | 'completed' | 'failed';
@@ -30,6 +33,9 @@ interface GenerationProgress {
   generatedContent?: string;
 }
 
+/**
+ * @interface GenerationProgressModalProps
+ */
 interface GenerationProgressModalProps {
   isOpen: boolean;
   onClose: () => void;

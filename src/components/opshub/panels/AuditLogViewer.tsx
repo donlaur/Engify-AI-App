@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
+/**
+ * @interface AuditLog
+ */
 interface AuditLog {
   _id: string;
   eventType: string;
@@ -18,6 +21,9 @@ interface AuditLog {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * @interface AuditLogViewerProps
+ */
 interface AuditLogViewerProps {
   initialLogs?: AuditLog[];
 }

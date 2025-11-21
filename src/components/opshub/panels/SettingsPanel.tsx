@@ -3,18 +3,27 @@
 import { useState, useEffect } from 'react';
 import { clientLogger } from '@/lib/logging/client-logger';
 
+/**
+ * @interface FeatureFlag
+ */
 interface FeatureFlag {
   name: string;
   value: boolean;
   description: string;
 }
 
+/**
+ * @interface ProviderKey
+ */
 interface ProviderKey {
   name: string;
   configured: boolean;
   masked: string;
 }
 
+/**
+ * @interface MessagingStatus
+ */
 interface MessagingStatus {
   twilio: {
     smsConfigured: boolean;
@@ -27,6 +36,9 @@ interface MessagingStatus {
   };
 }
 
+/**
+ * @interface SystemInfo
+ */
 interface SystemInfo {
   environment: string;
   version: string;

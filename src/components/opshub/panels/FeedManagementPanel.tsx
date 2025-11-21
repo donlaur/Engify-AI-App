@@ -49,6 +49,9 @@ import { clientLogger } from '@/lib/logging/client-logger';
 import { formatAdminDate, truncateText } from '@/lib/opshub/utils';
 import type { FeedConfig } from '@/lib/db/schemas/feed-config';
 
+/**
+ * @interface FeedWithMetadata
+ */
 interface FeedWithMetadata extends Omit<FeedConfig, 'createdAt' | 'updatedAt' | 'lastSyncedAt'> {
   _id: string;
   createdAt?: string;

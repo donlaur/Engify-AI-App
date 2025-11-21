@@ -8,6 +8,9 @@ import { Icons } from '@/lib/icons';
 import { Badge } from '@/components/ui/badge';
 import { clientLogger } from '@/lib/logging/client-logger';
 
+/**
+ * @interface DashboardStats
+ */
 interface DashboardStats {
   users: number;
   content: number;
@@ -19,6 +22,9 @@ interface DashboardStats {
   dlqMessages: number;
 }
 
+/**
+ * @interface RecentActivity
+ */
 interface RecentActivity {
   type: 'user' | 'content' | 'audit';
   title: string;

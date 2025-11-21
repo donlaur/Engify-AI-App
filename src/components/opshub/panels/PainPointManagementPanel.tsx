@@ -58,6 +58,9 @@ import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminError
 import { formatAdminDate, calculateStats, truncateText } from '@/lib/opshub/utils';
 import { filterPainPoints } from '@/lib/opshub/filterUtils';
 
+/**
+ * @interface PainPointWithMetadata
+ */
 interface PainPointWithMetadata extends PainPoint {
   _id: string;
   createdAt: string;

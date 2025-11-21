@@ -2,6 +2,8 @@ import type { Workflow } from '@/lib/workflows/workflow-schema';
 
 /**
  * Extended workflow interface with metadata
+ * 
+ * @interface WorkflowWithMetadata
  */
 export interface WorkflowWithMetadata extends Workflow {
   _id: string;

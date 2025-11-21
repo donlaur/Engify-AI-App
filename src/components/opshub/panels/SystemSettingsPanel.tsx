@@ -49,6 +49,9 @@ import {
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 
+/**
+ * @interface SystemSetting
+ */
 interface SystemSetting {
   _id: string;
   key: string;

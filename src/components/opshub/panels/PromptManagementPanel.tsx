@@ -47,6 +47,9 @@ import { formatAdminDate, calculateStats } from '@/lib/opshub/utils';
 import { clientLogger } from '@/lib/logging/client-logger';
 import { applyFilters } from '@/lib/opshub/utils';
 
+/**
+ * @interface Prompt
+ */
 interface Prompt {
   _id: string;
   id: string;

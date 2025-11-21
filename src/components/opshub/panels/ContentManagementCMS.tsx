@@ -49,6 +49,9 @@ import {
 } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
 
+/**
+ * @interface ContentItem
+ */
 interface ContentItem {
   _id: string;
   type: string;

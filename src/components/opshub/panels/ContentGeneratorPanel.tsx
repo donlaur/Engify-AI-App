@@ -24,6 +24,9 @@ interface Topic {
   keywords?: string[];
 }
 
+/**
+ * @interface JobStatus
+ */
 interface JobStatus {
   jobId: string;
   status: 'queued' | 'processing' | 'completed' | 'failed' | 'partial';

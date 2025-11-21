@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
+/**
+ * @interface ContentItem
+ */
 interface ContentItem {
   _id: string;
   title?: string;
@@ -12,6 +15,9 @@ interface ContentItem {
   reviewStatus?: 'pending' | 'approved' | 'rejected';
 }
 
+/**
+ * @interface ContentReviewQueueProps
+ */
 interface ContentReviewQueueProps {
   initialItems?: ContentItem[];
   showSourceFilter?: boolean;

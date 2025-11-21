@@ -26,6 +26,9 @@ import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { clientLogger } from '@/lib/logging/client-logger';
 
+/**
+ * @interface DLQMessage
+ */
 interface DLQMessage {
   message: {
     id: string;
@@ -45,6 +48,9 @@ interface DLQMessage {
   originalQueue: string;
 }
 
+/**
+ * @interface DLQStats
+ */
 interface DLQStats {
   totalMessages: number;
   oldestMessage: string | null;
