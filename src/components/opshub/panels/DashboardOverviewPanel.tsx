@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { Badge } from '@/components/ui/badge';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 interface DashboardStats {
   users: number;
@@ -107,7 +108,10 @@ export function DashboardOverviewPanel() {
         if (err instanceof Error && err.name === 'AbortError') {
           return;
         }
-        console.error('Failed to fetch dashboard data:', err);
+        clientLogger.apiError('/api/admin/dashboard', err, {
+          component: 'DashboardOverviewPanel',
+          action: 'fetchDashboardData',
+        });
         setError('Failed to load dashboard data. Please refresh the page.');
       } finally {
         setLoading(false);

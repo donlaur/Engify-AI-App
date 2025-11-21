@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
+import { clientLogger } from '@/lib/logging/client-logger';
 import {
   Dialog,
   DialogContent,
@@ -117,7 +118,10 @@ export function ContentManagementCMS() {
         setContentItems(data.content);
       }
     } catch (error) {
-      console.error('Failed to fetch content:', error);
+      clientLogger.apiError('/api/admin/content', error, {
+        component: 'ContentManagementCMS',
+        action: 'fetchContent',
+      });
     } finally {
       setLoading(false);
     }
@@ -169,7 +173,11 @@ export function ContentManagementCMS() {
         alert(`Error: ${data.error}`);
       }
     } catch (error) {
-      console.error('Failed to save content:', error);
+      clientLogger.apiError('/api/admin/content', error, {
+        component: 'ContentManagementCMS',
+        action: 'saveContent',
+        contentId: editingContent?._id,
+      });
       alert('Failed to save content');
     }
   };
@@ -190,7 +198,11 @@ export function ContentManagementCMS() {
         alert(`Error: ${data.error}`);
       }
     } catch (error) {
-      console.error('Failed to delete content:', error);
+      clientLogger.apiError('/api/admin/content', error, {
+        component: 'ContentManagementCMS',
+        action: 'deleteContent',
+        contentId: id,
+      });
       alert('Failed to delete content');
     }
   };
@@ -235,7 +247,10 @@ Make it educational, actionable, and suitable for ${editingItem.type === 'ai_ado
         alert(`Error: ${data.error || 'Failed to generate content'}`);
       }
     } catch (error) {
-      console.error('Failed to generate content:', error);
+      clientLogger.apiError('/api/admin/content/generate', error, {
+        component: 'ContentManagementCMS',
+        action: 'generateContent',
+      });
       alert('Failed to generate content');
     } finally {
       setIsGenerating(false);
@@ -279,7 +294,11 @@ Return enhanced markdown content.`;
         alert(`Error: ${data.error || 'Failed to enhance content'}`);
       }
     } catch (error) {
-      console.error('Failed to enhance content:', error);
+      clientLogger.apiError('/api/admin/content/enhance', error, {
+        component: 'ContentManagementCMS',
+        action: 'enhanceContent',
+        contentId: editingContent?._id,
+      });
       alert('Failed to enhance content');
     } finally {
       setIsGenerating(false);
@@ -331,7 +350,10 @@ Return enhanced markdown content.`;
         alert(`Error: ${data.error || data.message || 'Failed to generate recap'}`);
       }
     } catch (error) {
-      console.error('Failed to generate recap:', error);
+      clientLogger.apiError('/api/admin/content/recap', error, {
+        component: 'ContentManagementCMS',
+        action: 'generateRecap',
+      });
       alert('Failed to generate recap');
     } finally {
       setIsGeneratingRecap(false);
@@ -358,7 +380,7 @@ Return enhanced markdown content.`;
   };
 
   return (
-    <AdminErrorBoundary onError={(err) => console.error('Content Management CMS error:', err)}>
+    <AdminErrorBoundary onError={(err) => clientLogger.componentError('ContentManagementCMS', err)}>
       <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">

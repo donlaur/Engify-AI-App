@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 interface ContentStats {
   totalPrompts: number;
@@ -57,7 +58,10 @@ export function ContentQualityPanel() {
         setStats(data.stats);
       }
     } catch (error) {
-      console.error('Failed to fetch content stats:', error);
+      clientLogger.apiError('/api/admin/content/quality', error, {
+        component: 'ContentQualityPanel',
+        action: 'fetchContentStats',
+      });
     }
   };
 

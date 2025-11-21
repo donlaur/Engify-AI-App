@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import { Input } from '@/components/ui/input';
+import { clientLogger } from '@/lib/logging/client-logger';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
@@ -118,7 +119,10 @@ export function AffiliateLinkManagement() {
         setStats(data.stats || null);
       }
     } catch (error) {
-      console.error('Failed to fetch affiliate data:', error);
+      clientLogger.apiError('/api/admin/affiliate-links', error, {
+        component: 'AffiliateLinkManagement',
+        action: 'fetchAffiliateData',
+      });
     } finally {
       setLoading(false);
     }
@@ -143,7 +147,11 @@ export function AffiliateLinkManagement() {
         fetchAffiliateData();
       }
     } catch (error) {
-      console.error('Failed to save affiliate link:', error);
+      clientLogger.apiError('/api/admin/affiliate-links', error, {
+        component: 'AffiliateLinkManagement',
+        action: 'saveAffiliateLink',
+        linkId: editingLink?.id,
+      });
     }
   };
 

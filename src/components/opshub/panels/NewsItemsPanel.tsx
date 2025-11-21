@@ -41,6 +41,7 @@ import { AdminDataTable, type ColumnDef } from '@/components/opshub/panels/share
 import { AdminTableSkeleton } from '@/components/opshub/panels/shared/AdminTableSkeleton';
 import { AdminEmptyState } from '@/components/opshub/panels/shared/AdminEmptyState';
 import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
+import { clientLogger } from '@/lib/logging/client-logger';
 import { formatAdminDate, truncateText } from '@/lib/opshub/utils';
 import type { AIToolUpdate } from '@/lib/db/schemas/ai-tool-update';
 import { formatDistanceToNow } from 'date-fns';
@@ -203,7 +204,12 @@ export function NewsItemsPanel() {
           });
         } catch (archiveError) {
           // Log but don't fail the whole operation
-          console.warn('Failed to archive news item:', archiveError);
+          clientLogger.warn('Failed to archive news item', {
+            component: 'NewsItemsPanel',
+            action: 'archiveNewsItem',
+            newsItemId: item.id,
+            error: archiveError instanceof Error ? archiveError.message : String(archiveError),
+          });
         }
         
         showSuccess(
@@ -312,7 +318,7 @@ export function NewsItemsPanel() {
 
   if (error) {
     return (
-      <AdminErrorBoundary onError={(err) => console.error('News items panel error:', err)}>
+      <AdminErrorBoundary onError={(err) => clientLogger.componentError('NewsItemsPanel', err)}>
         <AdminEmptyState
           icon={<Icons.error className="h-12 w-12 text-destructive" />}
           title="Failed to load news items"

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 interface FeatureFlag {
   name: string;
@@ -86,7 +87,10 @@ export function SettingsPanel() {
           setSystemInfo(data.data.systemInfo || null);
         }
       } catch (err) {
-        console.error('Failed to load settings:', err);
+        clientLogger.apiError('/api/admin/settings', err, {
+          component: 'SettingsPanel',
+          action: 'loadSettings',
+        });
         // Fallback to empty arrays on error
         setFeatureFlags([]);
         setProviderKeys([]);

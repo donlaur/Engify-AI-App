@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
+import { clientLogger } from '@/lib/logging/client-logger';
 import {
   Table,
   TableBody,
@@ -118,7 +119,10 @@ export function SystemSettingsPanel() {
         setSettings(data.settings);
       }
     } catch (error) {
-      console.error('Failed to fetch settings:', error);
+      clientLogger.apiError('/api/admin/system-settings', error, {
+        component: 'SystemSettingsPanel',
+        action: 'fetchSettings',
+      });
     } finally {
       setLoading(false);
     }
@@ -170,7 +174,11 @@ export function SystemSettingsPanel() {
         alert(`Error: ${data.error}`);
       }
     } catch (error) {
-      console.error('Failed to save setting:', error);
+      clientLogger.apiError('/api/admin/system-settings', error, {
+        component: 'SystemSettingsPanel',
+        action: 'saveSetting',
+        settingId: editingSetting?._id,
+      });
       alert('Failed to save setting');
     }
   };
@@ -191,7 +199,11 @@ export function SystemSettingsPanel() {
         alert(`Error: ${data.error}`);
       }
     } catch (error) {
-      console.error('Failed to delete setting:', error);
+      clientLogger.apiError('/api/admin/system-settings', error, {
+        component: 'SystemSettingsPanel',
+        action: 'deleteSetting',
+        settingId: id,
+      });
       alert('Failed to delete setting');
     }
   };

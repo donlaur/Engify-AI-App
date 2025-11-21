@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Icons } from '@/lib/icons';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 interface DLQMessage {
   message: {
@@ -106,7 +107,10 @@ export function DeadLetterQueuePanel() {
       }
     } catch (error) {
       toast.error('Error loading DLQ data');
-      console.error(error);
+      clientLogger.apiError('/api/admin/dlq', error, {
+        component: 'DeadLetterQueuePanel',
+        action: 'loadDLQData',
+      });
     } finally {
       setLoading(false);
     }
@@ -133,7 +137,11 @@ export function DeadLetterQueuePanel() {
       }
     } catch (error) {
       toast.error('Error replaying message');
-      console.error(error);
+      clientLogger.apiError('/api/admin/dlq/replay', error, {
+        component: 'DeadLetterQueuePanel',
+        action: 'replayMessage',
+        messageId: messageId,
+      });
     }
   };
 
@@ -166,7 +174,11 @@ export function DeadLetterQueuePanel() {
       }
     } catch (error) {
       toast.error('Error replaying messages');
-      console.error(error);
+      clientLogger.apiError('/api/admin/dlq/replay-batch', error, {
+        component: 'DeadLetterQueuePanel',
+        action: 'replayMessages',
+        count: selectedMessages.length,
+      });
     }
   };
 
@@ -195,7 +207,11 @@ export function DeadLetterQueuePanel() {
       }
     } catch (error) {
       toast.error('Error deleting message');
-      console.error(error);
+      clientLogger.apiError('/api/admin/dlq/delete', error, {
+        component: 'DeadLetterQueuePanel',
+        action: 'deleteMessage',
+        messageId: messageId,
+      });
     }
   };
 
@@ -227,7 +243,10 @@ export function DeadLetterQueuePanel() {
       }
     } catch (error) {
       toast.error('Error purging DLQ');
-      console.error(error);
+      clientLogger.apiError('/api/admin/dlq/purge', error, {
+        component: 'DeadLetterQueuePanel',
+        action: 'purgeDLQ',
+      });
     }
   };
 

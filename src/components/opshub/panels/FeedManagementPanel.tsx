@@ -45,6 +45,7 @@ import { AdminDataTable } from '@/components/opshub/panels/shared/AdminDataTable
 import { AdminTableSkeleton } from '@/components/opshub/panels/shared/AdminTableSkeleton';
 import { AdminEmptyState } from '@/components/opshub/panels/shared/AdminEmptyState';
 import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
+import { clientLogger } from '@/lib/logging/client-logger';
 import { formatAdminDate, truncateText } from '@/lib/opshub/utils';
 import type { FeedConfig } from '@/lib/db/schemas/feed-config';
 
@@ -345,7 +346,7 @@ export function FeedManagementPanel() {
   );
 
   return (
-    <AdminErrorBoundary onError={(err) => console.error('Feed panel error:', err)}>
+    <AdminErrorBoundary onError={(err) => clientLogger.componentError('FeedManagementPanel', err)}>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">

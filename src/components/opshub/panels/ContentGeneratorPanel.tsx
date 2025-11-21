@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getAllContentTypes } from '@/lib/content/content-types';
 import { GenerationProgressModal } from './GenerationProgressModal';
 import { ContentPreview } from './ContentPreview';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 interface Topic {
   topic: string;
@@ -129,7 +130,10 @@ export function ContentGeneratorPanel() {
           setSelectedModel(data.models[0]?.id || '');
         }
       } catch (error) {
-        console.error('Error loading models:', error);
+        clientLogger.apiError('/api/admin/ai-models', error, {
+          component: 'ContentGeneratorPanel',
+          action: 'loadModels',
+        });
       }
     }
     loadModels();
@@ -155,7 +159,10 @@ export function ContentGeneratorPanel() {
         setQueueStats(statsData.stats);
       }
     } catch (error) {
-      console.error('Error loading queue:', error);
+      clientLogger.apiError('/api/admin/content/queue', error, {
+        component: 'ContentGeneratorPanel',
+        action: 'loadQueue',
+      });
     } finally {
       setLoadingQueue(false);
     }
@@ -185,7 +192,10 @@ export function ContentGeneratorPanel() {
         setReviewStats(statsData.stats);
       }
     } catch (error) {
-      console.error('Error loading review content:', error);
+      clientLogger.apiError('/api/admin/content/review', error, {
+        component: 'ContentGeneratorPanel',
+        action: 'loadReview',
+      });
     } finally {
       setLoadingReview(false);
     }
@@ -271,7 +281,11 @@ export function ContentGeneratorPanel() {
             }
           }
         } catch (error) {
-          console.error('Error polling job status:', error);
+          clientLogger.apiError('/api/admin/content/generation/status', error, {
+            component: 'ContentGeneratorPanel',
+            action: 'pollJobStatus',
+            jobId: currentJobId,
+          });
         }
       }, 3000); // Poll every 3 seconds
 
@@ -307,7 +321,10 @@ export function ContentGeneratorPanel() {
         }
       }
     } catch (error) {
-      console.error('Error asking AI:', error);
+      clientLogger.apiError('/api/admin/content/ask-ai', error, {
+        component: 'ContentGeneratorPanel',
+        action: 'askAI',
+      });
       toast({
         title: 'Error',
         description: 'Failed to get AI answer',
@@ -408,7 +425,10 @@ export function ContentGeneratorPanel() {
         });
       }
     } catch (error) {
-      console.error('Error submitting batch:', error);
+      clientLogger.apiError('/api/admin/content/generation/batch', error, {
+        component: 'ContentGeneratorPanel',
+        action: 'submitBatch',
+      });
       toast({
         title: 'Error',
         description: 'Failed to submit batch job',

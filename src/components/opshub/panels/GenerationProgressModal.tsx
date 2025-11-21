@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 interface GenerationStep {
   agent: string;
@@ -110,7 +111,11 @@ export function GenerationProgressModal({ isOpen, onClose, jobId, onComplete }: 
           }
         }
       } catch (error) {
-        console.error('Error fetching progress:', error);
+        clientLogger.apiError('/api/admin/content/generation/status', error, {
+          component: 'GenerationProgressModal',
+          action: 'fetchProgress',
+          jobId,
+        });
       }
     }, 2000); // Poll every 2 seconds (reduced frequency)
 
