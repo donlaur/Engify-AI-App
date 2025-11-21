@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -16,6 +16,7 @@ import { Icons } from '@/lib/icons';
 import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
 import { clientLogger } from '@/lib/logging/client-logger';
 import { useCrudOperations } from '@/hooks/opshub/useCrudOperations';
+import { applyFilters } from '@/lib/opshub/utils';
 import {
   Dialog,
   DialogContent,
@@ -328,12 +329,21 @@ Return enhanced markdown content.`;
     }
   };
 
-  const filteredContent = contentItems.filter((item) =>
-    searchTerm
-      ? item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.content.toLowerCase().includes(searchTerm.toLowerCase())
-      : true
-  );
+  // Use shared filtering utilities
+  const filteredContent = useMemo(() => {
+    return applyFilters(
+      contentItems,
+      filter !== 'all' ? {
+        predicates: [{
+          type: 'exact',
+          field: 'type',
+          value: filter,
+        } as any],
+      } : {},
+      searchTerm || undefined,
+      ['title', 'content']
+    );
+  }, [contentItems, filter, searchTerm]);
 
   const stats = {
     total: contentItems.length,

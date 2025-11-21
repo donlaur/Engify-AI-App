@@ -16,6 +16,7 @@ import { Icons } from '@/lib/icons';
 import { clientLogger } from '@/lib/logging/client-logger';
 import { useCrudOperations } from '@/hooks/opshub/useCrudOperations';
 import { useAdminToast } from '@/hooks/opshub/useAdminToast';
+import { applyFilters } from '@/lib/opshub/utils';
 import {
   Table,
   TableBody,
@@ -178,12 +179,21 @@ export function SystemSettingsPanel() {
     await deleteItem(id, 'Are you sure you want to delete this setting?');
   };
 
-  const filteredSettings = settings.filter((setting) =>
-    searchTerm
-      ? setting.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        setting.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      : true
-  );
+  // Use shared filtering utilities
+  const filteredSettings = useMemo(() => {
+    return applyFilters(
+      settings,
+      categoryFilter !== 'all' ? {
+        predicates: [{
+          type: 'exact',
+          field: 'category',
+          value: categoryFilter,
+        } as any],
+      } : {},
+      searchTerm || undefined,
+      ['key', 'description']
+    );
+  }, [settings, categoryFilter, searchTerm]);
 
   // Pagination
   const totalPages = Math.ceil(filteredSettings.length / itemsPerPage);
