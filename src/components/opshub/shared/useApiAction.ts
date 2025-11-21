@@ -3,7 +3,67 @@ import { useAdminToast } from '@/hooks/opshub';
 import { clientLogger } from '@/lib/logging/client-logger';
 
 /**
- * Hook for handling API actions with loading and error states
+ * Options for API action execution
+ * 
+ * @interface ApiActionOptions
+ * @template T - The return type of the action
+ */
+interface ApiActionOptions<T> {
+  /** Success message to display, or function to generate message from result */
+  successMessage?: string | ((result: T) => string);
+  /** Custom error message to display on failure */
+  errorMessage?: string;
+  /** Callback executed on successful action completion */
+  onSuccess?: (result: T) => void | Promise<void>;
+  /** Callback executed on action failure */
+  onError?: (error: Error) => void;
+}
+
+/**
+ * useApiAction Hook
+ * 
+ * A reusable React hook for handling asynchronous API actions with built-in
+ * loading states, error handling, and toast notifications. Provides a consistent
+ * pattern for API calls across admin panels.
+ * 
+ * @pattern CUSTOM_HOOK
+ * @principle DRY - Eliminates boilerplate for API action handling
+ * 
+ * @features
+ * - Automatic loading state management
+ * - Error handling with toast notifications
+ * - Success callbacks and messages
+ * - Error logging via clientLogger
+ * - Type-safe generic implementation
+ * 
+ * @returns Object containing execute function and loading state
+ * @returns {Function} execute - Function to execute API actions
+ * @returns {boolean} loading - Current loading state
+ * 
+ * @example
+ * ```tsx
+ * const { execute, loading } = useApiAction();
+ * 
+ * const handleSave = async () => {
+ *   await execute(
+ *     () => fetch('/api/save', { method: 'POST', body: data }),
+ *     {
+ *       successMessage: 'Data saved successfully',
+ *       errorMessage: 'Failed to save data',
+ *       onSuccess: () => {
+ *         // Refresh data or navigate
+ *         router.refresh();
+ *       },
+ *     }
+ *   );
+ * };
+ * ```
+ * 
+ * @usage
+ * Used throughout OpsHub admin panels for consistent API action handling.
+ * Reduces boilerplate and ensures consistent error handling and user feedback.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
  */
 export function useApiAction() {
   const [loading, setLoading] = useState(false);
