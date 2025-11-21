@@ -45,6 +45,7 @@ import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminError
 import { AdminPaginationControls } from '@/components/opshub/panels/shared/AdminPaginationControls';
 import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard';
 import { useCrudOperations } from '@/hooks/opshub/useCrudOperations';
+import { applyFilters } from '@/lib/opshub/utils';
 
 interface Pattern {
   _id: string;
@@ -173,26 +174,19 @@ export function PatternManagementPanel() {
     await deleteItem(id, 'Are you sure you want to delete this pattern?');
   };
 
-  // Filter patterns based on category, level, and search
+  // Filter patterns using shared filtering utilities (DRY pattern)
   const filteredPatterns = useMemo(() => {
-    return patterns.filter((pattern) => {
-      // Filter by category
-      if (filter !== 'all' && pattern.category !== filter) return false;
-
-      // Filter by level
-      if (levelFilter !== 'all' && pattern.level !== levelFilter) return false;
-
-      // Filter by search
-      if (debouncedSearch) {
-        const search = debouncedSearch.toLowerCase();
-        return (
-          pattern.name.toLowerCase().includes(search) ||
-          pattern.description.toLowerCase().includes(search)
-        );
-      }
-
-      return true;
-    });
+    return applyFilters(
+      patterns,
+      {
+        filters: {
+          ...(filter !== 'all' ? { category: filter } : {}),
+          ...(levelFilter !== 'all' ? { level: levelFilter } : {}),
+        },
+      },
+      debouncedSearch || undefined,
+      ['name', 'description']
+    );
   }, [patterns, filter, levelFilter, debouncedSearch]);
 
   // Calculate stats

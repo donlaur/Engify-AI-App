@@ -41,7 +41,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAdminToast } from '@/hooks/opshub/useAdminToast';
 import { clientLogger } from '@/lib/logging/client-logger';
 
@@ -95,6 +95,14 @@ export function useCrudOperations<T extends { _id?: string; id?: string }>({
 }: CrudOperationsOptions<T>) {
   const [loading, setLoading] = useState(false);
   const { success, error: showError } = useAdminToast();
+  
+  // Use ref to always call the latest onRefresh function, preventing stale closure issues
+  // This ensures that when onRefresh is recreated (e.g., with new filter values),
+  // the hook always calls the latest version even if called asynchronously
+  const onRefreshRef = useRef(onRefresh);
+  useEffect(() => {
+    onRefreshRef.current = onRefresh;
+  }, [onRefresh]);
 
   /**
    * Save an item (create or update)
@@ -131,7 +139,8 @@ export function useCrudOperations<T extends { _id?: string; id?: string }>({
           await onSaveSuccess(item, isCreating);
         }
 
-        onRefresh();
+        // Use ref to call latest onRefresh function (prevents stale closure)
+        onRefreshRef.current();
         return true;
       } else {
         const errorMsg = data.error || `${errorMessagePrefix}: ${data.message || 'Unknown error'}`;
@@ -199,7 +208,8 @@ export function useCrudOperations<T extends { _id?: string; id?: string }>({
           await onDeleteSuccess(id);
         }
 
-        onRefresh();
+        // Use ref to call latest onRefresh function (prevents stale closure)
+        onRefreshRef.current();
         return true;
       } else {
         const errorMsg = data.error || `${errorMessagePrefix}: ${data.message || 'Unknown error'}`;

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { clientLogger } from '@/lib/logging/client-logger';
 import { useAdminToast } from '@/hooks/opshub/useAdminToast';
+import { useCrudOperations } from '@/hooks/opshub/useCrudOperations';
 import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard';
 import {
   Card,
@@ -107,13 +108,11 @@ export function UserManagementPanel() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    fetchUsers();
-  }, [planFilter, roleFilter]);
-
   const { error: showError } = useAdminToast();
 
-  const fetchUsers = async () => {
+  // Memoize fetchUsers with useCallback to prevent stale closure issues in useCrudOperations
+  // When filters change, a new function is created that captures the latest filter values
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -129,12 +128,31 @@ export function UserManagementPanel() {
         showError('Failed to fetch users', data.error || 'Unknown error');
       }
     } catch (error) {
-      clientLogger.apiError('/api/admin/users', error, { component: 'UserManagementPanel' });
+      clientLogger.apiError('/api/admin/users', error, { component: 'UserManagementPanel', action: 'fetchUsers' });
       showError('Network error', 'Unable to connect to server');
     } finally {
       setLoading(false);
     }
-  };
+  }, [planFilter, roleFilter, showError]);
+
+  // Use shared CRUD operations hook (handles its own toasts)
+  // Note: onRefresh callback is memoized with useCallback above to ensure it always
+  // has the latest filter values when called asynchronously after save/delete operations
+  const { saveItem, deleteItem } = useCrudOperations<User>({
+    endpoint: '/api/admin/users',
+    onRefresh: fetchUsers,
+    createSuccessMessage: 'User created successfully',
+    updateSuccessMessage: 'User updated successfully',
+    deleteSuccessMessage: 'User deleted successfully',
+    onSaveSuccess: () => {
+      setIsEditDialogOpen(false);
+    },
+  });
+
+  useEffect(() => {
+    fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [planFilter, roleFilter]);
 
   const handleEdit = (user: User) => {
     setEditingUser(user);
@@ -165,48 +183,11 @@ export function UserManagementPanel() {
 
   const handleSave = async () => {
     if (!editingUser) return;
-
-    try {
-      const method = isCreating ? 'POST' : 'PUT';
-      const res = await fetch('/api/admin/users', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingUser),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        setIsEditDialogOpen(false);
-        fetchUsers();
-      } else {
-        showError('Save failed', data.error || 'Failed to save user');
-      }
-    } catch (error) {
-      clientLogger.apiError('/api/admin/users', error, { component: 'UserManagementPanel', action: 'save' });
-      showError('Network error', 'Unable to connect to server');
-    }
+    await saveItem(editingUser, isCreating);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-
-    try {
-      const res = await fetch(`/api/admin/users?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        fetchUsers();
-      } else {
-        showError('Delete failed', data.error || 'Failed to delete user');
-      }
-    } catch (error) {
-      clientLogger.apiError('/api/admin/users', error, { component: 'UserManagementPanel', action: 'delete' });
-      showError('Network error', 'Unable to connect to server');
-    }
+    await deleteItem(id, 'Are you sure you want to delete this user?');
   };
 
   const filteredUsers = users.filter((user) =>
