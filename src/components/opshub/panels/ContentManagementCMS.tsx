@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
 import { clientLogger } from '@/lib/logging/client-logger';
+import { useCrudOperations } from '@/hooks/opshub/useCrudOperations';
 import {
   Dialog,
   DialogContent,

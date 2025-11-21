@@ -14,6 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import { clientLogger } from '@/lib/logging/client-logger';
+import { useCrudOperations } from '@/hooks/opshub/useCrudOperations';
+import { useAdminToast } from '@/hooks/opshub/useAdminToast';
 import {
   Table,
   TableBody,
@@ -154,58 +156,26 @@ export function SystemSettingsPanel() {
     setIsEditDialogOpen(true);
   };
 
+  // Use shared CRUD operations hook
+  const { success, error: showError } = useAdminToast();
+  const { saveItem, deleteItem } = useCrudOperations<SystemSetting>({
+    endpoint: '/api/admin/system-settings',
+    onRefresh: fetchSettings,
+    createSuccessMessage: 'Setting created successfully',
+    updateSuccessMessage: 'Setting updated successfully',
+    deleteSuccessMessage: 'Setting deleted successfully',
+    onSaveSuccess: () => {
+      setIsEditDialogOpen(false);
+    },
+  });
+
   const handleSave = async () => {
     if (!editingSetting) return;
-
-    try {
-      const method = isCreating ? 'POST' : 'PUT';
-      const res = await fetch('/api/admin/system-settings', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingSetting),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        setIsEditDialogOpen(false);
-        fetchSettings();
-      } else {
-        alert(`Error: ${data.error}`);
-      }
-    } catch (error) {
-      clientLogger.apiError('/api/admin/system-settings', error, {
-        component: 'SystemSettingsPanel',
-        action: 'saveSetting',
-        settingId: editingSetting?._id,
-      });
-      alert('Failed to save setting');
-    }
+    await saveItem(editingSetting, isCreating);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this setting?')) return;
-
-    try {
-      const res = await fetch(`/api/admin/system-settings?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        fetchSettings();
-      } else {
-        alert(`Error: ${data.error}`);
-      }
-    } catch (error) {
-      clientLogger.apiError('/api/admin/system-settings', error, {
-        component: 'SystemSettingsPanel',
-        action: 'deleteSetting',
-        settingId: id,
-      });
-      alert('Failed to delete setting');
-    }
+    await deleteItem(id, 'Are you sure you want to delete this setting?');
   };
 
   const filteredSettings = settings.filter((setting) =>
