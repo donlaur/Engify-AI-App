@@ -16,7 +16,40 @@ interface ToolCardProps {
 }
 
 /**
- * Individual tool card component
+ * ToolCard Component
+ * 
+ * A card component for displaying individual AI tool information.
+ * Shows tool details including category, pricing, rating, and provides edit/status toggle actions.
+ * 
+ * @pattern REUSABLE_UI_COMPONENT
+ * @principle DRY - Eliminates duplication of tool card markup
+ * 
+ * @features
+ * - Tool name, tagline, and slug display
+ * - Category and pricing badges
+ * - Rating display (if available)
+ * - Edit and status toggle actions
+ * - Visual styling for deprecated tools (opacity)
+ * 
+ * @param tool - The AI tool data to display
+ * @param onEdit - Callback function when edit button is clicked
+ * @param onToggleStatus - Callback function when status toggle is clicked
+ * @param categoryLabels - Dictionary mapping category keys to display labels
+ * 
+ * @example
+ * ```tsx
+ * <ToolCard
+ *   tool={toolData}
+ *   onEdit={handleEdit}
+ *   onToggleStatus={handleToggle}
+ *   categoryLabels={{ 'code': 'Code Tools', 'text': 'Text Tools' }}
+ * />
+ * ```
+ * 
+ * @usage
+ * Used in AI tool management panels to display tool information in a card format.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
  */
 export function ToolCard({ tool, onEdit, onToggleStatus, categoryLabels }: ToolCardProps) {
   return (

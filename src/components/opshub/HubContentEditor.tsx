@@ -192,6 +192,43 @@ function HubContentSection<T extends { id: string; order: number }>({
   );
 }
 
+/**
+ * HubContentEditor Component
+ * 
+ * A complex editor component for managing hub content associated with AI tools.
+ * Provides interfaces for managing related prompts, patterns, problems, articles,
+ * getting started guides, and official/community resources.
+ * 
+ * @pattern COMPLEX_FORM_COMPONENT
+ * @principle DRY - Centralizes hub content editing logic
+ * 
+ * @features
+ * - Multiple content section management (prompts, patterns, problems, etc.)
+ * - Add, edit, and remove items in each section
+ * - Drag-and-drop reordering (via HubContentSection)
+ * - Resource management (official and community)
+ * - Automatic state synchronization with parent component
+ * 
+ * @param tool - The AI tool containing hub content to edit
+ * @param onChange - Callback function when hub content is updated
+ * 
+ * @example
+ * ```tsx
+ * <HubContentEditor
+ *   tool={toolData}
+ *   onChange={(updatedContent) => {
+ *     // Update tool with new hub content
+ *     updateTool({ ...tool, hubContent: updatedContent });
+ *   }}
+ * />
+ * ```
+ * 
+ * @usage
+ * Used within ToolForm for managing the hub content section of AI tools.
+ * Provides a comprehensive interface for organizing tool-related content.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function HubContentEditor({ tool, onChange }: HubContentEditorProps) {
   const [hubContent, setHubContent] = useState<NonNullable<AITool['hubContent']>>(
     tool.hubContent || {

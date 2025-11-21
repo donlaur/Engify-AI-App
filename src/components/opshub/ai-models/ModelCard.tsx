@@ -12,7 +12,32 @@ interface ModelCardProps {
 }
 
 /**
- * Individual model card component
+ * ModelCard Component
+ * 
+ * A card component for displaying individual AI model information.
+ * Shows model details including pricing, context window, and status.
+ * 
+ * @pattern REUSABLE_UI_COMPONENT
+ * @principle DRY - Eliminates duplication of model card markup
+ * 
+ * @features
+ * - Model name and ID display
+ * - Pricing information (input/output costs per 1M tokens)
+ * - Context window size
+ * - Deprecated status indication
+ * - Visual styling for deprecated models (opacity)
+ * 
+ * @param model - The AI model data to display
+ * 
+ * @example
+ * ```tsx
+ * <ModelCard model={modelData} />
+ * ```
+ * 
+ * @usage
+ * Used in AI model management panels to display model information in a card format.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
  */
 export function ModelCard({ model }: ModelCardProps) {
   const inputCost = model.inputCostPer1M || (model.costPer1kInputTokens || 0) * 1000;

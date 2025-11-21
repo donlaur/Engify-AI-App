@@ -29,7 +29,42 @@ interface ToolFormProps {
 }
 
 /**
- * Tool form component for creating/editing tools
+ * ToolForm Component
+ * 
+ * A comprehensive form component for creating and editing AI tools.
+ * Provides tabbed interface for organizing tool information including basic details,
+ * features, pros/cons, and hub content.
+ * 
+ * @pattern FORM_COMPONENT
+ * @principle DRY - Centralizes tool form logic and validation
+ * 
+ * @features
+ * - Create and edit tool functionality
+ * - Tabbed interface for organizing form fields
+ * - Automatic slug generation from name
+ * - Hub content editor integration
+ * - Form validation and error handling
+ * - Category selection with labels
+ * 
+ * @param tool - Existing tool data for editing, or null for creating new tool
+ * @param onSave - Callback function when form is submitted
+ * @param onCancel - Callback function when form is cancelled
+ * @param categoryLabels - Dictionary mapping category keys to display labels
+ * 
+ * @example
+ * ```tsx
+ * <ToolForm
+ *   tool={existingTool}
+ *   onSave={handleSave}
+ *   onCancel={handleCancel}
+ *   categoryLabels={CATEGORY_LABELS}
+ * />
+ * ```
+ * 
+ * @usage
+ * Used in AI tool management panels for creating and editing tool entries.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
  */
 export function ToolForm({ tool, onSave, onCancel, categoryLabels }: ToolFormProps) {
   const [formData, setFormData] = useState<Partial<ToolDisplay>>({
