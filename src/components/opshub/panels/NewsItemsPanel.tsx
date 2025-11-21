@@ -334,7 +334,7 @@ export function NewsItemsPanel() {
   }
 
   return (
-    <AdminErrorBoundary onError={(err) => console.error('News items panel error:', err)}>
+    <AdminErrorBoundary onError={(err) => clientLogger.componentError('NewsItemsPanel', err)}>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">

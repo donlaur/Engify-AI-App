@@ -5,6 +5,11 @@
  * statistics calculation, filtering, formatting, and query string building.
  */
 
+// Note: This file contains utility functions that may be used in both client and server contexts.
+// We use clientLogger here as these utilities are primarily used in client components.
+// If used in server components, the logger will gracefully handle it.
+import { clientLogger } from '@/lib/logging/client-logger';
+
 // ============================================================================
 // Type Definitions
 // ============================================================================
@@ -131,7 +136,12 @@ export function calculateStats<T>(
       try {
         acc[definition.key] = definition.calculate(items);
       } catch (error) {
-        console.error(`Error calculating stat "${definition.key}":`, error);
+        clientLogger.error(`Error calculating stat "${definition.key}"`, {
+          component: 'utils',
+          action: 'calculateStats',
+          statKey: definition.key,
+          error: error instanceof Error ? error.message : String(error),
+        });
         acc[definition.key] = 0;
       }
       return acc;
@@ -147,7 +157,11 @@ export function calculateStats<T>(
 
     return results;
   } catch (error) {
-    console.error('Error in calculateStats:', error);
+    clientLogger.error('Error in calculateStats', {
+      component: 'utils',
+      action: 'calculateStats',
+      error: error instanceof Error ? error.message : String(error),
+    });
     return statDefinitions.reduce((acc, def) => {
       acc[def.key] = 0;
       return acc;
@@ -258,7 +272,12 @@ export function applyFilters<T extends Record<string, any>>(
               try {
                 return predicate.predicate(item);
               } catch (error) {
-                console.error('Error in custom predicate:', error);
+                clientLogger.error('Error in custom predicate', {
+                  component: 'utils',
+                  action: 'applyFilters',
+                  filterType: 'custom',
+                  error: error instanceof Error ? error.message : String(error),
+                });
                 return false;
               }
 
@@ -295,7 +314,11 @@ export function applyFilters<T extends Record<string, any>>(
 
     return filtered;
   } catch (error) {
-    console.error('Error in applyFilters:', error);
+    clientLogger.error('Error in applyFilters', {
+      component: 'utils',
+      action: 'applyFilters',
+      error: error instanceof Error ? error.message : String(error),
+    });
     return items;
   }
 }
@@ -344,7 +367,11 @@ export function formatAdminDate(date: Date | string | null | undefined): string 
       year: 'numeric'
     });
   } catch (error) {
-    console.error('Error formatting date:', error);
+    clientLogger.error('Error formatting date', {
+      component: 'utils',
+      action: 'formatAdminDate',
+      error: error instanceof Error ? error.message : String(error),
+    });
     return 'Error';
   }
 }
@@ -409,7 +436,11 @@ export function createQueryString(params: QueryParams = {}): string {
 
     return searchParams.toString();
   } catch (error) {
-    console.error('Error creating query string:', error);
+    clientLogger.error('Error creating query string', {
+      component: 'utils',
+      action: 'createQueryString',
+      error: error instanceof Error ? error.message : String(error),
+    });
     return '';
   }
 }
@@ -465,7 +496,11 @@ export function truncateText(
 
     return text.slice(0, minLength - 3) + '...';
   } catch (error) {
-    console.error('Error truncating text:', error);
+    clientLogger.error('Error truncating text', {
+      component: 'utils',
+      action: 'truncateText',
+      error: error instanceof Error ? error.message : String(error),
+    });
     return '';
   }
 }
@@ -534,7 +569,11 @@ export function parseQueryString(queryString: string): Record<string, string> {
 
     return result;
   } catch (error) {
-    console.error('Error parsing query string:', error);
+    clientLogger.error('Error parsing query string', {
+      component: 'utils',
+      action: 'parseQueryString',
+      error: error instanceof Error ? error.message : String(error),
+    });
     return {};
   }
 }
