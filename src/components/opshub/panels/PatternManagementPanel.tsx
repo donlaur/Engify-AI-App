@@ -45,6 +45,8 @@ import { AdminEmptyState } from '@/components/opshub/panels/shared/AdminEmptySta
 import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
 import { AdminPaginationControls } from '@/components/opshub/panels/shared/AdminPaginationControls';
 import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard';
+import { useCrudOperations } from '@/hooks/opshub/useCrudOperations';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 interface Pattern {
   _id: string;
@@ -153,57 +155,25 @@ export function PatternManagementPanel() {
     setIsEditDialogOpen(true);
   };
 
+  // Use shared CRUD operations hook
+  const { saveItem, deleteItem, loading: crudLoading } = useCrudOperations<Pattern>({
+    endpoint: '/api/admin/patterns',
+    onRefresh: refresh,
+    createSuccessMessage: 'The pattern has been created successfully',
+    updateSuccessMessage: 'The pattern has been updated successfully',
+    deleteSuccessMessage: 'The pattern has been deleted successfully',
+    onSaveSuccess: () => {
+      setIsEditDialogOpen(false);
+    },
+  });
+
   const handleSave = async () => {
     if (!editingPattern) return;
-
-    try {
-      const method = isCreating ? 'POST' : 'PUT';
-      const res = await fetch('/api/admin/patterns', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingPattern),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        setIsEditDialogOpen(false);
-        refresh();
-        success(
-          isCreating ? 'Pattern created' : 'Pattern updated',
-          isCreating
-            ? 'The pattern has been created successfully'
-            : 'The pattern has been updated successfully'
-        );
-      } else {
-        showError('Save failed', data.error || 'Failed to save pattern');
-      }
-    } catch (err) {
-      console.error('Failed to save pattern:', err);
-      showError('Save failed', 'An unexpected error occurred');
-    }
+    await saveItem(editingPattern, isCreating);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this pattern?')) return;
-
-    try {
-      const res = await fetch(`/api/admin/patterns?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        refresh();
-        success('Pattern deleted', 'The pattern has been deleted successfully');
-      } else {
-        showError('Delete failed', data.error || 'Failed to delete pattern');
-      }
-    } catch (err) {
-      console.error('Failed to delete pattern:', err);
-      showError('Delete failed', 'An unexpected error occurred');
-    }
+    await deleteItem(id, 'Are you sure you want to delete this pattern?');
   };
 
   // Filter patterns based on category, level, and search

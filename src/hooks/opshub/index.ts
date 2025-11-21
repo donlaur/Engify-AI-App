@@ -26,3 +26,6 @@ export type {
 
 // useDebouncedValue hook
 export { useDebouncedValue } from './useDebouncedValue';
+
+// useCrudOperations hook
+export { useCrudOperations } from './useCrudOperations';

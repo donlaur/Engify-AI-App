@@ -44,6 +44,7 @@ import { AdminTableSkeleton } from '@/components/opshub/panels/shared/AdminTable
 import { AdminEmptyState } from '@/components/opshub/panels/shared/AdminEmptyState';
 import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
 import { formatAdminDate, calculateStats } from '@/lib/opshub/utils';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 interface Prompt {
   _id: string;
@@ -202,7 +203,11 @@ export function PromptManagementPanel() {
         showError('Failed to update status', 'Please try again');
       }
     } catch (err) {
-      console.error('Failed to toggle active status:', err);
+      clientLogger.apiError(`/api/admin/prompts/${promptId}`, err, {
+        component: 'PromptManagementPanel',
+        action: 'toggleActive',
+        promptId,
+      });
       showError('Network error', 'Unable to connect to server');
     }
   };
@@ -300,7 +305,7 @@ export function PromptManagementPanel() {
   ]), [prompts, totalCount]);
 
   return (
-    <AdminErrorBoundary onError={(err) => console.error('Prompt panel error:', err)}>
+    <AdminErrorBoundary onError={(err) => clientLogger.componentError('PromptManagementPanel', err)}>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
