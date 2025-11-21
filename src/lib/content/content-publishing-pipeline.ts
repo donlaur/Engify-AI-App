@@ -560,8 +560,218 @@ You're the guardian of quality. High standards, but be fair and constructive.`,
 export class ContentPublishingService {
   private organizationId: string;
 
+  // Fallback models by provider (as of Nov 2025)
+  private static readonly FALLBACK_MODELS = {
+    openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4'],
+    anthropic: ['claude-3-5-sonnet-20250219', 'claude-3-haiku-20240307'],
+    google: ['gemini-2.0-flash-exp', 'gemini-1.5-flash'],
+    groq: ['llama-3.1-70b-versatile', 'llama-3.1-8b-instant'],
+  } as const;
+
+  private static readonly INVALID_SUFFIXES = [':thinking', ':expanded', ':beta', ':preview'];
+  private static readonly INVALID_CAPABILITIES = ['audio-generation', 'video-generation', 'image-generation'];
+  private static readonly INVALID_TAGS = ['audio-only', 'realtime-only', 'unsuitable-for-text'];
+  private static readonly INVALID_MODEL_NAMES = ['audio', 'video', 'image', 'flux', 'sora', 'dalle', 'midjourney', 'transcribe', 'realtime'];
+
   constructor(organizationId: string) {
     this.organizationId = organizationId;
+  }
+
+  /**
+   * Get provider type from agent provider string
+   */
+  private getProviderType(provider: string): 'openai' | 'anthropic' | 'google' | 'groq' {
+    if (provider.includes('openai')) return 'openai';
+    if (provider.includes('claude')) return 'anthropic';
+    if (provider.includes('gemini')) return 'google';
+    if (provider.includes('groq')) return 'groq';
+    return 'openai';
+  }
+
+  /**
+   * Check if a model is valid for text generation
+   */
+  private isModelValid(model: any): boolean {
+    const status = ('status' in model ? model.status : 'active');
+    if (status !== 'active') return false;
+    
+    if ('isAllowed' in model && model.isAllowed === false) return false;
+    
+    const modelId = (model.id || '').toLowerCase();
+    
+    // Check for invalid suffixes
+    if (ContentPublishingService.INVALID_SUFFIXES.some(suffix => modelId.includes(suffix))) {
+      return false;
+    }
+    
+    // Check for invalid model names
+    if (ContentPublishingService.INVALID_MODEL_NAMES.some(name => modelId.includes(name))) {
+      return false;
+    }
+    
+    const capabilities = (model as any).capabilities || [];
+    const tags = (model as any).tags || [];
+    
+    // Check for invalid capabilities
+    if (ContentPublishingService.INVALID_CAPABILITIES.some(cap => capabilities.includes(cap))) {
+      return false;
+    }
+    
+    // Check for invalid tags
+    if (ContentPublishingService.INVALID_TAGS.some(tag => tags.includes(tag))) {
+      return false;
+    }
+    
+    // Must have 'text' capability if capabilities are specified
+    if (capabilities.length > 0 && !capabilities.includes('text')) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  /**
+   * Find a valid model from available models
+   */
+  private findValidModel(
+    availableModels: any[],
+    preferredModelId?: string
+  ): any | null {
+    // First try exact match
+    if (preferredModelId) {
+      const exactMatch = availableModels.find(m => 
+        this.isModelValid(m) && 
+        (m.id === preferredModelId || 
+         m.name === preferredModelId ||
+         m.id.includes(preferredModelId))
+      );
+      if (exactMatch) return exactMatch;
+    }
+    
+    // Fall back to first valid model
+    return availableModels.find(m => this.isModelValid(m)) || null;
+  }
+
+  /**
+   * Normalize model ID by removing provider prefix and invalid suffixes
+   */
+  private normalizeModelId(modelId: string, providerType: string): string {
+    let normalized = modelId;
+    
+    // Remove provider prefix
+    const prefix = `${providerType}/`;
+    if (normalized.startsWith(prefix)) {
+      normalized = normalized.substring(prefix.length);
+    }
+    
+    // Remove invalid suffixes
+    for (const suffix of ContentPublishingService.INVALID_SUFFIXES) {
+      if (normalized.includes(suffix)) {
+        normalized = normalized.split(suffix)[0];
+      }
+    }
+    
+    return normalized;
+  }
+
+  /**
+   * Create provider instance from model ID and provider type
+   */
+  private createProviderInstance(
+    modelId: string,
+    providerType: string,
+    agent: ContentPublishingAgent
+  ): OpenAIAdapter | ClaudeAdapter | GeminiAdapter | GroqAdapter | Promise<any> {
+    const normalizedId = this.normalizeModelId(modelId, providerType);
+    
+    switch (providerType) {
+      case 'openai':
+        return new OpenAIAdapter(normalizedId);
+      case 'anthropic':
+        return new ClaudeAdapter(normalizedId);
+      case 'google':
+        return new GeminiAdapter(normalizedId);
+      case 'groq':
+        return new GroqAdapter(normalizedId);
+      default:
+        return AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+    }
+  }
+
+  /**
+   * Get or create provider instance for an agent
+   */
+  private async getProviderInstance(agent: ContentPublishingAgent): Promise<any> {
+    const providerType = this.getProviderType(agent.provider);
+    
+    try {
+      const availableModels = await getModelsByProvider(providerType);
+      const modelId = agent.preferredModelId || agent.model;
+      
+      const dbModel = this.findValidModel(availableModels, modelId);
+      
+      if (dbModel && !('deprecated' in dbModel && dbModel.deprecated)) {
+        console.log(`   📌 Using DB model: ${this.normalizeModelId(dbModel.id, providerType)} for ${agent.name}`);
+        return this.createProviderInstance(dbModel.id, providerType, agent);
+      }
+    } catch (error) {
+      console.warn(`   ⚠️  Failed to query DB for models, using factory fallback:`, error);
+    }
+    
+    // Fallback to factory
+    return AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
+  }
+
+  /**
+   * Try fallback models if primary model fails
+   */
+  private async tryFallbackModels(
+    agent: ContentPublishingAgent,
+    prompt: string,
+    systemPrompt: string,
+    temperature: number,
+    maxTokens: number
+  ): Promise<string | null> {
+    const providerType = this.getProviderType(agent.provider);
+    const fallbackModels = ContentPublishingService.FALLBACK_MODELS[providerType] || [];
+    
+    for (const fallbackModel of fallbackModels) {
+      try {
+        const availableModels = await getModelsByProvider(providerType);
+        const dbModel = this.findValidModel(availableModels, fallbackModel);
+        
+        if (dbModel) {
+          const providerInstance = this.createProviderInstance(dbModel.id, providerType, agent);
+          
+          if (providerInstance instanceof Promise) {
+            const resolved = await providerInstance;
+            const response = await resolved.execute({
+              prompt,
+              systemPrompt,
+              temperature,
+              maxTokens,
+            });
+            console.log(`   ✅ Fallback model ${this.normalizeModelId(dbModel.id, providerType)} succeeded`);
+            return response.content;
+          } else {
+            const response = await providerInstance.execute({
+              prompt,
+              systemPrompt,
+              temperature,
+              maxTokens,
+            });
+            console.log(`   ✅ Fallback model ${this.normalizeModelId(dbModel.id, providerType)} succeeded`);
+            return response.content;
+          }
+        }
+      } catch (fallbackError: any) {
+        const fallbackMsg = fallbackError?.message || String(fallbackError);
+        console.warn(`   ⚠️  Fallback model ${fallbackModel} also failed: ${fallbackMsg.substring(0, 100)}...`);
+        continue;
+      }
+    }
+    
+    return null;
   }
 
   /**
@@ -677,145 +887,15 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
    * Uses models from database registry, falls back to provider defaults
    */
   private async runAgent(agent: ContentPublishingAgent, prompt: string): Promise<string> {
-    // Try to get model from DB registry first
-    let providerInstance;
-    
+    const providerInstance = await this.getProviderInstance(agent);
+
     try {
-      // Query DB for available models by provider
-      const providerType = agent.provider.includes('openai') ? 'openai' :
-                           agent.provider.includes('claude') ? 'anthropic' :
-                           agent.provider.includes('gemini') ? 'google' :
-                           agent.provider.includes('groq') ? 'groq' :
-                           'openai';
-
-      const availableModels = await getModelsByProvider(providerType);
+      const resolvedInstance = providerInstance instanceof Promise 
+        ? await providerInstance 
+        : providerInstance;
       
-      // Use preferred model ID if specified, otherwise use agent.model, otherwise find best match
-      const modelId = agent.preferredModelId || agent.model;
-      
-      // First, try to find exact match, but filter out deprecated models
-      let dbModel = availableModels.find(m => {
-        // Skip deprecated models
-        const status = ('status' in m ? m.status : 'active');
-        if (status !== 'active') return false;
-        if ('isAllowed' in m && m.isAllowed === false) return false;
-        
-        return m.id === modelId || 
-               m.name === modelId ||
-               (agent.preferredModelId && m.id.includes(agent.preferredModelId));
-      });
-
-      // If exact match not found, try to find best available model for this provider
-      if (!dbModel || ('status' in dbModel && dbModel.status !== 'active')) {
-        // Find first available, ACTIVE, ALLOWED model for this provider
-        // CRITICAL: Must explicitly check status === 'active' and isAllowed === true
-        dbModel = availableModels.find(m => {
-          // MUST be active (explicit check, not just "not deprecated")
-          const status = ('status' in m ? m.status : 'active');
-          if (status !== 'active') {
-            return false; // Reject if not explicitly active
-          }
-          
-          // MUST be allowed for use
-          if ('isAllowed' in m && m.isAllowed === false) {
-            return false; // Reject if explicitly not allowed
-          }
-
-          const modelId = (m.id || '').toLowerCase();
-          
-          // Skip models with invalid suffixes
-          if (modelId.includes(':thinking') || 
-              modelId.includes(':expanded') || 
-              modelId.includes(':beta') ||
-              modelId.includes(':preview') ||
-              modelId.includes('transcribe') ||
-              modelId.includes('realtime')) {
-            return false;
-          }
-          
-          // Skip audio/video/image models (they require different API endpoints)
-          const capabilities = (m as any).capabilities || [];
-          const tags = (m as any).tags || [];
-          if (capabilities.includes('audio-generation') ||
-              capabilities.includes('video-generation') ||
-              capabilities.includes('image-generation') ||
-              tags.includes('audio-only') ||
-              tags.includes('realtime-only') ||
-              tags.includes('unsuitable-for-text') ||
-              modelId.includes('audio') ||
-              modelId.includes('video') ||
-              modelId.includes('image') ||
-              modelId.includes('flux') ||
-              modelId.includes('sora') ||
-              modelId.includes('dalle') ||
-              modelId.includes('midjourney')) {
-            return false;
-          }
-          
-          // Must have 'text' capability for text-to-text chat
-          if (capabilities.length > 0 && !capabilities.includes('text')) {
-            return false;
-          }
-          
-          return true;
-        });
-        
-        if (dbModel) {
-          console.log(`   ⚠️  Model ${modelId} not available, using ${dbModel.id} instead`);
-        }
-      }
-
-      if (dbModel && !('deprecated' in dbModel && dbModel.deprecated)) {
-        // Use model from DB - create provider with specific model ID
-        // Normalize model ID by stripping provider prefix and invalid suffixes
-        // Example: "openai/gpt-4o" -> "gpt-4o"
-        // Example: "anthropic/claude-3.7-sonnet:thinking" -> "claude-3.7-sonnet"
-        let modelIdToUse = dbModel.id;
-        
-        // Remove provider prefix if present
-        const prefix = `${providerType}/`;
-        if (modelIdToUse.startsWith(prefix)) {
-          modelIdToUse = modelIdToUse.substring(prefix.length);
-        }
-        
-        // Remove invalid suffixes (like :thinking, :expanded, etc.)
-        // These are not valid model IDs for API calls
-        const invalidSuffixes = [':thinking', ':expanded', ':beta', ':preview'];
-        for (const suffix of invalidSuffixes) {
-          if (modelIdToUse.includes(suffix)) {
-            modelIdToUse = modelIdToUse.split(suffix)[0];
-          }
-        }
-        
-        console.log(`   📌 Using DB model: ${modelIdToUse} for ${agent.name}`);
-        
-        // Create provider with specific model ID
-        if (providerType === 'openai') {
-          providerInstance = new OpenAIAdapter(modelIdToUse);
-        } else if (providerType === 'anthropic') {
-          providerInstance = new ClaudeAdapter(modelIdToUse);
-        } else if (providerType === 'google') {
-          providerInstance = new GeminiAdapter(modelIdToUse);
-        } else if (providerType === 'groq') {
-          providerInstance = new GroqAdapter(modelIdToUse);
-        } else {
-          // Fallback to factory
-          providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
-        }
-      } else {
-        // Fallback to factory method (uses DB registry or hardcoded defaults)
-        providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
-      }
-    } catch (error) {
-      console.warn(`   ⚠️  Failed to query DB for models, using factory fallback:`, error);
-      // Fallback to factory method
-      providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
-    }
-
-    // Execute with retry logic for model-specific errors
-    try {
-      const response = await providerInstance.execute({
-        prompt: prompt,
+      const response = await resolvedInstance.execute({
+        prompt,
         systemPrompt: agent.systemPrompt,
         temperature: agent.temperature,
         maxTokens: agent.maxTokens,
@@ -824,105 +904,161 @@ Make it engaging, actionable, and SEO-friendly. Follow the structure in your sys
     } catch (error: any) {
       const errorMsg = error?.message || String(error);
       
-      // If it's a model-specific error (404, invalid model), try fallback models
-      if (errorMsg.includes('invalid model') || 
-          errorMsg.includes('not a chat model') ||
-          errorMsg.includes('404') ||
-          errorMsg.includes('not_found_error')) {
+      // If it's a model-specific error, try fallback models
+      if (this.isModelError(errorMsg)) {
         console.warn(`   ⚠️  Model failed with ${errorMsg.substring(0, 100)}..., trying fallback models...`);
         
-        // Try fallback models based on provider
-        const providerType = agent.provider.includes('openai') ? 'openai' :
-                             agent.provider.includes('claude') ? 'anthropic' :
-                             agent.provider.includes('gemini') ? 'google' :
-                             agent.provider.includes('groq') ? 'groq' :
-                             'openai';
+        const fallbackResult = await this.tryFallbackModels(
+          agent,
+          prompt,
+          agent.systemPrompt,
+          agent.temperature,
+          agent.maxTokens
+        );
         
-        // Current, non-deprecated fallback models (as of Nov 2025)
-        const fallbackModels = providerType === 'openai' 
-          ? ['gpt-4o-mini', 'gpt-4o', 'gpt-4'] // gpt-4o-mini is cheapest, gpt-4o is best balance
-          : providerType === 'anthropic'
-          ? ['claude-3-5-sonnet-20250219', 'claude-3-haiku-20240307'] // Latest Sonnet, then Haiku (fast/cheap)
-          : providerType === 'google'
-          ? ['gemini-2.0-flash-exp', 'gemini-1.5-flash'] // 2.0 Flash is free, 1.5 Flash is stable
-          : ['llama-3.1-70b-versatile', 'llama-3.1-8b-instant']; // Groq models
-        
-        // Try each fallback model
-        for (const fallbackModel of fallbackModels) {
-          try {
-            const availableModels = await getModelsByProvider(providerType);
-            
-            // Find model, filtering out deprecated ones
-            const dbModel = availableModels.find(m => {
-              const status = ('status' in m ? m.status : 'active');
-              const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
-              if (status !== 'active' || isAllowed === false) return false;
-              const mStatus = ('status' in m ? m.status : 'active');
-              if (mStatus !== 'active') return false;
-              
-              const modelIdLower = (m.id || '').toLowerCase();
-              const fallbackLower = fallbackModel.toLowerCase();
-              
-              return modelIdLower === fallbackLower || 
-                     modelIdLower.includes(fallbackLower) ||
-                     m.name?.toLowerCase() === fallbackLower;
-            });
-            
-            if (dbModel) {
-              let modelIdToUse = dbModel.id;
-              const prefix = `${providerType}/`;
-              if (modelIdToUse.startsWith(prefix)) {
-                modelIdToUse = modelIdToUse.substring(prefix.length);
-              }
-              
-              const invalidSuffixes = [':thinking', ':expanded', ':beta', ':preview'];
-              for (const suffix of invalidSuffixes) {
-                if (modelIdToUse.includes(suffix)) {
-                  modelIdToUse = modelIdToUse.split(suffix)[0];
-                }
-              }
-              
-              console.log(`   🔄 Retrying with fallback model: ${modelIdToUse}`);
-              
-              // Create new provider instance with fallback model
-              if (providerType === 'openai') {
-                // Using static import
-                providerInstance = new OpenAIAdapter(modelIdToUse);
-              } else if (providerType === 'anthropic') {
-                // Using static import
-                providerInstance = new ClaudeAdapter(modelIdToUse);
-              } else if (providerType === 'google') {
-                // Using static import
-                providerInstance = new GeminiAdapter(modelIdToUse);
-              } else if (providerType === 'groq') {
-                // Using static import
-                providerInstance = new GroqAdapter(modelIdToUse);
-              }
-              
-              const response = await providerInstance.execute({
-                prompt: prompt,
-                systemPrompt: agent.systemPrompt,
-                temperature: agent.temperature,
-                maxTokens: agent.maxTokens,
-              });
-              
-              console.log(`   ✅ Fallback model ${modelIdToUse} succeeded`);
-              return response.content;
-            }
-          } catch (fallbackError: any) {
-            const fallbackMsg = fallbackError?.message || String(fallbackError);
-            console.warn(`   ⚠️  Fallback model ${fallbackModel} also failed: ${fallbackMsg.substring(0, 100)}...`);
-            continue; // Try next fallback
-          }
+        if (fallbackResult) {
+          return fallbackResult;
         }
-        
-        // If all fallbacks failed, throw original error
-        throw error;
       }
       
-      // For other errors (rate limits, network), throw immediately
       throw error;
     }
+  }
+
+  /**
+   * Check if error is model-specific (should trigger fallback)
+   */
+  private isModelError(errorMsg: string): boolean {
+    return errorMsg.includes('invalid model') || 
+           errorMsg.includes('not a chat model') ||
+           errorMsg.includes('404') ||
+           errorMsg.includes('not_found_error');
+  }
+
+  /**
+   * Parse and repair JSON response from review agent
+   */
+  private parseReviewResponse(
+    jsonContent: string,
+    agentName: string
+  ): PublishingReview {
+    try {
+      // Remove control characters
+      let cleaned = jsonContent.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+      
+      // Extract JSON from markdown code blocks if present
+      const codeBlockMatch = cleaned.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+      if (codeBlockMatch) {
+        cleaned = codeBlockMatch[1];
+      } else {
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          cleaned = jsonMatch[0];
+        }
+      }
+      
+      // Repair common JSON issues
+      cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
+      cleaned = cleaned.replace(/,(\s*$)/gm, ''); // Remove trailing commas at end of lines
+      
+      // Close incomplete structures
+      cleaned = this.repairTruncatedJson(cleaned);
+      
+      const parsed = JSON.parse(cleaned);
+      
+      return {
+        agentName,
+        approved: parsed.approved || false,
+        score: parsed.score || 5,
+        feedback: parsed.feedback || '',
+        improvements: parsed.improvements || [],
+        revisedContent: parsed.revisedContent,
+        seoMetadata: parsed.seoMetadata,
+        timestamp: new Date(),
+      };
+    } catch (parseError: any) {
+      return this.extractPartialReviewData(jsonContent, agentName, parseError);
+    }
+  }
+
+  /**
+   * Repair truncated JSON by closing incomplete strings, arrays, and objects
+   */
+  private repairTruncatedJson(jsonContent: string): string {
+    let repaired = jsonContent;
+    
+    // Close incomplete strings near the end
+    const last200 = repaired.slice(-200);
+    if (last200.includes('"') && !last200.match(/"\s*[}\],]/)) {
+      repaired = repaired.replace(/"([^"]+)"\s*:\s*"([^"]+)$/gm, (match, key, value) => {
+        if (repaired.indexOf(match) + match.length >= repaired.length - 10) {
+          const safeValue = value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+          return `"${key}": "${safeValue}"`;
+        }
+        return match;
+      });
+    }
+    
+    // Close incomplete arrays
+    const openBrackets = (repaired.match(/\[/g) || []).length;
+    const closeBrackets = (repaired.match(/\]/g) || []).length;
+    if (openBrackets > closeBrackets) {
+      repaired += ']'.repeat(openBrackets - closeBrackets);
+    }
+    
+    // Close incomplete objects
+    const openBraces = (repaired.match(/\{/g) || []).length;
+    const closeBraces = (repaired.match(/\}/g) || []).length;
+    if (openBraces > closeBraces) {
+      repaired += '}'.repeat(openBraces - closeBraces);
+    }
+    
+    return repaired;
+  }
+
+  /**
+   * Extract partial review data from malformed JSON
+   */
+  private extractPartialReviewData(
+    jsonContent: string,
+    agentName: string,
+    parseError: any
+  ): PublishingReview {
+    const scoreMatch = jsonContent.match(/"score"\s*:\s*(\d+)/);
+    const approvedMatch = jsonContent.match(/"approved"\s*:\s*(true|false)/);
+    
+    // Extract feedback with truncation handling
+    let feedback = '';
+    const feedbackMatch = jsonContent.match(/"feedback"\s*:\s*"([^"]*(?:\\.[^"]*)*)"|"feedback"\s*:\s*"([^"]+)/);
+    if (feedbackMatch) {
+      feedback = feedbackMatch[1] || feedbackMatch[2] || '';
+      const sentences = feedback.match(/[^.!?]*[.!?]/g);
+      if (sentences && sentences.length > 0) {
+        feedback = sentences.slice(0, -1).join(' ');
+      }
+      if (!feedback.match(/[.!?]\s*$/)) {
+        feedback = feedback.trim() + '...';
+      }
+    }
+    
+    // Extract improvements array
+    const improvements: string[] = [];
+    const improvementsMatch = jsonContent.match(/"improvements"\s*:\s*\[([^\]]*)/);
+    if (improvementsMatch) {
+      const itemMatches = improvementsMatch[1].match(/"([^"]+)"/g);
+      if (itemMatches) {
+        improvements.push(...itemMatches.map(m => m.replace(/"/g, '')));
+      }
+    }
+    
+    return {
+      agentName,
+      approved: approvedMatch ? approvedMatch[1] === 'true' : false,
+      score: scoreMatch ? parseInt(scoreMatch[1]) : 5,
+      feedback: feedback || `JSON parse error: ${parseError.message}`,
+      improvements: improvements.length > 0 ? improvements : ['Retry the review - JSON parsing failed'],
+      timestamp: new Date(),
+    };
   }
 
   /**
@@ -947,133 +1083,14 @@ Provide your review in JSON format as specified in your system prompt.
 `;
 
     try {
-      // Use same DB-aware provider creation as runAgent
-      let providerInstance;
-      
-      try {
-        const providerType = agent.provider.includes('openai') ? 'openai' :
-                             agent.provider.includes('claude') ? 'anthropic' :
-                             agent.provider.includes('gemini') ? 'google' :
-                             agent.provider.includes('groq') ? 'groq' :
-                             'openai';
+      const providerInstance = await this.getProviderInstance(agent);
+      const resolvedInstance = providerInstance instanceof Promise 
+        ? await providerInstance 
+        : providerInstance;
 
-        const availableModels = await getModelsByProvider(providerType);
-        const modelId = agent.preferredModelId || agent.model;
-        let dbModel = availableModels.find(m => 
-          m.id === modelId || 
-          m.name === modelId ||
-          (agent.preferredModelId && m.id.includes(agent.preferredModelId))
-        );
-
-        // If exact match not found, try to find best available model for this provider
-        if (!dbModel || ('status' in dbModel && dbModel.status !== 'active')) {
-          // Find first available, ACTIVE, ALLOWED model for this provider
-          // CRITICAL: Must explicitly check status === 'active' and isAllowed === true
-          dbModel = availableModels.find(m => {
-            // MUST be active (explicit check, not just "not deprecated")
-            const status = ('status' in m ? m.status : 'active');
-            if (status !== 'active') {
-              return false; // Reject if not explicitly active
-            }
-            
-            // MUST be allowed for use
-            if ('isAllowed' in m && m.isAllowed === false) {
-              return false; // Reject if explicitly not allowed
-            }
-
-            const modelId = (m.id || '').toLowerCase();
-            
-            // Skip models with invalid suffixes
-            if (modelId.includes(':thinking') || 
-                modelId.includes(':expanded') || 
-                modelId.includes(':beta') ||
-                modelId.includes(':preview') ||
-                modelId.includes('transcribe') ||
-                modelId.includes('realtime')) {
-              return false;
-            }
-            
-            // Skip audio/video/image models (they require different API endpoints)
-            const capabilities = (m as any).capabilities || [];
-            const tags = (m as any).tags || [];
-            if (capabilities.includes('audio-generation') ||
-                capabilities.includes('video-generation') ||
-                capabilities.includes('image-generation') ||
-                tags.includes('audio-only') ||
-                tags.includes('realtime-only') ||
-                tags.includes('unsuitable-for-text') ||
-                modelId.includes('audio') ||
-                modelId.includes('video') ||
-                modelId.includes('image') ||
-                modelId.includes('flux') ||
-                modelId.includes('sora') ||
-                modelId.includes('dalle') ||
-                modelId.includes('midjourney')) {
-              return false;
-            }
-            
-            // Must have 'text' capability for text-to-text chat
-            if (capabilities.length > 0 && !capabilities.includes('text')) {
-              return false;
-            }
-            
-            return true;
-          });
-          if (dbModel) {
-            console.log(`   ⚠️  Model ${modelId} not available, using ${dbModel.id} instead`);
-          }
-        }
-
-        if (dbModel && !('deprecated' in dbModel && dbModel.deprecated)) {
-          // Normalize model ID by stripping provider prefix and invalid suffixes
-          // Example: "openai/gpt-4o" -> "gpt-4o"
-          // Example: "anthropic/claude-3.7-sonnet:thinking" -> "claude-3.7-sonnet"
-          let modelIdToUse = dbModel.id;
-          
-          // Remove provider prefix if present
-          const prefix = `${providerType}/`;
-          if (modelIdToUse.startsWith(prefix)) {
-            modelIdToUse = modelIdToUse.substring(prefix.length);
-          }
-          
-          // Remove invalid suffixes (like :thinking, :expanded, etc.)
-          // These are not valid model IDs for API calls
-          const invalidSuffixes = [':thinking', ':expanded', ':beta', ':preview'];
-          for (const suffix of invalidSuffixes) {
-            if (modelIdToUse.includes(suffix)) {
-              modelIdToUse = modelIdToUse.split(suffix)[0];
-            }
-          }
-          
-          if (providerType === 'openai') {
-            // Using static import
-            providerInstance = new OpenAIAdapter(modelIdToUse);
-          } else if (providerType === 'anthropic') {
-            // Using static import
-            providerInstance = new ClaudeAdapter(modelIdToUse);
-          } else if (providerType === 'google') {
-            // Using static import
-            providerInstance = new GeminiAdapter(modelIdToUse);
-          } else if (providerType === 'groq') {
-            // Using static import
-            providerInstance = new GroqAdapter(modelIdToUse);
-          } else {
-            providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
-          }
-        } else {
-          providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
-        }
-      } catch (error) {
-        providerInstance = await AIProviderFactoryWithRegistry.create(agent.provider, this.organizationId);
-      }
-
-      const provider = providerInstance;
-
-      // Execute with retry logic for model-specific errors
       let response;
       try {
-        // Note: JSON mode handled by adapter, not in request interface
-        response = await provider.execute({
+        response = await resolvedInstance.execute({
           prompt: reviewPrompt + '\n\nRespond in valid JSON format only.',
           systemPrompt: agent.systemPrompt + '\n\nYou must respond with valid JSON only. No markdown, no code blocks, just raw JSON.',
           temperature: agent.temperature,
@@ -1082,337 +1099,26 @@ Provide your review in JSON format as specified in your system prompt.
       } catch (error: any) {
         const errorMsg = error?.message || String(error);
         
-        // If it's a model-specific error (404, invalid model), try fallback models
-        if (errorMsg.includes('invalid model') || 
-            errorMsg.includes('not a chat model') ||
-            errorMsg.includes('404') ||
-            errorMsg.includes('not_found_error')) {
+        if (this.isModelError(errorMsg)) {
           console.warn(`   ⚠️  Model failed with ${errorMsg.substring(0, 100)}..., trying fallback models...`);
           
-          // Try fallback models based on provider
-          const providerType = agent.provider.includes('openai') ? 'openai' :
-                               agent.provider.includes('claude') ? 'anthropic' :
-                               agent.provider.includes('gemini') ? 'google' :
-                               agent.provider.includes('groq') ? 'groq' :
-                               'openai';
+          const fallbackResult = await this.tryFallbackModels(
+            agent,
+            reviewPrompt + '\n\nRespond in valid JSON format only.',
+            agent.systemPrompt + '\n\nYou must respond with valid JSON only. No markdown, no code blocks, just raw JSON.',
+            agent.temperature,
+            agent.maxTokens
+          );
           
-          // Current, non-deprecated fallback models (as of Nov 2025)
-          const fallbackModels = providerType === 'openai' 
-            ? ['gpt-4o-mini', 'gpt-4o', 'gpt-4'] // gpt-4o-mini is cheapest, gpt-4o is best balance
-            : providerType === 'anthropic'
-            ? ['claude-3-5-sonnet-20250219', 'claude-3-haiku-20240307'] // Latest Sonnet, then Haiku (fast/cheap)
-            : providerType === 'google'
-            ? ['gemini-2.0-flash-exp', 'gemini-1.5-flash'] // 2.0 Flash is free, 1.5 Flash is stable
-            : ['llama-3.1-70b-versatile', 'llama-3.1-8b-instant']; // Groq models
-          
-          // Try each fallback model
-          for (const fallbackModel of fallbackModels) {
-            try {
-              const availableModels = await getModelsByProvider(providerType);
-
-              // Find model, filtering out deprecated ones
-              const dbModel = availableModels.find(m => {
-                const status = ('status' in m ? m.status : 'active');
-                const isAllowed = ('isAllowed' in m ? m.isAllowed : true);
-                if (status !== 'active' || isAllowed === false) return false;
-                const mStatus = ('status' in m ? m.status : 'active');
-              if (mStatus !== 'active') return false;
-                
-                const modelIdLower = (m.id || '').toLowerCase();
-                const fallbackLower = fallbackModel.toLowerCase();
-                
-                return modelIdLower === fallbackLower || 
-                       modelIdLower.includes(fallbackLower) ||
-                       m.name?.toLowerCase() === fallbackLower;
-              });
-              
-              if (dbModel) {
-                let modelIdToUse = dbModel.id;
-                const prefix = `${providerType}/`;
-                if (modelIdToUse.startsWith(prefix)) {
-                  modelIdToUse = modelIdToUse.substring(prefix.length);
-                }
-                
-                const invalidSuffixes = [':thinking', ':expanded', ':beta', ':preview'];
-                for (const suffix of invalidSuffixes) {
-                  if (modelIdToUse.includes(suffix)) {
-                    modelIdToUse = modelIdToUse.split(suffix)[0];
-                  }
-                }
-                
-                console.log(`   🔄 Retrying with fallback model: ${modelIdToUse}`);
-                
-                // Create new provider instance with fallback model
-                let fallbackProvider;
-                if (providerType === 'openai') {
-                  // Using static import
-                  fallbackProvider = new OpenAIAdapter(modelIdToUse);
-                } else if (providerType === 'anthropic') {
-                  // Using static import
-                  fallbackProvider = new ClaudeAdapter(modelIdToUse);
-                } else if (providerType === 'google') {
-                  // Using static import
-                  fallbackProvider = new GeminiAdapter(modelIdToUse);
-                } else if (providerType === 'groq') {
-                  // Using static import
-                  fallbackProvider = new GroqAdapter(modelIdToUse);
-                }
-                
-                if (fallbackProvider) {
-                  response = await fallbackProvider.execute({
-                    prompt: reviewPrompt + '\n\nRespond in valid JSON format only.',
-                    systemPrompt: agent.systemPrompt + '\n\nYou must respond with valid JSON only. No markdown, no code blocks, just raw JSON.',
-                    temperature: agent.temperature,
-                    maxTokens: agent.maxTokens,
-                  });
-                  
-                  console.log(`   ✅ Fallback model ${modelIdToUse} succeeded`);
-                  break; // Success, exit loop
-                }
-              }
-            } catch (fallbackError: any) {
-              const fallbackMsg = fallbackError?.message || String(fallbackError);
-              console.warn(`   ⚠️  Fallback model ${fallbackModel} also failed: ${fallbackMsg.substring(0, 100)}...`);
-              continue; // Try next fallback
-            }
+          if (fallbackResult) {
+            return this.parseReviewResponse(fallbackResult, agent.name);
           }
-          
-          // If all fallbacks failed, throw original error
-          if (!response) {
-            throw error;
-          }
-        } else {
-          // For other errors (rate limits, network), throw immediately
-          throw error;
         }
+        
+        throw error;
       }
 
-      // Sanitize JSON: remove control characters that break JSON parsing
-      let jsonContent = response.content;
-      
-      try {
-        // Remove control characters (except newlines and tabs which are valid in JSON strings)
-        jsonContent = jsonContent.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-        
-        // Try to extract JSON from markdown code blocks if present
-        const codeBlockMatch = jsonContent.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
-        if (codeBlockMatch) {
-          jsonContent = codeBlockMatch[1];
-        } else {
-          // Try to extract JSON object directly
-          const jsonMatch = jsonContent.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            jsonContent = jsonMatch[0];
-          }
-        }
-        
-        // Repair common JSON issues
-        jsonContent = jsonContent.replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
-        jsonContent = jsonContent.replace(/,(\s*$)/gm, ''); // Remove trailing commas at end of lines
-        
-        // Handle truncated strings - find incomplete string values and close them
-        // This handles strings that are cut off mid-value, especially in nested objects
-        // Pattern: "key": "value that might be truncated...
-        const stringPattern = /"([^"]+)"\s*:\s*"([^"]*?)(?:"|$)/g;
-        let match;
-        const replacements: Array<{ start: number; end: number; replacement: string }> = [];
-        
-        while ((match = stringPattern.exec(jsonContent)) !== null) {
-          const fullMatch = match[0];
-          const key = match[1];
-          const value = match[2];
-          const matchStart = match.index;
-          const matchEnd = matchStart + fullMatch.length;
-          
-          // Check if this string value is incomplete (doesn't end with quote)
-          // and we're near the end of the content (likely truncated)
-          if (!fullMatch.endsWith('"')) {
-            const distanceFromEnd = jsonContent.length - matchEnd;
-            if (distanceFromEnd < 100) {
-              // This string is likely truncated - close it
-              const safeValue = value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-              replacements.push({
-                start: matchStart,
-                end: matchEnd,
-                replacement: `"${key}": "${safeValue}"`,
-              });
-            }
-          }
-        }
-        
-        // Apply replacements in reverse order to preserve indices
-        for (let i = replacements.length - 1; i >= 0; i--) {
-          const r = replacements[i];
-          jsonContent = jsonContent.substring(0, r.start) + r.replacement + jsonContent.substring(r.end);
-        }
-        
-        // Also handle cases where string is cut off mid-value (no quote at all)
-        // Pattern: "key": "value that ends abruptly
-        jsonContent = jsonContent.replace(/"([^"]+)"\s*:\s*"([^"]+)$/gm, (match, key, value) => {
-          // If we're at the end of content and string isn't closed, close it
-          if (jsonContent.indexOf(match) + match.length >= jsonContent.length - 10) {
-            const safeValue = value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-            return `"${key}": "${safeValue}"`;
-          }
-          return match;
-        });
-        
-        // Close incomplete arrays (if improvements array is truncated)
-        const improvementsMatch = jsonContent.match(/"improvements"\s*:\s*\[([^\]]*)/);
-        if (improvementsMatch && !jsonContent.includes('"improvements"') || jsonContent.match(/"improvements"\s*:\s*\[[^\]]*$/)) {
-          // Find where improvements array should end
-          const improvementsStart = jsonContent.indexOf('"improvements"');
-          if (improvementsStart !== -1) {
-            const afterImprovements = jsonContent.substring(improvementsStart);
-            const arrayStart = afterImprovements.indexOf('[');
-            if (arrayStart !== -1) {
-              const arrayContent = afterImprovements.substring(arrayStart + 1);
-              // Count open brackets
-              let openCount = 1;
-              let pos = 0;
-              while (pos < arrayContent.length && openCount > 0) {
-                if (arrayContent[pos] === '[') openCount++;
-                if (arrayContent[pos] === ']') openCount--;
-                pos++;
-              }
-              // If we didn't find closing bracket, add it
-              if (openCount > 0) {
-                const beforeArray = jsonContent.substring(0, improvementsStart + arrayStart + 1);
-                const arrayPart = arrayContent.substring(0, pos);
-                // Close any incomplete strings in array
-                const closedArray = arrayPart.replace(/"([^"]*)$/, '"$1"');
-                jsonContent = beforeArray + closedArray + ']';
-              }
-            }
-          }
-        }
-        
-        // Close incomplete objects (if JSON is truncated)
-        // This handles nested objects like seoMetadata that might be incomplete
-        const openBraces = (jsonContent.match(/\{/g) || []).length;
-        const closeBraces = (jsonContent.match(/\}/g) || []).length;
-        if (openBraces > closeBraces) {
-          // Check if we're near the end (likely truncated)
-          const last200 = jsonContent.slice(-200);
-          // If we have incomplete strings or objects near the end, close them
-          if (last200.includes('"') || last200.includes('{')) {
-            // Close incomplete nested objects first
-            // Find the last incomplete object (one that doesn't have a closing brace)
-            let braceCount = 0;
-            let lastOpenBrace = -1;
-            for (let i = jsonContent.length - 1; i >= 0; i--) {
-              if (jsonContent[i] === '}') braceCount++;
-              if (jsonContent[i] === '{') {
-                braceCount--;
-                if (braceCount < 0) {
-                  lastOpenBrace = i;
-                  break;
-                }
-              }
-            }
-            
-            // If we found an incomplete object, close any incomplete strings first, then close the object
-            if (lastOpenBrace !== -1) {
-              const afterLastOpen = jsonContent.substring(lastOpenBrace);
-              // Check if there's an incomplete string before we close
-              const incompleteStringMatch = afterLastOpen.match(/"([^"]+)"\s*:\s*"([^"]*)$/);
-              if (incompleteStringMatch) {
-                // Close the incomplete string first
-                const key = incompleteStringMatch[1];
-                const value = incompleteStringMatch[2];
-                const safeValue = value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-                const beforeIncomplete = jsonContent.substring(0, lastOpenBrace + (incompleteStringMatch.index ?? 0));
-                jsonContent = beforeIncomplete + `"${key}": "${safeValue}"`;
-              }
-            }
-            
-            // Now close all incomplete braces
-            jsonContent += '}'.repeat(openBraces - closeBraces);
-          }
-        }
-        
-        const parsed = JSON.parse(jsonContent);
-        
-        return {
-          agentName: agent.name,
-          approved: parsed.approved || false,
-          score: parsed.score || 5,
-          feedback: parsed.feedback || '',
-          improvements: parsed.improvements || [],
-          revisedContent: parsed.revisedContent,
-          seoMetadata: parsed.seoMetadata,
-          timestamp: new Date(),
-        };
-      } catch (parseError: any) {
-        // Only log if we can't extract partial data (reduces noise)
-        const canExtractPartial = response.content.includes('"score"') || response.content.includes('"approved"');
-        
-        if (!canExtractPartial) {
-          console.error(`   ⚠️  JSON parse error: ${parseError.message}`);
-          console.error(`   Raw response (first 500 chars): ${response.content.substring(0, 500)}`);
-        } else {
-          // Silent recovery - we can extract partial data, so just log a brief note
-          console.log(`   ⚠️  JSON truncated but recoverable`);
-        }
-        
-        // Try to extract partial data from malformed JSON
-        try {
-          // Try to extract just the score and feedback if possible
-          const scoreMatch = response.content.match(/"score"\s*:\s*(\d+)/);
-          const approvedMatch = response.content.match(/"approved"\s*:\s*(true|false)/);
-          
-          // Extract feedback - handle truncated strings
-          let feedback = '';
-          const feedbackMatch = response.content.match(/"feedback"\s*:\s*"([^"]*(?:\\.[^"]*)*)"|"feedback"\s*:\s*"([^"]+)/);
-          if (feedbackMatch) {
-            feedback = feedbackMatch[1] || feedbackMatch[2] || '';
-            // If feedback seems truncated (ends mid-sentence), try to find last complete sentence
-            if (feedback && !feedback.match(/[.!?]\s*$/)) {
-              const sentences = feedback.match(/[^.!?]*[.!?]/g);
-              if (sentences && sentences.length > 0) {
-                feedback = sentences.slice(0, -1).join(' '); // Take all but last incomplete sentence
-              }
-            }
-            // If still no complete sentences, take what we have but add ellipsis
-            if (!feedback.match(/[.!?]\s*$/)) {
-              feedback = feedback.trim() + '...';
-            }
-          }
-          
-          // Extract improvements array (handle truncated)
-          const improvements: string[] = [];
-          const improvementsMatch = response.content.match(/"improvements"\s*:\s*\[([^\]]*)/);
-          if (improvementsMatch) {
-            const improvementsContent = improvementsMatch[1];
-            // Extract complete string items
-            const itemMatches = improvementsContent.match(/"([^"]+)"/g);
-            if (itemMatches) {
-              improvements.push(...itemMatches.map(m => m.replace(/"/g, '')));
-            }
-          }
-          
-          return {
-            agentName: agent.name,
-            approved: approvedMatch ? approvedMatch[1] === 'true' : false,
-            score: scoreMatch ? parseInt(scoreMatch[1]) : 5,
-            feedback: feedback || `JSON parse error: ${parseError.message}`,
-            improvements: improvements.length > 0 ? improvements : [],
-            revisedContent: undefined,
-            seoMetadata: undefined,
-            timestamp: new Date(),
-          };
-        } catch (fallbackError) {
-          // Last resort: return error result
-          return {
-            agentName: agent.name,
-            approved: false,
-            score: 0,
-            feedback: `Review failed: JSON parse error - ${parseError.message}`,
-            improvements: ['Retry the review - JSON parsing failed'],
-            timestamp: new Date(),
-          };
-        }
-      }
+      return this.parseReviewResponse(response.content, agent.name);
     } catch (error) {
       console.error(`Error in ${agent.name} review:`, error);
 
