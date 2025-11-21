@@ -153,22 +153,34 @@ function HubContentSection<T extends { id: string; order: number }>({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {items?.map((item, idx) => (
-            <ItemCard
-              key={item.id}
-              fields={fields.map((f) => ({
-                name: String(f.name),
-                label: f.label,
-                placeholder: f.placeholder,
-                type: f.type,
-                rows: f.rows,
-              }))}
-              value={item as Record<string, string>}
-              onChange={(field, value) => update(idx, field as keyof T, value)}
-              onRemove={() => remove(idx)}
-              removeLabel={removeLabel}
-            />
-          ))}
+          {items?.map((item, idx) => {
+            // Extract only the string fields that are being edited
+            const stringFields = fields.reduce((acc, f) => {
+              const fieldName = String(f.name);
+              const fieldValue = item[fieldName as keyof T];
+              if (typeof fieldValue === 'string') {
+                acc[fieldName] = fieldValue;
+              }
+              return acc;
+            }, {} as Record<string, string>);
+
+            return (
+              <ItemCard
+                key={item.id}
+                fields={fields.map((f) => ({
+                  name: String(f.name),
+                  label: f.label,
+                  placeholder: f.placeholder,
+                  type: f.type,
+                  rows: f.rows,
+                }))}
+                value={stringFields}
+                onChange={(field, value) => update(idx, field as keyof T, value)}
+                onRemove={() => remove(idx)}
+                removeLabel={removeLabel}
+              />
+            );
+          })}
           <Button onClick={() => add(defaultItem)} variant="outline">
             <Icons.plus className="mr-2 h-4 w-4" />
             {addButtonLabel}
@@ -239,20 +251,27 @@ export function HubContentEditor({ tool, onChange }: HubContentEditorProps) {
             <div>
               <h4 className="mb-3 font-semibold">Official Resources</h4>
               <div className="space-y-3">
-                {hubContent.officialResources?.map((resource, idx) => (
-                  <ItemCard
-                    key={resource.id}
-                    fields={[
-                      { name: 'title', label: 'Title', placeholder: 'Title (e.g., Official Documentation)', type: 'input' },
-                      { name: 'url', label: 'URL', placeholder: 'URL', type: 'input' },
-                      { name: 'description', label: 'Description', placeholder: 'Description (optional)', type: 'input' },
-                    ]}
-                    value={resource as Record<string, string>}
-                    onChange={(field, value) => updateOfficialResource(idx, field as any, value)}
-                    onRemove={() => removeOfficialResource(idx)}
-                    removeLabel="Remove"
-                  />
-                ))}
+                {hubContent.officialResources?.map((resource, idx) => {
+                  const stringFields = {
+                    title: String(resource.title || ''),
+                    url: String(resource.url || ''),
+                    description: String(resource.description || ''),
+                  };
+                  return (
+                    <ItemCard
+                      key={resource.id}
+                      fields={[
+                        { name: 'title', label: 'Title', placeholder: 'Title (e.g., Official Documentation)', type: 'input' },
+                        { name: 'url', label: 'URL', placeholder: 'URL', type: 'input' },
+                        { name: 'description', label: 'Description', placeholder: 'Description (optional)', type: 'input' },
+                      ]}
+                      value={stringFields}
+                      onChange={(field, value) => updateOfficialResource(idx, field as any, value)}
+                      onRemove={() => removeOfficialResource(idx)}
+                      removeLabel="Remove"
+                    />
+                  );
+                })}
                 <Button onClick={() => addOfficialResource({ title: '', url: '', description: '' })} variant="outline" size="sm">
                   <Icons.plus className="mr-2 h-4 w-4" />
                   Add Official Resource
@@ -264,20 +283,27 @@ export function HubContentEditor({ tool, onChange }: HubContentEditorProps) {
             <div>
               <h4 className="mb-3 font-semibold">Community Resources</h4>
               <div className="space-y-3">
-                {hubContent.communityResources?.map((resource, idx) => (
-                  <ItemCard
-                    key={resource.id}
-                    fields={[
-                      { name: 'title', label: 'Title', placeholder: 'Title (e.g., Reddit Community)', type: 'input' },
-                      { name: 'url', label: 'URL', placeholder: 'URL', type: 'input' },
-                      { name: 'description', label: 'Description', placeholder: 'Description (optional)', type: 'input' },
-                    ]}
-                    value={resource as Record<string, string>}
-                    onChange={(field, value) => updateCommunityResource(idx, field as any, value)}
-                    onRemove={() => removeCommunityResource(idx)}
-                    removeLabel="Remove"
-                  />
-                ))}
+                {hubContent.communityResources?.map((resource, idx) => {
+                  const stringFields = {
+                    title: String(resource.title || ''),
+                    url: String(resource.url || ''),
+                    description: String(resource.description || ''),
+                  };
+                  return (
+                    <ItemCard
+                      key={resource.id}
+                      fields={[
+                        { name: 'title', label: 'Title', placeholder: 'Title (e.g., Reddit Community)', type: 'input' },
+                        { name: 'url', label: 'URL', placeholder: 'URL', type: 'input' },
+                        { name: 'description', label: 'Description', placeholder: 'Description (optional)', type: 'input' },
+                      ]}
+                      value={stringFields}
+                      onChange={(field, value) => updateCommunityResource(idx, field as any, value)}
+                      onRemove={() => removeCommunityResource(idx)}
+                      removeLabel="Remove"
+                    />
+                  );
+                })}
                 <Button onClick={() => addCommunityResource({ title: '', url: '', description: '' })} variant="outline" size="sm">
                   <Icons.plus className="mr-2 h-4 w-4" />
                   Add Community Resource

@@ -17,7 +17,8 @@ import { OpsHubTabs } from '@/components/opshub/panels/OpsHubTabs';
 
 export default async function OpsHubPage() {
   // ✅ REQUIRED: All opshub pages must use requireOpsHubAuth()
-  const { user, role } = await requireOpsHubAuth();
+  // This enforces authentication, admin role, and MFA (if enabled)
+  await requireOpsHubAuth();
 
   return (
     <div className="mx-auto max-w-7xl p-6">
