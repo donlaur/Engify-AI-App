@@ -31,6 +31,8 @@ interface AdminPaginationControlsProps {
  * - Current range display (e.g., "Showing 1 to 100 of 287 prompts")
  * - Automatic button disabling based on current position
  *
+ * @function AdminPaginationControls
+ * @component
  * @example
  * ```tsx
  * <AdminPaginationControls

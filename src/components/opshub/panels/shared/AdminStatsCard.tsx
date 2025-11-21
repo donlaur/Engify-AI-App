@@ -76,6 +76,7 @@ const colorVariantMap: Record<ColorVariant, string> = {
  * />
  * ```
  * 
+ * @function AdminStatsCard
  * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
  */
 export function AdminStatsCard({

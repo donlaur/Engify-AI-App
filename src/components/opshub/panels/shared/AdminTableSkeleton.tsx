@@ -36,6 +36,7 @@ interface AdminTableSkeletonProps {
  * A loading skeleton component that displays a table structure with animated skeleton bars.
  * Useful for displaying while table data is loading.
  *
+ * @function AdminTableSkeleton
  * @component
  * @example
  * ```tsx

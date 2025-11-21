@@ -62,6 +62,9 @@ interface AdminErrorFallbackProps {
  * - Error messages are sanitized to prevent information disclosure
  * - Stack traces are only shown in development mode
  * - Technical details are hidden from production users
+ *
+ * @function AdminErrorFallback
+ * @component
  */
 export function AdminErrorFallback({ error, retry }: AdminErrorFallbackProps) {
   const [copied, setCopied] = useState(false);

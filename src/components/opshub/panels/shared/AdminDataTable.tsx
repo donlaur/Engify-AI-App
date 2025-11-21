@@ -67,6 +67,8 @@ export interface AdminDataTableProps<T extends { _id: string }> {
  * a flexible, type-safe table with common features like status toggles, row actions,
  * loading states, and empty states.
  *
+ * @function AdminDataTable
+ * @component
  * @template T - The data type, must extend `{ _id: string }`
  *
  * @example

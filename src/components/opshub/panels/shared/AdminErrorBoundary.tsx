@@ -91,6 +91,7 @@ interface AdminErrorBoundaryState {
  * - Server-side rendering
  * - Errors thrown in the error boundary itself
  *
+ * @class AdminErrorBoundary
  * @see https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary
  */
 export class AdminErrorBoundary extends Component<

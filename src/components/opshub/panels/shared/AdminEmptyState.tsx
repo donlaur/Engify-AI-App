@@ -36,6 +36,8 @@ interface AdminEmptyStateProps {
  * - Optional action button with icon support
  * - Responsive spacing and sizing
  *
+ * @function AdminEmptyState
+ * @component
  * @example
  * // Basic empty state with default styling
  * ```tsx
