@@ -1,5 +1,14 @@
 'use client';
 
+/**
+ * Workflow Management Panel
+ *
+ * Admin panel for managing workflows, including viewing, filtering, and toggling status.
+ * Uses shared hooks and utilities to reduce code duplication and improve maintainability.
+ *
+ * @component
+ */
+
 import { useState, useMemo } from 'react';
 import {
   Card,
@@ -35,34 +44,26 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import type { Workflow } from '@/lib/workflows/workflow-schema';
 import { useAdminData } from '@/hooks/admin/useAdminData';
-import { useAdminToast } from '@/hooks/admin/useAdminToast';
+import { useAdminStatusToggle } from '@/hooks/admin/useAdminStatusToggle';
+import { useAdminViewDrawer } from '@/hooks/admin/useAdminViewDrawer';
 import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
 import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
 import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
-import { AdminDataTable, type ColumnDef } from '@/components/admin/shared/AdminDataTable';
+import { AdminDataTable } from '@/components/admin/shared/AdminDataTable';
 import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton';
 import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
 import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
-import { formatAdminDate, calculateStats } from '@/lib/admin/utils';
-
-interface WorkflowWithMetadata extends Workflow {
-  _id: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { formatAdminDate } from '@/lib/admin/utils';
+import { filterWorkflows } from '@/lib/admin/filterUtils';
+import { createWorkflowColumns, type WorkflowWithMetadata } from './workflows/workflowColumns';
+import { calculateWorkflowStats, calculateCategoryStats } from './workflows/workflowStats';
 
 export function WorkflowManagementPanel() {
-  const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowWithMetadata | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
 
   // Debounce search input to reduce API calls
   const debouncedSearch = useDebouncedValue(searchInput, 300);
-
-  // Toast notifications for user feedback
-  const { success, error: showError } = useAdminToast();
 
   // Use the new useAdminData hook for data management
   const {
@@ -83,140 +84,46 @@ export function WorkflowManagementPanel() {
     initialFilters: { category: 'all', status: 'all', audience: 'all' }
   });
 
-  const handleToggleStatus = async (
-    workflowId: string,
-    currentStatus: string
-  ) => {
-    try {
-      // Toggle between published and draft
-      const newStatus = currentStatus === 'published' ? 'draft' : 'published';
-
-      const res = await fetch(`/api/admin/workflows/${workflowId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (res.ok) {
-        refresh();
-        success(
-          'Status updated',
-          `Workflow ${newStatus === 'published' ? 'published' : 'saved as draft'} successfully`
-        );
-        if (selectedWorkflow?._id === workflowId) {
-          setSelectedWorkflow({ ...selectedWorkflow, status: newStatus as 'draft' | 'published' | 'coming_soon' });
-        }
-      } else {
-        showError('Failed to update status', 'Please try again');
-      }
-    } catch (err) {
-      console.error('Failed to toggle status:', err);
-      showError('Network error', 'Unable to connect to server');
-    }
-  };
-
-  const handleView = (workflow: WorkflowWithMetadata) => {
-    setSelectedWorkflow(workflow);
-    setIsDrawerOpen(true);
-  };
-
-  // Column definitions for AdminDataTable
-  const columns: ColumnDef<WorkflowWithMetadata>[] = [
-    {
-      id: 'title',
-      label: 'Title',
-      width: 'w-[300px]',
-      render: (workflow) => (
-        <button
-          onClick={() => handleView(workflow)}
-          className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
-        >
-          {workflow.title}
-        </button>
-      ),
-      cellClassName: 'font-medium'
-    },
-    {
-      id: 'category',
-      label: 'Category',
-      render: (workflow) => <Badge variant="outline">{workflow.category}</Badge>
-    },
-    {
-      id: 'audience',
-      label: 'Audience',
-      render: (workflow) => (
-        <div className="flex flex-wrap gap-1">
-          {workflow.audience.slice(0, 2).map((aud) => (
-            <Badge key={aud} variant="secondary" className="text-xs">
-              {aud}
-            </Badge>
-          ))}
-          {workflow.audience.length > 2 && (
-            <Badge variant="secondary" className="text-xs">
-              +{workflow.audience.length - 2}
-            </Badge>
-          )}
-        </div>
-      )
-    },
-    {
-      id: 'checklist',
-      label: 'Checklist Items',
-      render: (workflow) => (
-        <Badge variant="outline" className="text-center">
-          {workflow.manualChecklist.length}
-        </Badge>
-      )
-    },
-    {
-      id: 'updated',
-      label: 'Updated',
-      render: (workflow) => (
-        <span className="text-sm text-muted-foreground">
-          {formatAdminDate(workflow.updatedAt)}
-        </span>
-      )
-    }
-  ];
-
-  const filteredWorkflows = workflows.filter((workflow) => {
-    // Filter by category
-    if (filters.category !== 'all' && workflow.category !== filters.category) return false;
-
-    // Filter by status
-    if (filters.status !== 'all' && workflow.status !== filters.status) return false;
-
-    // Filter by audience
-    if (filters.audience !== 'all' && !workflow.audience.includes(filters.audience as any)) return false;
-
-    // Filter by search using debounced value
-    if (debouncedSearch) {
-      const search = debouncedSearch.toLowerCase();
-      return (
-        workflow.title.toLowerCase().includes(search) ||
-        workflow.slug.toLowerCase().includes(search)
-      );
-    }
-
-    return true;
+  // Use shared hooks for status toggle and view drawer
+  const { selectedItem: selectedWorkflow, isDrawerOpen, openDrawer, closeDrawer } = useAdminViewDrawer<WorkflowWithMetadata>();
+  
+  const { toggleStatus } = useAdminStatusToggle({
+    endpoint: '/api/admin/workflows',
+    entityName: 'Workflow',
+    onRefresh: refresh,
   });
 
-  // Calculate stats using the utility function
-  const stats = useMemo(() => calculateStats(workflows, [
-    { key: 'total', calculate: () => totalCount },
-    { key: 'published', calculate: (items) => items.filter(w => w.status === 'published').length },
-    { key: 'draft', calculate: (items) => items.filter(w => w.status === 'draft').length },
-    { key: 'comingSoon', calculate: (items) => items.filter(w => w.status === 'coming_soon').length },
-  ]), [workflows, totalCount]);
+  // Column definitions for AdminDataTable
+  const columns = useMemo(() => createWorkflowColumns(openDrawer), [openDrawer]);
+
+  // Filter workflows using shared utility
+  const filteredWorkflows = useMemo(
+    () => filterWorkflows(
+      workflows,
+      {
+        category: filters.category as string,
+        status: filters.status as string,
+        audience: filters.audience as string,
+      },
+      debouncedSearch
+    ),
+    [workflows, filters, debouncedSearch]
+  );
+
+  // Calculate stats using shared utility
+  const stats = useMemo(
+    () => calculateWorkflowStats(workflows, totalCount),
+    [workflows, totalCount]
+  );
 
   // Calculate category breakdown
-  const categoryStats = workflows.reduce((acc, workflow) => {
-    acc[workflow.category] = (acc[workflow.category] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const categoryStats = useMemo(
+    () => calculateCategoryStats(workflows),
+    [workflows]
+  );
 
   return (
-    <AdminErrorBoundary onError={(err) => console.error('Workflow panel error:', err)}>
+    <AdminErrorBoundary>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -328,17 +235,17 @@ export function WorkflowManagementPanel() {
               data={filteredWorkflows}
               columns={columns}
               statusField="status"
-              onStatusToggle={(id, currentStatus) => handleToggleStatus(id, currentStatus as string)}
+              onStatusToggle={(id, currentStatus) => toggleStatus(id, currentStatus as string)}
               renderRowActions={(workflow) => (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleView(workflow)}
+                  onClick={() => openDrawer(workflow)}
                 >
                   <Icons.eye className="h-4 w-4" />
                 </Button>
               )}
-              onRowClick={handleView}
+              onRowClick={openDrawer}
             />
           )}
 
@@ -357,7 +264,7 @@ export function WorkflowManagementPanel() {
       </Card>
 
       {/* Preview Drawer */}
-      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <Sheet open={isDrawerOpen} onOpenChange={closeDrawer}>
         <SheetContent className="w-[800px] overflow-y-auto sm:max-w-[800px]">
           {selectedWorkflow && (
             <>
@@ -377,7 +284,7 @@ export function WorkflowManagementPanel() {
                       id="status-toggle-header"
                       checked={selectedWorkflow.status === 'published'}
                       onCheckedChange={() =>
-                        handleToggleStatus(
+                        toggleStatus(
                           selectedWorkflow._id,
                           selectedWorkflow.status
                         )

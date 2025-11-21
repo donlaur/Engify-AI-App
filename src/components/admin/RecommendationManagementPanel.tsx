@@ -1,5 +1,14 @@
 'use client';
 
+/**
+ * Recommendation Management Panel
+ *
+ * Admin panel for managing recommendations, including viewing, filtering, and toggling status.
+ * Uses shared hooks and utilities to reduce code duplication and improve maintainability.
+ *
+ * @component
+ */
+
 import { useState, useMemo } from 'react';
 import {
   Card,
@@ -37,7 +46,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import type { Recommendation } from '@/lib/workflows/recommendation-schema';
 import { useAdminData } from '@/hooks/admin/useAdminData';
-import { useAdminToast } from '@/hooks/admin/useAdminToast';
+import { useAdminStatusToggle } from '@/hooks/admin/useAdminStatusToggle';
+import { useAdminViewDrawer } from '@/hooks/admin/useAdminViewDrawer';
 import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
 import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
 import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
@@ -46,6 +56,7 @@ import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton
 import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
 import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
 import { formatAdminDate, calculateStats } from '@/lib/admin/utils';
+import { filterRecommendations } from '@/lib/admin/filterUtils';
 
 interface RecommendationWithMeta extends Recommendation {
   _id: string;
@@ -60,14 +71,9 @@ export function RecommendationManagementPanel() {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchInput, setSearchInput] = useState('');
-  const [selectedRecommendation, setSelectedRecommendation] = useState<RecommendationWithMeta | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Debounce search input to reduce API calls
   const debouncedSearch = useDebouncedValue(searchInput, 300);
-
-  // Toast notifications for user feedback
-  const { success, error: showError } = useAdminToast();
 
   // Use the enterprise data hook for pagination and fetching
   const {
@@ -85,40 +91,14 @@ export function RecommendationManagementPanel() {
     dataKey: 'recommendations',
   });
 
-  const handleToggleStatus = async (
-    recommendationId: string,
-    currentStatus: string
-  ) => {
-    try {
-      const newStatus = currentStatus === 'published' ? 'draft' : 'published';
-      const res = await fetch(`/api/admin/recommendations/${recommendationId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (res.ok) {
-        refresh();
-        success(
-          'Status updated',
-          `Recommendation ${newStatus === 'published' ? 'published' : 'saved as draft'} successfully`
-        );
-        if (selectedRecommendation?._id === recommendationId) {
-          setSelectedRecommendation({ ...selectedRecommendation, status: newStatus as 'draft' | 'published' });
-        }
-      } else {
-        showError('Failed to update status', 'Please try again');
-      }
-    } catch (error) {
-      console.error('Failed to toggle status:', error);
-      showError('Network error', 'Unable to connect to server');
-    }
-  };
-
-  const handleView = (recommendation: RecommendationWithMeta) => {
-    setSelectedRecommendation(recommendation);
-    setIsDrawerOpen(true);
-  };
+  // Use shared hooks for status toggle and view drawer
+  const { selectedItem: selectedRecommendation, isDrawerOpen, openDrawer, closeDrawer } = useAdminViewDrawer<RecommendationWithMeta>();
+  
+  const { toggleStatus } = useAdminStatusToggle({
+    endpoint: '/api/admin/recommendations',
+    entityName: 'Recommendation',
+    onRefresh: refresh,
+  });
 
   // Column definitions for AdminDataTable
   const columns: ColumnDef<RecommendationWithMeta>[] = [
@@ -128,7 +108,7 @@ export function RecommendationManagementPanel() {
       width: 'w-[300px]',
       render: (rec) => (
         <button
-          onClick={() => handleView(rec)}
+          onClick={() => openDrawer(rec)}
           className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
         >
           {rec.title}
@@ -183,30 +163,20 @@ export function RecommendationManagementPanel() {
     }
   ];
 
-  const filteredRecommendations = recommendations.filter((rec) => {
-    // Filter by category
-    if (categoryFilter !== 'all' && rec.category !== categoryFilter) return false;
-
-    // Filter by audience
-    if (audienceFilter !== 'all' && !rec.audience.includes(audienceFilter as any)) return false;
-
-    // Filter by priority
-    if (priorityFilter !== 'all' && rec.priority !== priorityFilter) return false;
-
-    // Filter by status
-    if (statusFilter !== 'all' && rec.status !== statusFilter) return false;
-
-    // Filter by search using debounced value
-    if (debouncedSearch) {
-      const search = debouncedSearch.toLowerCase();
-      return (
-        rec.title.toLowerCase().includes(search) ||
-        rec.slug.toLowerCase().includes(search)
-      );
-    }
-
-    return true;
-  });
+  // Filter recommendations using shared utility
+  const filteredRecommendations = useMemo(
+    () => filterRecommendations(
+      recommendations,
+      {
+        category: categoryFilter,
+        audience: audienceFilter,
+        priority: priorityFilter,
+        status: statusFilter,
+      },
+      debouncedSearch
+    ),
+    [recommendations, categoryFilter, audienceFilter, priorityFilter, statusFilter, debouncedSearch]
+  );
 
   // Calculate stats using the enterprise utility function
   const stats = useMemo(() => calculateStats(recommendations, [
@@ -232,7 +202,7 @@ export function RecommendationManagementPanel() {
   };
 
   return (
-    <AdminErrorBoundary onError={(err) => console.error('Recommendation panel error:', err)}>
+    <AdminErrorBoundary>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
@@ -339,17 +309,17 @@ export function RecommendationManagementPanel() {
               data={filteredRecommendations}
               columns={columns}
               statusField="status"
-              onStatusToggle={handleToggleStatus}
+              onStatusToggle={(id, status) => toggleStatus(id, status as string)}
               renderRowActions={(rec) => (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleView(rec)}
+                  onClick={() => openDrawer(rec)}
                 >
                   <Icons.eye className="h-4 w-4" />
                 </Button>
               )}
-              onRowClick={handleView}
+              onRowClick={openDrawer}
             />
           )}
 
@@ -368,7 +338,7 @@ export function RecommendationManagementPanel() {
       </Card>
 
       {/* Preview Drawer */}
-      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <Sheet open={isDrawerOpen} onOpenChange={closeDrawer}>
         <SheetContent className="w-[800px] overflow-y-auto sm:max-w-[800px]">
           {selectedRecommendation && (
             <>
@@ -390,7 +360,7 @@ export function RecommendationManagementPanel() {
                     id="status-toggle-header"
                     checked={selectedRecommendation.status === 'published'}
                     onCheckedChange={() =>
-                      handleToggleStatus(
+                      toggleStatus(
                         selectedRecommendation._id,
                         selectedRecommendation.status
                       )

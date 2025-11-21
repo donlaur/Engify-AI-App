@@ -1,5 +1,14 @@
 'use client';
 
+/**
+ * Pain Point Management Panel
+ *
+ * Admin panel for managing pain points, including viewing, filtering, and toggling status.
+ * Uses shared hooks and utilities to reduce code duplication and improve maintainability.
+ *
+ * @component
+ */
+
 import { useState, useMemo } from 'react';
 import {
   Card,
@@ -37,7 +46,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import type { PainPoint } from '@/lib/workflows/pain-point-schema';
 import { useAdminData } from '@/hooks/admin/useAdminData';
-import { useAdminToast } from '@/hooks/admin/useAdminToast';
+import { useAdminStatusToggle } from '@/hooks/admin/useAdminStatusToggle';
+import { useAdminViewDrawer } from '@/hooks/admin/useAdminViewDrawer';
 import { useDebouncedValue } from '@/hooks/admin/useDebouncedValue';
 import { AdminPaginationControls } from '@/components/admin/shared/AdminPaginationControls';
 import { AdminStatsCard } from '@/components/admin/shared/AdminStatsCard';
@@ -46,6 +56,7 @@ import { AdminTableSkeleton } from '@/components/admin/shared/AdminTableSkeleton
 import { AdminEmptyState } from '@/components/admin/shared/AdminEmptyState';
 import { AdminErrorBoundary } from '@/components/admin/shared/AdminErrorBoundary';
 import { formatAdminDate, calculateStats, truncateText } from '@/lib/admin/utils';
+import { filterPainPoints } from '@/lib/admin/filterUtils';
 
 interface PainPointWithMetadata extends PainPoint {
   _id: string;
@@ -55,15 +66,10 @@ interface PainPointWithMetadata extends PainPoint {
 
 export function PainPointManagementPanel() {
   const [filter, setFilter] = useState<string>('all'); // all, published, draft
-  const [selectedPainPoint, setSelectedPainPoint] = useState<PainPointWithMetadata | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
 
   // Debounce search input to reduce API calls
   const debouncedSearch = useDebouncedValue(searchInput, 300);
-
-  // Toast notifications for user feedback
-  const { success, error: showError } = useAdminToast();
 
   // Use the new useAdminData hook for data fetching and pagination
   const {
@@ -81,40 +87,14 @@ export function PainPointManagementPanel() {
     dataKey: 'painPoints',
   });
 
-  const handleToggleStatus = async (
-    painPointId: string,
-    currentStatus: 'draft' | 'published'
-  ) => {
-    try {
-      const newStatus = currentStatus === 'published' ? 'draft' : 'published';
-      const res = await fetch(`/api/admin/pain-points/${painPointId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (res.ok) {
-        refresh();
-        success(
-          'Status updated',
-          `Pain point ${newStatus === 'published' ? 'published' : 'saved as draft'} successfully`
-        );
-        if (selectedPainPoint?._id === painPointId) {
-          setSelectedPainPoint({ ...selectedPainPoint, status: newStatus });
-        }
-      } else {
-        showError('Failed to update status', 'Please try again');
-      }
-    } catch (error) {
-      console.error('Failed to toggle status:', error);
-      showError('Network error', 'Unable to connect to server');
-    }
-  };
-
-  const handleView = (painPoint: PainPointWithMetadata) => {
-    setSelectedPainPoint(painPoint);
-    setIsDrawerOpen(true);
-  };
+  // Use shared hooks for status toggle and view drawer
+  const { selectedItem: selectedPainPoint, isDrawerOpen, openDrawer, closeDrawer } = useAdminViewDrawer<PainPointWithMetadata>();
+  
+  const { toggleStatus } = useAdminStatusToggle({
+    endpoint: '/api/admin/pain-points',
+    entityName: 'Pain point',
+    onRefresh: refresh,
+  });
 
   // Column definitions for AdminDataTable
   const columns: ColumnDef<PainPointWithMetadata>[] = [
@@ -124,7 +104,7 @@ export function PainPointManagementPanel() {
       width: 'w-[300px]',
       render: (painPoint) => (
         <button
-          onClick={() => handleView(painPoint)}
+          onClick={() => openDrawer(painPoint)}
           className="text-left hover:text-blue-600 hover:underline dark:hover:text-blue-400"
         >
           {painPoint.title}
@@ -170,23 +150,11 @@ export function PainPointManagementPanel() {
     }
   ];
 
-  const filteredPainPoints = painPoints.filter((painPoint) => {
-    // Filter by status
-    if (filter === 'published' && painPoint.status !== 'published') return false;
-    if (filter === 'draft' && painPoint.status !== 'draft') return false;
-
-    // Filter by search using debounced value
-    if (debouncedSearch) {
-      const search = debouncedSearch.toLowerCase();
-      return (
-        painPoint.title.toLowerCase().includes(search) ||
-        painPoint.slug.toLowerCase().includes(search) ||
-        painPoint.description.toLowerCase().includes(search)
-      );
-    }
-
-    return true;
-  });
+  // Filter pain points using shared utility
+  const filteredPainPoints = useMemo(
+    () => filterPainPoints(painPoints, filter, debouncedSearch),
+    [painPoints, filter, debouncedSearch]
+  );
 
   // Use calculateStats utility for statistics
   const stats = useMemo(() => calculateStats(painPoints, [
@@ -203,7 +171,7 @@ export function PainPointManagementPanel() {
   ]), [painPoints, totalCount]);
 
   return (
-    <AdminErrorBoundary onError={(err) => console.error('Pain point panel error:', err)}>
+    <AdminErrorBoundary>
       <div className="space-y-6">
         {/* Stats Cards - Using AdminStatsCard */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
@@ -263,17 +231,17 @@ export function PainPointManagementPanel() {
               data={filteredPainPoints}
               columns={columns}
               statusField="status"
-              onStatusToggle={handleToggleStatus}
+              onStatusToggle={(id, status) => toggleStatus(id, status as string)}
               renderRowActions={(painPoint) => (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleView(painPoint)}
+                  onClick={() => openDrawer(painPoint)}
                 >
                   <Icons.eye className="h-4 w-4" />
                 </Button>
               )}
-              onRowClick={handleView}
+              onRowClick={openDrawer}
             />
           )}
 
@@ -292,7 +260,7 @@ export function PainPointManagementPanel() {
       </Card>
 
       {/* Preview Drawer */}
-      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <Sheet open={isDrawerOpen} onOpenChange={closeDrawer}>
         <SheetContent className="w-[800px] overflow-y-auto sm:max-w-[800px]">
           {selectedPainPoint && (
             <>
@@ -311,7 +279,7 @@ export function PainPointManagementPanel() {
                     id="status-toggle-header"
                     checked={selectedPainPoint.status === 'published'}
                     onCheckedChange={() =>
-                      handleToggleStatus(
+                      toggleStatus(
                         selectedPainPoint._id,
                         selectedPainPoint.status
                       )
