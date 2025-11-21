@@ -150,7 +150,7 @@ export function AffiliateLinkManagement() {
       clientLogger.apiError('/api/admin/affiliate-links', error, {
         component: 'AffiliateLinkManagement',
         action: 'saveAffiliateLink',
-        linkId: editingLink?.id,
+        linkId: editingLink?._id,
       });
     }
   };

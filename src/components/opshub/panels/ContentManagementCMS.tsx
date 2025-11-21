@@ -102,23 +102,7 @@ export function ContentManagementCMS() {
   const [isGeneratingRecap, setIsGeneratingRecap] = useState(false);
   const [recapProvider, setRecapProvider] = useState<'openai' | 'anthropic' | 'google'>('openai');
 
-  // Use shared CRUD operations hook
-  const { saveItem, deleteItem } = useCrudOperations<ContentItem>({
-    endpoint: '/api/admin/content/manage',
-    onRefresh: fetchContent,
-    createSuccessMessage: 'Content created successfully',
-    updateSuccessMessage: 'Content updated successfully',
-    deleteSuccessMessage: 'Content deleted successfully',
-    onSaveSuccess: () => {
-      setIsEditDialogOpen(false);
-    },
-  });
-
-  useEffect(() => {
-    fetchContent();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
-
+  // Define fetchContent before useCrudOperations to avoid "used before declaration" error
   const fetchContent = async () => {
     setLoading(true);
     try {
@@ -140,6 +124,23 @@ export function ContentManagementCMS() {
       setLoading(false);
     }
   };
+
+  // Use shared CRUD operations hook (after fetchContent is defined)
+  const { saveItem, deleteItem } = useCrudOperations<ContentItem>({
+    endpoint: '/api/admin/content/manage',
+    onRefresh: fetchContent,
+    createSuccessMessage: 'Content created successfully',
+    updateSuccessMessage: 'Content updated successfully',
+    deleteSuccessMessage: 'Content deleted successfully',
+    onSaveSuccess: () => {
+      setIsEditDialogOpen(false);
+    },
+  });
+
+  useEffect(() => {
+    fetchContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleEdit = (item: ContentItem) => {
     setEditingItem(item);
@@ -266,7 +267,7 @@ Return enhanced markdown content.`;
       clientLogger.apiError('/api/admin/content/enhance', error, {
         component: 'ContentManagementCMS',
         action: 'enhanceContent',
-        contentId: editingContent?._id,
+        contentId: editingItem?._id,
       });
       alert('Failed to enhance content');
     } finally {

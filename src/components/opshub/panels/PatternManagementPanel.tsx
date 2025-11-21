@@ -37,7 +37,6 @@ import {
 } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
 import { useAdminData } from '@/hooks/opshub/useAdminData';
-import { useAdminToast } from '@/hooks/opshub/useAdminToast';
 import { useDebouncedValue } from '@/hooks/opshub/useDebouncedValue';
 import { AdminDataTable, type ColumnDef } from '@/components/opshub/panels/shared/AdminDataTable';
 import { AdminTableSkeleton } from '@/components/opshub/panels/shared/AdminTableSkeleton';
@@ -46,7 +45,6 @@ import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminError
 import { AdminPaginationControls } from '@/components/opshub/panels/shared/AdminPaginationControls';
 import { AdminStatsCard } from '@/components/opshub/panels/shared/AdminStatsCard';
 import { useCrudOperations } from '@/hooks/opshub/useCrudOperations';
-import { clientLogger } from '@/lib/logging/client-logger';
 
 interface Pattern {
   _id: string;
@@ -109,8 +107,7 @@ export function PatternManagementPanel() {
     dataKey: 'patterns',
   });
 
-  // Toast notifications
-  const { success, error: showError } = useAdminToast();
+  // Toast notifications are handled by useCrudOperations hook
 
   // State management
   const [filter, setFilter] = useState<string>('all');
@@ -156,7 +153,7 @@ export function PatternManagementPanel() {
   };
 
   // Use shared CRUD operations hook
-  const { saveItem, deleteItem, loading: crudLoading } = useCrudOperations<Pattern>({
+  const { saveItem, deleteItem } = useCrudOperations<Pattern>({
     endpoint: '/api/admin/patterns',
     onRefresh: refresh,
     createSuccessMessage: 'The pattern has been created successfully',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
 import { clientLogger } from '@/lib/logging/client-logger';
 import { useCrudOperations } from '@/hooks/opshub/useCrudOperations';
-import { useAdminToast } from '@/hooks/opshub/useAdminToast';
 import { applyFilters } from '@/lib/opshub/utils';
 import {
   Table,
@@ -157,8 +156,7 @@ export function SystemSettingsPanel() {
     setIsEditDialogOpen(true);
   };
 
-  // Use shared CRUD operations hook
-  const { success, error: showError } = useAdminToast();
+  // Use shared CRUD operations hook (handles its own toasts)
   const { saveItem, deleteItem } = useCrudOperations<SystemSetting>({
     endpoint: '/api/admin/system-settings',
     onRefresh: fetchSettings,

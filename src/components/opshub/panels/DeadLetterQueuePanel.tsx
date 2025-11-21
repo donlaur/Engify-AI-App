@@ -177,7 +177,7 @@ export function DeadLetterQueuePanel() {
       clientLogger.apiError('/api/admin/dlq/replay-batch', error, {
         component: 'DeadLetterQueuePanel',
         action: 'replayMessages',
-        count: selectedMessages.length,
+        count: selectedIds.size,
       });
     }
   };
