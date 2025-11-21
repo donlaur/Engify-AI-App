@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 /**
  * Base interface for all admin data items requiring an _id field
@@ -166,6 +167,52 @@ export function useAdminData<T extends AdminDataItem>(
   const [hasPrev, setHasPrev] = useState<boolean>(false);
 
   /**
+   * Reset pagination state to initial empty state
+   */
+  const resetPaginationState = useCallback(() => {
+    setData([]);
+    setTotalPages(1);
+    setTotalCount(0);
+    setHasNext(false);
+    setHasPrev(false);
+  }, []);
+
+  /**
+   * Update pagination metadata from API response
+   */
+  const updatePaginationState = useCallback((pagination: PaginationMeta | undefined, dataLength: number) => {
+    if (pagination) {
+      setTotalPages(pagination.totalPages);
+      setTotalCount(pagination.total);
+      setHasNext(pagination.hasNext);
+      setHasPrev(pagination.hasPrev);
+    } else {
+      // Fallback if pagination is not provided
+      setTotalPages(1);
+      setTotalCount(dataLength);
+      setHasNext(false);
+      setHasPrev(false);
+    }
+  }, []);
+
+  /**
+   * Extract data array from API response
+   */
+  const extractDataFromResponse = useCallback((result: AdminApiResponse): T[] => {
+    if (dataKey) {
+      return result[dataKey] || [];
+    }
+    // Try to infer data key by finding the array property
+    const dataKeys = Object.keys(result).filter(
+      key => Array.isArray(result[key]) && key !== 'pagination'
+    );
+    if (dataKeys.length > 0) {
+      return result[dataKeys[0]] || [];
+    }
+    return [];
+  }, [dataKey]);
+
+  /**
    * Build query string from filters, search term, and pagination params
    */
   const buildQueryString = useCallback(
@@ -216,51 +263,24 @@ export function useAdminData<T extends AdminDataItem>(
         }
 
         // Extract data using provided dataKey or infer from response
-        let extractedData: T[] = [];
-        if (dataKey) {
-          extractedData = result[dataKey] || [];
-        } else {
-          // Try to infer data key by finding the array property
-          const dataKeys = Object.keys(result).filter(
-            key => Array.isArray(result[key]) && key !== 'pagination'
-          );
-          if (dataKeys.length > 0) {
-            extractedData = result[dataKeys[0]] || [];
-          }
-        }
-
+        const extractedData = extractDataFromResponse(result);
         setData(extractedData);
 
         // Update pagination metadata
-        if (result.pagination) {
-          setTotalPages(result.pagination.totalPages);
-          setTotalCount(result.pagination.total);
-          setHasNext(result.pagination.hasNext);
-          setHasPrev(result.pagination.hasPrev);
-        } else {
-          // Fallback if pagination is not provided
-          setTotalPages(1);
-          setTotalCount(extractedData.length);
-          setHasNext(false);
-          setHasPrev(false);
-        }
+        updatePaginationState(result.pagination, extractedData.length);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to fetch data';
         setError(errorMessage);
-        console.error(`Failed to fetch data from ${endpoint}:`, err);
+        clientLogger.apiError(endpoint, err, { component: 'useAdminData' });
 
         // Reset to empty state on error
-        setData([]);
-        setTotalPages(1);
-        setTotalCount(0);
-        setHasNext(false);
-        setHasPrev(false);
+        resetPaginationState();
       } finally {
         setLoading(false);
       }
     },
-    [endpoint, currentPage, buildQueryString, dataKey]
+    [endpoint, currentPage, buildQueryString, extractDataFromResponse, updatePaginationState, resetPaginationState]
   );
 
   /**
