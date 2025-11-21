@@ -1,9 +1,43 @@
 /**
- * Utility functions for filtering admin data
+ * Filtering Utilities for OpsHub Admin Data
+ * 
+ * Provides reusable, type-safe filtering functions for admin panels.
+ * Implements DRY principle by extracting common filtering patterns into
+ * generic functions that can be composed for complex filtering scenarios.
+ * 
+ * @pattern FUNCTIONAL_FILTERING
+ * @principle DRY - eliminates duplication across filter implementations
+ * @usage Used by WorkflowManagementPanel, RecommendationManagementPanel, PainPointManagementPanel
+ * 
+ * @ai-readability
+ * - Generic functions with clear type parameters
+ * - Descriptive function names that explain purpose
+ * - JSDoc comments explain usage and parameters
+ * - Examples show how to compose filters
+ * 
+ * @architecture
+ * - Private generic functions (filterByField, filterByArrayField, searchByFields) provide base functionality
+ * - Public functions (filterByCategory, filterByStatus, etc.) are domain-specific wrappers
+ * - Composite functions (filterWorkflows, filterRecommendations) combine multiple filters
  */
 
 /**
  * Generic filter function for exact field matching
+ * 
+ * Filters items where a specific field exactly matches the filter value.
+ * Returns all items if filterValue is 'all' (common pattern for "show all" filters).
+ * 
+ * @template T - The type of items being filtered
+ * @param items - Array of items to filter
+ * @param filterValue - The value to match against (or 'all' to show all)
+ * @param getFieldValue - Function to extract the field value from each item
+ * @returns Filtered array of items matching the filter value
+ * 
+ * @example
+ * ```typescript
+ * // Filter users by role
+ * const admins = filterByField(users, 'admin', user => user.role);
+ * ```
  */
 function filterByField<T>(
   items: T[],
@@ -16,6 +50,21 @@ function filterByField<T>(
 
 /**
  * Generic filter function for array field matching
+ * 
+ * Filters items where a field contains an array and the filter value is in that array.
+ * Useful for filtering by tags, categories, audiences, etc.
+ * 
+ * @template T - The type of items being filtered
+ * @param items - Array of items to filter
+ * @param filterValue - The value to search for in the array field (or 'all' to show all)
+ * @param getFieldValue - Function to extract the array field from each item
+ * @returns Filtered array of items where the array field includes the filter value
+ * 
+ * @example
+ * ```typescript
+ * // Filter workflows by audience
+ * const developerWorkflows = filterByArrayField(workflows, 'developers', w => w.audience);
+ * ```
  */
 function filterByArrayField<T>(
   items: T[],
@@ -28,6 +77,21 @@ function filterByArrayField<T>(
 
 /**
  * Generic search function for text fields
+ * 
+ * Performs case-insensitive substring search across multiple text fields.
+ * Returns all items if searchTerm is empty or whitespace-only.
+ * 
+ * @template T - The type of items being filtered
+ * @param items - Array of items to search
+ * @param searchTerm - The text to search for (empty string returns all items)
+ * @param getFieldValues - Function to extract all searchable text fields from an item
+ * @returns Filtered array of items where any field contains the search term
+ * 
+ * @example
+ * ```typescript
+ * // Search prompts by title and slug
+ * const results = searchByFields(prompts, 'react', p => [p.title, p.slug]);
+ * ```
  */
 function searchByFields<T>(
   items: T[],
@@ -43,7 +107,15 @@ function searchByFields<T>(
 }
 
 /**
- * Filter items by category
+ * Filter items by category field
+ * 
+ * Domain-specific wrapper for filtering by category. Uses the generic filterByField
+ * function internally to reduce code duplication.
+ * 
+ * @template T - Item type must have a 'category' string field
+ * @param items - Array of items to filter
+ * @param categoryFilter - Category value to filter by, or 'all' to show all
+ * @returns Filtered array of items matching the category
  */
 export function filterByCategory<T extends { category: string }>(
   items: T[],
@@ -53,7 +125,14 @@ export function filterByCategory<T extends { category: string }>(
 }
 
 /**
- * Filter items by status
+ * Filter items by status field
+ * 
+ * Domain-specific wrapper for filtering by status (e.g., 'published', 'draft').
+ * 
+ * @template T - Item type must have a 'status' string field
+ * @param items - Array of items to filter
+ * @param statusFilter - Status value to filter by, or 'all' to show all
+ * @returns Filtered array of items matching the status
  */
 export function filterByStatus<T extends { status: string }>(
   items: T[],
@@ -63,7 +142,15 @@ export function filterByStatus<T extends { status: string }>(
 }
 
 /**
- * Filter items by audience (supports array of audiences)
+ * Filter items by audience array field
+ * 
+ * Filters items where the audience array includes the specified value.
+ * Useful for filtering content by target audience (e.g., 'developers', 'designers').
+ * 
+ * @template T - Item type must have an 'audience' string array field
+ * @param items - Array of items to filter
+ * @param audienceFilter - Audience value to search for, or 'all' to show all
+ * @returns Filtered array of items where audience includes the filter value
  */
 export function filterByAudience<T extends { audience: string[] }>(
   items: T[],
@@ -73,7 +160,14 @@ export function filterByAudience<T extends { audience: string[] }>(
 }
 
 /**
- * Filter items by priority
+ * Filter items by priority field
+ * 
+ * Domain-specific wrapper for filtering by priority (e.g., 'high', 'medium', 'low').
+ * 
+ * @template T - Item type must have a 'priority' string field
+ * @param items - Array of items to filter
+ * @param priorityFilter - Priority value to filter by, or 'all' to show all
+ * @returns Filtered array of items matching the priority
  */
 export function filterByPriority<T extends { priority: string }>(
   items: T[],
@@ -84,6 +178,14 @@ export function filterByPriority<T extends { priority: string }>(
 
 /**
  * Search items by text in title and slug fields
+ * 
+ * Performs case-insensitive search across title and slug fields.
+ * Commonly used for admin panel search functionality.
+ * 
+ * @template T - Item type must have 'title' and 'slug' string fields
+ * @param items - Array of items to search
+ * @param searchTerm - Text to search for (empty string returns all items)
+ * @returns Filtered array of items where title or slug contains the search term
  */
 export function searchByText<T extends { title: string; slug: string }>(
   items: T[],
@@ -94,6 +196,14 @@ export function searchByText<T extends { title: string; slug: string }>(
 
 /**
  * Search items by text in title, slug, and description fields
+ * 
+ * Extended search that includes description field for more comprehensive results.
+ * Useful when users might search for content by description text.
+ * 
+ * @template T - Item type must have 'title', 'slug', and optional 'description' fields
+ * @param items - Array of items to search
+ * @param searchTerm - Text to search for (empty string returns all items)
+ * @returns Filtered array of items where title, slug, or description contains the search term
  */
 export function searchByTextWithDescription<T extends { title: string; slug: string; description?: string }>(
   items: T[],
@@ -108,6 +218,24 @@ export function searchByTextWithDescription<T extends { title: string; slug: str
 
 /**
  * Apply multiple filters in sequence using a pipeline pattern
+ * 
+ * Composes multiple filter functions into a single filtering pipeline.
+ * Each filter is applied to the result of the previous filter, allowing
+ * complex filtering logic to be built from simple, reusable functions.
+ * 
+ * @template T - The type of items being filtered
+ * @param items - Initial array of items to filter
+ * @param filters - Array of filter functions to apply in sequence
+ * @returns Final filtered array after all filters have been applied
+ * 
+ * @example
+ * ```typescript
+ * const filtered = applyFilterPipeline(items, [
+ *   items => filterByCategory(items, 'workflow'),
+ *   items => filterByStatus(items, 'published'),
+ *   items => searchByText(items, 'react')
+ * ]);
+ * ```
  */
 function applyFilterPipeline<T>(
   items: T[],
@@ -117,7 +245,19 @@ function applyFilterPipeline<T>(
 }
 
 /**
- * Combine multiple filters for workflows
+ * Composite filter for workflow items
+ * 
+ * Applies multiple filters in sequence: category → status → audience → search.
+ * This is a domain-specific composite function that combines common filtering
+ * patterns for workflow management panels.
+ * 
+ * @template T - Item type must have category, status, audience, title, and slug fields
+ * @param items - Array of workflow items to filter
+ * @param filters - Object containing category, status, and audience filter values
+ * @param searchTerm - Text to search for in title and slug fields
+ * @returns Filtered array of workflows matching all filter criteria
+ * 
+ * @usage Used by WorkflowManagementPanel for filtering workflow lists
  */
 export function filterWorkflows<T extends { category: string; status: string; audience: string[]; title: string; slug: string }>(
   items: T[],
@@ -134,7 +274,18 @@ export function filterWorkflows<T extends { category: string; status: string; au
 }
 
 /**
- * Combine multiple filters for recommendations
+ * Composite filter for recommendation items
+ * 
+ * Applies multiple filters in sequence: category → audience → priority → status → search.
+ * More complex than workflow filtering due to additional priority field.
+ * 
+ * @template T - Item type must have category, status, audience, priority, title, and slug fields
+ * @param items - Array of recommendation items to filter
+ * @param filters - Object containing category, audience, priority, and status filter values
+ * @param searchTerm - Text to search for in title and slug fields
+ * @returns Filtered array of recommendations matching all filter criteria
+ * 
+ * @usage Used by RecommendationManagementPanel for filtering recommendation lists
  */
 export function filterRecommendations<T extends { category: string; status: string; audience: string[]; priority: string; title: string; slug: string }>(
   items: T[],
@@ -152,7 +303,18 @@ export function filterRecommendations<T extends { category: string; status: stri
 }
 
 /**
- * Combine multiple filters for pain points
+ * Composite filter for pain point items
+ * 
+ * Simpler composite filter that only applies status and search filters.
+ * Pain points don't have category or audience fields, so filtering is more straightforward.
+ * 
+ * @template T - Item type must have status, title, slug, and optional description fields
+ * @param items - Array of pain point items to filter
+ * @param statusFilter - Status value to filter by, or 'all' to show all
+ * @param searchTerm - Text to search for in title, slug, and description fields
+ * @returns Filtered array of pain points matching the filter criteria
+ * 
+ * @usage Used by PainPointManagementPanel for filtering pain point lists
  */
 export function filterPainPoints<T extends { status: string; title: string; slug: string; description?: string }>(
   items: T[],

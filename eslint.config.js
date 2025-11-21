@@ -3,6 +3,7 @@ import { FlatCompat } from '@eslint/eslintrc';
 import globals from 'globals';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import jsdoc from 'eslint-plugin-jsdoc';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,6 +30,9 @@ export default [
   ...compat.extends('next/core-web-vitals', 'plugin:@typescript-eslint/recommended'),
   {
     files: ['**/*.{ts,tsx,cts,mts}'],
+    plugins: {
+      jsdoc,
+    },
     languageOptions: {
       parserOptions: {
         ecmaVersion: 2022,
@@ -50,6 +54,37 @@ export default [
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'prefer-const': 'error',
       'no-var': 'error',
+      // JSDoc rules for code documentation
+      'jsdoc/require-jsdoc': [
+        'warn',
+        {
+          require: {
+            FunctionDeclaration: false, // Too noisy for all functions
+            MethodDefinition: false,
+            ClassDeclaration: true, // Require for classes
+            ArrowFunctionExpression: false,
+            FunctionExpression: false,
+          },
+          // Only require JSDoc for exported functions (public API)
+          contexts: [
+            'ExportNamedDeclaration > FunctionDeclaration',
+            'ExportDefaultDeclaration > FunctionDeclaration',
+            'ExportNamedDeclaration > VariableDeclarator > ArrowFunctionExpression',
+            'ExportDefaultDeclaration > ArrowFunctionExpression',
+          ],
+        },
+      ],
+      'jsdoc/check-syntax': 'error',
+      'jsdoc/require-description': 'warn',
+      'jsdoc/require-param': 'warn',
+      'jsdoc/require-returns': 'warn',
+      'jsdoc/check-param-names': 'error',
+      'jsdoc/check-types': 'warn',
+      'jsdoc/check-alignment': 'warn',
+      'jsdoc/check-indentation': 'warn',
+      // Allow empty JSDoc for now (we're building up documentation)
+      'jsdoc/require-param-description': 'off',
+      'jsdoc/require-returns-description': 'off',
     },
   },
   {
