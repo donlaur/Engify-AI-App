@@ -3,14 +3,53 @@
  */
 
 /**
+ * Generic filter function for exact field matching
+ */
+function filterByField<T>(
+  items: T[],
+  filterValue: string,
+  getFieldValue: (item: T) => string
+): T[] {
+  if (filterValue === 'all') return items;
+  return items.filter(item => getFieldValue(item) === filterValue);
+}
+
+/**
+ * Generic filter function for array field matching
+ */
+function filterByArrayField<T>(
+  items: T[],
+  filterValue: string,
+  getFieldValue: (item: T) => string[]
+): T[] {
+  if (filterValue === 'all') return items;
+  return items.filter(item => getFieldValue(item).includes(filterValue));
+}
+
+/**
+ * Generic search function for text fields
+ */
+function searchByFields<T>(
+  items: T[],
+  searchTerm: string,
+  getFieldValues: (item: T) => string[]
+): T[] {
+  if (!searchTerm.trim()) return items;
+  const search = searchTerm.toLowerCase();
+  return items.filter(item => {
+    const fieldValues = getFieldValues(item);
+    return fieldValues.some(value => value?.toLowerCase().includes(search));
+  });
+}
+
+/**
  * Filter items by category
  */
 export function filterByCategory<T extends { category: string }>(
   items: T[],
   categoryFilter: string
 ): T[] {
-  if (categoryFilter === 'all') return items;
-  return items.filter(item => item.category === categoryFilter);
+  return filterByField(items, categoryFilter, item => item.category);
 }
 
 /**
@@ -20,8 +59,7 @@ export function filterByStatus<T extends { status: string }>(
   items: T[],
   statusFilter: string
 ): T[] {
-  if (statusFilter === 'all') return items;
-  return items.filter(item => item.status === statusFilter);
+  return filterByField(items, statusFilter, item => item.status);
 }
 
 /**
@@ -31,8 +69,7 @@ export function filterByAudience<T extends { audience: string[] }>(
   items: T[],
   audienceFilter: string
 ): T[] {
-  if (audienceFilter === 'all') return items;
-  return items.filter(item => item.audience.includes(audienceFilter));
+  return filterByArrayField(items, audienceFilter, item => item.audience);
 }
 
 /**
@@ -42,8 +79,7 @@ export function filterByPriority<T extends { priority: string }>(
   items: T[],
   priorityFilter: string
 ): T[] {
-  if (priorityFilter === 'all') return items;
-  return items.filter(item => item.priority === priorityFilter);
+  return filterByField(items, priorityFilter, item => item.priority);
 }
 
 /**
@@ -53,13 +89,7 @@ export function searchByText<T extends { title: string; slug: string }>(
   items: T[],
   searchTerm: string
 ): T[] {
-  if (!searchTerm.trim()) return items;
-  const search = searchTerm.toLowerCase();
-  return items.filter(
-    item =>
-      item.title.toLowerCase().includes(search) ||
-      item.slug.toLowerCase().includes(search)
-  );
+  return searchByFields(items, searchTerm, item => [item.title, item.slug]);
 }
 
 /**
@@ -69,14 +99,21 @@ export function searchByTextWithDescription<T extends { title: string; slug: str
   items: T[],
   searchTerm: string
 ): T[] {
-  if (!searchTerm.trim()) return items;
-  const search = searchTerm.toLowerCase();
-  return items.filter(
-    item =>
-      item.title.toLowerCase().includes(search) ||
-      item.slug.toLowerCase().includes(search) ||
-      (item.description && item.description.toLowerCase().includes(search))
-  );
+  return searchByFields(items, searchTerm, item => [
+    item.title,
+    item.slug,
+    item.description || '',
+  ]);
+}
+
+/**
+ * Apply multiple filters in sequence using a pipeline pattern
+ */
+function applyFilterPipeline<T>(
+  items: T[],
+  filters: Array<(items: T[]) => T[]>
+): T[] {
+  return filters.reduce((filtered, filterFn) => filterFn(filtered), items);
 }
 
 /**
@@ -87,12 +124,13 @@ export function filterWorkflows<T extends { category: string; status: string; au
   filters: { category: string; status: string; audience: string },
   searchTerm: string
 ): T[] {
-  let filtered = items;
-  filtered = filterByCategory(filtered, filters.category);
-  filtered = filterByStatus(filtered, filters.status);
-  filtered = filterByAudience(filtered, filters.audience);
-  filtered = searchByText(filtered, searchTerm);
-  return filtered;
+  const filterPipeline = [
+    (items: T[]) => filterByCategory(items, filters.category),
+    (items: T[]) => filterByStatus(items, filters.status),
+    (items: T[]) => filterByAudience(items, filters.audience),
+    (items: T[]) => searchByText(items, searchTerm),
+  ];
+  return applyFilterPipeline(items, filterPipeline);
 }
 
 /**
@@ -103,13 +141,14 @@ export function filterRecommendations<T extends { category: string; status: stri
   filters: { category: string; audience: string; priority: string; status: string },
   searchTerm: string
 ): T[] {
-  let filtered = items;
-  filtered = filterByCategory(filtered, filters.category);
-  filtered = filterByAudience(filtered, filters.audience);
-  filtered = filterByPriority(filtered, filters.priority);
-  filtered = filterByStatus(filtered, filters.status);
-  filtered = searchByText(filtered, searchTerm);
-  return filtered;
+  const filterPipeline = [
+    (items: T[]) => filterByCategory(items, filters.category),
+    (items: T[]) => filterByAudience(items, filters.audience),
+    (items: T[]) => filterByPriority(items, filters.priority),
+    (items: T[]) => filterByStatus(items, filters.status),
+    (items: T[]) => searchByText(items, searchTerm),
+  ];
+  return applyFilterPipeline(items, filterPipeline);
 }
 
 /**
@@ -120,9 +159,10 @@ export function filterPainPoints<T extends { status: string; title: string; slug
   statusFilter: string,
   searchTerm: string
 ): T[] {
-  let filtered = items;
-  filtered = filterByStatus(filtered, statusFilter);
-  filtered = searchByTextWithDescription(filtered, searchTerm);
-  return filtered;
+  const filterPipeline = [
+    (items: T[]) => filterByStatus(items, statusFilter),
+    (items: T[]) => searchByTextWithDescription(items, searchTerm),
+  ];
+  return applyFilterPipeline(items, filterPipeline);
 }
 

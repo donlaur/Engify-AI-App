@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/select';
 import { Icons } from '@/lib/icons';
 import { AdminErrorBoundary } from '@/components/opshub/panels/shared/AdminErrorBoundary';
+import { TAB_CONFIGS, TAB_CATEGORIES, ALL_TABS } from './tabConfig';
 
-// Tab components
+// Tab components - imported dynamically to reduce bundle size
 import { DashboardOverviewPanel } from './DashboardOverviewPanel';
 import { ContentManagementCMS } from './ContentManagementCMS';
 import { ContentGeneratorPanel } from './ContentGeneratorPanel';
@@ -28,27 +29,27 @@ import { DeadLetterQueuePanel } from './DeadLetterQueuePanel';
 import { FeedManagementPanel } from './FeedManagementPanel';
 import { NewsItemsPanel } from './NewsItemsPanel';
 
-// Tab categories for organization
-const TAB_CATEGORIES = {
-  overview: {
-    label: 'Overview',
-    tabs: ['dashboard'],
-  },
-  content: {
-    label: 'Content',
-    tabs: ['content', 'generator', 'prompts', 'patterns'],
-  },
-  management: {
-    label: 'Management',
-    tabs: ['workflows', 'recommendations', 'painpoints', 'users'],
-  },
-  system: {
-    label: 'System',
-    tabs: ['feeds', 'news', 'queue', 'settings'],
-  },
-};
-
-const ALL_TABS = Object.values(TAB_CATEGORIES).flatMap(cat => cat.tabs);
+/**
+ * Get the component for a tab by ID
+ */
+function getTabComponent(tabId: string) {
+  const componentMap: Record<string, () => JSX.Element> = {
+    dashboard: () => <DashboardOverviewPanel />,
+    content: () => <ContentManagementCMS />,
+    generator: () => <ContentGeneratorPanel />,
+    prompts: () => <PromptManagementPanel />,
+    patterns: () => <PatternManagementPanel />,
+    workflows: () => <WorkflowManagementPanel />,
+    recommendations: () => <RecommendationManagementPanel />,
+    painpoints: () => <PainPointManagementPanel />,
+    users: () => <UserManagementPanel />,
+    queue: () => <DeadLetterQueuePanel />,
+    settings: () => <SystemSettingsPanel />,
+    feeds: () => <FeedManagementPanel />,
+    news: () => <NewsItemsPanel />,
+  };
+  return componentMap[tabId] || (() => <div>Tab not found</div>);
+}
 
 export function OpsHubTabs() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -102,151 +103,30 @@ export function OpsHubTabs() {
       >
         <div className="overflow-x-auto -mx-4 px-4">
           <TabsList className="inline-flex min-w-full gap-1 bg-slate-700/50">
-          {visibleTabs.includes('dashboard') && (
-            <TabsTrigger value="dashboard" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.barChart className="h-4 w-4" />
-              <span className="hidden sm:inline">Dashboard</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('content') && (
-            <TabsTrigger value="content" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.fileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Content</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('generator') && (
-            <TabsTrigger value="generator" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.zap className="h-4 w-4" />
-              <span className="hidden sm:inline">Generator</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('prompts') && (
-            <TabsTrigger value="prompts" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.code className="h-4 w-4" />
-              <span className="hidden sm:inline">Prompts</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('patterns') && (
-            <TabsTrigger value="patterns" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.brain className="h-4 w-4" />
-              <span className="hidden sm:inline">Patterns</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('workflows') && (
-            <TabsTrigger value="workflows" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.gitBranch className="h-4 w-4" />
-              <span className="hidden sm:inline">Workflows</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('recommendations') && (
-            <TabsTrigger value="recommendations" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.lightbulb className="h-4 w-4" />
-              <span className="hidden sm:inline">Recommendations</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('painpoints') && (
-            <TabsTrigger value="painpoints" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.alertTriangle className="h-4 w-4" />
-              <span className="hidden sm:inline">Pain Points</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('users') && (
-            <TabsTrigger value="users" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.users className="h-4 w-4" />
-              <span className="hidden sm:inline">Users</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('queue') && (
-            <TabsTrigger value="queue" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.alertCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">DLQ</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('settings') && (
-            <TabsTrigger value="settings" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.settings className="h-4 w-4" />
-              <span className="hidden sm:inline">Settings</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('feeds') && (
-            <TabsTrigger value="feeds" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.newspaper className="h-4 w-4" />
-              <span className="hidden sm:inline">Feeds</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('news') && (
-            <TabsTrigger value="news" className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white">
-              <Icons.newspaper className="h-4 w-4" />
-              <span className="hidden sm:inline">News</span>
-            </TabsTrigger>
-          )}
-        </TabsList>
+            {TAB_CONFIGS
+              .filter(tab => visibleTabs.includes(tab.id))
+              .map(tab => {
+                const IconComponent = Icons[tab.icon];
+                return (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-200 hover:text-white"
+                  >
+                    <IconComponent className="h-4 w-4" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </TabsTrigger>
+                );
+              })}
+          </TabsList>
         </div>
 
-        {/* Dashboard Tab */}
-        <TabsContent value="dashboard" className="space-y-4">
-          <DashboardOverviewPanel />
-        </TabsContent>
-
-        {/* Content Tab */}
-        <TabsContent value="content" className="space-y-4">
-          <ContentManagementCMS />
-        </TabsContent>
-
-        {/* Generator Tab */}
-        <TabsContent value="generator" className="space-y-4">
-          <ContentGeneratorPanel />
-        </TabsContent>
-
-        {/* Prompts Tab */}
-        <TabsContent value="prompts" className="space-y-4">
-          <PromptManagementPanel />
-        </TabsContent>
-
-        {/* Patterns Tab */}
-        <TabsContent value="patterns" className="space-y-4">
-          <PatternManagementPanel />
-        </TabsContent>
-
-        {/* Workflows Tab */}
-        <TabsContent value="workflows" className="space-y-4">
-          <WorkflowManagementPanel />
-        </TabsContent>
-
-        {/* Recommendations Tab */}
-        <TabsContent value="recommendations" className="space-y-4">
-          <RecommendationManagementPanel />
-        </TabsContent>
-
-        {/* Pain Points Tab */}
-        <TabsContent value="painpoints" className="space-y-4">
-          <PainPointManagementPanel />
-        </TabsContent>
-
-        {/* Users Tab */}
-        <TabsContent value="users" className="space-y-4">
-          <UserManagementPanel />
-        </TabsContent>
-
-        {/* Dead Letter Queue Tab */}
-        <TabsContent value="queue" className="space-y-4">
-          <DeadLetterQueuePanel />
-        </TabsContent>
-
-        {/* Settings Tab */}
-        <TabsContent value="settings" className="space-y-4">
-          <SystemSettingsPanel />
-        </TabsContent>
-
-        {/* Feeds Tab */}
-        <TabsContent value="feeds" className="space-y-4">
-          <FeedManagementPanel />
-        </TabsContent>
-
-        {/* News Items Tab */}
-        <TabsContent value="news" className="space-y-4">
-          <NewsItemsPanel />
-        </TabsContent>
+        {/* Tab Content - Map each tab to its component */}
+        {TAB_CONFIGS.map(tab => (
+          <TabsContent key={tab.id} value={tab.id} className="space-y-4">
+            {getTabComponent(tab.id)()}
+          </TabsContent>
+        ))}
       </Tabs>
       </div>
     </AdminErrorBoundary>
