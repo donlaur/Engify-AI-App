@@ -13,6 +13,33 @@ interface ContentStats {
   testResults: number;
 }
 
+/**
+ * ContentQualityPanel Component
+ * 
+ * Admin panel for analyzing and managing content quality metrics.
+ * Provides interface for viewing content statistics and running quality tests.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, ANALYTICS_PANEL
+ * @principle DRY - Centralizes content quality analysis
+ * 
+ * @features
+ * - Content quality statistics display
+ * - Tag analysis and recommendations
+ * - Quality test execution
+ * - Content metrics tracking
+ * 
+ * @example
+ * ```tsx
+ * <ContentQualityPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for content quality management.
+ * Provides interface for content analysis and improvement.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function ContentQualityPanel() {
   const [stats, setStats] = useState<ContentStats | null>(null);
   const [loading, setLoading] = useState(false);

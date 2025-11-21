@@ -16,6 +16,40 @@ interface ContentPreviewProps {
   className?: string;
 }
 
+/**
+ * ContentPreview Component
+ * 
+ * A component for previewing markdown content with syntax highlighting.
+ * Renders markdown content as formatted HTML with GitHub Flavored Markdown support.
+ * 
+ * @component
+ * @pattern CONTENT_PREVIEW
+ * @principle DRY - Centralizes content preview rendering
+ * 
+ * @features
+ * - Markdown rendering with ReactMarkdown
+ * - GitHub Flavored Markdown support
+ * - Prose styling for readability
+ * - Dark mode support
+ * - Custom className support
+ * 
+ * @param content - Markdown content string to preview
+ * @param className - Optional CSS class name for custom styling
+ * 
+ * @example
+ * ```tsx
+ * <ContentPreview
+ *   content="# Hello World\n\nThis is **markdown** content."
+ *   className="max-w-2xl"
+ * />
+ * ```
+ * 
+ * @usage
+ * Used throughout OpsHub for previewing markdown content.
+ * Provides consistent content preview rendering.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function ContentPreview({ content, className = '' }: ContentPreviewProps) {
   return (
     <div className={`prose prose-slate dark:prose-invert max-w-none ${className}`}>

@@ -22,6 +22,35 @@ interface AuditLogViewerProps {
   initialLogs?: AuditLog[];
 }
 
+/**
+ * AuditLogViewer Component
+ * 
+ * A component for viewing and filtering audit logs. Provides interface for
+ * displaying system audit trail with filtering and search capabilities.
+ * 
+ * @component
+ * @pattern LOG_VIEWER
+ * @principle DRY - Centralizes audit log display logic
+ * 
+ * @features
+ * - Audit log listing with filtering
+ * - Search functionality
+ * - Filter by action type, user, and date range
+ * - Initial data support for SSR
+ * 
+ * @param initialLogs - Optional array of initial audit logs (for SSR)
+ * 
+ * @example
+ * ```tsx
+ * <AuditLogViewer initialLogs={auditLogs} />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for viewing system audit logs.
+ * Provides interface for security and compliance auditing.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function AuditLogViewer({ initialLogs = [] }: AuditLogViewerProps) {
   const [logs, setLogs] = useState<AuditLog[]>(initialLogs);
   const [loading, setLoading] = useState(false);

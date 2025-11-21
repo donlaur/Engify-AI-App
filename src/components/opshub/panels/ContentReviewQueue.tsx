@@ -17,6 +17,40 @@ interface ContentReviewQueueProps {
   showSourceFilter?: boolean;
 }
 
+/**
+ * ContentReviewQueue Component
+ * 
+ * A component for managing content review queue. Provides interface for
+ * reviewing, approving, and managing content items awaiting review.
+ * 
+ * @component
+ * @pattern REVIEW_QUEUE
+ * @principle DRY - Centralizes content review logic
+ * 
+ * @features
+ * - Content item listing with filtering
+ * - Source filtering (optional)
+ * - Review and approval actions
+ * - Status management
+ * - Initial data support for SSR
+ * 
+ * @param initialItems - Optional array of initial content items (for SSR)
+ * @param showSourceFilter - Whether to show source filter (default: true)
+ * 
+ * @example
+ * ```tsx
+ * <ContentReviewQueue
+ *   initialItems={pendingContent}
+ *   showSourceFilter={true}
+ * />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing content review workflow.
+ * Provides interface for content moderation and approval.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function ContentReviewQueue({
   initialItems = [],
   showSourceFilter = true,

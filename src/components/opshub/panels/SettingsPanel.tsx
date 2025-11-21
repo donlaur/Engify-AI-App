@@ -34,6 +34,34 @@ interface SystemInfo {
   databaseConfigured: boolean;
 }
 
+/**
+ * SettingsPanel Component
+ * 
+ * Admin panel for managing system settings including feature flags,
+ * provider API keys, and messaging configuration.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, SETTINGS_MANAGEMENT
+ * @principle DRY - Centralizes settings management logic
+ * 
+ * @features
+ * - Feature flag management
+ * - Provider API key configuration
+ * - Messaging status display
+ * - System configuration management
+ * 
+ * @example
+ * ```tsx
+ * <SettingsPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for system configuration.
+ * Provides interface for managing platform settings.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ * @see SystemSettingsPanel for more comprehensive settings management
+ */
 export function SettingsPanel() {
   const [featureFlags, setFeatureFlags] = useState<FeatureFlag[]>([]);
   const [providerKeys, setProviderKeys] = useState<ProviderKey[]>([]);

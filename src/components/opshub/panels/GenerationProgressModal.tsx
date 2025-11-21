@@ -35,6 +35,47 @@ interface GenerationProgressModalProps {
   jobId: string | null;
 }
 
+/**
+ * GenerationProgressModal Component
+ * 
+ * A modal component for displaying AI content generation progress.
+ * Shows real-time progress updates, logs, and completion status.
+ * 
+ * @component
+ * @pattern MODAL_COMPONENT, PROGRESS_TRACKER
+ * @principle DRY - Centralizes generation progress display
+ * 
+ * @features
+ * - Real-time progress updates
+ * - Generation logs display
+ * - Progress percentage and status
+ * - Completion callback support
+ * - Auto-refresh polling
+ * 
+ * @param isOpen - Whether the modal is open
+ * @param onClose - Callback function when modal is closed
+ * @param jobId - ID of the generation job to track
+ * @param onComplete - Optional callback when generation completes
+ * 
+ * @example
+ * ```tsx
+ * <GenerationProgressModal
+ *   isOpen={isModalOpen}
+ *   onClose={() => setIsModalOpen(false)}
+ *   jobId={currentJobId}
+ *   onComplete={() => {
+ *     // Handle completion
+ *     refreshContent();
+ *   }}
+ * />
+ * ```
+ * 
+ * @usage
+ * Used in ContentGeneratorPanel for tracking generation progress.
+ * Provides real-time feedback during content generation.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function GenerationProgressModal({ isOpen, onClose, jobId, onComplete }: GenerationProgressModalProps & { onComplete?: () => void }) {
   const [progress, setProgress] = useState<GenerationProgress | null>(null);
   const [logs, setLogs] = useState<string[]>([]);

@@ -68,6 +68,34 @@ interface PartnershipOutreach {
   notes?: string;
 }
 
+/**
+ * AffiliateLinkManagement Component
+ * 
+ * Admin panel for managing affiliate links and partnership outreach.
+ * Provides interface for tracking affiliate relationships and outreach efforts.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, AFFILIATE_MANAGEMENT
+ * @principle DRY - Centralizes affiliate management logic
+ * 
+ * @features
+ * - Affiliate link listing and management
+ * - Partnership outreach tracking
+ * - Affiliate statistics display
+ * - Status tracking (pending, contacted, responded, partnership)
+ * - Notes and relationship management
+ * 
+ * @example
+ * ```tsx
+ * <AffiliateLinkManagement />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing affiliate partnerships.
+ * Provides interface for tracking and managing affiliate relationships.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function AffiliateLinkManagement() {
   const [links, setLinks] = useState<AffiliateLink[]>([]);
   const [outreach, setOutreach] = useState<PartnershipOutreach[]>([]);
