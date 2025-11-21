@@ -50,6 +50,35 @@ interface DLQStats {
   newestMessage: string | null;
 }
 
+/**
+ * DeadLetterQueuePanel Component
+ * 
+ * Admin panel for managing dead letter queue (DLQ) messages. Provides
+ * interface for viewing, filtering, and processing failed messages.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, QUEUE_MANAGEMENT
+ * @principle DRY - Uses shared components and utilities
+ * 
+ * @features
+ * - DLQ message listing with pagination
+ * - Queue statistics display
+ * - Filter by queue name
+ * - Message details and error information
+ * - Retry and delete operations
+ * - Message age and retry count tracking
+ * 
+ * @example
+ * ```tsx
+ * <DeadLetterQueuePanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for monitoring and managing failed messages.
+ * Provides interface for DLQ troubleshooting and recovery.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function DeadLetterQueuePanel() {
   const [messages, setMessages] = useState<DLQMessage[]>([]);
   const [stats, setStats] = useState<DLQStats | null>(null);

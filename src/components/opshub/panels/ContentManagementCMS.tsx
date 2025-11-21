@@ -57,6 +57,34 @@ interface ContentItem {
   updatedAt: string;
 }
 
+/**
+ * ContentManagementCMS Component
+ * 
+ * Admin panel for managing content items in the CMS. Provides comprehensive
+ * content management with filtering, searching, and CRUD operations.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, CRUD_INTERFACE
+ * @principle DRY - Uses shared components and utilities
+ * 
+ * @features
+ * - Content item listing with filtering
+ * - Search functionality
+ * - Filter by status (all, published, draft, archived)
+ * - Create, edit, and delete content items
+ * - Content preview and editing
+ * 
+ * @example
+ * ```tsx
+ * <ContentManagementCMS />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing CMS content.
+ * Provides a complete interface for content management.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function ContentManagementCMS() {
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);

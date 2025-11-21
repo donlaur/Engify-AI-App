@@ -50,6 +50,34 @@ interface JobStatus {
   }>;
 }
 
+/**
+ * ContentGeneratorPanel Component
+ * 
+ * Admin panel for generating content using AI. Supports both single-agent
+ * and multi-agent generation workflows with various content types.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, AI_GENERATION_INTERFACE
+ * @principle DRY - Centralizes content generation logic
+ * 
+ * @features
+ * - Single-agent and multi-agent generation modes
+ * - Multiple content type support (tutorial, article, etc.)
+ * - Topic input and processing
+ * - Generation progress tracking
+ * - Job management and monitoring
+ * 
+ * @example
+ * ```tsx
+ * <ContentGeneratorPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for AI-powered content generation.
+ * Provides interface for generating various types of content.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function ContentGeneratorPanel() {
   const { toast } = useToast();
   const [generatorType, setGeneratorType] = useState<'single-agent' | 'multi-agent'>('single-agent');

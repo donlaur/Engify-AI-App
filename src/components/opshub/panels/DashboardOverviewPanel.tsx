@@ -26,6 +26,34 @@ interface RecentActivity {
   id: string;
 }
 
+/**
+ * DashboardOverviewPanel Component
+ * 
+ * Main dashboard panel for the OpsHub admin center. Displays key statistics
+ * and recent activity across all areas of the platform.
+ * 
+ * @component
+ * @pattern DASHBOARD_PANEL
+ * @principle DRY - Centralizes dashboard data fetching and display
+ * 
+ * @features
+ * - Platform-wide statistics display
+ * - Recent activity feed
+ * - Real-time data updates
+ * - Loading and error states
+ * - Abort controller for cleanup
+ * 
+ * @example
+ * ```tsx
+ * <DashboardOverviewPanel />
+ * ```
+ * 
+ * @usage
+ * Used as the default tab in OpsHub admin center.
+ * Provides an overview of platform health and activity.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function DashboardOverviewPanel() {
   const [stats, setStats] = useState<DashboardStats>({
     users: 0,

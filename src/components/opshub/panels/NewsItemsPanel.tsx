@@ -55,6 +55,34 @@ interface NewsItemWithMetadata extends Omit<AIToolUpdate, 'publishedAt' | 'synce
   updatedAt?: string;
 }
 
+/**
+ * NewsItemsPanel Component
+ * 
+ * Admin panel for managing news items. Provides interface for viewing,
+ * filtering, and managing news items from various sources.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, CRUD_INTERFACE
+ * @principle DRY - Uses shared components and utilities
+ * 
+ * @features
+ * - News item listing with pagination
+ * - Search functionality
+ * - Filter by type (tool-update, model-release, blog-post, etc.)
+ * - Filter by source
+ * - News item management operations
+ * 
+ * @example
+ * ```tsx
+ * <NewsItemsPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing news items.
+ * Provides interface for news content management.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function NewsItemsPanel() {
   const [filter, setFilter] = useState<string>('all'); // all, tool-update, model-release, blog-post, etc.
   const [sourceFilter, setSourceFilter] = useState<string>('all');

@@ -55,6 +55,34 @@ interface FeedWithMetadata extends Omit<FeedConfig, 'createdAt' | 'updatedAt' | 
   lastSyncedAt?: string;
 }
 
+/**
+ * FeedManagementPanel Component
+ * 
+ * Admin panel for managing content feeds. Provides interface for viewing,
+ * filtering, and managing RSS and other content feeds.
+ * 
+ * @component
+ * @pattern ADMIN_PANEL, CRUD_INTERFACE
+ * @principle DRY - Uses shared components and utilities
+ * 
+ * @features
+ * - Feed listing with pagination
+ * - Search functionality
+ * - Filter by status (all, active, inactive)
+ * - Feed management operations
+ * - Sync status display
+ * 
+ * @example
+ * ```tsx
+ * <FeedManagementPanel />
+ * ```
+ * 
+ * @usage
+ * Used in OpsHub admin center for managing content feeds.
+ * Provides interface for feed configuration and monitoring.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
+ */
 export function FeedManagementPanel() {
   const [filter, setFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
