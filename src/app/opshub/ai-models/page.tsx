@@ -1,159 +1,109 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/lib/icons';
-import { useToast } from '@/hooks/use-toast';
-import type { AIModel } from '@/lib/db/schemas/ai-model';
-
-interface ModelDisplay extends AIModel {
-  deprecated?: boolean; // For backward compatibility with static config
-}
+import { useModelsData } from '@/components/opshub/ai-models/useModelsData';
+import { ModelCard } from '@/components/opshub/ai-models/ModelCard';
+import { filterModels, groupModelsByProvider, getProviderIcon, type FilterType } from '@/components/opshub/ai-models/modelUtils';
+import { useApiAction } from '@/components/opshub/shared/useApiAction';
+import { StatsCards } from '@/components/opshub/shared/StatsCards';
+import { FilterButtons } from '@/components/opshub/shared/FilterButtons';
+import { LoadingState } from '@/components/opshub/shared/LoadingState';
+import { EmptyState } from '@/components/opshub/shared/EmptyState';
 
 export default function AIModelsAdminPage() {
-  const [models, setModels] = useState<ModelDisplay[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'active' | 'deprecated'>('active');
-  const { toast } = useToast();
+  const { models, loading, reload } = useModelsData();
+  const [filter, setFilter] = useState<FilterType>('active');
+  const syncAction = useApiAction();
+  const migrateAction = useApiAction();
 
-  // Load models from database
-  useEffect(() => {
-    loadModels();
-    // loadModels is only called once on mount - adding it to deps would cause unnecessary re-renders
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const filteredModels = useMemo(() => filterModels(models, filter), [models, filter]);
+  const groupedByProvider = useMemo(() => groupModelsByProvider(filteredModels), [filteredModels]);
 
-  async function loadModels() {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/admin/ai-models');
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('API Error:', errorData);
-        throw new Error(errorData.error || `Failed to load models: ${response.status}`);
+  const handleSync = async () => {
+    await syncAction.execute<{ created?: number; updated?: number }>(
+      async () => {
+        const response = await fetch('/api/admin/ai-models/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: undefined }),
+        });
+        if (!response.ok) throw new Error('Failed to sync models');
+        return await response.json();
+      },
+      {
+        successMessage: (data) => {
+          if (data?.created !== undefined && data?.updated !== undefined) {
+            return `Created ${data.created} models, updated ${data.updated}`;
+          }
+          return 'Models synced successfully';
+        },
+        errorMessage: 'Failed to sync models',
+        onSuccess: async () => {
+          await reload();
+        },
       }
-      
-      const data = await response.json();
-      
-      // Handle both success wrapper and direct array
-      const modelsArray = data.models || data || [];
-      
-      const modelsWithDeprecated = modelsArray.map((m: AIModel) => ({
-        ...m,
-        deprecated: m.status === 'deprecated' || m.status === 'sunset',
-      }));
-      
-      setModels(modelsWithDeprecated);
-      
-      if (modelsArray.length === 0) {
-        console.warn('No models found in database. Try syncing from providers or migrating static config.');
+    );
+  };
+
+  const handleMigrate = async () => {
+    await migrateAction.execute<{ created?: number }>(
+      async () => {
+        const response = await fetch('/api/admin/ai-models/migrate', {
+          method: 'POST',
+        });
+        if (!response.ok) throw new Error('Failed to migrate models');
+        return await response.json();
+      },
+      {
+        successMessage: (data) => {
+          if (data?.created !== undefined) {
+            return `Migrated ${data.created} models from static config`;
+          }
+          return 'Models migrated successfully';
+        },
+        errorMessage: 'Failed to migrate models',
+        onSuccess: async () => {
+          await reload();
+        },
       }
-    } catch (error) {
-      console.error('Error loading models:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load AI models';
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function syncModels() {
-    try {
-      setSyncing(true);
-      const response = await fetch('/api/admin/ai-models/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: undefined }), // Sync all
-      });
-
-      if (!response.ok) throw new Error('Failed to sync models');
-      
-      const data = await response.json();
-      toast({
-        title: 'Sync Complete',
-        description: `Created ${data.created} models, updated ${data.updated}`,
-      });
-
-      // Reload models
-      await loadModels();
-    } catch (error) {
-      console.error('Error syncing models:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to sync models',
-        variant: 'destructive',
-      });
-    } finally {
-      setSyncing(false);
-    }
-  }
-
-  async function migrateStaticModels() {
-    try {
-      setSyncing(true);
-      const response = await fetch('/api/admin/ai-models/migrate', {
-        method: 'POST',
-      });
-
-      if (!response.ok) throw new Error('Failed to migrate models');
-      
-      const data = await response.json();
-      toast({
-        title: 'Migration Complete',
-        description: `Migrated ${data.created} models from static config`,
-      });
-
-      // Reload models
-      await loadModels();
-    } catch (error) {
-      console.error('Error migrating models:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to migrate models',
-        variant: 'destructive',
-      });
-    } finally {
-      setSyncing(false);
-    }
-  }
+    );
+  };
 
   if (loading) {
-    return (
-      <MainLayout>
-        <div className="container py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <Icons.spinner className="mx-auto mb-4 h-8 w-8 animate-spin" />
-              <p className="text-muted-foreground">Loading AI models...</p>
-            </div>
-          </div>
-        </div>
-      </MainLayout>
-    );
+    return <LoadingState message="Loading AI models..." />;
   }
 
-  const filteredModels = models.filter(model => {
-    if (filter === 'all') return true;
-    if (filter === 'active') return !model.deprecated && model.isAllowed;
-    if (filter === 'deprecated') return model.deprecated || model.status === 'deprecated';
-    return true;
-  });
+  const stats = [
+    { label: 'Total Models', value: models.length },
+    { label: 'Active Models', value: models.filter((m) => !m.deprecated).length, variant: 'success' as const },
+    { label: 'Deprecated', value: models.filter((m) => m.deprecated).length, variant: 'warning' as const },
+    {
+      label: 'Last Updated',
+      value:
+        models.length > 0 && models[0].lastVerified
+          ? new Date(models[0].lastVerified).toLocaleDateString()
+          : 'Never',
+    },
+  ];
 
-  const groupedByProvider = filteredModels.reduce((acc, model) => {
-    const provider = model.provider;
-    if (!acc[provider]) acc[provider] = [];
-    acc[provider].push(model);
-    return acc;
-  }, {} as Record<string, ModelDisplay[]>);
+  const filterOptions = [
+    { value: 'all' as FilterType, label: 'All Models', count: models.length },
+    {
+      value: 'active' as FilterType,
+      label: 'Active',
+      count: models.filter((m) => !m.deprecated).length,
+    },
+    {
+      value: 'deprecated' as FilterType,
+      label: 'Deprecated',
+      count: models.filter((m) => m.deprecated).length,
+    },
+  ];
 
   return (
     <MainLayout>
@@ -168,19 +118,11 @@ export default function AIModelsAdminPage() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={syncModels}
-                disabled={syncing}
-              >
-                <Icons.refresh className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
-                {syncing ? 'Syncing...' : 'Sync from Providers'}
+              <Button variant="outline" onClick={handleSync} disabled={syncAction.loading}>
+                <Icons.refresh className={`mr-2 h-4 w-4 ${syncAction.loading ? 'animate-spin' : ''}`} />
+                {syncAction.loading ? 'Syncing...' : 'Sync from Providers'}
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={migrateStaticModels}
-                disabled={syncing}
-              >
+              <Button variant="outline" onClick={handleMigrate} disabled={migrateAction.loading}>
                 <Icons.download className="mr-2 h-4 w-4" />
                 Migrate Static Config
               </Button>
@@ -189,116 +131,47 @@ export default function AIModelsAdminPage() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid gap-4 md:grid-cols-4 mb-8">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Models
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{models.length}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Active Models
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600">
-                {models.filter(m => !m.deprecated).length}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Deprecated
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-orange-600">
-                {models.filter(m => m.deprecated).length}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Last Updated
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold">
-                {models.length > 0 && models[0].lastVerified 
-                  ? new Date(models[0].lastVerified).toLocaleDateString()
-                  : 'Never'}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <StatsCards stats={stats} />
 
         {/* Empty State */}
         {models.length === 0 && (
-          <Card className="mb-8 border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
-                <Icons.info className="h-5 w-5" />
-                No Models Found
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-blue-600 dark:text-blue-300">
-                No AI models found in the database. To get started:
-              </p>
-              <ol className="list-decimal list-inside space-y-2 text-sm text-blue-600 dark:text-blue-300">
-                <li>Click <strong>&quot;Migrate Static Config&quot;</strong> to import models from <code>src/lib/config/ai-models.ts</code></li>
-                <li>Or click <strong>&quot;Sync from Providers&quot;</strong> to fetch the latest models from provider APIs</li>
-              </ol>
-              <div className="flex gap-2 mt-4">
-                <Button onClick={migrateStaticModels} disabled={syncing}>
+          <EmptyState
+            title="No Models Found"
+            description={
+              <>
+                <p className="text-sm text-blue-600 dark:text-blue-300 mb-2">
+                  No AI models found in the database. To get started:
+                </p>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-blue-600 dark:text-blue-300">
+                  <li>
+                    Click <strong>&quot;Migrate Static Config&quot;</strong> to import models from{' '}
+                    <code>src/lib/config/ai-models.ts</code>
+                  </li>
+                  <li>
+                    Or click <strong>&quot;Sync from Providers&quot;</strong> to fetch the latest models from provider
+                    APIs
+                  </li>
+                </ol>
+              </>
+            }
+            actions={
+              <>
+                <Button onClick={handleMigrate} disabled={migrateAction.loading}>
                   <Icons.download className="mr-2 h-4 w-4" />
                   Migrate Static Config
                 </Button>
-                <Button variant="outline" onClick={syncModels} disabled={syncing}>
-                  <Icons.refresh className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+                <Button variant="outline" onClick={handleSync} disabled={syncAction.loading}>
+                  <Icons.refresh className={`mr-2 h-4 w-4 ${syncAction.loading ? 'animate-spin' : ''}`} />
                   Sync from Providers
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </>
+            }
+          />
         )}
 
         {/* Filter */}
         {models.length > 0 && (
-          <div className="flex gap-2 mb-6">
-            <Button
-              variant={filter === 'all' ? 'default' : 'outline'}
-              onClick={() => setFilter('all')}
-              size="sm"
-            >
-              All Models ({models.length})
-            </Button>
-            <Button
-              variant={filter === 'active' ? 'default' : 'outline'}
-              onClick={() => setFilter('active')}
-              size="sm"
-            >
-              Active ({models.filter(m => !m.deprecated).length})
-            </Button>
-            <Button
-              variant={filter === 'deprecated' ? 'default' : 'outline'}
-              onClick={() => setFilter('deprecated')}
-              size="sm"
-            >
-              Deprecated ({models.filter(m => m.deprecated).length})
-            </Button>
-          </div>
+          <FilterButtons filter={filter} onFilterChange={setFilter} options={filterOptions} />
         )}
 
         {/* Important Notice */}
@@ -334,120 +207,26 @@ export default function AIModelsAdminPage() {
         </Card>
 
         {/* Models by Provider */}
-        {Object.entries(groupedByProvider).map(([provider, providerModels]) => (
-          <div key={provider} className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 capitalize flex items-center gap-2">
-              {provider === 'openai' && <Icons.zap className="h-6 w-6" />}
-              {provider === 'anthropic' && <Icons.brain className="h-6 w-6" />}
-              {provider === 'google' && <Icons.globe className="h-6 w-6" />}
-              {provider}
-              <Badge variant="secondary">{providerModels.length} models</Badge>
-            </h2>
-            
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {providerModels.map((model) => (
-                <Card key={model.id} className={model.deprecated ? 'opacity-60' : ''}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{model.name}</CardTitle>
-                        <CardDescription className="mt-1 font-mono text-xs">
-                          {model.id}
-                        </CardDescription>
-                      </div>
-                      {model.deprecated ? (
-                        <Badge variant="destructive">Deprecated</Badge>
-                      ) : (
-                        <Badge variant="default">Active</Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-3">
-                    {/* Pricing */}
-                    <div className="rounded-lg bg-muted p-3 space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Input:</span>
-                        <span className="font-mono font-semibold">
-                          ${(model.inputCostPer1M || model.costPer1kInputTokens * 1000).toFixed(2)}/1M
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Output:</span>
-                        <span className="font-mono font-semibold">
-                          ${(model.outputCostPer1M || model.costPer1kOutputTokens * 1000).toFixed(2)}/1M
-                        </span>
-                      </div>
-                    </div>
+        {Object.entries(groupedByProvider).map(([provider, providerModels]) => {
+          const IconComponent = getProviderIcon(provider);
+          const Icon = IconComponent ? Icons[IconComponent] : null;
 
-                    {/* Context Window */}
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Context:</span>
-                      <span className="font-semibold">
-                        {(model.contextWindow / 1000).toFixed(0)}K tokens
-                      </span>
-                    </div>
+          return (
+            <div key={provider} className="mb-8">
+              <h2 className="text-2xl font-bold mb-4 capitalize flex items-center gap-2">
+                {Icon && <Icon className="h-6 w-6" />}
+                {provider}
+                <Badge variant="secondary">{providerModels.length} models</Badge>
+              </h2>
 
-                    {/* Capabilities */}
-                    <div className="flex flex-wrap gap-1">
-                      {model.capabilities.map(cap => (
-                        <Badge key={cap} variant="outline" className="text-xs">
-                          {cap}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    {/* Notes */}
-                    {model.notes && (
-                      <p className="text-xs text-muted-foreground border-l-2 border-primary pl-2">
-                        {model.notes}
-                      </p>
-                    )}
-
-                    {/* Last Verified */}
-                    {model.lastVerified && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Icons.check className="h-3 w-3 text-green-500" />
-                        Last Verified: {new Date(model.lastVerified).toLocaleDateString()}
-                      </div>
-                    )}
-                    
-                    {/* Last Modified */}
-                    {model.updatedAt && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Icons.clock className="h-3 w-3 text-blue-500" />
-                        Last Modified: {new Date(model.updatedAt).toLocaleDateString()}
-                      </div>
-                    )}
-
-                    {/* Status badges */}
-                    <div className="flex gap-2 flex-wrap">
-                      {model.status === 'active' && model.isAllowed && (
-                        <Badge variant="default" className="text-xs">Active</Badge>
-                      )}
-                      {!model.isAllowed && (
-                        <Badge variant="secondary" className="text-xs">Disabled</Badge>
-                      )}
-                      {model.recommended && (
-                        <Badge variant="outline" className="text-xs">⭐ Recommended</Badge>
-                      )}
-                      {model.tier && (
-                        <Badge variant="outline" className="text-xs capitalize">{model.tier}</Badge>
-                      )}
-                    </div>
-
-                    {/* Replacement */}
-                    {model.deprecated && model.replacementModel && (
-                      <div className="rounded-lg bg-orange-100 dark:bg-orange-950/50 p-2 text-xs">
-                        <strong>Use instead:</strong> {model.replacementModel}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {providerModels.map((model) => (
+                  <ModelCard key={model.id} model={model} />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Update Instructions */}
         <Card className="mt-8 bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
