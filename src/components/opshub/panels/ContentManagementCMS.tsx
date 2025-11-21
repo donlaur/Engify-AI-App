@@ -101,6 +101,18 @@ export function ContentManagementCMS() {
   const [isGeneratingRecap, setIsGeneratingRecap] = useState(false);
   const [recapProvider, setRecapProvider] = useState<'openai' | 'anthropic' | 'google'>('openai');
 
+  // Use shared CRUD operations hook
+  const { saveItem, deleteItem } = useCrudOperations<ContentItem>({
+    endpoint: '/api/admin/content/manage',
+    onRefresh: fetchContent,
+    createSuccessMessage: 'Content created successfully',
+    updateSuccessMessage: 'Content updated successfully',
+    deleteSuccessMessage: 'Content deleted successfully',
+    onSaveSuccess: () => {
+      setIsEditDialogOpen(false);
+    },
+  });
+
   useEffect(() => {
     fetchContent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -156,56 +168,11 @@ export function ContentManagementCMS() {
 
   const handleSave = async () => {
     if (!editingItem) return;
-
-    try {
-      const method = isCreating ? 'POST' : 'PUT';
-      const res = await fetch('/api/admin/content/manage', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingItem),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        setIsEditDialogOpen(false);
-        fetchContent();
-      } else {
-        alert(`Error: ${data.error}`);
-      }
-    } catch (error) {
-      clientLogger.apiError('/api/admin/content', error, {
-        component: 'ContentManagementCMS',
-        action: 'saveContent',
-        contentId: editingContent?._id,
-      });
-      alert('Failed to save content');
-    }
+    await saveItem(editingItem, isCreating);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this content?')) return;
-
-    try {
-      const res = await fetch(`/api/admin/content/manage?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        fetchContent();
-      } else {
-        alert(`Error: ${data.error}`);
-      }
-    } catch (error) {
-      clientLogger.apiError('/api/admin/content', error, {
-        component: 'ContentManagementCMS',
-        action: 'deleteContent',
-        contentId: id,
-      });
-      alert('Failed to delete content');
-    }
+    await deleteItem(id, 'Are you sure you want to delete this content?');
   };
 
   const handleGenerateWithAI = async () => {
