@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAdminToast } from '@/hooks/opshub';
+import { clientLogger } from '@/lib/logging/client-logger';
 import type { AITool } from '@/lib/db/schemas/ai-tool';
 
 interface ToolDisplay extends AITool {
@@ -30,10 +31,10 @@ export function useToolsData() {
       setTools(toolsArray);
 
       if (toolsArray.length === 0) {
-        console.warn('No tools found in database. Tools may need to be migrated or synced.');
+        clientLogger.warn('No tools found in database', { component: 'useToolsData' });
       }
     } catch (error) {
-      console.error('Error loading tools:', error);
+      clientLogger.apiError('/api/admin/ai-tools', error, { component: 'useToolsData' });
       const errorMessage = error instanceof Error ? error.message : 'Failed to load AI tools';
       showError('Error', errorMessage);
     } finally {

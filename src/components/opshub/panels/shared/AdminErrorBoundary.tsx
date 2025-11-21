@@ -1,4 +1,5 @@
 'use client';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 import { Component, ReactNode, ErrorInfo } from 'react';
 import { AdminErrorFallback } from './AdminErrorFallback';
@@ -129,11 +130,10 @@ export class AdminErrorBoundary extends Component<
    * @param errorInfo - Object containing component stack trace
    */
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log error to console in development for debugging
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('AdminErrorBoundary caught an error:', error);
-      console.error('Component stack:', errorInfo.componentStack);
-    }
+    // Log error using clientLogger
+    clientLogger.componentError('AdminErrorBoundary', error, {
+      componentStack: errorInfo.componentStack,
+    });
 
     // Call optional error handler callback
     if (this.props.onError) {

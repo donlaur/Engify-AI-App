@@ -1,4 +1,5 @@
 'use client';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 import { useState } from 'react';
 import {
@@ -105,7 +106,7 @@ export function AdminErrorFallback({ error, retry }: AdminErrorFallbackProps) {
       // Reset copied state after 2 seconds
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy error to clipboard:', err);
+      clientLogger.error('Failed to copy error to clipboard', { component: 'AdminErrorFallback', error: err });
     }
   };
 

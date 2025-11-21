@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAdminToast } from '@/hooks/opshub';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 /**
  * Hook for handling API actions with loading and error states
@@ -39,7 +40,7 @@ export function useApiAction() {
       const errorMessage = options?.errorMessage || error.message;
 
       showError('Error', errorMessage);
-      console.error('API action failed:', error);
+      clientLogger.apiError('API action', error, { component: 'useApiAction', errorMessage });
 
       if (options?.onError) {
         options.onError(error);

@@ -1,4 +1,5 @@
 'use client';
+import { clientLogger } from '@/lib/logging/client-logger';
 
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -66,7 +67,7 @@ export function OpsHubTabs() {
   }, [selectedCategory, visibleTabs, activeTab]);
 
   return (
-    <AdminErrorBoundary onError={(err) => console.error('OpsHub tabs error:', err)}>
+    <AdminErrorBoundary onError={(err) => clientLogger.componentError('OpsHubTabs', err)}>
       <div className="space-y-4">
       {/* Header - Compact to prevent overflow */}
       <div className="relative z-10 bg-background pb-2">

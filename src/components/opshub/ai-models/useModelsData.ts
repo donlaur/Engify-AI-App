@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAdminToast } from '@/hooks/opshub';
+import { clientLogger } from '@/lib/logging/client-logger';
 import type { AIModel } from '@/lib/db/schemas/ai-model';
 
 interface ModelDisplay extends AIModel {
@@ -35,10 +36,10 @@ export function useModelsData() {
       setModels(modelsWithDeprecated);
 
       if (modelsArray.length === 0) {
-        console.warn('No models found in database. Try syncing from providers or migrating static config.');
+        clientLogger.warn('No models found in database', { component: 'useModelsData' });
       }
     } catch (error) {
-      console.error('Error loading models:', error);
+      clientLogger.apiError('/api/admin/ai-models', error, { component: 'useModelsData' });
       const errorMessage = error instanceof Error ? error.message : 'Failed to load AI models';
       showError('Error', errorMessage);
     } finally {
