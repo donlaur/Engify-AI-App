@@ -1,6 +1,9 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Icons } from '@/lib/icons';
 
+/**
+ * @interface LoadingStateProps
+ */
 interface LoadingStateProps {
   message?: string;
 }

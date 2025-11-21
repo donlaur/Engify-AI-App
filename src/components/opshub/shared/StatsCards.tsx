@@ -1,11 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+/**
+ * @interface StatCard
+ */
 interface StatCard {
   label: string;
   value: string | number;
   variant?: 'default' | 'success' | 'warning';
 }
 
+/**
+ * @interface StatsCardsProps
+ */
 interface StatsCardsProps {
   stats: StatCard[];
 }

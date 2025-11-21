@@ -2,12 +2,18 @@ import { Button } from '@/components/ui/button';
 
 export type FilterType = 'all' | 'active' | 'deprecated';
 
+/**
+ * @interface FilterOption
+ */
 interface FilterOption {
   value: FilterType;
   label: string;
   count: number;
 }
 
+/**
+ * @interface FilterButtonsProps
+ */
 interface FilterButtonsProps {
   filter: FilterType;
   onFilterChange: (filter: FilterType) => void;

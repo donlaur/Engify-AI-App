@@ -2,6 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { ReactNode } from 'react';
 
+/**
+ * @interface EmptyStateProps
+ */
 interface EmptyStateProps {
   title: string;
   description: string | ReactNode;

@@ -16,6 +16,11 @@ import { Label } from '@/components/ui/label';
 import { Icons } from '@/lib/icons';
 import type { AITool } from '@/lib/db/schemas/ai-tool';
 
+/**
+ * Props for the HubContentEditor component
+ * 
+ * @interface HubContentEditorProps
+ */
 interface HubContentEditorProps {
   tool: Partial<AITool>;
   onChange: (hubContent: NonNullable<AITool['hubContent']>) => void;
