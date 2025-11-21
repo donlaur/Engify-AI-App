@@ -7,7 +7,20 @@ interface ModelDisplay extends AIModel {
 export type FilterType = 'all' | 'active' | 'deprecated';
 
 /**
- * Filter models based on filter type
+ * Filter AI models based on filter type
+ * 
+ * Filters an array of AI models by their status (all, active, or deprecated).
+ * Active models are those that are not deprecated and are allowed.
+ * 
+ * @param models - Array of AI models to filter
+ * @param filter - Filter type: 'all', 'active', or 'deprecated'
+ * @returns Filtered array of models matching the filter criteria
+ * 
+ * @example
+ * ```tsx
+ * const activeModels = filterModels(allModels, 'active');
+ * const deprecatedModels = filterModels(allModels, 'deprecated');
+ * ```
  */
 export function filterModels(models: ModelDisplay[], filter: FilterType): ModelDisplay[] {
   switch (filter) {
@@ -23,7 +36,19 @@ export function filterModels(models: ModelDisplay[], filter: FilterType): ModelD
 }
 
 /**
- * Group models by provider
+ * Group AI models by their provider
+ * 
+ * Organizes an array of AI models into a dictionary keyed by provider name.
+ * Useful for displaying models grouped by provider (e.g., OpenAI, Anthropic, Google).
+ * 
+ * @param models - Array of AI models to group
+ * @returns Dictionary mapping provider names to arrays of models
+ * 
+ * @example
+ * ```tsx
+ * const grouped = groupModelsByProvider(models);
+ * // Result: { 'openai': [...], 'anthropic': [...], 'google': [...] }
+ * ```
  */
 export function groupModelsByProvider(
   models: ModelDisplay[]
@@ -37,7 +62,19 @@ export function groupModelsByProvider(
 }
 
 /**
- * Get provider icon component name
+ * Get the icon component name for an AI model provider
+ * 
+ * Maps provider names to their corresponding icon identifiers from the Icons library.
+ * Used for displaying provider-specific icons in the UI.
+ * 
+ * @param provider - Provider name (e.g., 'openai', 'anthropic', 'google')
+ * @returns Icon component name ('zap', 'brain', 'globe') or undefined if not found
+ * 
+ * @example
+ * ```tsx
+ * const iconName = getProviderIcon('openai'); // Returns 'zap'
+ * const Icon = Icons[iconName || 'globe'];
+ * ```
  */
 export function getProviderIcon(provider: string): 'zap' | 'brain' | 'globe' | undefined {
   switch (provider) {

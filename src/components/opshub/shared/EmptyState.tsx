@@ -9,7 +9,34 @@ interface EmptyStateProps {
 }
 
 /**
- * Reusable empty state component for admin panels
+ * EmptyState Component
+ * 
+ * A reusable component for displaying empty states in admin panels.
+ * Provides a consistent way to show when no data is available.
+ * 
+ * @pattern EMPTY_STATE_COMPONENT
+ * @principle DRY - Eliminates duplication of empty state markup
+ * 
+ * @features
+ * - Info icon and blue-themed styling
+ * - Title and description (supports ReactNode)
+ * - Optional action buttons
+ * - Responsive card layout
+ * 
+ * @example
+ * ```tsx
+ * <EmptyState
+ *   title="No Workflows Found"
+ *   description="Create your first workflow to get started."
+ *   actions={<Button onClick={handleCreate}>Create Workflow</Button>}
+ * />
+ * ```
+ * 
+ * @usage
+ * Used in admin panels when data arrays are empty.
+ * Provides user-friendly messaging and call-to-action options.
+ * 
+ * @see AdminEmptyState for a more feature-rich alternative
  */
 export function EmptyState({ title, description, actions }: EmptyStateProps) {
   return (

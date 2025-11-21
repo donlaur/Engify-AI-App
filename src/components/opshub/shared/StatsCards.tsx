@@ -11,7 +11,34 @@ interface StatsCardsProps {
 }
 
 /**
- * Reusable stats cards component for admin panels
+ * StatsCards Component
+ * 
+ * A reusable component for displaying statistics in a grid layout.
+ * Provides consistent styling for stat cards with optional color variants.
+ * 
+ * @pattern REUSABLE_UI_COMPONENT
+ * @principle DRY - Eliminates duplication of stat card markup
+ * 
+ * @features
+ * - Grid layout (responsive: 1 column on mobile, 4 on desktop)
+ * - Color variants (default, success, warning)
+ * - Consistent card styling
+ * 
+ * @example
+ * ```tsx
+ * <StatsCards
+ *   stats={[
+ *     { label: 'Total', value: 1234 },
+ *     { label: 'Active', value: 567, variant: 'success' },
+ *     { label: 'Pending', value: 89, variant: 'warning' },
+ *   ]}
+ * />
+ * ```
+ * 
+ * @usage
+ * Used in admin panels to display key metrics and statistics.
+ * 
+ * @see AdminStatsCard for a more feature-rich alternative
  */
 export function StatsCards({ stats }: StatsCardsProps) {
   const getValueColor = (variant?: StatCard['variant']) => {

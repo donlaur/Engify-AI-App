@@ -6,7 +6,27 @@ interface LoadingStateProps {
 }
 
 /**
- * Reusable loading state component for admin panels
+ * LoadingState Component
+ * 
+ * A full-page loading state component for admin panels.
+ * Displays a centered spinner with an optional message.
+ * 
+ * @pattern LOADING_STATE
+ * @principle DRY - Consistent loading UI across admin panels
+ * 
+ * @features
+ * - Centered spinner animation
+ * - Customizable message
+ * - Full-page layout with MainLayout
+ * 
+ * @example
+ * ```tsx
+ * <LoadingState message="Loading workflows..." />
+ * ```
+ * 
+ * @usage
+ * Used when data is being fetched in admin panels.
+ * Provides consistent loading experience across the OpsHub area.
  */
 export function LoadingState({ message = 'Loading...' }: LoadingStateProps) {
   return (

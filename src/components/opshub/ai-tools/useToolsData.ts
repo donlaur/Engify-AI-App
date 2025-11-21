@@ -8,7 +8,37 @@ interface ToolDisplay extends AITool {
 }
 
 /**
- * Hook for managing AI tools data
+ * useToolsData Hook
+ * 
+ * A custom React hook for fetching and managing AI tool data in admin panels.
+ * Handles loading states, error handling, and automatic data refresh.
+ * 
+ * @pattern CUSTOM_HOOK
+ * @principle DRY - Centralizes AI tool data fetching logic
+ * 
+ * @features
+ * - Automatic data fetching on mount
+ * - Loading state management
+ * - Error handling with toast notifications
+ * - Manual reload capability
+ * 
+ * @returns Object containing tools array, loading state, and reload function
+ * @returns {ToolDisplay[]} tools - Array of AI tools
+ * @returns {boolean} loading - Current loading state
+ * @returns {Function} reload - Function to manually refresh tool data
+ * 
+ * @example
+ * ```tsx
+ * const { tools, loading, reload } = useToolsData();
+ * 
+ * if (loading) return <LoadingState />;
+ * return <ToolList tools={tools} onRefresh={reload} />;
+ * ```
+ * 
+ * @usage
+ * Used in AI tool management panels to fetch and display tool data.
+ * 
+ * @see docs/opshub/OPSHUB_PATTERNS.md for usage patterns
  */
 export function useToolsData() {
   const [tools, setTools] = useState<ToolDisplay[]>([]);
