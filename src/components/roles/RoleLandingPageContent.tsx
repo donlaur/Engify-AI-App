@@ -22,6 +22,7 @@ import { FAQSection } from '@/components/features/FAQSection';
 import { getRoleFAQs } from '@/lib/data/role-faqs';
 import { generateCollectionPageSchema } from '@/lib/seo/metadata';
 import { loadWorkflowsFromJson } from '@/lib/workflows/load-workflows-from-json';
+import { loadGuardrailsFromJson } from '@/lib/workflows/load-guardrails-from-json';
 import { loadPainPointsFromJson } from '@/lib/workflows/load-pain-points-from-json';
 import { loadRecommendationsFromJson } from '@/lib/workflows/load-recommendations-from-json';
 import type { Workflow } from '@/lib/workflows/workflow-schema';
@@ -306,19 +307,18 @@ async function getRecommendationsByRole(dbRole: string): Promise<Recommendation[
 
 async function getGuardrailsByRole(dbRole: string): Promise<Workflow[]> {
   try {
-    const allWorkflows = await loadWorkflowsFromJson();
+    const allGuardrails = await loadGuardrailsFromJson();
     const audiences = getWorkflowAudienceFromDbRole(dbRole);
     
-    // Guardrails are workflows with category 'guardrails'
-    const guardrails = allWorkflows.filter(
-      (w) => w.status === 'published' && 
-      w.category === 'guardrails' &&
-      w.audience.some((aud) => audiences.includes(aud))
+    // Filter guardrails by audience and status
+    const guardrails = allGuardrails.filter(
+      (w: Workflow) => w.status === 'published' && 
+      w.audience.some((aud: string) => audiences.includes(aud))
     );
     
     // Sort by severity: critical > high > medium > low
     const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-    guardrails.sort((a, b) => {
+    guardrails.sort((a: Workflow, b: Workflow) => {
       const aSeverity = (a as any).severity || 'low';
       const bSeverity = (b as any).severity || 'low';
       return (severityOrder[aSeverity as keyof typeof severityOrder] || 3) - 

@@ -5,8 +5,8 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import {
-  loadWorkflowsFromJson,
-} from '@/lib/workflows/load-workflows-from-json';
+  loadGuardrailsFromJson,
+} from '@/lib/workflows/load-guardrails-from-json';
 import { GuardrailsClient } from './GuardrailsClient';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
@@ -14,8 +14,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 export const revalidate = 3600; // Revalidate once per hour
 
 export async function generateMetadata(): Promise<Metadata> {
-  const workflows = await loadWorkflowsFromJson();
-  const guardrails = workflows.filter((w) => w.category === 'guardrails');
+  const guardrails = await loadGuardrailsFromJson();
   const title = `${guardrails.length} AI Guardrails: Prevention Patterns for Production Safety | Engify.ai`;
   const description =
     'Browse 70+ automated guardrails that prevent AI-generated code issues. Filter by severity (critical, high, medium) and category (data integrity, security, performance, availability, financial, integration, testing).';
@@ -69,8 +68,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function GuardrailsPage() {
-  const workflows = await loadWorkflowsFromJson();
-  const guardrails = workflows.filter((w) => w.category === 'guardrails' && w.status === 'published');
+  const allGuardrails = await loadGuardrailsFromJson();
+  const guardrails = allGuardrails.filter((w) => w.status === 'published');
 
   // Calculate subcategory stats
   const subcategoryStats = guardrails.reduce((acc, guardrail) => {

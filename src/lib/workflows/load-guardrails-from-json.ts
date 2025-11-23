@@ -1,0 +1,95 @@
+/**
+ * Guardrails Static JSON Loader
+ *
+ * Loads guardrails from static JSON file (fast, no cold starts)
+ * Falls back to MongoDB if JSON file fails
+ *
+ * IMPORTANT: Uses filesystem (not fetch) for server-side rendering
+ * to avoid DYNAMIC_SERVER_USAGE errors during static generation/ISR.
+ */
+
+import type { Workflow } from '@/lib/workflows/workflow-schema';
+import { validateWorkflowsJson } from '@/lib/workflows/workflow-schema';
+import { workflowRepository } from '@/lib/db/repositories/ContentService';
+import { logger } from '@/lib/logging/logger';
+import fs from 'fs/promises';
+import path from 'path';
+
+interface GuardrailsJsonData {
+  version: string;
+  generatedAt: string;
+  totalGuardrails: number;
+  guardrails: Workflow[];
+}
+
+const JSON_FILE_PATH = path.join(process.cwd(), 'public', 'data', 'guardrails.json');
+
+/**
+ * Load guardrails from static JSON file (production-fast)
+ * Uses filesystem read for server-side rendering
+ * Falls back to MongoDB if JSON fails
+ */
+export async function loadGuardrailsFromJson(): Promise<Workflow[]> {
+  try {
+    // For server-side rendering, use filesystem access (faster, no network call)
+    if (typeof window === 'undefined') {
+      // Server-side: use filesystem
+      try {
+        const fileContent = await fs.readFile(JSON_FILE_PATH, 'utf-8');
+        const data: GuardrailsJsonData = JSON.parse(fileContent);
+        
+        // Ensure all guardrails have category='guardrails'
+        const validated = data.guardrails.map((g) => ({
+          ...g,
+          category: 'guardrails' as const,
+        }));
+        
+        // Validate using workflow schema
+        const workflowsData = {
+          version: data.version,
+          generatedAt: data.generatedAt,
+          totalWorkflows: validated.length,
+          workflows: validated,
+        };
+        
+        const validatedWorkflows = validateWorkflowsJson(workflowsData);
+        
+        logger.debug('Loaded guardrails from static JSON', {
+          count: validatedWorkflows.workflows.length,
+          generatedAt: data.generatedAt,
+        });
+        
+        return validatedWorkflows.workflows;
+      } catch (fsError) {
+        // File doesn't exist or can't be read - fall through to MongoDB
+        throw new Error(`Failed to read JSON file: ${fsError instanceof Error ? fsError.message : 'Unknown error'}`);
+      }
+    }
+
+    // Client-side: skip JSON loading, use MongoDB directly
+    throw new Error('Client-side JSON loading disabled - use MongoDB');
+  } catch (error) {
+    logger.warn('Failed to load guardrails from JSON, trying MongoDB', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+
+  // Fallback to MongoDB - get all workflows with category='guardrails'
+  try {
+    const allWorkflows = await workflowRepository.getAll();
+    const guardrails = allWorkflows.filter((w) => w.category === 'guardrails');
+    
+    logger.info('Loaded guardrails from MongoDB fallback', {
+      count: guardrails.length,
+    });
+    
+    return guardrails;
+  } catch (dbError) {
+    logger.error('CRITICAL: All fallbacks failed (JSON, MongoDB)', {
+      dbError: dbError instanceof Error ? dbError.message : 'Unknown error',
+    });
+
+    return [];
+  }
+}
+
