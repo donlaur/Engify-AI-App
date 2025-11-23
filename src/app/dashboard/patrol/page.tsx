@@ -61,17 +61,16 @@ export default function PatrolPage() {
       );
       setScans(patrolScans);
 
-      // Fetch repeat patterns from gateway
+      // Fetch repeat patterns from API route (which proxies to gateway)
+      // The API route handles authentication and environment variables
       try {
-        const patternsResponse = await fetch(
-          'http://localhost:8080/api/patrol/repeat-patterns?user_id=donlaur'
-        );
+        const patternsResponse = await fetch('/api/patrol/repeat-patterns');
         if (patternsResponse.ok) {
           const patternsData = await patternsResponse.json();
           setPatterns(patternsData.patterns || []);
         }
       } catch {
-        // Gateway might not be running
+        // Gateway might not be running - patterns will be empty array
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
