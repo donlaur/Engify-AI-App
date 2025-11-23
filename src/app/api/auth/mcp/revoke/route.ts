@@ -7,8 +7,11 @@
  */
 
 import { NextRequest } from 'next/server';
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import { ObjectId } from 'mongodb';
+
+// Use Upstash Redis directly (works on Vercel and locally)
+const redis = Redis.fromEnv();
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { getMongoDb } from '@/lib/db/mongodb';
@@ -65,9 +68,8 @@ export async function POST(request: NextRequest) {
       });
     } else if (refresh_token) {
       // Get JTI from refresh token
-      const refreshData = await kv.get<{ jti: string; userId: string }>(
-        `mcp_refresh_token:${refresh_token}`
-      );
+      const rawData = await redis.get(`mcp_refresh_token:${refresh_token}`);
+      const refreshData = rawData ? (typeof rawData === 'string' ? JSON.parse(rawData) : rawData) as { jti: string; userId: string } : null;
 
       if (refreshData && refreshData.userId === userId) {
         tokenToRevoke = await mcpTokensCollection.findOne({
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Delete refresh token from Redis
-        await kv.del(`mcp_refresh_token:${refresh_token}`);
+        await redis.del(`mcp_refresh_token:${refresh_token}`);
       }
     }
 
@@ -106,7 +108,7 @@ export async function POST(request: NextRequest) {
     // 5. Add JTI to Redis revocation list (for access token validation)
     const ttl = Math.floor((tokenToRevoke.expiresAt.getTime() - Date.now()) / 1000);
     if (ttl > 0) {
-      await kv.set(`mcp_revoked:${tokenToRevoke.jti}`, '1', { ex: ttl });
+      await redis.set(`mcp_revoked:${tokenToRevoke.jti}`, '1', { ex: ttl });
     }
 
     logger.info('MCP token revoked', {

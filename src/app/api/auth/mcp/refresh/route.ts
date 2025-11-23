@@ -8,8 +8,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import { z } from 'zod';
+
+// Use Upstash Redis directly (works on Vercel and locally)
+const redis = Redis.fromEnv();
 import crypto from 'crypto';
 import { logger } from '@/lib/logging/logger';
 import { success, fail } from '@/lib/api/response';
@@ -49,7 +52,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Validate refresh token
-    const refreshTokenData = await kv.get<{
+    const rawData = await redis.get(`mcp_refresh_token:${refresh_token}`);
+    const refreshTokenData = rawData ? (typeof rawData === 'string' ? JSON.parse(rawData) : rawData) as {
       userId: string;
       email: string;
       organizationId: string | null;
@@ -57,7 +61,7 @@ export async function POST(request: NextRequest) {
       scopes: string[];
       jti: string;
       createdAt: string;
-    }>(`mcp_refresh_token:${refresh_token}`);
+    } : null;
 
     if (!refreshTokenData) {
       return NextResponse.json(

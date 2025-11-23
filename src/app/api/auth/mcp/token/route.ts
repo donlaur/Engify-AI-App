@@ -27,8 +27,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import { ObjectId } from 'mongodb';
+
+// Use Upstash Redis directly (works on Vercel and locally)
+const redis = Redis.fromEnv();
 import { z } from 'zod';
 import crypto from 'crypto';
 import { auth } from '@/lib/auth';
@@ -164,9 +167,9 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
     };
 
-    await kv.set(
+    await redis.set(
       `mcp_refresh_token:${refreshToken}`,
-      refreshTokenData,
+      JSON.stringify(refreshTokenData),
       { ex: expiresInDays * 24 * 60 * 60 }
     );
 
