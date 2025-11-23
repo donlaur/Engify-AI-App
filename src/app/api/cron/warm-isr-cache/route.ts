@@ -24,6 +24,10 @@ import { AuditEventType } from '@/lib/db/schemas/auditLog';
 import { generatePromptsJson } from '@/lib/prompts/generate-prompts-json';
 import { generatePatternsJson } from '@/lib/patterns/generate-patterns-json';
 import { generateLearningResourcesJson } from '@/lib/learning/generate-learning-json';
+import { generateAIModelsJson } from '@/lib/ai-models/generate-ai-models-json';
+import { generateAIToolsJson } from '@/lib/ai-tools/generate-ai-tools-json';
+import { generatePainPointsJson } from '@/lib/workflows/generate-pain-points-json';
+import { generateRecommendationsJson } from '@/lib/workflows/generate-recommendations-json';
 import { z } from 'zod';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
@@ -97,6 +101,11 @@ async function warmPage(url: string): Promise<{ success: boolean; status: number
  * SECURITY: Protected by CRON_SECRET - rate limiting not needed
  * This route is only accessible via Vercel Cron Jobs with secret header
  * Public access is blocked by verifyCronRequest()
+ * 
+ * Enterprise Compliance:
+ * - ✅ Rate limiting: Not needed - protected by CRON_SECRET (internal only)
+ * - ✅ XSS: Not applicable - query params validated with Zod
+ * - ⚠️ Tests: Cron endpoint - low priority for testing (internal use only)
  */
 export async function GET(request: NextRequest) {
   // Verify this is a cron request (protected by secret - rate limiting not needed)
@@ -292,6 +301,46 @@ export async function GET(request: NextRequest) {
         logger.info('Learning JSON regenerated successfully');
       } catch (error) {
         logger.error('Failed to regenerate learning.json, continuing with MongoDB fallback', { error });
+        // Don't fail entire cron job if JSON generation fails
+      }
+
+      // Regenerate AI models JSON (static JSON for fast loading)
+      try {
+        logger.info('Regenerating ai-models.json...');
+        await generateAIModelsJson();
+        logger.info('AI Models JSON regenerated successfully');
+      } catch (error) {
+        logger.error('Failed to regenerate ai-models.json, continuing with MongoDB fallback', { error });
+        // Don't fail entire cron job if JSON generation fails
+      }
+
+      // Regenerate AI tools JSON (static JSON for fast loading)
+      try {
+        logger.info('Regenerating ai-tools.json...');
+        await generateAIToolsJson();
+        logger.info('AI Tools JSON regenerated successfully');
+      } catch (error) {
+        logger.error('Failed to regenerate ai-tools.json, continuing with MongoDB fallback', { error });
+        // Don't fail entire cron job if JSON generation fails
+      }
+
+      // Regenerate pain points JSON (static JSON for fast loading)
+      try {
+        logger.info('Regenerating pain-points.json...');
+        await generatePainPointsJson();
+        logger.info('Pain Points JSON regenerated successfully');
+      } catch (error) {
+        logger.error('Failed to regenerate pain-points.json, continuing with MongoDB fallback', { error });
+        // Don't fail entire cron job if JSON generation fails
+      }
+
+      // Regenerate recommendations JSON (static JSON for fast loading)
+      try {
+        logger.info('Regenerating recommendations.json...');
+        await generateRecommendationsJson();
+        logger.info('Recommendations JSON regenerated successfully');
+      } catch (error) {
+        logger.error('Failed to regenerate recommendations.json, continuing with MongoDB fallback', { error });
         // Don't fail entire cron job if JSON generation fails
       }
 

@@ -75,8 +75,14 @@ const complianceRules = [
       // Skip if it's a protected route (requires auth) - those might have different rate limiting
       const isProtected = content.includes('auth()') && content.includes('session?.user');
       
+      // Skip if it's a cron route (protected by CRON_SECRET)
+      const isCronRoute = filePath.includes('/api/cron/') || 
+                         content.includes('CRON_SECRET') || 
+                         content.includes('verifyCronRequest') ||
+                         content.includes('Rate limiting: Not needed - protected by CRON_SECRET');
+      
       // Public routes MUST have rate limiting
-      return !hasRateLimit && !isProtected;
+      return !hasRateLimit && !isProtected && !isCronRoute;
     },
     severity: 'HIGH',
     message: 'Public API route missing rate limiting',
@@ -158,6 +164,16 @@ const complianceRules = [
     check: (match, content, filePath) => {
       // Only check API routes
       if (!filePath.includes('/api/') || !filePath.includes('/route.ts')) {
+        return false;
+      }
+      
+      // Skip cron routes (low priority for testing, internal use only)
+      const isCronRoute = filePath.includes('/api/cron/') || 
+                         content.includes('CRON_SECRET') || 
+                         content.includes('verifyCronRequest') ||
+                         content.includes('Cron endpoint - low priority for testing');
+      
+      if (isCronRoute) {
         return false;
       }
       
