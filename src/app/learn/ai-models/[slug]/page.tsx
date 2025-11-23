@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { ModelIdCopy } from '@/components/features/ModelIdCopy';
 import { aiModelService } from '@/lib/services/AIModelService';
+import { loadAIModelFromJson } from '@/lib/ai-models/load-ai-models-from-json';
 import { generateSlug } from '@/lib/utils/slug';
 import { logger } from '@/lib/logging/logger';
 import {
@@ -53,11 +54,15 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  // Try slug first, then fallback to ID lookup (for backwards compatibility)
-  let model = await aiModelService.findBySlug(slug);
+  // Try JSON first (fast, no MongoDB connection), then fallback to MongoDB
+  let model = await loadAIModelFromJson(slug);
   if (!model) {
-    // Fallback: try finding by ID in case slug doesn't exist
-    model = await aiModelService.findById(slug);
+    // Fallback: try MongoDB if not found in JSON
+    model = await aiModelService.findBySlug(slug);
+    if (!model) {
+      // Fallback: try finding by ID in case slug doesn't exist
+      model = await aiModelService.findById(slug);
+    }
   }
 
   if (!model) {
@@ -195,11 +200,15 @@ export default async function AIModelDetailPage({ params }: PageProps) {
     }
   }
   
-  // Try slug first, then fallback to ID lookup (for backwards compatibility)
-  let model = await aiModelService.findBySlug(slug);
+  // Try JSON first (fast, no MongoDB connection), then fallback to MongoDB
+  let model = await loadAIModelFromJson(slug);
   if (!model) {
-    // Fallback: try finding by ID in case slug doesn't exist
-    model = await aiModelService.findById(slug);
+    // Fallback: try MongoDB if not found in JSON
+    model = await aiModelService.findBySlug(slug);
+    if (!model) {
+      // Fallback: try finding by ID in case slug doesn't exist
+      model = await aiModelService.findById(slug);
+    }
   }
 
   if (!model) {
@@ -229,8 +238,10 @@ export default async function AIModelDetailPage({ params }: PageProps) {
   const providerLabel = PROVIDER_LABELS[model.provider] || model.provider;
   const costPer1MInput = model.costPer1kInputTokens * 1000;
   const costPer1MOutput = model.costPer1kOutputTokens * 1000;
+  // Load replacement model from JSON if available
   const replacementModel = model.replacementModel
-    ? await aiModelService.findById(model.replacementModel)
+    ? (await loadAIModelFromJson(model.replacementModel)) ||
+      (await aiModelService.findById(model.replacementModel))
     : null;
 
   return (

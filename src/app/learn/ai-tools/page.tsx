@@ -19,6 +19,8 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/lib/icons';
 import { aiToolService } from '@/lib/services/AIToolService';
 import { aiModelService } from '@/lib/services/AIModelService';
+import { loadAIToolsFromJson } from '@/lib/ai-tools/load-ai-tools-from-json';
+import { loadAIModelsFromJson } from '@/lib/ai-models/load-ai-models-from-json';
 import { generateBreadcrumbSchema } from '@/lib/seo/metadata';
 import { AIToolsClient } from '@/components/features/AIToolsClient';
 
@@ -92,12 +94,22 @@ function calculateCategoryStats(tools: Awaited<ReturnType<typeof aiToolService.f
 }
 
 export default async function AIToolsHubPage() {
-  // Fetch all active tools
-  const tools = await aiToolService.findActive();
+  // Try JSON first (fast, no MongoDB connection), then filter for active tools
+  let allTools = await loadAIToolsFromJson();
+  // If JSON failed, fallback to MongoDB
+  if (allTools.length === 0) {
+    allTools = await aiToolService.find({});
+  }
+  // Filter for active tools
+  const tools = allTools.filter((t) => t.status === 'active');
 
-  // Fetch AI models count for CTA
-  const models = await aiModelService.findActive();
-  const activeModelCount = models.filter((m) => m.status === 'active').length;
+  // Fetch AI models count for CTA (try JSON first)
+  let allModels = await loadAIModelsFromJson();
+  // If JSON failed, fallback to MongoDB
+  if (allModels.length === 0) {
+    allModels = await aiModelService.find({});
+  }
+  const activeModelCount = allModels.filter((m) => m.status === 'active' && m.isAllowed).length;
 
   // Group by category
   const byCategory: Record<string, typeof tools> = {};

@@ -68,7 +68,12 @@ class PainPointProcessor implements ContentProcessor<PainPointDocument, PainPoin
       relatedWorkflows: raw.relatedWorkflows || [],
       relatedPrompts: raw.relatedPrompts || [],
       relatedPatterns: raw.relatedPatterns || [],
-      researchCitations: raw.researchCitations || [],
+      researchCitations: (raw.researchCitations || []).map(citation => ({
+        source: citation.source,
+        summary: citation.summary,
+        url: citation.url,
+        verified: citation.verified ?? false,
+      })),
       primaryKeywords: raw.primaryKeywords || [],
       painPointKeywords: raw.painPointKeywords || [],
       solutionKeywords: raw.solutionKeywords || [],

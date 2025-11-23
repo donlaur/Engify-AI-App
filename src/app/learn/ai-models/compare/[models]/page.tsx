@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { aiModelService } from '@/lib/services/AIModelService';
+import { loadAIModelFromJson } from '@/lib/ai-models/load-ai-models-from-json';
 import { generateSlug } from '@/lib/utils/slug';
 import { logger } from '@/lib/logging/logger';
 
@@ -52,9 +53,15 @@ export async function generateMetadata({
     };
   }
 
+  // Try JSON first (fast, no MongoDB connection), then fallback to MongoDB
+  const [model1Json, model2Json] = await Promise.all([
+    loadAIModelFromJson(modelSlugs[0]),
+    loadAIModelFromJson(modelSlugs[1]),
+  ]);
+  
   const [model1, model2] = await Promise.all([
-    aiModelService.findBySlug(modelSlugs[0]),
-    aiModelService.findBySlug(modelSlugs[1]),
+    model1Json || aiModelService.findBySlug(modelSlugs[0]),
+    model2Json || aiModelService.findBySlug(modelSlugs[1]),
   ]);
 
   if (!model1 || !model2) {
@@ -90,9 +97,15 @@ export default async function AIModelComparisonPage({ params }: PageProps) {
     notFound();
   }
 
+  // Try JSON first (fast, no MongoDB connection), then fallback to MongoDB
+  const [model1Json, model2Json] = await Promise.all([
+    loadAIModelFromJson(modelSlugs[0]),
+    loadAIModelFromJson(modelSlugs[1]),
+  ]);
+  
   const [model1, model2] = await Promise.all([
-    aiModelService.findBySlug(modelSlugs[0]),
-    aiModelService.findBySlug(modelSlugs[1]),
+    model1Json || aiModelService.findBySlug(modelSlugs[0]),
+    model2Json || aiModelService.findBySlug(modelSlugs[1]),
   ]);
 
   if (!model1 || !model2) {

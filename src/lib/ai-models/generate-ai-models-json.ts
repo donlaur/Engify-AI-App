@@ -6,7 +6,6 @@
  */
 
 import { aiModelService } from '@/lib/services/AIModelService';
-import type { AIModel } from '@/lib/db/schemas/ai-model';
 import fs from 'fs/promises';
 import path from 'path';
 

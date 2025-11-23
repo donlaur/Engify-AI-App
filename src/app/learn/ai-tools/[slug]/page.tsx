@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { aiToolService } from '@/lib/services/AIToolService';
+import { loadAIToolFromJson } from '@/lib/ai-tools/load-ai-tools-from-json';
 import { logger } from '@/lib/logging/logger';
 import { getToolLink } from '@/lib/utils/tool-links';
 import { AIToolCostComparison } from '@/components/features/AIToolCostComparison';
@@ -51,7 +52,8 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const tool = await aiToolService.findBySlug(slug);
+  // Try JSON first (fast, no MongoDB connection), then fallback to MongoDB
+  const tool = await loadAIToolFromJson(slug) || await aiToolService.findBySlug(slug);
 
   if (!tool) {
     return {
@@ -142,7 +144,8 @@ export async function generateMetadata({
 
 export default async function AIToolDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const tool = await aiToolService.findBySlug(slug);
+  // Try JSON first (fast, no MongoDB connection), then fallback to MongoDB
+  const tool = await loadAIToolFromJson(slug) || await aiToolService.findBySlug(slug);
 
   if (!tool) {
     logger.warn('AI tool not found', { slug });

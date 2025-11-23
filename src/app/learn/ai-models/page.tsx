@@ -10,6 +10,7 @@ import { Metadata } from 'next';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { AIModelsClient } from '@/components/features/AIModelsClient';
 import { aiModelService } from '@/lib/services/AIModelService';
+import { loadAIModelsFromJson } from '@/lib/ai-models/load-ai-models-from-json';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -43,8 +44,14 @@ export const metadata: Metadata = {
 };
 
 export default async function AIModelsHubPage() {
-  // Fetch all active models (including image/video models)
-  const models = await aiModelService.findActive();
+  // Try JSON first (fast, no MongoDB connection), then filter for active models
+  let allModels = await loadAIModelsFromJson();
+  // If JSON failed, fallback to MongoDB
+  if (allModels.length === 0) {
+    allModels = await aiModelService.find({});
+  }
+  // Filter for active models
+  const models = allModels.filter((m) => m.status === 'active' && m.isAllowed);
 
   // Get unique providers
   const providers = Array.from(

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/card';
 import { Icons } from '@/lib/icons';
 import { aiModelService } from '@/lib/services/AIModelService';
+import { loadAIModelsFromJson, loadAIModelFromJson } from '@/lib/ai-models/load-ai-models-from-json';
 import { generateSlug } from '@/lib/utils/slug';
 
 export const dynamic = 'force-dynamic';
@@ -56,11 +57,15 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 
 export default async function EOLTrackingPage() {
-  // Fetch all deprecated and sunset models
-  const [deprecated, sunset] = await Promise.all([
-    aiModelService.find({ status: 'deprecated' }),
-    aiModelService.find({ status: 'sunset' }),
-  ]);
+  // Try JSON first (fast, no MongoDB connection), then filter
+  let allModels = await loadAIModelsFromJson();
+  // If JSON failed, fallback to MongoDB
+  if (allModels.length === 0) {
+    allModels = await aiModelService.find({});
+  }
+  // Filter for deprecated and sunset models
+  const deprecated = allModels.filter((m) => m.status === 'deprecated');
+  const sunset = allModels.filter((m) => m.status === 'sunset');
 
   const allEOL = [...deprecated, ...sunset].sort((a, b) => {
     const dateA = a.deprecationDate || a.sunsetDate || new Date(0);
@@ -165,8 +170,10 @@ export default async function EOLTrackingPage() {
               {await Promise.all(
                 allEOL.map(async (model) => {
                   const slug = model.slug || generateSlug(model.displayName);
+                  // Load replacement model from JSON if available
                   const replacementModel = model.replacementModel
-                    ? await aiModelService.findById(model.replacementModel)
+                    ? (await loadAIModelFromJson(model.replacementModel)) ||
+                      (await aiModelService.findById(model.replacementModel))
                     : null;
 
                   return (
