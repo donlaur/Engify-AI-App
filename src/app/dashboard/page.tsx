@@ -183,6 +183,20 @@ function DashboardContent() {
                 </div>
               </Button>
 
+              <Link href="/dashboard/memories">
+                <Button variant="outline" className="w-full justify-start h-auto py-3">
+                  <div className="flex flex-col items-start gap-1">
+                    <div className="flex items-center gap-2">
+                      <Icons.brain className="h-4 w-4" />
+                      <span className="font-medium">Memories</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      Resume in Claude Code
+                    </span>
+                  </div>
+                </Button>
+              </Link>
+
               <Link href="/learn">
                 <Button variant="outline" className="w-full justify-start h-auto py-3">
                   <div className="flex flex-col items-start gap-1">
