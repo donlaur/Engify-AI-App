@@ -821,6 +821,42 @@ export function ContentGeneratorPanel() {
                         <Icons.cancel className="mr-2 h-4 w-4" />
                         Reject
                       </Button>
+                      <Button
+                        variant="outline"
+                        className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
+                        onClick={async () => {
+                          const feedback = prompt(
+                            'What corrections are needed?\n\nExample: "PBVR - R should be Refactor, not Review"\n\nThis feedback will be sent to the AI for regeneration:'
+                          );
+                          if (feedback) {
+                            try {
+                              const response = await fetch(`/api/admin/content/generated?id=${selectedContent.id}&action=review`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'regenerate', feedback }),
+                              });
+                              const data = await response.json();
+                              if (data.success) {
+                                toast({
+                                  title: 'Queued for Regeneration',
+                                  description: `Article will be regenerated with your feedback`,
+                                });
+                                loadReviewContent();
+                                setSelectedContent(null);
+                              }
+                            } catch (error) {
+                              toast({
+                                title: 'Error',
+                                description: 'Failed to queue for regeneration',
+                                variant: 'destructive',
+                              });
+                            }
+                          }
+                        }}
+                      >
+                        <Icons.refresh className="mr-2 h-4 w-4" />
+                        Regenerate
+                      </Button>
                     </>
                   )}
                   {selectedContent.status === 'approved' && (
@@ -988,6 +1024,8 @@ export function ContentGeneratorPanel() {
                               'workflows': 'workflows',
                               'tools': 'ai-tools',
                               'models': 'ai-models',
+                              'wsjf': 'wsjf',
+                              'wsjf-spokes': 'wsjf',
                             };
                             const category = categoryMap[item.category || ''] || item.category || '';
                             const previewUrl = item.publishedUrl || (category ? `/learn/${category}/${slug}` : `/learn/${slug}`);

@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { generatedContentService } from '@/lib/services/GeneratedContentService';
+import { contentQueueService } from '@/lib/services/ContentQueueService';
 import { z } from 'zod';
 
 const UpdateContentSchema = z.object({
@@ -17,8 +18,9 @@ const UpdateContentSchema = z.object({
 });
 
 const ReviewSchema = z.object({
-  action: z.enum(['approve', 'reject', 'publish']),
+  action: z.enum(['approve', 'reject', 'publish', 'regenerate']),
   notes: z.string().optional(),
+  feedback: z.string().optional(), // For regenerate: specific corrections
 });
 
 // GET: Get all generated content
@@ -87,6 +89,40 @@ export async function PATCH(request: NextRequest) {
         await generatedContentService.approve(id, 'admin', validated.notes);
       } else if (validated.action === 'reject') {
         await generatedContentService.reject(id, 'admin', validated.notes || 'Rejected');
+      } else if (validated.action === 'regenerate') {
+        // Get original content to requeue with feedback
+        const content = await generatedContentService.getById(id);
+        if (!content) {
+          return NextResponse.json(
+            { success: false, error: 'Content not found' },
+            { status: 404 }
+          );
+        }
+
+        // Create new queue item with feedback for regeneration
+        const feedbackNote = validated.feedback || validated.notes || 'Please regenerate with corrections';
+        await contentQueueService.addToQueue({
+          title: content.title,
+          contentType: content.contentType,
+          description: `REGENERATION: ${content.description || content.title}`,
+          keywords: content.keywords,
+          targetWordCount: content.wordCount || 2000,
+          priority: 'high', // Prioritize regenerations
+          batch: content.category || 'regenerations',
+          createdBy: 'admin',
+          source: 'manual',
+          // Include feedback for the AI
+          sourceNotes: `REGENERATION REQUEST - Previous version had issues:\n${feedbackNote}\n\nPlease address these concerns in the new version.`,
+        });
+
+        // Mark original as rejected with regeneration note
+        await generatedContentService.reject(id, 'admin', `Sent for regeneration: ${feedbackNote}`);
+
+        return NextResponse.json({
+          success: true,
+          message: 'Content queued for regeneration',
+          feedback: feedbackNote,
+        });
       } else if (validated.action === 'publish') {
         // Get content to generate URL
         const content = await generatedContentService.getById(id);
@@ -110,6 +146,8 @@ export async function PATCH(request: NextRequest) {
           'workflows': 'workflows',
           'tools': 'ai-tools',
           'models': 'ai-models',
+          'wsjf': 'wsjf',
+          'wsjf-spokes': 'wsjf',
         };
         const categoryPath = categoryMap[content.category || ''] || content.category || '';
         const url = categoryPath ? `/learn/${categoryPath}/${slug}` : `/learn/${slug}`;
