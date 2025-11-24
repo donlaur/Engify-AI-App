@@ -75,32 +75,65 @@ export async function loadArticlesFromJson(): Promise<LearningResource[]> {
         });
         
         // Map JSON structure to LearningResource interface
-        return data.resources.map((resource) => ({
-          id: resource.id,
-          title: resource.title,
-          description: resource.description,
-          category: resource.category || 'guide',
-          type: 'article' as const,
-          level: 'intermediate' as const, // Default, can be enhanced later
-          tags: resource.tags || [],
-          author: resource.author,
-          featured: false, // Default, can be enhanced later
-          status: (resource.status as 'active' | 'inactive') || 'active',
-          contentHtml: resource.content,
-          seo: {
-            metaTitle: resource.seo?.metaTitle || resource.title,
-            metaDescription: resource.seo?.metaDescription || resource.description,
-            keywords: resource.seo?.keywords || resource.tags || [],
-            slug: resource.seo?.slug || resource.slug,
-            canonicalUrl: resource.seo?.canonicalUrl || `https://engify.ai/learn/${resource.slug}`,
-            ogImage: resource.seo?.ogImage,
-          },
-          views: resource.views || 0,
-          shares: 0, // Default
-          publishedAt: resource.publishedAt ? new Date(resource.publishedAt) : undefined,
-          createdAt: resource.updatedAt ? new Date(resource.updatedAt) : new Date(),
-          updatedAt: resource.updatedAt ? new Date(resource.updatedAt) : new Date(),
-        }));
+        return data.resources.map((resource) => {
+          // Parse dates safely
+          let publishedAt: Date | undefined;
+          let createdAt: Date;
+          let updatedAt: Date;
+          
+          try {
+            publishedAt = resource.publishedAt 
+              ? (typeof resource.publishedAt === 'string' 
+                  ? new Date(resource.publishedAt) 
+                  : resource.publishedAt instanceof Date 
+                    ? resource.publishedAt 
+                    : undefined)
+              : undefined;
+          } catch {
+            publishedAt = undefined;
+          }
+          
+          try {
+            updatedAt = resource.updatedAt 
+              ? (typeof resource.updatedAt === 'string' 
+                  ? new Date(resource.updatedAt) 
+                  : resource.updatedAt instanceof Date 
+                    ? resource.updatedAt 
+                    : new Date())
+              : new Date();
+          } catch {
+            updatedAt = new Date();
+          }
+          
+          createdAt = updatedAt; // Use updatedAt as createdAt if not provided
+          
+          return {
+            id: resource.id,
+            title: resource.title,
+            description: resource.description,
+            category: resource.category || 'guide',
+            type: 'article' as const,
+            level: 'intermediate' as const, // Default, can be enhanced later
+            tags: resource.tags || [],
+            author: resource.author,
+            featured: false, // Default, can be enhanced later
+            status: (resource.status as 'active' | 'inactive') || 'active',
+            contentHtml: resource.content || '', // Ensure contentHtml is always a string
+            seo: {
+              metaTitle: resource.seo?.metaTitle || resource.title,
+              metaDescription: resource.seo?.metaDescription || resource.description,
+              keywords: resource.seo?.keywords || resource.tags || [],
+              slug: resource.seo?.slug || resource.slug,
+              canonicalUrl: resource.seo?.canonicalUrl || `https://engify.ai/learn/${resource.slug}`,
+              ogImage: resource.seo?.ogImage,
+            },
+            views: resource.views || 0,
+            shares: 0, // Default
+            publishedAt,
+            createdAt,
+            updatedAt,
+          };
+        });
       } catch (fsError) {
         // File doesn't exist or can't be read - fall through to backup
         throw new Error(`Failed to read JSON file: ${fsError instanceof Error ? fsError.message : 'Unknown error'}`);
@@ -129,32 +162,65 @@ export async function loadArticlesFromJson(): Promise<LearningResource[]> {
       });
       
       // Map JSON structure to LearningResource interface
-      return backupData.resources.map((resource) => ({
-        id: resource.id,
-        title: resource.title,
-        description: resource.description,
-        category: resource.category || 'guide',
-        type: 'article' as const,
-        level: 'intermediate' as const,
-        tags: resource.tags || [],
-        author: resource.author,
-        featured: false,
-        status: (resource.status as 'active' | 'inactive') || 'active',
-        contentHtml: resource.content,
-        seo: {
-          metaTitle: resource.seo?.metaTitle || resource.title,
-          metaDescription: resource.seo?.metaDescription || resource.description,
-          keywords: resource.seo?.keywords || resource.tags || [],
-          slug: resource.seo?.slug || resource.slug,
-          canonicalUrl: resource.seo?.canonicalUrl || `https://engify.ai/learn/${resource.slug}`,
-          ogImage: resource.seo?.ogImage,
-        },
-        views: resource.views || 0,
-        shares: 0,
-        publishedAt: resource.publishedAt ? new Date(resource.publishedAt) : undefined,
-        createdAt: resource.updatedAt ? new Date(resource.updatedAt) : new Date(),
-        updatedAt: resource.updatedAt ? new Date(resource.updatedAt) : new Date(),
-      }));
+      return backupData.resources.map((resource) => {
+        // Parse dates safely
+        let publishedAt: Date | undefined;
+        let createdAt: Date;
+        let updatedAt: Date;
+        
+        try {
+          publishedAt = resource.publishedAt 
+            ? (typeof resource.publishedAt === 'string' 
+                ? new Date(resource.publishedAt) 
+                : resource.publishedAt instanceof Date 
+                  ? resource.publishedAt 
+                  : undefined)
+            : undefined;
+        } catch {
+          publishedAt = undefined;
+        }
+        
+        try {
+          updatedAt = resource.updatedAt 
+            ? (typeof resource.updatedAt === 'string' 
+                ? new Date(resource.updatedAt) 
+                : resource.updatedAt instanceof Date 
+                  ? resource.updatedAt 
+                  : new Date())
+            : new Date();
+        } catch {
+          updatedAt = new Date();
+        }
+        
+        createdAt = updatedAt; // Use updatedAt as createdAt if not provided
+        
+        return {
+          id: resource.id,
+          title: resource.title,
+          description: resource.description,
+          category: resource.category || 'guide',
+          type: 'article' as const,
+          level: 'intermediate' as const,
+          tags: resource.tags || [],
+          author: resource.author,
+          featured: false,
+          status: (resource.status as 'active' | 'inactive') || 'active',
+          contentHtml: resource.content || '', // Ensure contentHtml is always a string
+          seo: {
+            metaTitle: resource.seo?.metaTitle || resource.title,
+            metaDescription: resource.seo?.metaDescription || resource.description,
+            keywords: resource.seo?.keywords || resource.tags || [],
+            slug: resource.seo?.slug || resource.slug,
+            canonicalUrl: resource.seo?.canonicalUrl || `https://engify.ai/learn/${resource.slug}`,
+            ogImage: resource.seo?.ogImage,
+          },
+          views: resource.views || 0,
+          shares: 0,
+          publishedAt,
+          createdAt,
+          updatedAt,
+        };
+      });
     } catch (backupError) {
       // LAST RESORT: Use MongoDB
       logger.error('Backup fallback failed, using MongoDB', {

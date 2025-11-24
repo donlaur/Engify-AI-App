@@ -98,10 +98,24 @@ export function validateConfig<T extends z.ZodType>(
   }
 
   // Check for placeholder values in production
+  // Exclude Vercel-provided optional env vars that can be empty
+  const EXCLUDED_KEYS = [
+    'VERCEL_GIT_PREVIOUS_SHA',
+    'VERCEL_GIT_PULL_REQUEST_ID',
+    'VERCEL_GIT_COMMIT_REF',
+    'VERCEL_GIT_COMMIT_SHA',
+    'VERCEL_GIT_REPO_SLUG',
+    'VERCEL_GIT_REPO_OWNER',
+  ];
+
   if (typeof data === 'object' && data !== null) {
     const env = (data as Record<string, unknown>).NODE_ENV as Environment;
     if (env === 'production') {
       for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+        // Skip Vercel-provided optional env vars
+        if (EXCLUDED_KEYS.includes(key)) {
+          continue;
+        }
         if (typeof value === 'string' && isPlaceholder(value)) {
           warnings.push({
             path: [key],
