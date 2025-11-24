@@ -12,6 +12,7 @@ import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 import { ArticleFeedback } from '@/components/article/ArticleFeedback';
 import { learningResourceRepository } from '@/lib/db/repositories/ContentService';
 import { logger } from '@/lib/logging/logger';
+import { getLearningResourceBySlug } from '@/lib/learning/mongodb-learning';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -21,7 +22,6 @@ export const dynamic = 'force-dynamic';
 
 async function getArticle(slug: string) {
   // Try JSON first (fast, no MongoDB timeouts), fallback to MongoDB
-  const { getLearningResourceBySlug } = await import('@/lib/learning/mongodb-learning');
   const article = await getLearningResourceBySlug(slug);
 
   if (!article) {
