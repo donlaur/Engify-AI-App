@@ -28,10 +28,20 @@ async function getArticle(slug: string) {
     return null;
   }
 
-  // Increment view count using repository method (non-blocking, don't wait)
-  // This is a write operation, so it's OK to use MongoDB directly
-  learningResourceRepository.incrementViews(slug).catch((error) => {
-    logger.warn('Failed to increment view count', { slug, error });
+  // Increment view count with timeout and error handling
+  // Skip if MongoDB is unavailable (non-critical operation)
+  // Use Promise.race with timeout to prevent hanging
+  Promise.race([
+    learningResourceRepository.incrementViews(slug),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('View increment timeout')), 2000)
+    ),
+  ]).catch((error) => {
+    // Silently fail - view counting is non-critical
+    logger.debug('View increment skipped', { 
+      slug, 
+      reason: error instanceof Error ? error.message : 'Unknown error' 
+    });
   });
 
   return article;

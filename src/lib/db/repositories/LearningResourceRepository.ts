@@ -199,20 +199,39 @@ export class LearningResourceRepository
   /**
    * Increment view count for a learning resource
    * Public query - learning content is intentionally accessible to all users (not organization-scoped)
+   * Uses timeout to prevent hanging on M0 tier connection pool exhaustion
    */
   async incrementViews(slug: string): Promise<void> {
     try {
-      const collection = await this.getCollection();
-      await collection.updateOne(
+      // Add timeout to prevent hanging on connection pool exhaustion
+      const collectionPromise = this.getCollection();
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('MongoDB connection timeout')), 1500)
+      );
+
+      const collection = await Promise.race([collectionPromise, timeoutPromise]);
+      
+      const updatePromise = collection.updateOne(
         {
           'seo.slug': slug,
           organizationId: null, // Public content - intentionally null for all users
         },
         { $inc: { views: 1 } } as any
       );
+
+      // Add timeout for the update operation too
+      await Promise.race([
+        updatePromise,
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Update operation timeout')), 1000)
+        ),
+      ]);
     } catch (error) {
-      console.error('Failed to increment view count:', error);
-      // Non-critical: view increment failure shouldn't break the page
+      // Silently fail - view counting is non-critical and shouldn't break the page
+      // Log at debug level to avoid noise in production logs
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('View increment skipped (non-critical):', error instanceof Error ? error.message : 'Unknown error');
+      }
     }
   }
 }
