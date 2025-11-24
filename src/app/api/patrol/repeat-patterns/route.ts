@@ -9,7 +9,7 @@ const PATROL_GATEWAY_URL = process.env.PATROL_GATEWAY_URL || 'http://localhost:8
  * Fetches repeat patterns from the patrol gateway for the authenticated user.
  * Proxies the request to the patrol gateway service.
  */
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     // Get authenticated user
     const session = await auth();
