@@ -1,15 +1,16 @@
 /**
- * MongoDB Learning Resource Fetching Utilities (DEPRECATED)
+ * MongoDB Learning Resource Fetching Utilities
  *
- * ⚠️ USE @/lib/db/repositories/LearningResourceRepository INSTEAD
- * 
- * This file is kept for backward compatibility but should be migrated
- * to use the unified repository pattern.
- * 
- * @deprecated Use learningResourceRepository from @/lib/db/repositories/ContentService
+ * Tries static JSON first (fast, no cold starts)
+ * Falls back to MongoDB if JSON unavailable
+ *
+ * This solves the cold start problem by using static JSON files
+ * similar to the prompts/patterns approach
  */
 
 import { learningResourceRepository } from '@/lib/db/repositories/ContentService';
+import { loadArticlesFromJson, loadArticleFromJson } from './load-articles-from-json';
+import { logger } from '@/lib/logging/logger';
 
 export interface LearningResource {
   id: string;
@@ -41,37 +42,65 @@ export interface LearningResource {
 }
 
 /**
- * Fetch all active learning resources from MongoDB
- * @deprecated Use learningResourceRepository.getAll() instead
+ * Fetch all active learning resources from static JSON (fast) or MongoDB (fallback)
+ * Uses JSON first to avoid MongoDB connection timeouts on M0 tier
  */
 export async function getAllLearningResources(): Promise<LearningResource[]> {
   try {
-    return learningResourceRepository.getAll();
+    // Try static JSON first (fast, no cold starts, no MongoDB timeouts)
+    return await loadArticlesFromJson();
   } catch (error) {
-    // During build, return empty array to avoid build failures
-    if (error instanceof Error && error.message.includes('BUILD_MODE')) {
-      console.warn('Build mode detected, returning empty learning resources array');
-      return [];
+    // Fallback to MongoDB (reliable, always works)
+    logger.debug('Using MongoDB fallback for learning resources', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    
+    try {
+      return learningResourceRepository.getAll();
+    } catch (mongoError) {
+      // During build, return empty array to avoid build failures
+      if (mongoError instanceof Error && mongoError.message.includes('BUILD_MODE')) {
+        logger.warn('Build mode detected, returning empty learning resources array');
+        return [];
+      }
+      throw mongoError;
     }
-    throw error;
   }
 }
 
 /**
- * Fetch a single learning resource by slug from MongoDB
- * @deprecated Use learningResourceRepository.getBySlug() instead
+ * Fetch a single learning resource by slug from static JSON (fast) or MongoDB (fallback)
+ * Uses JSON first to avoid MongoDB connection timeouts on M0 tier
  */
 export async function getLearningResourceBySlug(
   slug: string
 ): Promise<LearningResource | null> {
   try {
-    return learningResourceRepository.getBySlug(slug);
-  } catch (error) {
-    // During build, return null to avoid build failures
-    if (error instanceof Error && error.message.includes('BUILD_MODE')) {
-      console.warn('Build mode detected, returning null for learning resource lookup');
-      return null;
+    // Try static JSON first (fast, no MongoDB timeouts)
+    const article = await loadArticleFromJson(slug);
+    if (article) {
+      return article;
     }
-    throw error;
+    
+    // Not found in JSON - try MongoDB
+    logger.debug('Article not found in JSON, trying MongoDB', { slug });
+    return await learningResourceRepository.getBySlug(slug);
+  } catch (error) {
+    // JSON loading failed - try MongoDB fallback
+    logger.warn('JSON loading failed, using MongoDB fallback', {
+      slug,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    
+    try {
+      return await learningResourceRepository.getBySlug(slug);
+    } catch (mongoError) {
+      // During build, return null to avoid build failures
+      if (mongoError instanceof Error && mongoError.message.includes('BUILD_MODE')) {
+        logger.warn('Build mode detected, returning null for learning resource lookup');
+        return null;
+      }
+      throw mongoError;
+    }
   }
 }

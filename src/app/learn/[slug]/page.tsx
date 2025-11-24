@@ -11,6 +11,7 @@ import { HubSpokeLinks } from '@/components/features/HubSpokeLinks';
 import { CrossContentLinks } from '@/components/features/CrossContentLinks';
 import { ArticleFeedback } from '@/components/article/ArticleFeedback';
 import { learningResourceRepository } from '@/lib/db/repositories/ContentService';
+import { logger } from '@/lib/logging/logger';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -19,15 +20,19 @@ interface PageProps {
 export const dynamic = 'force-dynamic';
 
 async function getArticle(slug: string) {
-  // Use repository instead of direct collection access
-  const article = await learningResourceRepository.getBySlug(slug);
+  // Try JSON first (fast, no MongoDB timeouts), fallback to MongoDB
+  const { getLearningResourceBySlug } = await import('@/lib/learning/mongodb-learning');
+  const article = await getLearningResourceBySlug(slug);
 
   if (!article) {
     return null;
   }
 
-  // Increment view count using repository method
-  await learningResourceRepository.incrementViews(slug);
+  // Increment view count using repository method (non-blocking, don't wait)
+  // This is a write operation, so it's OK to use MongoDB directly
+  learningResourceRepository.incrementViews(slug).catch((error) => {
+    logger.warn('Failed to increment view count', { slug, error });
+  });
 
   return article;
 }

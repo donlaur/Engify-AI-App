@@ -101,10 +101,12 @@ async function getStaticFallbackStats(): Promise<StatsResponse> {
  * This is the SINGLE SOURCE OF TRUTH for stats fetching
  * 
  * @param skipMongoDB - If true, skip MongoDB and use static fallback (for build-time)
+ * @param skipRedis - If true, skip Redis cache (for static generation to avoid DYNAMIC_SERVER_USAGE)
  */
-export async function fetchPlatformStats(skipMongoDB = false): Promise<StatsResponse> {
-  // Try Redis cache first (if available)
-  if (redis) {
+export async function fetchPlatformStats(skipMongoDB = false, skipRedis = false): Promise<StatsResponse> {
+  // Skip Redis during static generation to avoid DYNAMIC_SERVER_USAGE error
+  // Try Redis cache first (if available and not skipped)
+  if (redis && !skipRedis && !skipMongoDB) {
     try {
       const cached = await redis.get(STATS_CACHE_KEY);
       if (cached) {
