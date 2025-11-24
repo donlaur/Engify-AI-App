@@ -980,62 +980,90 @@ export function ContentGeneratorPanel() {
                             )}
                           </div>
                           {/* Show URL for approved/published content */}
-                          {(item.status === 'approved' || item.status === 'published') && (
-                            <div className="mt-2 flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground font-mono">
-                                /blog/{item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}
-                              </span>
-                              {item.status === 'approved' && (
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  className="h-6 px-2 text-xs"
-                                  onClick={async (e) => {
-                                    e.stopPropagation();
-                                    try {
-                                      const response = await fetch(`/api/admin/content/generated?id=${item.id}&action=review`, {
-                                        method: 'PATCH',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ action: 'publish' }),
-                                      });
+                          {(item.status === 'approved' || item.status === 'published') && (() => {
+                            const slug = item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                            const categoryMap: Record<string, string> = {
+                              'ai-sdlc': 'ai-sdlc',
+                              'agile': 'agile',
+                              'workflows': 'workflows',
+                              'tools': 'ai-tools',
+                              'models': 'ai-models',
+                            };
+                            const category = categoryMap[item.category || ''] || item.category || '';
+                            const previewUrl = item.publishedUrl || (category ? `/learn/${category}/${slug}` : `/learn/${slug}`);
 
-                                      const data = await response.json();
-                                      if (data.success) {
-                                        toast({
-                                          title: 'Published',
-                                          description: `Live at ${data.url}`,
+                            return (
+                              <div className="mt-2 flex items-center gap-2">
+                                <a
+                                  href={previewUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-600 dark:text-blue-400 font-mono hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {previewUrl}
+                                </a>
+                                {item.status === 'approved' && (
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    className="h-6 px-2 text-xs"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      try {
+                                        const response = await fetch(`/api/admin/content/generated?id=${item.id}&action=review`, {
+                                          method: 'PATCH',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({ action: 'publish' }),
                                         });
-                                        loadReviewContent();
+
+                                        const data = await response.json();
+                                        if (data.success) {
+                                          toast({
+                                            title: 'Published',
+                                            description: (
+                                              <a
+                                                href={data.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="underline"
+                                              >
+                                                View live at {data.url}
+                                              </a>
+                                            ),
+                                          });
+                                          loadReviewContent();
+                                        }
+                                      } catch (error) {
+                                        toast({
+                                          title: 'Error',
+                                          description: 'Failed to publish',
+                                          variant: 'destructive',
+                                        });
                                       }
-                                    } catch (error) {
-                                      toast({
-                                        title: 'Error',
-                                        description: 'Failed to publish',
-                                        variant: 'destructive',
-                                      });
-                                    }
-                                  }}
-                                >
-                                  <Icons.globe className="h-3 w-3 mr-1" />
-                                  Publish Now
-                                </Button>
-                              )}
-                              {item.status === 'published' && item.publishedUrl && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 px-2 text-xs"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(item.publishedUrl, '_blank');
-                                  }}
-                                >
-                                  <Icons.externalLink className="h-3 w-3 mr-1" />
-                                  View Live
-                                </Button>
-                              )}
-                            </div>
-                          )}
+                                    }}
+                                  >
+                                    <Icons.globe className="h-3 w-3 mr-1" />
+                                    Publish Now
+                                  </Button>
+                                )}
+                                {item.status === 'published' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-xs"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(previewUrl, '_blank');
+                                    }}
+                                  >
+                                    <Icons.externalLink className="h-3 w-3 mr-1" />
+                                    Open
+                                  </Button>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </div>
                         <div className="flex flex-col gap-2 items-end min-w-[100px]">
                           <Badge

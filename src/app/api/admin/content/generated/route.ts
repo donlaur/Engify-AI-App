@@ -101,9 +101,18 @@ export async function PATCH(request: NextRequest) {
         const slug = content.slug || content.title.toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-|-$/g, '');
-        
-        // Generate URL based on content type
-        const url = `/blog/${slug}`;
+
+        // Generate URL based on category for SEO-rich structure
+        // Map category values to URL-friendly paths
+        const categoryMap: Record<string, string> = {
+          'ai-sdlc': 'ai-sdlc',
+          'agile': 'agile',
+          'workflows': 'workflows',
+          'tools': 'ai-tools',
+          'models': 'ai-models',
+        };
+        const categoryPath = categoryMap[content.category || ''] || content.category || '';
+        const url = categoryPath ? `/learn/${categoryPath}/${slug}` : `/learn/${slug}`;
         
         // Mark as published with slug
         await generatedContentService.markPublished(id, url, slug);
