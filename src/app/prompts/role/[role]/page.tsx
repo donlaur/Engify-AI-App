@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { APP_URL } from '@/lib/constants';
 import RolePageClient from './role-page-client';
+import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
 
 const ROLE_INFO: Record<string, { title: string; description: string }> = {
   'c-level': {
@@ -58,7 +59,6 @@ const ROLE_INFO: Record<string, { title: string; description: string }> = {
 async function getPromptsByRole(role: string) {
   try {
     // Use JSON first to avoid MongoDB timeouts
-    const { loadPromptsFromJson } = await import('@/lib/prompts/load-prompts-from-json');
     const allPrompts = await loadPromptsFromJson();
     
     // Filter by role

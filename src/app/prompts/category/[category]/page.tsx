@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { APP_URL } from '@/lib/constants';
 import CategoryPageClient from './category-page-client';
+import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
 
 const CATEGORY_INFO: Record<string, { title: string; description: string }> = {
   'code-generation': {
@@ -48,7 +49,6 @@ const CATEGORY_INFO: Record<string, { title: string; description: string }> = {
 async function getPromptsByCategory(category: string) {
   try {
     // Use JSON first to avoid MongoDB timeouts
-    const { loadPromptsFromJson } = await import('@/lib/prompts/load-prompts-from-json');
     const allPrompts = await loadPromptsFromJson();
     
     // Filter by category
