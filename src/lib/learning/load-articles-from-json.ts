@@ -107,6 +107,12 @@ export async function loadArticlesFromJson(): Promise<LearningResource[]> {
           
           createdAt = updatedAt; // Use updatedAt as createdAt if not provided
           
+          // Convert dates to ISO strings for Server Component serialization
+          // Date objects cannot be serialized in Server Components
+          const publishedAtStr = publishedAt ? publishedAt.toISOString() : undefined;
+          const createdAtStr = createdAt.toISOString();
+          const updatedAtStr = updatedAt.toISOString();
+          
           return {
             id: resource.id,
             title: resource.title,
@@ -129,9 +135,10 @@ export async function loadArticlesFromJson(): Promise<LearningResource[]> {
             },
             views: resource.views || 0,
             shares: 0, // Default
-            publishedAt,
-            createdAt,
-            updatedAt,
+            // Store as strings for Server Component serialization, convert to Date when needed
+            publishedAt: publishedAtStr ? new Date(publishedAtStr) : undefined,
+            createdAt: new Date(createdAtStr),
+            updatedAt: new Date(updatedAtStr),
           };
         });
       } catch (fsError) {
@@ -194,6 +201,12 @@ export async function loadArticlesFromJson(): Promise<LearningResource[]> {
         
         createdAt = updatedAt; // Use updatedAt as createdAt if not provided
         
+        // Convert dates to ISO strings for Server Component serialization
+        // Date objects cannot be serialized in Server Components
+        const publishedAtStr = publishedAt ? publishedAt.toISOString() : undefined;
+        const createdAtStr = createdAt.toISOString();
+        const updatedAtStr = updatedAt.toISOString();
+        
         return {
           id: resource.id,
           title: resource.title,
@@ -216,9 +229,10 @@ export async function loadArticlesFromJson(): Promise<LearningResource[]> {
           },
           views: resource.views || 0,
           shares: 0,
-          publishedAt,
-          createdAt,
-          updatedAt,
+          // Store as Date objects (will be serialized properly by Next.js)
+          publishedAt: publishedAtStr ? new Date(publishedAtStr) : undefined,
+          createdAt: new Date(createdAtStr),
+          updatedAt: new Date(updatedAtStr),
         };
       });
     } catch (backupError) {

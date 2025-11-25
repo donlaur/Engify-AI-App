@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { APP_URL } from '@/lib/constants';
 import CategoryPageClient from './category-page-client';
-import { getMongoDb } from '@/lib/db/mongodb';
 
 const CATEGORY_INFO: Record<string, { title: string; description: string }> = {
   'code-generation': {
@@ -48,22 +47,23 @@ const CATEGORY_INFO: Record<string, { title: string; description: string }> = {
 
 async function getPromptsByCategory(category: string) {
   try {
-    const db = await getMongoDb();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const collection = db.collection('prompts');
-
-    // Use MongoDB index for efficient category filtering
-    const prompts = await collection
-      .find({
-        category: category.toLowerCase(),
-        isPublic: true,
+    // Use JSON first to avoid MongoDB timeouts
+    const { loadPromptsFromJson } = await import('@/lib/prompts/load-prompts-from-json');
+    const allPrompts = await loadPromptsFromJson();
+    
+    // Filter by category
+    const prompts = allPrompts
+      .filter((p) => p.category?.toLowerCase() === category.toLowerCase() && p.isPublic !== false)
+      .sort((a, b) => {
+        // Sort by featured first, then views
+        if (a.isFeatured && !b.isFeatured) return -1;
+        if (!a.isFeatured && b.isFeatured) return 1;
+        return (b.views || 0) - (a.views || 0);
       })
-      .sort({ isFeatured: -1, views: -1 })
-      .limit(100)
-      .toArray();
+      .slice(0, 100);
 
     return prompts.map((p) => ({
-      id: p.id || p._id.toString(),
+      id: p.id,
       slug: p.slug,
       title: p.title,
       description: p.description,
@@ -80,7 +80,7 @@ async function getPromptsByCategory(category: string) {
     }));
   } catch (error) {
     console.error('Error fetching prompts by category:', error);
-    // Return empty array if MongoDB fails (app handles empty state)
+    // Return empty array if JSON loading fails (app handles empty state)
     return [];
   }
 }

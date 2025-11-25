@@ -80,7 +80,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: article.title,
       description: metaDescription,
       type: 'article',
-      publishedTime: article.publishedAt?.toISOString(),
+      publishedTime: article.publishedAt ? (typeof article.publishedAt === 'string' ? article.publishedAt : article.publishedAt.toISOString()) : undefined,
       authors: [article.author || 'Engify.ai Team'],
       images: article.seo?.ogImage ? [{ url: article.seo.ogImage }] : undefined,
     },
@@ -163,7 +163,10 @@ export default async function ArticlePage({ params }: PageProps) {
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   {article.publishedAt && (
                     <time>
-                      {new Date(article.publishedAt).toLocaleDateString('en-US', {
+                      {(typeof article.publishedAt === 'string' 
+                        ? new Date(article.publishedAt) 
+                        : article.publishedAt
+                      ).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
@@ -238,7 +241,10 @@ export default async function ArticlePage({ params }: PageProps) {
 
           {/* Metadata */}
           <div className="text-xs text-muted-foreground">
-            <p>Published on {article.publishedAt && new Date(article.publishedAt).toLocaleDateString('en-US', {
+            <p>Published on {article.publishedAt && (typeof article.publishedAt === 'string' 
+              ? new Date(article.publishedAt) 
+              : article.publishedAt
+            ).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
@@ -281,8 +287,8 @@ export default async function ArticlePage({ params }: PageProps) {
               '@type': 'Person',
               name: article.author || 'Engify.ai Team',
             },
-            datePublished: article.publishedAt,
-            dateModified: article.updatedAt || article.publishedAt,
+            datePublished: article.publishedAt ? (typeof article.publishedAt === 'string' ? article.publishedAt : article.publishedAt.toISOString()) : undefined,
+            dateModified: article.updatedAt ? (typeof article.updatedAt === 'string' ? article.updatedAt : article.updatedAt.toISOString()) : (article.publishedAt ? (typeof article.publishedAt === 'string' ? article.publishedAt : article.publishedAt.toISOString()) : undefined),
             publisher: {
               '@type': 'Organization',
               name: 'Engify.ai',

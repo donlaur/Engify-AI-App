@@ -130,9 +130,10 @@ export async function findRelatedContent(
   // Normalize tags to ensure it's always an array
   const normalizedTags = Array.isArray(tags) ? tags : tags ? [tags] : [];
 
-  // Find related articles
+  // Find related articles - use JSON to avoid MongoDB timeouts
   if (type !== 'article') {
-    const articles = await learningResourceRepository.getAll();
+    const { getAllLearningResources } = await import('@/lib/learning/mongodb-learning');
+    const articles = await getAllLearningResources();
     const relatedArticles = articles
       .filter((article) => {
         const articleTags = Array.isArray(article.tags)
@@ -275,7 +276,9 @@ function generateAnchorText(
 export async function findPillarClusterLinks(
   articleSlug: string
 ): Promise<{ pillar?: InternalLink; clusters: InternalLink[] }> {
-  const articles = await learningResourceRepository.getAll();
+  // Use JSON to avoid MongoDB timeouts
+  const { getAllLearningResources } = await import('@/lib/learning/mongodb-learning');
+  const articles = await getAllLearningResources();
   const currentArticle = articles.find(
     (a) => (a.seo?.slug || a.id) === articleSlug
   );

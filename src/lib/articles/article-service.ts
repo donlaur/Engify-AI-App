@@ -161,6 +161,7 @@ export async function getArticleTags(): Promise<string[]> {
 
 /**
  * Get related articles based on tags and category
+ * Uses JSON first to avoid MongoDB timeouts
  */
 export async function getRelatedArticles(
   currentSlug: string,
@@ -169,27 +170,33 @@ export async function getRelatedArticles(
   limit = 3
 ): Promise<Article[]> {
   try {
-    const client = await getClient();
-    const db = client.db('engify');
-    const collection = db.collection('learning_resources');
+    // Use JSON loader to avoid MongoDB timeouts
+    const { getAllLearningResources } = await import('@/lib/learning/mongodb-learning');
+    const allArticles = await getAllLearningResources();
     
     // Normalize tags to ensure it's always an array
     const normalizedTags = Array.isArray(tags) ? tags : (tags ? [tags] : []);
 
-    const articles = await collection
-      .find({
-        'seo.slug': { $ne: currentSlug },
-        status: 'active',
-        $or: [
-          ...(normalizedTags.length > 0 ? [{ tags: { $in: normalizedTags } }] : []),
-          ...(category ? [{ category }] : [])
-        ],
+    // Filter articles
+    const relatedArticles = allArticles
+      .filter((article) => {
+        const articleSlug = article.seo?.slug || article.id;
+        if (articleSlug === currentSlug) return false;
+        if (article.status !== 'active') return false;
+        
+        // Match by tags or category
+        const articleTags = Array.isArray(article.tags) ? article.tags : (article.tags ? [article.tags] : []);
+        const tagMatch = normalizedTags.length > 0 && articleTags.length > 0
+          ? articleTags.some((tag) => normalizedTags.includes(tag))
+          : false;
+        const categoryMatch = category ? article.category === category : false;
+        
+        return tagMatch || categoryMatch;
       })
-      .sort({ views: -1 })
-      .limit(limit)
-      .toArray();
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, limit);
 
-    return articles as unknown as Article[];
+    return relatedArticles as unknown as Article[];
   } catch (error) {
     console.error(`[ArticleService] Error fetching related articles for ${currentSlug}:`, error);
     return [];
