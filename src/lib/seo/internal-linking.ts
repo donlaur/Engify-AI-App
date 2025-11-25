@@ -11,6 +11,7 @@ import {
 } from '@/lib/db/repositories/ContentService';
 import { getPromptSlug } from '@/lib/utils/slug';
 import { getCompletePillarPages, type PillarPageConfig } from '@/lib/data/pillar-pages';
+import { getAllLearningResources } from '@/lib/learning/mongodb-learning';
 
 export interface InternalLink {
   url: string;
@@ -132,7 +133,6 @@ export async function findRelatedContent(
 
   // Find related articles - use JSON to avoid MongoDB timeouts
   if (type !== 'article') {
-    const { getAllLearningResources } = await import('@/lib/learning/mongodb-learning');
     const articles = await getAllLearningResources();
     const relatedArticles = articles
       .filter((article) => {
@@ -277,7 +277,6 @@ export async function findPillarClusterLinks(
   articleSlug: string
 ): Promise<{ pillar?: InternalLink; clusters: InternalLink[] }> {
   // Use JSON to avoid MongoDB timeouts
-  const { getAllLearningResources } = await import('@/lib/learning/mongodb-learning');
   const articles = await getAllLearningResources();
   const currentArticle = articles.find(
     (a) => (a.seo?.slug || a.id) === articleSlug

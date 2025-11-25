@@ -5,6 +5,7 @@
 
 import { getClient } from '@/lib/mongodb';
 import { z } from 'zod';
+import { getAllLearningResources } from '@/lib/learning/mongodb-learning';
 
 // Article schema for validation
 export const ArticleSchema = z.object({
@@ -171,7 +172,6 @@ export async function getRelatedArticles(
 ): Promise<Article[]> {
   try {
     // Use JSON loader to avoid MongoDB timeouts
-    const { getAllLearningResources } = await import('@/lib/learning/mongodb-learning');
     const allArticles = await getAllLearningResources();
     
     // Normalize tags to ensure it's always an array
