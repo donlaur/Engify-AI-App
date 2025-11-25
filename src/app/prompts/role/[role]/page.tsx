@@ -84,8 +84,8 @@ async function getPromptsByRole(role: string) {
       tags: p.tags || [],
       isFeatured: p.isFeatured || false,
       views: p.views || 0,
-      rating: p.rating || p.stats?.averageRating || 0,
-      ratingCount: p.ratingCount || p.stats?.totalRatings || 0,
+      rating: p.rating || 0,
+      ratingCount: p.ratingCount || 0,
       createdAt: p.createdAt || new Date(),
     }));
   } catch (error) {
