@@ -19,7 +19,33 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+
+type MCPClient = 'claude-code' | 'claude-desktop' | 'cursor' | 'windsurf';
+
+const MCP_CLIENT_CONFIG: Record<MCPClient, { name: string; configPath: string; notes: string }> = {
+  'claude-code': {
+    name: 'Claude Code',
+    configPath: 'Project root: .mcp.json or ~/.claude/projects/<project>/.mcp.json',
+    notes: 'Restart Claude Code after updating config',
+  },
+  'claude-desktop': {
+    name: 'Claude Desktop',
+    configPath: '~/Library/Application Support/Claude/claude_desktop_config.json',
+    notes: 'Restart Claude Desktop after updating config',
+  },
+  'cursor': {
+    name: 'Cursor',
+    configPath: 'Settings > MCP Servers (or ~/.cursor/mcp.json)',
+    notes: 'Restart Cursor after updating config',
+  },
+  'windsurf': {
+    name: 'Windsurf',
+    configPath: '~/.windsurf/mcp.json',
+    notes: 'Restart Windsurf after updating config',
+  },
+};
 
 interface MCPTokenDisplayProps {
   onClose?: () => void;
@@ -27,6 +53,7 @@ interface MCPTokenDisplayProps {
 
 export function MCPTokenDisplay({ onClose }: MCPTokenDisplayProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<MCPClient>('claude-code');
   const [token, setToken] = useState<{
     access_token?: string;
     refresh_token?: string;
@@ -97,12 +124,11 @@ export function MCPTokenDisplay({ onClose }: MCPTokenDisplayProps) {
   const copyConfigExample = async () => {
     const config = `{
   "mcpServers": {
-    "engify-bug-reporter": {
+    "engify": {
       "command": "npx",
-      "args": ["@engify/mcp-server"],
+      "args": ["@engify/engify-mcp-server"],
       "env": {
-        "ENGIFY_ACCESS_TOKEN": "${token?.access_token || 'YOUR_TOKEN_HERE'}",
-        "ENGIFY_SERVER_URL": "https://engify.ai/api/mcp"
+        "ENGIFY_TOKEN": "${token?.access_token || 'YOUR_TOKEN_HERE'}"
       }
     }
   }
@@ -233,59 +259,65 @@ export function MCPTokenDisplay({ onClose }: MCPTokenDisplayProps) {
                 Setup Instructions
               </h3>
 
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    1. Save token to file:
-                  </p>
-                  <div className="rounded-md bg-gray-100 dark:bg-gray-800 p-3 font-mono text-xs">
-                    echo &apos;{JSON.stringify({ access_token: token.access_token })}&apos; &gt; ~/.engify-mcp-auth.json
-                    <br />
-                    chmod 600 ~/.engify-mcp-auth.json
-                  </div>
-                </div>
+              <Tabs value={selectedClient} onValueChange={(v) => setSelectedClient(v as MCPClient)} className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="claude-code" className="text-xs">Claude Code</TabsTrigger>
+                  <TabsTrigger value="claude-desktop" className="text-xs">Desktop</TabsTrigger>
+                  <TabsTrigger value="cursor" className="text-xs">Cursor</TabsTrigger>
+                  <TabsTrigger value="windsurf" className="text-xs">Windsurf</TabsTrigger>
+                </TabsList>
 
-                <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    2. Configure Claude Desktop (macOS):
-                  </p>
-                  <div className="rounded-md bg-gray-100 dark:bg-gray-800 p-3 font-mono text-xs relative">
-                    <pre className="whitespace-pre-wrap">
+                {(['claude-code', 'claude-desktop', 'cursor', 'windsurf'] as MCPClient[]).map((client) => (
+                  <TabsContent key={client} value={client} className="space-y-3 mt-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        1. Add to your MCP config:
+                      </p>
+                      <div className="rounded-md bg-gray-100 dark:bg-gray-800 p-3 font-mono text-xs relative">
+                        <pre className="whitespace-pre-wrap overflow-x-auto">
 {`{
   "mcpServers": {
     "engify": {
       "command": "npx",
-      "args": ["@engify/mcp-server"],
+      "args": ["@engify/engify-mcp-server"],
       "env": {
-        "ENGIFY_TOKEN": "${token.access_token?.substring(0, 20) || ''}..."
+        "ENGIFY_TOKEN": "${token.access_token || 'YOUR_TOKEN_HERE'}"
       }
     }
   }
 }`}
-                    </pre>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={copyConfigExample}
-                      className="absolute right-2 top-2"
-                    >
-                      <Icons.copy className="h-3 w-3" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Save to: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>
-                  </p>
-                </div>
+                        </pre>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={copyConfigExample}
+                          className="absolute right-2 top-2"
+                        >
+                          <Icons.copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
 
-                <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    3. Restart Claude Desktop
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    The Engify MCP server will now be available in Claude Desktop
-                  </p>
-                </div>
-              </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        2. Config location:
+                      </p>
+                      <p className="text-xs text-muted-foreground font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                        {MCP_CLIENT_CONFIG[client].configPath}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        3. {MCP_CLIENT_CONFIG[client].notes}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        The Engify MCP server will provide code quality, memory, and pattern tools.
+                      </p>
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
             </div>
 
             {/* Refresh Token (Optional) */}
