@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify, SignJWT } from 'jose';
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import { checkOAuthRateLimit } from '@/lib/rate-limit/oauth';
 import { logger } from '@/lib/logging/logger';
+
+// Initialize Upstash Redis (works on Vercel and locally)
+const redis = Redis.fromEnv();
 
 // RFC 8693: OAuth 2.0 Token Exchange
 // Exchanges user's MCP access token for downstream service token
@@ -78,11 +81,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user's refresh token is still valid
-    const refreshTokens = await kv.keys(`mcp_refresh_token:*`);
+    const refreshTokens = await redis.keys(`mcp_refresh_token:*`);
     let userHasValidRefresh = false;
 
     for (const tokenKey of refreshTokens) {
-      const tokenData = await kv.get(tokenKey) as { userId?: string; resource?: string } | null;
+      const tokenData = await redis.get(tokenKey) as { userId?: string; resource?: string } | null;
       if (tokenData?.userId === payload.sub && tokenData?.resource === payload.resource) {
         userHasValidRefresh = true;
         break;
