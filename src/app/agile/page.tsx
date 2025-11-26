@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { loadPromptsFromJson } from '@/lib/prompts/load-prompts-from-json';
 import { loadPatternsFromJson } from '@/lib/patterns/load-patterns-from-json';
 import { getAllLearningResources } from '@/lib/learning/mongodb-learning';
-import { ArrowRight, Calculator, BookOpen, Target, Users, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Calculator, Users, TrendingUp } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Agile Hub: WSJF, Scrum, Sprint Planning & AI-Enabled Agile | Engify.ai',
