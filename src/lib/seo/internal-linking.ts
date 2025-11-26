@@ -7,7 +7,6 @@
 import {
   patternRepository,
   promptRepository,
-  learningResourceRepository,
 } from '@/lib/db/repositories/ContentService';
 import { getPromptSlug } from '@/lib/utils/slug';
 import { getCompletePillarPages, type PillarPageConfig } from '@/lib/data/pillar-pages';
