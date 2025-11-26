@@ -1,10 +1,12 @@
 /**
  * WSJF (Weighted Shortest Job First) Landing Page
- *
+ * 
  * SEO-optimized pillar page targeting high-impression keywords:
  * - wsjf formula, wsjf example, wsjf calculation, wsjf agile, agile wsjf
  * - wsjf prioritization, wsjf in agile, scaled agile wsjf
- *
+ * 
+ * Located at /agile/wsjf for better URL structure and SEO
+ * 
  * Created: 2025-11-24
  */
 
@@ -15,7 +17,7 @@ import { WSJFCalculator } from '@/components/features/WSJFCalculator';
 import { MainLayout } from '@/components/layout/MainLayout';
 
 export const metadata: Metadata = {
-  title: 'WSJF Calculator & Formula: Weighted Shortest Job First Prioritization Guide',
+  title: 'WSJF Calculator & Formula: Weighted Shortest Job First Prioritization Guide | Agile',
   description: 'Learn WSJF (Weighted Shortest Job First) with our free calculator. Complete guide with formula, examples, and SAFe implementation. Prioritize your backlog by economic value.',
   keywords: [
     'wsjf',
@@ -39,10 +41,10 @@ export const metadata: Metadata = {
     title: 'WSJF Calculator & Formula Guide | Weighted Shortest Job First',
     description: 'Free WSJF calculator with step-by-step formula guide. Learn how to prioritize your backlog using Weighted Shortest Job First from SAFe.',
     type: 'website',
-    url: 'https://www.engify.ai/wsjf',
+    url: 'https://www.engify.ai/agile/wsjf',
   },
   alternates: {
-    canonical: 'https://www.engify.ai/wsjf',
+    canonical: 'https://www.engify.ai/agile/wsjf',
   },
 };
 
@@ -307,10 +309,10 @@ export default function WSJFPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">Related Guides</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {[
+                { title: 'Agile Hub', desc: 'All agile resources in one place', href: '/agile' },
                 { title: 'AI-Enabled Agile', desc: 'Use AI in sprints and ceremonies', href: '/ai-enabled-agile' },
                 { title: 'AI-SDLC 2.0', desc: 'Full lifecycle framework', href: '/ai-sdlc' },
                 { title: 'PBVR Workflow', desc: 'Plan-Build-Verify-Release cycles', href: '/pbvr' },
-                { title: 'Prompt Engineering', desc: 'Master AI prompting', href: '/learn/prompt-engineering-masterclass' },
               ].map((item) => (
                 <Link
                   key={item.href}
@@ -378,17 +380,17 @@ export default function WSJFPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/ai-enabled-agile"
+              href="/agile"
               className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
             >
-              AI-Enabled Agile Guide
+              Agile Hub
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
             <Link
-              href="/prompts?category=agile"
+              href="/ai-enabled-agile"
               className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-lg hover:bg-white/10 transition-colors font-semibold"
             >
-              Browse Agile Prompts
+              AI-Enabled Agile Guide
             </Link>
           </div>
         </div>
@@ -434,3 +436,4 @@ export default function WSJFPage() {
     </MainLayout>
   );
 }
+

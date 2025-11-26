@@ -144,7 +144,7 @@ export default async function AgileHubPage() {
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Button asChild size="lg">
-              <Link href="/wsjf">
+              <Link href="/agile/wsjf">
                 <Calculator className="mr-2 h-5 w-5" />
                 WSJF Calculator
               </Link>
@@ -202,7 +202,7 @@ export default async function AgileHubPage() {
               </p>
             </div>
             <Button asChild variant="outline">
-              <Link href="/wsjf">
+              <Link href="/agile/wsjf">
                 View Calculator
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -363,7 +363,7 @@ export default async function AgileHubPage() {
               </CardHeader>
               <CardContent>
                 <Button asChild>
-                  <Link href="/wsjf">
+                  <Link href="/agile/wsjf">
                     Open Calculator
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
