@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { AI_ENABLED_AGILE_CONTENT } from '@/lib/data/ai-sdlc-content';
 import { ArrowRight, CheckCircle2, Calendar, Users, Target, BarChart3, MessageSquare } from 'lucide-react';
+import { MainLayout } from '@/components/layout/MainLayout';
 
 export const metadata: Metadata = {
   title: 'AI-Enabled Agile: How to Run Agile Software Development with AI | Engify',
@@ -24,7 +25,8 @@ const ceremonyIcons: Record<string, React.ElementType> = {
 
 export default function AIEnabledAgilePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <MainLayout>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-4xl mx-auto text-center">
@@ -304,6 +306,7 @@ export default function AIEnabledAgilePage() {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </MainLayout>
   );
 }
