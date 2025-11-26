@@ -7,6 +7,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { generatedContentService } from '@/lib/services/GeneratedContentService';
 import { contentQueueService } from '@/lib/services/ContentQueueService';
+import { learningResourceRepository } from '@/lib/db/repositories/ContentService';
+import { generateLearningResourcesJson } from '@/lib/learning/generate-learning-json';
+import { marked } from 'marked';
+import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 
 const UpdateContentSchema = z.object({
@@ -152,8 +156,76 @@ export async function PATCH(request: NextRequest) {
         const categoryPath = categoryMap[content.category || ''] || content.category || '';
         const url = categoryPath ? `/learn/${categoryPath}/${slug}` : `/learn/${slug}`;
         
+        // Convert markdown to HTML
+        const contentHtml = marked(content.content, { breaks: true });
+        
+        // Map contentType to learning resource type
+        const typeMap: Record<string, 'article' | 'guide' | 'tutorial'> = {
+          'pillar-page': 'article',
+          'hub-spoke': 'article',
+          'tutorial': 'tutorial',
+          'guide': 'guide',
+          'news': 'article',
+          'case-study': 'article',
+          'comparison': 'article',
+          'best-practices': 'guide',
+        };
+        
+        // Determine level from category or default to intermediate
+        const levelMap: Record<string, 'beginner' | 'intermediate' | 'advanced'> = {
+          'beginner': 'beginner',
+          'intermediate': 'intermediate',
+          'advanced': 'advanced',
+        };
+        const level = levelMap[content.category?.toLowerCase() || ''] || 'intermediate';
+        
+        // Save to learning_resources collection
+        const learningResourceId = new ObjectId().toString();
+        const now = new Date();
+        const publishedAt = content.publishedAt || now;
+        
+        // Get collection directly to insert
+        const { getDb } = await import('@/lib/mongodb');
+        const db = await getDb();
+        const collection = db.collection('learning_resources');
+        
+        await collection.insertOne({
+          id: learningResourceId,
+          title: content.title,
+          description: content.description || content.title,
+          category: content.category || 'Tutorial',
+          type: typeMap[content.contentType] || 'article',
+          level,
+          tags: content.keywords || [],
+          author: content.createdBy || 'Engify.ai Team',
+          featured: false,
+          status: 'active',
+          contentHtml,
+          organizationId: null, // Public content
+          seo: {
+            metaTitle: content.title,
+            metaDescription: content.description || content.title,
+            keywords: content.keywords || [],
+            slug,
+            canonicalUrl: `https://engify.ai${url}`,
+          },
+          views: 0,
+          shares: 0,
+          publishedAt,
+          createdAt: now,
+          updatedAt: now,
+        } as any);
+        
         // Mark as published with slug
         await generatedContentService.markPublished(id, url, slug);
+        
+        // Regenerate JSON file to include new article
+        try {
+          await generateLearningResourcesJson();
+        } catch (jsonError) {
+          console.error('Failed to regenerate JSON (non-critical):', jsonError);
+          // Don't fail the publish if JSON regeneration fails
+        }
         
         return NextResponse.json({
           success: true,
