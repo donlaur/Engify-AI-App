@@ -98,7 +98,7 @@ export default async function AgileHubPage() {
   const agilePatterns = allPatterns.filter(p =>
     matchesAgileKeywords(p.name) ||
     matchesAgileKeywords(p.description) ||
-    p.tags?.some(tag => matchesAgileKeywords(tag))
+    (p.useCases && p.useCases.some(useCase => matchesAgileKeywords(useCase)))
   );
 
   const agileArticles = allArticles.filter(a =>
