@@ -307,7 +307,7 @@ export default async function AgileHubPage() {
                   </CardHeader>
                   <CardContent>
                     <Button asChild variant="ghost" size="sm">
-                      <Link href={`/patterns/${pattern.slug || pattern.id}`}>
+                      <Link href={`/patterns/${pattern.id}`}>
                         View Pattern
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
