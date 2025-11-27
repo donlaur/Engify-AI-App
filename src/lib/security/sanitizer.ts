@@ -28,6 +28,7 @@ const SANITIZE_CONFIG = {
   },
   
   // Rich: Allow common rich text tags (for markdown/rich text editors)
+  // Includes all tags that marked parser generates
   rich: {
     ALLOWED_TAGS: [
       'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -35,9 +36,11 @@ const SANITIZE_CONFIG = {
       'b', 'i', 'em', 'strong', 'u', 's', 'code', 'pre',
       'ul', 'ol', 'li',
       'blockquote',
-      'a',
+      'a', 'img',
+      'table', 'thead', 'tbody', 'tr', 'th', 'td',
+      'figure', 'figcaption',
     ],
-    ALLOWED_ATTR: ['href', 'title', 'target', 'rel'],
+    ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'src', 'alt', 'class', 'id'],
     ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):)/i,
   },
 };

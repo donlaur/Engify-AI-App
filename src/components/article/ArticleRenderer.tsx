@@ -6,13 +6,46 @@ import rehypeHighlight from 'rehype-highlight';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import { CodeBlock } from './CodeBlock';
+import { sanitizeHtml } from '@/lib/security/sanitizer';
 import 'highlight.js/styles/github-dark.css';
 
 interface ArticleRendererProps {
   content: string;
 }
 
+/**
+ * Check if content is HTML (contains HTML tags) or markdown
+ */
+function isHTML(content: string): boolean {
+  if (!content || typeof content !== 'string') return false;
+  // Check for HTML tags (simple heuristic)
+  return /<[a-z][\s\S]*>/i.test(content);
+}
+
 export function ArticleRenderer({ content }: ArticleRendererProps) {
+  // If content is HTML (from marked.parse), render it directly with sanitization
+  // Otherwise, treat it as markdown and use ReactMarkdown
+  if (isHTML(content)) {
+    // Sanitize HTML content to prevent XSS
+    const sanitized = sanitizeHtml(content, 'rich');
+    
+    return (
+      <div 
+        className="prose prose-lg dark:prose-invert max-w-none
+          prose-headings:text-slate-900 dark:prose-headings:text-white
+          prose-p:text-slate-700 dark:prose-p:text-slate-300
+          prose-a:text-primary prose-a:underline
+          prose-strong:text-slate-900 dark:prose-strong:text-white
+          prose-code:text-slate-900 dark:prose-code:text-slate-100
+          prose-pre:bg-slate-100 dark:prose-pre:bg-slate-900
+          prose-blockquote:border-l-primary/30
+          prose-blockquote:bg-slate-50 dark:prose-blockquote:bg-slate-900"
+        dangerouslySetInnerHTML={{ __html: sanitized }}
+      />
+    );
+  }
+
+  // Fallback to markdown rendering for backward compatibility
   return (
     <div className="prose prose-lg dark:prose-invert max-w-none">
       <ReactMarkdown
