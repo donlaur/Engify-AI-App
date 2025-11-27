@@ -13,6 +13,8 @@ import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { auth } from '@/lib/auth';
+import { getDb } from '@/lib/mongodb';
+import { auditLog } from '@/lib/logging/audit';
 
 const UpdateContentSchema = z.object({
   title: z.string().optional(),
@@ -232,7 +234,6 @@ export async function PATCH(request: NextRequest) {
         const publishedAt = content.publishedAt || now;
         
         // Get collection directly to insert
-        const { getDb } = await import('@/lib/mongodb');
         const db = await getDb();
         const collection = db.collection('learning_resources');
         
@@ -262,6 +263,26 @@ export async function PATCH(request: NextRequest) {
           createdAt: now,
           updatedAt: now,
         } as any);
+        
+        // Audit log for database operation
+        const session = await auth();
+        await auditLog({
+          action: 'admin_action',
+          userId: session?.user?.email || 'unknown',
+          resource: 'learning_resource',
+          severity: 'info',
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
+          details: {
+            action: 'content_published',
+            contentId: id,
+            learningResourceId,
+            slug,
+            url,
+            title: content.title,
+            category: content.category,
+          },
+        });
         
         // Mark as published with slug
         await generatedContentService.markPublished(id, url, slug);
