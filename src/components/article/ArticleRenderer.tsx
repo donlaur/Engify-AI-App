@@ -32,14 +32,27 @@ export function ArticleRenderer({ content }: ArticleRendererProps) {
     return (
       <div 
         className="prose prose-lg dark:prose-invert max-w-none
-          prose-headings:text-slate-900 dark:prose-headings:text-white
-          prose-p:text-slate-700 dark:prose-p:text-slate-300
-          prose-a:text-primary prose-a:underline
-          prose-strong:text-slate-900 dark:prose-strong:text-white
-          prose-code:text-slate-900 dark:prose-code:text-slate-100
-          prose-pre:bg-slate-100 dark:prose-pre:bg-slate-900
-          prose-blockquote:border-l-primary/30
-          prose-blockquote:bg-slate-50 dark:prose-blockquote:bg-slate-900"
+          prose-headings:font-bold prose-headings:tracking-tight
+          prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4 prose-h1:text-slate-900 dark:prose-h1:text-white
+          prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:border-b prose-h2:border-slate-200 dark:prose-h2:border-slate-800 prose-h2:pb-2 prose-h2:text-slate-900 dark:prose-h2:text-white
+          prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-slate-900 dark:prose-h3:text-white
+          prose-h4:text-xl prose-h4:mt-6 prose-h4:mb-2 prose-h4:text-slate-900 dark:prose-h4:text-white
+          prose-p:text-base prose-p:leading-7 prose-p:mb-4 prose-p:text-slate-700 dark:prose-p:text-slate-300
+          prose-a:text-primary prose-a:font-medium prose-a:underline prose-a:decoration-primary/30 prose-a:underline-offset-4 prose-a:transition-colors hover:prose-a:text-primary/80
+          prose-strong:font-bold prose-strong:text-slate-900 dark:prose-strong:text-white
+          prose-em:italic prose-em:text-slate-700 dark:prose-em:text-slate-300
+          prose-code:rounded prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-mono prose-code:text-slate-900 dark:prose-code:bg-slate-800 dark:prose-code:text-slate-100
+          prose-pre:rounded-lg prose-pre:bg-slate-100 prose-pre:p-4 prose-pre:my-6 dark:prose-pre:bg-slate-900 prose-pre:overflow-x-auto
+          prose-pre code:bg-transparent prose-pre code:p-0
+          prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-slate-50 prose-blockquote:pl-4 prose-blockquote:py-3 prose-blockquote:my-4 prose-blockquote:italic prose-blockquote:text-slate-600 dark:prose-blockquote:bg-slate-900 dark:prose-blockquote:text-slate-400
+          prose-ul:list-disc prose-ul:list-outside prose-ul:ml-6 prose-ul:mb-4 prose-ul:space-y-2 prose-ul:text-slate-700 dark:prose-ul:text-slate-300
+          prose-ol:list-decimal prose-ol:list-outside prose-ol:ml-6 prose-ol:mb-4 prose-ol:space-y-2 prose-ol:text-slate-700 dark:prose-ol:text-slate-300
+          prose-li:leading-7
+          prose-hr:my-8 prose-hr:border-slate-200 dark:prose-hr:border-slate-800
+          prose-table:w-full prose-table:divide-y prose-table:divide-slate-200 dark:prose-table:divide-slate-800 prose-table:border prose-table:border-slate-200 dark:prose-table:border-slate-800 prose-table:rounded-lg prose-table:my-6 prose-table:overflow-x-auto
+          prose-thead:bg-slate-50 dark:prose-thead:bg-slate-900
+          prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:text-xs prose-th:font-semibold prose-th:text-slate-900 dark:prose-th:text-white prose-th:uppercase prose-th:tracking-wider
+          prose-td:px-4 prose-td:py-3 prose-td:text-sm prose-td:text-slate-700 dark:prose-td:text-slate-300"
         dangerouslySetInnerHTML={{ __html: sanitized }}
       />
     );

@@ -237,6 +237,16 @@ export async function PATCH(request: NextRequest) {
         const db = await getDb();
         const collection = db.collection('learning_resources');
         
+        // Normalize author - replace system/admin with Engify.ai Team
+        const normalizeAuthor = (author: string | undefined | null): string => {
+          if (!author) return 'Engify.ai Team';
+          const lower = author.toLowerCase();
+          if (lower === 'system' || lower === 'admin' || lower === 'ai' || lower === 'assistant') {
+            return 'Engify.ai Team';
+          }
+          return author;
+        };
+
         await collection.insertOne({
           id: learningResourceId,
           title: content.title,
@@ -245,7 +255,7 @@ export async function PATCH(request: NextRequest) {
           type: typeMap[content.contentType] || 'article',
           level,
           tags: content.keywords || [],
-          author: content.createdBy || 'Engify.ai Team',
+          author: normalizeAuthor(content.createdBy),
           featured: false,
           status: 'active',
           contentHtml,

@@ -43,6 +43,16 @@ const levelMap: Record<string, 'beginner' | 'intermediate' | 'advanced'> = {
   'advanced': 'advanced',
 };
 
+// Normalize author - replace system/admin with Engify.ai Team
+function normalizeAuthor(author: string | undefined | null): string {
+  if (!author) return 'Engify.ai Team';
+  const lower = author.toLowerCase();
+  if (lower === 'system' || lower === 'admin' || lower === 'ai' || lower === 'assistant') {
+    return 'Engify.ai Team';
+  }
+  return author;
+}
+
 async function migrateArticle(content: any) {
   // Generate slug if not exists
   const slug = content.slug || content.title.toLowerCase()
@@ -91,7 +101,7 @@ async function migrateArticle(content: any) {
           type: typeMap[content.contentType] || 'article',
           level,
           tags: content.keywords || [],
-          author: content.createdBy || 'Engify.ai Team',
+          author: normalizeAuthor(content.createdBy),
           contentHtml,
           seo: {
             metaTitle: content.title,
