@@ -7,11 +7,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { RBACPresets } from '@/lib/middleware/rbac';
 import { generatedContentService } from '@/lib/services/GeneratedContentService';
 import { contentQueueService } from '@/lib/services/ContentQueueService';
-import { learningResourceRepository } from '@/lib/db/repositories/ContentService';
 import { generateLearningResourcesJson } from '@/lib/learning/generate-learning-json';
 import { marked } from 'marked';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { auth } from '@/lib/auth';
 
 const UpdateContentSchema = z.object({
   title: z.string().optional(),
@@ -31,6 +32,29 @@ const ReviewSchema = z.object({
 export async function GET(request: NextRequest) {
   const r = await RBACPresets.requireOrgAdmin()(request);
   if (r) return r;
+
+  // Rate limiting
+  const session = await auth();
+  const userId = session?.user?.id || 'unknown';
+  const rateLimitResult = await checkRateLimit(
+    `admin-content-generated-get-${userId}`,
+    'authenticated'
+  );
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: rateLimitResult.reason || 'Rate limit exceeded',
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': '60',
+          'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
+        },
+      }
+    );
+  }
 
   try {
     const { searchParams } = new URL(request.url);
@@ -70,6 +94,29 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   const r = await RBACPresets.requireOrgAdmin()(request);
   if (r) return r;
+
+  // Rate limiting
+  const session = await auth();
+  const userId = session?.user?.id || 'unknown';
+  const rateLimitResult = await checkRateLimit(
+    `admin-content-generated-patch-${userId}`,
+    'authenticated'
+  );
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: rateLimitResult.reason || 'Rate limit exceeded',
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': '60',
+          'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
+        },
+      }
+    );
+  }
 
   try {
     const { searchParams } = new URL(request.url);
@@ -265,6 +312,29 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const r = await RBACPresets.requireOrgAdmin()(request);
   if (r) return r;
+
+  // Rate limiting
+  const session = await auth();
+  const userId = session?.user?.id || 'unknown';
+  const rateLimitResult = await checkRateLimit(
+    `admin-content-generated-delete-${userId}`,
+    'authenticated'
+  );
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: rateLimitResult.reason || 'Rate limit exceeded',
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': '60',
+          'X-RateLimit-Reset': rateLimitResult.resetAt.toISOString(),
+        },
+      }
+    );
+  }
 
   try {
     const { searchParams } = new URL(request.url);
