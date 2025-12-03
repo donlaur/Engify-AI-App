@@ -666,6 +666,52 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Failed to fetch recommendations for sitemap:', error);
   }
 
+  // MCP Server pages (moved from subdomain to /mcp path)
+  const mcpPages: MetadataRoute.Sitemap = [
+    {
+      url: 'https://engify.ai/mcp',
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: 'https://engify.ai/mcp/tools/memory',
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: 'https://engify.ai/mcp/tools/assess',
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: 'https://engify.ai/mcp/tools/pattern',
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: 'https://engify.ai/mcp/tools/context',
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: 'https://engify.ai/mcp/tools/monitor',
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: 'https://engify.ai/mcp/tools/help',
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+  ];
+
   // Combine all URLs
   const allPages = [
     ...staticPages,
@@ -683,6 +729,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...guardrailPages,
     ...painPointPages,
     ...recommendationPages,
+    ...mcpPages,
   ];
 
   // Sitemap generated with allPages.length URLs
@@ -701,7 +748,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     - Workflow pages: ${workflowPages.length}
     - Guardrail pages: ${guardrailPages.length}
     - Pain point pages: ${painPointPages.length}
-    - Recommendation pages: ${recommendationPages.length}`);
+    - Recommendation pages: ${recommendationPages.length}
+    - MCP Server pages: ${mcpPages.length}`);
 
   return allPages;
 }

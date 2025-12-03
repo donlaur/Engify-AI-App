@@ -14,19 +14,22 @@ import '@/lib/env';
 // const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Engify.ai - AI Guardrail Platform for Engineering Teams',
+  title: 'Engify.ai - AI Guardrail Platform & MCP Server for Engineering Teams',
   description:
-    'Operationalize AI guardrails across code, security, and delivery. Ship faster without shipping regressions using Engify workflows, automation, and institutional memory.',
+    'Operationalize AI guardrails with our MCP server for Claude Code and Cursor. Ship faster without regressions using code assessment, pattern coaching, and persistent memory across sessions.',
   keywords: [
     'AI guardrails',
+    'MCP server',
+    'Model Context Protocol',
+    'Claude Code',
+    'Cursor AI',
+    'AI code quality',
     'engineering governance',
-    'software delivery guardrails',
-    'ai risk management',
+    'code assessment',
+    'pattern coaching',
+    'AI memory',
     'guardrail automation',
-    'compliance automation',
-    'prompt governance',
-    'engineering enablement',
-    'mcp guardrails',
+    'schema validation',
     'engify',
   ],
   applicationName: 'Engify.ai',
@@ -38,9 +41,9 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://engify.ai',
     siteName: 'Engify.ai',
-    title: 'Engify.ai - AI Guardrail Platform for Engineering Teams',
+    title: 'Engify.ai - AI Guardrail Platform & MCP Server for Engineering Teams',
     description:
-      'Operationalize AI guardrails with production-ready workflows, automation hooks, and institutional memory. Ship responsibly with Engify.',
+      'MCP server for Claude Code and Cursor with code assessment, pattern coaching, and persistent memory. Operationalize AI guardrails across your team.',
     images: [
       {
         url: 'https://engify.ai/og-image.png',
@@ -52,9 +55,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Engify.ai - AI Guardrail Platform for Engineering Teams',
+    title: 'Engify.ai - MCP Server for AI Code Quality',
     description:
-      'Operationalize AI guardrails with Engify workflows, automation hooks, and institutional memory.',
+      'MCP server for Claude Code and Cursor. Code assessment, pattern coaching, and persistent memory across sessions.',
     images: ['https://engify.ai/og-image.png'],
     creator: '@engifyai',
   },

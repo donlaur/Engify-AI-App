@@ -9,28 +9,30 @@ import { Icons } from '@/lib/icons';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://engify.ai';
 
 export const metadata: Metadata = {
-  title: 'Hire Donnie Laur - Engineering Director for AI Platforms | Engify.ai',
+  title: 'Hire Donnie Laur - Engineering Leader & MCP Server Architect | Engify.ai',
   description:
-    'Recruit Donnie Laur as your next engineering manager, director, or VP to scale AI organizations, operationalize guardrails, and align product, platform, and compliance teams. Experienced in building production B2B SaaS platforms and leading engineering organizations.',
+    'Recruit Donnie Laur as your next engineering manager, director, or VP. Built production MCP server with 9 unified tools for AI code quality. Experienced scaling teams (14 direct reports), 95% on-time delivery, and 35% eNPS improvement.',
   keywords: [
     'Donnie Laur',
     'engineering director',
     'engineering manager',
+    'MCP server',
+    'Model Context Protocol',
     'head of engineering',
     'VP of engineering',
     'AI platform leadership',
-    'software engineering leadership',
+    'Claude Code',
+    'AI code quality',
     'engineering director hire',
     'engineering leadership recruitment',
-    'AI guardrails expert',
     'SaaS engineering leader',
     'platform engineering director',
   ],
   authors: [{ name: 'Donnie Laur', url: `${APP_URL}/authors/donnie-laur` }],
   openGraph: {
-    title: 'Hire Donnie Laur - Engineering Director for AI Platforms | Engify.ai',
+    title: 'Hire Donnie Laur - Engineering Leader & MCP Server Architect',
     description:
-      'Recruit Donnie Laur as your next engineering manager, director, or VP to scale AI organizations, operationalize guardrails, and align product, platform, and compliance teams.',
+      'Built production MCP server with 9 unified tools. Experienced scaling teams (14 direct reports), 95% on-time delivery, and 35% eNPS improvement.',
     type: 'website',
     url: `${APP_URL}/hireme`,
     siteName: 'Engify.ai',
@@ -46,9 +48,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Hire Donnie Laur - Engineering Director for AI Platforms',
+    title: 'Hire Donnie Laur - Engineering Leader & MCP Server Architect',
     description:
-      'Recruit Donnie Laur as your next engineering manager, director, or VP to scale AI organizations and operationalize guardrails.',
+      'Built production MCP server with 9 unified tools. Experienced scaling teams, 95% on-time delivery, 35% eNPS improvement.',
     creator: '@engifyai', // Update with actual Twitter handle if available
   },
   alternates: {
@@ -72,22 +74,22 @@ const RESUME_PATH =
 
 const LEADERSHIP_PILLARS = [
   {
-    icon: Icons.users,
-    title: 'Org Architecture & Delivery',
+    icon: Icons.server,
+    title: 'MCP Server Architecture',
     description:
-      'Builds multi-team operating models, planning cadences, and KPI dashboards that keep product, platform, and data groups aligned across regions.',
+      'Built production MCP server with 9 unified tools for code assessment, pattern coaching, and persistent memory—deployed on AWS with Docker, PostgreSQL, Redis, and Qdrant.',
+  },
+  {
+    icon: Icons.users,
+    title: 'Team Leadership (14 Reports)',
+    description:
+      'Led distributed teams achieving 95% on-time delivery, 35% eNPS improvement (6.2→8.4), and 50% faster onboarding through structured processes.',
   },
   {
     icon: Icons.shield,
-    title: 'AI & Regulated Delivery',
+    title: 'AI Code Quality',
     description:
-      'Leads guardrail strategy end-to-end—delivering compliant AI systems in regulated environments like defense, aviation, and finance.',
-  },
-  {
-    icon: Icons.flag,
-    title: 'Leadership Development',
-    description:
-      'Hires and develops world-class engineering managers and tech leads while reinforcing culture, feedback loops, and career paths.',
+      'Schema-aware guardrails validating AI-generated code against Drizzle/Prisma schemas, catching hallucinated database fields before runtime errors.',
   },
 ];
 
@@ -143,18 +145,18 @@ export default function HireMePage() {
           <Card className="border border-dashed border-primary/40">
             <CardHeader>
               <CardTitle className="text-2xl">
-                What is Engify?
+                What is the Engify MCP Server?
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <p>
-                • Engify.ai is a production B2B SaaS platform that transforms engineering teams into AI power users through structured learning, interactive workbenches, and automated quality guardrails.
+                • Production MCP (Model Context Protocol) server for Claude Code and Cursor with 9 unified tools: code assessment, pattern coaching, persistent memory, schema validation, and more.
               </p>
               <p>
-                • Built with Next.js 15, TypeScript strict mode, MongoDB, and multi-provider AI integration. 85K+ lines of code, 620 tests, 261 documentation files, all built in public.
+                • Full-stack deployment: AWS EC2, Docker Compose, PostgreSQL, Redis, Qdrant vector database, nginx reverse proxy with SSL. Memory classification (Episodic, Semantic, Procedural) enables cross-session learning.
               </p>
               <p>
-                • Demonstrates enterprise-grade engineering: RBAC security, audit logging, cost optimization, incident playbooks, ADRs, and systematic quality gates that prevent production issues.
+                • Adaptive guardrails auto-adjust strictness based on git branch (prototype→production). 50+ curated patterns for TypeScript, Python, React, APIs with feedback loop discovering new patterns from team corrections.
               </p>
             </CardContent>
           </Card>

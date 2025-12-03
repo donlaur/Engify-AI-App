@@ -24,63 +24,67 @@ import { PreloadContentJson } from '@/components/features/PreloadContentJson';
 import { PainPointJourneySlider } from '@/components/homepage/PainPointJourneySlider';
 
 export const metadata: Metadata = {
-  title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
+  title: 'Engify.ai - MCP Server for AI Code Quality | Claude Code & Cursor',
   description:
-    'Document the manual guardrails you run today and automate them tomorrow. Engify pairs production-ready workflows, enforcement hooks, and incident memory so teams ship responsibly.',
+    'Production MCP server with code assessment, pattern coaching, and persistent memory. Prevent AI-generated code errors with schema validation, security checks, and team-learned patterns.',
   keywords: [
+    'MCP server',
+    'Model Context Protocol',
+    'Claude Code',
+    'Cursor AI',
+    'AI code quality',
+    'code assessment',
+    'pattern coaching',
+    'AI memory',
+    'schema validation',
     'AI guardrails',
-    'guardrail automation',
     'engineering governance',
-    'prompt governance',
-    'ai risk management',
-    'institutional memory',
-    'software delivery controls',
-    'compliance automation',
   ],
   openGraph: {
-    title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
+    title: 'Engify.ai - MCP Server for AI Code Quality',
     description:
-      'Production guardrail workflows, automation handoffs, and incident memory—everything you need to prevent AI regressions.',
+      'Production MCP server with code assessment, pattern coaching, and persistent memory. Works with Claude Code and Cursor.',
     type: 'website',
     siteName: 'Engify.ai',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Engify.ai - Operationalize AI Guardrails With Institutional Memory',
+    title: 'Engify.ai - MCP Server for AI Code Quality',
     description:
-      'Production guardrail workflows, automation handoffs, and incident memory—everything you need to prevent AI regressions.',
+      'Production MCP server with code assessment, pattern coaching, and persistent memory. Works with Claude Code and Cursor.',
     creator: '@engifyai',
   },
 };
 
 const features = [
   {
-    icon: Icons.shield,
-    title: 'Production Guardrails',
+    icon: Icons.server,
+    title: 'MCP Server',
     description:
-      'Documented workflows anchored in audits, incidents, and daily engineering practice.',
+      'Production Model Context Protocol server for Claude Code and Cursor. Code assessment, pattern coaching, and persistent memory in your IDE.',
+    gradient: 'from-violet-500 to-purple-600',
+    href: '/mcp',
+  },
+  {
+    icon: Icons.shield,
+    title: 'Code Assessment',
+    description:
+      'Security checks, quality scoring, and schema validation catch AI-generated errors before they reach production.',
     gradient: 'from-blue-500 to-indigo-500',
   },
   {
-    icon: Icons.gitCompare,
-    title: 'Automation Hooks',
-    description:
-      'Pre-built handoffs for pre-commit, CI/CD, and MCP agents so enforcement is a toggle, not a rewrite.',
-    gradient: 'from-purple-500 to-fuchsia-500',
-  },
-  {
     icon: Icons.database,
-    title: 'Institutional Memory',
+    title: 'Persistent Memory',
     description:
-      'Capture every incident, checklist decision, and regression warning—then surface it when teams need it.',
+      'Three memory types (Episodic, Semantic, Procedural) help AI assistants learn from past sessions and team corrections.',
     gradient: 'from-teal-500 to-emerald-500',
   },
   {
-    icon: Icons.flag,
-    title: 'Compliance Evidence',
+    icon: Icons.gitCompare,
+    title: 'Pattern Coaching',
     description:
-      'Research citations, audit trails, and coverage views that satisfy security, platform, and leadership.',
-    gradient: 'from-amber-500 to-orange-500',
+      '50+ curated patterns for TypeScript, Python, React, and APIs. Feedback loop discovers new patterns from team usage.',
+    gradient: 'from-purple-500 to-fuchsia-500',
   },
 ];
 
@@ -337,27 +341,44 @@ export default async function Home() {
           <div className="grid gap-8 md:grid-cols-2">
             {features.map((feature, i) => {
               const Icon = feature.icon;
+              const CardWrapper = feature.href ? 'a' : 'div';
+              const cardProps = feature.href ? { href: feature.href, target: '_blank', rel: 'noopener noreferrer' } : {};
               return (
-                <Card
-                  key={feature.title}
-                  className="group animate-fade-in overflow-hidden border-2 transition-all duration-300 hover:border-transparent hover:shadow-2xl"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-r ${feature.gradient} opacity-0 transition-opacity group-hover:opacity-5`}
-                  />
-                  <CardHeader>
+                <CardWrapper key={feature.title} {...cardProps}>
+                  <Card
+                    className={`group animate-fade-in overflow-hidden border-2 transition-all duration-300 hover:border-transparent hover:shadow-2xl ${feature.href ? 'cursor-pointer' : ''}`}
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  >
                     <div
-                      className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-r ${feature.gradient}`}
-                    >
-                      <Icon className="h-7 w-7 text-white" />
-                    </div>
-                    <CardTitle className="text-2xl">{feature.title}</CardTitle>
-                    <CardDescription className="text-base text-gray-700 dark:text-gray-300">
-                      {feature.description}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
+                      className={`absolute inset-0 bg-gradient-to-r ${feature.gradient} opacity-0 transition-opacity group-hover:opacity-5`}
+                    />
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div
+                          className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-r ${feature.gradient}`}
+                        >
+                          <Icon className="h-7 w-7 text-white" />
+                        </div>
+                        {feature.href && (
+                          <Badge className="bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-100">
+                            <Icons.sparkles className="mr-1 h-3 w-3" />
+                            Coming Soon
+                          </Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-2xl">{feature.title}</CardTitle>
+                      <CardDescription className="text-base text-gray-700 dark:text-gray-300">
+                        {feature.description}
+                      </CardDescription>
+                      {feature.href && (
+                        <div className="mt-3 flex items-center text-violet-600 dark:text-violet-400">
+                          <span className="text-sm font-medium">Learn more</span>
+                          <Icons.arrowRight className="ml-1 h-4 w-4" />
+                        </div>
+                      )}
+                    </CardHeader>
+                  </Card>
+                </CardWrapper>
               );
             })}
           </div>
