@@ -25,6 +25,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Icons } from '@/lib/icons';
 import Link from 'next/link';
 
@@ -59,6 +65,7 @@ export default function AccessRequestsPage() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'spam'>('all');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<AccessRequest | null>(null);
 
   const fetchRequests = async () => {
     try {
@@ -242,7 +249,11 @@ export default function AccessRequestsPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredRequests.map(req => (
-                      <TableRow key={req._id} className={isSpamLikely(req) && req.status === 'pending' ? 'bg-red-500/5' : ''}>
+                      <TableRow
+                        key={req._id}
+                        className={`cursor-pointer hover:bg-muted/50 ${isSpamLikely(req) && req.status === 'pending' ? 'bg-red-500/5' : ''}`}
+                        onClick={() => setSelectedRequest(req)}
+                      >
                         <TableCell>
                           <div className="font-medium">{req.name}</div>
                           <div className="text-sm text-muted-foreground">{req.email}</div>
@@ -269,7 +280,7 @@ export default function AccessRequestsPage() {
                         <TableCell>
                           <div className="text-sm">{formatDate(req.requestedAt)}</div>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                           {actionLoading === req._id ? (
                             <Icons.spinner className="h-4 w-4 animate-spin ml-auto" />
                           ) : (
@@ -341,6 +352,119 @@ export default function AccessRequestsPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Detail Modal */}
+        <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                Request Details
+                {selectedRequest && (
+                  <Badge className={statusColors[selectedRequest.status]}>
+                    {selectedRequest.status}
+                  </Badge>
+                )}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedRequest && (
+              <div className="space-y-6">
+                {/* Contact Info */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Name</label>
+                    <p className="mt-1">{selectedRequest.name}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Email</label>
+                    <p className="mt-1">
+                      <a href={`mailto:${selectedRequest.email}`} className="text-primary hover:underline">
+                        {selectedRequest.email}
+                      </a>
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Company</label>
+                    <p className="mt-1">{selectedRequest.company || '-'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Role</label>
+                    <p className="mt-1">{selectedRequest.role || '-'}</p>
+                  </div>
+                </div>
+
+                {/* Use Case */}
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Use Case</label>
+                  <p className="mt-1 whitespace-pre-wrap rounded-lg bg-muted p-3">
+                    {selectedRequest.useCase || 'No use case provided'}
+                  </p>
+                </div>
+
+                {/* Metadata */}
+                <div className="border-t pt-4">
+                  <label className="text-sm font-medium text-muted-foreground">Request Info</label>
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                    <div>Requested: {formatDate(selectedRequest.requestedAt)}</div>
+                    {selectedRequest.reviewedAt && (
+                      <div>Reviewed: {formatDate(selectedRequest.reviewedAt)}</div>
+                    )}
+                    {selectedRequest.reviewedBy && (
+                      <div>By: {selectedRequest.reviewedBy}</div>
+                    )}
+                    {selectedRequest.ipAddress && (
+                      <div>IP: {selectedRequest.ipAddress}</div>
+                    )}
+                  </div>
+                  {selectedRequest.userAgent && (
+                    <p className="mt-2 text-xs text-muted-foreground truncate" title={selectedRequest.userAgent}>
+                      UA: {selectedRequest.userAgent}
+                    </p>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end gap-2 border-t pt-4">
+                  {selectedRequest.status !== 'approved' && (
+                    <Button
+                      onClick={() => {
+                        updateStatus(selectedRequest._id, 'approved', true);
+                        setSelectedRequest(null);
+                      }}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <Icons.check className="mr-2 h-4 w-4" />
+                      Approve & Send Email
+                    </Button>
+                  )}
+                  {selectedRequest.status !== 'rejected' && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        updateStatus(selectedRequest._id, 'rejected');
+                        setSelectedRequest(null);
+                      }}
+                    >
+                      <Icons.x className="mr-2 h-4 w-4" />
+                      Reject
+                    </Button>
+                  )}
+                  {selectedRequest.status !== 'spam' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        updateStatus(selectedRequest._id, 'spam');
+                        setSelectedRequest(null);
+                      }}
+                    >
+                      <Icons.alertTriangle className="mr-2 h-4 w-4" />
+                      Spam
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </MainLayout>
   );
