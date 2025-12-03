@@ -44,7 +44,7 @@ const navigationLinks = [
   { href: '/workflows', label: 'Workflows' },
   { href: '/learn/ai-tools', label: 'Tools' },
   { href: '/learn', label: 'Learn' },
-  { href: '/workbench', label: 'Workbench' },
+  { href: '/mcp', label: 'MCP' },
 ];
 
 export function Header({ user }: HeaderProps) {
@@ -150,15 +150,15 @@ export function Header({ user }: HeaderProps) {
             </Link>
           )}
           <Link
-            href="/workbench"
+            href="/mcp"
             className={cn(
               'text-sm font-medium transition-colors',
-              isActive('/workbench')
+              isActive('/mcp')
                 ? 'text-primary'
                 : 'text-foreground/80 hover:text-primary dark:text-foreground/80'
             )}
           >
-            Workbench
+            MCP
           </Link>
           {/* Removed RAG Chat (mock), Contact (email not ready), and AI Workflow (blank page) from header */}
           <Link

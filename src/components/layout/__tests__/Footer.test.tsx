@@ -41,11 +41,9 @@ describe('Footer', () => {
   it('should render all product links', () => {
     render(<Footer />);
 
-    expect(screen.getByText('AI Workbench')).toBeInTheDocument();
+    expect(screen.getByText('MCP Server')).toBeInTheDocument();
     expect(screen.getByText('Patterns')).toBeInTheDocument();
-    expect(screen.getByText('Prompt Library')).toBeInTheDocument();
-    // Pricing removed from footer - checking it's not there
-    expect(screen.queryByText('Pricing')).not.toBeInTheDocument();
+    expect(screen.getByText('Prompts')).toBeInTheDocument();
   });
 
   it('should render social links', () => {

@@ -195,7 +195,7 @@ export default function MCPPage() {
                       </div>
                       <CardTitle className="text-xl">{tool.name}</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="flex h-full flex-col space-y-3">
                       <p className="text-sm text-muted-foreground">
                         <span className="font-medium text-foreground">
                           What it does:
@@ -208,13 +208,14 @@ export default function MCPPage() {
                         </span>{' '}
                         {tool.useFor}
                       </p>
-                      <div className="flex items-center justify-between">
-                        <code className="rounded bg-muted px-2 py-1 text-xs">
+                      <div className="mt-auto space-y-3 pt-2">
+                        <code className="block overflow-x-auto rounded bg-muted px-2 py-1.5 text-xs">
                           {tool.example}
                         </code>
-                        <span className={`text-sm ${colors.text}`}>
-                          Learn more &rarr;
-                        </span>
+                        <div className={`flex items-center text-sm font-medium ${colors.text}`}>
+                          Learn more
+                          <span className="ml-1">&rarr;</span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

@@ -19,7 +19,7 @@ const footerLinks = {
     { href: '/workflows', label: 'Workflows' },
     { href: '/learn/ai-tools', label: 'Tools' },
     { href: '/learn', label: 'Learn' },
-    { href: '/workbench', label: 'Workbench' },
+    { href: '/mcp', label: 'MCP Server' },
   ],
   company: [
     { href: '/about', label: 'About' },
